@@ -1,0 +1,6 @@
+# OS and program files
+.DS_Store
+*.sublime-*
+
+# ignore node_modules
+/node_modules/*

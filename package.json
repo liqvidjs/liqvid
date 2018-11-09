@@ -1,0 +1,25 @@
+{
+  "name": "@webu/ractive-player",
+  "version": "0.8.0",
+  "description": "Library for authoring interactive videos using HTML/CSS/Javascript",
+  "main": "webpack.config.js",
+  "scripts": {
+    "css": "stylus -c -o dist/ styl/ractive-player.styl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysulyma/ractive-player.git"
+  },
+  "author": "Yuri Sulyma <yuri@lmqm.xyz>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ysulyma/ractive-player/issues"
+  },
+  "homepage": "https://github.com/ysulyma/ractive-player#readme",
+  "dependencies": {
+    "banner-webpack-plugin": "^0.2.3",
+    "nib": "^1.1.2",
+    "stylus": "^0.54.5",
+    "webpack": "^4.16.5"
+  }
+}

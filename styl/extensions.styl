@@ -1,0 +1,105 @@
+$ns = rp-codebooth
+
+.{$ns}
+  display block
+  position absolute
+  left 0
+  top 0
+  
+  textarea
+    background-color: #26292C !important
+    color #0F0 !important
+    font-family "Consolas", monospace
+    font-size 0.7em
+
+  .CodeMirror
+    font-size .5em
+    height calc(94vmin - var(--rp-controls-height))
+    position absolute
+    top 0
+    width scale(640)
+    
+  &.recording .CodeMirror
+    display block !important
+
+/* editors */
+.{$ns}-editor-replay
+  .{$ns}.recording &
+    height calc((100vh - var(--rp-controls-height)) * 2 / 3)
+    border-bottom 1px solid $blue
+
+.{$ns}-output
+  background-color #1E1E1E
+  color #0F0
+  font-size .75em
+  overflow-y auto
+  padding .5vmin
+  user-select all
+  
+  position absolute
+  width scale(640)
+  left scale(640)
+  box-sizing border-box
+  height calc((100vh - var(--rp-controls-height)) / 2)
+  top calc((100vh - var(--rp-controls-height)) / 2)
+  
+  .error
+    color red
+    
+  .{$ns}.recording &
+    height calc((100vh - var(--rp-controls-height)) / 3)
+    top calc((100vh - var(--rp-controls-height)) * 2 / 3)
+
+.active-replay .{$ns}-editor-playground,
+.active-playground .{$ns}-editor-replay
+  opacity 0
+  pointer-events none
+
+/* buttons */
+.{$ns} button
+  border 0 none transparent
+  border-radius 0
+  color #FFF
+  cursor pointer
+  font-family "Alegreya", serif;
+  font-size 1em
+  height 6vmin
+  position absolute
+  top calc(94vmin - var(--rp-controls-height))
+  width scale(128)
+
+  for $n in 0..4
+    &:nth-of-type({$n + 1})
+      left scale($n * 128)
+
+.active-replay .{$ns}-replay,
+.active-playground .{$ns}-playground
+  background-color $wine
+  
+.active-replay .{$ns}-playground,
+.active-playground .{$ns}-replay
+  background-color #444
+  color #666
+  
+  &:active
+    background-color #9E165C
+    
+.{$ns}-copy
+  background-color $blue
+  
+  &:active
+    background-color #16599a
+
+.{$ns}-run
+  background-color #18a85e
+  
+  &:active
+    background-color #148f50
+
+.{$ns}-clear
+  background-color $red
+  
+  &:active
+    background-color #8c1c14
+
+@import "prompt"
