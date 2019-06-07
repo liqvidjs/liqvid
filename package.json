@@ -1,5 +1,5 @@
 {
-  "name": "@webu/ractive-player",
+  "name": "ractive-player",
   "version": "0.8.0",
   "description": "Library for authoring interactive videos using HTML/CSS/Javascript",
   "main": "webpack.config.js",
