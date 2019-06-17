@@ -102,7 +102,7 @@ class HelpDialog extends React.PureComponent<{openDialog: () => void, style: any
 
     return ReactDOM.createPortal(
       <div className="rp-help-dialog" style={this.props.style}>
-        <button onClick={this.props.openDialog}>&times;</button>
+        <button onClick={this.props.closeDialog}>&times;</button>
 
         <div className="rp-help-tables">
           <table>
