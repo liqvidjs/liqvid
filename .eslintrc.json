@@ -3,7 +3,7 @@
     "browser": true,
     "es6": true
   },
-  "extends": "eslint:recommended",
+  "extends": "plugin:@typescript-eslint/recommended",
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -21,15 +21,27 @@
     "react"
   ],
   "rules": {
-    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error", {
       "ignoreRestSiblings": true
     }],
 
-    "indent": [
-      "error",
-      2
-    ],
+    "@typescript-eslint/explicit-function-return-type": ["off"],
+
+    "@typescript-eslint/explicit-member-accessibility": ["error", {
+      "accessibility": "no-public"
+    }],
+
+    "@typescript-eslint/type-annotation-spacing": ["error", {
+      "before": false,
+      "overrides": {
+        "arrow": {"before": true}
+      }
+    }],
+    "@typescript-eslint/indent": ["error", 2, {
+      "MemberExpression": 0,
+      "VariableDeclarator": { "var": 2, "let": 2, "const": 3 }
+    }],
+
     "linebreak-style": [
       "error",
       "unix"

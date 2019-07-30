@@ -1,16 +1,16 @@
-import {constrain} from './misc';
+import {constrain} from "./misc";
 
 // animation
 export function animate(options: {
-  startValue?: number,
-  endValue?: number,
-  startTime: number,
-  duration: number,
-  easing?: (x: number) => number
+  startValue?: number;
+  endValue?: number;
+  startTime: number;
+  duration: number;
+  easing?: (x: number) => number;
 }) {
-  if (!('startValue' in options)) options.startValue = 0;
-  if (!('endValue' in options)) options.endValue = 1;
-  if (!('easing' in options)) options.easing = (x: number) => x;
+  if (!("startValue" in options)) options.startValue = 0;
+  if (!("endValue" in options)) options.endValue = 1;
+  if (!("easing" in options)) options.easing = (x: number) => x;
   const {startValue, endValue, startTime, duration, easing} = options;
   return (t: number) => startValue + easing(constrain(0, (t - startTime) / duration, 1)) * (endValue - startValue);
 }
@@ -34,12 +34,11 @@ export function replay<K>({data, start, end, active, inactive, compressed}: Repl
     }
   }
 
-  if (typeof start === 'undefined') start = 0;
-  if (typeof end === 'undefined') end = start + times[times.length - 1];
+  if (typeof start === "undefined") start = 0;
+  if (typeof end === "undefined") end = start + times[times.length - 1];
 
   let lastTime = 0,
-      i = 0,
-      lastI = null;
+      i = 0;
 
   function listener(t: number) {
     if (t < lastTime) i = 0;

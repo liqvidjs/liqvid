@@ -5,29 +5,29 @@ export function bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, me
 }
 
 // wait
-export function wait(time : number): Promise<void> {
-  return new Promise((resolve, reject) => {
+export function wait(time: number): Promise<void> {
+  return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 }
 
 // await some condition to be true
 export function waitFor(callback: () => boolean, interval: number = 10): Promise<void> {
-  return new Promise((resolve, reject) => {
-    checkCondition();
-
-    function checkCondition() {
+  return new Promise((resolve) => {
+    const checkCondition = () => {
       if (callback()) {
         resolve();
       } else {
         setTimeout(checkCondition, interval);
       }
-    }
+    };
+
+    checkCondition();
   });
 }
 
-export function whitelist<T, K extends keyof T>(o: T, names: K[]): Pick<T, K> {
-  const ret: any = {};
+export function whitelist<T, K extends keyof T>(o: T, names: K[]) {
+  const ret: Pick<T, K> = {};
   for (const key of (Object.keys(o) as K[])) {
     if (names.includes(key))
       ret[key] = o[key];

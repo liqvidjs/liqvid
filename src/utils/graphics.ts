@@ -1,5 +1,5 @@
 // XXX this doesn't really belong here
-declare const THREE: any
+declare const THREE: any;
 
 // convert screen to SVG coords
 export function screenToSVG(elt: SVGElement, x: number, y: number): [number, number] {
@@ -32,7 +32,7 @@ export function screenToSVGVector(svg: SVGSVGElement, dx: number, dy: number): [
         aspectX = rect.width / viewBox.width,
         aspectY = rect.height / viewBox.height,
         svgDx = dx / aspectX,
-        svgDy = dy / aspectY
+        svgDy = dy / aspectY;
 
   return [svgDx, svgDy];
 }

@@ -1,5 +1,5 @@
-import * as React from 'react';
-import aspectRatio from '../aspectRatio';
+import * as React from "react";
+import aspectRatio from "../aspectRatio";
 
 interface StyleBlock {
   style?: any;
@@ -7,17 +7,17 @@ interface StyleBlock {
 
 // position an element
 export function pos(x?: number, y?: number, w?: number, h?: number): StyleBlock;
-export function pos(args: {x?: number, y?: number, w?: number, h?: number}): StyleBlock;
+export function pos(args: {x?: number; y?: number; w?: number; h?: number}): StyleBlock;
 export function pos(...args: any[]): StyleBlock {
   let x, y, w, h;
 
-  if (args.length === 1 && typeof args[0] === 'object') {
+  if (args.length === 1 && typeof args[0] === "object") {
     ({x, y, w, h} = args[0]);
   } else {
     [x, y, w, h] = args;
   }
 
-  const style: any = {position: 'absolute'};
+  const style: any = {position: "absolute"};
   
   if (x !== undefined)
     style.left = `${x * aspectRatio}vmin`;
@@ -36,7 +36,7 @@ export function showIf(cond: boolean): StyleBlock {
   if (!cond) return {
     style: {
       opacity: 0,
-      pointerEvents: 'none'
+      pointerEvents: "none"
     }
   };
   return {};
