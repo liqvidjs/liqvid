@@ -1,9 +1,8 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Media, {MediaProps} from './Media';
-import Playback from './playback';
-import Player from './Player';
-import {between} from './utils/misc';
+import Media, {MediaProps} from "./Media";
+import Player from "./Player";
+import {between} from "./utils/misc";
 
 class Video extends Media {
   onSeek(t: number) {
@@ -14,9 +13,9 @@ class Video extends Media {
     if (this.domElement.paused === oldVal) return;
 
     if (this.domElement.paused)
-      this.domElement.style.display = 'none';
+      this.domElement.style.display = "none";
     else
-      this.domElement.style.display = 'block';
+      this.domElement.style.display = "block";
   }
 
   onTimeUpdate(t: number) {
@@ -27,9 +26,9 @@ class Video extends Media {
     if (this.domElement.paused === oldVal) return;
 
     if (this.domElement.paused)
-      this.domElement.style.display = 'none';
+      this.domElement.style.display = "none";
     else
-      this.domElement.style.display = 'block';
+      this.domElement.style.display = "block";
   }
 
   // render method
@@ -39,7 +38,7 @@ class Video extends Media {
     const {player, start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
     (attrs as any).style = {
       ...((attrs as any).style || {}),
-      display: (this.domElement && between(this.start, playback.currentTime, this.end)) ? 'block' : 'none'
+      display: (this.domElement && between(this.start, playback.currentTime, this.end)) ? "block" : "none"
     }; 
 
     return (

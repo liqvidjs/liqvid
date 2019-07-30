@@ -1,6 +1,6 @@
-import * as EventEmitter from 'events';
-import {bind, constrain} from './utils/misc';
-import {parseTime} from './utils/time';
+import * as EventEmitter from "events";
+import {bind, constrain} from "./utils/misc";
+import {parseTime} from "./utils/time";
 
 interface PlaybackOptions {
   length: number;
@@ -54,7 +54,7 @@ export default class Playback {
     // hub will have lots of listeners, turn off warning
     this.hub.setMaxListeners(0);
 
-    bind(this, ['pause', 'play', '__advance']);
+    bind(this, ["pause", "play", "__advance"]);
 
     // initiate playback loop
     requestAnimationFrame(this.__advance);
@@ -68,7 +68,7 @@ export default class Playback {
   set captions(captions) {
     this.__captions = captions;
 
-    this.hub.emit('cuechange');
+    this.hub.emit("cuechange");
   }
 
   get muted() {
@@ -86,7 +86,7 @@ export default class Playback {
       this.audioNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
     }
 
-    this.hub.emit('volumechange');
+    this.hub.emit("volumechange");
   }
 
   get playbackRate() {
@@ -99,7 +99,7 @@ export default class Playback {
     this.__playbackRate = val;
     this.playingFrom = this.currentTime;
     this.startTime = performance.now();
-    this.hub.emit('ratechange');
+    this.hub.emit("ratechange");
   }
 
   get seeking(): boolean {
@@ -110,8 +110,8 @@ export default class Playback {
     if (val === this.__seeking) return;
 
     this.__seeking = val;
-    if (this.__seeking) this.hub.emit('seeking');
-    else this.hub.emit('seeked');
+    if (this.__seeking) this.hub.emit("seeking");
+    else this.hub.emit("seeked");
   }
 
   /* public methods */
@@ -119,22 +119,22 @@ export default class Playback {
     this.paused = true;
     this.playingFrom = this.currentTime;
 
-    this.hub.emit('pause');
+    this.hub.emit("pause");
   }
 
   play() {
     this.paused = false;
-    this.hub.emit('play');
+    this.hub.emit("play");
   }
 
   seek(t: number | string) {
-    if (typeof t === 'string') t = parseTime(t);
+    if (typeof t === "string") t = parseTime(t);
     t = constrain(0, t, this.length);
 
     this.currentTime = this.playingFrom = t;
     this.startTime = performance.now();
 
-    this.hub.emit('seek', t);
+    this.hub.emit("seek", t);
   }
 
   get volume() {
@@ -150,14 +150,14 @@ export default class Playback {
       this.audioNode.gain.exponentialRampToValueAtTime(this.__volume, this.audioContext.currentTime + 2);
     }
 
-    this.hub.emit('volumechange');
+    this.hub.emit("volumechange");
   }
 
   stop() {
     this.paused = true;
     this.playingFrom = 0;
 
-    this.hub.emit('stop');
+    this.hub.emit("stop");
   }
 
   /* private methods */
@@ -174,7 +174,7 @@ export default class Playback {
         this.stop();
       }
 
-      this.hub.emit('timeupdate', this.currentTime);
+      this.hub.emit("timeupdate", this.currentTime);
     }
 
     requestAnimationFrame(this.__advance);

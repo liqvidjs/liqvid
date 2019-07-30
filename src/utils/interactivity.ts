@@ -1,38 +1,79 @@
-import Player from '../Player';
+import Player from "../Player";
 
 export function dragHelper<T extends Node>(
-  mousemove: (e: MouseEvent, dx: number, dy: number) => void,
-  mousedown: (
-              e: MouseEvent | React.MouseEvent<T>,
-              mouseUpHandler: (e: MouseEvent) => void,
-              mousemoveHandler: (e: MouseEvent) => void
-             ) => void = (e) => {},
-  mouseup: (e: MouseEvent) => void = (e) => {}
+  move: (e: MouseEvent | TouchEvent, o: {x: number, y: number, dx: number, dy: number}) => void,
+  down: (
+          e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>,
+          upHandler: (e: MouseEvent | TouchEvent) => void,
+          moveHandler: (e: MouseEvent | TouchEvent) => void
+        ) => void = (e) => {},
+  up: (e: MouseEvent | TouchEvent) => void = (e) => {}
 ) {
-  return (e: MouseEvent | React.MouseEvent<T>) => {
-    if (e.button !== 0) return;
+  return (e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>) => {
+    let upHandler: ((e: MouseEvent) => void) | ((e: TouchEvent) => void),
+        moveHandler: ((e: MouseEvent) => void) | ((e: TouchEvent) => void);
+    if (e instanceof MouseEvent || isReactMouseEvent(e)) {
+      if (e.button !== 0) return;
 
-    let lastX = e.clientX,
+      let lastX = e.clientX,
+          lastY = e.clientY;
+
+      upHandler = (e: MouseEvent) => {
+        document.body.removeEventListener("mousemove", moveHandler);
+        window.removeEventListener("mouseup", upHandler);
+
+        return up(e);
+      }
+
+      moveHandler = (e: MouseEvent) => {
+        const dx = e.clientX - lastX,
+              dy = e.clientY - lastY;
+
+        lastX = e.clientX;
         lastY = e.clientY;
 
-    document.body.addEventListener('mousemove', mousemoveHandler);
-    window.addEventListener('mouseup', mouseupHandler);
+        return move(e, {x: e.clientX, y: e.clientY, dx, dy});
+      }
 
-    function mousemoveHandler(e: MouseEvent) {
-      const dx = e.clientX - lastX,
-            dy = e.clientY - lastY;
+      document.body.addEventListener("mousemove", moveHandler, false);
+      window.addEventListener("mouseup", upHandler, false);
+    } else {
+      e.preventDefault();
+      const touches = e.changedTouches;
 
-      lastX = e.clientX;
-      lastY = e.clientY;
+      const touchId = touches[0].identifier;
 
-      return mousemove(e, dx, dy);
-    }
+      let lastX = touches[0].clientX,
+          lastY = touches[0].clientY;
 
-    function mouseupHandler(e: MouseEvent) {
-      document.body.removeEventListener('mousemove', mousemoveHandler);
-      window.removeEventListener('mouseup', mouseupHandler);
+      upHandler = (e: TouchEvent) => {
+        e.preventDefault();
 
-      return mouseup(e);
+        window.removeEventListener("touchend", moveHandler);
+        window.removeEventListener("touchcancel", upHandler);
+        window.removeEventListener("touchmove", moveHandler);
+
+        return up(e);
+      }
+
+      moveHandler = (e: TouchEvent) => {
+        e.preventDefault();
+        for (const touch of Array.from(e.changedTouches)) {
+          if (touch.identifier !== touchId) continue;
+
+          const dx = touch.clientX - lastX,
+                dy = touch.clientY - lastY;
+
+          lastX = touch.clientX;
+          lastY = touch.clientY;
+
+          return move(e, {x: touch.clientX, y: touch.clientY, dx, dy});
+        }
+      }
+
+      window.addEventListener("touchend", upHandler, false);
+      window.addEventListener("touchcancel", upHandler, false);
+      window.addEventListener("touchmove", moveHandler, false);
     }
 
     // oh no oh no oh no
@@ -40,7 +81,8 @@ export function dragHelper<T extends Node>(
     // e.stopPropagation = () => {
     //   _stopPropagation();
     // };
-    return mousedown(e, mouseupHandler, mousemoveHandler);
+
+    return down(e, upHandler, moveHandler);
   }
 }
 
@@ -51,12 +93,18 @@ type Arg3 = DHR extends (a: infer A, b: infer B, c: infer C) => any ? C : any;
 
 // for use in React (ugh...)
 export function dragHelperReact<T>(mousemove: Arg1, mousedown: Arg2, mouseup: Arg3) {
+  const listener = dragHelper(mousemove, mousedown, mouseup);
   return {
-    onMouseDown: dragHelper(mousemove, mousedown, mouseup),
+    onMouseDown: listener,
     onMouseUp: (e: React.MouseEvent<T>) => {
       e.persist();
       // this sucks
       e[Player.ignoreCanvasClick] = true;
-    }
+    },
+    onTouchStart: listener
   }
+}
+
+function isReactMouseEvent<T>(e: any) : e is React.MouseEvent<T> {
+  return e.hasOwnProperty("nativeEvent") && e.nativeEvent instanceof MouseEvent;
 }

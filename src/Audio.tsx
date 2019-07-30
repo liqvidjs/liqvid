@@ -1,10 +1,9 @@
-import * as React from 'react';
-import Media, {MediaProps} from './Media';
+import * as React from "react";
+import Media, {MediaProps} from "./Media";
 
-import Playback from './playback';
-import Player from './Player';
+import Player from "./Player";
 
-import {fragmentFromHTML} from './utils/dom';
+import {fragmentFromHTML} from "./utils/dom";
 
 class Audio extends Media {
   domElement: HTMLAudioElement;
@@ -16,10 +15,10 @@ class Audio extends Media {
 
     // tracks
     for (const track of Array.from(this.domElement.textTracks)) {
-      track.addEventListener('cuechange', (e: Event) => {
+      track.addEventListener("cuechange", () => {
         const captions = [];
         for (const cue of Array.from(track.activeCues)) {
-          const html = cue.text.replace(/\n/g, '<br/>');
+          const html = cue.text.replace(/\n/g, "<br/>");
           captions.push(fragmentFromHTML(html));
         }
 

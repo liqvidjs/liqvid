@@ -1,15 +1,15 @@
-import * as React from 'react';
+import * as React from "react";
 
-import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from './utils/media';
-import {bind} from './utils/misc';
-import {parseTime} from './utils/time';
+import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
+import {bind} from "./utils/misc";
+import {parseTime} from "./utils/time";
 
-import Player from './Player';
+import Player from "./Player";
 
 export interface MediaProps {
   src?: string;
   start: number | string;
-};
+}
 
 export default class Media extends React.PureComponent<MediaProps & {player: Player}, {}> {
   protected player: Player;
@@ -20,7 +20,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
     super(props);
     this.player = props.player;
 
-    if (typeof props.start === 'string') {
+    if (typeof props.start === "string") {
       if (props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
         this.start = parseTime(props.start);
       else
@@ -29,24 +29,24 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       this.start = props.start;
     }
 
-    bind(this, ['onPause', 'onRateChange', 'onSeek', 'onSeeking', 'onTimeUpdate', 'onVolumeChange']);
+    bind(this, ["onPause", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
   }
 
   componentDidMount() {
     const {playback} = this.player;
 
     // attach event listeners
-    playback.hub.on('pause', this.onPause);
-    playback.hub.on('ratechange', this.onRateChange);
-    playback.hub.on('seek', this.onSeek);
-    playback.hub.on('seeked', this.onSeek);
-    playback.hub.on('seeking', this.onSeeking);
-    playback.hub.on('timeupdate', this.onTimeUpdate);
-    playback.hub.on('volumechange', this.onVolumeChange);
+    playback.hub.on("pause", this.onPause);
+    playback.hub.on("ratechange", this.onRateChange);
+    playback.hub.on("seek", this.onSeek);
+    playback.hub.on("seeked", this.onSeek);
+    playback.hub.on("seeking", this.onSeeking);
+    playback.hub.on("timeupdate", this.onTimeUpdate);
+    playback.hub.on("volumechange", this.onVolumeChange);
 
     // canplay/canplaythrough events
-    this.player.obstruct('canplay', awaitMediaCanPlay(this.domElement));
-    this.player.obstruct('canplaythrough', awaitMediaCanPlayThrough(this.domElement));
+    this.player.obstruct("canplay", awaitMediaCanPlay(this.domElement));
+    this.player.obstruct("canplaythrough", awaitMediaCanPlayThrough(this.domElement));
 
     // need to call this once initially
     this.onVolumeChange();
@@ -62,15 +62,15 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       }
 
       return buffers;
-    }
+    };
 
     const updateBuffers = () => {
       this.player.updateBuffer(this.domElement, getBuffers());
-    }
+    };
 
     this.player.registerBuffer(this.domElement);
     updateBuffers();
-    this.domElement.addEventListener('progress', updateBuffers);
+    this.domElement.addEventListener("progress", updateBuffers);
     // setInterval(updateBuffers, 1000);
     // this.domElement.addEventListener('load', updateBuffers);
   }

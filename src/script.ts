@@ -1,8 +1,8 @@
-import * as EventEmitter from 'events';
-import {bind} from './utils/misc';
-import {parseTime} from './utils/time';
+import * as EventEmitter from "events";
+import {bind} from "./utils/misc";
+import {parseTime} from "./utils/time";
 
-import Playback from './playback';
+import Playback from "./playback";
 
 type SlideType = [string, number, number];
 
@@ -18,7 +18,7 @@ export default class Script {
     this.hub.setMaxListeners(0);
 
     // bind methods
-    bind(this, ['slideByName', 'slideNumberOf']);
+    bind(this, ["slideByName", "slideNumberOf"]);
 
     // parse times
     let time = 0;
@@ -48,8 +48,8 @@ export default class Script {
       length: this.slides[this.slides.length - 1][2]
     });
 
-    this.playback.hub.on('seek', this.__updateSlide);
-    this.playback.hub.on('timeupdate', this.__updateSlide);
+    this.playback.hub.on("seek", this.__updateSlide);
+    this.playback.hub.on("timeupdate", this.__updateSlide);
   }
 
   // getter
@@ -95,7 +95,7 @@ export default class Script {
 
     if (newSlideIndex !== prevSlideIndex) {
       this.slideIndex = newSlideIndex;
-      this.hub.emit('slideupdate', prevSlideIndex);
+      this.hub.emit("slideupdate", prevSlideIndex);
     }
   }
 }

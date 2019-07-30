@@ -21,14 +21,18 @@ interface ReplayArgs<K> {
   data: ReplayData<K>;
   start?: number;
   end?: number;
+  compressed?: boolean;
   active: (current: K, index: number) => void;
   inactive: () => void;
 }
 
-export function replay<K>({data, start, end, active, inactive}: ReplayArgs<K>): (t: number) => void {
+export function replay<K>({data, start, end, active, inactive, compressed}: ReplayArgs<K>): (t: number) => void {
   const times = data.map(d => d[0]);
-  for (let i = 1; i < times.length; ++i)
-    times[i] += times[i-1];
+  if (compressed) {
+    for (let i = 1; i < times.length; ++i) {
+      times[i] += times[i-1];
+    }
+  }
 
   if (typeof start === 'undefined') start = 0;
   if (typeof end === 'undefined') end = start + times[times.length - 1];
