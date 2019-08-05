@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from '../polyfills';
+import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from '../fake-fullscreen';
 
 export default class FullScreen extends React.PureComponent<{}, {}> {
   componentDidMount() {
