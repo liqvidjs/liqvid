@@ -51,22 +51,24 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
     // playback.hub.on('bufferupdate', () => this.forceUpdate());
   }
 
-  onMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  onMouseDown(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
     const {playback} = this.player;
     playback.seeking = true;
 
-    const rect = this.scrubberBar.getBoundingClientRect(),
-          progress = constrain(0, (e.pageX - rect.left) / rect.width, 1);
+    const x = isReactMouseEvent(e) ? e.pageX : e.touches[0].pageY;
 
-    playback.seek(progress * playback.length);
+    const rect = this.scrubberBar.getBoundingClientRect(),
+          progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+    playback.seek(progress * playback.duration);
   }
 
-  onDrag(e: MouseEvent) {
+  onDrag(e: MouseEvent, {x}: {x: number}) {
     const {playback} = this.player;
     const rect = this.scrubberBar.getBoundingClientRect(),
-          progress = constrain(0, (e.pageX - rect.left) / rect.width, 1);
+          progress = constrain(0, (x - rect.left) / rect.width, 1);
 
-    playback.seek(progress * playback.length);
+    playback.seek(progress * playback.duration);
   }
 
   onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -84,21 +86,24 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
     const {playback, buffers} = this.player;
 
     const scrubberColor = '#FF0080',
-          progress = (playback.currentTime / playback.length * 100);
+          progress = (playback.currentTime / playback.duration * 100);
 
     const thumbFrequency = 1;
     const {thumbProgress} = this.state,
-          thumbTime = thumbProgress * playback.length,
+          thumbTime = thumbProgress * playback.duration,
           thumbName = Math.floor(thumbTime / 1000 / thumbFrequency);
 
     const highlights = (this.props.thumbs && this.props.thumbs.highlights) || [];
 
     const ranges = Array.from(buffers.values()).reduce((a, b) => a.concat(b), []);
 
+    const listener = dragHelper(this.onDrag, this.onMouseDown, this.onMouseUp);
+
     return (
       <div
         className="rp-controls-scrub"
-        onMouseDown={dragHelper(this.onDrag, this.onMouseDown, this.onMouseUp)}
+        onMouseDown={listener}
+        onTouchStart={listener}
         ref={node => this.scrubberBar = node}
       >
         {this.props.thumbs &&
@@ -123,7 +128,7 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
             {/*ranges.map(([start, end]) => (
               <rect
                 key={`${start}-${end}`} className="controls-progress-buffered"
-                x={start / playback.length * 100} y="0" height="10" width={(end - start) / playback.length * 100}/>
+                x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
             ))*/}
 
             {highlights.map(({time, title}) => (
@@ -132,7 +137,7 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
                 className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? 'past' : []).join(' ')}
                 onMouseOver={() => this.setState({thumbTitle: title})}
                 onMouseOut={() => this.setState({thumbTitle: null})}
-                x={time / playback.length * 100}
+                x={time / playback.duration * 100}
                 y="0"
                 width="1"
                 height="10"
@@ -146,4 +151,8 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
       </div>
     );
   }
+}
+
+function isReactMouseEvent(e: React.SyntheticEvent): e is React.MouseEvent {
+  return e.nativeEvent instanceof MouseEvent;
 }

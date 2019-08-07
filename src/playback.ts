@@ -3,7 +3,7 @@ import {bind, constrain} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
 interface PlaybackOptions {
-  length: number;
+  duration: number;
 }
 
 /* handle playback progress */
@@ -12,7 +12,7 @@ export default class Playback {
   audioNode:    GainNode;
   currentTime:  number;
   hub:          EventEmitter;
-  length:       number; // XXX should this be duration???
+  duration:     number;
   paused:       boolean;
   playingFrom:  number;
   startTime:    number;
@@ -22,12 +22,12 @@ export default class Playback {
   private __muted:        boolean;
   private __seeking:      boolean;
   private __volume:       number;
-
+  
   constructor(options: PlaybackOptions) {
     Object.assign(this, {
       currentTime: 0,
       hub: new EventEmitter(),
-      length: options.length,
+      duration: options.duration,
       playbackRate: 1,
       playingFrom: 0,
       startTime: performance.now(),
@@ -129,7 +129,7 @@ export default class Playback {
 
   seek(t: number | string) {
     if (typeof t === "string") t = parseTime(t);
-    t = constrain(0, t, this.length);
+    t = constrain(0, t, this.duration);
 
     this.currentTime = this.playingFrom = t;
     this.startTime = performance.now();
@@ -169,8 +169,8 @@ export default class Playback {
     // playing
       this.currentTime = this.playingFrom + Math.max((t - this.startTime) * this.__playbackRate, 0);
 
-      if (this.currentTime >= this.length) {
-        this.currentTime = this.length;
+      if (this.currentTime >= this.duration) {
+        this.currentTime = this.duration;
         this.stop();
       }
 

@@ -42,7 +42,7 @@ export default class ThumbnailBox extends React.PureComponent<Props, {}> {
 
     const count = cols * rows;
 
-    const maxSlide = Math.floor(player.playback.length / frequency / 1000),
+    const maxSlide = Math.floor(player.playback.duration / frequency / 1000),
           maxSheet = Math.floor(maxSlide / count);
 
     player.hub.on('canplay', () => {
@@ -58,7 +58,7 @@ export default class ThumbnailBox extends React.PureComponent<Props, {}> {
     const {playback} = this.props.player;
     const count = cols * rows;
 
-    const time = progress * playback.length / 1000,
+    const time = progress * playback.duration / 1000,
           slideNum = Math.floor(time / frequency),
           sheetNum = Math.floor(slideNum / count),
           slideNumOnSheet = slideNum % count,

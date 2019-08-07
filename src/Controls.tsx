@@ -1,5 +1,3 @@
-/// <reference types="mathjax" />
-
 import * as EventEmitter from 'events';
 import * as React from 'react';
 
@@ -159,7 +157,7 @@ export default class Controls extends React.PureComponent<Props, State> {
     // percentage seeking
     const num = parseInt(e.key);
     if (!isNaN(num)) {
-      playback.seek(playback.length * num / 10);
+      playback.seek(playback.duration * num / 10);
     }
   }
 

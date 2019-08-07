@@ -45,7 +45,7 @@ export default class Script {
 
     // create playback object
     this.playback = new Playback({
-      length: this.slides[this.slides.length - 1][2]
+      duration: this.slides[this.slides.length - 1][2]
     });
 
     this.playback.hub.on("seek", this.__updateSlide);
