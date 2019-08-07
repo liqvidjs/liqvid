@@ -2,9 +2,9 @@
   This file is a hideous hack to get around some circular dependency annoyances.
 */
 
-import * as React from 'react';
-import {createContextBroadcaster} from './utils/react-utils';
-import Player from './Player';
+import * as React from "react";
+import {createContextBroadcaster} from "./utils/react-utils";
+import Player from "./Player";
 
 export const PlayerContext = React.createContext<Player>();
 
@@ -15,4 +15,4 @@ export const PlayerPureReceiver = class PureReceiver<P = {}, S = {}> extends Rea
 PlayerReceiver[PlayerReceiverSymbol] = true;
 PlayerPureReceiver[PlayerReceiverSymbol] = true;
 
-export const PlayerBroadcaster = createContextBroadcaster(PlayerContext, PlayerReceiverSymbol, 'player');
+export const PlayerBroadcaster = createContextBroadcaster(PlayerContext, PlayerReceiverSymbol, "player");
