@@ -1,9 +1,9 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Player from './Player';
+import Player from "./Player";
 
-import {bind} from './utils/misc';
-import {recursiveMap} from './utils/react-utils';
+import {bind} from "./utils/misc";
+import {recursiveMap} from "./utils/react-utils";
 
 interface Props {
   map?: object;
@@ -11,17 +11,20 @@ interface Props {
 
 export default class IdMap extends React.PureComponent<Props, {}> {
   static Context = React.createContext();
+  public foundIds: Set<string>;
 
   constructor(props: Props) {
     super(props);
-    bind(this, ['renderContent']);
+    bind(this, ["renderContent"]);
+
+    this.foundIds = new Set();
   }
 
   render() {
-    if (this.props.hasOwnProperty('map')) {
+    if (this.props.hasOwnProperty("map")) {
       return (
-        <IdMap.Context.Provider value={this.props.map}>
-          {this.renderContent(this.props.map)}
+        <IdMap.Context.Provider value={[this.foundIds, this.props.map]}>
+          {this.renderContent([this.foundIds, this.props.map])}
         </IdMap.Context.Provider>
       );
     } else {
@@ -33,19 +36,20 @@ export default class IdMap extends React.PureComponent<Props, {}> {
     }
   }
 
-  renderContent(map: any) {
+  renderContent([foundIds, map]: [Set<string>, any]) {
     return (
       <Player.Context.Consumer>
         {(player: Player) => recursiveMap(this.props.children, node => {
           const attrs = {};
 
-          if (node.props.hasOwnProperty('id')) {
+          if (node.props.hasOwnProperty("id")) {
             const {id} = node.props;
+            foundIds.add(id);
             if (map[id] !== undefined)
               Object.assign(attrs, map[id]);
           }
 
-          if (typeof node.type !== 'string' && typeof node.type !== 'symbol' && Player.ReceiverSymbol in node.type) {
+          if (typeof node.type !== "string" && typeof node.type !== "symbol" && Player.ReceiverSymbol in node.type) {
             Object.assign(attrs, {player});
           }
 
