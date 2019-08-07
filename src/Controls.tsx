@@ -75,6 +75,7 @@ export default class Controls extends React.PureComponent<Props, State> {
     document.body.addEventListener('keydown', this.onKeyDown);
 
     // show/hiding
+    document.body.addEventListener("touchstart", this.resetTimer);
     document.body.addEventListener('mousemove', this.resetTimer);
     playback.hub.on('play', this.resetTimer);
 

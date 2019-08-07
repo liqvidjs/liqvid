@@ -32,7 +32,7 @@ class Audio extends Media {
     const {start, player, obstructCanPlay, obstructCanPlayThrough, children, ...attrs} = this.props;
 
     return (
-      <audio ref={node => this.domElement = node} {...attrs}>
+      <audio preload="auto" ref={node => this.domElement = node} {...attrs}>
         {children}
       </audio>
     );

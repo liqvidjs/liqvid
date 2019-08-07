@@ -42,7 +42,7 @@ class Video extends Media {
     }; 
 
     return (
-      <video ref={node => this.domElement = node} {...attrs}>
+      <video preload="auto" ref={node => this.domElement = node} {...attrs}>
         {children}
       </video>
     );

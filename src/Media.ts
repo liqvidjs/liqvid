@@ -7,6 +7,8 @@ import {parseTime} from "./utils/time";
 import Player from "./Player";
 
 export interface MediaProps {
+  obstructCanPlay?: boolean;
+  obstructCanPlayThrough?: boolean;
   src?: string;
   start: number | string;
 }
@@ -15,6 +17,11 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
   protected player: Player;
   protected domElement: HTMLMediaElement;
   start: number;
+
+  static defaultProps = {
+    obstructCanPlay: false,
+    obstructCanPlayThrough: false
+  };
 
   constructor(props: MediaProps & {player: Player}) {
     super(props);
@@ -29,7 +36,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       this.start = props.start;
     }
 
-    bind(this, ["onPause", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
+    bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
   }
 
   componentDidMount() {
@@ -37,6 +44,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
 
     // attach event listeners
     playback.hub.on("pause", this.onPause);
+    playback.hub.on("play", this.onPlay);
     playback.hub.on("ratechange", this.onRateChange);
     playback.hub.on("seek", this.onSeek);
     playback.hub.on("seeked", this.onSeek);
@@ -45,8 +53,12 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
     playback.hub.on("volumechange", this.onVolumeChange);
 
     // canplay/canplaythrough events
-    this.player.obstruct("canplay", awaitMediaCanPlay(this.domElement));
-    this.player.obstruct("canplaythrough", awaitMediaCanPlayThrough(this.domElement));
+    if (this.props.obstructCanPlay) {
+      this.player.obstruct("canplay", awaitMediaCanPlay(this.domElement));
+    }
+    if (this.props.obstructCanPlayThrough) {
+      this.player.obstruct("canplaythrough", awaitMediaCanPlayThrough(this.domElement));
+    }
 
     // need to call this once initially
     this.onVolumeChange();
@@ -80,6 +92,10 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
     return this.start + this.domElement.duration * 1000;
   }
 
+  onPlay() {
+    this.onTimeUpdate(this.player.playback.currentTime);
+  }
+
   onPause() {
     this.domElement.pause();
   }
@@ -99,7 +115,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       this.domElement.currentTime = (t - this.start) / 1000;
 
       if (this.domElement.paused && !playback.paused && !playback.seeking)
-        this.domElement.play().catch(console.error);
+        this.domElement.play().catch(this.player.playback.pause);
     } else {
       if (!this.domElement.paused)
         this.domElement.pause();
@@ -111,7 +127,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       if (!this.domElement.paused) return;
 
       this.domElement.currentTime = (t - this.start) / 1000;
-      this.domElement.play().catch(console.error);
+      this.domElement.play().catch(this.player.playback.pause);
     } else {
       if (!this.domElement.paused)
         this.domElement.pause();
