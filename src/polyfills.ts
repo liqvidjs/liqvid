@@ -1,20 +1,29 @@
-export function requestFullScreen(): void {
-  for (const method of ["requestFullscreen", "webkitRequestFullscreen", "mozRequestFullScreen", "msRequestFullscreen"])
-    if (document.body[method])
-      return document.body[method]();
-}
+const id = <T>(_: T) => _;
 
-export function exitFullScreen(): void {
-  for (const method of ["exitFullscreen", "webkitExitFullscreen", "mozCancelFullScreen", "msExitFullscreen"])
-    if (document[method])
-      return document[method]();
-}
+export const fullscreenEnabled: boolean =
+  ["fullscreenEnabled", 'webkitFullscreenEnabled', 'mozFullScreenEnabled', 'msFullscreenEnabled']
+  .map(_ => document[_])
+  .concat(false)
+  .find(_ => _ !== undefined);
 
-export function isFullScreen(): boolean {
-  for (const prop of ["fullscreen", "webkitIsFullScreen", "mozFullScreen"])
-    if (document[prop] !== undefined)
-      return document[prop];
-}
+export const requestFullScreen: () => Promise<void> =
+  ["requestFullscreen", "webkitRequestFullscreen", "mozRequestFullScreen", "msRequestFullscreen"]
+  .map(_ => document.body[_])
+  .concat(() => {})
+  .find(id)
+  .bind(document.body);
+
+export const exitFullScreen: () => Promise<void> =
+  ["exitFullscreen", "webkitExitFullscreen", "mozCancelFullScreen", "msExitFullscreen"]
+  .map(_ => document[_])
+  .concat(async () => {})
+  .find(id)
+  .bind(document);
+
+export const isFullScreen = () =>
+  ["fullscreen", "webkitIsFullScreen", "mozFullScreen"]
+  .map(_ => document[_] as boolean)
+  .find(_ => _ !== undefined);
 
 export function onFullScreenChange(callback: EventListener) {
   for (const event of ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"])

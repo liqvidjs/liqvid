@@ -21,7 +21,7 @@ export default class Volume extends PlayerPureReceiver {
   }
 
   onInput(e: React.ChangeEvent<HTMLInputElement>) {
-    this.player.playback.volume = parseInt(e.target.value) / 100;
+    this.player.playback.volume = parseFloat(e.target.value) / 100;
   }
 
   render() {

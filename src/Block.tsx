@@ -6,19 +6,24 @@ import {bind} from './utils/misc';
 export default class Block<P = {}, S = {}> extends Player.PureReceiver<P, S> {
   protected player: Player;
 
-  sbn: (name: string) => [string, number, number];
-  sn: (name: string) => number;
-
   constructor(props: P & {player: Player}) {
     super(props);
     this.player = props.player;
 
     const {script} = this.player;
 
-    this.sbn = script.slideByName.bind(script);
-    this.sn = script.slideNumberOf.bind(script);
+    // this.sbn = script.slideByName.bind(script);
+    // this.sn = script.slideNumberOf.bind(script);
 
     bind(this, ['onSlideUpdate', 'onTimeUpdate']);
+  }
+
+  sn(name: string) {
+    return this.player.script.slideNumberOf(name);
+  }
+
+  sbn(name: string) {
+    return this.player.script.slideByName(name);
   }
 
   componentDidMount() {
