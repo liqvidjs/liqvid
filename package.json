@@ -2,7 +2,9 @@
   "name": "ractive-player",
   "version": "0.8.0",
   "description": "Library for authoring interactive videos using HTML/CSS/Javascript",
-  "main": "webpack.config.js",
+  "files": "dist/*",
+  "main": "dist/ractive-player.js",
+  "typings": "dist/ractive-player.d.ts",
   "scripts": {
     "css": "stylus -c -o dist/ styl/ractive-player.styl"
   },
@@ -17,9 +19,19 @@
   },
   "homepage": "https://github.com/ysulyma/ractive-player#readme",
   "dependencies": {
+    "@types/node": "^12.6.8",
     "banner-webpack-plugin": "^0.2.3",
     "nib": "^1.1.2",
     "stylus": "^0.54.5",
     "webpack": "^4.16.5"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.24",
+    "@types/react-dom": "^16.8.5",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "eslint": "^6.1.0",
+    "eslint-plugin-react": "^7.14.3",
+    "webpack-cli": "^3.3.4"
   }
 }
