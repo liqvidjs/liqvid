@@ -26,7 +26,7 @@ export default class TimeDisplay extends PlayerPureReceiver {
       <span className="rp-controls-time">
         <span className="rp-current-time">{formatTime(playback.currentTime)}</span>
         <span className="rp-time-separator">/</span>
-        <span className="rp-total-time">{formatTime(playback.length)}</span>
+        <span className="rp-total-time">{formatTime(playback.duration)}</span>
       </span>
     );
   }
