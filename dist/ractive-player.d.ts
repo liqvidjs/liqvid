@@ -1,6 +1,5 @@
-/// <reference types="node" />
-
-import * as React from 'react';
+import {EventEmitter} from "events";
+import * as React from "react";
 
 export = RactivePlayer;
 export as namespace RactivePlayer;
@@ -11,7 +10,7 @@ declare namespace RactivePlayer {
   type ReplayData<K> = [number, K][];
 
   // type only!
-  class Activity extends React.Component<{close: Function}> {};
+  class Activity extends React.Component<{close: Function}> {}
   type ActivityList = React.Component<{open: Function}>;
 
   // Block
@@ -39,7 +38,9 @@ declare namespace RactivePlayer {
     map?: object;
   }
 
-  class IdMap extends React.PureComponent<IdMapProps, {}> {}
+  class IdMap extends React.PureComponent<IdMapProps, {}> {
+    foundIds: Set<string>;
+  }
 
   // Media
   interface MediaProps {
@@ -64,9 +65,12 @@ declare namespace RactivePlayer {
     audioContext: AudioContext;
     audioNode: GainNode;
     currentTime: number;
-    length: number;
-    hub: NodeJS.EventEmitter;
+    duration: number;
+    hub: EventEmitter;
+    paused: boolean;
     playbackRate: number;
+    playingFrom: number;
+    seeking: boolean;
 
     pause(): void;
     play(): Promise<void>;
@@ -74,7 +78,7 @@ declare namespace RactivePlayer {
   }
 
   class Script {
-    hub: NodeJS.EventEmitter;
+    hub: EventEmitter;
     loadTasks: Promise<any>[];
     slideIndex: number;
     slideName: string;
@@ -113,7 +117,6 @@ declare namespace RactivePlayer {
   }
 
   interface PlayerProps {
-    authoring?: boolean;
     map?: object;
     plugins?: Plugin[];
     script: Script;
@@ -131,11 +134,15 @@ declare namespace RactivePlayer {
 
     $controls: any;
     canvas: HTMLDivElement;
-    hub: NodeJS.EventEmitter;
+    hub: EventEmitter;
     playback: Playback;
     script: Script;
 
+    suspendKeyCapture(): void;
+    resumeKeyCapture(): void;
     obstruct(event: 'canplay' | 'canplaythrough', task: Promise<any>): void;
+
+    /** Call this method when the ractive is ready to begin playing. */
     ready(): void;
   }
 
@@ -192,6 +199,7 @@ declare namespace RactivePlayer {
     }
 
     authoring: {
+      during: (prefix: string) => any;
       from: (first: string, last?: string) => any;
       pos(args: {x?: number, y?: number, w?: number, h?: number}): StyleBlock;
       pos(x?: number, y?: number, w?: number, h?: number): StyleBlock;
