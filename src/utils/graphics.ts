@@ -1,6 +1,3 @@
-// XXX this doesn't really belong here
-declare const THREE: any;
-
 // convert screen to SVG coords
 export function screenToSVG(elt: SVGElement, x: number, y: number): [number, number] {
   let graphicsElt = elt;
@@ -35,18 +32,4 @@ export function screenToSVGVector(svg: SVGSVGElement, dx: number, dy: number): [
         svgDy = dy / aspectY;
 
   return [svgDx, svgDy];
-}
-
-// make THREE's ObjectLoader return a promise
-export function extendThree(): void {
-  (THREE.ObjectLoader.prototype as any).loadPromise = function(url: string, onProgress = () => {}) {
-    return new Promise((resolve, reject) => {
-      this.load(
-        url,
-        resolve,
-        onProgress,
-        reject
-      );
-    });
-  };
 }
