@@ -1,9 +1,8 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Playback from '../playback';
-import Player from '../Player';
+import Player from "../Player";
 
-import {formatTime} from '../utils/time';
+import {formatTime} from "../utils/time";
 
 interface Props {
   cols: number;
@@ -45,10 +44,10 @@ export default class ThumbnailBox extends React.PureComponent<Props, {}> {
     const maxSlide = Math.floor(player.playback.duration / frequency / 1000),
           maxSheet = Math.floor(maxSlide / count);
 
-    player.hub.on('canplay', () => {
+    player.hub.on("canplay", () => {
       for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
         const img = new Image();
-        img.src = path.replace('%s', sheetNum.toString());
+        img.src = path.replace("%s", sheetNum.toString());
       }
     });
   }
@@ -65,26 +64,26 @@ export default class ThumbnailBox extends React.PureComponent<Props, {}> {
           row = Math.floor(slideNumOnSheet / rows),
           col = slideNumOnSheet % rows;
 
-    const sheetName = path.replace('%s', sheetNum.toString());
+    const sheetName = path.replace("%s", sheetNum.toString());
 
     return (
       <div
         className="rp-controls-thumbnail"
         style={{
-          display: show ? 'block' : 'none',
+          display: show ? "block" : "none",
           left: `calc(${progress * 100}%)`
         }}>
-          {title && <span className="rp-thumbnail-title">{title}</span>}
-          <div className="rp-thumbnail-box">
-            <img
-              src={sheetName}
-              style={{
-                left: `-${col * width}px`,
-                top: `-${row * height}px`
-              }}
-            />
-            <span className="rp-thumbnail-time">{formatTime(time * 1000)}</span>
-          </div>
+        {title && <span className="rp-thumbnail-title">{title}</span>}
+        <div className="rp-thumbnail-box">
+          <img
+            src={sheetName}
+            style={{
+              left: `-${col * width}px`,
+              top: `-${row * height}px`
+            }}
+          />
+          <span className="rp-thumbnail-time">{formatTime(time * 1000)}</span>
+        </div>
       </div>
     );
   }

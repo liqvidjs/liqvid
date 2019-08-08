@@ -1,26 +1,25 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Playback from '../playback';
-import Player from '../Player';
-import {PlayerPureReceiver} from '../shared';
+import Player from "../Player";
+import {PlayerPureReceiver} from "../shared";
 
-import {formatTime, formatTimeMs} from '../utils/time';
+import {formatTime} from "../utils/time";
+import {bind} from "../utils/misc";
 
 export default class TimeDisplay extends PlayerPureReceiver {
-  private playback: Playback;
-
   constructor(props: ({player: Player})) {
     super(props);
-    this.playback = props.player.playback;
+
+    bind(this, ["forceUpdate"]);
   }
 
   componentDidMount() {
-    this.playback.hub.on('seek', () => this.forceUpdate());
-    this.playback.hub.on('timeupdate', () => this.forceUpdate());
+    this.props.player.playback.hub.on("seek", this.forceUpdate);
+    this.props.player.playback.hub.on("timeupdate", this.forceUpdate);
   }
 
   render() {
-    const {playback} = this;
+    const {playback} = this.props.player;
 
     return (
       <span className="rp-controls-time">

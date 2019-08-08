@@ -1,6 +1,6 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Player from './Player';
+import Player from "./Player";
 
 interface Props {
   player: Player;
@@ -12,8 +12,8 @@ export default class Captions extends React.PureComponent<Props, {}> {
   componentDidMount() {
     const {playback} = this.props.player;
 
-    playback.hub.on('cuechange', () => {
-      this.domElement.innerHTML = '';
+    playback.hub.on("cuechange", () => {
+      this.domElement.innerHTML = "";
 
       for (const cue of playback.captions) {
         this.domElement.appendChild(cue);

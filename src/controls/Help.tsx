@@ -1,9 +1,7 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 
-import Playback from '../playback';
-
-import {bind} from '../utils/misc';
+import {bind} from "../utils/misc";
 
 /* individual controls */
 interface Props {
@@ -18,7 +16,7 @@ export default class Help extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    bind(this, ['openDialog']);
+    bind(this, ["openDialog"]);
 
     this.state = {dialogOpen: false};
   }
@@ -43,7 +41,7 @@ export default class Help extends React.PureComponent<Props, State> {
 
   render() {
     const dialogStyle = {
-      display: this.state.dialogOpen ? 'block' : 'none'
+      display: this.state.dialogOpen ? "block" : "none"
     };
 
     return (
@@ -66,19 +64,19 @@ export default class Help extends React.PureComponent<Props, State> {
   }
 }
 
-class HelpDialog extends React.PureComponent<{openDialog: () => void, style: any}> {
+class HelpDialog extends React.PureComponent<{openDialog: () => void; style: React.CSSProperties}> {
   render() {
     const videoShortcuts = [
-      ['j', 'Go back 10 seconds'],
-      ['<Left>', 'Go back 5 seconds'],
+      ["j", "Go back 10 seconds"],
+      ["<Left>", "Go back 5 seconds"],
       [() => (
         <tr key='space'>
           <th scope="row"><kbd>k</kbd> or <kbd>&lt;Space&gt;</kbd></th>
           <td>Play/pause</td>
         </tr>
       )],
-      ['<Right>', 'Go forward 5 seconds'],
-      ['l', 'Go forward 10 seconds'],
+      ["<Right>", "Go forward 5 seconds"],
+      ["l", "Go forward 10 seconds"],
       [() => (
         <tr key='number'>
           <th scope="row"><kbd>&lt;0&gt;</kbd> – <kbd>&lt;9&gt;</kbd></th>
@@ -86,18 +84,18 @@ class HelpDialog extends React.PureComponent<{openDialog: () => void, style: any
         </tr>
       )],
 
-      ['f', 'Full screen'],
+      ["f", "Full screen"],
       
-      ['<Up>', 'Increase volume 5%'],
-      ['<Down>', 'Decrease volume 5%'],
-      ['m', 'Mute/unmute'],
+      ["<Up>", "Increase volume 5%"],
+      ["<Down>", "Decrease volume 5%"],
+      ["m", "Mute/unmute"],
       ["?", "Show help"]
     ];
 
     const controls3D = [
-      ['Left mouse', 'Orbit'],
-      ['Scroll wheel', 'Zoom'],
-      ['Right mouse', 'Pan']
+      ["Left mouse", "Orbit"],
+      ["Scroll wheel", "Zoom"],
+      ["Right mouse", "Pan"]
     ];
 
     return ReactDOM.createPortal(
@@ -109,11 +107,11 @@ class HelpDialog extends React.PureComponent<{openDialog: () => void, style: any
             <caption>Video controls</caption>
             <tbody>
               {videoShortcuts.map(([key, desc]) => (
-                typeof key === 'function' ? key() :
-                <tr key={key}>
-                  <th scope="row"><kbd>{key}</kbd></th>
-                  <td>{desc}</td>
-                </tr>
+                typeof key === "function" ? key() :
+                  <tr key={key}>
+                    <th scope="row"><kbd>{key}</kbd></th>
+                    <td>{desc}</td>
+                  </tr>
               ))}
             </tbody>
           </table>

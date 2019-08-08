@@ -1,12 +1,12 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Playback from '../playback';
-import Player from '../Player';
-import {PlayerPureReceiver} from '../shared';
+import Playback from "../playback";
+import Player from "../Player";
+import {PlayerPureReceiver} from "../shared";
 
-import {bind} from '../utils/misc';
+import {bind} from "../utils/misc";
 
-const wine = '#AF1866'; // XXX fix this
+const wine = "#AF1866"; // XXX fix this
 
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -22,7 +22,7 @@ export default class Settings extends PlayerPureReceiver<{}, State> {
     super(props);
     this.playback = props.player.playback;
 
-    bind(this, ['toggleDialog' ,'toggleSubtitles']);
+    bind(this, ["toggleDialog" ,"toggleSubtitles"]);
 
     this.state = {
       dialogOpen: false,
@@ -31,7 +31,7 @@ export default class Settings extends PlayerPureReceiver<{}, State> {
   }
 
   componentDidMount() {
-    this.playback.hub.on('ratechange', () => this.forceUpdate());
+    this.playback.hub.on("ratechange", () => this.forceUpdate());
   }
 
   closeDialog() {
@@ -58,19 +58,19 @@ export default class Settings extends PlayerPureReceiver<{}, State> {
   }
 
   toggleSubtitles() {
-    document.body.classList.toggle('rp-captions');
+    document.body.classList.toggle("rp-captions");
     this.forceUpdate();
   }
 
   render() {
     const dialogStyle = {
-      display: this.state.dialogOpen ? 'block' : 'none'
+      display: this.state.dialogOpen ? "block" : "none"
     };
     const speedDialogStyle = {
-      display: this.state.speedDialogOpen ? 'block' : 'none'
+      display: this.state.speedDialogOpen ? "block" : "none"
     };
 
-    const captions = document.body.classList.contains('rp-captions');
+    const captions = document.body.classList.contains("rp-captions");
     const {playbackRate} = this.playback;
 
     return (
@@ -80,11 +80,11 @@ export default class Settings extends PlayerPureReceiver<{}, State> {
           <ul>
             {PLAYBACK_RATES.map(rate => (
               <li
-                className={rate === playbackRate ? 'selected' : ''}
+                className={rate === playbackRate ? "selected" : ""}
                 key={rate}
                 onClick={() => this.setSpeed(rate)}
               >
-                {rate === 1 ? 'Normal' : rate.toString()}
+                {rate === 1 ? "Normal" : rate.toString()}
               </li>
             ))}
           </ul>
@@ -94,7 +94,7 @@ export default class Settings extends PlayerPureReceiver<{}, State> {
             <tbody>
               <tr onClick={() => this.setState({speedDialogOpen: true, dialogOpen: false})}>
                 <th scope="row">Speed</th>
-                <td>{playbackRate === 1 ? 'Normal' : playbackRate} &gt;</td>
+                <td>{playbackRate === 1 ? "Normal" : playbackRate} &gt;</td>
               </tr>
               <tr onClick={this.toggleSubtitles}>
                 <th scope="row">Subtitles</th>
