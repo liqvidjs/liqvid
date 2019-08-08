@@ -84,6 +84,11 @@ export default class Controls extends React.PureComponent<Props, State> {
       this.setState({visible: true});
     });
 
+    playback.hub.on('stop', () => {
+      clearTimeout(this.timer);
+      this.setState({visible: true});
+    });
+
     document.body.addEventListener('mouseleave', () => {
       if (this.player.playback.paused) return;
       this.setState({visible: false});
