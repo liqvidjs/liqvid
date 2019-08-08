@@ -4,19 +4,15 @@ import * as ReactDOM from "react-dom";
 import {bind} from "../utils/misc";
 
 /* individual controls */
-interface Props {
-  ref: Function;
-}
-
 interface State {
   dialogOpen: boolean;
 }
 
-export default class Help extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+export default class Help extends React.PureComponent<{}, State> {
+  constructor(props: {}) {
     super(props);
 
-    bind(this, ["openDialog"]);
+    bind(this, ["closeDialog", "openDialog"]);
 
     this.state = {dialogOpen: false};
   }
@@ -46,7 +42,7 @@ export default class Help extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <HelpDialog style={dialogStyle} openDialog={this.openDialog}/>
+        <HelpDialog style={dialogStyle} closeDialog={this.closeDialog} openDialog={this.openDialog}/>
         <svg className="rp-controls-help" onClick={this.openDialog} viewBox="0 0 20 20">
           <path
             d="m 10.896484,3.8652344 c -1.2309996,0 -1.7499996,0.8536094 -1.7499996,1.4746094 -0.026,0.737 0.39525,1.1816406 1.2812496,1.1816406 1.059,0 1.679688,-0.7171875 1.679688,-1.4921875 0,-0.621 -0.274938,-1.1640625 -1.210938,-1.1640625 z"
@@ -64,7 +60,13 @@ export default class Help extends React.PureComponent<Props, State> {
   }
 }
 
-class HelpDialog extends React.PureComponent<{openDialog: () => void; style: React.CSSProperties}> {
+interface DialogProps {
+  closeDialog: () => void;
+  openDialog: () => void;
+  style: React.CSSProperties;
+}
+
+class HelpDialog extends React.PureComponent<DialogProps> {
   render() {
     const videoShortcuts = [
       ["j", "Go back 10 seconds"],
