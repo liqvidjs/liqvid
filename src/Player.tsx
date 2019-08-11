@@ -5,7 +5,6 @@ import Captions from './Captions';
 
 import {bind} from './utils/misc';
 
-import IdMap from './IdMap';
 import Playback from './playback';
 import Script from './script';
 
@@ -99,7 +98,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.props.plugins.forEach(plugin => plugin.setup(hook));
 
     this.state = {ready: false};
-    bind(this, ["onMouseUp"]);
+    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture"]);
   }
 
   componentDidMount() {
@@ -131,17 +130,27 @@ export default class Player extends React.PureComponent<Props, State> {
     recurse(this.dag);
 
     function recurse(leaf: DAGLeaf) {
-      // root node
-      if (typeof leaf.first === 'undefined') return leaf.children.forEach(recurse);
+      if (typeof leaf.first !== "undefined") {
+        if (leaf.first <= script.slideIndex && (!leaf.last || script.slideIndex < leaf.last)) {
+          leaf.element.style.removeProperty('opacity');
+          leaf.element.style.removeProperty('pointer-events');
+          return leaf.children.forEach(recurse);
+        }
 
-      if (leaf.first <= script.slideIndex && (!leaf.last || script.slideIndex < leaf.last)) {
-        leaf.element.style.removeProperty('opacity');
-        leaf.element.style.removeProperty('pointer-events');
+        leaf.element.style.opacity = '0';
+        leaf.element.style['pointer-events'] = 'none';
+      } else if (typeof leaf.during !== "undefined") {
+        if (script.slideName.startsWith(leaf.during)) {
+          leaf.element.style.removeProperty('opacity');
+          leaf.element.style.removeProperty('pointer-events');
+          return leaf.children.forEach(recurse);
+        }
+
+        leaf.element.style.opacity = '0';
+        leaf.element.style['pointer-events'] = 'none';
+      } else {
         return leaf.children.forEach(recurse);
       }
-
-      leaf.element.style.opacity = '0';
-      leaf.element.style['pointer-events'] = 'none';
     }
   }
 
@@ -155,11 +164,19 @@ export default class Player extends React.PureComponent<Props, State> {
     this.$controls.canvasClick();
   }
 
+  suspendKeyCapture() {
+    this.$controls.captureKeys = false;
+  }
+
+  resumeKeyCapture() {
+    this.$controls.captureKeys = true;
+  }
+
   // toposort needs to be called after MathJax has rendered stuff
   ready() {
     this.dag = toposort(this.canvas, this.script.slideNumberOf);
 
-    this.script.hub.on('slideupdate', () => this.updateSlides());
+    this.script.hub.on('markerupdate', () => this.updateSlides());
     this.updateSlides();
 
     this.setState({
@@ -195,7 +212,7 @@ export default class Player extends React.PureComponent<Props, State> {
     };
 
     const classNames = ['ractive-player'];
-
+    
     if (!this.state.ready)
       classNames.push('not-ready');
     
@@ -204,7 +221,7 @@ export default class Player extends React.PureComponent<Props, State> {
     return (
       <Player.Context.Provider value={this}>
         <div className={classNames.join(' ')} {...attrs}>
-          <LoadingScreen ref={ref => this.loadingScreen = ref}/>
+          <LoadingScreen/>
           <div className="rp-canvas"
             onMouseUp={this.onMouseUp}
             ref={canvas => this.canvas = canvas}>
@@ -226,41 +243,38 @@ export default class Player extends React.PureComponent<Props, State> {
   }
 }
 
-class LoadingScreen extends React.PureComponent<{tasks: any[]}, {}> {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div className="rp-loading-screen">
-        <div className="rp-loading-spinner"/>
-      </div>
-   );
-  }
+function LoadingScreen() {
+  return (
+    <div className="rp-loading-screen">
+      <div className="rp-loading-spinner"/>
+    </div>
+ );
 }
 
 interface DAGLeaf {
   children: DAGLeaf[];
   element: HTMLElement | SVGElement;
+  during?: string;
   first?: number;
   last?: number;
 }
 
 /* topological sort */
 function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf {
-  const nodes = Array.from(root.querySelectorAll('*[data-from-first], *[data-annotation_slide]')) as (HTMLElement | SVGElement)[];
+  const nodes = Array.from(root.querySelectorAll('*[data-from-first], *[data-during], *[data-annotation_slide]')) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
   const path: DAGLeaf[] = [dag];
 
   for (const node of nodes) {
     // get first and last slide
-    let firstSlideName, lastSlideName;
+    let firstSlideName, lastSlideName, during;
 
     if (node.dataset.fromFirst) {
       firstSlideName = node.dataset.fromFirst;
       lastSlideName = node.dataset.fromLast;
+    } else if (node.dataset.during) {
+      during = node.dataset.during;
     } else {
       [firstSlideName, lastSlideName] = node.dataset.annotation_slide.split(',');
     }
@@ -269,16 +283,17 @@ function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf
     node.style.opacity = '0';
     node.style.pointerEvents = 'none';
 
-    node.removeAttribute('data-from-first');
-    node.removeAttribute('data-from-last');
-    node.removeAttribute('data-annotation_slide');
+    // node.removeAttribute('data-from-first');
+    // node.removeAttribute('data-from-last');
+    // node.removeAttribute('data-annotation_slide');
 
     // build the leaf
     const leaf: DAGLeaf = {
       children: [],
-      element: node,
-      first: sn(firstSlideName),
+      element: node
     };
+    if (during) leaf.during = during;
+    if (firstSlideName) leaf.first = sn(firstSlideName);
     if (lastSlideName) leaf.last = sn(lastSlideName);
 
     // figure out where to graft it
