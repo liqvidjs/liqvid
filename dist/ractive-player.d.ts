@@ -19,7 +19,7 @@ declare namespace RactivePlayer {
 
     sbn(name: string): [string, number, number];
     sn(name: string): number;
-    onSlideUpdate(prevIndex: number): void;
+    onMarkerUpdate(prevIndex: number): void;
     onTimeUpdate(t: number): void;
   }
 
@@ -80,13 +80,13 @@ declare namespace RactivePlayer {
   class Script {
     hub: EventEmitter;
     loadTasks: Promise<any>[];
-    slideIndex: number;
-    slideName: string;
-    slides: [string, number, number][];
+    markerIndex: number;
+    markerName: string;
+    markers: [string, number, number][];
 
-    constructor(slides: Array<[string, string | number] | [string, string | number, string | number]>);
-    slideByName(name: string): [string, number, number];
-    slideNumberOf(name: string): number;
+    constructor(markers: Array<[string, string | number] | [string, string | number, string | number]>);
+    markerByName(name: string): [string, number, number];
+    markerNumberOf(name: string): number;
   }
 
   // Player
