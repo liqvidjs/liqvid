@@ -1,17 +1,17 @@
-import * as EventEmitter from 'events';
-import * as React from 'react';
-import Controls, {ThumbData} from './Controls';
-import Captions from './Captions';
+import * as EventEmitter from "events";
+import * as React from "react";
+import Controls, {ThumbData} from "./Controls";
+import Captions from "./Captions";
 
-import {bind} from './utils/misc';
+import {bind} from "./utils/misc";
 
-import Playback from './playback';
-import Script from './script';
+import Playback from "./playback";
+import Script from "./script";
 
-import ErrorBoundary from './ErrorBoundary';
+import ErrorBoundary from "./ErrorBoundary";
 
-import {createContextBroadcaster} from './utils/react-utils';
-import {PlayerContext, PlayerReceiverSymbol, PlayerReceiver, PlayerPureReceiver, PlayerBroadcaster} from './shared';
+import {createContextBroadcaster} from "./utils/react-utils";
+import {PlayerContext, PlayerReceiverSymbol, PlayerReceiver, PlayerPureReceiver, PlayerBroadcaster} from "./shared";
 
 interface SVGElement {
   dataset: DOMStringMap;
@@ -34,7 +34,7 @@ interface Props {
   activities?: React.Component;
   plugins?: Plugin[];
   script: Script;
-  style?: Object;
+  style?: Record<string, any>;
   thumbs?: ThumbData;
 }
 
@@ -103,10 +103,10 @@ export default class Player extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     Promise.all(this.__canPlayTasks)
-      .then(() => this.hub.emit('canplay'));
+    .then(() => this.hub.emit("canplay"));
 
     Promise.all(this.__canPlayThroughTasks)
-      .then(() => this.hub.emit('canplaythrough'));
+    .then(() => this.hub.emit("canplaythrough"));
   }
 
   rememberVolumeSettings() {
@@ -114,13 +114,13 @@ export default class Player extends React.PureComponent<Props, State> {
           storage = window.sessionStorage;
 
     // restore volume settings
-    playback.volume = parseFloat(storage.getItem('ractive volume') || '1');
-    playback.muted = 'true' === (storage.getItem('ractive muted') || 'false');
+    playback.volume = parseFloat(storage.getItem("ractive volume") || "1");
+    playback.muted = "true" === (storage.getItem("ractive muted") || "false");
 
     // save volume settings
-    playback.hub.on('volumechange', () => {
-      storage.setItem('ractive muted', playback.muted.toString());
-      storage.setItem('ractive volume', playback.volume.toString());
+    playback.hub.on("volumechange", () => {
+      storage.setItem("ractive muted", playback.muted.toString());
+      storage.setItem("ractive volume", playback.volume.toString());
     });
   }
 
@@ -132,22 +132,22 @@ export default class Player extends React.PureComponent<Props, State> {
     function recurse(leaf: DAGLeaf) {
       if (typeof leaf.first !== "undefined") {
         if (leaf.first <= script.slideIndex && (!leaf.last || script.slideIndex < leaf.last)) {
-          leaf.element.style.removeProperty('opacity');
-          leaf.element.style.removeProperty('pointer-events');
+          leaf.element.style.removeProperty("opacity");
+          leaf.element.style.removeProperty("pointer-events");
           return leaf.children.forEach(recurse);
         }
 
-        leaf.element.style.opacity = '0';
-        leaf.element.style['pointer-events'] = 'none';
+        leaf.element.style.opacity = "0";
+        leaf.element.style["pointer-events"] = "none";
       } else if (typeof leaf.during !== "undefined") {
         if (script.slideName.startsWith(leaf.during)) {
-          leaf.element.style.removeProperty('opacity');
-          leaf.element.style.removeProperty('pointer-events');
+          leaf.element.style.removeProperty("opacity");
+          leaf.element.style.removeProperty("pointer-events");
           return leaf.children.forEach(recurse);
         }
 
-        leaf.element.style.opacity = '0';
-        leaf.element.style['pointer-events'] = 'none';
+        leaf.element.style.opacity = "0";
+        leaf.element.style["pointer-events"] = "none";
       } else {
         return leaf.children.forEach(recurse);
       }
@@ -176,7 +176,7 @@ export default class Player extends React.PureComponent<Props, State> {
   ready() {
     this.dag = toposort(this.canvas, this.script.slideNumberOf);
 
-    this.script.hub.on('markerupdate', () => this.updateSlides());
+    this.script.hub.on("markerupdate", () => this.updateSlides());
     this.updateSlides();
 
     this.setState({
@@ -190,11 +190,11 @@ export default class Player extends React.PureComponent<Props, State> {
 
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
-    this.playback.hub.emit('bufferupdate');
+    this.playback.hub.emit("bufferupdate");
   }
 
-  obstruct(event: 'canplay' | 'canplaythrough', task: Promise<any>, name: string = 'miscellaneous') {
-    if (event === 'canplay') {
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<any>, name: string = "miscellaneous") {
+    if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {
       this.__canPlayThroughTasks.push(task);
@@ -211,16 +211,16 @@ export default class Player extends React.PureComponent<Props, State> {
       style: this.props.style
     };
 
-    const classNames = ['ractive-player'];
+    const classNames = ["ractive-player"];
     
     if (!this.state.ready)
-      classNames.push('not-ready');
+      classNames.push("not-ready");
     
-    classNames.push(...this.applyHooks('classNames'));
+    classNames.push(...this.applyHooks("classNames"));
 
     return (
       <Player.Context.Provider value={this}>
-        <div className={classNames.join(' ')} {...attrs}>
+        <div className={classNames.join(" ")} {...attrs}>
           <LoadingScreen/>
           <div className="rp-canvas"
             onMouseUp={this.onMouseUp}
@@ -235,8 +235,8 @@ export default class Player extends React.PureComponent<Props, State> {
               activities={this.props.activities}
               ready={this.state.ready}
               thumbs={this.props.thumbs}
-              />
-            </ErrorBoundary>
+            />
+          </ErrorBoundary>
         </div>
       </Player.Context.Provider>
     );
@@ -248,7 +248,7 @@ function LoadingScreen() {
     <div className="rp-loading-screen">
       <div className="rp-loading-spinner"/>
     </div>
- );
+  );
 }
 
 interface DAGLeaf {
@@ -261,7 +261,7 @@ interface DAGLeaf {
 
 /* topological sort */
 function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf {
-  const nodes = Array.from(root.querySelectorAll('*[data-from-first], *[data-during], *[data-annotation_slide]')) as (HTMLElement | SVGElement)[];
+  const nodes = Array.from(root.querySelectorAll("*[data-from-first], *[data-during], *[data-annotation_slide]")) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
   const path: DAGLeaf[] = [dag];
@@ -276,12 +276,12 @@ function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf
     } else if (node.dataset.during) {
       during = node.dataset.during;
     } else {
-      [firstSlideName, lastSlideName] = node.dataset.annotation_slide.split(',');
+      [firstSlideName, lastSlideName] = node.dataset.annotation_slide.split(",");
     }
 
     // CSS hides this initially, take over now
-    node.style.opacity = '0';
-    node.style.pointerEvents = 'none';
+    node.style.opacity = "0";
+    node.style.pointerEvents = "none";
 
     // node.removeAttribute('data-from-first');
     // node.removeAttribute('data-from-last');
