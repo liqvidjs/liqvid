@@ -17,7 +17,7 @@ export default class Playback {
   playingFrom:  number;
   startTime:    number;
 
-  private __captions:     Array<DocumentFragment>;
+  private __captions:     DocumentFragment[];
   private __playbackRate: number;
   private __muted:        boolean;
   private __seeking:      boolean;
