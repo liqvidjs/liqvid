@@ -53,8 +53,8 @@ export default class Player extends React.PureComponent<Props, State> {
 
   private hooks: Map<string, (() => any)[]>;
 
-  private __canPlayTasks: Promise<any>[];
-  private __canPlayThroughTasks: Promise<any>[];
+  private __canPlayTasks: Promise<void>[];
+  private __canPlayThroughTasks: Promise<void>[];
 
   private dag: DAGLeaf;
 
@@ -124,14 +124,14 @@ export default class Player extends React.PureComponent<Props, State> {
     });
   }
 
-  updateSlides() {
+  updateTree() {
     const {script} = this;
 
     recurse(this.dag);
 
     function recurse(leaf: DAGLeaf) {
       if (typeof leaf.first !== "undefined") {
-        if (leaf.first <= script.slideIndex && (!leaf.last || script.slideIndex < leaf.last)) {
+        if (leaf.first <= script.markerIndex && (!leaf.last || script.markerIndex < leaf.last)) {
           leaf.element.style.removeProperty("opacity");
           leaf.element.style.removeProperty("pointer-events");
           return leaf.children.forEach(recurse);
@@ -140,7 +140,7 @@ export default class Player extends React.PureComponent<Props, State> {
         leaf.element.style.opacity = "0";
         leaf.element.style["pointer-events"] = "none";
       } else if (typeof leaf.during !== "undefined") {
-        if (script.slideName.startsWith(leaf.during)) {
+        if (script.markerName.startsWith(leaf.during)) {
           leaf.element.style.removeProperty("opacity");
           leaf.element.style.removeProperty("pointer-events");
           return leaf.children.forEach(recurse);
@@ -174,10 +174,10 @@ export default class Player extends React.PureComponent<Props, State> {
 
   // toposort needs to be called after MathJax has rendered stuff
   ready() {
-    this.dag = toposort(this.canvas, this.script.slideNumberOf);
+    this.dag = toposort(this.canvas, this.script.markerNumberOf);
 
-    this.script.hub.on("markerupdate", () => this.updateSlides());
-    this.updateSlides();
+    this.script.hub.on("markerupdate", () => this.updateTree());
+    this.updateTree();
 
     this.setState({
       ready: true
@@ -193,7 +193,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.playback.hub.emit("bufferupdate");
   }
 
-  obstruct(event: "canplay" | "canplaythrough", task: Promise<any>, name: string = "miscellaneous") {
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>, name: string = "miscellaneous") {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {
@@ -260,23 +260,27 @@ interface DAGLeaf {
 }
 
 /* topological sort */
-function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf {
-  const nodes = Array.from(root.querySelectorAll("*[data-from-first], *[data-during], *[data-annotation_slide]")) as (HTMLElement | SVGElement)[];
+function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLeaf {
+  const nodes = Array.from(root.querySelectorAll(
+    "*[data-from-first], *[data-during], *[data-annotation_slide], *[data-annotation_marker]"
+  )) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
   const path: DAGLeaf[] = [dag];
 
   for (const node of nodes) {
-    // get first and last slide
-    let firstSlideName, lastSlideName, during;
+    // get first and last marker
+    let firstMarkerName, lastMarkerName, during;
 
     if (node.dataset.fromFirst) {
-      firstSlideName = node.dataset.fromFirst;
-      lastSlideName = node.dataset.fromLast;
+      firstMarkerName = node.dataset.fromFirst;
+      lastMarkerName = node.dataset.fromLast;
     } else if (node.dataset.during) {
       during = node.dataset.during;
-    } else {
-      [firstSlideName, lastSlideName] = node.dataset.annotation_slide.split(",");
+    } else if (node.dataset.annotation_slide) {
+      [firstMarkerName, lastMarkerName] = node.dataset.annotation_slide.split(",");
+    } else if (node.dataset.annotation_marker) {
+      [firstMarkerName, lastMarkerName] = node.dataset.annotation_marker.split(",");
     }
 
     // CSS hides this initially, take over now
@@ -293,8 +297,8 @@ function toposort(root: HTMLElement, sn: (slideName: string) => number): DAGLeaf
       element: node
     };
     if (during) leaf.during = during;
-    if (firstSlideName) leaf.first = sn(firstSlideName);
-    if (lastSlideName) leaf.last = sn(lastSlideName);
+    if (firstMarkerName) leaf.first = mn(firstMarkerName);
+    if (lastMarkerName) leaf.last = mn(lastMarkerName);
 
     // figure out where to graft it
     let current = path[path.length - 1];
