@@ -2,10 +2,6 @@
 
 This was originally developed just for my own personal use, and is in the process of being cleaned up for general use. For example, it does not always adhere to modern software "best practices" like unit testing or commenting one's code.
 
-## aspectRatio
-
-Deprecated
-
 ## Audio
 
 The `start` attribute is either a number or the name of a marker. If you don't have multiple sources you can just stick `src` on Audio itself.
