@@ -3,8 +3,6 @@ import * as React from 'react';
 import Playback from './playback';
 import Player from './Player';
 
-import aspectRatio from './aspectRatio';
-
 import {replay, ReplayData} from './utils/animation';
 
 interface Props {
