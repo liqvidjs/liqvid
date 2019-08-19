@@ -4,11 +4,11 @@ This was originally developed just for my own personal use, and is in the proces
 
 ## aspectRatio
 
-1/8; for converting vmin. Original development machine had minimal dimension 800px.
+Deprecated
 
 ## Audio
 
-The `start` attribute is either a number or the name of a slide. If you don't have multiple sources you can just stick `src` on Audio itself.
+The `start` attribute is either a number or the name of a marker. If you don't have multiple sources you can just stick `src` on Audio itself.
 
 Example:
 
@@ -23,7 +23,7 @@ Example:
 
 ## Block
 
-This is a slightly more opinionated `Player.PureReceiver`. You use it by having your component extend it. It will subscribe to `slideupdate` and `timeupdate`, via methods `onSlideUpdate()` and `onTimeUpdate()` that you implement.
+This is a slightly more opinionated `Player.PureReceiver`. You use it by having your component extend it. It will subscribe to `markerupdate` and `timeupdate`, via methods `onMarkerUpdate()` and `onTimeUpdate()` that you implement.
 
 ## Cursor
 
@@ -31,7 +31,7 @@ This should maybe be moved to a separate module.
 
 ## IdMap
 
-This also broadcasts `Player`.
+Automagically adds attributes to things with IDs. This is mainly to enable GUI tools which will be developed elsewhere. This also broadcasts `Player`.
 
 ## Playback
 
@@ -45,7 +45,7 @@ Example:
 // media-url.ts
 export default ".";
 
-// slides.ts
+// markers.ts
 export default [
   ["begin", "1:00"]
 ] as [string, string][];
@@ -54,7 +54,7 @@ export default [
 import {Player, Script} from "ractive-player";
 
 import MEDIA_URL from "./media-url";
-import slides from "./slides";
+import markers from "./markers";
 
 class Ractive extends React.PureComponent {
   async componentDidMount() {
@@ -65,8 +65,7 @@ class Ractive extends React.PureComponent {
   }
 
   render() {
-    const script = new Script(slides);
-    const ss = (name: string) => script.slideByName(name)[1];
+    const script = new Script(markers);
 
     const highlights = [
     ];
