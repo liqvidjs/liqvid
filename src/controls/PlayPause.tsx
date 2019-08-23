@@ -1,47 +1,39 @@
 import * as React from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 
-import {PlayerPureReceiver} from "../shared";
+import Player from "../Player";
 
-import {bind} from "../utils/misc";
+export default function PlayPause() {
+  const {playback} = useContext(Player.Context);
+  const [state, setState] = useState(playback.paused || playback.seeking);
 
-export default class PlayPause extends PlayerPureReceiver {
-  constructor(props: {}) {
-    super(props);
+  const update = () => setState(playback.paused || playback.seeking);
 
-    bind(this, ["onClick", "forceUpdate"]);
-  }
+  useEffect(() => {
+    const events = ["pause", "play", "seeked", "seeking", "seeked", "stop"];
 
-  componentDidMount() {
-    const {playback} = this.props.player;
+    for (const e of events)
+      playback.hub.on(e, update);
 
-    playback.hub.on("pause", this.forceUpdate);
-    playback.hub.on("play", this.forceUpdate);
-    playback.hub.on("seeking", this.forceUpdate);
-    playback.hub.on("seeked", this.forceUpdate);
-    playback.hub.on("stop", this.forceUpdate);
-  }
+    return () => {
+      for (const e of events)
+        playback.hub.off(e, update);
+    };
+  }, []);
 
-  onClick() {
-    const {playback} = this.props.player;
-    playback.paused ? playback.play() : playback.pause();
-  }
+  const onClick = useCallback(() => playback.paused ? playback.play() : playback.pause(), []);
 
-  render() {
-    const {playback} = this.props.player;
-
-    return (
-      <svg
-        className="rp-controls-playpause"
-        onClick={this.onClick}
-        viewBox="0 0 36 36">
-        {
-          playback.paused || playback.seeking ?
-            <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>
-            :
-            <path d="M 12 26 h 4 v -16 h -4 z M 21 26 h 4 v -16 h -4 z" fill="white"/>
-        }
-        
-      </svg>
-    );
-  }
+  return (
+    <svg
+      className="rp-controls-playpause"
+      onClick={onClick}
+      viewBox="0 0 36 36">
+      {
+        state ?
+        <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>
+        :
+        <path d="M 12 26 h 4 v -16 h -4 z M 21 26 h 4 v -16 h -4 z" fill="white"/>
+      }
+    </svg>
+  );
 }
