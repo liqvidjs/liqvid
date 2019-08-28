@@ -6,7 +6,6 @@ import {bind} from "./utils/misc";
 
 import Player from "./Player";
 
-import Activities from "./controls/Activities";
 import FullScreen from "./controls/FullScreen";
 import Help from "./controls/Help";
 import PlayPause from "./controls/PlayPause";
@@ -18,7 +17,6 @@ import Volume from "./controls/Volume";
 const SECONDS = 1000;
 
 interface Props {
-  activities?: React.Component;
   player: Player;
   ready: boolean;
   thumbs?: ThumbData;
@@ -179,7 +177,6 @@ export default class Controls extends React.PureComponent<Props, State> {
           <ScrubberBar thumbs={this.props.thumbs}/>
           <div className="rp-controls-buttons">
             <PlayPause/>
-            {this.props.activities && <Activities list={this.props.activities}/>}
             <Volume/>
             <TimeDisplay/>
             <div className="rp-controls-float-right">

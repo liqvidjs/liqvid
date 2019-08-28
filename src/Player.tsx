@@ -31,7 +31,6 @@ interface Plugin {
 }
 
 interface Props {
-  activities?: React.Component;
   plugins?: Plugin[];
   script: Script;
   style?: Record<string, any>;
@@ -232,7 +231,6 @@ export default class Player extends React.PureComponent<Props, State> {
             <Controls
               player={this}
               ref={$controls => this.$controls = $controls}
-              activities={this.props.activities}
               ready={this.state.ready}
               thumbs={this.props.thumbs}
             />
