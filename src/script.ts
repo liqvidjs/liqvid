@@ -4,98 +4,93 @@ import {parseTime} from "./utils/time";
 
 import Playback from "./playback";
 
-type SlideType = [string, number, number];
+type Marker = [string, number, number];
 
 export default class Script {
   hub: EventEmitter;
   playback: Playback;
-  slides: SlideType[];
-  slideIndex: number;
-  loadTasks: Promise<any>[];
+  markers: Marker[];
+  markerIndex: number;
 
-  constructor(slides: Array<[string, string | number] | [string, string | number, string | number]>) {
+  constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
     this.hub = new EventEmitter();
     this.hub.setMaxListeners(0);
 
     // bind methods
-    bind(this, ["slideByName", "slideNumberOf"]);
+    bind(this, ["markerByName", "markerNumberOf", "__updateMarker"]);
 
     // parse times
     let time = 0;
-    for (const slide of slides) {
-      if (slide.length === 2) {
-        const [, duration] = <[string, string]>slide;
-        slide[1] = time;
-        slide[2] = time + parseTime(duration);
+    for (const marker of markers) {
+      if (marker.length === 2) {
+        const [, duration] = marker as [string, string];
+        marker[1] = time;
+        (marker as (string | number)[])[2] = time + parseTime(duration);
       } else {
-        const [, begin, end] = <[string, string, string]>slide;
-        slide[1] = parseTime(begin);
-        slide[2] = parseTime(end);
+        const [, begin, end] = marker as [string, string, string];
+        marker[1] = parseTime(begin);
+        marker[2] = parseTime(end);
       }
 
-      time = <number>(slide[2]);
+      time = marker[2] as number;
     }
-    this.slides = <SlideType[]>slides;
+    this.markers = markers as Marker[];
 
-    this.slideIndex = 0;
-
-    this.__updateSlide = this.__updateSlide.bind(this);
-
-    this.loadTasks = [];
+    this.markerIndex = 0;
 
     // create playback object
     this.playback = new Playback({
-      duration: this.slides[this.slides.length - 1][2]
+      duration: this.markers[this.markers.length - 1][2]
     });
 
-    this.playback.hub.on("seek", this.__updateSlide);
-    this.playback.hub.on("timeupdate", this.__updateSlide);
+    this.playback.hub.on("seek", this.__updateMarker);
+    this.playback.hub.on("timeupdate", this.__updateMarker);
   }
 
   // getter
-  get slideName() : string {
-    return this.slides[this.slideIndex][0];
+  get markerName() {
+    return this.markers[this.markerIndex][0];
   }
 
   // public methods
   back() {
-    this.playback.seek(this.slides[Math.max(0, this.slideIndex - 1)][1]);
+    this.playback.seek(this.markers[Math.max(0, this.markerIndex - 1)][1]);
   }
 
   forward() {
-    this.playback.seek(this.slides[Math.min(this.slides.length - 1, this.slideIndex + 1)][1]);
+    this.playback.seek(this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]);
   }
   
-  slideByName(name: string) {
-    return this.slides[this.slideNumberOf(name)];
+  markerByName(name: string) {
+    return this.markers[this.markerNumberOf(name)];
   }
 
-  slideNumberOf(name: string) {
-    for (let i = 0; i < this.slides.length; ++i) {
-      if (this.slides[i][0] === name) return i;
+  markerNumberOf(name: string) {
+    for (let i = 0; i < this.markers.length; ++i) {
+      if (this.markers[i][0] === name) return i;
     }
-    throw new Error(`Slide ${name} does not exist`);
+    throw new Error(`Marker ${name} does not exist`);
   }
 
-  // update slide
-  __updateSlide(t: number) {
-    let newSlideIndex;
-    for (let i = 0; i < this.slides.length; ++i) {
-      const [, begin, end] = this.slides[i];
+  // update marker
+  __updateMarker(t: number) {
+    let newIndex;
+    for (let i = 0; i < this.markers.length; ++i) {
+      const [, begin, end] = this.markers[i];
       if (begin <= t && t < end) {
-        newSlideIndex = i;
+        newIndex = i;
         break;
       }
     }
 
-    if (newSlideIndex === undefined)
-      newSlideIndex = this.slides.length - 1;
+    if (newIndex === undefined)
+      newIndex = this.markers.length - 1;
 
-    const prevSlideIndex = this.slideIndex;
-
-    if (newSlideIndex !== prevSlideIndex) {
-      this.slideIndex = newSlideIndex;
-      this.hub.emit("slideupdate", prevSlideIndex);
+    if (newIndex !== this.markerIndex) {
+      const prevIndex = this.markerIndex;
+      this.markerIndex = newIndex;
+      this.hub.emit("slideupdate", prevIndex);
+      this.hub.emit("markerupdate", prevIndex);
     }
   }
 }
