@@ -1,4 +1,4 @@
-// bind shit
+// bind functions
 export function bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, methods: K[]) {
   for (const method of methods)
     o[method] = (o[method] as Function).bind(o);
@@ -24,16 +24,6 @@ export function waitFor(callback: () => boolean, interval: number = 10): Promise
 
     checkCondition();
   });
-}
-
-export function whitelist<T, K extends keyof T>(o: T, names: K[]) {
-  const ret: Pick<T, K> = {};
-  for (const key of (Object.keys(o) as K[])) {
-    if (names.includes(key))
-      ret[key] = o[key];
-  }
-
-  return ret;
 }
 
 // range of numbers
