@@ -8,15 +8,7 @@ export default class Block<P = {}, S = {}> extends Player.PureReceiver<P, S> {
     super(props);
     this.player = props.player;
     
-    bind(this, ["sn", "sbn", "mn", "mbn", "onMarkerUpdate", "onSlideUpdate", "onTimeUpdate"]);
-  }
-
-  sn(name: string) {
-    return this.mn(name);
-  }
-
-  sbn(name: string) {
-    return this.mbn(name);
+    bind(this, ["mn", "mbn", "onMarkerUpdate", "onTimeUpdate"]);
   }
 
   mn(name: string) {
@@ -33,11 +25,9 @@ export default class Block<P = {}, S = {}> extends Player.PureReceiver<P, S> {
     playback.hub.on("seek", this.onTimeUpdate);
     playback.hub.on("timeupdate", this.onTimeUpdate);
 
-    script.hub.on("slideupdate", this.onSlideUpdate);
     script.hub.on("markerupdate", this.onMarkerUpdate);
   }
 
-  onSlideUpdate(prevIndex: number) {}
   onMarkerUpdate(prevIndex: number) {}
 
   onTimeUpdate(t: number) {}
