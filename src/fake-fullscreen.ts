@@ -7,7 +7,7 @@ import {
 } from "./polyfills";
 
 let __isFullScreen = false;
-const __callbacks: (() => {})[] = [];
+const __callbacks: (() => void)[] = [];
 
 export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : () => {
   window.parent.postMessage({type: "fake-fullscreen", value: true}, location.origin);
@@ -33,6 +33,6 @@ export const isFullScreen = fullscreenEnabled ? $isFullScreen : () => {
   return __isFullScreen;
 };
 
-export const onFullScreenChange = fullscreenEnabled ? $onFullScreenChange : (callback: () => {}) => {
+export const onFullScreenChange = fullscreenEnabled ? $onFullScreenChange : (callback: () => void) => {
   __callbacks.push(callback);
 };
