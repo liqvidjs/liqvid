@@ -260,7 +260,7 @@ interface DAGLeaf {
 /* topological sort */
 function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLeaf {
   const nodes = Array.from(root.querySelectorAll(
-    "*[data-from-first], *[data-during], *[data-annotation_slide], *[data-annotation_marker]"
+    "*[data-from-first], *[data-during]"
   )) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
@@ -275,10 +275,6 @@ function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLea
       lastMarkerName = node.dataset.fromLast;
     } else if (node.dataset.during) {
       during = node.dataset.during;
-    } else if (node.dataset.annotation_slide) {
-      [firstMarkerName, lastMarkerName] = node.dataset.annotation_slide.split(",");
-    } else if (node.dataset.annotation_marker) {
-      [firstMarkerName, lastMarkerName] = node.dataset.annotation_marker.split(",");
     }
 
     // CSS hides this initially, take over now
