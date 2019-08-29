@@ -21,8 +21,8 @@ class Cursor extends React.PureComponent<Props & {player: Player}, {}> {
     super(props);
     const {script} = this.props.player;
 
-    this.start = (typeof props.start === 'number') ? props.start : script.slideByName(props.start)[1];
-    this.end = (typeof props.end === 'number') ? props.end : script.slideByName(props.end)[1];
+    this.start = (typeof props.start === 'number') ? props.start : script.markerByName(props.start)[1];
+    this.end = (typeof props.end === 'number') ? props.end : script.markerByName(props.end)[1];
   }
 
   componentDidMount() {
@@ -40,13 +40,14 @@ class Cursor extends React.PureComponent<Props & {player: Player}, {}> {
       active: (([x, y]) => {
         Object.assign(this.domElement.style, {
           display: 'block',
-          left: `calc(${x}vmin - ${width/2}px)`,
-          top: `calc(${y}vmin - ${height/2}px)`
+          left: `calc(${x}% - ${width/2}px)`,
+          top: `calc(${y}% - ${height/2}px)`
         });
       }),
       inactive: () => {
         this.domElement.style.display = 'none';
-      }
+      },
+      compressed: true
     });
 
     playback.hub.on('seek', () => update(playback.currentTime));
