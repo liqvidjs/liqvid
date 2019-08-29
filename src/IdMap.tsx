@@ -11,7 +11,7 @@ interface Props {
 
 export default class IdMap extends React.PureComponent<Props, {}> {
   static Context = React.createContext([]);
-  public foundIds: Set<string>;
+  foundIds: Set<string>;
 
   constructor(props: Props) {
     super(props);
@@ -36,7 +36,7 @@ export default class IdMap extends React.PureComponent<Props, {}> {
     }
   }
 
-  renderContent([foundIds, map]: [Set<string>, any]) {
+  renderContent([foundIds, map]: [Set<string>, unknown]) {
     return (
       <Player.Context.Consumer>
         {(player: Player) => recursiveMap(this.props.children, node => {

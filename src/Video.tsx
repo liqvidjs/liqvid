@@ -36,8 +36,8 @@ class Video extends Media {
     const {playback} = this.player;
 
     const {player, start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
-    (attrs as any).style = {
-      ...((attrs as any).style || {}),
+    attrs.style = {
+      ...(attrs.style || {}),
       display: (this.domElement && between(this.start, playback.currentTime, this.end)) ? "block" : "none"
     }; 
 

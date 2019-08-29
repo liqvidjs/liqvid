@@ -6,10 +6,9 @@ import {parseTime} from "./utils/time";
 
 import Player from "./Player";
 
-export interface MediaProps {
+export interface MediaProps extends React.HTMLAttributes<HTMLMediaElement> {
   obstructCanPlay?: boolean;
   obstructCanPlayThrough?: boolean;
-  src?: string;
   start: number | string;
 }
 

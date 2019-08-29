@@ -1,11 +1,11 @@
-import * as React from 'react';
+import * as React from "react";
 
-import Player from '../Player';
-import ThumbnailBox, {ThumbData} from './ThumbnailBox';
+import Player from "../Player";
+import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
-import {dragHelper} from '../utils/interactivity';
-import {bind, constrain} from '../utils/misc';
-import {PlayerPureReceiver} from '../shared';
+import {dragHelper} from "../utils/interactivity";
+import {bind, constrain} from "../utils/misc";
+import {PlayerPureReceiver} from "../shared";
 
 export {ThumbData};
 
@@ -29,7 +29,7 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
     super(props);
     this.player = props.player;
 
-    bind(this, ['onDrag', 'onMouseDown', 'onMouseMove', 'onMouseUp'])
+    bind(this, ["onDrag", "onMouseDown", "onMouseMove", "onMouseUp"]);
 
     this.state = {
       progress: 0,
@@ -43,9 +43,9 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
   componentDidMount() {
     const {playback} = this.player;
 
-    playback.hub.on('seek', () => this.forceUpdate());
+    playback.hub.on("seek", () => this.forceUpdate());
     // playback.hub.on('seeking', () => this.forceUpdate());
-    playback.hub.on('timeupdate', () => this.forceUpdate());
+    playback.hub.on("timeupdate", () => this.forceUpdate());
 
     // hack
     // playback.hub.on('bufferupdate', () => this.forceUpdate());
@@ -83,19 +83,18 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
   }
 
   render() {
-    const {playback, buffers} = this.player;
+    const {playback/*, buffers*/} = this.player;
 
-    const scrubberColor = '#FF0080',
-          progress = (playback.currentTime / playback.duration * 100);
+    const progress = (playback.currentTime / playback.duration * 100);
 
-    const thumbFrequency = 1;
-    const {thumbProgress} = this.state,
-          thumbTime = thumbProgress * playback.duration,
-          thumbName = Math.floor(thumbTime / 1000 / thumbFrequency);
+    // const thumbFrequency = 1;
+    const {thumbProgress} = this.state;
+    // thumbTime = thumbProgress * playback.duration,
+    // thumbName = Math.floor(thumbTime / 1000 / thumbFrequency);
 
     const highlights = (this.props.thumbs && this.props.thumbs.highlights) || [];
 
-    const ranges = Array.from(buffers.values()).reduce((a, b) => a.concat(b), []);
+    // const ranges = Array.from(buffers.values()).reduce((a, b) => a.concat(b), []);
 
     const listener = dragHelper(this.onDrag, this.onMouseDown, this.onMouseUp);
 
@@ -134,7 +133,7 @@ export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
             {highlights.map(({time, title}) => (
               <rect
                 key={time}
-                className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? 'past' : []).join(' ')}
+                className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
                 onMouseOver={() => this.setState({thumbTitle: title})}
                 onMouseOut={() => this.setState({thumbTitle: null})}
                 x={time / playback.duration * 100}
