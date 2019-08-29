@@ -6,9 +6,9 @@ import * as React from "react";
 import {createContextBroadcaster} from "./utils/react-utils";
 import Player from "./Player";
 
-export const PlayerContext = React.createContext<Player>();
+export const PlayerContext = React.createContext<Player>(null);
 
-export const PlayerReceiverSymbol: symbol = Symbol();
+export const PlayerReceiverSymbol = Symbol();
 export const PlayerReceiver = class Receiver<P = {}, S = {}> extends React.Component<P & {player?: Player}, S> {};
 export const PlayerPureReceiver = class PureReceiver<P = {}, S = {}> extends React.PureComponent<P & {player?: Player}, S> {};
 

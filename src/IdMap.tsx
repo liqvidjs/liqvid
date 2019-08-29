@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default class IdMap extends React.PureComponent<Props, {}> {
-  static Context = React.createContext();
+  static Context = React.createContext([]);
   public foundIds: Set<string>;
 
   constructor(props: Props) {
