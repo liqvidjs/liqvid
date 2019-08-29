@@ -8,8 +8,6 @@ import {bind} from "./utils/misc";
 import Playback from "./playback";
 import Script from "./script";
 
-import ErrorBoundary from "./ErrorBoundary";
-
 import {createContextBroadcaster} from "./utils/react-utils";
 import {PlayerContext, PlayerReceiverSymbol, PlayerReceiver, PlayerPureReceiver, PlayerBroadcaster} from "./shared";
 
@@ -227,14 +225,12 @@ export default class Player extends React.PureComponent<Props, State> {
             {this.props.children}
           </div>
           <Captions player={this}/>
-          <ErrorBoundary>
-            <Controls
-              player={this}
-              ref={$controls => this.$controls = $controls}
-              ready={this.state.ready}
-              thumbs={this.props.thumbs}
-            />
-          </ErrorBoundary>
+          <Controls
+            player={this}
+            ref={$controls => this.$controls = $controls}
+            ready={this.state.ready}
+            thumbs={this.props.thumbs}
+          />
         </div>
       </Player.Context.Provider>
     );
