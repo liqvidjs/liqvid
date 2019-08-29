@@ -31,7 +31,7 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
       if (props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
         this.start = parseTime(props.start);
       else
-        this.start = this.player.script.slideByName(props.start)[1];
+        this.start = this.player.script.markerByName(props.start)[1];
     } else {
       this.start = props.start;
     }
