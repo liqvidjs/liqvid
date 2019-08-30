@@ -6,13 +6,13 @@ import {parseTime} from "./utils/time";
 
 import Player from "./Player";
 
-export interface MediaProps extends React.HTMLAttributes<HTMLMediaElement> {
+interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   obstructCanPlay?: boolean;
   obstructCanPlayThrough?: boolean;
   start: number | string;
 }
 
-export default class Media extends React.PureComponent<MediaProps & {player: Player}, {}> {
+export default class Media extends React.PureComponent<Props, {}> {
   protected player: Player;
   protected domElement: HTMLMediaElement;
   start: number;
@@ -22,26 +22,31 @@ export default class Media extends React.PureComponent<MediaProps & {player: Pla
     obstructCanPlayThrough: false
   };
 
-  constructor(props: MediaProps & {player: Player}) {
-    super(props);
-    this.player = props.player;
+  static contextType = Player.Context;
+  context!: Player;
 
-    if (typeof props.start === "string") {
-      if (props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
-        this.start = parseTime(props.start);
-      else
-        this.start = this.player.script.markerByName(props.start)[1];
-    } else {
-      this.start = props.start;
-    }
+  constructor(props: Props) {
+    super(props);
 
     bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
   }
 
   componentDidMount() {
-    const {playback} = this.player;
-
+    this.player = this.context;
+    
+    // get the time right
+    if (typeof this.props.start === "string") {
+      if (this.props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
+        this.start = parseTime(this.props.start);
+      else
+        this.start = this.player.script.markerByName(this.props.start)[1];
+    } else {
+      this.start = this.props.start;
+    }
+    
     // attach event listeners
+    const {playback} = this.player;
+    
     playback.hub.on("pause", this.onPause);
     playback.hub.on("play", this.onPlay);
     playback.hub.on("ratechange", this.onRateChange);

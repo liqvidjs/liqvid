@@ -1,10 +1,12 @@
 import * as React from "react";
 
-import Media, {MediaProps} from "./Media";
+import Media from "./Media";
 import Player from "./Player";
 import {between} from "./utils/misc";
 
-class Video extends Media {
+export default class Video extends Media {
+  domElement: HTMLVideoElement;
+  
   onSeek(t: number) {
     const oldVal = this.domElement.paused;
 
@@ -33,9 +35,9 @@ class Video extends Media {
 
   // render method
   render() {
-    const {playback} = this.player;
+    const {playback} = this.context;
 
-    const {player, start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
+    const {start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
     attrs.style = {
       ...(attrs.style || {}),
       display: (this.domElement && between(this.start, playback.currentTime, this.end)) ? "block" : "none"
@@ -48,9 +50,3 @@ class Video extends Media {
     );
   }
 }
-
-export default React.forwardRef<Video, MediaProps>((props, ref) => (
-  <Player.Context.Consumer>
-    {(player: Player) => (<Video {...props} ref={ref} player={player}/>)}
-  </Player.Context.Consumer>
-));

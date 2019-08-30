@@ -1,11 +1,11 @@
 import * as React from "react";
-import Media, {MediaProps} from "./Media";
+import Media from "./Media";
 
 import Player from "./Player";
 
 import {fragmentFromHTML} from "./utils/dom";
 
-class Audio extends Media {
+export default class Audio extends Media {
   domElement: HTMLAudioElement;
 
   componentDidMount() {
@@ -29,7 +29,7 @@ class Audio extends Media {
 
   // render method
   render() {
-    const {start, player, obstructCanPlay, obstructCanPlayThrough, children, ...attrs} = this.props;
+    const {start, obstructCanPlay, obstructCanPlayThrough, children, ...attrs} = this.props;
 
     return (
       <audio preload="auto" ref={node => this.domElement = node} {...attrs}>
@@ -38,9 +38,3 @@ class Audio extends Media {
     );
   }
 }
-
-export default React.forwardRef<Audio, MediaProps>((props, ref) => (
-  <Player.Context.Consumer>
-    {(player: Player) => (<Audio {...props} ref={ref} player={player} />)}
-  </Player.Context.Consumer>
-));
