@@ -1,8 +1,6 @@
 import * as React from "react";
 import Media from "./Media";
 
-import Player from "./Player";
-
 import {fragmentFromHTML} from "./utils/dom";
 
 export default class Audio extends Media {

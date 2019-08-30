@@ -1,12 +1,11 @@
 import * as React from "react";
 
 import Media from "./Media";
-import Player from "./Player";
 import {between} from "./utils/misc";
 
 export default class Video extends Media {
   domElement: HTMLVideoElement;
-  
+
   onSeek(t: number) {
     const oldVal = this.domElement.paused;
 
