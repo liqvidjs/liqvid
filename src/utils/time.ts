@@ -7,7 +7,7 @@ export function parseTime(str: string) {
     .map(x => x || "0");
 
   ms = ms.padEnd(3, "0");
-  const [hours, minutes, seconds, milliseconds] = [h, m, s, ms].map(x => parseInt(x));
+  const [hours, minutes, seconds, milliseconds] = [h, m, s, ms].map(x => parseInt(x, 10));
   
   return milliseconds + 1000 * (seconds + 60 * (minutes + 60 * hours));
 }
