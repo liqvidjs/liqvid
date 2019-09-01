@@ -1,17 +1,21 @@
 import * as React from "react";
 
-import {PlayerPureReceiver} from "../shared";
+import Player from "../Player";
+import {PlayerContext} from "../shared";
 
 import {formatTime} from "../utils/time";
 
-export default class TimeDisplay extends PlayerPureReceiver {
+export default class TimeDisplay extends React.PureComponent {
+  static contextType = PlayerContext;
+  context!: Player;
+
   componentDidMount() {
-    this.props.player.playback.hub.on("seek", () => this.forceUpdate());
-    this.props.player.playback.hub.on("timeupdate", () => this.forceUpdate());
+    this.context.playback.hub.on("seek", () => this.forceUpdate());
+    this.context.playback.hub.on("timeupdate", () => this.forceUpdate());
   }
 
   render() {
-    const {playback} = this.props.player;
+    const {playback} = this.context;
 
     return (
       <span className="rp-controls-time">

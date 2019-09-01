@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import Player from "./Player";
+import {PlayerContext} from "./shared";
 
 interface Props {
   player: Player;
@@ -8,9 +9,11 @@ interface Props {
 
 export default class Captions extends React.PureComponent<Props, {}> {
   private domElement: HTMLDivElement;
+  static contextType = PlayerContext;
+  context!: Player;
 
   componentDidMount() {
-    const {playback} = this.props.player;
+    const {playback} = this.context;
 
     playback.hub.on("cuechange", () => {
       this.domElement.innerHTML = "";

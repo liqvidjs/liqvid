@@ -1,16 +1,17 @@
 import * as React from "react";
 
 import Player from "../Player";
-import {PlayerPureReceiver} from "../shared";
+import {PlayerContext} from "../shared";
 
 import {bind} from "../utils/misc";
 
-export default class Volume extends PlayerPureReceiver {
+export default class Volume extends React.Component {
   private player: Player;
+  static contextType = PlayerContext;
 
-  constructor(props: {player: Player}) {
-    super(props);
-    this.player = props.player;
+  constructor(props: {}, context: Player) {
+    super(props, context);
+    this.player = context;
 
     bind(this, ["onInput"]);
   }

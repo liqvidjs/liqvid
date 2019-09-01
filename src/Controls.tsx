@@ -1,10 +1,10 @@
-import * as EventEmitter from "events";
 import * as React from "react";
 
 import {requestFullScreen, exitFullScreen, isFullScreen} from "./polyfills";
 import {bind} from "./utils/misc";
 
 import Player from "./Player";
+import {PlayerContext} from "./shared";
 
 import FullScreen from "./controls/FullScreen";
 import Help from "./controls/Help";
@@ -29,20 +29,19 @@ interface State {
 export {ThumbData};
 
 export default class Controls extends React.PureComponent<Props, State> {
+  static contextType = PlayerContext;
   private player: Player;
   private $helpControl: Help;
   private $settingsControl: Settings;
   private timer: number;
 
   captureKeys: boolean;
-  hub: EventEmitter;
 
-  constructor(props: Props) {
-    super(props);
-    this.player = props.player;
+  constructor(props: Props, context: Player) {
+    super(props, context);
+    this.player = context;
 
     this.captureKeys = true;
-    this.hub = new EventEmitter();
 
     bind(this, ["forceUpdate", "onKeyDown", "resetTimer"]);
 
@@ -137,7 +136,7 @@ export default class Controls extends React.PureComponent<Props, State> {
     case "m":
       playback.muted = !playback.muted;
       return;
-    // seek by slide
+    // seek by marker
     case "w":
       script.back();
       return;
@@ -154,7 +153,7 @@ export default class Controls extends React.PureComponent<Props, State> {
     }
 
     // percentage seeking
-    const num = parseInt(e.key);
+    const num = parseInt(e.key, 10);
     if (!isNaN(num)) {
       playback.seek(playback.duration * num / 10);
     }
@@ -172,22 +171,20 @@ export default class Controls extends React.PureComponent<Props, State> {
     if (!this.state.visible) classNames.push("hidden");
 
     return (
-      <Player.Broadcaster>
-        <div className={classNames.join(" ")}>
-          <ScrubberBar thumbs={this.props.thumbs}/>
-          <div className="rp-controls-buttons">
-            <PlayPause/>
-            <Volume/>
-            <TimeDisplay/>
-            <div className="rp-controls-float-right">
-              {this.player.applyHooks("controls")}
-              <Settings ref={control => this.$settingsControl = control}/>
-              <Help ref={control => this.$helpControl = control}/>
-              <FullScreen/>
-            </div>
+      <div className={classNames.join(" ")}>
+        <ScrubberBar thumbs={this.props.thumbs}/>
+        <div className="rp-controls-buttons">
+          <PlayPause/>
+          <Volume/>
+          <TimeDisplay/>
+          <div className="rp-controls-float-right">
+            {this.player.applyHooks("controls")}
+            <Settings ref={control => this.$settingsControl = control}/>
+            <Help ref={control => this.$helpControl = control}/>
+            <FullScreen/>
           </div>
         </div>
-      </Player.Broadcaster>
+      </div>
     );
   }
 }

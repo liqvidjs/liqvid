@@ -11,21 +11,25 @@ interface Props {
   replay: ReplayData<[number, number]>;
 }
 
-class Cursor extends React.PureComponent<Props & {player: Player}, {}> {
+export default class Cursor extends React.PureComponent<Props> {
   private domElement: HTMLImageElement;
   private start: number;
   private end: number;
 
-  constructor(props: Props & {player: Player}) {
-    super(props);
-    const {script} = this.props.player;
+  static contextType = Player.Context;
+  private player: Player;
+
+  constructor(props: Props, context: Player) {
+    super(props, context);
+    this.player = context;
+    const {script} = this.player;
 
     this.start = (typeof props.start === "number") ? props.start : script.markerByName(props.start)[1];
     this.end = (typeof props.end === "number") ? props.end : script.markerByName(props.end)[1];
   }
 
   componentDidMount() {
-    const {playback} = this.props.player;
+    const {playback} = this.player;
 
     const {display} = this.domElement.style;
     this.domElement.style.display = "block";
@@ -56,7 +60,7 @@ class Cursor extends React.PureComponent<Props & {player: Player}, {}> {
   }
 
   render() {
-    const {playback} = this.props.player;
+    const {playback} = this.player;
 
     const style = {
       display: (this.start <= playback.currentTime && playback.currentTime < this.end) ? "block" : "none"
@@ -67,9 +71,3 @@ class Cursor extends React.PureComponent<Props & {player: Player}, {}> {
     );
   }
 }
-
-export default React.forwardRef<Cursor, Props>((props, ref) => (
-  <Player.Context.Consumer>
-    {(player: Player) => (<Cursor {...props} ref={ref} player={player} />)}
-  </Player.Context.Consumer>
-));

@@ -1,11 +1,11 @@
 import * as React from "react";
 
 import Player from "../Player";
+import {PlayerContext} from "../shared";
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
 import {dragHelper} from "../utils/interactivity";
 import {bind, constrain} from "../utils/misc";
-import {PlayerPureReceiver} from "../shared";
 
 export {ThumbData};
 
@@ -21,13 +21,14 @@ interface State {
   thumbTitle: string;
 }
 
-export default class ScrubberBar extends PlayerPureReceiver<Props, State> {
+export default class ScrubberBar extends React.PureComponent<Props, State> {
   private scrubberBar: HTMLDivElement;
   private player: Player;
+  static contextType = PlayerContext;
 
-  constructor(props: Props & {player: Player}) {
-    super(props);
-    this.player = props.player;
+  constructor(props: Props, context: Player) {
+    super(props, context);
+    this.player = context;
 
     bind(this, ["onDrag", "onMouseDown", "onMouseMove", "onMouseUp"]);
 

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import Playback from "../playback";
 import Player from "../Player";
-import {PlayerPureReceiver} from "../shared";
+import {PlayerContext} from "../shared";
 
 import {bind} from "../utils/misc";
 
@@ -15,12 +15,13 @@ interface State {
   speedDialogOpen: boolean;
 }
 
-export default class Settings extends PlayerPureReceiver<{}, State> {
+export default class Settings extends React.PureComponent<{}, State> {
   private playback: Playback;
+  static contextType = PlayerContext;
 
-  constructor(props: {player: Player}) {
-    super(props);
-    this.playback = props.player.playback;
+  constructor(props: {}, context: Player) {
+    super(props, context);
+    this.playback = context.playback;
 
     bind(this, ["toggleDialog" ,"toggleSubtitles"]);
 

@@ -1,4 +1,4 @@
-import * as EventEmitter from "events";
+import {EventEmitter} from "events";
 import {bind, constrain} from "./utils/misc";
 import {parseTime} from "./utils/time";
 

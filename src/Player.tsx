@@ -1,4 +1,4 @@
-import * as EventEmitter from "events";
+import {EventEmitter} from "events";
 import * as React from "react";
 import Controls, {ThumbData} from "./Controls";
 import Captions from "./Captions";
@@ -8,8 +8,7 @@ import {bind} from "./utils/misc";
 import Playback from "./playback";
 import Script from "./script";
 
-import {createContextBroadcaster} from "./utils/react-utils";
-import {PlayerContext, PlayerReceiverSymbol, PlayerReceiver, PlayerPureReceiver, PlayerBroadcaster} from "./shared";
+import {PlayerContext} from "./shared";
 
 interface SVGElement {
   dataset: DOMStringMap;
@@ -28,16 +27,17 @@ interface Plugin {
   setup(hook: HookFn<keyof HookMap>): void;
 }
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
   plugins?: Plugin[];
   script: Script;
-  style?: Record<string, any>;
   thumbs?: ThumbData;
 }
 
 interface State {
   ready: boolean;
 }
+
+const ignoreCanvasClick = Symbol();
 
 export default class Player extends React.PureComponent<Props, State> {
   $controls: Controls;
@@ -55,13 +55,7 @@ export default class Player extends React.PureComponent<Props, State> {
 
   private dag: DAGLeaf;
 
-  static ReceiverSymbol = PlayerReceiverSymbol;
   static Context = PlayerContext;
-  static Receiver = PlayerReceiver;
-  static PureReceiver = PlayerPureReceiver;
-  static Broadcaster = PlayerBroadcaster;
-
-  static ignoreCanvasClick = Symbol();
 
   static defaultProps = {
     plugins: [] as Plugin[],
@@ -106,7 +100,7 @@ export default class Player extends React.PureComponent<Props, State> {
     .then(() => this.hub.emit("canplaythrough"));
   }
 
-  rememberVolumeSettings() {
+  private rememberVolumeSettings() {
     const {playback} = this,
           storage = window.sessionStorage;
 
@@ -121,7 +115,7 @@ export default class Player extends React.PureComponent<Props, State> {
     });
   }
 
-  updateTree() {
+  private updateTree() {
     const {script} = this;
 
     recurse(this.dag);
@@ -156,19 +150,24 @@ export default class Player extends React.PureComponent<Props, State> {
     //  and the listener added by dragHelper, so you can't call stopPropagation() in the onMouseUp or
     //  else the dragging won't release.
     //  Note that e.persist() must be called on e if one is using this escape hatch.
-    if (e[Player.ignoreCanvasClick]) return;
+    if (e[ignoreCanvasClick]) return;
         
     this.$controls.canvasClick();
   }
 
+  static preventCanvasClick(e: React.SyntheticEvent) {
+    e.persist();
+    e[ignoreCanvasClick] = true;
+  }
+  
   suspendKeyCapture() {
     this.$controls.captureKeys = false;
   }
-
+  
   resumeKeyCapture() {
     this.$controls.captureKeys = true;
   }
-
+  
   // toposort needs to be called after MathJax has rendered stuff
   ready() {
     this.dag = toposort(this.canvas, this.script.markerNumberOf);
@@ -180,41 +179,41 @@ export default class Player extends React.PureComponent<Props, State> {
       ready: true
     });
   }
-
+  
   registerBuffer(elt: HTMLMediaElement) {
     this.buffers.set(elt, []);
   }
-
+  
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
     this.playback.hub.emit("bufferupdate");
   }
-
-  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>, name: string = "miscellaneous") {
+  
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>, name = "miscellaneous") {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {
       this.__canPlayThroughTasks.push(task);
     }
   }
-
+  
   applyHooks<K extends keyof HookMap>(name: K): HookMap[K][] {
     if (!this.hooks.has(name)) return [];
     return this.hooks.get(name).map(_ => _());
   }
-
+  
   render() {
     const attrs = {
       style: this.props.style
     };
-
+    
     const classNames = ["ractive-player"];
     
     if (!this.state.ready)
       classNames.push("not-ready");
     
     classNames.push(...this.applyHooks("classNames"));
-
+    
     return (
       <Player.Context.Provider value={this}>
         <div className={classNames.join(" ")} {...attrs}>
@@ -277,9 +276,9 @@ function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLea
     node.style.opacity = "0";
     node.style.pointerEvents = "none";
 
-    // node.removeAttribute('data-from-first');
-    // node.removeAttribute('data-from-last');
-    // node.removeAttribute('data-annotation_slide');
+    // node.removeAttribute("data-from-first");
+    // node.removeAttribute("data-from-last");
+    // node.removeAttribute("data-from-during");
 
     // build the leaf
     const leaf: DAGLeaf = {

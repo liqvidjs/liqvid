@@ -9,17 +9,17 @@ interface Props {
   map?: object;
 }
 
-export default class IdMap extends React.PureComponent<Props, {}> {
+export default class IdMap extends React.PureComponent<Props> {
   static Context = React.createContext([]);
   foundIds: Set<string>;
-
+  
   constructor(props: Props) {
     super(props);
     bind(this, ["renderContent"]);
 
     this.foundIds = new Set();
   }
-
+  
   render() {
     if (this.props.hasOwnProperty("map")) {
       return (
@@ -35,31 +35,23 @@ export default class IdMap extends React.PureComponent<Props, {}> {
       );
     }
   }
-
+  
   renderContent([foundIds, map]: [Set<string>, unknown]) {
-    return (
-      <Player.Context.Consumer>
-        {(player: Player) => recursiveMap(this.props.children, node => {
-          const attrs = {};
+    return recursiveMap(this.props.children, node => {
+      const attrs = {};
 
-          if (node.props.hasOwnProperty("id")) {
-            const {id} = node.props;
-            foundIds.add(id);
-            if (map[id] !== undefined)
-              Object.assign(attrs, map[id]);
-          }
+      if (node.props.hasOwnProperty("id")) {
+        const {id} = node.props;
+        foundIds.add(id);
+        if (map[id] !== undefined)
+          Object.assign(attrs, map[id]);
+      }
 
-          if (typeof node.type !== "string" && typeof node.type !== "symbol" && Player.ReceiverSymbol in node.type) {
-            Object.assign(attrs, {player});
-          }
-
-          if (Object.keys(attrs).length === 0) {
-            return node;
-          } else {
-            return React.cloneElement(node, attrs);
-          }
-        })}
-      </Player.Context.Consumer>
-    );
+      if (Object.keys(attrs).length === 0) {
+        return node;
+      } else {
+        return React.cloneElement(node, attrs);
+      }
+    });
   }
 }

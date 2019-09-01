@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import Player from "../Player";
+import {PlayerContext} from "../shared";
 
 import {formatTime} from "../utils/time";
 
@@ -34,7 +35,10 @@ export interface ThumbData {
   highlights?: VideoHighlight[];
 }
 
-export default class ThumbnailBox extends React.PureComponent<Props, {}> {
+export default class ThumbnailBox extends React.PureComponent<Props> {
+  static contextType = PlayerContext;
+  context!: Player;
+
   componentDidMount() {
     // preload thumbs (once more important loading has taken place)
     const {cols, rows, frequency, path, player} = this.props;
@@ -54,15 +58,15 @@ export default class ThumbnailBox extends React.PureComponent<Props, {}> {
 
   render() {
     const {cols, rows, frequency, path, progress, show, title, height, width} = this.props;
-    const {playback} = this.props.player;
+    const {playback} = this.context;
     const count = cols * rows;
 
     const time = progress * playback.duration / 1000,
-          slideNum = Math.floor(time / frequency),
-          sheetNum = Math.floor(slideNum / count),
-          slideNumOnSheet = slideNum % count,
-          row = Math.floor(slideNumOnSheet / rows),
-          col = slideNumOnSheet % rows;
+          markerNum = Math.floor(time / frequency),
+          sheetNum = Math.floor(markerNum / count),
+          markerNumOnSheet = markerNum % count,
+          row = Math.floor(markerNumOnSheet / rows),
+          col = markerNumOnSheet % rows;
 
     const sheetName = path.replace("%s", sheetNum.toString());
 

@@ -15,31 +15,7 @@ export function recursiveMap(
       });
     }
 
+    // @ts-ignore
     return fn(child);
   });
-}
-
-// XXX figure out how to type this
-export function createContextBroadcaster
-<C>
-(Context: React.Context<C>, ReceiverSymbol: symbol, name: string): any
-{
-  return class extends React.PureComponent {
-    render() {
-      return (
-        <Context.Consumer>
-          {context => recursiveMap(this.props.children, node => {
-            if (typeof node.type === "string")
-              return node;
-
-            else if (!(ReceiverSymbol in node.type))
-              return node;
-
-            const replacement = React.cloneElement(node, {[name]: context});
-            return replacement;
-          })}
-        </Context.Consumer>
-      );
-    }
-  };
 }

@@ -1,12 +1,19 @@
+import * as React from "react";
 import Player from "./Player";
 import {bind} from "./utils/misc";
 
-export default class Block<P = {}, S = {}> extends Player.PureReceiver<P, S> {
-  protected player: Player;
+/**
+  Convenience class for binding to markerupdate and timeupdate events.
 
-  constructor(props: P & {player: Player}) {
-    super(props);
-    this.player = props.player;
+  This is discouraged for new code and will likely be removed in a future release.
+*/
+export default class Block<P = {}, S = {}> extends React.PureComponent<P, S> {
+  protected player: Player;
+  static contextType = Player.Context;
+
+  constructor(props: P, context: Player) {
+    super(props, context);
+    this.player = context;
     
     bind(this, ["mn", "mbn", "onMarkerUpdate", "onTimeUpdate"]);
   }

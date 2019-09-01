@@ -12,7 +12,7 @@ interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   start: number | string;
 }
 
-export default class Media extends React.PureComponent<Props, {}> {
+export default class Media extends React.PureComponent<Props> {
   protected player: Player;
   protected domElement: HTMLMediaElement;
   start: number;
@@ -25,15 +25,10 @@ export default class Media extends React.PureComponent<Props, {}> {
   static contextType = Player.Context;
   context!: Player;
 
-  constructor(props: Props) {
-    super(props);
+  constructor(props: Props, context: Player) {
+    super(props, context);
+    this.player = context;
 
-    bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
-  }
-
-  componentDidMount() {
-    this.player = this.context;
-    
     // get the time right
     if (typeof this.props.start === "string") {
       if (this.props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
@@ -43,7 +38,11 @@ export default class Media extends React.PureComponent<Props, {}> {
     } else {
       this.start = this.props.start;
     }
-    
+
+    bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
+  }
+
+  componentDidMount() {
     // attach event listeners
     const {playback} = this.player;
     

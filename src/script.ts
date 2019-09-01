@@ -1,4 +1,4 @@
-import * as EventEmitter from "events";
+import {EventEmitter} from "events";
 import {bind} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
@@ -89,7 +89,6 @@ export default class Script {
     if (newIndex !== this.markerIndex) {
       const prevIndex = this.markerIndex;
       this.markerIndex = newIndex;
-      this.hub.emit("slideupdate", prevIndex);
       this.hub.emit("markerupdate", prevIndex);
     }
   }
