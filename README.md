@@ -1,10 +1,12 @@
 # ractive-player
 
-This is a library for authoring interactive videos using HTML/CSS/Javascript (and React). Here are some examples:
+This is a library for playing interactive videos using HTML/CSS/Javascript (and React). Here are some examples:
 
 [Computing cos and sin](https://lmqm.xyz/a/9vb/computing_cos_and_sin)
 
 [Points and vectors](https://lmqm.xyz/a/w7s/points_and_vectors)
+
+To author these you will also need [ractive-editor](https://github.com/ysulyma/ractive-editor/).
 
 This was originally developed just for my own personal use, and there is not much documentation yet.
 
