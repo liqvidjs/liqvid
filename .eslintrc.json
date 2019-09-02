@@ -3,7 +3,7 @@
     "browser": true,
     "es6": true
   },
-  "extends": "plugin:@typescript-eslint/recommended",
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -18,8 +18,14 @@
   },
   "plugins": [
     "@typescript-eslint",
-    "react"
+    "react",
+    "react-hooks"
   ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", {
       "ignoreRestSiblings": true
@@ -31,28 +37,25 @@
       "accessibility": "no-public"
     }],
 
+    "@typescript-eslint/indent": ["error", 2, {
+      "MemberExpression": 0,
+      "VariableDeclarator": { "var": 2, "let": 2, "const": 3 }
+    }],
+
+    "@typescript-eslint/no-use-before-define": ["off"],
+
     "@typescript-eslint/type-annotation-spacing": ["error", {
       "before": false,
       "overrides": {
         "arrow": {"before": true}
       }
     }],
-    "@typescript-eslint/indent": ["error", 2, {
-      "MemberExpression": 0,
-      "VariableDeclarator": { "var": 2, "let": 2, "const": 3 }
-    }],
 
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "off",
+
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "double"],
+    "semi": ["error", "always"]
   }
 }
