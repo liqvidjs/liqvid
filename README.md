@@ -104,9 +104,9 @@ Handy helpers for animation. Also exports shortcuts from https://easings.net/. Y
 
 ### authoring
 
-You will use `from` a lot to control when things appear on screen. I have `_f + TAB` as a shortcut for `{...from("")}` in my editor. Occasionally `showIf` for more fine-grained control.
+You will use `during` and `from` a lot to control when things appear on screen. Occasionally `showIf` for more fine-grained control.
 
-Note that `from` operates outside of React, so will work without its parent component being updated. However for `showIf` you will need to make sure the parent component is subscribing to `onTimeUpdate` or `onSlideUpdate`.
+Note that `during` and `from` operate outside of React, so will work without the parent component being updated. However for `showIf` you will need to make sure the parent component is subscribing to `onTimeUpdate` or `onMarkerUpdate`.
 
 ### interactivity
 
