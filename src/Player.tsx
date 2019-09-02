@@ -10,12 +10,6 @@ import Script from "./script";
 
 import {PlayerContext} from "./shared";
 
-interface SVGElement {
-  dataset: DOMStringMap;
-  style: CSSStyleDeclaration;
-  removeAttribute: (qualifiedName: string) => void;
-}
-
 interface HookMap {
   canvasClick: boolean;
   classNames: string;
@@ -48,7 +42,7 @@ export default class Player extends React.PureComponent<Props, State> {
 
   buffers: Map<HTMLMediaElement, [number, number][]>;
 
-  private hooks: Map<string, (() => any)[]>;
+  private hooks: Map<string, (() => unknown)[]>;
 
   private __canPlayTasks: Promise<void>[];
   private __canPlayThroughTasks: Promise<void>[];
@@ -78,7 +72,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.buffers = new Map();
     this.hooks = new Map();
 
-    const hook = (name: string, listener: () => any) => {
+    const hook = (name: string, listener: () => unknown) => {
       if (!this.hooks.has(name)) {
         this.hooks.set(name, []);
       }
@@ -155,7 +149,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.$controls.canvasClick();
   }
 
-  static preventCanvasClick(e: React.SyntheticEvent) {
+  static preventCanvasClick(e: React.MouseEvent) {
     e.persist();
     e[ignoreCanvasClick] = true;
   }
@@ -288,15 +282,15 @@ function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLea
     if (during) leaf.during = during;
     if (firstMarkerName) leaf.first = mn(firstMarkerName);
     if (lastMarkerName) leaf.last = mn(lastMarkerName);
-
+    
     // figure out where to graft it
     let current = path[path.length - 1];
-
-    while (!(current.element as any).contains(node)) {
+    
+    while (!current.element.contains(node)) {
       path.pop();
       current = path[path.length - 1];
     }
-
+    
     current.children.push(leaf);
     path.push(leaf);
   }
