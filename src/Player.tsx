@@ -188,7 +188,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.playback.hub.emit("bufferupdate");
   }
   
-  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>, name = "miscellaneous") {
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>) {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {
@@ -198,6 +198,7 @@ export default class Player extends React.PureComponent<Props, State> {
   
   applyHooks<K extends keyof HookMap>(name: K): HookMap[K][] {
     if (!this.hooks.has(name)) return [];
+    // @ts-ignore
     return this.hooks.get(name).map(_ => _());
   }
   

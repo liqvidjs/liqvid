@@ -141,7 +141,7 @@ export default function ScrubberBar(props: Props) {
               x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
           ))*/}
 
-          {highlights.map(({time, title}) => (
+          {highlights.map(({time}) => (
             <rect
               key={time}
               className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
