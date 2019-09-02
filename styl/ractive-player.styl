@@ -3,9 +3,6 @@ $blue = #1A69B5
 $green = #1BBB68
 $red = #A52117
 
-scale(x)
-  (x / 8)vmin
-  
 /* reset styles */
 *
   box-sizing border-box
@@ -28,25 +25,23 @@ iframe, img
   --rp-scrubber-color $wine
   --rp-scrub-height 6px
 
-  background-color #121212
-  height 100vh
-  width 100vw
+  background-color #000
+  height 100%
+  width 100%
+  overflow hidden
   position absolute
   left 0
   top 0
-  
-  &.editor
-    background-color #134E86
     
 .rp-canvas 
   background-color #121212
-  font-size 3vmin
-  height 100vh
-  margin 0 auto
   position relative
   user-select none
-  width 160vh
-  
+  height var(--rp-height)
+  width var(--rp-width)
+  font-size calc(var(--rp-height) * 3 / 100)
+
+// this will get removed in 2.0
 .rp-cursor
   pointer-events none
   position absolute
@@ -55,47 +50,29 @@ iframe, img
   // I don't understand these lines, but past me must have thought they were important
   height 4vmin
   width 4vmin
-  
-/* jesus fucking christ */
-*[data-from-first], *[data-annotation_slide]
-  visibility hidden
-  
-/* loading */
-.rp-loading-screen
-  background-color rgba(0, 0, 0, 0.7)
-  display none
-  height 100%
-  position absolute
-  width 100%
-  z-index 10000
-  
-.rp-loading-spinner
-  border 16px solid #f3f3f3
-  border-top 16px solid $blue
-  border-radius 50%
-  margin 40vmin auto 0 auto
-  width 20vmin
-  height 20vmin
-  animation spin 1s linear infinite
-  
-.rp-loading-tasks
-  list-style-type none
-  color $green
-  font-size 3em
-  margin 0 auto
-  padding 0 20%
-  width 160vh
-  height 100vh
 
-@keyframes spin
-  0%
-    transform rotate(0deg)
-  
-  100%
-    transform rotate(360deg)
+// yikes
+.not-ready
+  *[data-from-first], *[data-during]
+    visibility hidden
+    
+@media (min-aspect-ratio: 8/5)
+  .ractive-player
+    --rp-height 100vh
+    --rp-width 160vh
 
-.ractive-player.not-ready > .rp-loading-screen
-  display block
+  .rp-canvas
+    margin 0 auto
+    
+@media (max-aspect-ratio: 8/5)
+  .ractive-player
+    --rp-height 62.5vw
+    --rp-width 100vw
+  
+  .rp-canvas
+    top calc((100% - 62.5vw) / 2)
+  
+@import "loading"
 
 /* control positioning */
 .rp-controls
@@ -117,6 +94,7 @@ iframe, img
 .rp-controls-scrub 
   cursor pointer
   height var(--rp-scrub-height)
+  // height calc(5.5% / 0.55)
   margin 0 auto
   position relative
   width 97%
@@ -138,405 +116,17 @@ iframe, img
     display inline-block
     height 100%
 
-.rp-controls-scrub-wrap
-  height 100%
-  width 100%
-  
-.rp-thumb-highlight
-  fill #FFF
-  
-  &.past
-    fill #ec76b3
-
-/*
-  individual controls
- */
-/* scrubbing */
-.rp-controls-scrub-progress
-  display block
-  height 100%
-  width 100%
-
-.rp-progress-elapsed 
-  fill var(--rp-elapsed-color)
-
-.rp-progress-remaining 
-  fill rgba(255, 255, 255, 0.6)
-  
-.controls-progress-buffered
-  fill orange
-
-.rp-scrubber 
-  height 13px
-  position absolute
-  top -3px
-  
-  > circle
-    fill var(--rp-scrubber-color)
-
-/* thumbnails */
-$thumb-img-height = 100px
-$thumb-img-width = 160px
-$thumb-padding = 3px
-.rp-controls-thumbnail
-  background #333
-  
-  font-size .85em
-  padding $thumb-padding
-  bottom 13px
-  text-align center
-  position absolute
-  margin-left (-($thumb-img-width / 2 + $thumb-padding))
-
-.rp-thumbnail-box
-  overflow hidden
-  
-  height $thumb-img-height
-  width $thumb-img-width
-  margin 0 auto
-  position relative
-  text-align center
-  
-  > img
-    position absolute
-
-.rp-thumbnail-title
-  color #FFF
-  font-family "Droid Sans Mono", sans-serif
-  
-.rp-thumbnail-time
-  color #FFF
-  font-family "Droid Sans Mono", sans-serif
-  position absolute
-  bottom .5em
-  text-align center
-  width 100%
-  left 0
-
-/* play/pause */
-.rp-controls-playpause 
+// individual controls
+.rp-controls-playpause, .rp-controls-fullscreen
   cursor pointer
 
-/* volume */
-range-thumb()
-  &::-webkit-slider-thumb
-    {block}
-  
-  &::-moz-range-thumb
-    {block}
-    
-  &::-ms-thumb
-    {block}
-    
-range-track()
-  &::-webkit-slider-runnable-track
-    {block}
+@import "controls/captions"
+@import "controls/help"
+@import "controls/scrubber"
+@import "controls/settings"
+@import "controls/thumbs"
+@import "controls/time"
+@import "controls/volume"
 
-  &::-moz-range-track
-    {block}
-    
-  &::-ms-track
-    {block}
-
-.rp-controls-volume 
-  cursor pointer
-  z-index 100000
-  
-  > svg
-    height 100%
-    padding 3px
-
-  > input[type=range]
-    background transparent
-    width 10em
-    height 100%
-    -webkit-appearance none
-    
-    +range-thumb()
-      -webkit-appearance none
-      height 1.1em
-      width 1.1em
-      border-radius 1em
-      background $wine
-      cursor pointer
-      vertical-align middle
-      margin-top -.5em
-      line-height 1.5em
-    
-    +range-track()
-      height 2px
-      cursor pointer
-      background #FFF
-      border-radius 1.3px
-      margin auto 4px
-      vertical-align middle
-      line-height 1.5em
-
-/* All the same stuff for Firefox */
-input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-/* All the same stuff for IE */
-input[type=range]::-ms-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-/* activities */
-.rp-activity-list
-  list-style-type none
-
-  font-family "Roboto Slab"
-  font-size .8em
-  margin 0 0 .5em
-  
-  a
-    color #FFF
-    cursor pointer
-    display block
-    height 100%
-    padding .5em
-    width 100%
-    
-    &:hover
-      color $blue
-      
-  > li:first-child > a
-    border-radius 3px 3px 0 0
-
-#rp-activities-dialog
-  background-color #222
-  // background-color rgba(32, 32, 32, 0.85)
-  border-radius 3px 3px 0 0
-  position absolute
-  bottom calc(var(--rp-controls-height) - var(--rp-scrub-height) - 7px)
-  z-index 3
-  
-  &::after
-    height 7px
-    display block
-    background-color rgba(0, 0, 0, 0.5)
-    width 100%
-    z-index 100000
-    content ""
-  
-#rp-activity-overlay
-  background-color rgba(0, 0, 0, 0.85)
-  height 100vh
-  width 160vh
-  position fixed
-  left calc(50vw - 80vh)
-  top 0
-  z-index 1001
-
-/* settings */
-.rp-controls-settings
-  position relative
-  
-  > svg
-    cursor pointer
-    height 100%
-    padding 6px
-  
-/* wtf is this shit */
-.rp-settings-dialog
-  background-color rgba(32, 32, 32, 0.85)
-  border-radius 3px 3px 0 0
-  padding 2px 0
-  position absolute
-  bottom 42px
-  right 0
-  width 10em
-  
-  > table
-    border-collapse collapse
-    width 100%
-  
-  > table > tbody > tr
-    cursor pointer
-    font-family "Roboto Slab", sans-serif
-    
-    &:hover
-      background-color rgba(72, 72, 72, 0.85)
-    
-    > th
-      padding .25em 0 .25em .5em
-      vertical-align middle
-      text-align left
-
-    > td
-      padding .25em .5em .25em 0
-      text-align right
-      vertical-align middle
-      
-.rp-settings-speed-dialog
-  background-color rgba(32, 32, 32, 0.85)
-  padding 2px 0
-  position absolute
-  bottom 42px
-  right 0
-  width 6em
-  
-  > ul
-    list-style-type none
-    
-    > li
-      cursor pointer
-      padding 4px .5em
-
-      &:hover
-        background-color rgba(72, 72, 72, 0.85)
-        
-      &.selected
-        color $wine
-
-.rp-dialog-subtitle
-  border-bottom 1px solid #AAA
-  display block
-  text-align center
-
-/* help */
-.rp-controls-help
-  cursor pointer
-  height 100%
-
-.rp-help-dialog
-  background-color rgba(0, 0, 0, 0.85)
-  height 100vh
-  padding 5vh 10vh
-  width 160vh
-  position fixed
-  left calc(50vw - 80vh)
-  top 0
-  z-index 1001
-  
-  > button
-    background none
-    border none
-    color red
-    cursor pointer
-    font-family "Helvetica", "Arial", sans-serif
-    font-size 5em
-    position absolute
-    right 2%
-    top -1%
-  
-.rp-help-tables
-  display flex
-  justify-content space-around
-
-  > table
-    border-collapse separate
-    border-spacing 1em
-    font-family "Alegreya Sans", sans-serif
-    vertical-align top
-    
-  > table > caption
-    color $blue
-    font-family "Roboto Slab", sans-serif
-    font-weight bold
-    
-  > table th
-    font-weight normal
-    text-align right
-  
-  kbd
-    color yellow
-    
-.rp-fix-mathjax
-  border-top 1px solid $blue
-  margin-top .5em
-  padding-top 1em
-  text-align left
-  
-  > button
-    background-color $wine
-    border none
-    border-radius 3px
-    color #FFF
-    cursor pointer
-    float left
-    font-family "Alegreya", serif
-    font-size 1.5em
-    margin-right 1em
-    padding 4px 8px
-    
-    &:active
-      background-color darken($wine, 15%)
-    
-  > p
-    margin-left 2em
-
-/* fullscreen */
-.rp-controls-fullscreen 
-  cursor pointer
-  float right
-
-/* time display */
-.rp-controls-time 
-  display inline-block
-  font-family "Droid Sans Mono", sans-serif
-  font-size 11px
-  line-height 36px
-  padding 0 1.5em
-  text-align center
-  user-select none
-  vertical-align top
-
-.rp-time-separator 
-  margin 0 3px
-
-/* captions */
-body:not(.rp-captions) .rp-captions-display
-  display none
-
-.rp-captions-display
-  $width = 100vh
-  
-  background-color rgba(255, 255, 255, 0.1)
-  border-radius 5px
-  color #FFF
-  font-family "Roboto Slab", sans-serif
-  font-size 1.3em
-  z-index 500
-  padding .7em
-  text-align center
-  user-select none
-  width $width
-  
-  position absolute
-  bottom 10vh
-  left unquote("calc(50vw - " + $width/2 + ")")
-  
-  &:empty
-    display none
-
-  &.editing
-    font-size 1em
-    display block !important
-    text-align left
-    opacity 0.5
-    top 10vh
-    bottom unset
-    width 140vh
-    left unquote("calc(50vw - 70vh)")
-    
-    > br
-      content ""
-      display block
-      margin .5em 0
-
-@import "editor"      
-@import "extensions"
+// mobile styles
+@import "mobile"

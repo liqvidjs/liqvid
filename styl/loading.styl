@@ -1,0 +1,27 @@
+/* loading */
+.rp-loading-screen
+  background-color rgba(0, 0, 0, 0.7)
+  display none
+  height 100%
+  position absolute
+  width 100%
+  z-index 10000
+  
+.rp-loading-spinner
+  border 16px solid #f3f3f3
+  border-top 16px solid $blue
+  border-radius 50%
+  margin 40vmin auto 0 auto
+  width 20vmin
+  height 20vmin
+  animation spin 1s linear infinite
+
+@keyframes spin
+  0%
+    transform rotate(0deg)
+  
+  100%
+    transform rotate(360deg)
+
+.ractive-player.not-ready > .rp-loading-screen
+  display block

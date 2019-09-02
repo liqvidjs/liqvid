@@ -1,0 +1,38 @@
+body:not(.rp-captions) .rp-captions-display
+  display none
+
+.rp-captions-display
+  $width = 100vh
+  
+  background-color rgba(255, 255, 255, 0.1)
+  border-radius 5px
+  color #FFF
+  font-family "Roboto Slab", sans-serif
+  font-size 1.3em
+  z-index 500
+  padding .7em
+  text-align center
+  user-select none
+  width $width
+  
+  position absolute
+  bottom 10vh
+  left unquote("calc(50vw - " + $width/2 + ")")
+  
+  &:empty
+    display none
+
+  &.editing
+    font-size 1em
+    display block !important
+    text-align left
+    opacity 0.5
+    top 10vh
+    bottom unset
+    width 140vh
+    left unquote("calc(50vw - 70vh)")
+    
+    > br
+      content ""
+      display block
+      margin .5em 0

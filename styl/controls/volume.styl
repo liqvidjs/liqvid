@@ -1,0 +1,56 @@
+range-thumb()
+  &::-webkit-slider-thumb
+    {block}
+  
+  &::-moz-range-thumb
+    {block}
+    
+  &::-ms-thumb
+    {block}
+    
+range-track()
+  &::-webkit-slider-runnable-track
+    {block}
+
+  &::-moz-range-track
+    {block}
+    
+  &::-ms-track
+    {block}
+
+.rp-controls-volume 
+  cursor pointer
+  z-index 100000
+  
+  > svg
+    height 100%
+    padding 3px
+
+  > input[type=range]
+    background transparent
+    width 10em
+    height 100%
+    -webkit-appearance none
+    
+    +range-thumb()
+      -webkit-appearance none
+      height 1.1em
+      width 1.1em
+      
+      background $wine
+      border 1px solid #000
+      border-radius 1em
+      box-shadow 1px 1px 1px #000, 0px 0px 1px #0d0d0d
+      cursor pointer
+      margin-top -.5em
+      line-height 1.5em
+      vertical-align middle
+    
+    +range-track()
+      height 2px
+      cursor pointer
+      background #FFF
+      border-radius 1.3px
+      margin auto 4px
+      vertical-align middle
+      line-height 1.5em

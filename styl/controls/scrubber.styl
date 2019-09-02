@@ -1,0 +1,32 @@
+/* scrubbing */
+.rp-controls-scrub-progress
+  display block
+  height 100%
+  width 100%
+  
+.rp-controls-scrub-wrap
+  height 100%
+  width 100%
+
+.rp-progress-elapsed 
+  fill var(--rp-elapsed-color)
+
+.rp-progress-remaining 
+  fill rgba(255, 255, 255, 0.6)
+  
+.controls-progress-buffered
+  fill orange
+
+.rp-scrubber 
+  height 13px
+  position absolute
+  top -3px
+  
+  > circle
+    fill var(--rp-scrubber-color)
+
+.rp-thumb-highlight
+  fill #FFF
+  
+  &.past
+    fill #ec76b3

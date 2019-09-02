@@ -9,13 +9,14 @@
     width var(--rp-width)
     bottom calc((100% - 62.5vw) / 2)
     user-select none
+    -webkit-user-select none
     z-index 1000
     left 0
     
   // hide certain controls
   .rp-controls-volume, .rp-controls-help
     display none !important
-    
+  
   // time
   .rp-controls-time
     line-height unset
@@ -49,6 +50,7 @@
   .rp-scrubber
     height 216%
     top -50%
+    pointer-events all
     
   .rp-controls-playpause
     bottom 0
@@ -56,6 +58,8 @@
     left 4.2%
     height 120%
     top -10%
+    cursor pointer
+    pointer-events all
     
   .rp-controls-float-right
     position fixed
@@ -67,5 +71,9 @@
       background #FFF1
       border-radius 4%
       display inline-block
-      margin 0 .1em
+      margin 0 .2em
+      height 2em
+      width 2em
       vertical-align top
+      cursor pointer
+      pointer-events all
