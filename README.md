@@ -1,6 +1,12 @@
 # ractive-player
 
-This was originally developed just for my own personal use, and is in the process of being cleaned up for general use. For example, it does not always adhere to modern software "best practices" like unit testing or commenting one's code.
+This is a library for authoring interactive videos using HTML/CSS/Javascript (and React). Here are some examples:
+
+[Computing cos and sin](https://lmqm.xyz/a/9vb/computing_cos_and_sin)
+
+[Points and vectors](https://lmqm.xyz/a/w7s/points_and_vectors)
+
+This was originally developed just for my own personal use, and there is not much documentation yet.
 
 ## Audio
 
