@@ -49,7 +49,7 @@ export default class Playback {
     });
 
     // audio
-    this.audioContext = new (AudioContext || webkitAudioContext)();
+    this.audioContext = new (window.AudioContext || webkitAudioContext)();
     this.audioNode = this.audioContext.createGain();
     this.audioNode.connect(this.audioContext.destination);
 
