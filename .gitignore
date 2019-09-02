@@ -3,4 +3,7 @@
 *.sublime-*
 
 # ignore node_modules
-/node_modules/*
+/node_modules
+
+# types aren't yet generated the way we want them to be
+/types
