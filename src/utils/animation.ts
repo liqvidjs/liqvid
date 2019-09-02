@@ -27,6 +27,8 @@ interface ReplayArgs<K> {
 }
 
 export function replay<K>({data, start, end, active, inactive, compressed}: ReplayArgs<K>): (t: number) => void {
+  if (typeof compressed === "undefined") compressed = false;
+
   const times = data.map(d => d[0]);
   if (compressed) {
     for (let i = 1; i < times.length; ++i) {
@@ -38,15 +40,22 @@ export function replay<K>({data, start, end, active, inactive, compressed}: Repl
   if (typeof end === "undefined") end = start + times[times.length - 1];
 
   let lastTime = 0,
-      i = 0;
+      i = 0,
+      isActive = true;
 
   function listener(t: number) {
+    // don't call inactive() repeatedly
+    if (t < start || t >= end) {
+      if (isActive) {
+        isActive = false;
+        return inactive();
+      }
+      return;
+    }
+    isActive = true;
+
     if (t < lastTime) i = 0;
     lastTime = t;
-
-    if (t < start || t >= end) {
-      return inactive();
-    }
 
     let maxI = Math.min(i, times.length - 1);
 
