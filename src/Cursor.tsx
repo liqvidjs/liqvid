@@ -3,6 +3,7 @@ import * as React from "react";
 import Player from "./Player";
 
 import {replay, ReplayData} from "./utils/animation";
+import {between} from "./utils/misc";
 
 interface Props {
   src: string;
@@ -63,7 +64,7 @@ export default class Cursor extends React.PureComponent<Props> {
     const {playback} = this.player;
 
     const style = {
-      display: (this.start <= playback.currentTime && playback.currentTime < this.end) ? "block" : "none"
+      display: between(this.start, playback.currentTime, this.end) ? "block" : "none"
     };
 
     return (

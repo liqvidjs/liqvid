@@ -1,5 +1,5 @@
 import {EventEmitter} from "events";
-import {bind} from "./utils/misc";
+import {between, bind} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
 import Playback from "./playback";
@@ -77,7 +77,7 @@ export default class Script {
     let newIndex;
     for (let i = 0; i < this.markers.length; ++i) {
       const [, begin, end] = this.markers[i];
-      if (begin <= t && t < end) {
+      if (between(begin, t, end)) {
         newIndex = i;
         break;
       }

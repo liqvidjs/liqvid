@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
-import {bind} from "./utils/misc";
+import {between, bind} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
 import Player from "./Player";
@@ -114,7 +114,7 @@ export default class Media extends React.PureComponent<Props> {
   onSeek(t: number) {
     const {playback} = this.player;
 
-    if (this.start <= t && t < this.end) {
+    if (between(this.start, t, this.end)) {
       this.domElement.currentTime = (t - this.start) / 1000;
 
       if (this.domElement.paused && !playback.paused && !playback.seeking)
@@ -126,7 +126,7 @@ export default class Media extends React.PureComponent<Props> {
   }
 
   onTimeUpdate(t: number) {
-    if (this.start <= t && t < this.end) {
+    if (between(this.start, t, this.end)) {
       if (!this.domElement.paused) return;
 
       this.domElement.currentTime = (t - this.start) / 1000;
