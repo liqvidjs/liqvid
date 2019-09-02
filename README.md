@@ -10,24 +10,20 @@ Example:
 
 ```JSX
 <Audio start="speech">
-  <source src={`${MEDIA_URL}/audio/speech.webm`} type="audio/webm"/>
-  <source src={`${MEDIA_URL}/audio/speech.mp4`} type="audio/mp4"/>
+  <source src={`${MEDIA_URL}/audio/intro.webm`} type="audio/webm"/>
+  <source src={`${MEDIA_URL}/audio/intro.mp4`} type="audio/mp4"/>
 </Audio>
 ```
 
 `MEDIA_URL` would be "." in development and your assets host in production.
 
-## Block
-
-This is a slightly more opinionated `Player.PureReceiver`. You use it by having your component extend it. It will subscribe to `markerupdate` and `timeupdate`, via methods `onMarkerUpdate()` and `onTimeUpdate()` that you implement.
-
 ## Cursor
 
-This should maybe be moved to a separate module.
+For replaying cursor movements (although you could use any image). Once we have a proper plugin system this will be moved to its own package.
 
 ## IdMap
 
-Automagically adds attributes to things with IDs. This is mainly to enable GUI tools which will be developed elsewhere. This also broadcasts `Player`.
+Automagically adds attributes to things with IDs. This is mainly to enable GUI tools which will be developed elsewhere.
 
 ## Playback
 
@@ -43,11 +39,13 @@ export default ".";
 
 // markers.ts
 export default [
-  ["begin", "1:00"]
+  ["begin", "1:00"],
+  ["world", "1:00"]
 ] as [string, string][];
 
 // index.tsx
-import {Player, Script} from "ractive-player";
+import {Player, Script, Utils} from "ractive-player";
+const {from} = Utils.authoring;
 
 import MEDIA_URL from "./media-url";
 import markers from "./markers";
@@ -64,6 +62,7 @@ class Ractive extends React.PureComponent {
     const script = new Script(markers);
 
     const highlights = [
+      {title: "World", time: script.markerByName("world")[1]}
     ];
 
     const thumbData = {
@@ -78,7 +77,7 @@ class Ractive extends React.PureComponent {
   
     return (
       <Player ref={player => this.player = player} script={script}>
-        Hello World!
+        Hello <span {...from("world")}>World!</span>
       </Player>
     );
   }
@@ -87,27 +86,11 @@ class Ractive extends React.PureComponent {
 ReactDOM.render(<Ractive/>, document.querySelector("main"));
 ```
 
-thumbs
-
-script attribute
-
-plugins for editor
-
-stuff
-
-ignoreCanvasClick
-
-$controls
-
-hub
-
-also has playback and script
-
 ## Script
 
 ## Utils
 
-Some of these are for internal use. You should probably only use `animation`, `authoring`, and `misc`.
+Some of these are for internal use. You should probably only use `animation`, `authoring`, `interactivity`, `misc`, and `mobile`.
 
 ### animation
 
@@ -119,13 +102,9 @@ You will use `from` a lot to control when things appear on screen. I have `_f + 
 
 Note that `from` operates outside of React, so will work without its parent component being updated. However for `showIf` you will need to make sure the parent component is subscribing to `onTimeUpdate` or `onSlideUpdate`.
 
-### graphics
-
-Don't use this, it will be removed.
-
 ### interactivity
 
-Helper for implementing drag functionality. This might get removed.
+Helper for implementing drag functionality.
 
 ### media
 
@@ -133,11 +112,11 @@ This wraps [`canplay`]() and [`canplaythrough`]() events as Promises.
 
 ### misc
 
-At one point in time this module was called KitchenSink. Basically just a hodgepodge of things that are helpful when authoring, i.e. polyfilling Javascript functions that should exist but don't. This is "bad programming practice" but makes the authoring experience easier. Conceivably could have more things in it as well; imagine the possibilities.
+Assorted helper functions.
 
 ### react
 
-This is for implementing `Player.Broadcaster` and `IdMap`. Don't use this.
+This is for implementing `IdMap`. Don't use this.
 
 ### time
 
