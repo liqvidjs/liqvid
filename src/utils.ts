@@ -5,7 +5,8 @@ import * as authoring from "./utils/authoring";
 import * as interactivity from "./utils/interactivity";
 import * as media from "./utils/media";
 import * as misc from "./utils/misc";
+import * as mobile from "./utils/mobile";
 import * as react from "./utils/react-utils";
 import * as time from "./utils/time";
 
-export {animation, authoring, interactivity, media, misc, react, time};
+export {animation, authoring, interactivity, media, misc, mobile, react, time};
