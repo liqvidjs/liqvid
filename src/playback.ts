@@ -6,6 +6,8 @@ interface PlaybackOptions {
   duration: number;
 }
 
+declare let webkitAudioContext: typeof AudioContext;
+
 /* handle playback progress */
 export default class Playback {
   audioContext: AudioContext;
@@ -47,7 +49,7 @@ export default class Playback {
     });
 
     // audio
-    this.audioContext = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+    this.audioContext = new (AudioContext || webkitAudioContext)();
     this.audioNode = this.audioContext.createGain();
     this.audioNode.connect(this.audioContext.destination);
 

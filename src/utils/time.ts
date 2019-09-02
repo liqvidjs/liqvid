@@ -1,13 +1,12 @@
 // parse time
 export function parseTime(str: string) {
-  let [h, m, s, ms] =
+  const [h, m, s, ms] =
     str
     .match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/)
     .slice(1)
     .map(x => x || "0");
-
-  ms = ms.padEnd(3, "0");
-  const [hours, minutes, seconds, milliseconds] = [h, m, s, ms].map(x => parseInt(x, 10));
+  
+  const [hours, minutes, seconds, milliseconds] = [h, m, s, ms.padEnd(3, "0")].map(x => parseInt(x, 10));
   
   return milliseconds + 1000 * (seconds + 60 * (minutes + 60 * hours));
 }

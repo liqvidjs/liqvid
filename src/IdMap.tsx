@@ -1,7 +1,5 @@
 import * as React from "react";
 
-import Player from "./Player";
-
 import {bind} from "./utils/misc";
 import {recursiveMap} from "./utils/react-utils";
 

@@ -12,7 +12,7 @@ export function wait(time: number): Promise<void> {
 }
 
 // await some condition to be true
-export function waitFor(callback: () => boolean, interval: number = 10): Promise<void> {
+export function waitFor(callback: () => boolean, interval = 10): Promise<void> {
   return new Promise((resolve) => {
     const checkCondition = () => {
       if (callback()) {

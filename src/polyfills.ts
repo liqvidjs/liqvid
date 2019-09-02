@@ -1,7 +1,7 @@
 const id = <T>(_: T) => _;
 
 export const fullscreenEnabled: boolean =
-  ["fullscreenEnabled", 'webkitFullscreenEnabled', 'mozFullScreenEnabled', 'msFullscreenEnabled']
+  ["fullscreenEnabled", "webkitFullscreenEnabled", "mozFullScreenEnabled", "msFullscreenEnabled"]
   .map(_ => document[_])
   .concat(false)
   .find(_ => _ !== undefined);
