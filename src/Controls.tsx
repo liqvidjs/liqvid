@@ -32,7 +32,6 @@ export default class Controls extends React.PureComponent<Props, State> {
   static contextType = PlayerContext;
   private player: Player;
   private $helpControl: Help;
-  private $settingsControl: Settings;
   private timer: number;
 
   captureKeys: boolean;
@@ -57,7 +56,7 @@ export default class Controls extends React.PureComponent<Props, State> {
       playback.paused ? playback.play() : playback.pause();
     }
     
-    this.$settingsControl.closeDialog();
+    this.player.hub.emit("canvasClick");
   }
 
   componentDidMount() {
@@ -179,7 +178,7 @@ export default class Controls extends React.PureComponent<Props, State> {
           <TimeDisplay/>
           <div className="rp-controls-float-right">
             {this.player.applyHooks("controls")}
-            <Settings ref={control => this.$settingsControl = control}/>
+            <Settings/>
             <Help ref={control => this.$helpControl = control}/>
             <FullScreen/>
           </div>

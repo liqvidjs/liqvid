@@ -4,6 +4,7 @@ import Controls, {ThumbData} from "./Controls";
 import Captions from "./Captions";
 
 import {bind} from "./utils/misc";
+import {anyHover} from "./utils/mobile";
 
 import Playback from "./playback";
 import Script from "./script";
@@ -87,6 +88,10 @@ export default class Player extends React.PureComponent<Props, State> {
   }
 
   componentDidMount() {
+    // prevent scroll on mobile
+    document.addEventListener("touchmove", e => e.preventDefault(), {passive: false});
+    document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
+
     Promise.all(this.__canPlayTasks)
     .then(() => this.hub.emit("canplay"));
 
@@ -200,6 +205,7 @@ export default class Player extends React.PureComponent<Props, State> {
     const attrs = {
       style: this.props.style
     };
+    const canvasAttrs = anyHover ? {onMouseUp: this.onMouseUp} : {};
     
     const classNames = ["ractive-player"];
     
@@ -213,8 +219,9 @@ export default class Player extends React.PureComponent<Props, State> {
         <div className={classNames.join(" ")} {...attrs}>
           <LoadingScreen/>
           <div className="rp-canvas"
-            onMouseUp={this.onMouseUp}
-            ref={canvas => this.canvas = canvas}>
+            {...canvasAttrs}
+            ref={canvas => this.canvas = canvas}
+          >
             {this.props.children}
           </div>
           <Captions player={this}/>

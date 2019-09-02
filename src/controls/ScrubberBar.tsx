@@ -1,11 +1,12 @@
 import * as React from "react";
+import {useContext, useEffect, useMemo, useRef, useState} from "react";
 
 import Player from "../Player";
-import {PlayerContext} from "../shared";
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
 import {dragHelper} from "../utils/interactivity";
-import {bind, constrain} from "../utils/misc";
+import {between, constrain} from "../utils/misc";
+import {anyHover} from "../utils/mobile";
 
 export {ThumbData};
 
@@ -13,146 +14,148 @@ interface Props {
   thumbs: ThumbData;
 }
 
-interface State {
-  progress: number;
-  seeking: boolean;
-  showThumb: boolean;
-  thumbProgress: number;
-  thumbTitle: string;
-}
+export default function ScrubberBar(props: Props) {
+  const {playback} = useContext(Player.Context);
 
-export default class ScrubberBar extends React.PureComponent<Props, State> {
-  private scrubberBar: HTMLDivElement;
-  private player: Player;
-  static contextType = PlayerContext;
+  const [progress, setProgress] = useState({
+    scrubber: playback.currentTime / playback.duration,
+    thumb: playback.currentTime / playback.duration,
+  });
+  const [showThumb, setShowThumb] = useState(false);
 
-  constructor(props: Props, context: Player) {
-    super(props, context);
-    this.player = context;
+  // refs
+  const scrubberBar = useRef<HTMLDivElement>();
 
-    bind(this, ["onDrag", "onMouseDown", "onMouseMove", "onMouseUp"]);
+  // bind 
+  useEffect(() => {
+    playback.hub.on("seek", () => {
+      if (playback.seeking) return;
+      const progress = playback.currentTime / playback.duration;
+      setProgress({scrubber: progress, thumb: progress});
+    });
+    playback.hub.on("seeked", () => {
+      const progress = playback.currentTime / playback.duration;
+      setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+    });
+    playback.hub.on("timeupdate", () => {
+      const progress = playback.currentTime / playback.duration;
+      setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+    });
+  }, []);
 
-    this.state = {
-      progress: 0,
-      seeking: false,
-      showThumb: false,
-      thumbProgress: 0,
-      thumbTitle: null
+  // event handlers
+  const divEvents = useMemo(() => {
+    if (!anyHover) return {};
+    return {onMouseDown: dragHelper(
+      // move
+      (e: MouseEvent, {x}: {x: number}) => {
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+        setProgress({scrubber: progress, thumb: progress});
+        playback.seek(progress * playback.duration);
+      },
+      // down
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        playback.seeking = true;
+
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
+
+        setProgress({scrubber: progress, thumb: progress});
+        playback.seek(progress * playback.duration);
+      },
+      // up
+      () => playback.seeking = false
+    )};
+  }, []);
+
+  const wrapEvents = useMemo(() => {
+    if (!anyHover) return [];
+    return {
+      onMouseOver: () => setShowThumb(true),
+      onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
+
+        setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
+      },
+      onMouseOut: () => setShowThumb(false)
     };
-  }
+  }, []);
 
-  componentDidMount() {
-    const {playback} = this.player;
+  const scrubberEvents = useMemo(() => {
+    if (anyHover) return {};
+    return {onTouchStart: dragHelper(
+      // move
+      (e: TouchEvent, {x}: {x: number}) => {
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (x - rect.left) / rect.width, 1);
 
-    playback.hub.on("seek", () => this.forceUpdate());
-    // playback.hub.on('seeking', () => this.forceUpdate());
-    playback.hub.on("timeupdate", () => this.forceUpdate());
+        setProgress({scrubber: progress, thumb: progress});
+      },
+      // start
+      (e: React.TouchEvent<SVGSVGElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        playback.seeking = true;
+        setShowThumb(true);
+      },
+      // end
+      (e: TouchEvent, {x}: {x: number}) => {
+        e.preventDefault();
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (x - rect.left) / rect.width, 1);
 
-    // hack
-    // playback.hub.on('bufferupdate', () => this.forceUpdate());
-  }
+        setShowThumb(false);
+        playback.seeking = false;
+        playback.seek(progress * playback.duration);
+      }
+    )};
+  }, []);
 
-  onMouseDown(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
-    const {playback} = this.player;
-    playback.seeking = true;
+  const highlights = (props.thumbs && props.thumbs.highlights) || [];
+  const activeHighlight = highlights.find(
+    _ => between(_.time / playback.duration, progress.thumb, _.time / playback.duration + 0.01)
+  );
+  const thumbTitle = activeHighlight ? activeHighlight.title : null;
 
-    const x = isReactMouseEvent(e) ? e.pageX : e.touches[0].pageY;
-
-    const rect = this.scrubberBar.getBoundingClientRect(),
-          progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-    playback.seek(progress * playback.duration);
-  }
-
-  onDrag(e: MouseEvent, {x}: {x: number}) {
-    const {playback} = this.player;
-    const rect = this.scrubberBar.getBoundingClientRect(),
-          progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-    playback.seek(progress * playback.duration);
-  }
-
-  onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = this.scrubberBar.getBoundingClientRect(),
-          thumbProgress = constrain(0, (e.pageX - rect.left) / rect.width, 1);
-
-    this.setState({thumbProgress});
-  }
-
-  onMouseUp() {
-    this.player.playback.seeking = false;
-  }
-
-  render() {
-    const {playback/*, buffers*/} = this.player;
-
-    const progress = (playback.currentTime / playback.duration * 100);
-
-    // const thumbFrequency = 1;
-    const {thumbProgress} = this.state;
-    // thumbTime = thumbProgress * playback.duration,
-    // thumbName = Math.floor(thumbTime / 1000 / thumbFrequency);
-
-    const highlights = (this.props.thumbs && this.props.thumbs.highlights) || [];
-
-    // const ranges = Array.from(buffers.values()).reduce((a, b) => a.concat(b), []);
-
-    const listener = dragHelper(this.onDrag, this.onMouseDown, this.onMouseUp);
-
-    return (
-      <div
-        className="rp-controls-scrub"
-        onMouseDown={listener}
-        onTouchStart={listener}
-        ref={node => this.scrubberBar = node}
-      >
-        {this.props.thumbs &&
+  return (
+    <div className="rp-controls-scrub" ref={scrubberBar} {...divEvents}>
+      {props.thumbs &&
         <ThumbnailBox
-          {...this.props.thumbs}
-          player={this.player}
-          progress={thumbProgress}
-          show={this.state.showThumb}
-          title={this.state.thumbTitle}/>
-        }
+          {...props.thumbs}
+          progress={progress.thumb}
+          show={showThumb}
+          title={thumbTitle}/>
+      }
 
-        <div
-          className="rp-controls-scrub-wrap" 
-          onMouseOver={() => this.setState({showThumb: true})}
-          onMouseMove={this.onMouseMove}
-          onMouseOut={() => this.setState({showThumb: false})}
-        >
-          <svg className="rp-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
-            <rect className="rp-progress-elapsed" x="0" y="0" height="10" width={progress}/>
-            <rect className="rp-progress-remaining" x={progress} y="0" height="10" width={100 - progress}/>
+      <div className="rp-controls-scrub-wrap" {...wrapEvents}>
+        <svg className="rp-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
+          <rect className="rp-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100}/>
+          <rect className="rp-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100}/>
 
-            {/*ranges.map(([start, end]) => (
-              <rect
-                key={`${start}-${end}`} className="controls-progress-buffered"
-                x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
-            ))*/}
+          {/*ranges.map(([start, end]) => (
+            <rect
+              key={`${start}-${end}`} className="controls-progress-buffered"
+              x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
+          ))*/}
 
-            {highlights.map(({time, title}) => (
-              <rect
-                key={time}
-                className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
-                onMouseOver={() => this.setState({thumbTitle: title})}
-                onMouseOut={() => this.setState({thumbTitle: null})}
-                x={time / playback.duration * 100}
-                y="0"
-                width="1"
-                height="10"
-              />
-            ))}
-          </svg>
-          <svg className="rp-scrubber" style={{left: `calc(${progress}% - 6px)`}} viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="50" stroke="none"/>
-          </svg>
-        </div>
+          {highlights.map(({time, title}) => (
+            <rect
+              key={time}
+              className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
+              x={time / playback.duration * 100}
+              y="0"
+              width="1"
+              height="10"
+            />
+          ))}
+        </svg>
+        <svg className="rp-scrubber" style={{left: `calc(${progress.scrubber * 100}% - 6px)`}} viewBox="0 0 100 100" {...scrubberEvents}>
+          <circle cx="50" cy="50" r="50" stroke="none"/>
+        </svg>
       </div>
-    );
-  }
-}
-
-function isReactMouseEvent(e: React.SyntheticEvent): e is React.MouseEvent {
-  return e.nativeEvent instanceof MouseEvent;
+    </div>
+  );
 }

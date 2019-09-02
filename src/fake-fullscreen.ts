@@ -13,20 +13,18 @@ export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : () => 
   window.parent.postMessage({type: "fake-fullscreen", value: true}, location.origin);
 
   if (!__isFullScreen) {
+    __isFullScreen = true;
     for (const _ of __callbacks) _();
   }
-
-  __isFullScreen = true;
 };
 
 export const exitFullScreen = fullscreenEnabled ? $exitFullScreen : () => {
   window.parent.postMessage({type: "fake-fullscreen", value: false}, location.origin);
 
   if (__isFullScreen) {
+    __isFullScreen = false;
     for (const _ of __callbacks) _();
   }
-
-  __isFullScreen = false;
 };
 
 export const isFullScreen = fullscreenEnabled ? $isFullScreen : () => {
