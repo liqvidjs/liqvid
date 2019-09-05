@@ -1,4 +1,5 @@
 import {EventEmitter} from "events";
+import StrictEventEmitter from "strict-event-emitter-types";
 import * as React from "react";
 
 export = RactivePlayer;
@@ -50,7 +51,19 @@ declare namespace RactivePlayer {
     audioNode: GainNode;
     currentTime: number;
     duration: number;
-    hub: EventEmitter;
+    hub: StrictEventEmitter<EventEmitter, {
+      "bufferupdate": void;
+      "cuechange": void;
+      "pause": void;
+      "play": void;
+      "seek": number;
+      "seeked": void;
+      "seeking": void;
+      "stop": void;
+      "ratechange": void;
+      "timeupdate": number;
+      "volumechange": void;
+    }>;
     paused: boolean;
     playbackRate: number;
     playingFrom: number;
@@ -62,7 +75,9 @@ declare namespace RactivePlayer {
   }
   
   class Script {
-    hub: EventEmitter;
+    hub: StrictEventEmitter<EventEmitter, {
+      "markerupdate": number;
+    }>;
     loadTasks: Promise<any>[];
     markerIndex: number;
     markerName: string;
@@ -114,7 +129,11 @@ declare namespace RactivePlayer {
 
     $controls: any;
     canvas: HTMLDivElement;
-    hub: EventEmitter;
+    hub: StrictEventEmitter<EventEmitter, {
+      "canplay": void;
+      "canplaythrough": void;
+      "canvasClick": void;
+    }>;
     playback: Playback;
     script: Script;
 
