@@ -1,4 +1,5 @@
 import {EventEmitter} from "events";
+import StrictEventEmitter from "strict-event-emitter-types";
 import {between, bind} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
@@ -6,14 +7,18 @@ import Playback from "./playback";
 
 type Marker = [string, number, number];
 
+interface ScriptEvents {
+  "markerupdate": number;
+}
+
 export default class Script {
-  hub: EventEmitter;
+  hub: StrictEventEmitter<EventEmitter, ScriptEvents>;
   playback: Playback;
   markers: Marker[];
   markerIndex: number;
 
   constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
-    this.hub = new EventEmitter();
+    this.hub = new EventEmitter() as StrictEventEmitter<EventEmitter, ScriptEvents>;
     this.hub.setMaxListeners(0);
 
     // bind methods
