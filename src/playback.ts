@@ -1,6 +1,21 @@
 import {EventEmitter} from "events";
+import StrictEventEmitter from "strict-event-emitter-types";
 import {bind, constrain} from "./utils/misc";
 import {parseTime} from "./utils/time";
+
+interface PlaybackEvents {
+  "bufferupdate": void;
+  "cuechange": void;
+  "pause": void;
+  "play": void;
+  "seek": number;
+  "seeked": void;
+  "seeking": void;
+  "stop": void;
+  "ratechange": void;
+  "timeupdate": number;
+  "volumechange": void;
+}
 
 interface PlaybackOptions {
   duration: number;
@@ -13,7 +28,7 @@ export default class Playback {
   audioContext: AudioContext;
   audioNode:    GainNode;
   currentTime:  number;
-  hub:          EventEmitter;
+  hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
   duration:     number;
   paused:       boolean;
   playingFrom:  number;

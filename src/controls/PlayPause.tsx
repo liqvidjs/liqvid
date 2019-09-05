@@ -11,7 +11,7 @@ export default function PlayPause() {
 
   useEffect(() => {
     const update = () => setState(playback.paused || playback.seeking);
-    const events = ["pause", "play", "seeked", "seeking", "seeked", "stop"];
+    const events = ["pause", "play", "seeking", "seeked", "stop"] as const;
 
     for (const e of events)
       playback.hub.on(e, update);

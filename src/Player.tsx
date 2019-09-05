@@ -1,4 +1,5 @@
 import {EventEmitter} from "events";
+import StrictEventEmitter from "strict-event-emitter-types";
 import * as React from "react";
 import Controls, {ThumbData} from "./Controls";
 import Captions from "./Captions";
@@ -22,6 +23,12 @@ interface Plugin {
   setup(hook: HookFn<keyof HookMap>): void;
 }
 
+interface PlayerEvents {
+  "canplay": void;
+  "canplaythrough": void;
+  "canvasClick": void;
+}
+
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   plugins?: Plugin[];
   script: Script;
@@ -37,7 +44,7 @@ const ignoreCanvasClick = Symbol();
 export default class Player extends React.PureComponent<Props, State> {
   $controls: Controls;
   canvas: HTMLDivElement;
-  hub: EventEmitter;
+  hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
   playback: Playback;
   script: Script;
 
@@ -61,7 +68,7 @@ export default class Player extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.hub = new EventEmitter();
+    this.hub = new EventEmitter() as StrictEventEmitter<EventEmitter, PlayerEvents>;
     this.__canPlayTasks = [];
     this.__canPlayThroughTasks = [];
 
