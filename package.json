@@ -1,6 +1,6 @@
 {
   "name": "ractive-player",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Library for authoring interactive videos using HTML/CSS/Javascript",
   "files": ["dist/*"],
   "main": "dist/ractive-player.js",
