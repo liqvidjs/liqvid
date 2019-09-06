@@ -50,7 +50,6 @@ export default class Media extends React.PureComponent<Props> {
     playback.hub.on("play", this.onPlay);
     playback.hub.on("ratechange", this.onRateChange);
     playback.hub.on("seek", this.onSeek);
-    playback.hub.on("seeked", this.onSeek);
     playback.hub.on("seeking", this.onSeeking);
     playback.hub.on("timeupdate", this.onTimeUpdate);
     playback.hub.on("volumechange", this.onVolumeChange);
