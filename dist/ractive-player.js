@@ -970,7 +970,6 @@ class Media extends react__WEBPACK_IMPORTED_MODULE_0__["PureComponent"] {
         playback.hub.on("play", this.onPlay);
         playback.hub.on("ratechange", this.onRateChange);
         playback.hub.on("seek", this.onSeek);
-        playback.hub.on("seeked", this.onSeek);
         playback.hub.on("seeking", this.onSeeking);
         playback.hub.on("timeupdate", this.onTimeUpdate);
         playback.hub.on("volumechange", this.onVolumeChange);
@@ -1482,7 +1481,7 @@ function PlayPause() {
     const [state, setState] = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(playback.paused || playback.seeking);
     Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
         const update = () => setState(playback.paused || playback.seeking);
-        const events = ["pause", "play", "seeked", "seeking", "seeked", "stop"];
+        const events = ["pause", "play", "seeking", "seeked", "stop"];
         for (const e of events)
             playback.hub.on(e, update);
         return () => {
