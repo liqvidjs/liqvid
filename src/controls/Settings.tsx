@@ -18,7 +18,7 @@ export default function Settings() {
   useEffect(() => {
     playback.hub.on("ratechange", () => setRate(playback.playbackRate));
     player.hub.on("canvasClick", () => setDialog({main: false, speed: false}));
-  });
+  }, []);
 
   /* handlers */
   const setSpeed = useMemo(() => {
