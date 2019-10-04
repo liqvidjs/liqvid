@@ -29,6 +29,8 @@ Example:
 
 For replaying cursor movements (although you could use any image). Once we have a proper plugin system this will be moved to its own package.
 
+This component is deprecated and will be removed in a future major version. You should use [rp-cursor](https://github.com/ysulyma/rp-cursor) instead.
+
 ## IdMap
 
 Automagically adds attributes to things with IDs. This is mainly to enable GUI tools which will be developed elsewhere.
@@ -121,6 +123,10 @@ This wraps [`canplay`]() and [`canplaythrough`]() events as Promises.
 ### misc
 
 Assorted helper functions.
+
+### mobile
+
+Helper functions for dealing with mobile quirks.
 
 ### react
 
