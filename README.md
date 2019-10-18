@@ -8,7 +8,7 @@ This is a library for playing interactive videos using HTML/CSS/Javascript (and 
 
 To author these you will also need [ractive-editor](https://github.com/ysulyma/ractive-editor/).
 
-This was originally developed just for my own personal use, and there is not much documentation yet.
+For documentation, see the [wiki](https://github.com/ysulyma/ractive-player/wiki).
 
 ## Audio
 
