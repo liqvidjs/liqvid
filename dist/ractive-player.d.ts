@@ -259,6 +259,12 @@ declare namespace RactivePlayer {
           onTouchStart: (e: React.TouchEvent<T>) => void;
           onTouchEnd: (e: React.TouchEvent<T>) => void;
       };
+
+      /**
+        Replacement for addEventListener("click") which works better on mobile.
+        Returns a function to remove the event listener.
+      */
+      attachClickHandler(node: Node, callback: (e: MouseEvent| TouchEvent) => void): () => void;
     }
     
     react: {
