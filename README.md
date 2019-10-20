@@ -6,7 +6,7 @@ This is a library for playing interactive videos using HTML/CSS/Javascript (and 
 
 [Points and vectors](https://lmqm.xyz/a/w7s/points_and_vectors)
 
-To author these you will also need [ractive-editor](https://github.com/ysulyma/ractive-editor/).
+To author these you will also need [rp-recording](https://github.com/ysulyma/rp-recording/).
 
 For documentation, see the [wiki](https://github.com/ysulyma/ractive-player/wiki).
 
