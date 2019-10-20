@@ -64,8 +64,6 @@ export default class Player extends React.PureComponent<Props, State> {
     style: {}
   }
 
-  static CONTROLS_HEIGHT = 44;
-
   constructor(props: Props) {
     super(props);
     this.hub = new EventEmitter() as StrictEventEmitter<EventEmitter, PlayerEvents>;
