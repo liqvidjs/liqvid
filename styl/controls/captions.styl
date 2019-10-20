@@ -7,7 +7,7 @@ body:not(.rp-captions) .rp-captions-display
   background-color rgba(255, 255, 255, 0.1)
   border-radius 5px
   color #FFF
-  font-family "Roboto Slab", sans-serif
+  font-family sans-serif
   font-size 1.3em
   z-index 500
   padding .7em
@@ -21,18 +21,3 @@ body:not(.rp-captions) .rp-captions-display
   
   &:empty
     display none
-
-  &.editing
-    font-size 1em
-    display block !important
-    text-align left
-    opacity 0.5
-    top 10vh
-    bottom unset
-    width 140vh
-    left unquote("calc(50vw - 70vh)")
-    
-    > br
-      content ""
-      display block
-      margin .5em 0
