@@ -71,17 +71,47 @@ export default function ScrubberBar(props: Props) {
   }, []);
 
   const wrapEvents = useMemo(() => {
-    if (!anyHover) return [];
-    return {
-      onMouseOver: () => setShowThumb(true),
-      onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
+    if (anyHover) {
+      return {
+        onMouseOver: () => setShowThumb(true),
+        onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
+          const rect = scrubberBar.current.getBoundingClientRect(),
+                progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
 
-        setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
-      },
-      onMouseOut: () => setShowThumb(false)
-    };
+          setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
+        },
+        onMouseOut: () => setShowThumb(false)
+      };
+    } else {
+      return {
+        onTouchStart: dragHelper(
+          // move
+          (e: TouchEvent, {x}: {x: number}) => {
+            const rect = scrubberBar.current.getBoundingClientRect(),
+                  progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+            setProgress({scrubber: progress, thumb: progress});
+          },
+          // start
+          (e: React.TouchEvent<SVGSVGElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            playback.seeking = true;
+            setShowThumb(true);
+          },
+          // end
+          (e: TouchEvent, {x}: {x: number}) => {
+            e.preventDefault();
+            const rect = scrubberBar.current.getBoundingClientRect(),
+                  progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+            setShowThumb(false);
+            playback.seeking = false;
+            playback.seek(progress * playback.duration);
+          }
+        )
+      };
+    }
   }, []);
 
   const scrubberEvents = useMemo(() => {
