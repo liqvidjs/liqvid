@@ -130,3 +130,9 @@ iframe, img
 
 // mobile styles
 @import "mobile"
+
+// hack to target Safari, which does horrible things without this line
+@media not all and (min-resolution:.001dpcm)
+  @supports (-webkit-appearance:none)
+    *[data-from-first], *[data-during]
+      will-change opacity
