@@ -131,7 +131,7 @@ declare namespace RactivePlayer {
     playback: Playback;
     script: Script;
 
-    static preventCanvasClick(e: React.SyntheticEvent): void;
+    static preventCanvasClick(e: React.MouseEvent | MouseEvent): void;
     suspendKeyCapture(): void;
     resumeKeyCapture(): void;
     obstruct(event: "canplay" | "canplaythrough", task: Promise<any>): void;

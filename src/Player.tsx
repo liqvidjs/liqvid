@@ -159,8 +159,10 @@ export default class Player extends React.PureComponent<Props, State> {
     this.controls.canvasClick();
   }
 
-  static preventCanvasClick(e: React.MouseEvent) {
-    e.persist();
+  static preventCanvasClick(e: React.MouseEvent | MouseEvent) {
+    if ("nativeEvent" in e) {
+      e.persist();
+    }
     e[ignoreCanvasClick] = true;
   }
   
