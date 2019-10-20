@@ -8,7 +8,7 @@ This is a library for playing interactive videos using HTML/CSS/Javascript (and 
 
 To author these you will also need [ractive-editor](https://github.com/ysulyma/ractive-editor/).
 
-This was originally developed just for my own personal use, and there is not much documentation yet.
+For documentation, see the [wiki](https://github.com/ysulyma/ractive-player/wiki).
 
 ## Audio
 
@@ -28,6 +28,8 @@ Example:
 ## Cursor
 
 For replaying cursor movements (although you could use any image). Once we have a proper plugin system this will be moved to its own package.
+
+This component is deprecated and will be removed in a future major version. You should use [rp-cursor](https://github.com/ysulyma/rp-cursor) instead.
 
 ## IdMap
 
@@ -121,6 +123,10 @@ This wraps [`canplay`]() and [`canplaythrough`]() events as Promises.
 ### misc
 
 Assorted helper functions.
+
+### mobile
+
+Helper functions for dealing with mobile quirks.
 
 ### react
 
