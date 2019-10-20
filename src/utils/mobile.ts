@@ -33,3 +33,44 @@ export const onClick = <T extends Node>(callback: (e: React.MouseEvent<T> | Reac
     };
   }
 };
+
+/**
+  Replacement for addEventListener("click") which works better on mobile.
+  Returns a function to remove the event listener.
+*/
+export const attachClickHandler = (node: Node, callback: (e: MouseEvent| TouchEvent) => void): () => void => {
+  if (anyHover) {
+    node.addEventListener("click", callback);
+    return () => {
+      node.removeEventListener("click", callback);
+    };
+  }
+
+  let touchId: number;
+
+  const touchStart = (e: TouchEvent) => {
+    if (touchId) return;
+    touchId = e.changedTouches[0].identifier;
+  };
+
+  const touchEnd = (e: TouchEvent) => {
+    if (!touchId) return;
+    for (const touch of Array.from(e.changedTouches)) {
+      if (touch.identifier !== touchId) continue;
+
+      if (node.contains(document.elementFromPoint(touch.clientX, touch.clientY))) {
+        callback(e);
+      }
+
+      touchId = null;
+    }
+  };
+
+  node.addEventListener("touchstart", touchStart);
+  node.addEventListener("touchend", touchEnd);
+
+  return () => {
+    node.removeEventListener("touchstart", touchStart);
+    node.removeEventListener("touchend", touchEnd);
+  };
+};

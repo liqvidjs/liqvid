@@ -1,3 +1,7 @@
+## 1.1.0 (October 20, 2019)
+
+* add `attachClickHandler` in `utils/mobile`
+
 ## 1.0.3 (October 20, 2019)
 
 * better mobile scrubbing
