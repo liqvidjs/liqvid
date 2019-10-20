@@ -1,3 +1,13 @@
+## 2.0.0 (???)
+
+* deprecate Cursor; use rp-cursor instead
+
+* rename `Player.$controls` -> `Player.controls`
+
+* remove `Player.CONTROLS_HEIGHT`
+
+* support ordinary events in `Player.preventCanvasClick`
+
 ## 1.1.1 (October 20, 2019)
 
 * fix typings for `utils/animation/replay`
