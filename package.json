@@ -1,8 +1,10 @@
 {
   "name": "ractive-player",
-  "version": "1.0.2",
-  "description": "Library for authoring interactive videos using HTML/CSS/Javascript",
-  "files": ["dist/*"],
+  "version": "1.0.3",
+  "description": "Library for playing interactive videos using HTML/CSS/Javascript",
+  "files": [
+    "dist/*"
+  ],
   "main": "dist/ractive-player.js",
   "typings": "dist/ractive-player.d.ts",
   "scripts": {
@@ -18,25 +20,26 @@
     "url": "https://github.com/ysulyma/ractive-player/issues"
   },
   "homepage": "https://github.com/ysulyma/ractive-player#readme",
-  "devDependencies": {
+  "dependencies": {
     "@types/events": "^3.0.0",
-    "@types/react": "^16.9.2",
-    "@types/react-dom": "^16.9.0",
-    "@typescript-eslint/eslint-plugin": "^2.1.0",
-    "@typescript-eslint/parser": "^2.1.0",
-    "awesome-typescript-loader": "^5.2.1",
+    "@types/react": "^16.9.9",
+    "@types/react-dom": "^16.9.2",
+    "strict-event-emitter-types": "^2.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
     "banner-webpack-plugin": "^0.2.3",
-    "eslint": "^6.3.0",
-    "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-react-hooks": "^2.0.1",
+    "eslint": "^6.5.1",
+    "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-react-hooks": "^2.1.2",
     "events": "^3.0.0",
     "nib": "^1.1.2",
-    "react": "^16.9.0",
-    "strict-event-emitter-types": "^2.0.0",
+    "react": "^16.10.2",
     "stylus": "^0.54.7",
-    "ts-loader": "^6.0.4",
-    "typescript": "^3.6.2",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "ts-loader": "^6.2.0",
+    "typescript": "^3.6.4",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
   }
 }
