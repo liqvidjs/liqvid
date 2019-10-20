@@ -119,8 +119,6 @@ declare namespace RactivePlayer {
   }
   
   class Player extends React.PureComponent<PlayerProps, {}> {
-    static CONTROLS_HEIGHT: number;
-
     static Context: React.Context<Player>;
 
     controls: Controls;
