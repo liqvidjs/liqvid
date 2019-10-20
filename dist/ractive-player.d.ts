@@ -7,6 +7,12 @@ export as namespace RactivePlayer;
 
 declare namespace RactivePlayer {
   type ReplayData<K> = [number, K][];
+
+  // Controls
+  class Controls {
+    captureKeys: boolean;
+    canvasClick(): void;
+  }
   
   // IdMap
   interface IdMapProps {
@@ -117,7 +123,7 @@ declare namespace RactivePlayer {
 
     static Context: React.Context<Player>;
 
-    $controls: any;
+    controls: Controls;
     canvas: HTMLDivElement;
     hub: StrictEventEmitter<EventEmitter, {
       "canplay": void;

@@ -42,7 +42,7 @@ interface State {
 const ignoreCanvasClick = Symbol();
 
 export default class Player extends React.PureComponent<Props, State> {
-  $controls: Controls;
+  controls: Controls;
   canvas: HTMLDivElement;
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
   playback: Playback;
@@ -158,7 +158,7 @@ export default class Player extends React.PureComponent<Props, State> {
     //  Note that e.persist() must be called on e if one is using this escape hatch.
     if (e[ignoreCanvasClick]) return;
         
-    this.$controls.canvasClick();
+    this.controls.canvasClick();
   }
 
   static preventCanvasClick(e: React.MouseEvent) {
@@ -167,11 +167,11 @@ export default class Player extends React.PureComponent<Props, State> {
   }
   
   suspendKeyCapture() {
-    this.$controls.captureKeys = false;
+    this.controls.captureKeys = false;
   }
   
   resumeKeyCapture() {
-    this.$controls.captureKeys = true;
+    this.controls.captureKeys = true;
   }
   
   // toposort needs to be called after MathJax has rendered stuff
@@ -235,7 +235,7 @@ export default class Player extends React.PureComponent<Props, State> {
           <Captions player={this}/>
           <Controls
             player={this}
-            ref={$controls => this.$controls = $controls}
+            ref={ref => this.controls = ref}
             ready={this.state.ready}
             thumbs={this.props.thumbs}
           />
