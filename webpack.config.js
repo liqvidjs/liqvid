@@ -1,5 +1,4 @@
 const webpack = require("webpack");
-// const {CheckerPlugin} = require("awesome-typescript-loader");
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
@@ -13,7 +12,6 @@ module.exports = {
   devtool: false,
 
   externals: {
-    "prop-types": "PropTypes",
     "react": "React",
     "react-dom": "ReactDOM"
   },
@@ -24,10 +22,7 @@ module.exports = {
     rules: [
      {
         test: /\.tsx?$/,
-        loader: "ts-loader",
-        // options: {
-        //   configFileName: `${__dirname}/tsconfig.json`
-        // }
+        loader: "ts-loader"
       }
     ]
   },
@@ -45,7 +40,6 @@ module.exports = {
   },
 
   plugins: [
-    // new CheckerPlugin(),
     new webpack.BannerPlugin({
       banner: () => require("fs").readFileSync("./LICENSE", {encoding: "utf8"})
     })
