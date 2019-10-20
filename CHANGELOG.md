@@ -1,3 +1,7 @@
+## 1.1.1 (October 20, 2019)
+
+* fix typings for `utils/animation/replay`
+
 ## 1.1.0 (October 20, 2019)
 
 * add `attachClickHandler` in `utils/mobile`
