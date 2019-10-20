@@ -25,12 +25,6 @@ Example:
 
 `MEDIA_URL` would be "." in development and your assets host in production.
 
-## Cursor
-
-For replaying cursor movements (although you could use any image). Once we have a proper plugin system this will be moved to its own package.
-
-This component is deprecated and will be removed in a future major version. You should use [rp-cursor](https://github.com/ysulyma/rp-cursor) instead.
-
 ## IdMap
 
 Automagically adds attributes to things with IDs. This is mainly to enable GUI tools which will be developed elsewhere.

@@ -7,16 +7,6 @@ export as namespace RactivePlayer;
 
 declare namespace RactivePlayer {
   type ReplayData<K> = [number, K][];
-
-  // Cursor
-  interface CursorProps {
-    src: string;
-    start: number | string;
-    end: number | string;
-    replay: ReplayData<[number, number]>;
-  }
-  
-  class Cursor extends React.PureComponent<CursorProps, {}> {}
   
   // IdMap
   interface IdMapProps {
