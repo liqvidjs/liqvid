@@ -151,11 +151,12 @@ declare namespace RactivePlayer {
   }
   
   interface ReplayArgs<K> {
-    playback: Playback;
     data: ReplayData<K>;
     start?: number;
     end?: number;
-    callback: (current: K) => void;
+    compressed?: boolean;
+    active: (current: K, index: number) => void;
+    inactive: () => void;
   }
   
   const Utils: {
@@ -168,7 +169,7 @@ declare namespace RactivePlayer {
         easing?: (x: number) => number
       }): (t: number) => number;
       
-      replay<K>({data, start, end, callback}: ReplayArgs<K>): (t: number) => void;
+      replay<K>({data, start, end, active, inactive, compressed}: ReplayArgs<K>): (t: number) => void;
       
       easings: {
         easeInSine:     [number, number, number, number];
