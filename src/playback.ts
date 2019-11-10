@@ -56,11 +56,7 @@ export default class Playback {
       __playbackRate: 1,
       paused: true,
       __seeking: false,
-      __volume: 1,
-
-      // canplay and canplaythrough events
-      __canPlayTasks: [],
-      __canPlayThroughTasks: []
+      __volume: 1
     });
 
     // audio
