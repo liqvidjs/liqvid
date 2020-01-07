@@ -33,10 +33,12 @@ declare namespace RactivePlayer {
   
   class Media extends React.PureComponent<MediaProps, {}> {}
   
+  /** RP equivalent of <audio>. */
   class Audio extends Media {
     domElement: HTMLAudioElement;
   }
   
+  /** RP equivalent of <video>. */
   class Video extends Media {
     domElement: HTMLVideoElement;
   }
@@ -46,6 +48,11 @@ declare namespace RactivePlayer {
     audioContext: AudioContext;
     audioNode: GainNode;
     currentTime: number;
+    /**
+      The duration in milliseconds.
+
+      Warning: the HTMLMediaElement interface measures this property in seconds.
+    */
     duration: number;
     hub: StrictEventEmitter<EventEmitter, {
       "bufferupdate": void;
@@ -80,6 +87,8 @@ declare namespace RactivePlayer {
     markers: [string, number, number][];
 
     constructor(markers: Array<[string, string | number] | [string, string | number, string | number]>);
+    back(): void;
+    forward(): void;
     markerByName(name: string): [string, number, number];
     markerNumberOf(name: string): number;
   }
@@ -194,7 +203,10 @@ declare namespace RactivePlayer {
     }
     
     authoring: {
+      /** Returns a CSS block to hide the element when marker name begins with `prefix` */
       during: (prefix: string) => {"data-during": string;};
+
+      /** Returns a CSS block to show the element when marker is in [first, last) */
       from: (first: string, last?: string) => {"data-from-first": string; "data-from-last"?: string;};
       showIf(cond: boolean): StyleBlock;
     }
@@ -233,13 +245,20 @@ declare namespace RactivePlayer {
       awaitMediaCanPlayThrough(media: HTMLMediaElement): Promise<Event>;
     }
     
+    /** Miscellaneous utilities to polyfill basic functions that don't exist in Javascript. */
     misc: {
+      /** Equivalent to `(min <= val) && (val < max)`. */
       between(min: number, val: number, max: number): boolean;
+      /** Bind methods on o. */
       bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, methods: K[]): void;
+      /** Equivalent to `Math.min(max, Math.max(min, val))` */
       constrain: (min: number, val: number, max: number) => number;    
+      /** Returns [0, ..., n-1] */
       range: (n: number) => number[];
 
+      /** Returns a Promise that resolves in `time` milliseconds. */
       wait(time: number): Promise<void>;
+      /** Returns a Promise that resolves once `callback` returns true. */
       waitFor(callback: () => boolean, interval?: number): Promise<void>;
     }
 
