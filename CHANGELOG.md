@@ -8,6 +8,8 @@
 
 * support ordinary events in `Player.preventCanvasClick`
 
+* added `Player.allowScroll`
+
 ## 1.1.1 (October 20, 2019)
 
 * fix typings for `utils/animation/replay`
