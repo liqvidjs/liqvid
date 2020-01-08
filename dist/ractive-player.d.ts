@@ -139,7 +139,8 @@ declare namespace RactivePlayer {
     }>;
     playback: Playback;
     script: Script;
-
+    
+    static allowScroll(e: React.TouchEvent | TouchEvent): void;
     static preventCanvasClick(e: React.MouseEvent | MouseEvent): void;
     suspendKeyCapture(): void;
     resumeKeyCapture(): void;

@@ -39,6 +39,7 @@ interface State {
   ready: boolean;
 }
 
+const allowScroll = Symbol();
 const ignoreCanvasClick = Symbol();
 
 export default class Player extends React.PureComponent<Props, State> {
@@ -94,7 +95,10 @@ export default class Player extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     // prevent scroll on mobile
-    document.addEventListener("touchmove", e => e.preventDefault(), {passive: false});
+    document.addEventListener("touchmove", e => {
+      if (e[allowScroll]) return;
+      e.preventDefault();
+    }, {passive: false});
     document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
     Promise.all(this.__canPlayTasks)
@@ -156,6 +160,10 @@ export default class Player extends React.PureComponent<Props, State> {
     if (e.nativeEvent[ignoreCanvasClick]) return;
         
     this.controls.canvasClick();
+  }
+
+  static allowScroll(e: React.TouchEvent | TouchEvent) {
+    ("nativeEvent" in e ? e.nativeEvent : e)[allowScroll] = true;
   }
 
   static preventCanvasClick(e: React.MouseEvent | MouseEvent) {
