@@ -1,8 +1,9 @@
-// parse time
+export const timeRegexp = /^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/;
+
 export function parseTime(str: string) {
   const [h, m, s, ms] =
     str
-    .match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/)
+    .match(timeRegexp)
     .slice(1)
     .map(x => x || "0");
   
