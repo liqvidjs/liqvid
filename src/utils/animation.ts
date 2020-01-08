@@ -1,4 +1,5 @@
 import {constrain} from "./misc";
+import {ReplayData} from "./replay-data";
 
 // animation
 export function animate(options: {
@@ -14,8 +15,6 @@ export function animate(options: {
   const {startValue, endValue, startTime, duration, easing} = options;
   return (t: number) => startValue + easing(constrain(0, (t - startTime) / duration, 1)) * (endValue - startValue);
 }
-
-export type ReplayData<K> = [number, K][];
 
 interface ReplayArgs<K> {
   data: ReplayData<K>;
