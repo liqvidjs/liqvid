@@ -289,6 +289,11 @@ declare namespace RactivePlayer {
         (children: React.ReactNode, fn: (child: React.ReactElement<any>) => React.ReactElement<any>)
         : React.ReactChild[];
     }
+
+    replayData: {
+      concat<T>(...args: [ReplayData<T>, number][]): ReplayData<T>;
+      length<T>(data: ReplayData<T>): number;
+    }
     
     time: {
       timeRegexp: RegExp;

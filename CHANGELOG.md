@@ -14,6 +14,8 @@
 
 * added `Utils.time.timeRegexp`
 
+* added `Utils.replayData`
+
 ## 1.1.1 (October 20, 2019)
 
 * fix typings for `utils/animation/replay`
