@@ -10,6 +10,8 @@
 
 * added `Player.allowScroll`
 
+* added `Script.parseStart` and `Script.parseEnd`
+
 * added `Utils.time.timeRegexp`
 
 ## 1.1.1 (October 20, 2019)

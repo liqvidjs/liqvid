@@ -30,14 +30,7 @@ export default class Media extends React.PureComponent<Props> {
     this.player = context;
 
     // get the time right
-    if (typeof this.props.start === "string") {
-      if (this.props.start.match(/^(?:(?:(\d+):)?(\d+):)?(\d+)(?:\.(\d+))?$/))
-        this.start = parseTime(this.props.start);
-      else
-        this.start = this.player.script.markerByName(this.props.start)[1];
-    } else {
-      this.start = this.props.start;
-    }
+    this.start = this.player.script.parseStart(this.props.start);
 
     bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
   }

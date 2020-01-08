@@ -1,7 +1,7 @@
 import {EventEmitter} from "events";
 import StrictEventEmitter from "strict-event-emitter-types";
 import {between, bind} from "./utils/misc";
-import {parseTime} from "./utils/time";
+import {parseTime, timeRegexp} from "./utils/time";
 
 import Playback from "./playback";
 
@@ -22,7 +22,7 @@ export default class Script {
     this.hub.setMaxListeners(0);
 
     // bind methods
-    bind(this, ["markerByName", "markerNumberOf", "__updateMarker"]);
+    bind(this, ["markerByName", "markerNumberOf", "parseStart", "parseEnd", "__updateMarker"]);
 
     // parse times
     let time = 0;
@@ -75,6 +75,28 @@ export default class Script {
       if (this.markers[i][0] === name) return i;
     }
     throw new Error(`Marker ${name} does not exist`);
+  }
+
+  parseStart(start: number | string) {
+    if (typeof start === "string") {
+      if (start.match(timeRegexp))
+        return parseTime(start);
+      else
+        return this.markerByName(start)[1];
+    } else {
+      return start;
+    }
+  }
+
+  parseEnd(end: number | string) {
+    if (typeof end === "string") {
+      if (end.match(timeRegexp))
+        return parseTime(end);
+      else
+        return this.markerByName(end)[2];
+    } else {
+      return end;
+    }
   }
 
   // update marker

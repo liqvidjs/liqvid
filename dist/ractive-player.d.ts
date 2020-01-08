@@ -91,6 +91,8 @@ declare namespace RactivePlayer {
     forward(): void;
     markerByName(name: string): [string, number, number];
     markerNumberOf(name: string): number;
+    parseStart(start: number | string);
+    parseEnd(end: number | string);
   }
   
   // Player
