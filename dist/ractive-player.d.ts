@@ -289,6 +289,7 @@ declare namespace RactivePlayer {
     }
     
     time: {
+      timeRegexp: RegExp;
       parseTime(str: string): number;
       formatTime(time: number): string;
       formatTimeMs(time: number): string;    
