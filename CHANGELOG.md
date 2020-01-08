@@ -1,6 +1,6 @@
 ## 2.0.0 (???)
 
-* deprecate Cursor; use rp-cursor instead
+* deprecate Cursor; use [rp-cursor](https://www.npmjs.com/package/rp-cursor) instead
 
 * rename `Player.$controls` -> `Player.controls`
 
