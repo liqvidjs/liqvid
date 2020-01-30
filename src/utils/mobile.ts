@@ -14,12 +14,12 @@ export const onClick = <T extends Node>(callback: (e: React.MouseEvent<T> | Reac
         target: T & EventTarget;
     return {
 	    onTouchStart: (e: React.TouchEvent<T>) => {
-	      if (touchId) return;
+	      if (typeof touchId === "number") return;
 	      target = e.currentTarget;
 	      touchId = e.changedTouches[0].identifier;
 	    },
 	    onTouchEnd: (e: React.TouchEvent<T>) => {
-	      if (!touchId) return;
+	      if (typeof touchId !== "number") return;
 	      for (const touch of Array.from(e.changedTouches)) {
 	        if (touch.identifier !== touchId) continue;
 
@@ -27,7 +27,7 @@ export const onClick = <T extends Node>(callback: (e: React.MouseEvent<T> | Reac
 	          callback(e);
 	        }
 
-	        touchId = null;
+	        touchId = undefined;
 	      }
 	    }
     };
@@ -49,12 +49,12 @@ export const attachClickHandler = (node: Node, callback: (e: MouseEvent| TouchEv
   let touchId: number;
 
   const touchStart = (e: TouchEvent) => {
-    if (touchId) return;
+    if (typeof touchId === "number") return;
     touchId = e.changedTouches[0].identifier;
   };
 
   const touchEnd = (e: TouchEvent) => {
-    if (!touchId) return;
+    if (typeof touchId !== "number") return;
     for (const touch of Array.from(e.changedTouches)) {
       if (touch.identifier !== touchId) continue;
 
@@ -62,7 +62,7 @@ export const attachClickHandler = (node: Node, callback: (e: MouseEvent| TouchEv
         callback(e);
       }
 
-      touchId = null;
+      touchId = undefined;
     }
   };
 
