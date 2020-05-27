@@ -25,11 +25,11 @@ export default function PlayPause() {
   // event handler
   const button = useRef<SVGSVGElement>();
   const events = useMemo(
-    () => onClick(() => playback.paused ? playback.play() : playback.pause())
+    () => onClick(() => playback.paused ? playback.play() : playback.pause(), button)
     , []);
 
   return (
-    <svg className="rp-controls-playpause" viewBox="0 0 36 36" ref={button} {...events}>
+    <svg className="rp-controls-playpause" viewBox="0 0 36 36" {...events}>
       {
         state ?
           <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>

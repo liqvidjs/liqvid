@@ -5,7 +5,7 @@ import Player from "../Player";
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
 import {dragHelper} from "../utils/interactivity";
-import {between, constrain} from "../utils/misc";
+import {between, captureRef, constrain} from "../utils/misc";
 import {anyHover} from "../utils/mobile";
 
 export {ThumbData};
@@ -70,9 +70,11 @@ export default function ScrubberBar(props: Props) {
     )};
   }, []);
 
+  // events to attach on the wrapper
   const wrapEvents = useMemo(() => {
     if (anyHover) {
       return {
+        // show thumb preview on hover
         onMouseOver: () => setShowThumb(true),
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
           const rect = scrubberBar.current.getBoundingClientRect(),
@@ -83,40 +85,46 @@ export default function ScrubberBar(props: Props) {
         onMouseOut: () => setShowThumb(false)
       };
     } else {
+      const listener = dragHelper(
+        // move
+        (e: TouchEvent, {x}: {x: number}) => {
+          const rect = scrubberBar.current.getBoundingClientRect(),
+                progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+          setProgress({scrubber: progress, thumb: progress});
+        },
+        // start
+        (e: React.TouchEvent<HTMLDivElement>) => {
+          e.preventDefault();
+          e.stopPropagation();
+          playback.seeking = true;
+          setShowThumb(true);
+        },
+        // end
+        (e: TouchEvent, {x}: {x: number}) => {
+          e.preventDefault();
+          const rect = scrubberBar.current.getBoundingClientRect(),
+                progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+          setShowThumb(false);
+          playback.seeking = false;
+          playback.seek(progress * playback.duration);
+        }
+      );
+
       return {
-        onTouchStart: dragHelper(
-          // move
-          (e: TouchEvent, {x}: {x: number}) => {
-            const rect = scrubberBar.current.getBoundingClientRect(),
-                  progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-            setProgress({scrubber: progress, thumb: progress});
-          },
-          // start
-          (e: React.TouchEvent<SVGSVGElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            playback.seeking = true;
-            setShowThumb(true);
-          },
-          // end
-          (e: TouchEvent, {x}: {x: number}) => {
-            e.preventDefault();
-            const rect = scrubberBar.current.getBoundingClientRect(),
-                  progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-            setShowThumb(false);
-            playback.seeking = false;
-            playback.seek(progress * playback.duration);
-          }
-        )
+        ref: captureRef((ref: HTMLDivElement) => {
+          ref.addEventListener("touchstart", listener, {passive: false});
+        })
       };
     }
   }, []);
 
+  // events to be attached to the scrubber
   const scrubberEvents = useMemo(() => {
     if (anyHover) return {};
-    return {onTouchStart: dragHelper(
+
+    const listener = dragHelper(
       // move
       (e: TouchEvent, {x}: {x: number}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
@@ -133,6 +141,7 @@ export default function ScrubberBar(props: Props) {
       },
       // end
       (e: TouchEvent, {x}: {x: number}) => {
+        console.log("scrubber end seek")
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = constrain(0, (x - rect.left) / rect.width, 1);
@@ -141,7 +150,13 @@ export default function ScrubberBar(props: Props) {
         playback.seeking = false;
         playback.seek(progress * playback.duration);
       }
-    )};
+    );
+
+    return {
+      ref: captureRef((ref: HTMLDivElement) => {
+        ref.addEventListener("touchstart", listener, {passive: false});
+      })
+    };
   }, []);
 
   const highlights = (props.thumbs && props.thumbs.highlights) || [];
