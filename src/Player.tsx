@@ -44,6 +44,8 @@ const ignoreCanvasClick = Symbol();
 
 export default class Player extends React.PureComponent<Props, State> {
   controls: Controls;
+  canPlay: Promise<void[]>;
+  canPlayThrough: Promise<void[]>;
   canvas: HTMLDivElement;
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
   playback: Playback;
@@ -101,10 +103,14 @@ export default class Player extends React.PureComponent<Props, State> {
     }, {passive: false});
     document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
-    Promise.all(this.__canPlayTasks)
-    .then(() => this.hub.emit("canplay"));
+    this.canPlay = Promise.all(this.__canPlayTasks);
+    this.canPlay
+    .then(() => {
+      this.hub.emit("canplay")
+    });
 
-    Promise.all(this.__canPlayThroughTasks)
+    this.canPlayThrough = Promise.all(this.__canPlayThroughTasks);
+    this.canPlayThrough
     .then(() => this.hub.emit("canplaythrough"));
   }
 

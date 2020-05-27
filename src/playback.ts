@@ -27,12 +27,22 @@ declare let webkitAudioContext: typeof AudioContext;
 export default class Playback {
   audioContext: AudioContext;
   audioNode:    GainNode;
+  /**
+    The current playback time in milliseconds.
+    Warning: the HTMLMediaElement interface measures this property in seconds.
+  */
   currentTime:  number;
-  hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
+
+  /**
+    The length of the playback in milliseconds.
+    Warning: the HTMLMediaElement interface measures this property in seconds.
+  */
   duration:     number;
+  hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
   paused:       boolean;
-  playingFrom:  number;
-  startTime:    number;
+
+  private playingFrom:  number;
+  private startTime:    number;
 
   private __captions:     DocumentFragment[];
   private __playbackRate: number;
@@ -127,7 +137,7 @@ export default class Playback {
     else this.hub.emit("seeked");
   }
 
-  /* public methods */
+  /** Pause playback. */
   pause() {
     this.paused = true;
     this.playingFrom = this.currentTime;
@@ -135,11 +145,13 @@ export default class Playback {
     this.hub.emit("pause");
   }
 
+  /** Resume playback. */
   play() {
     this.paused = false;
     this.hub.emit("play");
   }
 
+  /** Seek playback to a specific time. */
   seek(t: number | string) {
     if (typeof t === "string") t = parseTime(t);
     t = constrain(0, t, this.duration);
