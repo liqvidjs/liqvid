@@ -3,7 +3,9 @@ import * as React from "react";
 import Media from "./Media";
 import {between} from "./utils/misc";
 
+/** RP equivalent of <video>. */
 export default class Video extends Media {
+  /** The underlying <video> element. */
   domElement: HTMLVideoElement;
 
   onSeek(t: number) {

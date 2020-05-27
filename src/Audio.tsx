@@ -3,7 +3,9 @@ import Media from "./Media";
 
 import {fragmentFromHTML} from "./utils/dom";
 
+/** RP equivalent of <audio>. */
 export default class Audio extends Media {
+  /** The underlying <audio> element. */
   domElement: HTMLAudioElement;
 
   componentDidMount() {

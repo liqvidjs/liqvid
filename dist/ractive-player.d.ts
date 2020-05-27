@@ -35,11 +35,13 @@ declare namespace RactivePlayer {
   
   /** RP equivalent of <audio>. */
   class Audio extends Media {
+    /** The underlying <audio> element. */
     domElement: HTMLAudioElement;
   }
   
   /** RP equivalent of <video>. */
   class Video extends Media {
+    /** The underlying <video> element. */
     domElement: HTMLVideoElement;
   }
   
@@ -47,10 +49,14 @@ declare namespace RactivePlayer {
   class Playback {
     audioContext: AudioContext;
     audioNode: GainNode;
-    currentTime: number;
     /**
-      The duration in milliseconds.
+      The current playback time in milliseconds.
+      Warning: the HTMLMediaElement interface measures this property in seconds.
+    */
+    currentTime: number;
 
+    /**
+      The length of the playback in milliseconds.
       Warning: the HTMLMediaElement interface measures this property in seconds.
     */
     duration: number;
@@ -72,8 +78,13 @@ declare namespace RactivePlayer {
     playingFrom: number;
     seeking: boolean;
     
+    /** Pause playback. */
     pause(): void;
-    play(): Promise<void>;
+
+    /** Resume playback. */
+    play(): void;
+
+    /** Seek playback to a specific time. */
     seek(t: number | string): void;
   }
   
@@ -81,7 +92,7 @@ declare namespace RactivePlayer {
     hub: StrictEventEmitter<EventEmitter, {
       "markerupdate": number;
     }>;
-    loadTasks: Promise<any>[];
+    loadTasks: Promise<unknown>[];
     markerIndex: number;
     markerName: string;
     markers: [string, number, number][];
@@ -91,8 +102,8 @@ declare namespace RactivePlayer {
     forward(): void;
     markerByName(name: string): [string, number, number];
     markerNumberOf(name: string): number;
-    parseStart(start: number | string);
-    parseEnd(end: number | string);
+    parseStart(start: number | string): number;
+    parseEnd(end: number | string): number;
   }
   
   // Player
@@ -133,6 +144,8 @@ declare namespace RactivePlayer {
     static Context: React.Context<Player>;
 
     controls: Controls;
+    canPlay: Promise<void[]>;
+    canPlayThrough: Promise<void[]>;
     canvas: HTMLDivElement;
     hub: StrictEventEmitter<EventEmitter, {
       "canplay": void;
@@ -142,11 +155,18 @@ declare namespace RactivePlayer {
     playback: Playback;
     script: Script;
     
+    /** Prevents intercepting of scroll on mobile. */
     static allowScroll(e: React.TouchEvent | TouchEvent): void;
+
+    /** Prevents a click from pausing/playing the video. */
     static preventCanvasClick(e: React.MouseEvent | MouseEvent): void;
+
+    /** Suspends keyboard controls so that components can receive keyboard input. */
     suspendKeyCapture(): void;
+
+    /** Resumes keyboard controls. */
     resumeKeyCapture(): void;
-    obstruct(event: "canplay" | "canplaythrough", task: Promise<any>): void;
+    obstruct(event: "canplay" | "canplaythrough", task: Promise<unknown>): void;
 
     /** Call this method when the ractive is ready to begin playing. */
     ready(): void;
@@ -206,7 +226,7 @@ declare namespace RactivePlayer {
     }
     
     authoring: {
-      /** Returns a CSS block to hide the element when marker name begins with `prefix` */
+      /** Returns a CSS block to show the element only when marker name begins with `prefix` */
       during: (prefix: string) => {"data-during": string;};
 
       /** Returns a CSS block to show the element when marker is in [first, last) */
@@ -226,7 +246,7 @@ declare namespace RactivePlayer {
         up?: (e: MouseEvent | TouchEvent) => void
       ): (e: E) => void;
 
-      dragHelperReact<T>(
+      dragHelperReact<T extends Node>(
         move: (e: MouseEvent | TouchEvent, o: {x: number; y: number; dx: number; dy: number}) => void,
         down?: (
           e: React.MouseEvent<T> | React.TouchEvent<T>,
@@ -234,11 +254,12 @@ declare namespace RactivePlayer {
           upHandler: (e: MouseEvent | TouchEvent) => void,
           moveHandler: (e: MouseEvent | TouchEvent) => void
         ) => void,
-        up?: (e: MouseEvent | TouchEvent) => void
+        up?: (e: MouseEvent | TouchEvent) => void,
+        innerRef?: React.Ref<T>
       ): {
         onMouseDown: (e: React.MouseEvent<T>) => void;
         onMouseUp: (e: React.MouseEvent<T>) => void;
-        onTouchStart: (e: React.TouchEvent<T>) => void;
+        ref: (_: T) => void;
       };
     }
     
@@ -270,11 +291,13 @@ declare namespace RactivePlayer {
       anyHover: boolean;
 
       /** Drop-in replacement for onClick handlers which works better on mobile. */
-      onClick: <T extends Node>(callback: (e: React.MouseEvent<T, MouseEvent> | React.TouchEvent<T>) => void) => {
-          onClick: (e: React.MouseEvent<T, MouseEvent> | React.TouchEvent<T>) => void;
+      onClick: <T extends Node>(
+        callback: (e: React.MouseEvent<T, MouseEvent> | React.TouchEvent<T>) => void,
+        innerRef?: React.Ref<T>
+      ) => {
+        onClick: (e: React.MouseEvent<T, MouseEvent> | React.TouchEvent<T>) => void;
       } | {
-          onTouchStart: (e: React.TouchEvent<T>) => void;
-          onTouchEnd: (e: React.TouchEvent<T>) => void;
+        ref: (_: T) => void;
       };
 
       /**
