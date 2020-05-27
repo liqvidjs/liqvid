@@ -1,5 +1,7 @@
 import Player from "../Player";
 
+import {captureRef} from "./misc";
+
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
 ): e is React.MouseEvent<T> {
@@ -43,8 +45,8 @@ export function dragHelper<T extends Node>(
         return move(e, {x: e.clientX, y: e.clientY, dx, dy});
       };
 
-      document.body.addEventListener("mousemove", moveHandler, false);
-      window.addEventListener("mouseup", upHandler, false);
+      document.body.addEventListener("mousemove", moveHandler, {passive: false});
+      window.addEventListener("mouseup", upHandler, {passive: false});
 
       return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
     } else {
@@ -65,9 +67,9 @@ export function dragHelper<T extends Node>(
           const dx = touch.clientX - lastX,
                 dy = touch.clientY - lastY;
           
-          window.removeEventListener("touchend", moveHandler);
-          window.removeEventListener("touchcancel", upHandler);
-          window.removeEventListener("touchmove", moveHandler);
+          window.removeEventListener("touchend", upHandler, {capture: false, passive: false});
+          window.removeEventListener("touchcancel", upHandler, {capture: false, passive: false});
+          window.removeEventListener("touchmove", moveHandler, {capture: false, passive: false});
 
           return up(e, {x: touch.clientX, y: touch.clientY, dx, dy});
         }
@@ -102,12 +104,16 @@ type Arg1 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? A : unkno
 type Arg2 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? B : unknown;
 type Arg3 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? C : unknown;
 
-// for use in React (ugh...)
-export function dragHelperReact<T>(move: Arg1, down?: Arg2, up?: Arg3) {
+/**
+  the innerRef attribute is a hack around https://github.com/facebook/react/issues/2043.
+*/
+export function dragHelperReact<T extends Node>(move: Arg1, down?: Arg2, up?: Arg3, innerRef?: React.Ref<T>) {
   const listener = dragHelper(move, down, up);
+  const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
+
   return {
     onMouseDown: listener,
     onMouseUp: Player.preventCanvasClick,
-    onTouchStart: listener
+    ref: intercept
   };
 }
