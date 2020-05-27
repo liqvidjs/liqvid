@@ -16,6 +16,12 @@
 
 * added `Utils.replayData`
 
+* added some documentation
+
+* workaround for https://github.com/facebook/react/issues/2043 affecting Android
+
+* added `Utils.misc.captureRef`
+
 ## 1.1.1 (October 20, 2019)
 
 * fix typings for `utils/animation/replay`
