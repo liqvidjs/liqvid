@@ -22,7 +22,7 @@ export default class Script {
     this.hub.setMaxListeners(0);
 
     // bind methods
-    bind(this, ["markerByName", "markerNumberOf", "parseStart", "parseEnd", "__updateMarker"]);
+    bind(this, ["back", "forward", "markerByName", "markerNumberOf", "parseStart", "parseEnd", "__updateMarker"]);
 
     // parse times
     let time = 0;
