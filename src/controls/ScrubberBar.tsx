@@ -1,12 +1,13 @@
 import * as React from "react";
-import {useContext, useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 
-import Player from "../Player";
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
+import {usePlayer} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
-import {between, captureRef, constrain} from "../utils/misc";
+import {between, constrain} from "../utils/misc";
 import {anyHover} from "../utils/mobile";
+import {captureRef} from "../utils/react-utils";
 
 export {ThumbData};
 
@@ -15,7 +16,7 @@ interface Props {
 }
 
 export default function ScrubberBar(props: Props) {
-  const {playback} = useContext(Player.Context);
+  const {keymap, playback, script} = usePlayer();
 
   const [progress, setProgress] = useState({
     scrubber: playback.currentTime / playback.duration,
@@ -26,8 +27,9 @@ export default function ScrubberBar(props: Props) {
   // refs
   const scrubberBar = useRef<HTMLDivElement>();
 
-  // bind 
+  /* subscriptions */
   useEffect(() => {
+    /* playback liseners */
     playback.hub.on("seek", () => {
       if (playback.seeking) return;
       const progress = playback.currentTime / playback.duration;
@@ -40,6 +42,27 @@ export default function ScrubberBar(props: Props) {
     playback.hub.on("timeupdate", () => {
       const progress = playback.currentTime / playback.duration;
       setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+    });
+
+    /* keyboard shortcuts */
+    // seek 5
+    keymap.bind("arrowleft", () => playback.seek(playback.currentTime - 5000));
+    keymap.bind("arrowright", () => playback.seek(playback.currentTime + 5000));
+
+    // seek 10
+    keymap.bind("j", () => playback.seek(playback.currentTime - 10000));
+    keymap.bind("l", () => playback.seek(playback.currentTime + 10000));
+
+    // seek by marker
+    keymap.bind("w", () => script.back());
+    keymap.bind("e", () => script.forward());
+
+    // percentage seeking
+    keymap.bind("0,1,2,3,4,5,6,7,8,9", e => {
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num)) {
+        playback.seek(playback.duration * num / 10);
+      }
     });
   }, []);
 
@@ -141,7 +164,6 @@ export default function ScrubberBar(props: Props) {
       },
       // end
       (e: TouchEvent, {x}: {x: number}) => {
-        console.log("scrubber end seek")
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = constrain(0, (x - rect.left) / rect.width, 1);

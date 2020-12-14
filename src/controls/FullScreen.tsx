@@ -2,19 +2,29 @@ import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 
 import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from "../fake-fullscreen";
+import {usePlayer} from "../hooks";
+import {useForceUpdate} from "../utils/react-utils";
 import {onClick} from "../utils/mobile";
 
 export default function FullScreen() {
-  // this is stupid
-  const [state, setState] = useState(isFullScreen());
+  const {keymap} = usePlayer();
+  const forceUpdate = useForceUpdate();
+
   useEffect(() => {
-    onFullScreenChange(() => setState(isFullScreen()));
-  });
-  const events = useMemo(() => onClick(() => {isFullScreen() ? exitFullScreen() : requestFullScreen();}), []);
+    // listener
+    onFullScreenChange(forceUpdate);
+
+    // keyboard shortcut
+    keymap.bind("f", () => isFullScreen() ? exitFullScreen() : requestFullScreen()); 
+  }, []);
+
+  const events = useMemo(() => onClick(
+    () => isFullScreen() ? exitFullScreen() : requestFullScreen()
+  ), []);
 
   return (
     <svg className="rp-controls-fullscreen" {...events} viewBox="0 0 36 36">
-      {state ?
+      {isFullScreen() ?
       <>
         <path fill="white" d="M 14 14 h -4 v 2 h 6 v -6 h -2 v 4 z"/>
         <path fill="white" d="M 22 14 v -4 h -2 v 6 h 6 v -2 h -4 z"/>

@@ -1,8 +1,7 @@
 import * as React from "react";
-import {useContext, useEffect} from "react";
+const {useEffect} = React;
 
-import Player from "../Player";
-
+import {usePlayer} from "../hooks";
 import {formatTime} from "../utils/time";
 
 interface Props {
@@ -34,7 +33,7 @@ export interface ThumbData {
 }
 
 export default function ThumbnailBox(props: Props) {
-  const player = useContext(Player.Context),
+  const player = usePlayer(),
         {playback} = player;
 
   const {cols, rows, frequency, path, progress, show, title, height, width} = props;

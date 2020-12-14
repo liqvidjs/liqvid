@@ -1,6 +1,6 @@
 import Player from "../Player";
 
-import {captureRef} from "./misc";
+import {captureRef} from "./react-utils";
 
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
