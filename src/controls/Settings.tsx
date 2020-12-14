@@ -1,8 +1,7 @@
 import * as React from "react";
-import {useContext, useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 
-import Player from "../Player";
-
+import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
 
 // const wine = "#AF1866"; // XXX fix this
@@ -10,14 +9,20 @@ import {onClick} from "../utils/mobile";
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export default function Settings() {
-  const player = useContext(Player.Context),
-        {playback} = player;
+  const player = usePlayer(),
+        {keymap, playback} = player;
 
   const [dialog, setDialog] = useState({main: false, speed: false});
   const [currentRate, setRate] = useState(playback.playbackRate);
+
   useEffect(() => {
+    // subscribe
     playback.hub.on("ratechange", () => setRate(playback.playbackRate));
     player.hub.on("canvasClick", () => setDialog({main: false, speed: false}));
+
+    // keyboard shortcuts
+    keymap.bind("<", () => playback.playbackRate = PLAYBACK_RATES[Math.max(0, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1)]);
+    keymap.bind(">", () => playback.playbackRate = PLAYBACK_RATES[Math.min(PLAYBACK_RATES.length - 1, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1)]);
   }, []);
 
   /* handlers */

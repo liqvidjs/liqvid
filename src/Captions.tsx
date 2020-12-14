@@ -1,32 +1,23 @@
 import * as React from "react";
+const {useEffect, useRef} = React;
 
-import Player from "./Player";
-import {PlayerContext} from "./shared";
+import {usePlayer} from "./hooks";
 
-interface Props {
-  player: Player;
-}
+export default function Captions() {
+  const {playback} = usePlayer();
+  const domElement = useRef<HTMLDivElement>();
 
-export default class Captions extends React.PureComponent<Props, {}> {
-  private domElement: HTMLDivElement;
-  static contextType = PlayerContext;
-  context!: Player;
-
-  componentDidMount() {
-    const {playback} = this.context;
-
+  useEffect(() => {
     playback.hub.on("cuechange", () => {
-      this.domElement.innerHTML = "";
+      domElement.current.innerHTML = "";
 
       for (const cue of playback.captions) {
-        this.domElement.appendChild(cue);
+        domElement.current.appendChild(cue);
       }
     });
-  }
+  }, []);
 
-  render() {
-    return (
-      <div className="rp-captions-display" ref={node => this.domElement = node}/>
-    );
-  }
+  return (
+    <div className="rp-captions-display" ref={domElement}/>
+  );
 }
