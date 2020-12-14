@@ -1,11 +1,12 @@
 import {EventEmitter} from "events";
-import StrictEventEmitter from "strict-event-emitter-types";
+import type StrictEventEmitter from "strict-event-emitter-types";
 import {bind, constrain} from "./utils/misc";
 import {parseTime} from "./utils/time";
 
 interface PlaybackEvents {
   "bufferupdate": void;
   "cuechange": void;
+  "durationchange": void;
   "pause": void;
   "play": void;
   "seek": number;
@@ -33,11 +34,6 @@ export default class Playback {
   */
   currentTime:  number;
 
-  /**
-    The length of the playback in milliseconds.
-    Warning: the HTMLMediaElement interface measures this property in seconds.
-  */
-  duration:     number;
   hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
   paused:       boolean;
 
@@ -45,6 +41,7 @@ export default class Playback {
   private startTime:    number;
 
   private __captions:     DocumentFragment[];
+  private __duration:     number;
   private __playbackRate: number;
   private __muted:        boolean;
   private __seeking:      boolean;
@@ -94,12 +91,30 @@ export default class Playback {
     this.hub.emit("cuechange");
   }
 
+  /**
+    The length of the playback in milliseconds.
+    Warning: the HTMLMediaElement interface measures this property in seconds.
+  */
+  get duration() {
+    return this.__duration;
+  }
+
+  set duration(duration) {
+    if (duration === this.__duration)
+      return;
+
+    this.__duration = duration;
+
+    this.hub.emit("durationchange");
+  }
+
   get muted() {
     return this.__muted;
   }
 
   set muted(val) {
-    if (val === this.__muted) return;
+    if (val === this.__muted)
+      return;
 
     this.__muted = val;
 
@@ -117,7 +132,8 @@ export default class Playback {
   }
 
   set playbackRate(val) {
-    if (val === this.__playbackRate) return;
+    if (val === this.__playbackRate)
+      return;
 
     this.__playbackRate = val;
     this.playingFrom = this.currentTime;
@@ -130,7 +146,8 @@ export default class Playback {
   }
 
   set seeking(val) {
-    if (val === this.__seeking) return;
+    if (val === this.__seeking)
+      return;
 
     this.__seeking = val;
     if (this.__seeking) this.hub.emit("seeking");
@@ -153,7 +170,8 @@ export default class Playback {
 
   /** Seek playback to a specific time. */
   seek(t: number | string) {
-    if (typeof t === "string") t = parseTime(t);
+    if (typeof t === "string")
+      t = parseTime(t);
     t = constrain(0, t, this.duration);
 
     this.currentTime = this.playingFrom = t;
@@ -168,8 +186,10 @@ export default class Playback {
 
   set volume(volume: number) {
     this.muted = false;
+    const prevVolume = this.__volume;
     this.__volume = constrain(0, volume, 1);
-    if (this.__volume === 0) {
+
+    if (prevVolume === 0 || this.__volume === 0) {
       this.audioNode.gain.setValueAtTime(0, this.audioContext.currentTime);
     } else {
       this.audioNode.gain.exponentialRampToValueAtTime(this.__volume, this.audioContext.currentTime + 2);
