@@ -109,11 +109,20 @@ type Arg3 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? C : unkno
 */
 export function dragHelperReact<T extends Node>(move: Arg1, down?: Arg2, up?: Arg3, innerRef?: React.Ref<T>) {
   const listener = dragHelper(move, down, up);
-  const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
+  
+  if (innerRef) {
+   const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
+    return {
+      onMouseDown: listener,
+      onMouseUp: Player.preventCanvasClick,
+      ref: intercept
+    };
+ } else {
+    return {
+      onMouseDown: listener,
+      onMouseUp: Player.preventCanvasClick,
+      onTouchStart: listener
+    };
+ }
 
-  return {
-    onMouseDown: listener,
-    onMouseUp: Player.preventCanvasClick,
-    ref: intercept
-  };
 }
