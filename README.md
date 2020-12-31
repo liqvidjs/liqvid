@@ -98,7 +98,7 @@ Some of these are for internal use. You should probably only use `animation`, `a
 
 ### animation
 
-Handy helpers for animation. Also exports shortcuts from https://easings.net/. You will need to use your own Bezier curve module though.
+Handy helpers for animation.
 
 ### authoring
 

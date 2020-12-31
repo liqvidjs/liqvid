@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/ysulyma/ractive-player.git"
   },
-  "author": "Yuri Sulyma <yuri@lmqm.xyz>",
+  "author": "Yuri Sulyma <yuri@ractive-player.org>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ysulyma/ractive-player/issues"
