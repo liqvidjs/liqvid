@@ -1,20 +1,37 @@
-@media (any-hover: none)
+@media (max-width: 1000px)
+  .ractive-player
+    --rp-controls-height 36px
+    
   .rp-controls
-    // background-color rgba(0, 0, 0, 0.5)
+    --rp-controls-left 2
+    --rp-controls-right 3
+
+@media (max-width: 400px)
+  .ractive-player
+    --rp-controls-height 30px
+    
+  .rp-controls
+    --rp-controls-left 2
+    --rp-controls-right 2
+    
+  .rp-controls-settings
+    display none
+
+@media (any-hover: none)  
+  .rp-controls
     color #FFF
-    height 8%
+    height var(--rp-controls-height)
     position absolute
     top unset
     transition opacity .25s cubic-bezier(0.0,0.0,0.2,1)
     width var(--rp-width)
-    bottom calc((100% - 62.5vw) / 2)
+    bottom calc((100% - var(--rp-height)) / 2)
     user-select none
-    -webkit-user-select none
     z-index 1000
-    left 0
+    left calc((100% - var(--rp-width)) / 2)
     
   // hide certain controls
-  .rp-controls-volume, .rp-controls-help
+  .rp-controls-volume
     display none !important
   
   // time
@@ -22,29 +39,40 @@
     line-height unset
 
   .rp-current-time, .rp-total-time
-    height 2em
-    line-height 0
+    height var(--rp-controls-height)
+    line-height var(--rp-controls-height)
     position absolute
-    top 50%
-    width 5%
+    top 0
+    width var(--rp-controls-height)
     
   .rp-current-time
     left 0
     text-align right
     
   .rp-total-time
-    right 0
+    right calc((var(--rp-controls-right) - 1) * var(--rp-controls-height))
     text-align left
 
   .rp-time-separator
     display none
     
+  .rp-controls-scrub-wrap
+    position relative
+    
+    &::after
+      content ""
+      position absolute
+      top calc(var(--rp-controls-height) * (0.075 / 0.55 - 0.5))
+      bottom calc(var(--rp-controls-height) * (0.075 / 0.55 - 0.5))
+      left 0
+      right 0
+    
   .rp-controls-scrub
     height calc(7.5% / 0.55)
     top unset
     top calc(50% - 0.5 * (7.5% / 0.55))
-    width 84%
-    left 10%
+    width calc(100% - (var(--rp-controls-left) + var(--rp-controls-right)) * var(--rp-controls-height) - 7px)
+    left calc(var(--rp-controls-left) * var(--rp-controls-height))
     margin unset
     
   .rp-scrubber
@@ -53,27 +81,20 @@
     pointer-events all
     
   .rp-controls-playpause
-    bottom 0
-    position absolute
-    left 4.2%
-    height 120%
-    top -10%
     cursor pointer
     pointer-events all
-    
-  .rp-controls-float-right
-    position fixed
-    bottom 11%
-    height 6%
-    right 2%
+
+    position absolute
+    left var(--rp-controls-height)
+    top 0
+    width var(--rp-controls-height)
+
+  .rp-controls-right
+    float unset
+    position absolute
+    right 0
+    top 0
     
     > *
-      background #FFF1
-      border-radius 4%
-      display inline-block
-      margin 0 .2em
-      height 2em
-      width 2em
-      vertical-align top
-      cursor pointer
-      pointer-events all
+      width var(--rp-controls-height)
+
