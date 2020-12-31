@@ -15,9 +15,9 @@ export default function Volume() {
     playback.hub.on("volumechange", forceUpdate);
 
     // keyboard controls
-    keymap.bind("arrowup", () => playback.volume = playback.volume + 0.05);
-    keymap.bind("arrowdown", () => playback.volume = playback.volume - 0.05);
-    keymap.bind("m", () => playback.muted = !playback.muted);
+    keymap.bind("ArrowUp", () => playback.volume = playback.volume + 0.05);
+    keymap.bind("ArrowDown", () => playback.volume = playback.volume - 0.05);
+    keymap.bind("M", () => playback.muted = !playback.muted);
   }, []);
   
   // input

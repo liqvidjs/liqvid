@@ -4,8 +4,6 @@ import {useEffect, useMemo, useState} from "react";
 import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
 
-// const wine = "#AF1866"; // XXX fix this
-
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export default function Settings() {
@@ -21,8 +19,8 @@ export default function Settings() {
     player.hub.on("canvasClick", () => setDialog({main: false, speed: false}));
 
     // keyboard shortcuts
-    keymap.bind("<", () => playback.playbackRate = PLAYBACK_RATES[Math.max(0, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1)]);
-    keymap.bind(">", () => playback.playbackRate = PLAYBACK_RATES[Math.min(PLAYBACK_RATES.length - 1, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1)]);
+    keymap.bind("Shift+<", () => playback.playbackRate = PLAYBACK_RATES[Math.max(0, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1)]);
+    keymap.bind("Shift+>", () => playback.playbackRate = PLAYBACK_RATES[Math.min(PLAYBACK_RATES.length - 1, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1)]);
   }, []);
 
   /* handlers */

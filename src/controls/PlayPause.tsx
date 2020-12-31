@@ -18,8 +18,8 @@ export default function PlayPause() {
 
     // keyboard controls
     const toggle = () => playback[playback.paused ? "play" : "pause"]();
-    keymap.bind("k", toggle);
-    keymap.bind(" ", toggle);
+    keymap.bind("K", toggle);
+    keymap.bind("Space", toggle);
 
     return () => {
       // unbind playback listeners
@@ -27,8 +27,8 @@ export default function PlayPause() {
         playback.hub.off(e, forceUpdate);
 
       // unbind keyboard controls
-      keymap.unbind("k", toggle);
-      keymap.unbind(" ", toggle);
+      keymap.unbind("K", toggle);
+      keymap.unbind("Space", toggle);
     };
   }, []);
 

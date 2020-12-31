@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 
 import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from "../fake-fullscreen";
 import {usePlayer} from "../hooks";
@@ -9,18 +9,23 @@ import {onClick} from "../utils/mobile";
 export default function FullScreen() {
   const {keymap} = usePlayer();
   const forceUpdate = useForceUpdate();
+  const toggleFullScreen = useCallback(() =>
+    isFullScreen() ? exitFullScreen() : requestFullScreen()
+  , []);
 
   useEffect(() => {
     // listener
     onFullScreenChange(forceUpdate);
 
     // keyboard shortcut
-    keymap.bind("f", () => isFullScreen() ? exitFullScreen() : requestFullScreen()); 
+    keymap.bind("F", toggleFullScreen);
+
+    return () => {
+      keymap.unbind("F", toggleFullScreen);
+    };
   }, []);
 
-  const events = useMemo(() => onClick(
-    () => isFullScreen() ? exitFullScreen() : requestFullScreen()
-  ), []);
+  const events = useMemo(() => onClick(toggleFullScreen), []);
 
   return (
     <svg className="rp-controls-fullscreen" {...events} viewBox="0 0 36 36">
