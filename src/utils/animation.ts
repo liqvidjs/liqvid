@@ -1,5 +1,5 @@
 import {constrain} from "./misc";
-import {ReplayData} from "./replay-data";
+import type {ReplayData} from "./replay-data";
 
 // animation
 export function animate(options: {
@@ -12,7 +12,9 @@ export function animate(options: {
   if (!("startValue" in options)) options.startValue = 0;
   if (!("endValue" in options)) options.endValue = 1;
   if (!("easing" in options)) options.easing = (x: number) => x;
+
   const {startValue, endValue, startTime, duration, easing} = options;
+  
   return (t: number) => startValue + easing(constrain(0, (t - startTime) / duration, 1)) * (endValue - startValue);
 }
 
