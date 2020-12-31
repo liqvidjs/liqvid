@@ -1,27 +1,21 @@
-import {EventEmitter} from "events";
-import StrictEventEmitter from "strict-event-emitter-types";
 import * as React from "react";
-import Controls, {ThumbData} from "./Controls";
+import {EventEmitter} from "events";
+import type StrictEventEmitter from "strict-event-emitter-types";
+
 import Captions from "./Captions";
-
-import {bind} from "./utils/misc";
-import {anyHover} from "./utils/mobile";
-
+import KeyMap from "./keymap";
 import Playback from "./playback";
 import Script from "./script";
 
-import {PlayerContext} from "./shared";
-
-interface HookMap {
-  canvasClick: boolean;
-  classNames: string;
-  controls: React.ReactChild;
-}
-
-type HookFn<T extends keyof HookMap> = (name: T, listener: () => HookMap[T]) => void;
-interface Plugin {
-  setup(hook: HookFn<keyof HookMap>): void;
-}
+import Controls from "./Controls";
+import FullScreen from "./controls/FullScreen";
+import PlayPause from "./controls/PlayPause";
+import type {ThumbData} from "./controls/ScrubberBar";
+import Settings from "./controls/Settings";
+import TimeDisplay from "./controls/TimeDisplay";
+import Volume from "./controls/Volume";
+import {bind} from "./utils/misc";
+import {anyHover} from "./utils/mobile";
 
 interface PlayerEvents {
   "canplay": void;
@@ -30,7 +24,7 @@ interface PlayerEvents {
 }
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  plugins?: Plugin[];
+  controls?: JSX.Element;
   script: Script;
   thumbs?: ThumbData;
 }
@@ -43,11 +37,12 @@ const allowScroll = Symbol();
 const ignoreCanvasClick = Symbol();
 
 export default class Player extends React.PureComponent<Props, State> {
-  controls: Controls;
   canPlay: Promise<void[]>;
   canPlayThrough: Promise<void[]>;
   canvas: HTMLDivElement;
+  captureKeys: boolean;
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
+  keymap: KeyMap;
   playback: Playback;
   script: Script;
 
@@ -60,10 +55,26 @@ export default class Player extends React.PureComponent<Props, State> {
 
   private dag: DAGLeaf;
 
-  static Context = PlayerContext;
+  static Context = React.createContext<Player>(null);;
+
+  static defaultControlsLeft = (<>
+    <PlayPause/>
+    <Volume/>
+    <TimeDisplay/>
+  </>);
+  static defaultControlsRight = (<>
+    <Settings/>
+    <FullScreen/>
+  </>);
 
   static defaultProps = {
-    plugins: [] as Plugin[],
+    controls: (<>
+      {Player.defaultControlsLeft}
+
+      <div className="rp-controls-right">
+        {Player.defaultControlsRight}
+      </div>
+    </>),
     style: {}
   }
 
@@ -73,10 +84,11 @@ export default class Player extends React.PureComponent<Props, State> {
     this.__canPlayTasks = [];
     this.__canPlayThroughTasks = [];
 
-    this.script = this.props.script;
-    this.playback = this.script.playback;
+    this.keymap = new KeyMap();
+    this.captureKeys = true;
 
-    this.rememberVolumeSettings();
+    this.script = props.script;
+    this.playback = this.script.playback;
 
     this.buffers = new Map();
     this.hooks = new Map();
@@ -89,13 +101,18 @@ export default class Player extends React.PureComponent<Props, State> {
       this.hooks.get(name).push(listener);
     };
 
-    this.props.plugins.forEach(plugin => plugin.setup(hook));
-
     this.state = {ready: false};
     bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture"]);
   }
 
   componentDidMount() {
+    // keyboard events
+    document.body.addEventListener("keydown", e => {
+      if (!this.captureKeys)
+        return;
+      this.keymap.handle(e);
+    });
+
     // prevent scroll on mobile
     document.addEventListener("touchmove", e => {
       if (e[allowScroll]) return;
@@ -112,21 +129,6 @@ export default class Player extends React.PureComponent<Props, State> {
     this.canPlayThrough = Promise.all(this.__canPlayThroughTasks);
     this.canPlayThrough
     .then(() => this.hub.emit("canplaythrough"));
-  }
-
-  private rememberVolumeSettings() {
-    const {playback} = this,
-          storage = window.sessionStorage;
-
-    // restore volume settings
-    playback.volume = parseFloat(storage.getItem("ractive volume") || "1");
-    playback.muted = "true" === (storage.getItem("ractive muted") || "false");
-
-    // save volume settings
-    playback.hub.on("volumechange", () => {
-      storage.setItem("ractive muted", playback.muted.toString());
-      storage.setItem("ractive volume", playback.volume.toString());
-    });
   }
 
   private updateTree() {
@@ -159,13 +161,22 @@ export default class Player extends React.PureComponent<Props, State> {
     }
   }
 
+  private canvasClick() {
+    const allow = this.hub.listeners("canvasClick").every(_ => _() ?? true);
+    if (allow) {
+      this.playback.paused ? this.playback.play() : this.playback.pause();
+    }
+    
+    this.hub.emit("canvasClick");
+  }
+
   onMouseUp(e: React.MouseEvent<HTMLDivElement>) {
     // the reason for this escape hatch is that this gets called in between an element's onMouseUp
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
     // onMouseUp or else the dragging won't release.
     if (e.nativeEvent[ignoreCanvasClick]) return;
         
-    this.controls.canvasClick();
+    this.canvasClick();
   }
 
   static allowScroll(e: React.TouchEvent | TouchEvent) {
@@ -177,11 +188,11 @@ export default class Player extends React.PureComponent<Props, State> {
   }
   
   suspendKeyCapture() {
-    this.controls.captureKeys = false;
+    this.captureKeys = false;
   }
   
   resumeKeyCapture() {
-    this.controls.captureKeys = true;
+    this.captureKeys = true;
   }
   
   // toposort needs to be called after MathJax has rendered stuff
@@ -213,12 +224,6 @@ export default class Player extends React.PureComponent<Props, State> {
     }
   }
   
-  applyHooks<K extends keyof HookMap>(name: K): HookMap[K][] {
-    if (!this.hooks.has(name)) return [];
-    // @ts-ignore
-    return this.hooks.get(name).map(_ => _());
-  }
-  
   render() {
     const attrs = {
       style: this.props.style
@@ -230,37 +235,21 @@ export default class Player extends React.PureComponent<Props, State> {
     if (!this.state.ready)
       classNames.push("not-ready");
     
-    classNames.push(...this.applyHooks("classNames"));
-    
     return (
       <Player.Context.Provider value={this}>
         <div className={classNames.join(" ")} {...attrs}>
-          <LoadingScreen/>
           <div className="rp-canvas"
             {...canvasAttrs}
             ref={canvas => this.canvas = canvas}
           >
             {this.props.children}
           </div>
-          <Captions player={this}/>
-          <Controls
-            player={this}
-            ref={ref => this.controls = ref}
-            ready={this.state.ready}
-            thumbs={this.props.thumbs}
-          />
+          <Captions/>
+          <Controls controls={this.props.controls} thumbs={this.props.thumbs}/>
         </div>
       </Player.Context.Provider>
     );
   }
-}
-
-function LoadingScreen() {
-  return (
-    <div className="rp-loading-screen">
-      <div className="rp-loading-spinner"/>
-    </div>
-  );
 }
 
 interface DAGLeaf {

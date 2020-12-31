@@ -12,6 +12,12 @@ export default function TimeDisplay() {
     playback.hub.on("durationchange", forceUpdate);
     playback.hub.on("seek", forceUpdate);
     playback.hub.on("timeupdate", forceUpdate);
+
+    return () => {
+      playback.hub.off("durationchange", forceUpdate);
+      playback.hub.off("seek", forceUpdate);
+      playback.hub.off("timeupdate", forceUpdate);
+    };
   }, []);
 
   return (
