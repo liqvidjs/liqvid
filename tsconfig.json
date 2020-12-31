@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "alwaysStrict": true,
+    "declaration": false,
+    "incremental": true,
     "jsx": "react",
-    "lib": ["es2015", "es2016", "es2017", "dom"],
+    "lib": ["esnext", "dom"],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "pretty": true,
@@ -10,5 +12,5 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "ES2017"
   },
-  "files": ["./src/index.ts"]
+  "files": ["./src/index.ts", "./dist/ractive-player.d.ts"]
 }
