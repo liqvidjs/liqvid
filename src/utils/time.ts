@@ -13,6 +13,9 @@ export function parseTime(str: string) {
 }
 
 export function formatTime(time: number) {
+  if (time < 0) {
+    return "-" + formatTime(-time);
+  }
   const minutes = Math.floor(time / 60 / 1000),
         seconds = Math.floor(time / 1000 % 60);
 
@@ -20,9 +23,10 @@ export function formatTime(time: number) {
 }
 
 export function formatTimeMs(time: number) {
-  const milliseconds = Math.floor(time % 1000),
-        minutes = Math.floor(time / 60 / 1000),
-        seconds = Math.floor(time / 1000 % 60);
+  if (time < 0) {
+    return "-" + formatTimeMs(-time);
+  }
+  const milliseconds = Math.floor(time % 1000);
 
-  return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds}`;
+  return `${formatTime(time)}.${milliseconds}`;
 }
