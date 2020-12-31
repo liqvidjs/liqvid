@@ -1,7 +1,9 @@
 $wine = #AF1866
 $blue = #1A69B5
-$green = #1BBB68
-$red = #A52117
+
+user-select(value)
+  user-select value
+  -webkit-user-select value
 
 /* reset styles */
 *
@@ -24,6 +26,7 @@ iframe, img
   --rp-elapsed-color $wine
   --rp-scrubber-color $wine
   --rp-scrub-height 6px
+  --rp-volume-color $wine
 
   background-color #000
   height 100%
@@ -33,13 +36,12 @@ iframe, img
   left 0
   top 0
     
-.rp-canvas 
+.rp-canvas
   background-color #121212
   position relative
   user-select none
   height var(--rp-height)
   width var(--rp-width)
-  font-size calc(var(--rp-height) * 3 / 100)
 
 // yikes
 .not-ready
@@ -47,6 +49,9 @@ iframe, img
     visibility hidden
     
 @media (min-aspect-ratio: 8/5)
+  :root
+    font-size 2vh
+
   .ractive-player
     --rp-height 100vh
     --rp-width 160vh
@@ -55,14 +60,15 @@ iframe, img
     margin 0 auto
     
 @media (max-aspect-ratio: 8/5)
+  :root
+    font-size 1.25vw
+
   .ractive-player
     --rp-height 62.5vw
     --rp-width 100vw
   
   .rp-canvas
     top calc((100% - 62.5vw) / 2)
-  
-@import "loading"
 
 /* control positioning */
 .rp-controls
@@ -70,10 +76,10 @@ iframe, img
   color #FFF
   height var(--rp-controls-height)
   position absolute
-  top calc(100vh - 44px)
-  left calc(50vw - 80vh)
+  top calc(50vh + var(--rp-height)/2 - var(--rp-controls-height))
+  left calc(50vw - var(--rp-width) / 2)
   transition opacity .25s cubic-bezier(0.0,0.0,0.2,1)
-  width 160vh
+  width var(--rp-width)
   user-select none
   z-index 1000
   
@@ -92,14 +98,15 @@ iframe, img
 
 .rp-controls-buttons 
   height 36px
+  line-height 36px
   margin 0 auto
   width 97%
   
   > *
     display inline-block
     height 100%
-
-.rp-controls-float-right 
+    
+.rp-controls-right
   float right
   
   > *
@@ -111,7 +118,6 @@ iframe, img
   cursor pointer
 
 @import "controls/captions"
-@import "controls/help"
 @import "controls/scrubber"
 @import "controls/settings"
 @import "controls/thumbs"
