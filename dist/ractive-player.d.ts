@@ -7,19 +7,20 @@ export as namespace RactivePlayer;
 
 declare namespace RactivePlayer {
   type ReplayData<K> = [number, K][];
-
-  // Controls
-  class Controls {
-    captureKeys: boolean;
-    canvasClick(): void;
+  
+  // KeyMap
+  class KeyMap {
+    static canonize(seq: string): string;
+    static identify(e: KeyboardEvent | React.KeyboardEvent<unknown>): string;
+    bind(seq: string, cb: (e: KeyboardEvent) => void): void;
+    unbind(seq: string, cb: (e: KeyboardEvent) => void): void;
+    getKeys(): string[];
+    getHandlers(seq: string): ((e: KeyboardEvent) => void)[];
+    handle(e: KeyboardEvent): void;
   }
   
   // IdMap
-  interface IdMapProps {
-    map?: object;
-  }
-  
-  class IdMap extends React.PureComponent<IdMapProps, {}> {
+  class IdMap extends React.PureComponent<{map?: object}, {}> {
     foundIds: Set<string>;
   }
   
@@ -38,6 +39,14 @@ declare namespace RactivePlayer {
     /** The underlying <audio> element. */
     domElement: HTMLAudioElement;
   }
+
+  const Controls: {
+    FullScreen: () => JSX.Element;
+    PlayPause: () => JSX.Element;
+    Settings: () => JSX.Element;
+    TimeDisplay: () => JSX.Element;
+    Volume: () => JSX.Element;
+  };
   
   /** RP equivalent of <video>. */
   class Video extends Media {
@@ -46,6 +55,10 @@ declare namespace RactivePlayer {
   }
   
   // Playback
+  interface PlaybackOptions {
+    duration: number;
+  }
+
   class Playback {
     audioContext: AudioContext;
     audioNode: GainNode;
@@ -73,10 +86,14 @@ declare namespace RactivePlayer {
       "timeupdate": number;
       "volumechange": void;
     }>;
+    muted: boolean;
     paused: boolean;
     playbackRate: number;
     playingFrom: number;
     seeking: boolean;
+    volume: number;
+
+    constructor(options: PlaybackOptions);
     
     /** Pause playback. */
     pause(): void;
@@ -121,37 +138,29 @@ declare namespace RactivePlayer {
     path: string;
     highlights?: VideoHighlight[];
   }
-  
-  interface HookMap {
-    canvasClick: boolean;
-    classNames: string;
-    controls: React.ReactChild;
-  }
-  
-  type HookFunction<T extends keyof HookMap> = (name: T, listener: () => HookMap[T]) => void;
-  interface Plugin {
-    setup(hook: HookFunction<keyof HookMap>): void;
-  }
-  
+
   interface PlayerProps {
-    map?: object;
-    plugins?: Plugin[];
+    controls?: JSX.Element;
     script: Script;
     thumbs?: ThumbData;
   }
   
   class Player extends React.PureComponent<PlayerProps, {}> {
-    static Context: React.Context<Player>;
+    static readonly Context: React.Context<Player>;
 
-    controls: Controls;
+    static readonly defaultControlsLeft: JSX.Element;
+    static readonly defaultControlsRight: JSX.Element;
+
     canPlay: Promise<void[]>;
     canPlayThrough: Promise<void[]>;
     canvas: HTMLDivElement;
+    captureKeys: boolean;
     hub: StrictEventEmitter<EventEmitter, {
       "canplay": void;
       "canplaythrough": void;
       "canvasClick": void;
     }>;
+    keymap: KeyMap;
     playback: Playback;
     script: Script;
     
@@ -166,14 +175,11 @@ declare namespace RactivePlayer {
 
     /** Resumes keyboard controls. */
     resumeKeyCapture(): void;
+
     obstruct(event: "canplay" | "canplaythrough", task: Promise<unknown>): void;
 
     /** Call this method when the ractive is ready to begin playing. */
     ready(): void;
-  }
-  
-  interface StyleBlock {
-    style?: React.CSSProperties;
   }
   
   interface ReplayArgs<K> {
@@ -196,33 +202,6 @@ declare namespace RactivePlayer {
       }): (t: number) => number;
       
       replay<K>({data, start, end, active, inactive, compressed}: ReplayArgs<K>): (t: number) => void;
-      
-      easings: {
-        easeInSine:     [number, number, number, number];
-        easeOutSine:    [number, number, number, number];
-        easeInOutSine:  [number, number, number, number];
-        easeInQuad:     [number, number, number, number];
-        easeOutQuad:    [number, number, number, number];
-        easeInOutQuad:  [number, number, number, number];
-        easeInCubic:    [number, number, number, number];
-        easeOutCubic:   [number, number, number, number];
-        easeInOutCubic: [number, number, number, number];
-        easeInQuart:    [number, number, number, number];
-        easeOutQuart:   [number, number, number, number];
-        easeInOutQuart: [number, number, number, number];
-        easeInQuint:    [number, number, number, number];
-        easeOutQuint:   [number, number, number, number];
-        easeInOutQuint: [number, number, number, number];
-        easeInExpo:     [number, number, number, number];
-        easeOutExpo:    [number, number, number, number];
-        easeInOutExpo:  [number, number, number, number];
-        easeInCirc:     [number, number, number, number];
-        easeOutCirc:    [number, number, number, number];
-        easeInOutCirc:  [number, number, number, number];
-        easeInBack:     [number, number, number, number];
-        easeOutBack:    [number, number, number, number];
-        easeInOutBack:  [number, number, number, number];
-      }
     }
     
     authoring: {
@@ -231,7 +210,11 @@ declare namespace RactivePlayer {
 
       /** Returns a CSS block to show the element when marker is in [first, last) */
       from: (first: string, last?: string) => {"data-from-first": string; "data-from-last"?: string;};
-      showIf(cond: boolean): StyleBlock;
+
+      
+      showIf(cond: boolean): {
+        style?: React.CSSProperties;
+      };
     }
     
     interactivity: {
@@ -264,7 +247,6 @@ declare namespace RactivePlayer {
     }
     
     media: {
-      awaitMedia(media: HTMLMediaElement): Promise<Event>;
       awaitMediaCanPlay(media: HTMLMediaElement): Promise<Event>;
       awaitMediaCanPlayThrough(media: HTMLMediaElement): Promise<Event>;
     }
@@ -273,15 +255,19 @@ declare namespace RactivePlayer {
     misc: {
       /** Equivalent to `(min <= val) && (val < max)`. */
       between(min: number, val: number, max: number): boolean;
+
       /** Bind methods on o. */
       bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, methods: K[]): void;
+
       /** Equivalent to `Math.min(max, Math.max(min, val))` */
       constrain: (min: number, val: number, max: number) => number;    
+
       /** Returns [0, ..., n-1] */
       range: (n: number) => number[];
 
       /** Returns a Promise that resolves in `time` milliseconds. */
       wait(time: number): Promise<void>;
+
       /** Returns a Promise that resolves once `callback` returns true. */
       waitFor(callback: () => boolean, interval?: number): Promise<void>;
     }
@@ -308,6 +294,8 @@ declare namespace RactivePlayer {
     }
     
     react: {
+      captureRef<T>(callback: (ref: T) => void, innerRef?: React.Ref<T>): (ref: T) => void;
+      useForceUpdate(): React.DispatchWithoutAction;
       recursiveMap
         (children: React.ReactNode, fn: (child: React.ReactElement<any>) => React.ReactElement<any>)
         : React.ReactChild[];
@@ -325,4 +313,8 @@ declare namespace RactivePlayer {
       formatTimeMs(time: number): string;    
     }
   }
+
+  function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: React.DependencyList): void;
+  function usePlayer(): Player;
+  function useTimeUpdate(callback: (t: number) => void, deps?: React.DependencyList): void;
 }

@@ -1,6 +1,6 @@
 ## 2.0.0 (???)
 
-* deprecate Cursor; use [rp-cursor](https://www.npmjs.com/package/rp-cursor) instead
+* remove Cursor; use [rp-cursor](https://www.npmjs.com/package/rp-cursor) instead
 
 * rename `Player.$controls` -> `Player.controls`
 
@@ -18,9 +18,21 @@
 
 * added some documentation
 
-* workaround for https://github.com/facebook/react/issues/2043 affecting Android
+* workaround for https://github.com/facebook/react/issues/2043 affecting Android (now fixed in React v.17)
 
-* added `Utils.misc.captureRef`
+* added `Utils.react.captureRef`
+
+* added `useMarkerUpdate`, `usePlayer`, `useTimeUpdate` hooks
+
+* added `rp-volume-color` CSS variable
+
+* removed `rememberVolumeSettings` due to cookie laws
+
+* added `KeyMap`
+
+* removed plugin system and "hooks" system (easily confused with React's Hooks); added `Player.props.controls` and `Player.defaultControls*` to replace
+
+* removed LoadingScreen
 
 ## 1.1.1 (October 20, 2019)
 
