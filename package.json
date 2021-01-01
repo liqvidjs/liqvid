@@ -1,15 +1,12 @@
 {
   "name": "ractive-player",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": [
     "dist/*"
   ],
   "main": "dist/ractive-player.js",
   "typings": "dist/ractive-player.d.ts",
-  "scripts": {
-    "css": "stylus -c -o dist/ styl/ractive-player.styl"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ysulyma/ractive-player.git"
