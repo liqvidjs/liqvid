@@ -1,4 +1,4 @@
-## 2.0.0 (???)
+## 2.0.0 (Dec 31, 2020)
 
 * remove Cursor; use [rp-cursor](https://www.npmjs.com/package/rp-cursor) instead
 
@@ -32,7 +32,9 @@
 
 * removed plugin system and "hooks" system (easily confused with React's Hooks); added `Player.props.controls` and `Player.defaultControls*` to replace
 
-* removed LoadingScreen
+* removed `LoadingScreen`
+
+* added `Player.reparseTree`
 
 ## 1.1.1 (October 20, 2019)
 
