@@ -262,7 +262,7 @@ declare namespace RactivePlayer {
       /** Equivalent to `Math.min(max, Math.max(min, val))` */
       constrain: (min: number, val: number, max: number) => number;    
 
-      /** Returns [0, ..., n-1] */
+      /** Returns [a, b). For backwards compatibility, returns [0, a) if passed a single argument. */
       range: (n: number) => number[];
 
       /** Returns a Promise that resolves in `time` milliseconds. */

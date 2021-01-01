@@ -26,9 +26,14 @@ export function waitFor(callback: () => boolean, interval = 10): Promise<void> {
   });
 }
 
-/** Returns [0, ..., n-1] */
-export function range(n: number) {
-  return new Array(n).fill(null).map((_, i) => i);
+/**
+  Returns [a, b). For backwards compatibility, returns [0, a) if passed a single argument.
+*/
+export function range(a: number, b?: number) {
+  if (b === void 0) {
+    return range(0, a);
+  }
+  return new Array(b - a).fill(null).map((_, i) => a+i);
 };
 
 /** Equivalent to `Math.min(max, Math.max(min, val))` */
