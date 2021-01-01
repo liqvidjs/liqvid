@@ -1,5 +1,5 @@
 import * as React from "react";
-const {useCallback, useEffect, useRef, useState} = React;
+const {useCallback, useEffect, useRef} = React;
 
 import ScrubberBar, {ThumbData} from "./controls/ScrubberBar";
 import {usePlayer} from "./hooks";
@@ -7,7 +7,7 @@ import {usePlayer} from "./hooks";
 interface Props {
   controls: (() => JSX.Element)[];
   thumbs?: ThumbData;
-};
+}
 
 // hiding timeout
 const TIMEOUT = 3000;
