@@ -2,7 +2,6 @@ import * as React from "react";
 const {useCallback, useEffect, useMemo} = React;
 
 import {usePlayer} from "../hooks";
-import {bind} from "../utils/misc";
 import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
 

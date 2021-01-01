@@ -48,14 +48,12 @@ export default class Player extends React.PureComponent<Props, State> {
 
   buffers: Map<HTMLMediaElement, [number, number][]>;
 
-  private hooks: Map<string, (() => unknown)[]>;
-
   private __canPlayTasks: Promise<void>[];
   private __canPlayThroughTasks: Promise<void>[];
 
   private dag: DAGLeaf;
 
-  static Context = React.createContext<Player>(null);;
+  static Context = React.createContext<Player>(null);
 
   static defaultControlsLeft = (<>
     <PlayPause/>
@@ -91,16 +89,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.playback = this.script.playback;
 
     this.buffers = new Map();
-    this.hooks = new Map();
-
-    const hook = (name: string, listener: () => unknown) => {
-      if (!this.hooks.has(name)) {
-        this.hooks.set(name, []);
-      }
-
-      this.hooks.get(name).push(listener);
-    };
-
+    
     this.state = {ready: false};
     bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree"]);
   }
@@ -123,7 +112,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.canPlay = Promise.all(this.__canPlayTasks);
     this.canPlay
     .then(() => {
-      this.hub.emit("canplay")
+      this.hub.emit("canplay");
     });
 
     this.canPlayThrough = Promise.all(this.__canPlayThroughTasks);
