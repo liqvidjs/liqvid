@@ -1,4 +1,4 @@
-@media (max-width: 1000px)
+@media (max-width: 800px)
   .ractive-player
     --rp-controls-height 36px
     
@@ -39,18 +39,18 @@
     line-height unset
 
   .rp-current-time, .rp-total-time
-    height var(--rp-controls-height)
-    line-height var(--rp-controls-height)
+    height var(--rp-buttons-height)
+    line-height var(--rp-buttons-height)
     position absolute
     top 0
-    width var(--rp-controls-height)
+    width var(--rp-buttons-height)
     
   .rp-current-time
     left 0
     text-align right
     
   .rp-total-time
-    right calc((var(--rp-controls-right) - 1) * var(--rp-controls-height))
+    right calc((var(--rp-controls-right) - 1) * var(--rp-buttons-height))
     text-align left
 
   .rp-time-separator
@@ -62,8 +62,8 @@
     &::after
       content ""
       position absolute
-      top calc(var(--rp-controls-height) * (0.075 / 0.55 - 0.5))
-      bottom calc(var(--rp-controls-height) * (0.075 / 0.55 - 0.5))
+      top calc(var(--rp-buttons-height) * (0.075 / 0.55 - 0.5))
+      bottom calc(var(--rp-buttons-height) * (0.075 / 0.55 - 0.5))
       left 0
       right 0
     
@@ -71,8 +71,8 @@
     height calc(7.5% / 0.55)
     top unset
     top calc(50% - 0.5 * (7.5% / 0.55))
-    width calc(100% - (var(--rp-controls-left) + var(--rp-controls-right)) * var(--rp-controls-height) - 7px)
-    left calc(var(--rp-controls-left) * var(--rp-controls-height))
+    width calc(100% - (var(--rp-controls-left) + var(--rp-controls-right)) * var(--rp-buttons-height) - 7px)
+    left calc(var(--rp-controls-left) * var(--rp-buttons-height))
     margin unset
     
   .rp-scrubber
@@ -85,9 +85,9 @@
     pointer-events all
 
     position absolute
-    left var(--rp-controls-height)
+    left var(--rp-buttons-height)
     top 0
-    width var(--rp-controls-height)
+    width var(--rp-buttons-height)
 
   .rp-controls-right
     float unset
@@ -96,5 +96,5 @@
     top 0
     
     > *
-      width var(--rp-controls-height)
+      width var(--rp-buttons-height)
 

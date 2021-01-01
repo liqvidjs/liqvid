@@ -27,6 +27,7 @@ iframe, img
   --rp-scrubber-color $wine
   --rp-scrub-height 6px
   --rp-volume-color $wine
+  --rp-buttons-height calc(var(--rp-controls-height) - var(--rp-scrub-height))
 
   background-color #000
   height 100%
@@ -96,9 +97,9 @@ iframe, img
   width 97%
   z-index 2
 
-.rp-controls-buttons 
-  height 36px
-  line-height 36px
+.rp-controls-buttons
+  height var(--rp-buttons-height)
+  line-height var(--rp-buttons-height)
   margin 0 auto
   width 97%
   
