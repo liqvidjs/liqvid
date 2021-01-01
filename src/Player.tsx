@@ -102,7 +102,7 @@ export default class Player extends React.PureComponent<Props, State> {
     };
 
     this.state = {ready: false};
-    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture"]);
+    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree"]);
   }
 
   componentDidMount() {
@@ -199,12 +199,34 @@ export default class Player extends React.PureComponent<Props, State> {
   ready() {
     this.dag = toposort(this.canvas, this.script.markerNumberOf);
 
-    this.script.hub.on("markerupdate", () => this.updateTree());
+    this.script.hub.on("markerupdate", this.updateTree);
     this.updateTree();
 
     this.setState({
       ready: true
     });
+  }
+
+  reparseTree(node: HTMLElement | SVGElement) {
+    // find where to update the tree from
+    function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf) {
+      if (!haystack.element.contains(needle)) {
+        return null;
+      }
+      for (let i = 0; i < haystack.children.length; ++i) {
+        if (haystack.children[i].element.contains(needle)) {
+          return findClosest(needle, haystack.children[i]) ?? [haystack, i];
+        }
+      }
+    }
+
+    const [root, index] = findClosest(node, this.dag);
+    if (!root) {
+      throw new Error("Could not find node in tree");
+    }
+    root.children[index].children = toposort(root.children[index].element, this.script.markerNumberOf).children;
+
+    this.updateTree();
   }
   
   registerBuffer(elt: HTMLMediaElement) {
