@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef} from "react";
 
 import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
@@ -36,7 +36,7 @@ export default function PlayPause() {
   const button = useRef<SVGSVGElement>();
   const events = useMemo(
     () => onClick(() => playback.paused ? playback.play() : playback.pause(), button)
-  , []);
+    , []);
 
   return (
     <svg className="rp-controls-playpause" viewBox="0 0 36 36" {...events}>

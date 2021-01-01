@@ -4,7 +4,7 @@ import {bind} from "./utils/misc";
 import {recursiveMap} from "./utils/react-utils";
 
 interface Props {
-  map?: object;
+  map?: Record<string, unknown>;
 }
 
 export default class IdMap extends React.PureComponent<Props> {
