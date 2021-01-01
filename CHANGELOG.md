@@ -36,6 +36,8 @@
 
 * added `Player.reparseTree`
 
+* allowed `Utils.misc.range` to take two arguments
+
 ## 1.1.1 (October 20, 2019)
 
 * fix typings for `utils/animation/replay`
