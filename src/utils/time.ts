@@ -12,7 +12,7 @@ export function parseTime(str: string) {
   return milliseconds + 1000 * (seconds + 60 * (minutes + 60 * hours));
 }
 
-export function formatTime(time: number) {
+export function formatTime(time: number): string {
   if (time < 0) {
     return "-" + formatTime(-time);
   }
@@ -22,7 +22,7 @@ export function formatTime(time: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function formatTimeMs(time: number) {
+export function formatTimeMs(time: number): string {
   if (time < 0) {
     return "-" + formatTimeMs(-time);
   }
