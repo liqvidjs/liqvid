@@ -91,7 +91,7 @@ export default class Player extends React.PureComponent<Props, State> {
     this.buffers = new Map();
     
     this.state = {ready: false};
-    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree"]);
+    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree", "reparseTree"]);
   }
 
   componentDidMount() {
@@ -198,7 +198,7 @@ export default class Player extends React.PureComponent<Props, State> {
 
   reparseTree(node: HTMLElement | SVGElement) {
     // find where to update the tree from
-    function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf) {
+    function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf): [DAGLeaf, number] {
       if (!haystack.element.contains(needle)) {
         return null;
       }
@@ -272,7 +272,7 @@ interface DAGLeaf {
 }
 
 /* topological sort */
-function toposort(root: HTMLElement, mn: (markerName: string) => number): DAGLeaf {
+function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => number): DAGLeaf {
   const nodes = Array.from(root.querySelectorAll(
     "*[data-from-first], *[data-during]"
   )) as (HTMLElement | SVGElement)[];

@@ -29,7 +29,7 @@ export function waitFor(callback: () => boolean, interval = 10): Promise<void> {
 /**
   Returns [a, b). For backwards compatibility, returns [0, a) if passed a single argument.
 */
-export function range(a: number, b?: number) {
+export function range(a: number, b?: number): number[] {
   if (b === void 0) {
     return range(0, a);
   }
