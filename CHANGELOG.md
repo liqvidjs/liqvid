@@ -1,3 +1,7 @@
+## 2.0.1 (Jan 10, 2021)
+
+* `KeyMap.getHandlers` will return `[]` on unbound sequences instead of throwing error
+
 ## 2.0.0 (Dec 31, 2020)
 
 * remove Cursor; use [rp-cursor](https://www.npmjs.com/package/rp-cursor) instead
