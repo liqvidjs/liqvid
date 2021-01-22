@@ -1,4 +1,4 @@
-## 2.0.2 (Jan 22, 2021)
+## 2.0.2/2.0.3 (Jan 22, 2021)
 
 * fix bug in mobile styling
 
