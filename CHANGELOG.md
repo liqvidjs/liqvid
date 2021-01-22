@@ -1,3 +1,7 @@
+## 2.0.2 (Jan 22, 2021)
+
+* fix bug in mobile styling
+
 ## 2.0.1 (Jan 10, 2021)
 
 * `KeyMap.getHandlers` will return `[]` on unbound sequences instead of throwing error
