@@ -19,7 +19,7 @@ export const captureRef = <T>(callback: (ref: T) => void, innerRef?: React.Ref<T
 };
 
 export function useForceUpdate() {
-  return React.useReducer(c => !c, false)[1];
+  return React.useReducer((c: boolean) => !c, false)[1];
 }
 
 export function recursiveMap(
