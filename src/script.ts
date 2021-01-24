@@ -13,8 +13,16 @@ interface ScriptEvents {
 
 export default class Script {
   hub: StrictEventEmitter<EventEmitter, ScriptEvents>;
+
+  /**
+  The underlying {@link Playback} object.
+  */
   playback: Playback;
   markers: Marker[];
+
+  /**
+  Index of the active marker.
+  */
   markerIndex: number;
 
   constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
@@ -53,15 +61,24 @@ export default class Script {
   }
 
   // getter
+  /**
+  Name of the active marker.
+  */
   get markerName() {
     return this.markers[this.markerIndex][0];
   }
 
   // public methods
+  /**
+  Seek playback to the previous marker.
+  */
   back() {
     this.playback.seek(this.markers[Math.max(0, this.markerIndex - 1)][1]);
   }
 
+  /**
+  Advance playback to the next marker.
+  */
   forward() {
     this.playback.seek(this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]);
   }
@@ -70,6 +87,12 @@ export default class Script {
     return this.markers[this.markerNumberOf(name)];
   }
 
+  /**
+  Returns the first index of a marker named `name`. Throws an error if no marker named `name` exists.
+
+  @throws {Error}
+  Thrown if no marker named `name` exists.
+  */
   markerNumberOf(name: string) {
     for (let i = 0; i < this.markers.length; ++i) {
       if (this.markers[i][0] === name) return i;
@@ -77,6 +100,9 @@ export default class Script {
     throw new Error(`Marker ${name} does not exist`);
   }
 
+  /**
+  If `start` is a string, returns the starting time of the marker with that name. Otherwise, returns `start`.
+  */
   parseStart(start: number | string) {
     if (typeof start === "string") {
       if (start.match(timeRegexp))
@@ -88,6 +114,9 @@ export default class Script {
     }
   }
 
+  /**
+  If `end` is a string, returns the ending time of the marker with that name. Otherwise, returns `end`.
+  */
   parseEnd(end: number | string) {
     if (typeof end === "string") {
       if (end.match(timeRegexp))

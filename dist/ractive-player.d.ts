@@ -110,17 +110,51 @@ declare namespace RactivePlayer {
       "markerupdate": number;
     }>;
     loadTasks: Promise<unknown>[];
+
+    /**
+    Index of the active marker.
+    */
     markerIndex: number;
+
+    /**
+    Name of the active marker.
+    */
     markerName: string;
     markers: [string, number, number][];
+    playback: Playback;
 
     constructor(markers: Array<[string, string | number] | [string, string | number, string | number]>);
+
+    /**
+    Seek playback to the previous marker.
+    */
     back(): void;
+
+    /**
+    Advance playback to the next marker.
+    */
     forward(): void;
+
+
     markerByName(name: string): [string, number, number];
+
+    /**
+    Returns the first index of a marker named `name`. Throws an error if no marker named `name` exists.
+
+    @throws {Error}
+    Thrown if no marker named `name` exists.
+    */
     markerNumberOf(name: string): number;
-    parseStart(start: number | string): number;
+
+    /**
+    If `end` is a string, returns the ending time of the marker with that name. Otherwise, returns `end`.
+    */
     parseEnd(end: number | string): number;
+
+    /**
+    If `start` is a string, returns the starting time of the marker with that name. Otherwise, returns `start`.
+    */
+    parseStart(start: number | string): number;
   }
   
   // Player
