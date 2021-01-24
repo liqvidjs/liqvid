@@ -35,6 +35,10 @@ export default class Playback {
   currentTime:  number;
 
   hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
+
+  /**
+  Whether the playback is paused.
+  */
   paused:       boolean;
 
   private playingFrom:  number;
@@ -92,8 +96,8 @@ export default class Playback {
   }
 
   /**
-    The length of the playback in milliseconds.
-    Warning: the HTMLMediaElement interface measures this property in seconds.
+  The length of the playback in milliseconds.
+  Warning: the HTMLMediaElement interface measures this property in seconds.
   */
   get duration() {
     return this.__duration;
@@ -108,6 +112,9 @@ export default class Playback {
     this.hub.emit("durationchange");
   }
 
+  /**
+  Whether playback audio is muted.
+  */
   get muted() {
     return this.__muted;
   }
@@ -127,6 +134,9 @@ export default class Playback {
     this.hub.emit("volumechange");
   }
 
+  /**
+  The rate at which the playback is being played.
+  */
   get playbackRate() {
     return this.__playbackRate;
   }
@@ -141,6 +151,9 @@ export default class Playback {
     this.hub.emit("ratechange");
   }
 
+  /**
+  Whether the playback is in the process of seeking to a new position.
+  */
   get seeking(): boolean {
     return this.__seeking;
   }
@@ -154,7 +167,9 @@ export default class Playback {
     else this.hub.emit("seeked");
   }
 
-  /** Pause playback. */
+  /**
+  Pause playback.
+  */
   pause() {
     this.paused = true;
     this.playingFrom = this.currentTime;
@@ -162,13 +177,17 @@ export default class Playback {
     this.hub.emit("pause");
   }
 
-  /** Resume playback. */
+  /**
+  Resume playback.
+  */
   play() {
     this.paused = false;
     this.hub.emit("play");
   }
 
-  /** Seek playback to a specific time. */
+  /**
+  Seek playback to a specific time.
+  */
   seek(t: number | string) {
     if (typeof t === "string")
       t = parseTime(t);
@@ -180,6 +199,9 @@ export default class Playback {
     this.hub.emit("seek", t);
   }
 
+  /**
+  A number indicating the audio volume, from 0.0 (silent) to 1.0 (loudest).
+  */
   get volume() {
     return this.__volume;
   }

@@ -62,6 +62,7 @@ declare namespace RactivePlayer {
   class Playback {
     audioContext: AudioContext;
     audioNode: GainNode;
+    
     /**
       The current playback time in milliseconds.
       Warning: the HTMLMediaElement interface measures this property in seconds.
@@ -86,22 +87,47 @@ declare namespace RactivePlayer {
       "timeupdate": number;
       "volumechange": void;
     }>;
+
+    /**
+    Whether playback audio is muted.
+    */
     muted: boolean;
+
+    /**
+    Whether the playback is paused.
+    */
     paused: boolean;
+
+    /**
+    The rate at which the playback is being played.
+    */
     playbackRate: number;
-    playingFrom: number;
+
+    /**
+    Whether the playback is in the process of seeking to a new position.
+    */
     seeking: boolean;
+
+    /**
+    A number indicating the audio volume, from 0.0 (silent) to 1.0 (loudest).
+    */
     volume: number;
 
     constructor(options: PlaybackOptions);
     
-    /** Pause playback. */
+    /**
+    Pause playback.
+    */
     pause(): void;
 
-    /** Resume playback. */
+    /**
+    Resume playback.
+    */
     play(): void;
 
-    /** Seek playback to a specific time. */
+    /**
+    Seek playback to a specific time.
+    */
     seek(t: number | string): void;
   }
   
@@ -121,6 +147,10 @@ declare namespace RactivePlayer {
     */
     markerName: string;
     markers: [string, number, number][];
+
+    /**
+    The underlying {@link Playback} object.
+    */
     playback: Playback;
 
     constructor(markers: Array<[string, string | number] | [string, string | number, string | number]>);
