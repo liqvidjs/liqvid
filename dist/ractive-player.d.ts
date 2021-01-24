@@ -62,7 +62,7 @@ declare namespace RactivePlayer {
   class Playback {
     audioContext: AudioContext;
     audioNode: GainNode;
-    
+
     /**
       The current playback time in milliseconds.
       Warning: the HTMLMediaElement interface measures this property in seconds.
@@ -224,8 +224,14 @@ declare namespace RactivePlayer {
       "canplaythrough": void;
       "canvasClick": void;
     }>;
+
+    /** The {@link KeyMap} instance attached to this player. */
     keymap: KeyMap;
+
+    /** The underlying {@link Playback} instance. */
     playback: Playback;
+
+    /** The underlying {@link Script} instance. */
     script: Script;
     
     /** Prevents intercepting of scroll on mobile. */

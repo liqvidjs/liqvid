@@ -42,8 +42,14 @@ export default class Player extends React.PureComponent<Props, State> {
   canvas: HTMLDivElement;
   captureKeys: boolean;
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
+
+  /** The {@link KeyMap} instance attached to this player. */
   keymap: KeyMap;
+
+  /** The underlying {@link Playback} instance. */
   playback: Playback;
+
+  /** The underlying {@link Script} instance. */
   script: Script;
 
   buffers: Map<HTMLMediaElement, [number, number][]>;
