@@ -6,4 +6,4 @@ To get started, clone https://github.com/ysulyma/rp-tutorial
 
 For documentation, visit https://ractive-player.org/
 
-For inspiration, see https://lmqm.xyz/
+For inspiration, see https://epiplexis.xyz/
