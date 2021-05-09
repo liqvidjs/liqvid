@@ -1,3 +1,7 @@
+## 2.0.4 (May 9, 2021)
+
+* fix bug in `KeyMap.normalize` + mistyping as `KeyMap.canonize`
+
 ## 2.0.2/2.0.3 (Jan 22, 2021)
 
 * fix bug in mobile styling
