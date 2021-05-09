@@ -7,10 +7,10 @@ interface Bindings {
 }
 
 const modifierMap = {
-  Alt: "Alt",
   Control: "Ctrl",
-  Meta: "Meta",
-  Shift: "Shift"
+  Alt: "Alt",
+  Shift: "Shift",
+  Meta: "Meta"
 };
 
 const mixedCaseVals = [
@@ -191,7 +191,7 @@ for (const key of mixedCaseVals) {
   mixedCase[key.toLowerCase()] = key;
 }
 
-const modifierOrder = ["Control", "Alt", "Shift", "Meta"];
+const modifierOrder: string[] = Object.keys(modifierMap).map(k => modifierMap[k])
 
 const useCode = [
   "Backspace",
@@ -236,13 +236,13 @@ export default class KeyMap {
 
       return str[0].toUpperCase() + lower.slice(1);
     }).sort((a, b) => {
-      if (a in modifierMap) {
-        if (b in modifierMap) {
+      if (modifierOrder.includes(a)) {
+        if (modifierOrder.includes(b)) {
           return modifierOrder.indexOf(a) - modifierOrder.indexOf(b);
         } else {
           return -1;
         }
-      } else if (b in modifierMap) {
+      } else if (modifierOrder.includes(b)) {
         return 1;
       } else {
         return cmp(a, b);

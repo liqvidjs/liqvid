@@ -10,7 +10,7 @@ declare namespace RactivePlayer {
   
   // KeyMap
   class KeyMap {
-    static canonize(seq: string): string;
+    static normalize(seq: string): string;
     static identify(e: KeyboardEvent | React.KeyboardEvent<unknown>): string;
     bind(seq: string, cb: (e: KeyboardEvent) => void): void;
     unbind(seq: string, cb: (e: KeyboardEvent) => void): void;
