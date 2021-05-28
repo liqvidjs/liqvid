@@ -2,7 +2,7 @@ import * as React from "react";
 const {useCallback, useEffect, useRef, useState} = React;
 
 import ScrubberBar, {ThumbData} from "./controls/ScrubberBar";
-import {usePlayer} from "./hooks";
+import {useKeyMap, usePlayback} from "./hooks";
 
 interface Props {
   controls: (() => JSX.Element)[];
@@ -13,8 +13,8 @@ interface Props {
 const TIMEOUT = 3000;
 
 export default function Controls(props: Props) {
-  const player = usePlayer();
-  const {keymap, playback} = player;
+  const keymap = useKeyMap();
+  const playback = usePlayback();
   const [visible, setVisible] = useState(true);
 
   const timer = useRef(0);

@@ -1,11 +1,11 @@
 import * as React from "react";
 
 import {useForceUpdate} from "../utils/react-utils";
-import {usePlayer} from "../hooks";
+import {usePlayback} from "../hooks";
 import {formatTime} from "../utils/time";
 
 export default function TimeDisplay() {
-  const {playback} = usePlayer();
+  const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
   React.useEffect(() => {

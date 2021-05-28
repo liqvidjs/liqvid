@@ -2,6 +2,8 @@
 
 * attach events directly to `Playback` and `Script` instead of `.hub`
 
+* add `useKeyMap`, `usePlayback`, `useScript` hooks
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons
