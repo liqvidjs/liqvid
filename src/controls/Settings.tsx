@@ -15,7 +15,7 @@ export default function Settings() {
 
   useEffect(() => {
     // subscribe
-    playback.hub.on("ratechange", () => setRate(playback.playbackRate));
+    playback.on("ratechange", () => setRate(playback.playbackRate));
     player.hub.on("canvasClick", () => setDialog({main: false, speed: false}));
 
     // keyboard shortcuts

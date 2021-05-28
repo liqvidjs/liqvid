@@ -1,5 +1,5 @@
 import * as React from "react";
-const {useEffect} = React;
+import {useEffect} from "react";
 
 import {usePlayer} from "../hooks";
 import {formatTime} from "../utils/time";

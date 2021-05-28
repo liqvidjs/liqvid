@@ -39,13 +39,13 @@ export default class Media extends React.PureComponent<Props> {
 
   componentDidMount() {
     // attach event listeners
-    this.playback.hub.on("pause", this.pause);
-    this.playback.hub.on("play", this.onPlay);
-    this.playback.hub.on("ratechange", this.onRateChange);
-    this.playback.hub.on("seek", this.onSeek);
-    this.playback.hub.on("seeking", this.pause);
-    this.playback.hub.on("timeupdate", this.onTimeUpdate);
-    this.playback.hub.on("volumechange", this.onVolumeChange);
+    this.playback.on("pause", this.pause);
+    this.playback.on("play", this.onPlay);
+    this.playback.on("ratechange", this.onRateChange);
+    this.playback.on("seek", this.onSeek);
+    this.playback.on("seeking", this.pause);
+    this.playback.on("timeupdate", this.onTimeUpdate);
+    this.playback.on("volumechange", this.onVolumeChange);
 
     this.domElement.addEventListener("play", this.onDomPlay);
     this.domElement.addEventListener("pause", this.onDomPause);
@@ -86,13 +86,13 @@ export default class Media extends React.PureComponent<Props> {
   }
 
   componentWillUnmount() {
-    this.playback.hub.off("pause", this.pause);
-    this.playback.hub.off("play", this.onPlay);
-    this.playback.hub.off("ratechange", this.onRateChange);
-    this.playback.hub.off("seek", this.onSeek);
-    this.playback.hub.off("seeking", this.pause);
-    this.playback.hub.off("timeupdate", this.onTimeUpdate);
-    this.playback.hub.off("volumechange", this.onVolumeChange);
+    this.playback.off("pause", this.pause);
+    this.playback.off("play", this.onPlay);
+    this.playback.off("ratechange", this.onRateChange);
+    this.playback.off("seek", this.onSeek);
+    this.playback.off("seeking", this.pause);
+    this.playback.off("timeupdate", this.onTimeUpdate);
+    this.playback.off("volumechange", this.onVolumeChange);
 
     this.domElement.removeEventListener("pause", this.onDomPause);
     this.domElement.removeEventListener("play", this.onDomPlay);

@@ -1,3 +1,7 @@
+## 2.1.0 (???)
+
+* attach events directly to `Playback` and `Script` instead of `.hub`
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons

@@ -9,14 +9,14 @@ export default function TimeDisplay() {
   const forceUpdate = useForceUpdate();
 
   React.useEffect(() => {
-    playback.hub.on("durationchange", forceUpdate);
-    playback.hub.on("seek", forceUpdate);
-    playback.hub.on("timeupdate", forceUpdate);
+    playback.on("durationchange", forceUpdate);
+    playback.on("seek", forceUpdate);
+    playback.on("timeupdate", forceUpdate);
 
     return () => {
-      playback.hub.off("durationchange", forceUpdate);
-      playback.hub.off("seek", forceUpdate);
-      playback.hub.off("timeupdate", forceUpdate);
+      playback.off("durationchange", forceUpdate);
+      playback.off("seek", forceUpdate);
+      playback.off("timeupdate", forceUpdate);
     };
   }, []);
 
