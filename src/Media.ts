@@ -2,7 +2,6 @@ import * as React from "react";
 
 import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
 import {between, bind} from "./utils/misc";
-import {parseTime} from "./utils/time";
 
 import Player from "./Player";
 
@@ -80,6 +79,20 @@ export default class Media extends React.PureComponent<Props> {
     this.domElement.addEventListener("progress", updateBuffers);
     // setInterval(updateBuffers, 1000);
     // this.domElement.addEventListener('load', updateBuffers);
+  }
+
+  componentWillUnmount() {
+    const {playback} = this.player;
+
+    playback.hub.off("pause", this.onPause);
+    playback.hub.off("play", this.onPlay);
+    playback.hub.off("ratechange", this.onRateChange);
+    playback.hub.off("seek", this.onSeek);
+    playback.hub.off("seeking", this.onSeeking);
+    playback.hub.off("timeupdate", this.onTimeUpdate);
+    playback.hub.off("volumechange", this.onVolumeChange);
+
+    this.player.unregisterBuffer(this.domElement);
   }
 
   // getter
