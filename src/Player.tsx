@@ -221,6 +221,10 @@ export default class Player extends React.PureComponent<Props, State> {
   registerBuffer(elt: HTMLMediaElement) {
     this.buffers.set(elt, []);
   }
+
+  unregisterBuffer(elt: HTMLMediaElement) {
+    this.buffers.delete(elt);
+  }
   
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
