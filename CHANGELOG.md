@@ -6,6 +6,8 @@
 
 * add `Playback.timeline` for much easier animation
 
+* make scrubber bar work on desktop touchscreens
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`

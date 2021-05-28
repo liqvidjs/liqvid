@@ -97,8 +97,11 @@ export default function ScrubberBar(props: Props) {
 
   // events to attach on the wrapper
   const wrapEvents = useMemo(() => {
+    const props = {} as React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>;
+
     if (anyHover) {
-      return {
+      Object.assign(props, {
+
         // show thumb preview on hover
         onMouseOver: () => setShowThumb(true),
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
@@ -108,46 +111,46 @@ export default function ScrubberBar(props: Props) {
           setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
         },
         onMouseOut: () => setShowThumb(false)
-      };
-    } else {
-      const listener = dragHelper(
-        // move
-        (e: TouchEvent, {x}: {x: number}) => {
-          const rect = scrubberBar.current.getBoundingClientRect(),
-                progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-          setProgress({scrubber: progress, thumb: progress});
-        },
-        // start
-        (e: React.TouchEvent<HTMLDivElement>) => {
-          e.preventDefault();
-          e.stopPropagation();
-          playback.seeking = true;
-          setShowThumb(true);
-        },
-        // end
-        (e: TouchEvent, {x}: {x: number}) => {
-          e.preventDefault();
-          const rect = scrubberBar.current.getBoundingClientRect(),
-                progress = constrain(0, (x - rect.left) / rect.width, 1);
-
-          setShowThumb(false);
-          playback.seeking = false;
-          playback.seek(progress * playback.duration);
-        }
-      );
-
-      return {
-        ref: captureRef((ref: HTMLDivElement) => {
-          ref.addEventListener("touchstart", listener, {passive: false});
-        })
-      };
+      });
     }
+
+    const listener = dragHelper(
+      // move
+      (e: TouchEvent, {x}: {x: number}) => {
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+        setProgress({scrubber: progress, thumb: progress});
+      },
+      // start
+      (e: React.TouchEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        playback.seeking = true;
+        setShowThumb(true);
+      },
+      // end
+      (e: TouchEvent, {x}: {x: number}) => {
+        e.preventDefault();
+        const rect = scrubberBar.current.getBoundingClientRect(),
+              progress = constrain(0, (x - rect.left) / rect.width, 1);
+
+        setShowThumb(false);
+        playback.seeking = false;
+        playback.seek(progress * playback.duration);
+      }
+    );
+
+    props.ref = captureRef((ref: HTMLDivElement) => {
+      ref.addEventListener("touchstart", listener, {passive: false});
+    });
+
+    return props;
   }, []);
 
   // events to be attached to the scrubber
   const scrubberEvents = useMemo(() => {
-    if (anyHover) return {};
+    // if (anyHover) return {};
 
     const listener = dragHelper(
       // move
@@ -177,7 +180,7 @@ export default function ScrubberBar(props: Props) {
     );
 
     return {
-      ref: captureRef((ref: HTMLDivElement) => {
+      ref: captureRef((ref: SVGSVGElement) => {
         ref.addEventListener("touchstart", listener, {passive: false});
       })
     };
