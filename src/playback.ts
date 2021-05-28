@@ -37,6 +37,7 @@ export default class Playback
   currentTime:  number;
 
   paused:       boolean;
+  timeline: DocumentTimeline;
 
   private playingFrom:  number;
   private startTime:    number;
@@ -74,6 +75,11 @@ export default class Playback
 
     // hub will have lots of listeners, turn off warning
     this.setMaxListeners(0);
+
+    // timeline
+    if (typeof DocumentTimeline !== "undefined") {
+      this.__createTimeline();
+    }
 
     bind(this, ["pause", "play", "__advance"]);
 
@@ -228,5 +234,84 @@ export default class Playback
     }
 
     requestAnimationFrame(this.__advance);
+  }
+
+  /**
+  Create our timeline
+  */
+  private __createTimeline() {
+    this.timeline = new DocumentTimeline();
+    
+    const delays = new WeakMap<AnimationEffect, number>();
+    const animations: Animation[] = [];
+
+    const getAnimations = () => {
+      for (const a of document.getAnimations()) {
+        if (a.timeline !== this.timeline)
+          continue;
+
+        // get new animations
+        if (!animations.includes(a)) {
+          a.pause();
+          animations.push(a);
+          const delay = a.effect.getTiming().delay;
+          delays.set(a.effect, delay);
+          if (delay !== 0) {
+            a.effect.updateTiming({delay: 0.1});
+          }
+          a.currentTime = 0;
+
+          // prevent memory leaks?
+          a.addEventListener("cancel", () => {
+            animations.splice(animations.indexOf(a), 1);
+          });
+        }
+      }
+      return animations;
+    }
+
+    // pause
+    this.on("pause", () => {
+      for (const anim of getAnimations()) {
+        anim.pause();
+      }
+    });
+
+    // play
+    this.on("play", () => {
+      for (const anim of getAnimations()) {
+        anim.startTime = null;
+        anim.play();
+        anim.startTime =
+          this.timeline.currentTime +
+          (delays.get(anim.effect) - this.currentTime) / this.playbackRate;
+        // console.log(timeline.currentTime, anim.startTime, anim.currentTime);
+      }
+    });
+
+    // ratechange
+    this.on("ratechange", () => {
+      for (const anim of getAnimations()) {
+        anim.playbackRate = this.playbackRate;
+      }
+    });
+
+    // seek
+    this.on("seek", () => {
+      for (const anim of getAnimations()) {
+        const offset = (delays.get(anim.effect) - this.currentTime) / this.playbackRate;
+        if (this.paused) {
+          // anim.startTime =
+          //   timeline.currentTime +
+          //   (delays.get(anim.effect) - this.currentTime) / this.playbackRate; 
+          anim.currentTime = -offset;
+          anim.pause();
+        } else {
+          anim.startTime =
+            this.timeline.currentTime +
+            (delays.get(anim.effect) - this.currentTime) / this.playbackRate;        
+        }
+      }
+    });
   }
 }

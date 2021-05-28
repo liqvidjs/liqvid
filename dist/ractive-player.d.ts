@@ -92,6 +92,7 @@ declare namespace RactivePlayer {
     playbackRate: number;
     playingFrom: number;
     seeking: boolean;
+    timeline: DocumentTimeline;
     volume: number;
 
     constructor(options: PlaybackOptions);
