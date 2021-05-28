@@ -4,6 +4,8 @@
 
 * add `useKeyMap`, `usePlayback`, `useScript` hooks
 
+* add `Playback.timeline` for much easier animation
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons
