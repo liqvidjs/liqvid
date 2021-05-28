@@ -86,7 +86,6 @@ export default class Player extends React.PureComponent<Props> {
 
     this.buffers = new Map();
     
-    this.state = {ready: false};
     bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree", "reparseTree"]);
   }
 
@@ -105,6 +104,7 @@ export default class Player extends React.PureComponent<Props> {
     }, {passive: false});
     document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
+    // canPlay events --- mostly unused
     this.canPlay = Promise.all(this.__canPlayTasks);
     this.canPlay
     .then(() => {
@@ -115,10 +115,13 @@ export default class Player extends React.PureComponent<Props> {
     this.canPlayThrough
     .then(() => this.hub.emit("canplaythrough"));
 
-    this.dag = toposort(this.canvas, this.script.markerNumberOf);
+    // hiding stuff
+    if (this.script) {
+      this.dag = toposort(this.canvas, this.script.markerNumberOf);
 
-    this.script.hub.on("markerupdate", this.updateTree);
-    this.updateTree();
+      this.script.on("markerupdate", this.updateTree);
+      this.updateTree();
+    }
   }
 
   private updateTree() {
@@ -205,7 +208,9 @@ export default class Player extends React.PureComponent<Props> {
   }
   
   // toposort needs to be called after MathJax has rendered stuff
-  ready() {}
+  ready() {
+    console.info(".ready() is a noop in v2.1");
+  }
 
   reparseTree(node: HTMLElement | SVGElement) {
     // find where to update the tree from
