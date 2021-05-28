@@ -2,12 +2,12 @@ import * as React from "react";
 import {useCallback, useEffect, useMemo} from "react";
 
 import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from "../fake-fullscreen";
-import {usePlayer} from "../hooks";
+import {useKeyMap} from "../hooks";
 import {useForceUpdate} from "../utils/react-utils";
 import {onClick} from "../utils/mobile";
 
 export default function FullScreen() {
-  const {keymap} = usePlayer();
+  const keymap = useKeyMap();
   const forceUpdate = useForceUpdate();
   const toggleFullScreen = useCallback(() =>
     isFullScreen() ? exitFullScreen() : requestFullScreen()

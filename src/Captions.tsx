@@ -1,10 +1,10 @@
 import * as React from "react";
 const {useEffect, useRef} = React;
 
-import {usePlayer} from "./hooks";
+import {usePlayback} from "./hooks";
 
 export default function Captions() {
-  const {playback} = usePlayer();
+  const playback = usePlayback();
   const domElement = useRef<HTMLDivElement>();
 
   useEffect(() => {

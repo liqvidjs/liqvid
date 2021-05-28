@@ -2,6 +2,8 @@
 
 * attach events directly to `Playback` and `Script` instead of `.hub`
 
+* add `useKeyMap`, `usePlayback`, `useScript` hooks
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`

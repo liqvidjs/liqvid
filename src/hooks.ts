@@ -2,7 +2,7 @@ import {useContext, useEffect} from "react";
 import Player from "./Player";
 
 export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: React.DependencyList) {
-  const {script} = useContext(Player.Context);
+  const script = useScript();
 
   useEffect(() => {
     script.on("markerupdate", callback);
@@ -13,12 +13,24 @@ export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: Re
   }, deps);  
 }
 
+export function useKeyMap() {
+  return usePlayer().keymap;
+}
+
+export function usePlayback() {
+  return usePlayer().playback;
+}
+
+export function useScript() {
+  return usePlayer().script;
+}
+
 export function usePlayer() {
   return useContext(Player.Context);
 }
 
 export function useTimeUpdate(callback: (t: number) => void, deps?: React.DependencyList) {
-  const {playback} = useContext(Player.Context);
+  const playback = usePlayback();
 
   useEffect(() => {
     playback.on("seek", callback);
