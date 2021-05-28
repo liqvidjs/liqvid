@@ -1,12 +1,13 @@
 import * as React from "react";
 const {useCallback, useEffect, useMemo} = React;
 
-import {usePlayer} from "../hooks";
+import {useKeyMap, usePlayback} from "../hooks";
 import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
 
 export default function Volume() {
-  const {keymap, playback} = usePlayer();
+  const keymap = useKeyMap();
+  const playback = usePlayback();
   const forceUpdate = useForceUpdate();
   
   useEffect(() => {

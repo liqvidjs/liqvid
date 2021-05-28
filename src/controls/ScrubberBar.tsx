@@ -3,7 +3,7 @@ import {useEffect, useMemo, useRef, useState} from "react";
 
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
-import {usePlayer} from "../hooks";
+import {useKeyMap, usePlayback, useScript} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
 import {between, constrain} from "../utils/misc";
 import {anyHover} from "../utils/mobile";
@@ -16,7 +16,9 @@ interface Props {
 }
 
 export default function ScrubberBar(props: Props) {
-  const {keymap, playback, script} = usePlayer();
+  const keymap = useKeyMap();
+  const playback = usePlayback();
+  const script = useScript();
 
   const [progress, setProgress] = useState({
     scrubber: playback.currentTime / playback.duration,
