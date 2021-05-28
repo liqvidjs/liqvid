@@ -113,6 +113,7 @@ declare namespace RactivePlayer {
     markerIndex: number;
     markerName: string;
     markers: [string, number, number][];
+    playback: Playback;
 
     constructor(markers: Array<[string, string | number] | [string, string | number, string | number]>);
     back(): void;
