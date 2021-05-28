@@ -59,21 +59,8 @@ declare namespace RactivePlayer {
     duration: number;
   }
 
-  class Playback {
-    audioContext: AudioContext;
-    audioNode: GainNode;
-    /**
-      The current playback time in milliseconds.
-      Warning: the HTMLMediaElement interface measures this property in seconds.
-    */
-    currentTime: number;
-
-    /**
-      The length of the playback in milliseconds.
-      Warning: the HTMLMediaElement interface measures this property in seconds.
-    */
-    duration: number;
-    hub: StrictEventEmitter<EventEmitter, {
+  class Playback
+    extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, {
       "bufferupdate": void;
       "cuechange": void;
       "pause": void;
@@ -85,7 +72,21 @@ declare namespace RactivePlayer {
       "ratechange": void;
       "timeupdate": number;
       "volumechange": void;
-    }>;
+  }>) {
+    audioContext: AudioContext;
+    audioNode: GainNode;
+
+    /**
+      The current playback time in milliseconds.
+      Warning: the HTMLMediaElement interface measures this property in seconds.
+    */
+    currentTime: number;
+
+    /**
+      The length of the playback in milliseconds.
+      Warning: the HTMLMediaElement interface measures this property in seconds.
+    */
+    duration: number;
     muted: boolean;
     paused: boolean;
     playbackRate: number;
@@ -105,10 +106,10 @@ declare namespace RactivePlayer {
     seek(t: number | string): void;
   }
   
-  class Script {
-    hub: StrictEventEmitter<EventEmitter, {
-      "markerupdate": number;
-    }>;
+  class Script
+    extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, {
+    "markerupdate": number;
+  }>) {
     loadTasks: Promise<unknown>[];
     markerIndex: number;
     markerName: string;

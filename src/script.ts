@@ -11,15 +11,16 @@ interface ScriptEvents {
   "markerupdate": number;
 }
 
-export default class Script {
-  hub: StrictEventEmitter<EventEmitter, ScriptEvents>;
+export default class Script
+  extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, ScriptEvents>)
+{
   playback: Playback;
   markers: Marker[];
   markerIndex: number;
 
   constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
-    this.hub = new EventEmitter() as StrictEventEmitter<EventEmitter, ScriptEvents>;
-    this.hub.setMaxListeners(0);
+    super();
+    this.setMaxListeners(0);
 
     // bind methods
     bind(this, ["back", "forward", "markerByName", "markerNumberOf", "parseStart", "parseEnd", "__updateMarker"]);
@@ -48,8 +49,12 @@ export default class Script {
       duration: this.markers[this.markers.length - 1][2]
     });
 
-    this.playback.hub.on("seek", this.__updateMarker);
-    this.playback.hub.on("timeupdate", this.__updateMarker);
+    this.playback.on("seek", this.__updateMarker);
+    this.playback.on("timeupdate", this.__updateMarker);
+  }
+
+  get hub() {
+    return this;
   }
 
   // getter
@@ -116,7 +121,7 @@ export default class Script {
     if (newIndex !== this.markerIndex) {
       const prevIndex = this.markerIndex;
       this.markerIndex = newIndex;
-      this.hub.emit("markerupdate", prevIndex);
+      this.emit("markerupdate", prevIndex);
     }
   }
 }

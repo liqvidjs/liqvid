@@ -239,7 +239,7 @@ export default class Player extends React.PureComponent<Props> {
   
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
-    this.playback.hub.emit("bufferupdate");
+    this.playback.emit("bufferupdate");
   }
   
   obstruct(event: "canplay" | "canplaythrough", task: Promise<void>) {

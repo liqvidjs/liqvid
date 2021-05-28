@@ -11,7 +11,7 @@ export default function Volume() {
   
   useEffect(() => {
     // bind to volume changes
-    playback.hub.on("volumechange", forceUpdate);
+    playback.on("volumechange", forceUpdate);
 
     // keyboard controls
     keymap.bind("ArrowUp", () => playback.volume = playback.volume + 0.05);

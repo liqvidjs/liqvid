@@ -5,10 +5,10 @@ export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: Re
   const {script} = useContext(Player.Context);
 
   useEffect(() => {
-    script.hub.on("markerupdate", callback);
+    script.on("markerupdate", callback);
 
     return () => {
-      script.hub.off("markerupdate", callback);
+      script.off("markerupdate", callback);
     };
   }, deps);  
 }
@@ -21,12 +21,12 @@ export function useTimeUpdate(callback: (t: number) => void, deps?: React.Depend
   const {playback} = useContext(Player.Context);
 
   useEffect(() => {
-    playback.hub.on("seek", callback);
-    playback.hub.on("timeupdate", callback);
+    playback.on("seek", callback);
+    playback.on("timeupdate", callback);
 
     return () => {
-      playback.hub.off("seek", callback);
-      playback.hub.off("timeupdate", callback);
+      playback.off("seek", callback);
+      playback.off("timeupdate", callback);
     };
   }, deps);
 }

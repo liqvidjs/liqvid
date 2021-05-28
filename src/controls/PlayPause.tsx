@@ -14,7 +14,7 @@ export default function PlayPause() {
     const events = ["pause", "play", "seeking", "seeked", "stop"] as const;
 
     for (const e of events)
-      playback.hub.on(e, forceUpdate);
+      playback.on(e, forceUpdate);
 
     // keyboard controls
     const toggle = () => playback[playback.paused ? "play" : "pause"]();
@@ -24,7 +24,7 @@ export default function PlayPause() {
     return () => {
       // unbind playback listeners
       for (const e of events)
-        playback.hub.off(e, forceUpdate);
+        playback.off(e, forceUpdate);
 
       // unbind keyboard controls
       keymap.unbind("K", toggle);
