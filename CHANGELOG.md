@@ -1,3 +1,11 @@
+## 2.0.5 (May 28, 2021)
+
+* correctly remove listeners when unmounting `<Audio>`/`<Video>`
+
+* remove silly `<Video>` hiding behavior
+
+* add `Script.playback` to typings
+
 ## 2.0.4 (May 9, 2021)
 
 * fix bug in `KeyMap.normalize` + mistyping as `KeyMap.canonize`
