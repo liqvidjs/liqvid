@@ -92,7 +92,7 @@ export default class Player extends React.PureComponent<Props> {
   componentDidMount() {
     // keyboard events
     document.body.addEventListener("keydown", e => {
-      if (!this.captureKeys)
+      if (!this.captureKeys || document.activeElement !== document.body)
         return;
       this.keymap.handle(e);
     });
@@ -171,6 +171,18 @@ export default class Player extends React.PureComponent<Props> {
   }
 
   onMouseUp(e: React.MouseEvent<HTMLDivElement>) {
+    // ignore clicks on input tags
+    if ([
+      "a", "area",
+      "button",
+      "input",
+      "option",
+      "select",
+      "textarea",
+      "video"
+    ].includes((e.target as Element).nodeName.toLowerCase()))
+      return;
+
     // the reason for this escape hatch is that this gets called in between an element's onMouseUp
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
     // onMouseUp or else the dragging won't release.
