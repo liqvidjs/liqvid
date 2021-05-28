@@ -8,9 +8,8 @@ export default function Captions() {
   const domElement = useRef<HTMLDivElement>();
 
   useEffect(() => {
-    playback.hub.on("cuechange", () => {
+    playback.on("cuechange", () => {
       domElement.current.innerHTML = "";
-
       for (const cue of playback.captions) {
         domElement.current.appendChild(cue);
       }

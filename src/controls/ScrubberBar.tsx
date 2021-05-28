@@ -30,16 +30,16 @@ export default function ScrubberBar(props: Props) {
   /* subscriptions */
   useEffect(() => {
     /* playback liseners */
-    playback.hub.on("seek", () => {
+    playback.on("seek", () => {
       if (playback.seeking) return;
       const progress = playback.currentTime / playback.duration;
       setProgress({scrubber: progress, thumb: progress});
     });
-    playback.hub.on("seeked", () => {
+    playback.on("seeked", () => {
       const progress = playback.currentTime / playback.duration;
       setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
     });
-    playback.hub.on("timeupdate", () => {
+    playback.on("timeupdate", () => {
       const progress = playback.currentTime / playback.duration;
       setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
     });

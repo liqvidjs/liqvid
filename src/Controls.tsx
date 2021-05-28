@@ -1,5 +1,5 @@
 import * as React from "react";
-const {useCallback, useEffect, useRef} = React;
+const {useCallback, useEffect, useRef, useState} = React;
 
 import ScrubberBar, {ThumbData} from "./controls/ScrubberBar";
 import {usePlayer} from "./hooks";
@@ -15,7 +15,7 @@ const TIMEOUT = 3000;
 export default function Controls(props: Props) {
   const player = usePlayer();
   const {keymap, playback} = player;
-  const [visible, setVisible] = React.useState(true);
+  const [visible, setVisible] = useState(true);
 
   const timer = useRef(0);
 
@@ -37,20 +37,20 @@ export default function Controls(props: Props) {
     // show/hiding
     document.body.addEventListener("touchstart", resetTimer);
     document.body.addEventListener("mousemove", resetTimer);
-    playback.hub.on("play", resetTimer);
+    playback.on("play", resetTimer);
 
-    playback.hub.on("pause", () => {
+    playback.on("pause", () => {
       clearTimeout(timer.current);
       setVisible(true);
     });
 
-    playback.hub.on("stop", () => {
+    playback.on("stop", () => {
       clearTimeout(timer.current);
       setVisible(true);
     });
 
     document.body.addEventListener("mouseleave", () => {
-      if (player.playback.paused) return;
+      if (playback.paused) return;
       setVisible(false);
     });
   }, []);

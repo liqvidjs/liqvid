@@ -25,7 +25,9 @@ interface PlaybackOptions {
 declare let webkitAudioContext: typeof AudioContext;
 
 /* handle playback progress */
-export default class Playback {
+export default class Playback
+  extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, PlaybackEvents>)
+{
   audioContext: AudioContext;
   audioNode:    GainNode;
   /**
@@ -34,7 +36,6 @@ export default class Playback {
   */
   currentTime:  number;
 
-  hub:          StrictEventEmitter<EventEmitter, PlaybackEvents>;
   paused:       boolean;
 
   private playingFrom:  number;
@@ -48,9 +49,9 @@ export default class Playback {
   private __volume:       number;
   
   constructor(options: PlaybackOptions) {
+    super();
     Object.assign(this, {
       currentTime: 0,
-      hub: new EventEmitter(),
       duration: options.duration,
       playbackRate: 1,
       playingFrom: 0,
@@ -72,12 +73,16 @@ export default class Playback {
     this.audioNode.connect(this.audioContext.destination);
 
     // hub will have lots of listeners, turn off warning
-    this.hub.setMaxListeners(0);
+    this.setMaxListeners(0);
 
     bind(this, ["pause", "play", "__advance"]);
 
     // initiate playback loop
     requestAnimationFrame(this.__advance);
+  }
+
+  get hub() {
+    return this;
   }
 
   /* magic properties */
@@ -88,7 +93,7 @@ export default class Playback {
   set captions(captions) {
     this.__captions = captions;
 
-    this.hub.emit("cuechange");
+    this.emit("cuechange");
   }
 
   /**
@@ -105,7 +110,7 @@ export default class Playback {
 
     this.__duration = duration;
 
-    this.hub.emit("durationchange");
+    this.emit("durationchange");
   }
 
   get muted() {
@@ -124,7 +129,7 @@ export default class Playback {
       this.audioNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
     }
 
-    this.hub.emit("volumechange");
+    this.emit("volumechange");
   }
 
   get playbackRate() {
@@ -138,7 +143,7 @@ export default class Playback {
     this.__playbackRate = val;
     this.playingFrom = this.currentTime;
     this.startTime = performance.now();
-    this.hub.emit("ratechange");
+    this.emit("ratechange");
   }
 
   get seeking(): boolean {
@@ -150,8 +155,8 @@ export default class Playback {
       return;
 
     this.__seeking = val;
-    if (this.__seeking) this.hub.emit("seeking");
-    else this.hub.emit("seeked");
+    if (this.__seeking) this.emit("seeking");
+    else this.emit("seeked");
   }
 
   /** Pause playback. */
@@ -159,13 +164,13 @@ export default class Playback {
     this.paused = true;
     this.playingFrom = this.currentTime;
 
-    this.hub.emit("pause");
+    this.emit("pause");
   }
 
   /** Resume playback. */
   play() {
     this.paused = false;
-    this.hub.emit("play");
+    this.emit("play");
   }
 
   /** Seek playback to a specific time. */
@@ -177,7 +182,7 @@ export default class Playback {
     this.currentTime = this.playingFrom = t;
     this.startTime = performance.now();
 
-    this.hub.emit("seek", t);
+    this.emit("seek", t);
   }
 
   get volume() {
@@ -195,14 +200,14 @@ export default class Playback {
       this.audioNode.gain.exponentialRampToValueAtTime(this.__volume, this.audioContext.currentTime + 2);
     }
 
-    this.hub.emit("volumechange");
+    this.emit("volumechange");
   }
 
   stop() {
     this.paused = true;
     this.playingFrom = 0;
 
-    this.hub.emit("stop");
+    this.emit("stop");
   }
 
   /* private methods */
@@ -219,7 +224,7 @@ export default class Playback {
         this.stop();
       }
 
-      this.hub.emit("timeupdate", this.currentTime);
+      this.emit("timeupdate", this.currentTime);
     }
 
     requestAnimationFrame(this.__advance);

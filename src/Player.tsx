@@ -188,7 +188,7 @@ export default class Player extends React.PureComponent<Props, State> {
   ready() {
     this.dag = toposort(this.canvas, this.script.markerNumberOf);
 
-    this.script.hub.on("markerupdate", this.updateTree);
+    this.script.on("markerupdate", this.updateTree);
     this.updateTree();
 
     this.setState({
@@ -228,7 +228,7 @@ export default class Player extends React.PureComponent<Props, State> {
   
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
-    this.playback.hub.emit("bufferupdate");
+    this.playback.emit("bufferupdate");
   }
   
   obstruct(event: "canplay" | "canplaythrough", task: Promise<void>) {

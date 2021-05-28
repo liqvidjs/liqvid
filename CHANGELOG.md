@@ -1,3 +1,7 @@
+## 2.1.0 (???)
+
+* attach events directly to `Playback` and `Script` instead of `.hub`
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`
