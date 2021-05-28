@@ -8,6 +8,8 @@
 
 * make scrubber bar work on desktop touchscreens
 
+* no longer necessary to call `.ready()`, now a noop
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`

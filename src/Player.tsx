@@ -29,14 +29,10 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   thumbs?: ThumbData;
 }
 
-interface State {
-  ready: boolean;
-}
-
 const allowScroll = Symbol();
 const ignoreCanvasClick = Symbol();
 
-export default class Player extends React.PureComponent<Props, State> {
+export default class Player extends React.PureComponent<Props> {
   canPlay: Promise<void[]>;
   canPlayThrough: Promise<void[]>;
   canvas: HTMLDivElement;
@@ -90,7 +86,6 @@ export default class Player extends React.PureComponent<Props, State> {
 
     this.buffers = new Map();
     
-    this.state = {ready: false};
     bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree", "reparseTree"]);
   }
 
@@ -109,6 +104,7 @@ export default class Player extends React.PureComponent<Props, State> {
     }, {passive: false});
     document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
+    // canPlay events --- mostly unused
     this.canPlay = Promise.all(this.__canPlayTasks);
     this.canPlay
     .then(() => {
@@ -118,6 +114,14 @@ export default class Player extends React.PureComponent<Props, State> {
     this.canPlayThrough = Promise.all(this.__canPlayThroughTasks);
     this.canPlayThrough
     .then(() => this.hub.emit("canplaythrough"));
+
+    // hiding stuff
+    if (this.script) {
+      this.dag = toposort(this.canvas, this.script.markerNumberOf);
+
+      this.script.on("markerupdate", this.updateTree);
+      this.updateTree();
+    }
   }
 
   private updateTree() {
@@ -125,25 +129,32 @@ export default class Player extends React.PureComponent<Props, State> {
 
     recurse(this.dag);
 
+    function hide(leaf: DAGLeaf) {
+      leaf.element.style.opacity = "0";
+      leaf.element.style["pointer-events"] = "none";
+      leaf.element.setAttribute("aria-hidden", "true");
+    }
+
+    function show(leaf: DAGLeaf) {
+      leaf.element.style.removeProperty("opacity");
+      leaf.element.style.removeProperty("pointer-events");
+      leaf.element.removeAttribute("aria-hidden");
+      return leaf.children.forEach(recurse);
+    }
+
     function recurse(leaf: DAGLeaf) {
       if (typeof leaf.first !== "undefined") {
         if (leaf.first <= script.markerIndex && (!leaf.last || script.markerIndex < leaf.last)) {
-          leaf.element.style.removeProperty("opacity");
-          leaf.element.style.removeProperty("pointer-events");
-          return leaf.children.forEach(recurse);
+          return show(leaf);
         }
 
-        leaf.element.style.opacity = "0";
-        leaf.element.style["pointer-events"] = "none";
+        hide(leaf);
       } else if (typeof leaf.during !== "undefined") {
         if (script.markerName.startsWith(leaf.during)) {
-          leaf.element.style.removeProperty("opacity");
-          leaf.element.style.removeProperty("pointer-events");
-          return leaf.children.forEach(recurse);
+          return show(leaf);
         }
 
-        leaf.element.style.opacity = "0";
-        leaf.element.style["pointer-events"] = "none";
+        return hide(leaf);
       } else {
         return leaf.children.forEach(recurse);
       }
@@ -186,14 +197,7 @@ export default class Player extends React.PureComponent<Props, State> {
   
   // toposort needs to be called after MathJax has rendered stuff
   ready() {
-    this.dag = toposort(this.canvas, this.script.markerNumberOf);
-
-    this.script.on("markerupdate", this.updateTree);
-    this.updateTree();
-
-    this.setState({
-      ready: true
-    });
+    console.info(".ready() is a noop in v2.1");
   }
 
   reparseTree(node: HTMLElement | SVGElement) {
@@ -246,9 +250,6 @@ export default class Player extends React.PureComponent<Props, State> {
     const canvasAttrs = anyHover ? {onMouseUp: this.onMouseUp} : {};
     
     const classNames = ["ractive-player"];
-    
-    if (!this.state.ready)
-      classNames.push("not-ready");
     
     return (
       <Player.Context.Provider value={this}>
