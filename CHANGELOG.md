@@ -1,3 +1,7 @@
+## 2.0.6 (Jun 7, 2021)
+
+* make scrubber bar work on desktop touchscreens
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`
