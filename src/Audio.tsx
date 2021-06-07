@@ -11,8 +11,6 @@ export default class Audio extends Media {
   componentDidMount() {
     super.componentDidMount();
 
-    const {playback} = this.player;
-
     // tracks
     for (const track of Array.from(this.domElement.textTracks)) {
       track.addEventListener("cuechange", () => {
@@ -22,7 +20,7 @@ export default class Audio extends Media {
           captions.push(fragmentFromHTML(html));
         }
 
-        playback.captions = captions;
+        this.playback.captions = captions;
       });
     }
   }

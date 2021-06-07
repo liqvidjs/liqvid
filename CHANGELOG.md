@@ -1,5 +1,7 @@
 ## 2.0.6 (Jun 7, 2021)
 
+* work correctly with keyboard play/pause buttons
+
 * make scrubber bar work on desktop touchscreens
 
 * no longer necessary to call `.ready()`, now a noop
