@@ -34,7 +34,7 @@ export default class Media extends React.PureComponent<Props> {
     // get the time right
     this.start = this.player.script.parseStart(this.props.start);
 
-    bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange"]);
+    bind(this, ["onPause", "onPlay", "onRateChange", "onSeek", "onSeeking", "onTimeUpdate", "onVolumeChange", "onDomPlay", "onDomPause"]);
   }
 
   componentDidMount() {
@@ -46,6 +46,8 @@ export default class Media extends React.PureComponent<Props> {
     this.playback.on("seeking", this.onSeeking);
     this.playback.on("timeupdate", this.onTimeUpdate);
     this.playback.on("volumechange", this.onVolumeChange);
+    this.domElement.addEventListener("play", this.onDomPlay);
+    this.domElement.addEventListener("pause", this.onDomPause);
 
     // canplay/canplaythrough events
     if (this.props.obstructCanPlay) {
@@ -90,6 +92,9 @@ export default class Media extends React.PureComponent<Props> {
     this.playback.off("seeking", this.onSeeking);
     this.playback.off("timeupdate", this.onTimeUpdate);
     this.playback.off("volumechange", this.onVolumeChange);
+    
+    this.domElement.removeEventListener("pause", this.onDomPause);
+    this.domElement.removeEventListener("play", this.onDomPlay);
 
     this.player.unregisterBuffer(this.domElement);
   }
@@ -142,5 +147,15 @@ export default class Media extends React.PureComponent<Props> {
   onVolumeChange() {
     this.domElement.volume = this.playback.volume;
     this.domElement.muted = this.playback.muted;
+  }
+
+  onDomPlay() {
+    if (this.playback.paused)
+      this.playback.play();
+  }
+
+  onDomPause() {
+    if (!this.playback.seeking && !this.playback.paused)
+      this.playback.pause();
   }
 }
