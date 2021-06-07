@@ -144,7 +144,8 @@ declare namespace RactivePlayer {
 
   interface PlayerProps {
     controls?: JSX.Element;
-    script: Script;
+    playback?: Playback;
+    script?: Script;
     thumbs?: ThumbData;
   }
   
@@ -193,7 +194,7 @@ declare namespace RactivePlayer {
     active: (current: K, index: number) => void;
     inactive: () => void;
   }
-  
+
   const Utils: {
     animation: {
       animate(options: {
@@ -201,7 +202,7 @@ declare namespace RactivePlayer {
         endValue?: number,
         startTime: number,
         duration: number,
-        easing?: (x: number) => number
+        easing?: (x: number) => number;
       }): (t: number) => number;
       
       replay<K>({data, start, end, active, inactive, compressed}: ReplayArgs<K>): (t: number) => void;

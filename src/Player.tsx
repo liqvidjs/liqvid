@@ -25,7 +25,8 @@ interface PlayerEvents {
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   controls?: JSX.Element;
-  script: Script;
+  playback?: Playback;
+  script?: Script;
   thumbs?: ThumbData;
 }
 
@@ -81,8 +82,12 @@ export default class Player extends React.PureComponent<Props> {
     this.keymap = new KeyMap();
     this.captureKeys = true;
 
-    this.script = props.script;
-    this.playback = this.script.playback;
+    if (props.script) {
+      this.script = props.script;
+      this.playback = this.script.playback;
+    } else {
+      this.playback = props.playback;
+    }
 
     this.buffers = new Map();
     
