@@ -1,9 +1,4 @@
-body:not(.rp-captions) .rp-captions-display
-  display none
-
 .rp-captions-display
-  $width = 100vh
-  
   background-color rgba(255, 255, 255, 0.1)
   border-radius 5px
   color #FFF
@@ -13,11 +8,11 @@ body:not(.rp-captions) .rp-captions-display
   padding .7em
   text-align center
   user-select none
-  width $width
+  width 50%
   
   position absolute
-  bottom 10vh
-  left unquote("calc(50vw - " + $width/2 + ")")
+  bottom 10%
+  left 25%
   
   &:empty
     display none

@@ -8,6 +8,8 @@
 
 * more intelligent canvasClick/keyCapture behavior
 
+* enable captions
+
 ## 2.0.5 (May 28, 2021)
 
 * correctly remove listeners when unmounting `<Audio>`/`<Video>`
