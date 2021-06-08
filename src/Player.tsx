@@ -187,7 +187,7 @@ export default class Player extends React.PureComponent<Props> {
       "video"
     ].includes((e.target as Element).nodeName.toLowerCase()))
       return;
-    
+
     // the reason for this escape hatch is that this gets called in between an element's onMouseUp
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
     // onMouseUp or else the dragging won't release.
