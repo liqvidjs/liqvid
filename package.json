@@ -7,6 +7,10 @@
   ],
   "main": "dist/ractive-player.js",
   "typings": "dist/ractive-player.d.ts",
+  "scripts": {
+    "stylus": "stylus -o dist/ractive-player.css -w styl/ractive-player.styl",
+    "stylus-prod": "stylus -c -o dist/ractive-player.min.css -w styl/ractive-player.styl"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ysulyma/ractive-player.git"
