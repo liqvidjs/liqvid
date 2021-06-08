@@ -46,7 +46,7 @@ export default class Media extends React.PureComponent<Props> {
     this.playback.on("seeking", this.pause);
     this.playback.on("timeupdate", this.onTimeUpdate);
     this.playback.on("volumechange", this.onVolumeChange);
-
+    
     this.domElement.addEventListener("play", this.onDomPlay);
     this.domElement.addEventListener("pause", this.onDomPause);
 
