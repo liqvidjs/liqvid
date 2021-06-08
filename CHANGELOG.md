@@ -6,6 +6,8 @@
 
 * add `Playback.timeline` for much easier animation
 
+* add `--rp-canvas-height` CSS variable
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons
