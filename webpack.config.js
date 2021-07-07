@@ -6,14 +6,25 @@ module.exports = {
   output: {
     filename: process.env.NODE_ENV === "development" ? "ractive-player.js" : "ractive-player.min.js",
     path: `${__dirname}/dist`,
-    library: "RactivePlayer"
+    library: "RactivePlayer",
+    libraryTarget: "umd"
   },
 
   devtool: false,
 
   externals: {
-    "react": "React",
-    "react-dom": "ReactDOM"
+    "react": {
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "react",
+      root: "React"
+    },
+    "react-dom": {
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "react-dom",
+      root: "ReactDOM"
+    }
   },
 
   mode: process.env.NODE_ENV,
