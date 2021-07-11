@@ -1,7 +1,7 @@
 import {EventEmitter} from "events";
 import StrictEventEmitter from "strict-event-emitter-types";
-import {between, bind} from "./utils/misc";
-import {parseTime, timeRegexp} from "./utils/time";
+import {between, bind} from "@liqvid/utils/misc";
+import {parseTime, timeRegexp} from "@liqvid/utils/time";
 
 import Playback from "./playback";
 

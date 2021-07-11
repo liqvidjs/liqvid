@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import {bind} from "./utils/misc";
+import {bind} from "@liqvid/utils/misc";
 import {recursiveMap} from "./utils/react-utils";
 
 interface Props {

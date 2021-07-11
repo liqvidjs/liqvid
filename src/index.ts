@@ -1,6 +1,6 @@
 import Audio from "./Audio";
 import IdMap from "./IdMap";
-import KeyMap from "./keymap";
+import {KeyMap} from "@liqvid/keymap";
 import Playback from "./playback";
 import Player from "./Player";
 import Script from "./script";

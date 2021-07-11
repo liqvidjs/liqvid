@@ -3,7 +3,7 @@ import {EventEmitter} from "events";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
 import Captions from "./Captions";
-import KeyMap from "./keymap";
+import {KeyMap} from "@liqvid/keymap";
 import Playback from "./playback";
 import Script from "./script";
 
@@ -14,7 +14,7 @@ import type {ThumbData} from "./controls/ScrubberBar";
 import Settings from "./controls/Settings";
 import TimeDisplay from "./controls/TimeDisplay";
 import Volume from "./controls/Volume";
-import {bind} from "./utils/misc";
+import {bind} from "@liqvid/utils/misc";
 import {anyHover} from "./utils/mobile";
 
 interface PlayerEvents {

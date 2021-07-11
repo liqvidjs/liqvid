@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
-import {between, bind} from "./utils/misc";
+import {between, bind} from "@liqvid/utils/misc";
 
 import type Playback from "./playback";
 import Player from "./Player";
