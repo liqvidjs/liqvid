@@ -167,9 +167,7 @@ export class Playback
   }
 
   /** Seek playback to a specific time. */
-  seek(t: number | string) {
-    if (typeof t === "string")
-      t = parseTime(t);
+  seek(t: number) {
     t = constrain(0, t, this.duration);
 
     this.currentTime = this.__playingFrom = t;
