@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "jsx": "react-jsx",
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "pretty": true,
+    "removeComments": true,
+    "target": "ES2017"
+  }
+}
