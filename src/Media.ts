@@ -106,9 +106,11 @@ export default class Media extends React.PureComponent<Props> {
   }
 
   pause() {
-    this.domElement.removeEventListener("pause", this.onDomPause);
-    this.domElement.pause();
-    this.domElement.addEventListener("pause", this.onDomPause);
+    if (!this.domElement.ended) {
+      this.domElement.removeEventListener("pause", this.onDomPause);
+      this.domElement.pause();
+      this.domElement.addEventListener("pause", this.onDomPause);
+    }
   }
 
   play() {
@@ -140,7 +142,7 @@ export default class Media extends React.PureComponent<Props> {
 
   onTimeUpdate(t: number) {
     if (between(this.start, t, this.end)) {
-      if (!this.domElement.paused) return;
+      if (!this.domElement.paused || this.domElement.ended) return;
 
       this.domElement.currentTime = (t - this.start) / 1000;
       this.play().catch(this.playback.pause);
@@ -164,7 +166,7 @@ export default class Media extends React.PureComponent<Props> {
   }
 
   onDomPause() {
-    if (!this.playback.seeking && !this.playback.paused) {
+    if (!this.playback.seeking && !this.playback.paused && !this.domElement.ended) {
       this.playback.off("pause", this.pause);
       this.playback.pause();
       this.playback.on("pause", this.pause);
