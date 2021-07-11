@@ -13,7 +13,8 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
-  "dependencies": {
+  "devDependencies": {
     "typescript": "^4.3.5"
-  }
+  },
+  "sideEffects": false,
 }

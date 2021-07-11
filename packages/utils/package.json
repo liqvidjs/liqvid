@@ -7,7 +7,9 @@
   },
   "typesVersions": {
     "*": {
-      "*": [ "./dist/*" ]
+      "*": [
+        "./dist/*"
+      ]
     }
   },
   "type": "module",
@@ -21,5 +23,8 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  }
 }

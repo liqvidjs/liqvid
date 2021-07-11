@@ -24,5 +24,6 @@
     "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
-  }
+  },
+  "sideEffects": false
 }
