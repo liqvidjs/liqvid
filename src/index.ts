@@ -1,13 +1,14 @@
 import Audio from "./Audio";
 import IdMap from "./IdMap";
 import {KeyMap} from "@liqvid/keymap";
+import Media from "./Media";
 import Playback from "./playback";
 import Player from "./Player";
 import Script from "./script";
 import * as Utils from "./utils";
 import Video from "./Video";
 
-export {Audio, IdMap, KeyMap, Playback, Player, Script, Utils, Video};
+export {Audio, IdMap, KeyMap, Media, Playback, Player, Script, Utils, Video};
 export * from "./hooks";
 
 import FullScreen from "./controls/FullScreen";
