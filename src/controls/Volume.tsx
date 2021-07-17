@@ -28,7 +28,7 @@ export default function Volume() {
   const events = useMemo(() => onClick(() => playback.muted = !playback.muted), []);
 
   return (
-    <div className="rp-controls-volume">
+    <div className="lv-controls-volume">
       <svg {...events} viewBox="0 0 100 100">
         <path d="M 10 35 h 20 l 25 -20 v 65 l -25 -20 h -20 z" fill="white" stroke="none"/>
         {

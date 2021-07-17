@@ -28,7 +28,7 @@ export default function FullScreen() {
   const events = useMemo(() => onClick(toggleFullScreen), []);
 
   return (
-    <svg className="rp-controls-fullscreen" {...events} viewBox="0 0 36 36">
+    <svg className="lv-controls-fullscreen" {...events} viewBox="0 0 36 36">
       {isFullScreen() ?
         <>
           <path fill="white" d="M 14 14 h -4 v 2 h 6 v -6 h -2 v 4 z"/>

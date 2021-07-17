@@ -37,7 +37,7 @@ export default function Settings() {
   const toggle = useMemo(() => onClick(() => setDialog(prev => ({main: !(prev.main || prev.speed), speed: false}))), []);
 
   // toggleSubtitles() {
-  //   document.body.classList.toggle("rp-captions");
+  //   document.body.classList.toggle("lv-captions");
   //   this.forceUpdate();
   // }
 
@@ -48,12 +48,12 @@ export default function Settings() {
   const dialogStyle = {display: dialog.main ? "block" : "none"};
   const speedDialogStyle = {display: dialog.speed ? "block" : "none"};
 
-  // const captions = document.body.classList.contains("rp-captions");
+  // const captions = document.body.classList.contains("lv-captions");
 
   return (
-    <div className="rp-controls-settings">
-      <div className="rp-settings-speed-dialog" style={speedDialogStyle}>
-        <span className="rp-dialog-subtitle" {...openMain}>&lt; Speed</span>
+    <div className="lv-controls-settings">
+      <div className="lv-settings-speed-dialog" style={speedDialogStyle}>
+        <span className="lv-dialog-subtitle" {...openMain}>&lt; Speed</span>
         <ul>
           {PLAYBACK_RATES.map(rate => (
             <li
@@ -66,7 +66,7 @@ export default function Settings() {
           ))}
         </ul>
       </div>
-      <div className="rp-settings-dialog" style={dialogStyle}>
+      <div className="lv-settings-dialog" style={dialogStyle}>
         <table>
           <tbody>
             <tr {...openSpeed}>

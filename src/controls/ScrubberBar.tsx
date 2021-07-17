@@ -1,11 +1,11 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
 import {useKeyMap, usePlayback, useScript} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
-import {between, constrain} from "../utils/misc";
+import {between, constrain} from "@liqvid/utils/misc";
 import {anyHover} from "../utils/mobile";
 import {captureRef} from "../utils/react-utils";
 
@@ -29,9 +29,14 @@ export default function ScrubberBar(props: Props) {
   // refs
   const scrubberBar = useRef<HTMLDivElement>();
 
-  /* subscriptions */
-  useEffect(() => {
-    /* playback liseners */
+  /*
+    Set up subscriptions.
+    We don't do this in useEffect() because it needs to run
+    before useEffect()s in the video content.
+  */
+  const subscribed = useRef(false);
+  if (!subscribed.current) {
+    /* playback listeners */
     playback.on("seek", () => {
       if (playback.seeking) return;
       const progress = playback.currentTime / playback.duration;
@@ -66,7 +71,8 @@ export default function ScrubberBar(props: Props) {
         playback.seek(playback.duration * num / 10);
       }
     });
-  }, []);
+    subscribed.current = true;
+  }
 
   // event handlers
   const divEvents = useMemo(() => {
@@ -193,7 +199,7 @@ export default function ScrubberBar(props: Props) {
   const thumbTitle = activeHighlight ? activeHighlight.title : null;
 
   return (
-    <div className="rp-controls-scrub" ref={scrubberBar} {...divEvents}>
+    <div className="lv-controls-scrub" ref={scrubberBar} {...divEvents}>
       {props.thumbs &&
         <ThumbnailBox
           {...props.thumbs}
@@ -202,10 +208,10 @@ export default function ScrubberBar(props: Props) {
           title={thumbTitle}/>
       }
 
-      <div className="rp-controls-scrub-wrap" {...wrapEvents}>
-        <svg className="rp-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
-          <rect className="rp-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100}/>
-          <rect className="rp-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100}/>
+      <div className="lv-controls-scrub-wrap" {...wrapEvents}>
+        <svg className="lv-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
+          <rect className="lv-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100}/>
+          <rect className="lv-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100}/>
 
           {/*ranges.map(([start, end]) => (
             <rect
@@ -216,7 +222,7 @@ export default function ScrubberBar(props: Props) {
           {highlights.map(({time}) => (
             <rect
               key={time}
-              className={["rp-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
+              className={["lv-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
               x={time / playback.duration * 100}
               y="0"
               width="1"
@@ -224,7 +230,7 @@ export default function ScrubberBar(props: Props) {
             />
           ))}
         </svg>
-        <svg className="rp-scrubber" style={{left: `calc(${progress.scrubber * 100}% - 6px)`}} viewBox="0 0 100 100" {...scrubberEvents}>
+        <svg className="lv-scrubber" style={{left: `calc(${progress.scrubber * 100}% - 6px)`}} viewBox="0 0 100 100" {...scrubberEvents}>
           <circle cx="50" cy="50" r="50" stroke="none"/>
         </svg>
       </div>

@@ -2,7 +2,7 @@ import * as React from "react";
 import {useEffect} from "react";
 
 import {usePlayer} from "../hooks";
-import {formatTime} from "../utils/time";
+import {formatTime} from "@liqvid/utils/time";
 
 interface Props {
   cols: number;
@@ -63,13 +63,13 @@ export default function ThumbnailBox(props: Props) {
 
   return (
     <div
-      className="rp-controls-thumbnail"
+      className="lv-controls-thumbnail"
       style={{
         display: show ? "block" : "none",
         left: `calc(${progress * 100}%)`
       }}>
-      {title && <span className="rp-thumbnail-title">{title}</span>}
-      <div className="rp-thumbnail-box">
+      {title && <span className="lv-thumbnail-title">{title}</span>}
+      <div className="lv-thumbnail-box">
         <img
           src={sheetName}
           style={{
@@ -77,7 +77,7 @@ export default function ThumbnailBox(props: Props) {
             top: `-${row * height}px`
           }}
         />
-        <span className="rp-thumbnail-time">{formatTime(time * 1000)}</span>
+        <span className="lv-thumbnail-time">{formatTime(time * 1000)}</span>
       </div>
     </div>
   );
