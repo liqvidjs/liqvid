@@ -18,3 +18,12 @@ import ScrubberBar from "./controls/ScrubberBar";
 import TimeDisplay from "./controls/TimeDisplay";
 import Volume from "./controls/Volume";
 export const Controls = {FullScreen, PlayPause, ScrubberBar, Settings, TimeDisplay, Volume};
+
+// alias
+Object.defineProperty(window, "RactivePlayer", {
+  get() {
+    if (typeof window.Liqvid !== "undefined") {
+      return window.Liqvid;
+    }
+  }
+});
