@@ -14,6 +14,7 @@ export * from "./hooks";
 import FullScreen from "./controls/FullScreen";
 import PlayPause from "./controls/PlayPause";
 import Settings from "./controls/Settings";
+import ScrubberBar from "./controls/ScrubberBar";
 import TimeDisplay from "./controls/TimeDisplay";
 import Volume from "./controls/Volume";
-export const Controls = {FullScreen, PlayPause, Settings, TimeDisplay, Volume};
+export const Controls = {FullScreen, PlayPause, ScrubberBar, Settings, TimeDisplay, Volume};

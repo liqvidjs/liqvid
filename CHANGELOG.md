@@ -10,6 +10,8 @@
 
 * expose `Media` class
 
+* expose `ScrubberBar` control
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons
