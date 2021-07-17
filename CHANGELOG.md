@@ -1,5 +1,7 @@
 ## 2.1.0 (???)
 
+* rename library to Liqvid
+
 * attach events directly to `Playback` and `Script` instead of `.hub`
 
 * add `useKeyMap`, `usePlayback`, `useScript` hooks

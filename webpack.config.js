@@ -6,8 +6,10 @@ module.exports = {
   output: {
     filename: process.env.NODE_ENV === "development" ? "ractive-player.js" : "ractive-player.min.js",
     path: `${__dirname}/dist`,
-    library: "RactivePlayer",
-    libraryTarget: "umd"
+    library: {
+      name: "Liqvid",
+      type: "umd"
+    }
   },
 
   devtool: false,
