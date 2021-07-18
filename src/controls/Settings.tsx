@@ -1,22 +1,31 @@
 import * as React from "react";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 
 import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
+import {useForceUpdate} from "../utils/react-utils";
 
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
+enum Dialogs {
+  None,
+  Main,
+  Speed,
+  Captions
+}
 
 export default function Settings() {
   const player = usePlayer(),
         {keymap, playback} = player;
 
-  const [dialog, setDialog] = useState({main: false, speed: false});
+  const [dialog, setDialog] = useState<Dialogs>(Dialogs.None);
   const [currentRate, setRate] = useState(playback.playbackRate);
+  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     // subscribe
     playback.on("ratechange", () => setRate(playback.playbackRate));
-    player.hub.on("canvasClick", () => setDialog({main: false, speed: false}));
+    player.hub.on("canvasClick", () => setDialog(Dialogs.None);
 
     // keyboard shortcuts
     keymap.bind("Shift+<", () => playback.playbackRate = PLAYBACK_RATES[Math.max(0, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1)]);
@@ -29,26 +38,67 @@ export default function Settings() {
     for (const rate of PLAYBACK_RATES) {
       map[rate] = onClick(() => {
         playback.playbackRate = rate;
-        setDialog({main: true, speed: false});
+        setDialog(Dialogs.Main);
       });
     }
     return map;
   }, []);
-  const toggle = useMemo(() => onClick(() => setDialog(prev => ({main: !(prev.main || prev.speed), speed: false}))), []);
+  const toggle = useMemo(() => onClick(() => setDialog(prev => (prev === Dialogs.None ? Dialogs.Main : Dialogs.None))), []);
 
-  // toggleSubtitles() {
-  //   document.body.classList.toggle("lv-captions");
-  //   this.forceUpdate();
-  // }
+  const toggleSubtitles = useMemo(() => onClick(() => {
+    document.body.classList.toggle("lv-captions")
+    forceUpdate();
+  }), []);
 
   // event handlers
-  const openMain = onClick(() => setDialog({main: true, speed: false}));
-  const openSpeed = onClick(() => setDialog({speed: true, main: false}));
+  const openMain = onClick(() => setDialog(Dialogs.Main));
+  const openSpeed = onClick(() => setDialog(Dialogs.Speed));
+  const openCaptions = onClick(() => setDialog(Dialogs.Captions));
 
-  const dialogStyle = {display: dialog.main ? "block" : "none"};
-  const speedDialogStyle = {display: dialog.speed ? "block" : "none"};
+  // styles
+  const dialogStyle = useMemo(() => ({
+    display: dialog === Dialogs.Main ? "block" : "none"
+  }), [dialog === Dialogs.Main]);
+  const speedDialogStyle = useMemo(() => ({
+    display: dialog === Dialogs.Speed ? "block" : "none"
+  }), [dialog === Dialogs.Speed]);
+  const captionDialogStyle = useMemo(() => ({
+    display: dialog === Dialogs.Captions ? "block" : "none"
+  }), [dialog === Dialogs.Captions]);
 
-  // const captions = document.body.classList.contains("lv-captions");
+  // captions, ugh
+  const mainAudio = React.useRef<HTMLAudioElement>();
+  React.useEffect(() => {
+    mainAudio.current = getMainAudio(player.canvas);
+    if (mainAudio.current) {
+      tracks.current = captionsAndSubtitles(mainAudio.current);
+    }
+  }, []);
+  const tracks = React.useRef<TextTrack[]>([]);
+  const selectedTrack = tracks.current.find(t => t.mode === "showing");
+  const setTrack = React.useMemo(() => onClick<HTMLElement>(e => {
+    // get index, this is kind of ugly
+    let i = -1;
+    let temp = e.currentTarget as Element;
+    while (temp = temp.previousElementSibling) i++;
+
+    // hide old tracks
+    for (let j = 0; j < tracks.current.length; ++j) {
+      if (j !== i) {
+        // this is absurd but necessary to dispatch cuechange???
+        tracks.current[j].mode = "disabled";
+        tracks.current[j].mode = "hidden";
+        tracks.current[j].mode = "disabled";
+      }
+    }
+
+    // activate new track
+    if (i >= 0)
+      tracks.current[i].mode = "showing";
+
+    // refresh
+    forceUpdate();
+  }), []);
 
   return (
     <div className="lv-controls-settings">
@@ -66,6 +116,21 @@ export default function Settings() {
           ))}
         </ul>
       </div>
+      <div className="lv-settings-captions-dialog" style={captionDialogStyle}>
+        <span className="lv-dialog-subtitle" {...openMain}>&lt; Captions</span>
+        <ul>
+          <li className={selectedTrack ? "" : "selected"} {...setTrack}>Off</li>
+          {tracks.current.map(track => (
+            <li
+              className={track === selectedTrack ? "selected" : ""}
+              key={track.id || track.label || track.language}
+              {...setTrack}
+            >
+              {trackLabel(track)}
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="lv-settings-dialog" style={dialogStyle}>
         <table>
           <tbody>
@@ -73,15 +138,10 @@ export default function Settings() {
               <th scope="row">Speed</th>
               <td>{currentRate === 1 ? "Normal" : currentRate} &gt;</td>
             </tr>
-            {/*<tr onClick={this.toggleSubtitles}>
-              <th scope="row">Subtitles</th>
-              <td>
-                <svg height="25" viewBox="0 0 70 50">
-                  <rect fill={captions ? wine : "#888"} x="2" y="11" height="28" width="66" rx="12" ry="12"/>
-                  <circle cx={captions ? 50: 20} cy="25" r="20" fill="#EEE"/>
-                </svg>
-              </td>
-            </tr>*/}
+            {tracks.current.length > 0 && <tr {...openCaptions}>
+              <th scope="row">Subtitles ({tracks.current.length})</th>
+              <td>{trackLabel(selectedTrack)} &gt;</td>
+            </tr>}
           </tbody>
         </table>
       </div>
@@ -93,4 +153,21 @@ export default function Settings() {
       </svg>
     </div>
   );
+}
+
+function getMainAudio(elt: HTMLDivElement) {
+  for (const audio of Array.from(elt.querySelectorAll("audio"))) {
+    if (captionsAndSubtitles(audio).length > 0)
+      return audio;
+  };
+}
+
+function trackLabel(track?: TextTrack) {
+  if (track === undefined)
+    return "Off";
+  return track.label || track.language;
+}
+
+function captionsAndSubtitles(audio: HTMLAudioElement) {
+  return Array.from(audio.textTracks).filter(t => ["captions", "subtitles"].includes(t.kind));
 }

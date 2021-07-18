@@ -17,6 +17,6 @@ export default function Captions() {
   }, []);
 
   return (
-    <div className="rp-captions-display" ref={domElement}/>
+    <div className="lv-captions-display" ref={domElement}/>
   );
 }
