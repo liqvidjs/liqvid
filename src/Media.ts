@@ -147,8 +147,8 @@ export default class Media extends React.PureComponent<Props> {
       this.domElement.currentTime = (t - this.start) / 1000;
       this.play().catch(this.playback.pause);
     } else {
-      if (!this.domElement.paused)
-        this.pause();
+      // if (!this.domElement.paused)
+      //   this.pause();
     }
   }
 
