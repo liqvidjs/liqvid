@@ -1,3 +1,7 @@
+## 2.0.8 (Jul 19, 2021)
+
+* fix bug introduced in 2.0.6 where Media ending would pause playback
+
 ## 2.0.7 (Jul 7, 2021)
 
 * package as UMD
