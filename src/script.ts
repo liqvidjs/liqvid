@@ -11,6 +11,10 @@ interface ScriptEvents {
   "markerupdate": number;
 }
 
+function normalize(t: string | number) {
+  return typeof t === "string" ? parseTime(t) : t;
+}
+
 export default class Script {
   hub: StrictEventEmitter<EventEmitter, ScriptEvents>;
   playback: Playback;
@@ -28,13 +32,13 @@ export default class Script {
     let time = 0;
     for (const marker of markers) {
       if (marker.length === 2) {
-        const [, duration] = marker as [string, string];
+        const [, duration] = marker;
         marker[1] = time;
-        (marker as (string | number)[])[2] = time + parseTime(duration);
+        (marker as (string | number)[])[2] = time + normalize(duration);
       } else {
-        const [, begin, end] = marker as [string, string, string];
-        marker[1] = parseTime(begin);
-        marker[2] = parseTime(end);
+        const [, begin, end] = marker;
+        marker[1] = normalize(begin);
+        marker[2] = normalize(end);
       }
 
       time = marker[2] as number;

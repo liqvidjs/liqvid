@@ -4,6 +4,8 @@
 
 * fix bug where scrubber keys could not be properly reassigned
 
+* fix normalization in Script constructor
+
 ## 2.0.7 (Jul 7, 2021)
 
 * package as UMD
