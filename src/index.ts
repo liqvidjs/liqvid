@@ -16,3 +16,11 @@ import Settings from "./controls/Settings";
 import TimeDisplay from "./controls/TimeDisplay";
 import Volume from "./controls/Volume";
 export const Controls = {FullScreen, PlayPause, Settings, TimeDisplay, Volume};
+
+Object.defineProperty(window, "Liqvid", {
+    get() {
+        if (typeof window.RactivePlayer !== "undefined") {
+            return window.RactivePlayer;
+        }
+    }
+});
