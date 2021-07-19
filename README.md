@@ -1,4 +1,4 @@
-# ractive-player
+# liqvid
 
 This is a library for making **interactive** videos in React.
 
@@ -12,6 +12,6 @@ Here's an interactive graph:
 
 To get started, clone https://github.com/ysulyma/rp-tutorial
 
-For documentation, visit https://ractive-player.org/
+For documentation, visit https://liqvidjs.org/
 
 For inspiration, see https://epiplexis.xyz/
