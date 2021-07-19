@@ -41,6 +41,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new TerserPlugin({
+        extractComments: false,
         parallel: true,
         terserOptions: {
           safari10: true
