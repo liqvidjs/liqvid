@@ -12,7 +12,7 @@ export default class Video extends Media {
     const {start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
 
     return (
-      <video preload="auto" ref={node => this.domElement = node} {...attrs}>
+      <video playsInline preload="auto" ref={node => this.domElement = node} {...attrs}>
         {children}
       </video>
     );
