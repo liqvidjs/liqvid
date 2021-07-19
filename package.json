@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ysulyma/ractive-player.git"
+    "url": "git+https://github.com/liqvidjs/player.git"
   },
-  "author": "Yuri Sulyma <yuri@ractive-player.org>",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ysulyma/ractive-player/issues"
+    "url": "https://github.com/liqvidjs/player/issues"
   },
-  "homepage": "https://github.com/ysulyma/ractive-player#readme",
+  "homepage": "https://github.com/liqvidjs/player#readme",
   "peerDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
