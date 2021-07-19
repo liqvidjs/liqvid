@@ -1,3 +1,7 @@
+## 2.0.10 (Jul 19, 2021)
+
+* add `playsInline` to `<Video>`
+
 ## 2.0.9 (Jul 19, 2021)
 
 * fix bug introduced in 2.0.6 where Media ending would pause playback
