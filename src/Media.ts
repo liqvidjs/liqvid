@@ -107,16 +107,12 @@ export default class Media extends React.PureComponent<Props> {
 
   pause() {
     if (!this.domElement.ended) {
-      this.domElement.removeEventListener("pause", this.onDomPause);
       this.domElement.pause();
-      this.domElement.addEventListener("pause", this.onDomPause);
     }
   }
 
   play() {
-    this.domElement.removeEventListener("play", this.onDomPlay);
     const promise = this.domElement.play();
-    this.domElement.addEventListener("play", this.onDomPlay);
     return promise;
   }
 
@@ -162,11 +158,15 @@ export default class Media extends React.PureComponent<Props> {
       this.playback.hub.off("play", this.onPlay);
       this.playback.play();
       this.playback.hub.on("play", this.onPlay);
+    } else if (this.playback.currentTime >= this.end) {
+      this.domElement.pause();
+      this.domElement.currentTime = this.domElement.duration;
+      this.playback.pause();
     }
   }
 
   onDomPause() {
-    if (!this.playback.seeking && !this.playback.paused && !this.domElement.ended) {
+    if (!this.playback.seeking && !this.playback.paused && this.playback.currentTime < this.end) {
       this.playback.hub.off("pause", this.pause);
       this.playback.pause();
       this.playback.hub.on("pause", this.pause);
