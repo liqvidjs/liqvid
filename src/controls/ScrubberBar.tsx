@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
@@ -27,9 +27,14 @@ export default function ScrubberBar(props: Props) {
   // refs
   const scrubberBar = useRef<HTMLDivElement>();
 
-  /* subscriptions */
-  useEffect(() => {
-    /* playback liseners */
+  /*
+    Set up subscriptions.
+    We don't do this in useEffect() because it needs to run
+    before useEffect()s in the video content.
+  */
+  const subscribed = useRef(false);
+  if (!subscribed.current) {
+    /* playback listeners */
     playback.hub.on("seek", () => {
       if (playback.seeking) return;
       const progress = playback.currentTime / playback.duration;
@@ -64,7 +69,8 @@ export default function ScrubberBar(props: Props) {
         playback.seek(playback.duration * num / 10);
       }
     });
-  }, []);
+    subscribed.current = true;
+  }
 
   // event handlers
   const divEvents = useMemo(() => {

@@ -2,6 +2,8 @@
 
 * fix bug introduced in 2.0.6 where Media ending would pause playback
 
+* fix bug where scrubber keys could not be properly reassigned
+
 ## 2.0.7 (Jul 7, 2021)
 
 * package as UMD
