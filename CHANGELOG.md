@@ -1,6 +1,8 @@
-## 2.0.8 (Jul 19, 2021)
+## 2.0.9 (Jul 19, 2021)
 
 * fix bug introduced in 2.0.6 where Media ending would pause playback
+
+## 2.0.8 (Jul 19, 2021)
 
 * fix bug where scrubber keys could not be properly reassigned
 
