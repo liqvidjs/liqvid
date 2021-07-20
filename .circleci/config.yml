@@ -1,0 +1,49 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: node:16.5.0-buster-slim
+  resource_class: small
+
+jobs:
+  npm-install:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: npm install
+          command: npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+             - .
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: lint
+          command: eslint . --ext .ts
+  
+  webpack:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: build
+          command: npx webpack
+      - store_artifacts:
+          path: /root/repo/dist/
+
+        
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - npm-install
+      - webpack:
+          requires:
+            - npm-install
