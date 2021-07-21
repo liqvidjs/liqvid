@@ -2,21 +2,18 @@ import * as assert from "assert";
 import Script from "../src/script";
 
 (globalThis.window as any) = {
-    AudioContext : class {
-        createGain(){
-            return { connect(x) {} };
-        }
+  AudioContext: class {
+    createGain() {
+      return { connect(x) {} };
     }
+  },
 };
 
-(globalThis.requestAnimationFrame as any) = function(cb){};
-
-
+(globalThis.requestAnimationFrame as any) = function (cb) {};
 
 this.audioContext = new (window.AudioContext || webkitAudioContext)();
 this.audioNode = this.audioContext.createGain();
 this.audioNode.connect(this.audioContext.destination);
-
 
 describe("Script", () => {
   describe("markers", () => {
@@ -37,14 +34,13 @@ describe("Script", () => {
       assert.strictEqual(script.parseEnd("ex/"), 16000);
     });
     it("blah", async () => {
-        const script = new Script([
-            ["intro/title", "0:05"],
-            ["intro/fun", "0:03"],
-            ["intro/agenda", "0:07"],
-            ["ex/", "0:01"],
-        ]);
-        script.playback.play();
-
-    })
+      const script = new Script([
+        ["intro/title", "0:05"],
+        ["intro/fun", "0:03"],
+        ["intro/agenda", "0:07"],
+        ["ex/", "0:01"],
+      ]);
+      script.playback.play();
+    });
   });
 });
