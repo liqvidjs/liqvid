@@ -97,3 +97,6 @@ workflows:
       - browser-tests:
           requires:
             - build-test-apps
+      - node-tests:
+          requires:
+            - npm-install
