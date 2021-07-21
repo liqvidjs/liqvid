@@ -48,6 +48,10 @@ jobs:
       - run:
           name: Build test apps
           command: npx webpack -c tests/test-apps/webpack.config.js || true
+      - persist_to_workspace:
+          root: .
+          paths:
+             - .
       - store_artifacts:
           path: /root/repo/tests/test-apps/bundles/
 
