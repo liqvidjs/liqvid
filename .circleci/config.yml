@@ -57,7 +57,7 @@ jobs:
 
   browser-tests:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.12.0-focal
+      - image: mcr.microsoft.com/playwright:v1.11.0-focal
     steps:
       - attach_workspace:
           at: .

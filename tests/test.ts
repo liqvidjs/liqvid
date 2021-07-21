@@ -37,7 +37,7 @@ test("basic", async ({ page, port }) => {
     playback.pause();
     return playback.currentTime;
   });
-  expect(Math.abs(curTime - 1000 - fuzzTime)).toBeLessThan(fuzzTime);
+  expect(Math.abs(curTime - 1000 - fuzzTime)).toBeLessThan(2*fuzzTime);
   expect(
     (await page.getAttribute(sel1, "style")).slice(0, hiddenStyle.length)
   ).toBe(hiddenStyle);
