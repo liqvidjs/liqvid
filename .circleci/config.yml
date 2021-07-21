@@ -53,21 +53,15 @@ jobs:
 
   browser-tests:
     docker:
-      - image: mcr.microsoft.com/playwright:focal
+      - image: mcr.microsoft.com/playwright:v1.12.0-focal
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: Fix weird firefox issue
-          command: |
-            cd /
-            yes | npx playwright
-            cd /root/repo/
           
       - run:
           name: Run Tests
           command: |
-            npm install -D @playwright/test
+            npx playwright test
   
 
 workflows:

@@ -5,11 +5,6 @@ export { expect } from "@playwright/test";
 
 import { serve } from "./server.ts";
 
-const express = require("express");
-const morgan = require("morgan");
-const compression = require("compression");
-const mustacheExpress = require("mustache-express");
-
 export const test = base.extend<{}, { port: Number }>({
   port: [
     async ({}, use, workerInfo) => {

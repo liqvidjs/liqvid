@@ -1,5 +1,4 @@
 const express = require("express");
-const morgan = require("morgan");
 const compression = require("compression");
 const mustacheExpress = require("mustache-express");
 import * as path from "path";
@@ -9,15 +8,9 @@ export async function* serve(port: Number) {
   const app = express();
 
   // standard stuff
-  // app.use(morgan("dev"))
   app.use(compression());
-
-  // Register '.html' extension with The Mustache Express
-  app.use(compression());
-
   // Register '.html' extension with The Mustache Express
   app.engine("html", mustacheExpress());
-
   app.set("view engine", "mustache");
   app.set("views", path.resolve(__dirname, "./test-apps"));
 
