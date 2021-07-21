@@ -15,8 +15,6 @@ function getconfig(name) {
     },
 
     externals: {
-      liqvid: "Liqvid",
-      "ractive-player": "RactivePlayer",
       react: "React",
       "react-dom": "ReactDOM",
     },

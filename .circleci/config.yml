@@ -35,6 +35,9 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Build main css
+          command: npx stylus styl
+      - run:
           name: Build main bundle
           command: npx webpack
       - store_artifacts:
@@ -97,6 +100,7 @@ workflows:
       - browser-tests:
           requires:
             - build-test-apps
+            - build-main
       - node-tests:
           requires:
             - npm-install
