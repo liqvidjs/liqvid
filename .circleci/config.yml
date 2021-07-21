@@ -64,7 +64,9 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-          
+      - run:
+          name: Build main css
+          command: npx stylus styl
       - run:
           name: Run Tests
           command: |
@@ -100,7 +102,6 @@ workflows:
       - browser-tests:
           requires:
             - build-test-apps
-            - build-main
       - node-tests:
           requires:
             - npm-install
