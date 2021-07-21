@@ -2,6 +2,7 @@ import { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from 'playwright';
 
 const config: PlaywrightTestConfig = {
+  testDir: "test-playwright",
   projects: [
     {
         name: 'Webkit',

@@ -1,5 +1,6 @@
 import * as ReactDOM from "react-dom";
 import { Player, Script } from "liqvidjs";
+import "../utils";
 
 const markers = [
   ["intro/title", "0:05"],
@@ -48,3 +49,6 @@ function Lesson() {
 }
 
 ReactDOM.render(<Lesson />, document.querySelector("main"));
+let globals = self as any;
+globals.playback = script.playback;
+globals.script = script;
