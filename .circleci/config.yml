@@ -33,12 +33,41 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: build
+          name: build-main
           command: npx webpack
       - store_artifacts:
           path: /root/repo/dist/
 
-        
+  build-test-apps:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build test apps
+          command: npx webpack -c tests/test-apps/webpack.config.js
+      - store_artifacts:
+          path: /root/repo/tests/test-apps/bundles/
+
+  browser-tests:
+    docker:
+      - image: mcr.microsoft.com/playwright:focal
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Fix weird firefox issue
+          command: |
+            cd /
+            yes | npx playwright
+            cd /root/repo/
+          
+      - run:
+          name: Run Tests
+          command: |
+            npm install -D @playwright/test
+  
+
 workflows:
   version: 2
   build-and-deploy:
