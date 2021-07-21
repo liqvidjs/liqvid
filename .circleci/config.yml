@@ -79,7 +79,7 @@ jobs:
           name: Mocha tests
           command: |
             mkdir test-results
-            MOCHA_FILE=./test-results/junit.xml mocha "./test-mocha/**/*.ts"  --reporter mocha-junit-reporter  
+            MOCHA_FILE=./test-results/junit.xml npx mocha "./test-mocha/**/*.ts"  --reporter mocha-junit-reporter  
       - store_test_results:
           path: test-results
 
