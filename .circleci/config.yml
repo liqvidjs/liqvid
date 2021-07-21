@@ -29,13 +29,13 @@ jobs:
           name: lint
           command: eslint . --ext .ts
   
-  webpack:
+  build-main:
     <<: *defaults
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: build-main
+          name: Build main bundle
           command: npx webpack
       - store_artifacts:
           path: /root/repo/dist/
@@ -75,6 +75,12 @@ workflows:
   build-and-deploy:
     jobs:
       - npm-install
-      - webpack:
+      - build-main:
           requires:
             - npm-install
+      - build-test-apps:
+          requires:
+            - npm-install
+      - browser-tests:
+          requires:
+            - build-test-apps
