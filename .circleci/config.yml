@@ -1,0 +1,107 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: node:16.5.0-buster-slim
+  resource_class: small
+
+jobs:
+  npm-install:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: npm install
+          command: | 
+            npm install
+            npm install --no-save
+      - persist_to_workspace:
+          root: .
+          paths:
+             - .
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: lint
+          command: eslint . --ext .ts
+  
+  build-main:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build main css
+          command: npx stylus styl
+      - run:
+          name: Build main bundle
+          command: npx webpack
+      - store_artifacts:
+          path: /root/repo/dist/
+
+  build-test-apps:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build test apps
+          command: npx webpack -c test-playwright/test-apps/webpack.config.js || true
+      - persist_to_workspace:
+          root: .
+          paths:
+             - .
+      - store_artifacts:
+          path: /root/repo/test-playwright/test-apps/bundles/
+
+  browser-tests:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.12.0-focal
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build main css
+          command: npx stylus styl
+      - run:
+          name: Run Tests
+          command: |
+            mkdir test-results
+            PLAYWRIGHT_JUNIT_OUTPUT_NAME="test-results/junit.xml" npx playwright test --reporter=junit,line
+      - store_test_results:
+          path: test-results
+  
+  node-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Mocha tests
+          command: |
+            mkdir test-results
+            MOCHA_FILE=./test-results/junit.xml npx ts-mocha "./test-mocha/**/*.ts"  --reporter mocha-junit-reporter  
+      - store_test_results:
+          path: test-results
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - npm-install
+      - build-main:
+          requires:
+            - npm-install
+      - build-test-apps:
+          requires:
+            - npm-install
+      - browser-tests:
+          requires:
+            - build-test-apps
+      - node-tests:
+          requires:
+            - npm-install

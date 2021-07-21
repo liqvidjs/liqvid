@@ -10,6 +10,7 @@
 /dist/ractive-player.min.css
 /dist/ractive-player.js
 /dist/ractive-player.min.js
+test-playwright/test-apps/bundles
 
 # types aren't yet generated the way we want them to be
 /types

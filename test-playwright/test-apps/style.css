@@ -1,0 +1,39 @@
+.rp-canvas {
+  background: #fff;
+}
+
+section {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+h1 {
+  /* color: purple; */
+  font-size: 8em;
+  text-align: center;
+  position: absolute;
+  top: 30%;
+  width: 100%;
+}
+
+h2 {
+  color: teal;
+  font-size: 5em;
+  text-align: center;
+  position: absolute;
+  top: 10%;
+  width: 100%;
+}
+
+#intro-props {
+  position: absolute;
+  left: 20%;
+  top: 20%;
+}
+
+#ex-list {
+  position: absolute;
+  left: 20%;
+  top: 30%;
+}
