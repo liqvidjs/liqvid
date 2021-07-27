@@ -2,12 +2,13 @@ import * as React from "react";
 import {EventEmitter} from "events";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
-import Captions from "./Captions";
+import CaptionsDisplay from "./CaptionsDisplay";
 import {KeyMap} from "@liqvid/keymap";
 import Playback from "./playback";
 import Script from "./script";
 
 import Controls from "./Controls";
+import Captions from "./controls/Captions";
 import FullScreen from "./controls/FullScreen";
 import PlayPause from "./controls/PlayPause";
 import type {ThumbData} from "./controls/ScrubberBar";

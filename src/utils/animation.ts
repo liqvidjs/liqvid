@@ -1,4 +1,4 @@
-import {constrain} from "./misc";
+import {constrain} from "@liqvid/utils/misc";
 import type {ReplayData} from "./replay-data";
 
 // animation
