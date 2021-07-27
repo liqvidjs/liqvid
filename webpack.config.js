@@ -4,7 +4,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 module.exports = {
   entry: `${__dirname}/src/index.ts`,
   output: {
-    filename: process.env.NODE_ENV === "development" ? "ractive-player.js" : "ractive-player.min.js",
+    filename: process.env.NODE_ENV === "development" ? "liqvid.js" : "liqvid.min.js",
     path: `${__dirname}/dist`,
     library: {
       name: "Liqvid",
@@ -43,6 +43,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new TerserPlugin({
+        extractComments: false,
         parallel: true,
         terserOptions: {
           safari10: true

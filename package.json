@@ -1,26 +1,32 @@
 {
-  "name": "ractive-player",
-  "version": "2.0.7",
+  "name": "liqvid",
+  "version": "2.0.10",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": [
     "dist/*"
   ],
-  "main": "dist/ractive-player.js",
-  "typings": "dist/ractive-player.d.ts",
+  "main": "dist/liqvid.js",
+  "typings": "dist/liqvid.d.ts",
   "scripts": {
-    "stylus": "stylus -o dist/ractive-player.css -w styl/ractive-player.styl",
-    "stylus-prod": "stylus -c -o dist/ractive-player.min.css -w styl/ractive-player.styl"
+    "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
+    "stylus-prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ysulyma/ractive-player.git"
+    "url": "git+https://github.com/liqvidjs/player.git"
   },
-  "author": "Yuri Sulyma <yuri@ractive-player.org>",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ysulyma/ractive-player/issues"
+    "url": "https://github.com/liqvidjs/player/issues"
   },
-  "homepage": "https://github.com/ysulyma/ractive-player#readme",
+  "homepage": "https://github.com/liqvidjs/player#readme",
+  "peerDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "react": "^17.0.1",
+    "strict-event-emitter-types": "^2.0.0"
+  },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.17.1",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
