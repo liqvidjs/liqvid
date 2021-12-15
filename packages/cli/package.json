@@ -1,0 +1,39 @@
+{
+  "name": "@liqvid/cli",
+  "version": "1.0.0",
+  "description": "Liqvid command line utility",
+  "main": "dist/index.js",
+  "bin": {
+    "liqvid": "liqvid-cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid#readme",
+  "devDependencies": {
+    "@types/cli-progress": "^3.9.2",
+    "@types/node": "^16.3.2",
+    "@types/yargs": "^17.0.2",
+    "ibm-watson": "^6.2.0",
+    "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "ibm-watson": "^6.2.0"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@liqvid/server": "^0.0.1",
+    "@liqvid/utils": "^0.0.1",
+    "cli-progress": "^3.9.0",
+    "execa": "^5.1.1",
+    "webpack": "^5.65.0",
+    "yargs": "^17.0.1",
+    "yargs-parser": "^20.2.9"
+  }
+}
