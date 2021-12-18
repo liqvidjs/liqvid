@@ -4,8 +4,6 @@ This module provides [GSAP](https://greensock.com/gsap/) integration for Liqvid.
 
 ## Installation
 
-## Installation
-
     $ npm install @liqvid/gsap
 
 ## Usage
