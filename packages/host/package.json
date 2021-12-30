@@ -1,0 +1,20 @@
+{
+  "name": "@liqvid/host",
+  "version": "1.0.0",
+  "description": "Liqvid host page script",
+  "files": [
+    "lv-host.js"
+  ],
+  "main": "lv-host.js",
+  "keywords": ["Liqvid", "React", "Javascript"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid#readme"
+}
