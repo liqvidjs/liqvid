@@ -4,11 +4,11 @@
   "description": "Liqvid command line utility",
   "main": "dist/index.js",
   "bin": {
-    "liqvid": "liqvid-cli.js"
+    "liqvid": "liqvid-cli.mjs"
   },
   "files": [
     "dist/*",
-    "liqvid-cli.js"
+    "liqvid-cli.mjs"
   ],
   "repository": {
     "type": "git",
