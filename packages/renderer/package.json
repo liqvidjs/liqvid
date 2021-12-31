@@ -27,7 +27,6 @@
     "@types/cli-progress": "^3.9.1",
     "@types/node": "^14.14.37",
     "@types/puppeteer-core": "^5.4.0",
-    "@types/yargs": "^16.0.1",
     "@typescript-eslint/eslint-plugin": "^4.11.1",
     "@typescript-eslint/parser": "^4.11.1",
     "eslint": "^7.16.0",
@@ -43,7 +42,6 @@
     "puppeteer-core": "10.0.0",
     "puppeteer-mass-screenshots": "^1.0.15",
     "puppeteer-video-recorder": "^1.0.5",
-    "yargs": "^16.2.0",
     "yargs-parser": "^20.2.7"
   }
 }
