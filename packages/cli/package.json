@@ -6,6 +6,10 @@
   "bin": {
     "liqvid": "liqvid-cli.js"
   },
+  "files": [
+    "dist/*",
+    "liqvid-cli.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
