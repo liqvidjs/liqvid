@@ -22,6 +22,9 @@ export async function main() {
   config = serve(config);
   config = render(config);
   config = thumbs(config);
+
+  // version
+  config.version(require("../package.json").version);
   
   return config.help().argv;
 }

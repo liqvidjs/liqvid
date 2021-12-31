@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Liqvid command line utility",
   "main": "dist/index.js",
   "bin": {
@@ -28,10 +28,10 @@
   },
   "sideEffects": false,
   "dependencies": {
-  	"@liqvid/captioning": "^0.0.1",
-  	"@liqvid/renderer": "^0.0.1",
-    "@liqvid/server": "^0.0.1",
-    "@liqvid/utils": "^0.0.1",
+  	"@liqvid/captioning": "^1.0.0",
+  	"@liqvid/renderer": "^1.0.2",
+    "@liqvid/server": "^1.0.0",
+    "@liqvid/utils": "^1.0.0",
     "cli-progress": "^3.9.0",
     "execa": "^5.1.1",
     "ts-node": "^10.4.0",
