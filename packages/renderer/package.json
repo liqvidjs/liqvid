@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/renderer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
   "files": [
     "dist/*"
@@ -35,7 +35,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@liqvid/utils": "0.0.1",
+    "@liqvid/utils": "^1.0.0",
     "cli-progress": "^3.9.0",
     "execa": "^5.0.0",
     "jimp": "^0.16.1",
