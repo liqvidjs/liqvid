@@ -1,0 +1,49 @@
+{
+  "name": "@liqvid/renderer",
+  "version": "0.0.1",
+  "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
+  "files": [
+    "dist/*"
+  ],
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/renderer#readme",
+  "devDependencies": {
+    "@types/cli-progress": "^3.9.1",
+    "@types/node": "^14.14.37",
+    "@types/puppeteer-core": "^5.4.0",
+    "@types/yargs": "^16.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.11.1",
+    "@typescript-eslint/parser": "^4.11.1",
+    "eslint": "^7.16.0",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@liqvid/utils": "0.0.1",
+    "cli-progress": "^3.9.0",
+    "execa": "^5.0.0",
+    "jimp": "^0.16.1",
+    "puppeteer-core": "10.0.0",
+    "puppeteer-mass-screenshots": "^1.0.15",
+    "puppeteer-video-recorder": "^1.0.5",
+    "yargs": "^16.2.0",
+    "yargs-parser": "^20.2.7"
+  }
+}
