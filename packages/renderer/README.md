@@ -1,23 +1,11 @@
 # @liqvid/renderer
 
-This package provides rendering utilities for [Liqvid](https://liqvidjs.org). It is used internally by [@liqvid/cli](../cli).
+This package handles utilities for [Liqvid](https://liqvidjs.org) interfacing with FFmpeg and/or Puppeteer. It is used internally by [@liqvid/cli](../cli), and handles the following commands:
 
-## Static video
+[`liqvid audio convert`](https://liqvidjs.org/docs/cli/audio#convert)
 
-Export a Liqvid project to a traditional mp4/webm video.
+[`liqvid audio join`](https://liqvidjs.org/docs/cli/audio#join)
 
-```bash
-liqvid render <url> <outfile>
-```
+[`liqvid render`](https://liqvidjs.org/docs/cli/render)
 
-See https://liqvidjs.org/docs/cli/render for full documentation.
-
-## Thumbnail generation
-
-Generate thumbnail sheets for previews on the scrubber bar.
-
-```bash
-liqvid thumbs <url>
-```
-
-See https://liqvidjs.org/docs/cli/thumbs for full documentation.
+[`liqvid thumbs`](https://liqvidjs.org/docs/cli/thumbs)
