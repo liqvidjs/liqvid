@@ -9,10 +9,32 @@ export function bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, me
     o[method] = (o[method] as Function).bind(o);
 }
 
+/**
+ * Linear interpolation from a to b.
+ */
+export function lerp(a: number, b: number, t: number) {
+  return a + t * (b - a);
+}
+
 /** Equivalent to `Math.min(max, Math.max(min, val))` */
-export function constrain(min: number, val: number, max: number) {
+export function clamp(min: number, val: number, max: number) {
   return Math.min(max, Math.max(min, val));
 }
+
+/** Equivalent to `Math.min(max, Math.max(min, val))` */
+export function constrain(min: number, val: number, max: number) {
+  return clamp(min, val, max);
+}
+
+/**
+  Returns [a, b). For backwards compatibility, returns [0, a) if passed a single argument.
+*/
+export function range(a: number, b?: number): number[] {
+  if (b === void 0) {
+    return range(0, a);
+  }
+  return new Array(b - a).fill(null).map((_, i) => a+i);
+};
 
 /** Returns a Promise that resolves in `time` milliseconds. */
 export function wait(time: number): Promise<void> {
@@ -35,13 +57,3 @@ export function waitFor(callback: () => boolean, interval = 10): Promise<void> {
     checkCondition();
   });
 }
-
-/**
-  Returns [a, b). For backwards compatibility, returns [0, a) if passed a single argument.
-*/
-export function range(a: number, b?: number): number[] {
-  if (b === void 0) {
-    return range(0, a);
-  }
-  return new Array(b - a).fill(null).map((_, i) => a+i);
-};

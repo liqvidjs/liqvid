@@ -3,7 +3,9 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "removeComments": false,
+    "rootDir": "./src",
+    "module": "esnext"
   },
   "include": ["./src"]
 }

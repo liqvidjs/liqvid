@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Utility functions for Liqvid",
   "exports": {
-    "./": "./dist/"
+    "./*": {
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    }
   },
   "typesVersions": {
     "*": {
@@ -12,6 +15,9 @@
       ]
     }
   },
+  "files": [
+    "dist/*"
+  ],
   "type": "module",
   "repository": {
     "type": "git",
@@ -26,5 +32,8 @@
   "sideEffects": false,
   "devDependencies": {
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "bezier-easing": "^2.1.0"
   }
 }
