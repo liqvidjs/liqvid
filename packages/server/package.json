@@ -2,17 +2,8 @@
   "name": "@liqvid/server",
   "version": "0.0.1",
   "description": "Development server for Liqvid",
-  "exports": {
-    ".": "./dist/index.js",
-    "./template": "./dist/template.js"
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*"
-      ]
-    }
-  },
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "files": [
     "dist/*"
   ],
@@ -20,6 +11,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
+    "@liqvid/magic": "^0.0.1",
     "@types/express": "^4.17.13",
     "@types/node": "^16.11.13",
     "body-parser": "^1.19.1",

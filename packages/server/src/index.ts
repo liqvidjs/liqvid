@@ -11,14 +11,18 @@ import webpack from "webpack";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-import {scripts as defaultScripts, styles as defaultStyles} from "./default-assets";
-import {template} from "./template";
+import {transform, scripts as defaultScripts, styles as defaultStyles, StyleData, ScriptData} from "@liqvid/magic";
 import {AddressInfo} from "ws";
 
 /**
  * Create Express app to run Liqvid development server.
  */ 
 export function createServer(config: {
+  /**
+   * Build directory.
+   */ 
+  build?: string;
+
   /**
    * Port to run LiveReload on.
    */ 
@@ -32,7 +36,11 @@ export function createServer(config: {
   /**
    * Static directory.
    */
-   static?: string; 
+   static?: string;
+
+   scripts?: Record<string, ScriptData>;
+
+   styles?: Record<string, StyleData>;
 }) {
   const app = express();
   const cwd = process.cwd();
@@ -52,13 +60,26 @@ export function createServer(config: {
 
   app.use("/", htmlMagic);
   app.use("/", express.static(config.static));
-  app.listen(config.port);
+  app.use("/dist", express.static(config.build));
 
-  console.log(`Server listening on port ${config.port}`);
+  // support dynamic port via config.port = 0
+  const server = app.listen(config.port);
+  server.on("listening", () => {
+    const {port} = server.address() as AddressInfo;
+    app.set("port", port);
 
+    console.log(`View your video at http://localhost:${port}`);
+
+    runWebpack(port);
+  });
+  server.on("error", err => {
+    console.error(err);
+    process.exit(1);
+  });
+
+  // livereload
   const lr = createLivereload(config.livereloadPort);
   app.set("livereloadPort", (lr.server.address() as AddressInfo).port);
-  runWebpack(config.port);
 
   return app;
 }
@@ -93,20 +114,21 @@ const htmlMagic: express.RequestHandler = async (req, res, next) => {
       scripts,
       styles: defaultStyles
     };
-    res.send(template(file, config));
+    res.send(transform(file, config));
   } catch(e) {
     next();
   }
 }
 
 /**
- * Create LiveReload server.
- */ 
+ * Run LiveReload server
+ * @param port Port to run LiveReload on
+ */
 function createLivereload(port: number) {
   /* livereload */
   const lrHttpServer = livereload.createServer({
     exts: ["html", "css", "png", "gif", "jpg", "svg"],
-    port: 0
+    port
   });
   
   lrHttpServer.watch(process.cwd());
