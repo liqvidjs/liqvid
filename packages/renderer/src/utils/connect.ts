@@ -43,7 +43,7 @@ export async function connect({
   await page.evaluate(async () => {
     const searchKeys = ["child", "stateNode", "current"];
 
-    function searchTree(obj: unknown, depth=0): unknown {
+    function searchTree(obj: any, depth=0): unknown {
       if (depth > 5)
         return;
       for (const key of searchKeys) {
@@ -65,7 +65,7 @@ export async function connect({
     const key = Object.keys(root).find(key => key.startsWith("__reactContainer"));
 
     await Liqvid.Utils.misc.waitFor(
-      () => (window as any).player = searchTree(root[key]) as boolean
+      () => (window as any).player = searchTree(root[key as keyof typeof root]) as boolean
     );
   });
 

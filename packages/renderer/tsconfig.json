@@ -1,19 +1,11 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "alwaysStrict": true,
-    "declaration": false,
-    "esModuleInterop": true,
-    "incremental": true,
-    "jsx": "react",
-    "lib": ["esnext", "dom"],
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "noImplicitAny": true,
+    "composite": true,
     "outDir": "./dist",
-    "pretty": true,
-    "removeComments": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "target": "ES2017"
+    "rootDir": ".",
+    "module": "commonjs",
+    "target": "esnext"
   },
-  "files": ["./index.ts"]
+  "include": ["./src"]
 }

@@ -1,17 +1,11 @@
 {
   "name": "@liqvid/renderer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
   "files": [
     "dist/*"
   ],
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*"
-      ]
-    }
-  },
+  "typings": "./dist/index.d.ts",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
