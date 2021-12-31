@@ -5,10 +5,10 @@ import path from "path";
 
 import {parseConfig, DEFAULT_CONFIG} from "./config.js";
 import webpack from "webpack";
-import {template, scripts, styles} from "@liqvid/server/template";
+import {transform, scripts, styles, ScriptData, StyleData} from "@liqvid/magic";
 
 /**
- * Transcribe audio file
+ * Build project
 */ 
 export const build = (yargs: typeof Yargs) =>
   yargs
@@ -16,6 +16,12 @@ export const build = (yargs: typeof Yargs) =>
     return (yargs
       .config("config", parseConfig("build"))
       .default("config", DEFAULT_CONFIG)
+      .option("clean", {
+        alias: "C",
+        default: false,
+        desc: "Delete old dist directory before starting",
+        type: "boolean"
+      })
       .option("out", {
         alias: "o",
         coerce: path.resolve,
@@ -23,33 +29,66 @@ export const build = (yargs: typeof Yargs) =>
         default: "./dist",
         normalize: true
       })
+      .option("static", {
+        alias: "s",
+        coerce: path.resolve,
+        desc: "Static directory",
+        default: "./static"
+      })
+      .option("scripts", {
+        coerce: coerceScripts,
+        desc: "Script aliases",
+        default: {}
+      })
+      .option("styles", {
+        desc: "Style aliases",
+        default: {}
+      })
     );
   }, (args) => {
     return buildProject(args);
   })
 
-async function buildProject(config: {
+export async function buildProject(config: {
+  /** Clean build directory */
+  clean: boolean;
+  
+  /** Output directory */
   out: string;
+
+  /** Static directory */
+  static: string;
+
+  scripts: Record<string, ScriptData>;
+
+  styles: Record<string, StyleData>;
 }) {
-  console.log("!", Object.keys(scripts));
   // clean build directory
-  console.log("Cleaning build directory...");
-  await fsp.rm(config.out, {force: true, recursive: true});
+  if (config.clean) {
+    console.log("Cleaning build directory...");
+    await fsp.rm(config.out, {force: true, recursive: true});
+  }
+
+  // ensure build directory exists
   await fsp.mkdir(config.out, {recursive: true});
 
   // copy static files
   console.log("Copying files...");
-  await buildStatic(config);  
+  await buildStatic(config);
 
   // webpack
   console.log("Creating production bundle...");
   await buildBundle(config);
 }
 
+/**
+ * Copy over static files.
+ */
 async function buildStatic(config: {
   out: string;
+  static: string;
 }) {
-  const staticDir = path.resolve(process.cwd(), "static");
+  const staticDir = path.resolve(process.cwd(), config.static);
 
   await walkDir(staticDir, async (filename) => {
     const relative = path.relative(staticDir, filename);
@@ -58,9 +97,9 @@ async function buildStatic(config: {
     // apply html magic
     if (filename.endsWith(".html")) {
       const file = await fsp.readFile(filename, "utf8");
-      await idemWrite(dest, template(file, {mode: "production", scripts, styles}))
-    } else if (filename === "bundle.js") {
-
+      await idemWrite(dest, transform(file, {mode: "production", scripts, styles}))
+    } else if (relative === "bundle.js") {
+      
     } else {
       await fsp.mkdir(path.dirname(dest), {recursive: true});
       await fsp.copyFile(filename, dest);
@@ -68,10 +107,14 @@ async function buildStatic(config: {
   });
 }
 
+/**
+ * Compile bundle in production mode.
+ */
 async function buildBundle(config: {
   out: string;
 }) {
   // configure webpack
+  process.env.NODE_ENV = "production";
   const webpackConfig = require(path.join(process.cwd(), "webpack.config.js"));
   webpackConfig.mode = "production";
   webpackConfig.output.path = config.out;
@@ -121,4 +164,23 @@ async function walkDir(dirname: string, callback: (filename: string) => Promise<
       return callback(file);
     }
   }));
+}
+
+/**
+ * Fix files.
+ */
+function coerceScripts(json: Record<string, {
+  crossorigin?: boolean | string;
+  development?: string;
+  production?: string;
+} | string>) {
+  for (const key in json) {
+    const record = json[key];
+    if (typeof record === "object") {
+      if (typeof record.crossorigin === "string" && ["true","false"].includes(record.crossorigin)) {
+        record.crossorigin = record.crossorigin === "true";
+      }
+    }
+  }
+  return json;
 }
