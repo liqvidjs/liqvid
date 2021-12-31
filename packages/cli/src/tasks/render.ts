@@ -10,7 +10,8 @@ yargs.command("render", "Render static video", (yargs) => {
   .default("config", DEFAULT_CONFIG)
   .example([
     ["liqvid render"],
-    ["liqvid render -u http://localhost:8080/dist/ -o video.webm"]
+    ["liqvid render -a ./audio/audio.webm -o video.webm"],
+    ["liqvid render -u http://localhost:8080/dist/"]
   ])
   // Selection
   .group(["audio-file", "output", "url", "duration", "end", "sequence", "start"], "What to render")
@@ -48,7 +49,8 @@ yargs.command("render", "Render static video", (yargs) => {
     alias: "o",
     default: "./video.mp4",
     desc: "Output filename",
-    normalize: true
+    normalize: true,
+    demandOption: true
   })
   .option("url", {
     alias: "u",
