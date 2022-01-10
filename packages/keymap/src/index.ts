@@ -27,9 +27,15 @@ const useCode = [
   "Tab"
 ];
 
-export class KeyMap {
-  #bindings: Bindings;
+/** Maps keyboard shortcuts to actions */
+export class Keymap {
+  private __bindings: Bindings;
 
+  constructor() {
+    this.__bindings = {};
+  }
+
+  /** Given a KeyboardEvent, returns a shortcut sequence matching that event. */
   static identify(e: KeyboardEvent) {
     const parts: string[] = [];
     for (const modifier in modifierMap) {
@@ -50,6 +56,7 @@ export class KeyMap {
     return parts.join("+");
   }
 
+  /** Returns a canonical form of the shortcut sequence. */
   static normalize(seq: string) {
     return seq.split("+").map(str => {
       const lower = str.toLowerCase();
@@ -77,10 +84,11 @@ export class KeyMap {
     }).join("+");
   }
 
-  constructor() {
-    this.#bindings = {};
-  }
-
+  /**
+   * Bind a handler to be called when the shortcut sequence is pressed.
+   * @param seq Shortcut sequence
+   * @param cb Callback function
+   */
   bind(seq: string, cb: Callback) {
     if (seq.indexOf(",") > -1) {
       for (const atomic of seq.split(",")) {
@@ -88,13 +96,18 @@ export class KeyMap {
       }
       return;
     }
-    seq = KeyMap.normalize(seq);
-    if (!this.#bindings.hasOwnProperty(seq)) {
-      this.#bindings[seq] = [];
+    seq = Keymap.normalize(seq);
+    if (!this.__bindings.hasOwnProperty(seq)) {
+      this.__bindings[seq] = [];
     }
-    this.#bindings[seq].push(cb);
+    this.__bindings[seq].push(cb);
   }
 
+  /**
+   * Unbind a handler from a shortcut sequence.
+   * @param seq Shortcut sequence
+   * @param cb Handler to unbind
+   */
   unbind(seq: string, cb: Callback) {
     if (seq.indexOf(",") > -1) {
       for (const atomic of seq.split(",")) {
@@ -102,62 +115,58 @@ export class KeyMap {
       }
       return;
     }
-    seq = KeyMap.normalize(seq);
-    if (!this.#bindings.hasOwnProperty(seq))
+    seq = Keymap.normalize(seq);
+    if (!this.__bindings.hasOwnProperty(seq))
       throw new Error(`${seq} is not bound`);
-    const index = this.#bindings[seq].indexOf(cb);
+    const index = this.__bindings[seq].indexOf(cb);
     if (index < 0) {
       throw new Error(`${seq} is not bound to ${cb.name ?? "callback"}`);
     }
-    this.#bindings[seq].splice(index, 1);
-    if (this.#bindings[seq].length === 0) {
-      delete this.#bindings[seq];
+    this.__bindings[seq].splice(index, 1);
+    if (this.__bindings[seq].length === 0) {
+      delete this.__bindings[seq];
     }
   }
 
+  /** Return all shortcut sequences with handlers bound to them. */
   getKeys() {
-    return Object.keys(this.#bindings);
+    return Object.keys(this.__bindings);
   }
 
+  /** Get the list of handlers for a given shortcut sequence. */
   getHandlers(seq: string) {
-    if (!this.#bindings.hasOwnProperty(seq))
+    if (!this.__bindings.hasOwnProperty(seq))
       return [];
-    return this.#bindings[seq].slice();
+    return this.__bindings[seq].slice();
   }
-
+  
+  /** Dispatches all handlers matching the given event. */
   handle(e: KeyboardEvent) {
-    let defaultPrevented = false;
-    const seq = KeyMap.identify(e);
+    const seq = Keymap.identify(e);
 
-    if (!this.#bindings[seq] && !this.#bindings["*"])
+    if (!this.__bindings[seq] && !this.__bindings["*"])
       return;
 
-    if (defaultPrevented) {
+    if (this.__bindings[seq]) {
       e.preventDefault();
-      defaultPrevented = true;
-    }
-
-    if (this.#bindings[seq]) {
-      for (const cb of this.#bindings[seq]) {
+      
+      for (const cb of this.__bindings[seq]) {
         cb(e);
       }
     }
 
-    if (this.#bindings["*"]) {
-      for (const cb of this.#bindings["*"]) {
+    if (this.__bindings["*"]) {
+      for (const cb of this.__bindings["*"]) {
         cb(e);
       }
     }
   }
 }
 
-function titlecase(str: string) {
-  if (str === "")
-    return "";
-  return str[0].toUpperCase() + str.slice(1).toLowerCase();
-}
-
-function cmp(a: unknown, b: unknown) {
+/**
+ * Returns -1 if a < b, 0 if a === b, and 1 if a > b.
+ */
+function cmp<T>(a: T, b: T) {
   if (a < b)
     return -1;
   else if (a === b)

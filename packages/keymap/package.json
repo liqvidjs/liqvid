@@ -1,20 +1,41 @@
 {
   "name": "@liqvid/keymap",
   "version": "1.0.0",
-  "description": "Key bindings for Liqvid",
-  "main": "dist/index.js",
+  "description": "Key binding for Liqvid",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
+  "exports": {
+    ".": "./dist/index.js",
+    "./react": "./dist/react.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
   "devDependencies": {
     "typescript": "^4.3.5"
   },
   "sideEffects": false,
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
 }
