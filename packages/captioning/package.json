@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/captioning",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Audio transcription and captioning for Liqvid",
   "files": [
     "dist/*"
@@ -33,8 +33,5 @@
     "ibm-watson": {
       "optional": true
     }
-  },
-  "dependencies": {
-    "@liqvid/utils": "0.0.1"
   }
 }
