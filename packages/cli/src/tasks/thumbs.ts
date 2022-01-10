@@ -25,7 +25,7 @@ yargs.command("thumbs", "Generate thumbnails", (yargs) => {
     default: "http://localhost:3000/dist/"
   })
   // General
-  .group(["browser-executable", "concurrency", "config", "help", "output", "url"], "General options")
+  .group(["browser-executable", "concurrency", "config", "help"], "General options")
   .option("browser-executable", BROWSER_EXECUTABLE)
   .option("concurrency", CONCURRENCY)
   // Format

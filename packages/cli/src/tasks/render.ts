@@ -14,12 +14,30 @@ yargs.command("render", "Render static video", (yargs) => {
     ["liqvid render -u http://localhost:8080/dist/"]
   ])
   // Selection
-  .group(["audio-file", "output", "url", "duration", "end", "sequence", "start"], "What to render")
+  .group(["audio-file", "output", "url"], "What to render")
   .option("audio-file", {
     alias: "a",
     desc: "Path to audio file",
     normalize: true
   })
+  .option("output", {
+    alias: "o",
+    default: "./video.mp4",
+    desc: "Output filename",
+    normalize: true,
+    demandOption: true
+  })
+  .option("url", {
+    alias: "u",
+    desc: "URL of video to generate thumbs for",
+    default: "http://localhost:3000/dist/"
+  })
+  // General configuration
+  .group(["browser-executable", "concurrency", "config", "help"], "General options")
+  .option("browser-executable", BROWSER_EXECUTABLE)
+  .option("concurrency", CONCURRENCY)
+  // Input options
+  .group(["duration", "end", "sequence", "start"], "Input options")
   .option("start", {
     alias: "s",
     coerce: coerceTime,
@@ -45,22 +63,6 @@ yargs.command("render", "Render static video", (yargs) => {
     desc: "Output image sequence instead of video. If this flag is set, --output will be interpreted as a directory.",
     type: "boolean"
   })
-  .option("output", {
-    alias: "o",
-    default: "./video.mp4",
-    desc: "Output filename",
-    normalize: true,
-    demandOption: true
-  })
-  .option("url", {
-    alias: "u",
-    desc: "URL of video to generate thumbs for",
-    default: "http://localhost:3000/dist/"
-  })
-  // general configuration
-  .group(["browser-executable", "concurrency", "config", "help"], "General options")
-  .option("browser-executable", BROWSER_EXECUTABLE)
-  .option("concurrency", CONCURRENCY)
   // Frames
   .group(["height", "image-format", "quality", "width"], "Frame formatting")
   .option("height", {
