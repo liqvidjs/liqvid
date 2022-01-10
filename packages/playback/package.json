@@ -2,10 +2,20 @@
   "name": "@liqvid/playback",
   "version": "1.0.0",
   "description": "Playback class for Liqvid",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "exports": {
+    ".": "./dist/index.js",
+    "./react": "./dist/react.js"
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
@@ -15,15 +25,23 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/playback#readme",
   "devDependencies": {
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.2"
   },
   "dependencies": {
-    "@liqvid/utils": "^1.0.0",
+    "@liqvid/utils": "*",
     "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
 }
