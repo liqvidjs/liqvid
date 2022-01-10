@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
   "sideEffects": false,
   "devDependencies": {
     "typescript": "^4.3.5"
