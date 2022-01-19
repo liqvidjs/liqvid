@@ -5,7 +5,7 @@ import path from "path";
 
 import {parseConfig, DEFAULT_CONFIG} from "./config.js";
 import webpack from "webpack";
-import {transform, scripts, styles, ScriptData, StyleData} from "@liqvid/magic";
+import {transform, scripts as defaultScripts, styles as defaultStyles, ScriptData, StyleData} from "@liqvid/magic";
 
 /**
  * Build project
@@ -87,8 +87,12 @@ export async function buildProject(config: {
 async function buildStatic(config: {
   out: string;
   static: string;
+  scripts: Record<string, ScriptData>;
+  styles: Record<string, StyleData>;
 }) {
   const staticDir = path.resolve(process.cwd(), config.static);
+  const scripts = Object.assign({}, defaultScripts, config.scripts);
+  const styles = Object.assign({}, defaultStyles, config.styles);
 
   await walkDir(staticDir, async (filename) => {
     const relative = path.relative(staticDir, filename);

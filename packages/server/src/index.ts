@@ -1,18 +1,14 @@
+import {ScriptData, scripts as defaultScripts, StyleData, styles as defaultStyles, transform} from "@liqvid/magic";
+import bodyParser from "body-parser";
+import {exec} from "child_process";
+import compression from "compression";
+import cookieParser from "cookie-parser";
 import express from "express";
 import {promises as fsp} from "fs";
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
-import {exec} from "child_process";
 import livereload from "livereload";
-import compression from "compression";
+import * as path from "path";
 import webpack from "webpack";
-
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-
-import {transform, scripts as defaultScripts, styles as defaultStyles, StyleData, ScriptData} from "@liqvid/magic";
-import {AddressInfo} from "ws";
+import type {AddressInfo} from "ws";
 
 /**
  * Create Express app to run Liqvid development server.
@@ -43,7 +39,6 @@ export function createServer(config: {
    styles?: Record<string, StyleData>;
 }) {
   const app = express();
-  const cwd = process.cwd();
 
   // standard stuff
   app.use(compression());
@@ -58,7 +53,27 @@ export function createServer(config: {
   // vars
   app.set("static", config.static);
 
-  app.use("/", htmlMagic);
+  // livereload
+  const lr = createLivereload(config.livereloadPort, config.static);
+  const lrPort = (lr.server.address() as AddressInfo).port;
+  app.set("livereloadPort", lrPort);
+
+  // magic
+  const scripts = Object.assign({}, defaultScripts, config.scripts ?? {}, {
+    "livereload": {
+      development() {
+        return (
+          "document.write(`<script src=\"${location.protocol}//${(location.host || 'localhost').split(':')[0]}:" + 
+          lrPort +
+          "/livereload.js?snipver=1\"></` + 'script>');"
+        );
+      }
+    }
+  });
+  const styles = Object.assign({}, defaultStyles, config.styles ?? {});
+
+  // routes
+  app.use("/", htmlMagic(scripts, styles));
   app.use("/", express.static(config.static));
   app.use("/dist", express.static(config.build));
 
@@ -77,46 +92,27 @@ export function createServer(config: {
     process.exit(1);
   });
 
-  // livereload
-  const lr = createLivereload(config.livereloadPort);
-  app.set("livereloadPort", (lr.server.address() as AddressInfo).port);
-
   return app;
 }
 
-const htmlMagic: express.RequestHandler = async (req, res, next) => {
-  let filename;
-  if (req.path.endsWith("/")) {
-    filename = req.path + "index.html";
-  } else if (req.path.endsWith(".html")) {
-    filename = req.path;
-  } else {
-    return next();
-  }
+function htmlMagic(scripts: Record<string, ScriptData>, styles: Record<string, StyleData>): express.RequestHandler {
+  return async (req, res, next) => {
+    let filename;
+    if (req.path.endsWith("/")) {
+      filename = req.path + "index.html";
+    } else if (req.path.endsWith(".html")) {
+      filename = req.path;
+    } else {
+      return next();
+    }
 
-  // content files
-  try {
-    let file = await fsp.readFile(path.join(req.app.get("static"), filename), "utf8");
-    const scripts = Object.assign({}, defaultScripts, {
-      "livereload": {
-        development() {
-          const port = req.app.get("livereloadPort");
-          return (
-            "document.write(`<script src=\"${location.protocol}//${(location.host || 'localhost').split(':')[0]}:" + 
-            port +
-            "/livereload.js?snipver=1\"></` + 'script>');"
-          );
-        }
-      }
-    });
-    const config = {
-      mode: "development" as const,
-      scripts,
-      styles: defaultStyles
-    };
-    res.send(transform(file, config));
-  } catch(e) {
-    next();
+    // content files
+    try {
+      const file = await fsp.readFile(path.join(req.app.get("static"), filename), "utf8");
+      res.send(transform(file, {mode: "development", scripts, styles}));
+    } catch(e) {
+      next();
+    }
   }
 }
 
@@ -124,14 +120,14 @@ const htmlMagic: express.RequestHandler = async (req, res, next) => {
  * Run LiveReload server
  * @param port Port to run LiveReload on
  */
-function createLivereload(port: number) {
+function createLivereload(port: number, staticDir: string) {
   /* livereload */
   const lrHttpServer = livereload.createServer({
     exts: ["html", "css", "png", "gif", "jpg", "svg"],
     port
   });
   
-  lrHttpServer.watch(process.cwd());
+  lrHttpServer.watch(staticDir);
 
   return lrHttpServer;
 }
