@@ -1,6 +1,11 @@
 node_modules
 dist
+coverage
 tsconfig.tsbuildinfo
 lerna-debug.log
 .DS_Store
+*.code-*
 *.sublime-*
+*.log
+
+packages/**/LICENSE

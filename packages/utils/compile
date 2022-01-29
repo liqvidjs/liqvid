@@ -1,6 +1,0 @@
-tsc -m commonjs && echo "done"
-for x in dist/*.js
-  do
-    mv $x "${x%.js}.cjs"
-  done
-tsc
