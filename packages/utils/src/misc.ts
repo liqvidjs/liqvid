@@ -3,9 +3,15 @@ export function between(min: number, val: number, max: number) {
   return (min <= val) && (val < max);
 }
 
-/** Bind methods on o. */
+/**
+ * Bind methods on an object.
+ * @param o Object on which to bind methods
+ * @param methods Method names to bind
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, methods: K[]) {
   for (const method of methods)
+    // eslint-disable-next-line @typescript-eslint/ban-types
     o[method] = (o[method] as Function).bind(o);
 }
 
@@ -16,12 +22,22 @@ export function lerp(a: number, b: number, t: number) {
   return a + t * (b - a);
 }
 
-/** Equivalent to `Math.min(max, Math.max(min, val))` */
+/**
+ * Clamps a value between a lower and upper bound. Aliased as {@link constrain}.
+ * @param min Lower bound
+ * @param val Value to clamp
+ * @param max Upper bound
+ */
 export function clamp(min: number, val: number, max: number) {
   return Math.min(max, Math.max(min, val));
 }
 
-/** Equivalent to `Math.min(max, Math.max(min, val))` */
+/**
+ * Clamps a value between a lower and upper bound. Alias for {@link clamp}.
+ * @param min Lower bound
+ * @param val Value to clamp
+ * @param max Upper bound
+ */
 export function constrain(min: number, val: number, max: number) {
   return clamp(min, val, max);
 }
@@ -34,7 +50,7 @@ export function range(a: number, b?: number): number[] {
     return range(0, a);
   }
   return new Array(b - a).fill(null).map((_, i) => a+i);
-};
+}
 
 /** Returns a Promise that resolves in `time` milliseconds. */
 export function wait(time: number): Promise<void> {
