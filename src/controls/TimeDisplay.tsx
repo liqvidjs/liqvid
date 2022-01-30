@@ -1,14 +1,14 @@
-import * as React from "react";
-
-import {useForceUpdate} from "../utils/react-utils";
-import {usePlayback} from "../hooks";
 import {formatTime} from "@liqvid/utils/time";
+import * as React from "react";
+import {useEffect} from "react";
+import {usePlayback} from "../hooks";
+import {useForceUpdate} from "../utils/react-utils";
 
 export default function TimeDisplay() {
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     playback.on("durationchange", forceUpdate);
     playback.on("seek", forceUpdate);
     playback.on("timeupdate", forceUpdate);

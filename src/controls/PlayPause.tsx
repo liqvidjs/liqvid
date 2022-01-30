@@ -1,12 +1,13 @@
+import {useKeymap} from "@liqvid/keymap/react";
+import {usePlayback} from "@liqvid/playback/react";
 import * as React from "react";
-import {useEffect, useMemo, useRef} from "react";
-
-import {useKeyMap, usePlayback} from "../hooks";
+import {useEffect, useMemo} from "react";
+import {strings} from "../i18n";
 import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
 
 export default function PlayPause() {
-  const keymap = useKeyMap();
+  const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
@@ -34,19 +35,23 @@ export default function PlayPause() {
   }, []);
 
   // event handler
-  const button = useRef<SVGSVGElement>();
-  const events = useMemo(
-    () => onClick(() => playback.paused ? playback.play() : playback.pause(), button)
-    , []);
+  const events = useMemo(() => onClick(() => playback.paused ? playback.play() : playback.pause()), []);
+  const label = ((playback.paused || playback.seeking) ? strings.PLAY : strings.PAUSE) + " (k)";
 
   return (
-    <svg className="lv-controls-playpause" viewBox="0 0 36 36" {...events}>
-      {
-        (playback.paused || playback.seeking) ?
-          <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>
-          :
-          <path d="M 12 26 h 4 v -16 h -4 z M 21 26 h 4 v -16 h -4 z" fill="white"/>
-      }
-    </svg>
+    <button className="lv-controls-playpause" aria-label={label} title={label} {...events}>
+      <svg viewBox="0 0 36 36">
+        {(playback.paused || playback.seeking) ? playIcon : pauseIcon}
+      </svg>
+    </button>
   );
 }
+
+
+/** Play icon */
+const playIcon =
+<path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>;
+
+/** Pause icon */
+const pauseIcon = <path d="M 12 26 h 4 v -16 h -4 z M 21 26 h 4 v -16 h -4 z" fill="white"/>;
+
