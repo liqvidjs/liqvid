@@ -1,0 +1,4 @@
+Object.defineProperty(window, 'DocumentTimeline', {
+  writable: true,
+  value: jest.fn().mockImplementation(() => ({})),
+});
