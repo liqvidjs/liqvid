@@ -1,17 +1,38 @@
 import BezierEasing from "bezier-easing";
 
-import {constrain, lerp} from "./misc.js";
+import {clamp, lerp} from "./misc";
 import type {ReplayData} from "./replay-data";
 
 interface AnimateOptions {
+  /**
+   * Start value for animation.
+   * @default 0
+   */
   startValue?: number;
+
+  /**
+   * End value for animation.
+   * @default 1
+   */
   endValue?: number;
+
+  /** Start time for animation. */
   startTime: number;
+
+  /** Duration of animation in milliseconds. */
   duration: number;
+
+  /** Easing function. Defaults to the identity function, i.e. linear easing. */
   easing?: (x: number) => number;
 }
 
-// animation
+/**
+ * Returns a function that takes in a time in milliseconds and returns a numeric value.
+ * The function will return `startValue` whenever t is less than `startTime`, and similarly
+ * will return `endValue` whenever t is greater than `startTime + duration`.
+ * 
+ * If an array is passed, the functions are combined.
+*/
 export function animate(options: AnimateOptions | AnimateOptions[]) {
   if (options instanceof Array) {
     options.sort((a, b) => a.startTime - b.startTime);
@@ -28,7 +49,7 @@ export function animate(options: AnimateOptions | AnimateOptions[]) {
         }
       }
       return fns[options.length - 1](t);
-    }
+    };
   }
 
   if (!("startValue" in options)) options.startValue = 0;
@@ -37,7 +58,7 @@ export function animate(options: AnimateOptions | AnimateOptions[]) {
 
   const {startValue, endValue, startTime, duration, easing} = options;
   
-  return (t: number) => lerp(startValue, endValue, easing(constrain(0, (t - startTime) / duration, 1)));
+  return (t: number) => lerp(startValue, endValue, easing(clamp(0, (t - startTime) / duration, 1)));
 }
 
 /** Cubic Bezier curve function */
@@ -71,12 +92,32 @@ export const easings = {
   easeInOutBack: [0.68, -0.55, 0.265, 1.55]
 } as const;
 
+/**
+ * Returns a function that takes in a time (in milliseconds) and returns the "active" replay datum. Useful for writing replay plugins.
+ */
 export function replay<K>({data, start, end, active, inactive, compressed}: {
+  /** Recording data to iterate through. */
   data: ReplayData<K>;
+
+  /**
+   * Start time.
+   * @default 0
+   */
   start?: number;
+
+  /** End time. If not specified, defaults to `start` + total duration of `data`. */
   end?: number;
+
+  /**
+   * If true, times are interpreted as relative. Otherwise, they are interpreted as absolute times.
+   * @default false
+   */
   compressed?: boolean;
+
+  /** Callback receiving active value and index of active value. */
   active: (current: K, index: number) => void;
+
+  /** Callback called when replay is inactive. Doesn't get called repeatedly. */
   inactive: () => void;
 }): (t: number) => void {
   if (typeof compressed === "undefined") compressed = false;
