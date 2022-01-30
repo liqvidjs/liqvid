@@ -11,11 +11,9 @@ import {captureRef} from "../utils/react-utils";
 
 export {ThumbData};
 
-interface Props {
+export function ScrubberBar(props: {
   thumbs: ThumbData;
-}
-
-export default function ScrubberBar(props: Props) {
+}) {
   const keymap = useKeymap();
   const playback = usePlayback();
   const script = useScript();
@@ -57,7 +55,6 @@ export default function ScrubberBar(props: Props) {
       playback.seek(playback.duration * num / 10);
     }
   }, []);
-
 
   /*
     Set up subscriptions.

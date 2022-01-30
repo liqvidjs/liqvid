@@ -1,10 +1,10 @@
 import * as React from "react";
-import Media from "./Media";
+import {Media} from "./Media";
 
 import {fragmentFromHTML} from "./utils/dom";
 
 /** Liqvid equivalent of {@link HTMLAudioElement `<audio>`}. */
-export default class Audio extends Media {
+export class Audio extends Media {
   /** The underlying <audio> element. */
   domElement: HTMLAudioElement;
 

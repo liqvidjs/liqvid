@@ -3,19 +3,24 @@ import StrictEventEmitter from "strict-event-emitter-types";
 import {between, bind} from "@liqvid/utils/misc";
 import {parseTime, timeRegexp} from "@liqvid/utils/time";
 
-import Playback from "./playback";
+import {Playback} from "./playback";
 
-type Marker = [string, number, number];
+export type Marker = [string, number, number];
 
 interface ScriptEvents {
   "markerupdate": number;
 }
 
-export default class Script
+export class Script
   extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, ScriptEvents>)
 {
+  /** The underlying {@link Playback} instance. */
   playback: Playback;
+
+  /** The array of markers, in the form [name, startTime, endTime]. */
   markers: Marker[];
+
+  /** Index of the active marker. */
   markerIndex: number;
 
   constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
@@ -53,28 +58,40 @@ export default class Script
     this.playback.on("timeupdate", this.__updateMarker);
   }
 
+  /** @deprecated */
   get hub() {
     return this;
   }
 
-  // getter
+  /** Name of the active marker. */
   get markerName() {
     return this.markers[this.markerIndex][0];
   }
 
   // public methods
+
+  /** Seek playback to the previous marker. */
   back() {
     this.playback.seek(this.markers[Math.max(0, this.markerIndex - 1)][1]);
   }
 
+  /** Advance playback to the next marker. */
   forward() {
     this.playback.seek(this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]);
   }
   
+  /**
+   * Returns the first marker with the given name.
+   * @throws {Error} If no marker named `name` exists.
+   */
   markerByName(name: string) {
     return this.markers[this.markerNumberOf(name)];
   }
 
+  /**
+   * Returns the first index of a marker named `name`.
+   * @throws {Error} If no marker named `name` exists.
+   */ 
   markerNumberOf(name: string) {
     for (let i = 0; i < this.markers.length; ++i) {
       if (this.markers[i][0] === name) return i;
@@ -82,6 +99,7 @@ export default class Script
     throw new Error(`Marker ${name} does not exist`);
   }
 
+  /** If `start` is a string, returns the starting time of the marker with that name. Otherwise, returns `start`. */
   parseStart(start: number | string) {
     if (typeof start === "string") {
       if (start.match(timeRegexp))
@@ -93,6 +111,7 @@ export default class Script
     }
   }
 
+  /** If `end` is a string, returns the ending time of the marker with that name. Otherwise, returns `end`. */
   parseEnd(end: number | string) {
     if (typeof end === "string") {
       if (end.match(timeRegexp))

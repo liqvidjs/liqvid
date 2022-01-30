@@ -1,6 +1,6 @@
+import {clamp} from "@liqvid/utils/misc";
 import * as React from "react";
-import {useCallback, useEffect, useMemo, useState} from "react";
-
+import {useEffect, useMemo, useRef, useState} from "react";
 import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
@@ -14,7 +14,8 @@ enum Dialogs {
   Captions
 }
 
-export default function Settings() {
+/** Settings menu */
+export function Settings() {
   const player = usePlayer(),
         {keymap, playback} = player;
 
@@ -23,13 +24,27 @@ export default function Settings() {
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
+    const ratechange = () => setRate(playback.playbackRate);
+    const canvasClick = () => setDialog(Dialogs.None);
+
+    const slowDown = () => playback.playbackRate = get(PLAYBACK_RATES, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1);
+    const speedUp = () => playback.playbackRate = get(PLAYBACK_RATES, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1);
+
     // subscribe
-    playback.on("ratechange", () => setRate(playback.playbackRate));
-    player.hub.on("canvasClick", () => setDialog(Dialogs.None);
+    playback.on("ratechange", ratechange);
+    player.hub.on("canvasClick", canvasClick);
 
     // keyboard shortcuts
-    keymap.bind("Shift+<", () => playback.playbackRate = PLAYBACK_RATES[Math.max(0, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1)]);
-    keymap.bind("Shift+>", () => playback.playbackRate = PLAYBACK_RATES[Math.min(PLAYBACK_RATES.length - 1, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1)]);
+    keymap.bind("Shift+<", slowDown);
+    keymap.bind("Shift+>", speedUp);
+
+    return () => {
+      playback.off("ratechange", ratechange);
+      player.hub.off("canvasClick",canvasClick);
+
+      keymap.unbind("Shift+<", slowDown);
+      keymap.unbind("Shift+>", speedUp);
+    };
   }, []);
 
   /* handlers */
@@ -46,7 +61,7 @@ export default function Settings() {
   const toggle = useMemo(() => onClick(() => setDialog(prev => (prev === Dialogs.None ? Dialogs.Main : Dialogs.None))), []);
 
   const toggleSubtitles = useMemo(() => onClick(() => {
-    document.body.classList.toggle("lv-captions")
+    document.body.classList.toggle("lv-captions");
     forceUpdate();
   }), []);
 
@@ -67,16 +82,16 @@ export default function Settings() {
   }), [dialog === Dialogs.Captions]);
 
   // captions, ugh
-  const mainAudio = React.useRef<HTMLAudioElement>();
-  React.useEffect(() => {
+  const mainAudio = useRef<HTMLAudioElement>();
+  useEffect(() => {
     mainAudio.current = getMainAudio(player.canvas);
     if (mainAudio.current) {
       tracks.current = captionsAndSubtitles(mainAudio.current);
     }
   }, []);
-  const tracks = React.useRef<TextTrack[]>([]);
+  const tracks = useRef<TextTrack[]>([]);
   const selectedTrack = tracks.current.find(t => t.mode === "showing");
-  const setTrack = React.useMemo(() => onClick<HTMLElement>(e => {
+  const setTrack = useMemo(() => onClick<HTMLElement>(e => {
     // get index, this is kind of ugly
     let i = -1;
     let temp = e.currentTarget as Element;
@@ -159,7 +174,7 @@ function getMainAudio(elt: HTMLDivElement) {
   for (const audio of Array.from(elt.querySelectorAll("audio"))) {
     if (captionsAndSubtitles(audio).length > 0)
       return audio;
-  };
+  }
 }
 
 function trackLabel(track?: TextTrack) {
@@ -170,4 +185,8 @@ function trackLabel(track?: TextTrack) {
 
 function captionsAndSubtitles(audio: HTMLAudioElement) {
   return Array.from(audio.textTracks).filter(t => ["captions", "subtitles"].includes(t.kind));
+}
+
+function get<T>(arr: T[], i: number) {
+  return arr[clamp(0, i, arr.length - 1)];
 }

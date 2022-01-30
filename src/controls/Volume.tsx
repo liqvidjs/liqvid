@@ -7,7 +7,7 @@ import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
 
 /** Volume control */
-export default function Volume() {
+export function Volume() {
   const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
@@ -72,7 +72,7 @@ export default function Volume() {
   );
 }
 
-const speakerIcon = <path d="M 10 35 h 20 l 25 -20 v 65 l -25 -20 h -20 z" fill="white" stroke="none" />;
-const mutedIcon = <path d="M 63 55 l 20 20 m 0 -20 l -20 20" stroke="white" strokeWidth="7" />;
-const waveIcon1 = <path d="M 62 32.5 a 1,1 0 0,1 0,30" fill="white" stroke="none" />;
-const waveIcon2 = <path d="M 62 15 a 1,1 0 0,1 0,65 v -10 a 10,10 0 0,0 0,-45 v -10 z" fill="white" stroke="none" />;
+const speakerIcon = <path d="M 10 35 h 20 l 25 -20 v 65 l -25 -20 h -20 z" fill="white" stroke="none"/>;
+const mutedIcon = <path d="M 63 55 l 20 20 m 0 -20 l -20 20" stroke="white" strokeWidth="7"/>;
+const waveIcon1 = <path d="M 62 32.5 a 1,1 0 0,1 0,30" fill="white" stroke="none"/>;
+const waveIcon2 = <path d="M 62 15 a 1,1 0 0,1 0,65 v -10 a 10,10 0 0,0 0,-45 v -10 z" fill="white" stroke="none"/>;

@@ -4,14 +4,17 @@ import {useEffect} from "react";
 import {usePlayer} from "../hooks";
 import {formatTime} from "@liqvid/utils/time";
 
-interface Props {
-  cols: number;
-  rows: number;
-  height: number;
-  width: number;
-  frequency: number;
+export interface ThumbData {
+  cols?: number;
+  rows?: number;
+  width?: number;
+  height?: number;
+  frequency?: number;
   path: string;
+  highlights?: VideoHighlight[];
+}
 
+interface Props extends Omit<ThumbData, "highlights"> {
   progress: number;
   show: boolean;
   title: string;
@@ -22,21 +25,11 @@ interface VideoHighlight {
   title: string;
 }
 
-export interface ThumbData {
-  cols: number;
-  rows: number;
-  width: number;
-  height: number;
-  frequency: number;
-  path: string;
-  highlights?: VideoHighlight[];
-}
-
 export default function ThumbnailBox(props: Props) {
   const player = usePlayer(),
         {playback} = player;
 
-  const {cols, rows, frequency, path, progress, show, title, height, width} = props;
+  const {cols = 5, rows = 5, frequency = 4, path, progress, show, title, height = 100, width = 160} = props;
   const count = cols * rows;
 
   useEffect(() => {

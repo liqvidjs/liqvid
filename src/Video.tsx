@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import Media from "./Media";
+import {Media} from "./Media";
 
-/** RP equivalent of <video>. */
-export default class Video extends Media {
+/** Liqvid equivalent of {@link HTMLVideoElement `<video>`}. */
+export class Video extends Media {
   /** The underlying <video> element. */
   domElement: HTMLVideoElement;
 

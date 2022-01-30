@@ -6,7 +6,8 @@ import {strings} from "../i18n";
 import {onClick} from "../utils/mobile";
 import {useForceUpdate} from "../utils/react-utils";
 
-export default function PlayPause() {
+/** Control for playing/pausing */
+export function PlayPause() {
   const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
@@ -49,8 +50,7 @@ export default function PlayPause() {
 
 
 /** Play icon */
-const playIcon =
-<path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>;
+const playIcon = <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" fill="white"/>;
 
 /** Pause icon */
 const pauseIcon = <path d="M 12 26 h 4 v -16 h -4 z M 21 26 h 4 v -16 h -4 z" fill="white"/>;

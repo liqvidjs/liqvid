@@ -7,8 +7,14 @@ interface Props {
   map?: Record<string, unknown>;
 }
 
-export default class IdMap extends React.PureComponent<Props> {
+/**
+ * This class gives a way to automagically attach data loaded from a file as attributes on elements.
+ * This is provided to facilitate the development of—and provide a standard interface for—GUI tools.
+ */ 
+export class IdMap extends React.PureComponent<Props> {
   static Context = React.createContext([]);
+
+  /** IDs found within the IdMap */
   foundIds: Set<string>;
   
   constructor(props: Props) {

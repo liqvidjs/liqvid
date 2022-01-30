@@ -4,7 +4,7 @@ import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
 import {between, bind} from "@liqvid/utils/misc";
 
 import type {Playback} from "@liqvid/playback";
-import Player from "./Player";
+import {Player} from "./Player";
 
 interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   obstructCanPlay?: boolean;
@@ -12,7 +12,7 @@ interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   start?: number;
 }
 
-export default class Media extends React.PureComponent<Props> {
+export class Media extends React.PureComponent<Props> {
   protected playback: Playback;
   protected player: Player;
   protected domElement: HTMLMediaElement;

@@ -4,7 +4,7 @@ import {useEffect} from "react";
 import {usePlayback} from "../hooks";
 import {useForceUpdate} from "../utils/react-utils";
 
-export default function TimeDisplay() {
+export function TimeDisplay() {
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 

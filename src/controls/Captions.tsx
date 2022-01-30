@@ -1,11 +1,10 @@
 import * as React from "react";
 import {useCallback, useEffect, useMemo, useState} from "react";
 
-import {requestFullScreen, exitFullScreen, isFullScreen, onFullScreenChange} from "../fake-fullscreen";
 import {useKeymap, usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
 
-export default function Captions() {
+export function Captions() {
   const player = usePlayer();
   const keymap = useKeymap();
   const [visible, setVisible] = useState(false);

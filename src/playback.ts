@@ -13,4 +13,4 @@ Playback.prototype.seek = function(t: number | string) {
   seek.call(this, t);
 };
 
-export default Playback;
+export {Playback};

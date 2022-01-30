@@ -1,10 +1,10 @@
 import * as React from "react";
 import {useCallback, useEffect, useRef, useState} from "react";
 
-import ScrubberBar, {ThumbData} from "./controls/ScrubberBar";
+import {ScrubberBar, ThumbData} from "./controls/ScrubberBar";
 import {useKeymap} from "@liqvid/keymap/react";
 import {usePlayback} from "@liqvid/playback/react";
-import Player from "./Player";
+import {Player} from "./Player";
 
 interface Props {
   controls: (() => JSX.Element)[];

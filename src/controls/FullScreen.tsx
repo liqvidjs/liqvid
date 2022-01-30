@@ -9,7 +9,8 @@ import {useKeymap} from "@liqvid/keymap/react";
 const toggleFullScreen = () => isFullScreen() ? exitFullScreen() : requestFullScreen();
 const events = onClick(toggleFullScreen);
 
-export default function FullScreen() {
+/** Fullscreen control */
+export function FullScreen() {
   const keymap = useKeymap();
   const forceUpdate = useForceUpdate();
 
