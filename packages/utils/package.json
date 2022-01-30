@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/utils",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Utility functions for Liqvid",
   "exports": {
     "./*": "./dist/*.js"
@@ -16,7 +16,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "tsc --build",
     "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
