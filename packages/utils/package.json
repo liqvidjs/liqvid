@@ -3,10 +3,7 @@
   "version": "1.0.1",
   "description": "Utility functions for Liqvid",
   "exports": {
-    "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
-    }
+    "./*": "./dist/*.js"
   },
   "typesVersions": {
     "*": {
@@ -18,9 +15,8 @@
   "files": [
     "dist/*"
   ],
-  "type": "module",
   "scripts": {
-    "build": "tsc -m commonjs; for x in dist/*.js; do mv $x \"${x%.js}.cjs\"; done; tsc",
+    "build": "rm -rf dist && tsc",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
   "repository": {
