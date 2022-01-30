@@ -18,17 +18,17 @@ describe("Volume button", () => {
     act(() => {
       playback.muted = false;
       playback.volume = 1;
-    })
+    });
     button = document.querySelector(".lv-controls-volume > button > svg");
     slider = document.querySelector(".lv-controls-volume > input");
-  })
+  });
 
   test("Pressing button mutes", () => {
     fireEvent.click(button);
     expect(playback.muted).toBe(true);
     fireEvent.click(button);
     expect(playback.muted).toBe(false);
-  })
+  });
 
   test("Setting volume works", () => {
     fireEvent.change(slider, {target: {value: 70}});
@@ -46,14 +46,14 @@ describe("Volume button", () => {
   });
 
   test("Keyboard shortcuts work", () => {
-    fireEvent.keyDown(document.body, {key: 'ArrowDown', code: 'ArrowDown'});
-    fireEvent.keyDown(document.body, {key: 'ArrowDown', code: 'ArrowDown'});
+    fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
+    fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
     expect(playback.volume).toBeCloseTo(0.9, 5);
     
-    fireEvent.keyDown(document.body, {key: 'ArrowUp', code: 'ArrowUp'});
+    fireEvent.keyDown(document.body, {key: "ArrowUp", code: "ArrowUp"});
     expect(playback.volume).toBeCloseTo(0.95, 5);
 
-    fireEvent.keyDown(document.body, {key: 'M', code: 'KeyM'});
+    fireEvent.keyDown(document.body, {key: "M", code: "KeyM"});
     expect(playback.muted).toBe(true);
   });
 });

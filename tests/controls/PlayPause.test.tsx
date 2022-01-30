@@ -1,5 +1,6 @@
 import * as React from "react";
 import {fireEvent, render} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
@@ -17,40 +18,40 @@ describe("Play/pause button", () => {
     act(() => {
       playback.pause();
       playback.seeking = false;
-    })
+    });
     button = document.querySelector(".lv-controls-playpause > svg");
-  })
+  });
 
   test("Clicking button toggles", () => {
     fireEvent.click(button);
     expect(playback.paused).toBe(false);
     fireEvent.click(button);
     expect(playback.paused).toBe(true);
-  })
+  });
 
   test("Icon updates", () => {
     expect(button).toMatchSnapshot();
     act(() => {
       playback.play();
-    })
+    });
     expect(button).toMatchSnapshot();
     act(() => {
       playback.seeking = true;
-    })
+    });
     expect(button).toMatchSnapshot();
-  })
+  });
 
   test("Keyboard shortcuts work", () => {
-    fireEvent.keyDown(document.body, {key: 'K', code: 'KeyK'});
+    fireEvent.keyDown(document.body, {key: "K", code: "KeyK"});
     expect(playback.paused).toBe(false);
 
-    fireEvent.keyDown(document.body, {key: 'K', code: 'KeyK'});
+    fireEvent.keyDown(document.body, {key: "K", code: "KeyK"});
     expect(playback.paused).toBe(true);
 
-    fireEvent.keyDown(document.body, {key: ' ', code: 'Space'});
+    fireEvent.keyDown(document.body, {key: " ", code: "Space"});
     expect(playback.paused).toBe(false);
 
-    fireEvent.keyDown(document.body, {key: ' ', code: 'Space'});
+    fireEvent.keyDown(document.body, {key: " ", code: "Space"});
     expect(playback.paused).toBe(true);
   });
 });
