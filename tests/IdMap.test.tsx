@@ -4,7 +4,7 @@ import {render} from "@testing-library/react";
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
-import {IdMap} from "../dist/liqvid";
+import {IdMap} from "..";
 
 function Component() {
   return (

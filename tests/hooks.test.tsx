@@ -4,7 +4,7 @@ import {render} from "@testing-library/react";
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
-import {KeyMap, Playback, Player, Script, usePlayback, usePlayer, useKeymap, useScript, useMarkerUpdate, useTimeUpdate} from "../dist/liqvid";
+import {KeyMap, Playback, Player, Script, usePlayback, usePlayer, useKeymap, useScript, useMarkerUpdate, useTimeUpdate} from "..";
 
 function Test<T>(props: {
   hook: () => T;

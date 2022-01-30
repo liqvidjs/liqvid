@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
-import {Playback, Player} from "../../dist/liqvid";
+import {Playback, Player} from "../..";
 import {act} from "react-dom/test-utils";
 
 describe("Play/pause button", () => {

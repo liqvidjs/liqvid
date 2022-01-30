@@ -6,10 +6,10 @@
     "dist/*"
   ],
   "main": "dist/liqvid.js",
-  "typings": "dist/liqvid.d.ts",
+  "typings": "dist/types/index.d.ts",
   "scripts": {
     "build": "webpack && NODE_ENV=production webpack",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "lint": "eslint --ext ts,tsx --fix src; eslint --ext ts,tsx --fix tests",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus-prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
     "test": "jest"
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.19.4",
     "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.0.0-beta.8",
     "@types/jest": "^27.4.0",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
