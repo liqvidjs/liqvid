@@ -4,6 +4,9 @@ const MINUTES = 60 * SECONDS;
 const HOURS = 60 * MINUTES;
 const DAYS = 24 * HOURS;
 
+// nice minus sign
+const MINUS_SIGN = "\u2212";
+
 /**
  * Regular expression used to match times
  */
@@ -14,19 +17,26 @@ export const timeRegexp = new RegExp("^" + "(?:(\\d+):)?".repeat(3) + "(\\d+)(?:
  * @param str String to parse
  * @returns Time in milliseconds
  */
-export function parseTime(str: string) {
-  const parts = str.match(timeRegexp).slice(1)
-
-  for (let i = 0; i < parts.length; ++i) {
-    if (!parts[i]) {
-      parts.splice(i, 1);
-      parts.unshift("0");
-    }
+export function parseTime(str: string): number {
+  if (str[0] === MINUS_SIGN || str[0] === "-") {
+    return -parseTime(str.slice(1));
   }
 
-  const [d, h, m, s, ms] = parts;
+  // d, h, m, s
+  const parts = str.split(":").map(x => parseInt(x, 10));
+  while (parts.length < 4) {
+    parts.unshift(0);
+  }
+
+  // ms
+  let $_ = str.match(/\.(\d{0,3})/);
+  if ($_) {
+    parts.push(parseInt($_[1].padStart(3, "0")));
+  } else {
+    parts.push(0);
+  }
   
-  const [days, hours, minutes, seconds, milliseconds] = [d, h, m, s, ms.padEnd(3, "0")].map(x => parseInt(x, 10));
+  const [days, hours, minutes, seconds, milliseconds] = parts;
   
   return milliseconds + 1000 * (seconds + 60 * (minutes + 60 * (hours + 24 * days)));
 }
@@ -38,7 +48,7 @@ export function parseTime(str: string) {
  */
 export function formatTime(time: number): string {
   if (time < 0) {
-    return "\u2212" + formatTime(-time);
+    return MINUS_SIGN + formatTime(-time);
   }
   const days = Math.floor(time / DAYS),
         hours = Math.floor(time / HOURS % 24),
@@ -72,9 +82,9 @@ export function formatTime(time: number): string {
  */
 export function formatTimeMs(time: number): string {
   if (time < 0) {
-    return "\u2212" + formatTimeMs(-time);
+    return MINUS_SIGN + formatTimeMs(-time);
   }
   const milliseconds = Math.floor(time % 1000);
 
-  return `${formatTime(time)}.${milliseconds}`;
+  return formatTime(time) + "." + String(milliseconds).padStart(3, "0").replace(/0+$/, "");
 }
