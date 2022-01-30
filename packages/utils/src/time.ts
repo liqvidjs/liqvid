@@ -29,7 +29,7 @@ export function parseTime(str: string): number {
   }
 
   // ms
-  let $_ = str.match(/\.(\d{0,3})/);
+  const $_ = str.match(/\.(\d{0,3})/);
   if ($_) {
     parts.push(parseInt($_[1].padStart(3, "0")));
   } else {

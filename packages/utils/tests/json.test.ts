@@ -2,8 +2,8 @@ import {getJSON, loadAllJSON, loadJSON} from "../src/json";
 
 declare module "../src/json" {
   interface GetJSONMap {
-    A: any;
-    B: any;
+    A: {value: string;};
+    B: {value: string;};
     C: never;
   }
 }
@@ -31,7 +31,7 @@ describe("json/*", () => {
   /* not found */
   test("async not found", () => {
     expect(loadJSON("C")).rejects.toEqual("JSON record \"C\" not found");
-  })
+  });
   
   test("sync not found", () => {
     expect(() => getJSON("A")).toThrow("JSON record \"A\" not loaded");
@@ -39,12 +39,12 @@ describe("json/*", () => {
 
   test("async found", () => {
     expect(loadJSON("A")).resolves.toEqual({value: "http://localhost/A.json"});
-  })
+  });
 
   test("async preload", () => {
     const promise = loadAllJSON().then(() => {
       return [getJSON("A"), getJSON("B")];
-    })
+    });
     expect(promise).resolves.toEqual([{value: "http://localhost/A.json"}, {value: "http://localhost/B.json"}]);
-  })
+  });
 });
