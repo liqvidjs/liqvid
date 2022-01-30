@@ -17,6 +17,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc",
+    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
   "repository": {
