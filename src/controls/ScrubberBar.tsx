@@ -46,6 +46,19 @@ export default function ScrubberBar(props: Props) {
     setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
   }, []);
 
+  const back5 = useCallback(() => playback.seek(playback.currentTime - 5000), []);
+  const fwd5 = useCallback(() => playback.seek(playback.currentTime + 5000), []);
+  const back10 = useCallback(() => playback.seek(playback.currentTime - 10000), []);
+  const fwd10 = useCallback(() => playback.seek(playback.currentTime + 10000), []);
+
+  const seekPercent = useCallback((e: KeyboardEvent) => {
+    const num = parseInt(e.key, 10);
+    if (!isNaN(num)) {
+      playback.seek(playback.duration * num / 10);
+    }
+  }, []);
+
+
   /*
     Set up subscriptions.
     We don't do this in useEffect() because it needs to run
@@ -60,24 +73,22 @@ export default function ScrubberBar(props: Props) {
 
     /* keyboard shortcuts */
     // seek 5
-    keymap.bind("ArrowLeft", () => playback.seek(playback.currentTime - 5000));
-    keymap.bind("ArrowRight", () => playback.seek(playback.currentTime + 5000));
+    keymap.bind("ArrowLeft", back5);
+    keymap.bind("ArrowRight", fwd5);
 
     // seek 10
-    keymap.bind("J", () => playback.seek(playback.currentTime - 10000));
-    keymap.bind("L", () => playback.seek(playback.currentTime + 10000));
-
-    // seek by marker
-    keymap.bind("W", () => script.back());
-    keymap.bind("E", () => script.forward());
+    keymap.bind("J", back10);
+    keymap.bind("L", fwd10);
 
     // percentage seeking
-    keymap.bind("0,1,2,3,4,5,6,7,8,9", e => {
-      const num = parseInt(e.key, 10);
-      if (!isNaN(num)) {
-        playback.seek(playback.duration * num / 10);
-      }
-    });
+    keymap.bind("0,1,2,3,4,5,6,7,8,9", seekPercent);
+
+    // seek by marker
+    if (script) {
+      keymap.bind("W", script.back);
+      keymap.bind("E", script.forward);
+    }
+
     subscribed.current = true;
   }
 
@@ -86,6 +97,18 @@ export default function ScrubberBar(props: Props) {
       playback.off("seek", seek);
       playback.off("seeked", seeked);
       playback.off("timeupdate", timeupdate);
+
+      keymap.unbind("ArrowLeft", back5);
+      keymap.unbind("ArrowRight", fwd5);
+      keymap.unbind("J", back10);
+      keymap.unbind("L", fwd10);
+
+      keymap.unbind("0,1,2,3,4,5,6,7,8,9", seekPercent);
+
+      if (script) {
+        keymap.unbind("W", script.back);
+        keymap.unbind("E", script.forward);
+      }
       subscribed.current = false;
     };
   }, []);
