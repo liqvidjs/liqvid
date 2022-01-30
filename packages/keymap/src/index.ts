@@ -18,7 +18,7 @@ for (const key of mixedCaseVals) {
   mixedCase[key.toLowerCase()] = key;
 }
 
-const modifierOrder = (Object.keys(modifierMap) as (keyof typeof modifierMap)[]).map(k => modifierMap[k])
+const modifierOrder = (Object.keys(modifierMap) as (keyof typeof modifierMap)[]).map(k => modifierMap[k]);
 
 const useCode = [
   "Backspace",
