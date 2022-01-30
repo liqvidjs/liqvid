@@ -4,7 +4,7 @@ import {fireEvent, render} from "@testing-library/react";
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
-import {Playback, Player, Script} from "../..";
+import {Player, Script} from "../..";
 import {act} from "react-dom/test-utils";
 
 describe("Scrubber bar", () => {
@@ -49,5 +49,5 @@ describe("Scrubber bar", () => {
     expect(playback.currentTime).toBe(40000);
     fireEvent.keyDown(document.body, {key: "w", code: "KeyW"});
     expect(playback.currentTime).toBe(20000);
-  })
+  });
 });

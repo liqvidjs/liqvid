@@ -4,6 +4,7 @@ import {Player} from "./Player";
 
 export {useKeymap} from "@liqvid/keymap/react";
 export {usePlayback, useTime} from "@liqvid/playback/react";
+import type {Script} from "./script";
 
 /** Access the ambient {@link Player} */
 export function usePlayer() {
@@ -23,7 +24,7 @@ export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: Re
 }
 
 /** Access the ambient {@link Script} */
-export function useScript() {
+export function useScript(): Script {
   return usePlayer().script;
 }
 

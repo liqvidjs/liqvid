@@ -73,5 +73,5 @@ describe("Script", () => {
     script.playback.seek(30000);
     expect(script.markerIndex).toBe(1);
     expect(script.markerName).toBe("B");
-  })
+  });
 });

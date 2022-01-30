@@ -39,13 +39,22 @@ const ignoreCanvasClick = Symbol();
 export class Player extends React.PureComponent<Props> {
   canPlay: Promise<void[]>;
   canPlayThrough: Promise<void[]>;
+
+  /** The {@link HTMLDivElement `<div>`} where content is attached (separate from controls). */
   canvas: HTMLDivElement;
+
+  /** Whether keyboard controls are currently being handled. */
   captureKeys: boolean;
+  
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
 
   /** {@link Keymap} attached to the player */
   keymap: Keymap;
+
+  /** {@link Playback} attached to the player */
   playback: Playback;
+
+  /** {@link Script} attached to the player */
   script: Script;
 
   buffers: Map<HTMLMediaElement, [number, number][]>;
@@ -55,7 +64,14 @@ export class Player extends React.PureComponent<Props> {
 
   private dag: DAGLeaf;
 
+  /** {@link React.Context} used to access ambient Player */
   static Context = React.createContext<Player>(null);
+
+  /**
+   * Symbol to access the player instance attached to a DOM element
+   * 
+   * `player.canvas.parentElement[Player.symbol] === player`
+   */
   static symbol = Symbol();
 
   static defaultControlsLeft = (<>
@@ -98,7 +114,8 @@ export class Player extends React.PureComponent<Props> {
 
     this.buffers = new Map();
 
-    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree", "reparseTree"]);
+    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "reparseTree"]);
+    this.updateTree = this.updateTree.bind(this);
   }
 
   componentDidMount() {
@@ -222,10 +239,12 @@ export class Player extends React.PureComponent<Props> {
     ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
   }
 
+  /** Suspends keyboard controls so that components can receive keyboard input. */
   suspendKeyCapture() {
     this.captureKeys = false;
   }
 
+  /** Resumes keyboard controls. */
   resumeKeyCapture() {
     this.captureKeys = true;
   }
@@ -298,7 +317,7 @@ export class Player extends React.PureComponent<Props> {
                 {this.props.children}
               </div>
               <CaptionsDisplay />
-              <Controls controls={this.props.controls} thumbs={this.props.thumbs} />
+              <Controls controls={this.props.controls} thumbs={this.props.thumbs}/>
             </div>
           </KeymapContext.Provider>
         </PlaybackContext.Provider>

@@ -16,6 +16,8 @@ export class Media extends React.PureComponent<Props> {
   protected playback: Playback;
   protected player: Player;
   protected domElement: HTMLMediaElement;
+
+  /** When the media element should start playing. */
   start: number;
 
   static defaultProps = {

@@ -5,12 +5,40 @@ import {usePlayer} from "../hooks";
 import {formatTime} from "@liqvid/utils/time";
 
 export interface ThumbData {
+  /**
+   * Number of columns per thumbnail sheet.
+   * @default 5
+   */
   cols?: number;
+
+  /**
+   * Number of rows per thumbnail sheet.
+   * @default 5
+   */
   rows?: number;
+
+  /**
+   * Width of individual thumbnails.
+   * @default 160
+   */
   width?: number;
+
+  /**
+   * Height of individual thumbnails.
+   * @default 100
+   */
   height?: number;
+
+  /**
+   * How many seconds between thumbnails.
+   * @default 4
+   */
   frequency?: number;
+
+  /** URL pattern for thumbnails. Must include "%s". */
   path: string;
+
+  /** Points of interest in the video to highlight. */
   highlights?: VideoHighlight[];
 }
 
@@ -25,7 +53,7 @@ interface VideoHighlight {
   title: string;
 }
 
-export default function ThumbnailBox(props: Props) {
+export function ThumbnailBox(props: Props) {
   const player = usePlayer(),
         {playback} = player;
 

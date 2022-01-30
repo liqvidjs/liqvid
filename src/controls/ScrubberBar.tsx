@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
+import {ThumbnailBox, ThumbData} from "./ThumbnailBox";
 
 import {useKeymap, usePlayback, useScript} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
