@@ -3,13 +3,13 @@ import * as React from "react";
 import {awaitMediaCanPlay, awaitMediaCanPlayThrough} from "./utils/media";
 import {between, bind} from "@liqvid/utils/misc";
 
-import type Playback from "./playback";
+import type {Playback} from "@liqvid/playback";
 import Player from "./Player";
 
 interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   obstructCanPlay?: boolean;
   obstructCanPlayThrough?: boolean;
-  start: number | string;
+  start?: number;
 }
 
 export default class Media extends React.PureComponent<Props> {
@@ -32,7 +32,7 @@ export default class Media extends React.PureComponent<Props> {
     this.playback = context.playback;
 
     // get the time right
-    this.start = this.player.script.parseStart(this.props.start);
+    this.start = this.props.start ?? 0;
 
     bind(this, ["pause", "play", "onPlay", "onRateChange", "onSeek", "onTimeUpdate", "onVolumeChange", "onDomPlay", "onDomPause"]);
   }
@@ -62,7 +62,7 @@ export default class Media extends React.PureComponent<Props> {
     this.onVolumeChange();
 
     // progress updater?    
-    const getBuffers = () => {
+    /*const getBuffers = () => {
       const ranges = this.domElement.buffered;
 
       const buffers: [number, number][] = [];
@@ -83,6 +83,7 @@ export default class Media extends React.PureComponent<Props> {
     this.domElement.addEventListener("progress", updateBuffers);
     // setInterval(updateBuffers, 1000);
     // this.domElement.addEventListener('load', updateBuffers);
+    */
   }
 
   componentWillUnmount() {
@@ -97,14 +98,14 @@ export default class Media extends React.PureComponent<Props> {
     this.domElement.removeEventListener("pause", this.onDomPause);
     this.domElement.removeEventListener("play", this.onDomPlay);
 
-    this.player.unregisterBuffer(this.domElement);
+    // this.player.unregisterBuffer(this.domElement);
   }
 
   // getter
   get end() {
     return this.start + this.domElement.duration * 1000;
   }
-
+  
   pause() {
     if (!this.domElement.ended) {
       this.domElement.removeEventListener("pause", this.onDomPause);
@@ -157,7 +158,7 @@ export default class Media extends React.PureComponent<Props> {
     this.domElement.muted = this.playback.muted;
   }
 
-   onDomPlay() {
+  onDomPlay() {
     if (this.playback.paused) {
       this.playback.off("play", this.onPlay);
       this.playback.play();

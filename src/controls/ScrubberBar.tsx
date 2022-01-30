@@ -1,9 +1,9 @@
 import * as React from "react";
-import {useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 import ThumbnailBox, {ThumbData} from "./ThumbnailBox";
 
-import {useKeyMap, usePlayback, useScript} from "../hooks";
+import {useKeymap, usePlayback, useScript} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
 import {between, constrain} from "@liqvid/utils/misc";
 import {anyHover} from "../utils/mobile";
@@ -16,18 +16,35 @@ interface Props {
 }
 
 export default function ScrubberBar(props: Props) {
-  const keymap = useKeyMap();
+  const keymap = useKeymap();
   const playback = usePlayback();
   const script = useScript();
 
   const [progress, setProgress] = useState({
     scrubber: playback.currentTime / playback.duration,
-    thumb: playback.currentTime / playback.duration,
+    thumb: playback.currentTime / playback.duration
   });
   const [showThumb, setShowThumb] = useState(false);
 
   // refs
   const scrubberBar = useRef<HTMLDivElement>();
+
+  /* Event handlers */
+  const seek = useCallback(() => {
+    if (playback.seeking) return;
+    const progress = playback.currentTime / playback.duration;
+    setProgress({scrubber: progress, thumb: progress});
+  }, []);
+
+  const seeked = useCallback(() => {
+    const progress = playback.currentTime / playback.duration;
+    setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+  }, []);
+
+  const timeupdate = useCallback(() => {
+    const progress = playback.currentTime / playback.duration;
+    setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+  }, []);
 
   /*
     Set up subscriptions.
@@ -37,19 +54,9 @@ export default function ScrubberBar(props: Props) {
   const subscribed = useRef(false);
   if (!subscribed.current) {
     /* playback listeners */
-    playback.on("seek", () => {
-      if (playback.seeking) return;
-      const progress = playback.currentTime / playback.duration;
-      setProgress({scrubber: progress, thumb: progress});
-    });
-    playback.on("seeked", () => {
-      const progress = playback.currentTime / playback.duration;
-      setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
-    });
-    playback.on("timeupdate", () => {
-      const progress = playback.currentTime / playback.duration;
-      setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
-    });
+    playback.on("seek", seek);
+    playback.on("seeked", seeked);
+    playback.on("timeupdate", timeupdate);
 
     /* keyboard shortcuts */
     // seek 5
@@ -73,6 +80,15 @@ export default function ScrubberBar(props: Props) {
     });
     subscribed.current = true;
   }
+
+  useEffect(() => {
+    return () => {
+      playback.off("seek", seek);
+      playback.off("seeked", seeked);
+      playback.off("timeupdate", timeupdate);
+      subscribed.current = false;
+    };
+  }, []);
 
   // event handlers
   const divEvents = useMemo(() => {

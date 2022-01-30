@@ -9,7 +9,7 @@ export function showIf(cond: boolean): {style?: CSSProperties} {
     }
   };
   return {};
-};
+}
 
 /** Returns a CSS block to show the element only when marker name begins with `prefix` */
 export function during(prefix: string) {

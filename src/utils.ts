@@ -1,13 +1,11 @@
 /* various things we sometimes use */
-import * as animation from "./utils/animation";
-import * as authoring from "./utils/authoring";
-// import * as dom from './utils/dom';
-import * as interactivity from "./utils/interactivity";
-import * as media from "./utils/media";
-import * as misc from "@liqvid/utils/misc";
-import * as mobile from "./utils/mobile";
-import * as react from "./utils/react-utils";
-import * as replayData from "./utils/replay-data";
-import * as time from "@liqvid/utils/time";
-
-export {animation, authoring, interactivity, media, misc, mobile, react, replayData, time};
+export * as animation from "@liqvid/utils/animation";
+export * as authoring from "./utils/authoring";
+// export * as dom from './utils/dom';
+export * as interactivity from "./utils/interactivity";
+export * as media from "./utils/media";
+export * as misc from "@liqvid/utils/misc";
+export * as mobile from "./utils/mobile";
+export * as react from "./utils/react-utils";
+export * as replayData from "@liqvid/utils/replay-data";
+export * as time from "@liqvid/utils/time";

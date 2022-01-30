@@ -1,7 +1,7 @@
 import * as React from "react";
-const {useEffect, useRef} = React;
+import {useEffect, useRef} from "react";
 
-import {usePlayback} from "./hooks";
+import {usePlayback} from "@liqvid/playback/react";
 
 export default function Captions() {
   const playback = usePlayback();

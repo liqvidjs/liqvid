@@ -1,8 +1,10 @@
 import * as React from "react";
-const {useCallback, useEffect, useRef, useState} = React;
+import {useCallback, useEffect, useRef, useState} from "react";
 
 import ScrubberBar, {ThumbData} from "./controls/ScrubberBar";
-import {useKeyMap, usePlayback} from "./hooks";
+import {useKeymap} from "@liqvid/keymap/react";
+import {usePlayback} from "@liqvid/playback/react";
+import Player from "./Player";
 
 interface Props {
   controls: (() => JSX.Element)[];
@@ -13,7 +15,7 @@ interface Props {
 const TIMEOUT = 3000;
 
 export default function Controls(props: Props) {
-  const keymap = useKeyMap();
+  const keymap = useKeymap();
   const playback = usePlayback();
   const [visible, setVisible] = useState(true);
 
@@ -55,15 +57,23 @@ export default function Controls(props: Props) {
     });
   }, []);
 
-  const classNames = ["rp-controls"];
+  const classNames = ["rp-controls", "lv-controls"];
   if (!visible)
     classNames.push("hidden");
 
   return (
     <div className={classNames.join(" ")}>
       <ScrubberBar thumbs={props.thumbs}/>
-      <div className="rp-controls-buttons">
-        {...props.controls}
+      <div className="lv-controls-buttons">
+        {props.controls instanceof Array ?
+          <>
+            {Player.defaultControlsLeft}
+
+            <div className="lv-controls-right">
+              {...props.controls}
+              {Player.defaultControlsRight}
+            </div>
+          </> : props.controls}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Media from "./Media";
 
 import {fragmentFromHTML} from "./utils/dom";
 
-/** RP equivalent of <audio>. */
+/** Liqvid equivalent of {@link HTMLAudioElement `<audio>`}. */
 export default class Audio extends Media {
   /** The underlying <audio> element. */
   domElement: HTMLAudioElement;
@@ -26,6 +26,7 @@ export default class Audio extends Media {
         mode = track.mode;
         const captions = [];
         for (const cue of Array.from(track.activeCues)) {
+          // @ts-expect-error check this I guess
           const html = cue.text.replace(/\n/g, "<br/>");
           captions.push(fragmentFromHTML(html));
         }

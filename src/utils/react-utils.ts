@@ -1,4 +1,21 @@
-import * as React from "react";
+import {useReducer} from "react";
+
+export function combineRefs<T>(...args: React.Ref<T>[]) {
+  return (o: T) => {
+    for (const ref of args) {
+      if (typeof ref === "function") {
+        ref(o);
+      } else if (ref === null) {
+      } else if (typeof ref === "object" && ref.hasOwnProperty("current")) {
+        (ref as React.MutableRefObject<T>).current = o;
+      }
+    }
+  };
+}
+
+export function useForceUpdate() {
+  return useReducer((c: boolean) => !c, false)[1];
+}
 
 /**
   Helper for the https://github.com/facebook/react/issues/2043 workaround. Use to intercept refs and
@@ -17,10 +34,6 @@ export const captureRef = <T>(callback: (ref: T) => void, innerRef?: React.Ref<T
     (innerRef as React.MutableRefObject<T>).current = ref;
   }
 };
-
-export function useForceUpdate() {
-  return React.useReducer((c: boolean) => !c, false)[1];
-}
 
 export function recursiveMap(
   children: React.ReactNode,

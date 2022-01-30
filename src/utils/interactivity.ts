@@ -111,18 +111,18 @@ export function dragHelperReact<T extends Node>(move: Arg1, down?: Arg2, up?: Ar
   const listener = dragHelper(move, down, up);
   
   if (innerRef) {
-   const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
+    const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
     return {
       onMouseDown: listener,
       onMouseUp: Player.preventCanvasClick,
       ref: intercept
     };
- } else {
+  } else {
     return {
       onMouseDown: listener,
       onMouseUp: Player.preventCanvasClick,
       onTouchStart: listener
     };
- }
+  }
 
 }
