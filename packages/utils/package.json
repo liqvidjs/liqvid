@@ -20,7 +20,7 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "tsc -m commonjs; for x in dist/*.js; do mv $x '${x%.js}.cjs'; done; tsc",
+    "build": "tsc -m commonjs; for x in dist/*.js; do mv $x \"${x%.js}.cjs\"; done; tsc",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
   "repository": {
