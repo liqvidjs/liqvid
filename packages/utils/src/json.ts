@@ -1,15 +1,14 @@
 const results: Record<string, unknown> = {};
 
-export interface GetJSONMap {
-
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetJSONMap {}
 
 /**
  * Preload all JSON resources.
  */
 export function loadAllJSON() {
   return Promise.all(
-    (Array.from(document.querySelectorAll("link[rel='preload'][type='application/json']")) as HTMLLinkElement[])
+    (Array.from(document.querySelectorAll("link[data-name][rel='preload'][type='application/json']")) as HTMLLinkElement[])
     .map(link =>
       fetch(link.href)
       .then(res => res.json())
