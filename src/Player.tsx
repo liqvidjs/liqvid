@@ -3,18 +3,20 @@ import {EventEmitter} from "events";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
 import CaptionsDisplay from "./CaptionsDisplay";
-import {KeyMap} from "@liqvid/keymap";
-import Playback from "./playback";
-import Script from "./script";
+import {Keymap} from "@liqvid/keymap";
+import {Playback} from "./playback";
+import {PlaybackContext} from "@liqvid/playback/react";
+import {KeymapContext} from "@liqvid/keymap/react";
+import {Script} from "./script";
 
 import Controls from "./Controls";
-import Captions from "./controls/Captions";
-import FullScreen from "./controls/FullScreen";
-import PlayPause from "./controls/PlayPause";
+import {Captions} from "./controls/Captions";
+import {FullScreen} from "./controls/FullScreen";
+import {PlayPause} from "./controls/PlayPause";
 import type {ThumbData} from "./controls/ScrubberBar";
-import Settings from "./controls/Settings";
-import TimeDisplay from "./controls/TimeDisplay";
-import Volume from "./controls/Volume";
+import {Settings} from "./controls/Settings";
+import {TimeDisplay} from "./controls/TimeDisplay";
+import {Volume} from "./controls/Volume";
 import {bind} from "@liqvid/utils/misc";
 import {anyHover} from "./utils/mobile";
 
@@ -25,7 +27,7 @@ interface PlayerEvents {
 }
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  controls?: JSX.Element;
+  controls?: JSX.Element | JSX.Element[];
   playback?: Playback;
   script?: Script;
   thumbs?: ThumbData;
@@ -34,13 +36,15 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const allowScroll = Symbol();
 const ignoreCanvasClick = Symbol();
 
-export default class Player extends React.PureComponent<Props> {
+export class Player extends React.PureComponent<Props> {
   canPlay: Promise<void[]>;
   canPlayThrough: Promise<void[]>;
   canvas: HTMLDivElement;
   captureKeys: boolean;
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
-  keymap: KeyMap;
+
+  /** {@link Keymap} attached to the player */
+  keymap: Keymap;
   playback: Playback;
   script: Script;
 
@@ -52,6 +56,7 @@ export default class Player extends React.PureComponent<Props> {
   private dag: DAGLeaf;
 
   static Context = React.createContext<Player>(null);
+  static symbol = Symbol();
 
   static defaultControlsLeft = (<>
     <PlayPause/>
@@ -59,6 +64,7 @@ export default class Player extends React.PureComponent<Props> {
     <TimeDisplay/>
   </>);
   static defaultControlsRight = (<>
+    <Captions/>
     <Settings/>
     <FullScreen/>
   </>);
@@ -67,12 +73,12 @@ export default class Player extends React.PureComponent<Props> {
     controls: (<>
       {Player.defaultControlsLeft}
 
-      <div className="rp-controls-right">
+      <div className="lv-controls-right">
         {Player.defaultControlsRight}
       </div>
     </>),
     style: {}
-  }
+  };
 
   constructor(props: Props) {
     super(props);
@@ -80,7 +86,7 @@ export default class Player extends React.PureComponent<Props> {
     this.__canPlayTasks = [];
     this.__canPlayThroughTasks = [];
 
-    this.keymap = new KeyMap();
+    this.keymap = new Keymap();
     this.captureKeys = true;
 
     if (props.script) {
@@ -91,11 +97,22 @@ export default class Player extends React.PureComponent<Props> {
     }
 
     this.buffers = new Map();
-    
+
     bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "updateTree", "reparseTree"]);
   }
 
   componentDidMount() {
+    const element = this.canvas.parentElement;
+    element[Player.symbol] = this;
+
+    // inline or frame?
+    const client =
+      element.parentElement.nodeName.toLowerCase() === "main" &&
+      element.parentElement.parentElement === document.body &&
+      element.parentElement.childNodes.length === 1;
+    document.documentElement.classList.toggle("lv-frame", client);
+    element.classList.toggle("lv-frame", client);
+
     // keyboard events
     document.body.addEventListener("keydown", e => {
       if (!this.captureKeys || document.activeElement !== document.body)
@@ -104,11 +121,11 @@ export default class Player extends React.PureComponent<Props> {
     });
 
     // prevent scroll on mobile
-    document.addEventListener("touchmove", e => {
-      if (e[allowScroll]) return;
-      e.preventDefault();
-    }, {passive: false});
-    document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
+    // document.addEventListener("touchmove", e => {
+    //   if (e[allowScroll]) return;
+    //   e.preventDefault();
+    // }, {passive: false});
+    // document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
     // canPlay events --- mostly unused
     this.canPlay = Promise.all(this.__canPlayTasks);
@@ -172,7 +189,7 @@ export default class Player extends React.PureComponent<Props> {
     if (allow) {
       this.playback.paused ? this.playback.play() : this.playback.pause();
     }
-    
+
     this.hub.emit("canvasClick");
   }
 
@@ -193,7 +210,7 @@ export default class Player extends React.PureComponent<Props> {
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
     // onMouseUp or else the dragging won't release.
     if (e.nativeEvent[ignoreCanvasClick]) return;
-        
+
     this.canvasClick();
   }
 
@@ -204,16 +221,16 @@ export default class Player extends React.PureComponent<Props> {
   static preventCanvasClick(e: React.MouseEvent | MouseEvent) {
     ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
   }
-  
+
   suspendKeyCapture() {
     this.captureKeys = false;
   }
-  
+
   resumeKeyCapture() {
     this.captureKeys = true;
   }
-  
-  // toposort needs to be called after MathJax has rendered stuff
+
+  /** @deprecated */
   ready() {
     console.info(".ready() is a noop in v2.1");
   }
@@ -239,7 +256,7 @@ export default class Player extends React.PureComponent<Props> {
 
     this.updateTree();
   }
-  
+
   registerBuffer(elt: HTMLMediaElement) {
     this.buffers.set(elt, []);
   }
@@ -247,12 +264,12 @@ export default class Player extends React.PureComponent<Props> {
   unregisterBuffer(elt: HTMLMediaElement) {
     this.buffers.delete(elt);
   }
-  
+
   updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
     this.buffers.set(elt, buffers);
     this.playback.emit("bufferupdate");
   }
-  
+
   obstruct(event: "canplay" | "canplaythrough", task: Promise<void>) {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
@@ -260,27 +277,31 @@ export default class Player extends React.PureComponent<Props> {
       this.__canPlayThroughTasks.push(task);
     }
   }
-  
+
   render() {
     const attrs = {
       style: this.props.style
     };
     const canvasAttrs = anyHover ? {onMouseUp: this.onMouseUp} : {};
-    
-    const classNames = ["ractive-player"];
-    
+
+    const classNames = ["lv-player", "ractive-player"];
+
     return (
       <Player.Context.Provider value={this}>
-        <div className={classNames.join(" ")} {...attrs}>
-          <div className="rp-canvas"
-            {...canvasAttrs}
-            ref={canvas => this.canvas = canvas}
-          >
-            {this.props.children}
-          </div>
-          <Captions/>
-          <Controls controls={this.props.controls} thumbs={this.props.thumbs}/>
-        </div>
+        <PlaybackContext.Provider value={this.playback}>
+          <KeymapContext.Provider value={this.keymap}>
+            <div className={classNames.join(" ")} {...attrs}>
+              <div className="rp-canvas lv-canvas"
+                {...canvasAttrs}
+                ref={canvas => this.canvas = canvas}
+              >
+                {this.props.children}
+              </div>
+              <CaptionsDisplay />
+              <Controls controls={this.props.controls} thumbs={this.props.thumbs} />
+            </div>
+          </KeymapContext.Provider>
+        </PlaybackContext.Provider>
       </Player.Context.Provider>
     );
   }
@@ -330,15 +351,15 @@ function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => nu
     if (during) leaf.during = during;
     if (firstMarkerName) leaf.first = mn(firstMarkerName);
     if (lastMarkerName) leaf.last = mn(lastMarkerName);
-    
+
     // figure out where to graft it
     let current = path[path.length - 1];
-    
+
     while (!current.element.contains(node)) {
       path.pop();
       current = path[path.length - 1];
     }
-    
+
     current.children.push(leaf);
     path.push(leaf);
   }
