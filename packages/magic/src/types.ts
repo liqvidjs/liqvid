@@ -19,12 +19,12 @@ export type ScriptData = {
   /**
    * Integrity attribute for production.
    */
-   integrity?: string; 
+  integrity?: string; 
 
   /**
    * Production src.
    */
-   production?: string | (() => string);
+  production?: string | (() => string);
 } | string;
 
 export type StyleData = {

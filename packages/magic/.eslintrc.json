@@ -1,0 +1,6 @@
+{
+  "extends": "@yuri",
+  "rules": {
+    "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }]
+  }
+}
