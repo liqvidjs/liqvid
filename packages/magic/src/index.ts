@@ -26,8 +26,8 @@ export function transform(content: string, config: {
       }
   
       if (typeof handler === "string") {
-        const attrs: any = {};
-        attrs.src = handler;
+        const attrs: Record<string, string> = {};
+        
         if (script.crossorigin) {
           attrs.crossorigin = "anonymous";//script.crossorigin;
         }
@@ -35,6 +35,8 @@ export function transform(content: string, config: {
         if (config.mode === "production" && script.integrity) {
           attrs.integrity = script.integrity;
         }
+        
+        attrs.src = handler;
   
         return tag("script", attrs);
       } else {
@@ -51,15 +53,22 @@ export function transform(content: string, config: {
       return match;
     }
 
-    const attrs: any = {
+    const attrs: Record<string, string> = {
       rel: "stylesheet",
       type: "text/css"
     };
 
     if (typeof style === "string") {
-      attrs.href = style;
+      return tag("link", {href: style, ...attrs}, true);
     } else {
-      attrs.href = style[config.mode];
+      const handler = style[config.mode];
+      if (!handler) {
+        return "";
+      }
+
+      if (typeof handler === "string") {
+        return tag("link", {href: style[config.mode], ...attrs}, true);
+      }
     }
 
     return tag("link", attrs, true);
@@ -83,7 +92,11 @@ export function transform(content: string, config: {
 /**
  * Create an HTML tag.
  */ 
-export function tag<K extends keyof HTMLElementTagNameMap>(tagName: K, attrs: any = {}, nextOrClose: boolean | (() => string) = false) {
+export function tag<K extends keyof HTMLElementTagNameMap>(
+  tagName: K,
+  attrs: Record<string, boolean | string> = {},
+  nextOrClose: boolean | number | string | (() => string) = false
+) {
   const close = (nextOrClose === true);
 
   const attrString = Object.keys(attrs)
