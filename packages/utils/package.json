@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/utils",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Utility functions for Liqvid",
   "exports": {
     "./*": "./dist/*.js"
@@ -16,7 +16,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build --force",
     "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
@@ -30,11 +30,10 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
-  "sideEffects": false,
   "devDependencies": {
+    "@babel/core": "^7.16.12",
     "@types/jest": "^27.4.0",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
+    "@yuri/eslint-config": "^1.0.1",
     "eslint": "^8.8.0",
     "jest": "^27.4.7",
     "ts-jest": "^27.1.3",
