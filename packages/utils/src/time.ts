@@ -31,7 +31,7 @@ export function parseTime(str: string): number {
   // ms
   const $_ = str.match(/\.(\d{0,3})/);
   if ($_) {
-    parts.push(parseInt($_[1].padStart(3, "0")));
+    parts.push(parseInt($_[1].padEnd(3, "0")));
   } else {
     parts.push(0);
   }

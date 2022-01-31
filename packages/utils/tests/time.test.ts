@@ -70,6 +70,12 @@ describe("time/formatTimeMs", () => {
 });
 
 describe("time/parseTime", () => {
+  test("milliseconds", () => {
+    expect(parseTime("1:00.5")).toBe(60500);
+    expect(parseTime("1:00.02")).toBe(60020);
+    expect(parseTime("1:00.131")).toBe(60131);
+  });
+
   // seconds
   test("0:ss", () => {
     expect(parseTime("0:01")).toBe(1 * SECONDS);
