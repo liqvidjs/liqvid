@@ -139,14 +139,40 @@ iframe, img
     display inline-block
     height 100%
     vertical-align top
+
+
+
+.lv-controls-buttons, .rp-controls-buttons,
+.lv-controls-right, .rp-controls-right,
+.lv-controls-volume, .rp-controls-volume
+  > button
+    background none
+    border none
+    outline none
+    cursor pointer
+    opacity .9
+    transition opacity .1s cubic-bezier(0.4,0,1,1)
+    height 100%
+    padding 0
+    width 36px
     
-.lv-controls-buttons > button, .lv-controls-right > button
+    &:hover
+      opacity 1
+      transition opacity .1s cubic-bezier(0,0,0.2,1)
+      
+    > svg
+      height 100%
+
+.lv-controls-buttons > button,
+.lv-controls-right > button,
+.lv-controls-buttons > .lv-controls-volume > button
   background none
   border none
+  outline none
   cursor pointer
   opacity .9
   transition opacity .1s cubic-bezier(0.4,0,1,1)
-  width 36px
+  width 38px
   
   &:hover
     opacity 1
