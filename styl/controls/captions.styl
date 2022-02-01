@@ -1,18 +1,45 @@
+.lv-controls-captions
+  position relative
+
+  > svg > path
+    fill #FFF
+  
+  &::after
+    content ""
+    background $wine
+    border-radius 2px
+    bottom 3px
+    display block
+    height 2px
+    left 18px
+    position absolute
+    width 0
+    transition left .1s cubic-bezier(0.4,0,1,1), width .1s cubic-bezier(0.4,0,1,1)
+    
+  .lv-captions &::after
+    width 30px
+    left 3px
+    transition left .25s cubic-bezier(0,0,0.2,1),width .25s cubic-bezier(0,0,0.2,1)
+  
+
 .lv-captions-display
-  background-color rgba(255, 255, 255, 0.1)
+  background-color rgba(0, 0, 0, .5)
   border-radius 5px
   color #FFF
+  display none
   font-family sans-serif
   font-size 1.3em
   z-index 500
   padding .7em
   text-align center
   user-select none
-  width 50%
   
   position absolute
   bottom 10%
-  left 25%
-  
-  &:empty
-    display none
+  left 50%
+  transform translateX(-50%)
+  width auto
+
+.lv-captions > .lv-captions-display:not(:empty)
+  display block
+
