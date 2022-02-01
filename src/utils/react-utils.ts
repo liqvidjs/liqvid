@@ -39,7 +39,7 @@ export const captureRef = <T>(callback: (ref: T) => void, innerRef?: React.Ref<T
 export function recursiveMap(
   children: React.ReactNode,
   fn: (child: React.ReactElement<any>) => React.ReactElement<any>
-): React.ReactChild[] {
+): React.ReactNode[] {
   return React.Children.map(children, (child) => {
     if (!React.isValidElement<any>(child)) {
       return child;

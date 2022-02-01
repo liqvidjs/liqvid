@@ -2,13 +2,20 @@ import {Player} from "../Player";
 
 import {captureRef} from "./react-utils";
 
+/* https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener#matching_event_listeners_for_removal */
+declare global {
+  interface EventListenerOptions {
+    passive?: boolean;
+  }
+}
+
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
 ): e is React.MouseEvent<T> {
   return ("nativeEvent" in e) && e.nativeEvent instanceof MouseEvent;
 }
 
-export function dragHelper<T extends Node>(
+export function dragHelper<T extends HTMLElement | SVGElement>(
   move: (e: MouseEvent | TouchEvent, hit: {x: number; y: number; dx: number; dy: number}) => void,
   down: (
     e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>,
@@ -99,19 +106,21 @@ export function dragHelper<T extends Node>(
   };
 }
 
-type DHR = typeof dragHelper;
-type Arg1 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? A : unknown;
-type Arg2 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? B : unknown;
-type Arg3 = DHR extends (a: infer A, b: infer B, c: infer C) => void ? C : unknown;
+type Arg1 = Parameters<typeof dragHelper>[0];
+type Arg2 = Parameters<typeof dragHelper>[1];
+type Arg3 = Parameters<typeof dragHelper>[2];
 
 /**
   the innerRef attribute is a hack around https://github.com/facebook/react/issues/2043.
 */
-export function dragHelperReact<T extends Node>(move: Arg1, down?: Arg2, up?: Arg3, innerRef?: React.Ref<T>) {
+export function dragHelperReact<T extends HTMLElement | SVGElement>(move: Arg1, down?: Arg2, up?: Arg3, innerRef?: React.Ref<T>) {
   const listener = dragHelper(move, down, up);
   
+  /* https://github.com/microsoft/TypeScript/issues/46819 */
+  type AEL = HTMLElement["addEventListener"];
+
   if (innerRef) {
-    const intercept = captureRef(ref => ref.addEventListener("touchstart", listener, {passive: false}), innerRef);
+    const intercept = captureRef(ref => (ref.addEventListener as AEL)("touchstart", listener, {passive: false}), innerRef);
     return {
       onMouseDown: listener,
       onMouseUp: Player.preventCanvasClick,
@@ -124,5 +133,4 @@ export function dragHelperReact<T extends Node>(move: Arg1, down?: Arg2, up?: Ar
       onTouchStart: listener
     };
   }
-
 }
