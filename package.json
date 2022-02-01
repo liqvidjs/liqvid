@@ -8,7 +8,7 @@
   "main": "dist/liqvid.js",
   "typings": "dist/types/index.d.ts",
   "scripts": {
-    "build": "webpack && NODE_ENV=production webpack",
+    "build": "webpack; NODE_ENV=production webpack; stylus -o dist/liqvid.css styl/liqvid.styl; stylus -c -o dist/liqvid.min.css styl/liqvid.styl",
     "lint": "eslint --ext ts,tsx --fix src; eslint --ext ts,tsx --fix tests",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus-prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
@@ -24,12 +24,6 @@
     "url": "https://github.com/liqvidjs/player/issues"
   },
   "homepage": "https://github.com/liqvidjs/player#readme",
-  "peerDependencies": {
-    "@types/react": "^17.0.19",
-    "@types/react-dom": "^17.0.11",
-    "react": "^17.0.2",
-    "strict-event-emitter-types": "^2.0.0"
-  },
   "devDependencies": {
     "@testing-library/dom": "^8.11.3",
     "@testing-library/react": "^12.1.2",
