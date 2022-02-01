@@ -31,12 +31,11 @@
     "strict-event-emitter-types": "^2.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.19.4",
+    "@testing-library/dom": "^8.11.3",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^14.0.0-beta.8",
     "@types/jest": "^27.4.0",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
+    "@yuri/eslint-config": "^1.0.1",
     "banner-webpack-plugin": "^0.2.3",
     "eslint": "^8.8.0",
     "eslint-plugin-react": "^7.28.0",
@@ -59,7 +58,7 @@
     "@liqvid/keymap": "^1.0.0",
     "@liqvid/playback": "^1.0.0",
     "@liqvid/react": "^0.0.1",
-    "@liqvid/utils": "^1.0.3",
+    "@liqvid/utils": "1.1.0",
     "@types/events": "^3.0.0",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
