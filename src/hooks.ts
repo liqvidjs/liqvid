@@ -2,8 +2,8 @@ import {usePlayback} from "@liqvid/playback/react";
 import {useContext, useEffect} from "react";
 import {Player} from "./Player";
 
-export {useKeymap} from "@liqvid/keymap/react";
-export {usePlayback, useTime} from "@liqvid/playback/react";
+export {KeymapContext, useKeymap} from "@liqvid/keymap/react";
+export {PlaybackContext, usePlayback, useTime} from "@liqvid/playback/react";
 import type {Script} from "./script";
 
 /** Access the ambient {@link Player} */
