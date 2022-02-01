@@ -8,6 +8,8 @@ import * as Utils from "./utils";
 import {Video} from "./Video";
 export * from "./hooks";
 
+export {ReplayData} from "@liqvid/utils/replay-data";
+
 export {Audio, IdMap, Media, Playback, Player, Script, Utils, Video};
 
 // backwards compatibility
