@@ -1,9 +1,7 @@
 import {ResizeObserver} from "@juggle/resize-observer";
-import {KeymapContext} from "@liqvid/keymap/react";
-import {PlaybackContext} from "@liqvid/playback/react";
 import {useContextBridge} from "@react-three/drei/core/useContextBridge";
 import {Canvas as ThreeCanvas, useThree} from "@react-three/fiber";
-import {Player} from "liqvid";
+import {Player, PlaybackContext, KeymapContext} from "liqvid";
 import {useEffect} from "react";
 
 /**
