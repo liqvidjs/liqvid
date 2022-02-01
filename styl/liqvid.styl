@@ -130,12 +130,29 @@ iframe, img
   > *
     display inline-block
     height 100%
+    vertical-align top
     
 .lv-controls-right, .rp-controls-right
   float right
   
   > *
     display inline-block
+    height 100%
+    vertical-align top
+    
+.lv-controls-buttons > button, .lv-controls-right > button
+  background none
+  border none
+  cursor pointer
+  opacity .9
+  transition opacity .1s cubic-bezier(0.4,0,1,1)
+  width 36px
+  
+  &:hover
+    opacity 1
+    transition opacity .1s cubic-bezier(0,0,0.2,1)
+    
+  > svg
     height 100%
 
 // individual controls
