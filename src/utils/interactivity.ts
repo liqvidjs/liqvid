@@ -1,13 +1,11 @@
+import {dragHelper as htmlDragHelper} from "@liqvid/utils/interactivity";
 import {Player} from "../Player";
-
 import {captureRef} from "./react-utils";
 
-/* https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener#matching_event_listeners_for_removal */
-declare global {
-  interface EventListenerOptions {
-    passive?: boolean;
-  }
-}
+type Move = Parameters<typeof htmlDragHelper>[0];
+type Down = Parameters<typeof dragHelper>[1];
+type DownArgs = Parameters<typeof htmlDragHelper>[1] extends (arg0: any, ...args: infer T) => void ? T : never;
+type Up = Parameters<typeof htmlDragHelper>[2];
 
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
@@ -15,105 +13,61 @@ function isReactMouseEvent<T>(
   return ("nativeEvent" in e) && e.nativeEvent instanceof MouseEvent;
 }
 
+/**
+ * Helper for implementing drag functionality, abstracting over mouse vs touch events.
+ * @returns An event listener which should be added to both `mousedown` and `touchstart` events.
+ */
 export function dragHelper<T extends HTMLElement | SVGElement>(
-  move: (e: MouseEvent | TouchEvent, hit: {x: number; y: number; dx: number; dy: number}) => void,
+  move: Move,
+  /** Callback for when dragging begins (pointer is touched). */
   down: (
+    /** The underlying `mousedown` or `touchstart` event */
     e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>,
-    hit: {x: number; y: number},
+    /** Information about the pointer location */
+    hit: {
+      /** Horizontal coordinate of pointer */
+      x: number;
+      /** Vertical coordinate of pointer */
+      y: number;
+    },
+    /** The upHandler used internally by this method */
     upHandler: (e: MouseEvent | TouchEvent) => void,
+    /** The moveHandler used internally by this method */
     moveHandler: (e: MouseEvent | TouchEvent) => void
   ) => void = () => {},
-  up: (e: MouseEvent | TouchEvent, hit: {x: number; y: number; dx: number; dy: number}) => void = () => {}
+  /** Callback for when dragging ends (pointer is lifted). */
+  up: Up = () => {}
 ) {
+  /*
+    We can't directly use the version from @liqvid/utils/interactivity because down() might want to use React types.
+    Hence this goofiness.
+  */
+  let args: DownArgs;
+  const __down: Parameters<typeof htmlDragHelper>[1] = (e, ...captureArgs) => {
+    args = captureArgs;
+  };
+  const listener = htmlDragHelper(move, __down, up);
+
   return (e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>) => {
-    if (e instanceof MouseEvent || isReactMouseEvent(e)) {
-      if (e.button !== 0) return;
+    if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)
+      return;
 
-      let lastX = e.clientX,
-          lastY = e.clientY;
+      if ("nativeEvent" in e) {
+        listener(e.nativeEvent);
+      } else {
+        listener(e);
+      }
 
-      const upHandler = (e: MouseEvent) => {
-        const dx = e.clientX - lastX,
-              dy = e.clientY - lastY;
-
-        document.body.removeEventListener("mousemove", moveHandler);
-        window.removeEventListener("mouseup", upHandler);
-
-        return up(e, {x: e.clientX, y: e.clientY, dx, dy});
-      };
-
-      const moveHandler = (e: MouseEvent) => {
-        const dx = e.clientX - lastX,
-              dy = e.clientY - lastY;
-
-        lastX = e.clientX;
-        lastY = e.clientY;
-
-        return move(e, {x: e.clientX, y: e.clientY, dx, dy});
-      };
-
-      document.body.addEventListener("mousemove", moveHandler, {passive: false});
-      window.addEventListener("mouseup", upHandler, {passive: false});
-
-      return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
-    } else {
-      e.preventDefault();
-      const touches = e.changedTouches;
-
-      const touchId = touches[0].identifier;
-
-      let lastX = touches[0].clientX,
-          lastY = touches[0].clientY;
-
-      const upHandler = (e: TouchEvent) => {
-        e.preventDefault();
-
-        for (const touch of Array.from(e.changedTouches)) {
-          if (touch.identifier !== touchId) continue;
-
-          const dx = touch.clientX - lastX,
-                dy = touch.clientY - lastY;
-          
-          window.removeEventListener("touchend", upHandler, {capture: false, passive: false});
-          window.removeEventListener("touchcancel", upHandler, {capture: false, passive: false});
-          window.removeEventListener("touchmove", moveHandler, {capture: false, passive: false});
-
-          return up(e, {x: touch.clientX, y: touch.clientY, dx, dy});
-        }
-      };
-
-      const moveHandler = (e: TouchEvent) => {
-        e.preventDefault();
-        for (const touch of Array.from(e.changedTouches)) {
-          if (touch.identifier !== touchId) continue;
-          
-          const dx = touch.clientX - lastX,
-                dy = touch.clientY - lastY;
-          
-          lastX = touch.clientX;
-          lastY = touch.clientY;
-          
-          return move(e, {x: touch.clientX, y: touch.clientY, dx, dy});
-        }
-      };
-
-      window.addEventListener("touchend", upHandler, {capture: false, passive: false});
-      window.addEventListener("touchcancel", upHandler, {capture: false, passive: false});
-      window.addEventListener("touchmove", moveHandler, {capture: false, passive: false});
-
-      return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
-    }
+      down(e, ...args);
   };
 }
 
-type Arg1 = Parameters<typeof dragHelper>[0];
-type Arg2 = Parameters<typeof dragHelper>[1];
-type Arg3 = Parameters<typeof dragHelper>[2];
-
 /**
-  the innerRef attribute is a hack around https://github.com/facebook/react/issues/2043.
-*/
-export function dragHelperReact<T extends HTMLElement | SVGElement>(move: Arg1, down?: Arg2, up?: Arg3, innerRef?: React.Ref<T>) {
+ * Helper for implementing drag functionality, abstracting over mouse vs touch events.
+ * @param innerRef Any `ref` that you want attached to the element, since this method attaches its own `ref` attribute. This is a hack around https://github.com/facebook/react/issues/2043.
+ * @returns An object of event handlers which should be added to a React element with {...}
+ */
+export function dragHelperReact<T extends HTMLElement | SVGElement>(move: Move, down?: Down, up?: Up, innerRef?: React.Ref<T>) {
   const listener = dragHelper(move, down, up);
   
   /* https://github.com/microsoft/TypeScript/issues/46819 */
