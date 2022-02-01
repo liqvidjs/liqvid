@@ -1,5 +1,6 @@
 const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
+const path = require("path");
 
 module.exports = {
   entry: `${__dirname}/src/index.ts`,
@@ -61,5 +62,11 @@ module.exports = {
 
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
-  }
+  },
+
+  resolveLoader: {
+    modules: [
+      path.join(__dirname, "node_modules")
+    ]
+  },
 };

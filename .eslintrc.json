@@ -4,6 +4,7 @@
     "react"
   ],
   "rules": {
-    "react/self-closing-comp": "off"
+    "react/self-closing-comp": "off",
+    "@typescript-eslint/no-empty-function": "off"
   }
 }
