@@ -9,7 +9,7 @@ export const anyHover = window.matchMedia("(any-hover: hover)").matches;
 	Drop-in replacement for onClick handlers which works better on mobile.
   The innerRef attribute, and the implementation, is a hack around https://github.com/facebook/react/issues/2043.
 */
-export const onClick = <T extends Node>(
+export const onClick = <T extends HTMLElement | SVGElement>(
   callback: (e: React.MouseEvent<T> | TouchEvent) => void,
   innerRef?: React.Ref<T>
 ) => {
@@ -58,7 +58,7 @@ export const onClick = <T extends Node>(
   Replacement for addEventListener("click") which works better on mobile.
   Returns a function to remove the event listener.
 */
-export const attachClickHandler = (node: Node, callback: (e: MouseEvent | TouchEvent) => void): () => void => {
+export const attachClickHandler = (node: HTMLElement | SVGElement, callback: (e: MouseEvent | TouchEvent) => void): () => void => {
   if (anyHover) {
     node.addEventListener("click", callback);
     return () => {

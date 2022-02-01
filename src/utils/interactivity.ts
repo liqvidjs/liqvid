@@ -52,13 +52,13 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
     if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)
       return;
 
-      if ("nativeEvent" in e) {
-        listener(e.nativeEvent);
-      } else {
-        listener(e);
-      }
+    if ("nativeEvent" in e) {
+      listener(e.nativeEvent);
+    } else {
+      listener(e);
+    }
 
-      down(e, ...args);
+    down(e, ...args);
   };
 }
 
