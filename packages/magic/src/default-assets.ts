@@ -36,7 +36,7 @@ export const scripts: Record<string, ScriptData> = {
 
 export const styles: Record<string, StyleData> = {
   "liqvid": {
-    "development": "https://unpkg.com/liqvid/dist/liqvid.css",
-    "production": "https://unpkg.com/liqvid/dist/liqvid.min.css"
+    "development": "https://unpkg.com/liqvid@2.0.10/dist/liqvid.css",
+    "production": "https://unpkg.com/liqvid@2.0.10/dist/liqvid.min.css"
   }
 };
