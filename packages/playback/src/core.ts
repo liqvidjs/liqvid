@@ -189,6 +189,10 @@ export class Playback
   play() {
     this.paused = false;
 
+    // this is necessary for currentTime to be correct when playing from stop state
+    this.currentTime = this.__playingFrom;
+    this.__startTime = performance.now();
+
     this.emit("play");
   }
 
