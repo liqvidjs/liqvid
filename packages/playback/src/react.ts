@@ -1,12 +1,12 @@
 import {createContext, useContext, useEffect, useRef} from "react";
-import {Playback} from ".";
+import type {Playback} from ".";
 
 /**
- * {@link React.Context} used to access ambient Playback
+ * {@link React.Context} used to access ambient {@link Playback}
  */
 export const PlaybackContext = createContext<Playback>(null);
 
-/** Access the ambient Playback */
+/** Access the ambient {@link Playback} */
 export function usePlayback() {
   return useContext(PlaybackContext);
 }
