@@ -15,7 +15,7 @@ export function combineRefs<T>(...args: React.Ref<T>[]) {
 }
 
 export function useForceUpdate() {
-  return useReducer((c: boolean) => !c, false)[1];
+  return useReducer((c: number) => c+1, 0)[1];
 }
 
 /**
