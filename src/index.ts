@@ -28,13 +28,15 @@ import {Volume} from "./controls/Volume";
 export const Controls = {Captions, FullScreen, PlayPause, ScrubberBar, Settings, TimeDisplay, Volume};
 
 // alias
-Object.defineProperty(window, "RactivePlayer", {
-  get() {
-    if (typeof window.Liqvid !== "undefined") {
-      return window.Liqvid;
+if (!window.hasOwnProperty("RactivePlayer")) {
+  Object.defineProperty(window, "RactivePlayer", {
+    get() {
+      if (typeof window.Liqvid !== "undefined") {
+        return window.Liqvid;
+      }
     }
-  }
-});
+  });
+}
 
 // export type
 import type {useKeymap, useMarkerUpdate, usePlayback, usePlayer, useScript, useTime, useTimeUpdate} from "./hooks";
