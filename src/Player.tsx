@@ -222,6 +222,11 @@ export class Player extends React.PureComponent<Props> {
       "video"
     ].includes((e.target as Element).nodeName.toLowerCase()))
       return;
+    
+    // data-affords markup
+    if ((e.target as Element)?.closest(`*[data-affords~="click"]`)) {
+      return;
+    }
 
     // the reason for this escape hatch is that this gets called in between an element's onMouseUp
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the

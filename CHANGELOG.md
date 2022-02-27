@@ -1,20 +1,46 @@
 ## 2.1.0 (???)
 
-* rename library to Liqvid
+### New features
+
+* add `Playback.timeline` and `Playback.newAnimation` for much easier animation
+
+* add `Utils.json` and `Utils.svg`
+
+* add `Utils.react.combineRefs`
+
+* put `Utils.animation.bezier` and `Utils.animation.easings` back in
+
+* add `useKeymap`, `usePlayback`, `useScript` hooks
+
+* add `useTime` hook
+
+### Ease-of-use
+
+* `start` prop on `<Audio>` and `<Video>` elements now defaults to `0`
+
+* add defaults to `thumbs` prop
 
 * attach events directly to `Playback` and `Script` instead of `.hub`
 
-* add `useKeyMap`, `usePlayback`, `useScript` hooks
+* can now use `Player` without `Script`
 
-* add `Playback.timeline` for much easier animation
+* add `--lv-canvas-height` CSS variable
 
-* add `--rp-canvas-height` CSS variable
+* add `data-affords="click"` for cancelling `canvasClick`
+
+### Miscellaneous
+
+* rename library to Liqvid
 
 * expose `Media` class
 
 * expose `ScrubberBar` control
 
 * improve captions support, add captions control
+
+* rename `KeyMap` to `Keymap`
+
+* move most internals to `@liqvid` namespace
 
 ## 2.0.6 (Jun 7, 2021)
 
