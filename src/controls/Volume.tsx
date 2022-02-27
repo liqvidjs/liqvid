@@ -1,5 +1,5 @@
 import * as React from "react";
-const {useCallback, useEffect, useMemo} = React;
+import {useCallback, useEffect, useMemo, useRef} from "react";
 
 import {useKeymap, usePlayback} from "../hooks";
 import {strings} from "../i18n";
@@ -12,18 +12,26 @@ export function Volume() {
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
-  useEffect(() => {
-    // keyboard controls
-    const incrementVolume = () => playback.volume = playback.volume + 0.05;
-    const decrementVolume = () => playback.volume = playback.volume - 0.05;
-    const toggleMute = () => playback.muted = !playback.muted;
+  // keyboard controls
+  const incrementVolume = useCallback(() => playback.volume = playback.volume + 0.05, []);
+  const decrementVolume = useCallback(() => playback.volume = playback.volume - 0.05, []);
+  const toggleMute = useCallback(() => playback.muted = !playback.muted, []);
 
-    // subscriptions
+  /*
+    Set up subscriptions.
+    We don't do this in useEffect() because it needs to run
+    before useEffect()s in the video content.
+  */
+  const subscribed = useRef(false);
+  if (!subscribed.current) {
     playback.on("volumechange", forceUpdate);
     keymap.bind("ArrowUp", incrementVolume);
     keymap.bind("ArrowDown", decrementVolume);
     keymap.bind("M", toggleMute);
+    subscribed.current = true;
+  }
 
+  useEffect(() => {
     // unsubscriptions
     return () => {
       playback.off("volumechange", forceUpdate);
