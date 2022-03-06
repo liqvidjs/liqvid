@@ -1,4 +1,5 @@
-.lv-controls-captions
+.lv-controls-captions,
+.rp-controls-captions
   position relative
 
   > svg > path
@@ -16,13 +17,15 @@
     width 0
     transition left .1s cubic-bezier(0.4,0,1,1), width .1s cubic-bezier(0.4,0,1,1)
     
-  .lv-captions &::after
+  .lv-captions &::after,
+  .rp-captions &::after
     width 30px
     left 3px
     transition left .25s cubic-bezier(0,0,0.2,1),width .25s cubic-bezier(0,0,0.2,1)
   
 
-.lv-captions-display
+.lv-captions-display,
+.rp-captions-display
   background-color rgba(0, 0, 0, .5)
   border-radius 5px
   color #FFF
@@ -40,6 +43,7 @@
   transform translateX(-50%)
   width auto
 
-.lv-captions > .lv-captions-display:not(:empty)
+.lv-captions > .lv-captions-display:not(:empty),
+.rp-captions > .rp-captions-display:not(:empty)
   display block
 

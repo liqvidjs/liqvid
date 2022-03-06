@@ -1,27 +1,33 @@
 /* scrubbing */
-.lv-controls-scrub
+.lv-controls-scrub,
+.rp-controls-scrub
   -webkit-tap-highlight-color transparent
   
-.lv-controls-scrub-wrap
+.lv-controls-scrub-wrap,
+.rp-controls-scrub-wrap
   height 100%
   width 100%
 
-.lv-controls-scrub-progress
+.lv-controls-scrub-progress,
+.rp-controls-scrub-progress
   display block
   height 100%
   width 100%
   pointer-events none
 
-.lv-progress-elapsed
+.lv-progress-elapsed,
+.rp-progress-elapsed
   fill var(--lv-elapsed-color)
 
-.lv-progress-remaining
+.lv-progress-remaining,
+.rp-progress-remaining
   fill rgba(255, 255, 255, 0.6)
   
 .controls-progress-buffered
   fill orange
 
-.lv-scrubber
+.lv-scrubber,
+.rp-scrubber
   height 13px
   position absolute
   top -3px
@@ -29,7 +35,8 @@
   > circle
     fill var(--lv-scrubber-color)
 
-.lv-thumb-highlight
+.lv-thumb-highlight,
+.rp-thumb-highlight
   fill #FFF
   
   &.past

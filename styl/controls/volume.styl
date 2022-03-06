@@ -18,9 +18,14 @@ range-track()
   &::-ms-track
     {block}
 
-.lv-controls-volume
+.lv-controls-volume,
+.rp-controls-volume
   cursor pointer
   z-index 100000
+  
+  > svg
+    height 100%
+    padding 3px
   
   > button > svg
     padding 3px

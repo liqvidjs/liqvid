@@ -1,7 +1,9 @@
 $thumb-img-height = 100px
 $thumb-img-width = 160px
 $thumb-padding = 3px
-.lv-controls-thumbnail
+
+.lv-controls-thumbnail,
+.rp-controls-thumbnail
   background #333
   
   font-size .85em
@@ -11,7 +13,8 @@ $thumb-padding = 3px
   position absolute
   margin-left (-($thumb-img-width / 2 + $thumb-padding))
 
-.lv-thumbnail-box
+.lv-thumbnail-box,
+.rp-thumbnail-box
   overflow hidden
   
   height $thumb-img-height
@@ -23,11 +26,13 @@ $thumb-padding = 3px
   > img
     position absolute
 
-.lv-thumbnail-title
+.lv-thumbnail-title,
+.rp-thumbnail-title
   color #FFF
   font-family sans-serif
   
-.lv-thumbnail-time
+.lv-thumbnail-time,
+.rp-thumbnail-time
   color #FFF
   font-family sans-serif
   position absolute

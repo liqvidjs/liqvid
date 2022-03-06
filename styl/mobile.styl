@@ -1,25 +1,31 @@
 @media (min-width: 401px)    
-  .lv-controls
+  .lv-controls,
+  .rp-controls
     --lv-controls-left 2
     --lv-controls-right 3
 
 @media (max-width: 800px)
-  .lv-player
+  .lv-player,
+  .ractive-player
     --lv-controls-height 36px
 
 @media (max-width: 400px)
-  .lv-player
+  .lv-player,
+  .ractive-player
     --lv-controls-height 30px
     
-  .lv-controls
+  .lv-controls,
+  .rp-controls
     --lv-controls-left 2
     --lv-controls-right 2
     
-  .lv-controls-settings
+  .lv-controls-settings,
+  .rp-controls-settings
     display none
 
 @media (any-hover: none)
-  .lv-controls
+  .lv-controls,
+  .rp-controls
     color #FFF
     height var(--lv-controls-height)
     position absolute
@@ -32,32 +38,39 @@
     left calc((100% - var(--lv-width)) / 2)
     
   // hide certain controls
-  .lv-controls-volume
+  .lv-controls-volume,
+  .rp-controls-volume
     display none !important
   
   // time
-  .lv-controls-time
+  .lv-controls-time,
+  .rp-controls-time
     line-height unset
 
-  .lv-current-time, .lv-total-time
+  .lv-current-time, .lv-total-time,
+  .rp-current-time, .rp-total-time
     height var(--lv-buttons-height)
     line-height var(--lv-buttons-height)
     position absolute
     top 0
     width var(--lv-buttons-height)
     
-  .lv-current-time
+  .lv-current-time,
+  .rp-current-time
     left 0
     text-align right
     
-  .lv-total-time
+  .lv-total-time,
+  .rp-total-time
     right calc((var(--lv-controls-right) - 1) * var(--lv-buttons-height))
     text-align left
 
-  .lv-time-separator
+  .lv-time-separator,
+  .rp-time-separator
     display none
     
-  .lv-controls-scrub-wrap
+  .lv-controls-scrub-wrap,
+  .rp-controls-scrub-wrap
     position relative
     
     &::after
@@ -68,7 +81,8 @@
       left 0
       right 0
     
-  .lv-controls-scrub
+  .lv-controls-scrub,
+  .rp-controls-scrub
     height calc(7.5% / 0.55)
     top unset
     top calc(50% - 0.5 * (7.5% / 0.55))
@@ -76,12 +90,14 @@
     left calc(var(--lv-controls-left) * var(--lv-buttons-height))
     margin unset
     
-  .lv-scrubber
+  .lv-scrubber,
+  .rp-scrubber
     height 216%
     top -50%
     pointer-events all
     
-  .lv-controls-playpause
+  .lv-controls-playpause,
+  .rp-controls-playpause
     cursor pointer
     pointer-events all
 
@@ -90,7 +106,8 @@
     top 0
     width var(--lv-buttons-height)
 
-  .lv-controls-right
+  .lv-controls-right,
+  .rp-controls-right
     float unset
     position absolute
     right 0
@@ -98,4 +115,3 @@
     
     > *
       width var(--lv-buttons-height)
-

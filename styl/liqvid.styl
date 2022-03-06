@@ -21,7 +21,8 @@ user-select(value)
 iframe, img
   border none
 
-.lv-player
+.lv-player,
+.ractive-player
   --lv-aspect-ratio 1.6
   --lv-controls-height 44px
   --lv-elapsed-color $wine
@@ -46,7 +47,9 @@ iframe, img
   --rp-width var(--lv-width)
 
 // frame mode
-.lv-player.lv-frame
+// .lv-player.lv-frame
+.lv-player,
+.ractive-player
   height 100%
   width 100%
   overflow hidden
@@ -54,14 +57,17 @@ iframe, img
   left 0
   top 0
 
-.lv-canvas
+.lv-canvas,
+.rp-canvas
   background-color #FFF
   position relative
   user-select none
-  height 100%
-  width 100%
+  // height 100%
+  // width 100%
   
-.lv-frame > .lv-canvas
+// .lv-frame > .lv-canvas
+.lv-canvas,
+.rp-canvas
   height var(--lv-height)
   width var(--lv-width)
 
@@ -69,29 +75,46 @@ iframe, img
 .not-ready
   *[data-from-first], *[data-during]
     visibility hidden
-    
+
 @media (min-aspect-ratio: 8/5)
-  :root.lv-frame
+  // :root.lv-frame
+  :root
     font-size 2vh
 
-  .lv-player.lv-frame
+  // .lv-player.lv-frame
+  .lv-player
     --lv-width 160vh
 
     > .lv-canvas
       margin 0 auto
+  
+  .ractive-player
+    --lv-width 160vh
+
+    > .rp-canvas
+      margin 0 auto
     
 @media (max-aspect-ratio: 8/5)
-  :root.lv-frame
+  // :root.lv-frame
+  :root
     font-size 1.25vw
 
-  .lv-player.lv-frame
+  // .lv-player.lv-frame
+  .lv-player
     --lv-width 100vw
 
     > .lv-canvas
       top calc((100% - 62.5vw) / 2)
 
+  .ractive-player
+    --lv-width 100vw
+
+    > .rp-canvas
+      top calc((100% - 62.5vw) / 2)
+
 /* control positioning */
-.lv-controls
+.lv-controls,
+.rp-controls
   background-color rgba(0, 0, 0, 0.5)
   color #FFF
   height var(--lv-controls-height)
@@ -107,12 +130,15 @@ iframe, img
     opacity 0
     transition opacity .1s cubic-bezier(0.4, 0, 1, 1)
 
-.lv-frame > .lv-controls
+// .lv-frame > .lv-controls
+.lv-controls,
+.rp-controls
   top calc(50vh + var(--lv-height)/2 - var(--lv-controls-height))
   left calc(50vw - var(--lv-width) / 2)
   width var(--lv-width)
 
-.lv-controls-scrub
+.lv-controls-scrub,
+.rp-controls-scrub
   cursor pointer
   height var(--lv-scrub-height)
   // height calc(5.5% / 0.55)
@@ -121,7 +147,8 @@ iframe, img
   width 97%
   z-index 2
 
-.lv-controls-buttons
+.lv-controls-buttons,
+.rp-controls-buttons
   height var(--lv-buttons-height)
   line-height var(--lv-buttons-height)
   margin 0 auto
@@ -132,7 +159,8 @@ iframe, img
     height 100%
     vertical-align top
     
-.lv-controls-right, .rp-controls-right
+.lv-controls-right,
+.rp-controls-right
   float right
   
   > *
@@ -140,11 +168,9 @@ iframe, img
     height 100%
     vertical-align top
 
-
-
-.lv-controls-buttons, .rp-controls-buttons,
-.lv-controls-right, .rp-controls-right,
-.lv-controls-volume, .rp-controls-volume
+.lv-controls-buttons,
+.lv-controls-right, .rp-controls-right
+.lv-controls-volume
   > button
     background none
     border none
@@ -154,7 +180,7 @@ iframe, img
     transition opacity .1s cubic-bezier(0.4,0,1,1)
     height 100%
     padding 0
-    width 36px
+    width 38px
     
     &:hover
       opacity 1
@@ -163,26 +189,9 @@ iframe, img
     > svg
       height 100%
 
-.lv-controls-buttons > button,
-.lv-controls-right > button,
-.lv-controls-buttons > .lv-controls-volume > button
-  background none
-  border none
-  outline none
-  cursor pointer
-  opacity .9
-  transition opacity .1s cubic-bezier(0.4,0,1,1)
-  width 38px
-  
-  &:hover
-    opacity 1
-    transition opacity .1s cubic-bezier(0,0,0.2,1)
-    
-  > svg
-    height 100%
-
 // individual controls
-.lv-controls-playpause, .lv-controls-fullscreen
+.lv-controls-playpause, .lv-controls-fullscreen,
+.rp-controls-playpause, .rp-controls-fullscreen
   cursor pointer
 
 @import "controls/captions"
