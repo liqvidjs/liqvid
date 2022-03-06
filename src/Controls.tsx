@@ -7,7 +7,7 @@ import {usePlayback} from "@liqvid/playback/react";
 import {Player} from "./Player";
 
 interface Props {
-  controls: (() => JSX.Element)[];
+  controls: JSX.Element | JSX.Element[];
   thumbs?: ThumbData;
 }
 
