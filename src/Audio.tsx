@@ -6,7 +6,7 @@ import {fragmentFromHTML} from "./utils/dom";
 /** Liqvid equivalent of {@link HTMLAudioElement `<audio>`}. */
 export class Audio extends Media {
   /** The underlying <audio> element. */
-  domElement: HTMLAudioElement;
+  declare domElement: HTMLAudioElement;
 
   componentDidMount() {
     super.componentDidMount();

@@ -5,7 +5,7 @@ import {Media} from "./Media";
 /** Liqvid equivalent of {@link HTMLVideoElement `<video>`}. */
 export class Video extends Media {
   /** The underlying <video> element. */
-  domElement: HTMLVideoElement;
+  declare domElement: HTMLVideoElement;
 
   // render method
   render() {

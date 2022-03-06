@@ -12,7 +12,7 @@ interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   start?: number;
 }
 
-export class Media extends React.PureComponent<Props> {
+export class Media extends React.PureComponent<Props, Record<string, never>, Player> {
   protected playback: Playback;
   protected player: Player;
   protected domElement: HTMLMediaElement;
@@ -26,7 +26,6 @@ export class Media extends React.PureComponent<Props> {
   };
 
   static contextType = Player.Context;
-  context!: Player;
 
   constructor(props: Props, context: Player) {
     super(props, context);
