@@ -5,6 +5,7 @@
   ],
   "rules": {
     "react/self-closing-comp": "off",
-    "@typescript-eslint/no-empty-function": "off"
+    "@typescript-eslint/no-empty-function": "off",
+    "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }]
   }
 }

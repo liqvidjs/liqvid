@@ -37,8 +37,17 @@ const allowScroll = Symbol();
 const ignoreCanvasClick = Symbol();
 
 export class Player extends React.PureComponent<Props> {
-  canPlay: Promise<void[]>;
-  canPlayThrough: Promise<void[]>;
+  /**
+   * Liqvid analogue of the [`canplay`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplay_event) event.
+   * This can be used to wait for Audio or Video files to load. You can also use {@link obstruct} to add custom loaders.
+   */
+  canPlay: Promise<void>;
+
+  /**
+   * Liqvid analogue of the [`canplaythrough`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplaythrough_event) event.
+   * This can be used to wait for Audio or Video files to load. You can also use {@link obstruct} to add custom loaders.
+   */
+  canPlayThrough: Promise<void>;
 
   /** The {@link HTMLDivElement `<div>`} where content is attached (separate from controls). */
   canvas: HTMLDivElement;
@@ -59,8 +68,8 @@ export class Player extends React.PureComponent<Props> {
 
   buffers: Map<HTMLMediaElement, [number, number][]>;
 
-  private __canPlayTasks: Promise<void>[];
-  private __canPlayThroughTasks: Promise<void>[];
+  private __canPlayTasks: Promise<unknown>[];
+  private __canPlayThroughTasks: Promise<unknown>[];
 
   private dag: DAGLeaf;
 
@@ -123,12 +132,12 @@ export class Player extends React.PureComponent<Props> {
     element[Player.symbol] = this;
 
     // inline or frame?
-    const client =
-      element.parentElement.nodeName.toLowerCase() === "main" &&
-      element.parentElement.parentElement === document.body &&
-      element.parentElement.childNodes.length === 1;
-    document.documentElement.classList.toggle("lv-frame", client);
-    element.classList.toggle("lv-frame", client);
+    // const client =
+    //   element.parentElement.nodeName.toLowerCase() === "main" &&
+    //   element.parentElement.parentElement === document.body &&
+    //   element.parentElement.childNodes.length === 1;
+    // document.documentElement.classList.toggle("lv-frame", client);
+    // element.classList.toggle("lv-frame", client);
 
     // keyboard events
     document.body.addEventListener("keydown", e => {
@@ -145,15 +154,13 @@ export class Player extends React.PureComponent<Props> {
     // document.addEventListener("touchforcechange", e => e.preventDefault(), {passive: false});
 
     // canPlay events --- mostly unused
-    this.canPlay = Promise.all(this.__canPlayTasks);
-    this.canPlay
-    .then(() => {
+    this.canPlay = Promise.all(this.__canPlayTasks).then(() => {
       this.hub.emit("canplay");
     });
 
-    this.canPlayThrough = Promise.all(this.__canPlayThroughTasks);
-    this.canPlayThrough
-    .then(() => this.hub.emit("canplaythrough"));
+    this.canPlayThrough = Promise.all(this.__canPlayThroughTasks).then(() => {
+      this.hub.emit("canplaythrough");
+    });
 
     // hiding stuff
     if (this.script) {
@@ -294,7 +301,12 @@ export class Player extends React.PureComponent<Props> {
     this.playback.emit("bufferupdate");
   }
 
-  obstruct(event: "canplay" | "canplaythrough", task: Promise<void>) {
+  /**
+   * Obstruct {@link canPlay} or {@link canPlayThrough} events
+   * @param event Which event type to obstruct
+   * @param task Promise to append
+   */
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<unknown>) {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {
