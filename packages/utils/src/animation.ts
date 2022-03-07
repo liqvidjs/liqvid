@@ -1,4 +1,4 @@
-import * as BezierEasing from "bezier-easing";
+import BezierEasing from "bezier-easing";
 
 import {clamp, lerp} from "./misc";
 import type {ReplayData} from "./replay-data";

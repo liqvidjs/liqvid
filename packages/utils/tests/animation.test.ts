@@ -1,4 +1,4 @@
-import {animate, replay} from "../src/animation";
+import {animate, bezier, replay} from "../src/animation";
 import {ReplayData} from "../src/replay-data";
 
 describe("animation/animate", () => {
@@ -32,6 +32,12 @@ describe("animation/animate", () => {
     expect(fn(750)).toBe(3);
     expect(fn(1200)).toBe(4);
     expect(fn(2000)).toBe(7);
+  });
+});
+
+describe("animation/bezier", () => {
+  test("bezier imported correctly", () => {
+    expect(typeof bezier).toBe("function");
   });
 });
 
