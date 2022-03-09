@@ -1,0 +1,56 @@
+{
+  "name": "@liqvid/xyjax",
+  "version": "1.0.0",
+  "description": "XyJax animation helpers for Liqvid",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "keywords": [
+    "liqvid",
+    "mathjax",
+    "xyjax"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysulyma/rp-xyjax.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ysulyma/rp-xyjax/issues"
+  },
+  "homepage": "https://github.com/ysulyma/rp-xyjax#readme",
+  "license": "MIT",
+  "peerDependencies": {
+    "@liqvid/mathjax": "workspace:^1.0.0",
+    "@types/react": "^17.0.38",
+    "liqvid": "2.1.0-beta.3",
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "@liqvid/mathjax": "workspace:^1.0.0",
+    "@types/react": "^17.0.38",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "@yuri/eslint-config": "^1.0.1",
+    "banner-webpack-plugin": "^0.2.3",
+    "eslint": "^8.7.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "liqvid": "2.1.0-beta.3",
+    "react": "^17.0.2",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@liqvid/utils": "^1.0.0"
+  }
+}
