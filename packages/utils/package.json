@@ -1,14 +1,17 @@
 {
   "name": "@liqvid/utils",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Utility functions for Liqvid",
   "exports": {
-    "./*": "./dist/*.js"
+    "./*": {
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js"
+    }
   },
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*"
+        "./dist/types/*"
       ]
     }
   },
@@ -31,7 +34,6 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
   "devDependencies": {
-    "@babel/core": "^7.17.5",
     "@types/jest": "^27.4.1",
     "@types/react": "^17.0.39",
     "@yuri/eslint-config": "^1.0.1",
