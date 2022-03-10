@@ -1,4 +1,4 @@
-import {Children, cloneElement, isValidElement, useReducer} from "react";
+import {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
 
 /**
  * Combine multiple refs into one
@@ -68,4 +68,21 @@ export function recursiveMap(
     // @ts-ignore
     return fn(child);
   });
+}
+
+/**
+ * Get a promise and resolver
+ * @param deps React dependency list
+ * @returns [promise, resolve, reject]
+ */
+export function usePromise(deps: React.DependencyList = []): [Promise<void>, () => void, () => void] {
+  const resolve = useRef<() => void>();
+  const reject = useRef<() => void>();
+
+  const promise = useMemo(() => new Promise<void>((res, rej) => {
+    resolve.current = res;
+    reject.current = rej;
+  }), deps);
+
+  return [promise, resolve.current, reject.current];
 }
