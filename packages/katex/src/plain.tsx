@@ -1,32 +1,31 @@
-import {usePlayer} from "liqvid";
-import {forwardRef, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
 import {KaTeXReady} from "./loading";
+import {usePromise} from "@liqvid/utils/react";
 
 /**
  * KTX element API
  */
 export interface Handle {
+  /** The underlying <span> element */
   domElement: HTMLSpanElement;
+
+  /** Promise that resolves once typesetting is finished */
   ready: Promise<void>;
 }
 
-type Props = {
+interface Props extends React.HTMLAttributes<HTMLSpanElement> {
+  /**
+   * Whether to render in display style
+   * @default false
+   */
   display?: boolean;
-  reparse?: boolean;
-} & React.HTMLAttributes<HTMLSpanElement>;
+}
 
-// blocking version
-const implementation: React.ForwardRefRenderFunction<Handle, Props> = function KTX(props, ref) {
+/** Component for KaTeX code */
+export const KTX = forwardRef<Handle, Props>(function KTX(props, ref) {
   const spanRef = useRef<HTMLSpanElement>();
-  const {children, display, reparse, ...attrs} = props;
-  const resolveRef = useRef<() => void>();
-  const player = usePlayer();
-
-  const ready = useMemo(() => {
-    return new Promise<void>((resolve) => {
-      resolveRef.current = resolve;
-    });
-  }, []);
+  const {children, display = false, ...attrs} = props;
+  const [ready, resolve] = usePromise();
 
   // handle
   useImperativeHandle(ref, () => ({
@@ -44,24 +43,24 @@ const implementation: React.ForwardRefRenderFunction<Handle, Props> = function K
         trust: true
       });
 
-      // move katex into placeholder element
+      /* move katex into placeholder element */
       const child = spanRef.current.firstElementChild as HTMLSpanElement;
+
+      // copy classes
       for (let i = 0, len = child.classList.length; i < len; ++i) {
         spanRef.current.classList.add(child.classList.item(i));
       }
 
+      // move children
       while (child.childNodes.length > 0) {
         spanRef.current.appendChild(child.firstChild);
       }
+
+      // delete child
       child.remove();
 
-      // reparse tree?
-      if (reparse) {
-        player.reparseTree(spanRef.current);
-      }
-
       // resolve promise
-      resolveRef.current();
+      resolve();
     });
   }, [children]);
 
@@ -75,7 +74,4 @@ const implementation: React.ForwardRefRenderFunction<Handle, Props> = function K
   return (
     <span {...attrs} ref={spanRef}/>
   );
-};
-
-export const KTXNonBlocking = forwardRef(implementation);
-
+});

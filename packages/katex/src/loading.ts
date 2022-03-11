@@ -1,6 +1,6 @@
 // option of loading KaTeX asynchronously
 const KaTeXLoad = new Promise<typeof katex>((resolve) => {
-  const script = document.querySelector(`script[src*="katex.js"], script[src*="katex.min.js"]`);
+  const script = document.querySelector("script[src*=\"katex.js\"], script[src*=\"katex.min.js\"]");
   if (!script) return;
 
   if (window.hasOwnProperty("katex")) {
@@ -39,7 +39,7 @@ Parse \newcommand macros in a file.
 Also supports \ktxnewcommand (for use in conjunction with MathJax).
 */
 function parseMacros(file: string) {
-  const macros = {};
+  const macros: Record<string, string> = {};
   const rgx = /\\(?:ktx)?newcommand\{(.+?)\}(?:\[\d+\])?\{/g;
   let match: RegExpExecArray;
   

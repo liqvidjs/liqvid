@@ -1,17 +1,24 @@
 {
   "name": "@liqvid/katex",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "KaTeX integration for Liqvid",
   "files": [
     "dist/*"
   ],
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./plain": {
+      "import": "./dist/plain.mjs",
+      "require": "./dist/plain.js"
+    }
   },
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*"
+        "./dist/types/*"
       ]
     }
   },
@@ -20,19 +27,24 @@
     "liqvid",
     "katex"
   ],
+  "scripts": {
+    "build": "tsc --build --force",
+    "lint": "eslint --ext ts,tsx --fix src"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ysulyma/rp-katex.git"
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
   "bugs": {
-    "url": "https://github.com/ysulyma/rp-katex/issues"
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/ysulyma/rp-katex#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
   "license": "MIT",
   "peerDependencies": {
-    "@types/react": "^17.0.39",
-    "liqvid": "2.1.0-beta.3",
-    "react": "^17.0.2"
+    "@types/katex": "^0.11.1",
+    "@types/react": ">=17.0.0",
+    "liqvid": ">=2.1.0-beta.4",
+    "react": ">=17.0.0"
   },
   "peerDependenciesMeta": {
     "liqvid": {
@@ -46,12 +58,12 @@
     "@yuri/eslint-config": "^1.0.1",
     "eslint": "^8.10.0",
     "eslint-plugin-react": "^7.29.3",
-    "liqvid": "2.1.0-beta.3",
+    "liqvid": ">=2.1.0-beta.4",
     "react": "^17.0.2",
+    "rollup": "^2.70.0",
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "@types/events": "^3.0.0",
-    "@types/katex": "^0.11.1"
+    "@liqvid/utils": "^1.3.0"
   }
 }

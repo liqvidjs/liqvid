@@ -1,22 +1,28 @@
-import {Children, cloneElement, forwardRef, isValidElement, useEffect, useMemo, useRef, useImperativeHandle} from "react";
+import {recursiveMap, usePromise} from "@liqvid/utils/react";
 import {usePlayer} from "liqvid";
+import React, {cloneElement, forwardRef, isValidElement, ReactElement, useEffect, useImperativeHandle, useRef} from "react";
+import {KTX} from "./fancy";
+import {Handle as KTXHandle, KTX as KTXPlain} from "./plain";
 
-import {Handle as KTXHandle, KTXNonBlocking} from "./NonBlocking";
-import { KTXBlocking } from "./Blocking";
-
+/** RenderGroup element API */
 interface Handle {
+  /** Promise that resolves once all KTX descendants have finished typesetting */
   ready: Promise<void>;
 }
 
 interface Props {
+  /**
+   * Whether to reparse descendants for `during()` and `from()`
+   * @default false
+  */
   reparse?: boolean;
 }
 
 /**
- * Wait for a bunch of things to be rendered
- */
- export const RenderGroup = forwardRef<Handle, Props>(function RenderGroup(props, ref) {
-   const [ready, resolve] = usePromise();
+ * Wait for several things to be rendered
+*/
+export const RenderGroup = forwardRef<Handle, Props>(function RenderGroup(props, ref) {
+  const [ready, resolve] = usePromise();
 
   // handle
   useImperativeHandle(ref, () => ({ready}));
@@ -29,6 +35,7 @@ interface Props {
   useEffect(() => {
     // promises
     Promise.all(promises.current).then(() => {
+
       // reparse
       if (props.reparse) {
         player.reparseTree(leastCommonAncestor(elements.current));
@@ -38,7 +45,7 @@ interface Props {
       resolve();
     });
   }, []);
-  
+
   return recursiveMap(props.children, node => {
     if (shouldInspect(node)) {
       const originalRef = node.ref;
@@ -60,44 +67,15 @@ interface Props {
     }
 
     return node;
-  });
+  }) as unknown as React.ReactElement;
 });
 
+/**
+ * Determine whether the node is a <KTX> element
+ * @param node Element to check
+ */
 function shouldInspect(node: React.ReactNode): node is React.ReactElement & React.RefAttributes<KTXHandle> {
-  return isValidElement(node) && typeof node.type === "object" && (node.type === KTXBlocking || node.type === KTXNonBlocking);
-}
-
-// belongs in a separate file, but currently only used here
-// (as well as in liqvid, but that can't be helped)
-export function recursiveMap(
-  children: React.ReactNode,
-  fn: (child: React.ReactNode) => React.ReactNode
-): React.ReactNode {
-  return Children.map(children, (child) => {
-    if (!isValidElement(child)) {
-      return child;
-    }
-
-    if ("children" in child.props) {
-      child = cloneElement(child, {
-        children: recursiveMap(child.props.children, fn)
-      });
-    }
-
-    return fn(child);
-  });
-}
-
-function usePromise(deps: React.DependencyList = []): [Promise<void>, () => void, () => void] {
-  const resolve = useRef<() => void>();
-  const reject = useRef<() => void>();
-
-  const promise = useMemo(() => new Promise<void>((res, rej) => {
-    resolve.current = res;
-    reject.current = rej;
-  }), deps);
-
-  return [promise, resolve.current, reject.current];
+  return isValidElement(node) && typeof node.type === "object" && (node.type === KTX || node.type === KTXPlain);
 }
 
 /**
@@ -105,7 +83,7 @@ function usePromise(deps: React.DependencyList = []): [Promise<void>, () => void
  * @param elements Elements
  * @returns Deepest node containing all passed elements
  */
-function leastCommonAncestor(elements: Element[]) {
+function leastCommonAncestor(elements: HTMLElement[]): HTMLElement {
   if (elements.length === 0) {
     throw new Error("Must pass at least one element");
   }

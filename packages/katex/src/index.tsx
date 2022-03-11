@@ -1,9 +1,8 @@
-export {KTXBlocking as KTX, KTXBlocking} from "./Blocking";
+export {KTX} from "./fancy";
 export {KaTeXReady} from "./loading";
-export {Handle, KTXNonBlocking} from "./NonBlocking";
+export {Handle} from "./plain";
 export {RenderGroup} from "./RenderGroup";
 
 declare global {
   const katex: typeof katex;
 }
-
