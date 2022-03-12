@@ -2,10 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true,
+    "declarationDir": "./dist/types",
     "outDir": "./dist",
-    "removeComments": false,
-    "rootDir": "./src",
-    "target": "esnext"
+    "rootDir": "./src"
   },
   "include": ["./src"]
 }
