@@ -6,10 +6,11 @@
     "incremental": true,
     "jsx": "react-jsx",
     "lib": ["esnext", "dom"],
+    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "pretty": true,
-    "removeComments": true,
-    "target": "ES2017"
+    "removeComments": false,
+    "target": "es2021"
   }
 }
