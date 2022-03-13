@@ -7,11 +7,12 @@ export {PlaybackContext, usePlayback, useTime} from "@liqvid/playback/react";
 import type {Script} from "./script";
 
 /** Access the ambient {@link Player} */
-export function usePlayer() {
+export function usePlayer(): Player {
   return useContext(Player.Context);
 }
 
-export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: React.DependencyList) {
+/** Register a callback for when the marker changes */
+export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: React.DependencyList): void {
   const script = useScript();
 
   useEffect(() => {
@@ -28,7 +29,8 @@ export function useScript(): Script {
   return usePlayer().script;
 }
 
-export function useTimeUpdate(callback: (t: number) => void, deps?: React.DependencyList) {
+/** Register a callback for when the time changes */
+export function useTimeUpdate(callback: (t: number) => void, deps?: React.DependencyList): void {
   const playback = usePlayback();
 
   useEffect(() => {

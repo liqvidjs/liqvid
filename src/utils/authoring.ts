@@ -1,7 +1,5 @@
-import {CSSProperties} from "react";
-
 // conditional display
-export function showIf(cond: boolean): {style?: CSSProperties} {
+export function showIf(cond: boolean): {style?: React.CSSProperties} {
   if (!cond) return {
     style: {
       opacity: 0,

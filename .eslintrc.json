@@ -4,6 +4,16 @@
     "react"
   ],
   "rules": {
+    "@typescript-eslint/explicit-function-return-type": ["off", {
+      "allowExpressions": true,
+      "allowTypedFunctionExpressions": true,
+      "allowConciseArrowFunctionExpressionsStartingWithVoid": true,
+      "allowedNames": ["componentDidMount", "componentWillUnmount", "render", "Volume", "PlayPause", "Settings", "Player", "TimeDisplay", "ThumbnailBox"]
+    }],
+    "@typescript-eslint/explicit-module-boundary-types": ["off", {
+      "allowTypedFunctionExpressions": true,
+      "allowedNames": ["componentDidMount", "componentWillUnmount", "render", "Captions", "Controls", "FullScreen", "IdMap", "PlayPause", "Settings", "Player", "ScrubberBar", "TimeDisplay", "ThumbnailBox", "Volume"]
+    }],
     "react/self-closing-comp": "off",
     "@typescript-eslint/no-empty-function": "off",
     "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }]

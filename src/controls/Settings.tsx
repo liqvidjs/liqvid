@@ -170,23 +170,23 @@ export function Settings() {
   );
 }
 
-function getMainAudio(elt: HTMLDivElement) {
+function getMainAudio(elt: HTMLDivElement): HTMLAudioElement {
   for (const audio of Array.from(elt.querySelectorAll("audio"))) {
     if (captionsAndSubtitles(audio).length > 0)
       return audio;
   }
 }
 
-function trackLabel(track?: TextTrack) {
+function trackLabel(track?: TextTrack): string {
   if (track === undefined)
     return "Off";
   return track.label || track.language;
 }
 
-function captionsAndSubtitles(audio: HTMLAudioElement) {
+function captionsAndSubtitles(audio: HTMLAudioElement): TextTrack[] {
   return Array.from(audio.textTracks).filter(t => ["captions", "subtitles"].includes(t.kind));
 }
 
-function get<T>(arr: T[], i: number) {
+function get<T>(arr: T[], i: number): T {
   return arr[clamp(0, i, arr.length - 1)];
 }

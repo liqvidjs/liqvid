@@ -103,11 +103,11 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
   }
 
   // getter
-  get end() {
+  get end(): number {
     return this.start + this.domElement.duration * 1000;
   }
   
-  pause() {
+  pause(): void {
     if (!this.domElement.ended) {
       this.domElement.removeEventListener("pause", this.onDomPause);
       this.domElement.pause();
@@ -115,22 +115,22 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     }
   }
 
-  play() {
+  play(): Promise<void> {
     this.domElement.removeEventListener("play", this.onDomPlay);
     const promise = this.domElement.play();
     this.domElement.addEventListener("play", this.onDomPlay);
     return promise;
   }
 
-  onPlay() {
+  onPlay(): void {
     this.onTimeUpdate(this.playback.currentTime);
   }
 
-  onRateChange() {
+  onRateChange(): void {
     this.domElement.playbackRate = this.playback.playbackRate;
   }
 
-  onSeek(t: number) {
+  onSeek(t: number): void {
     if (between(this.start, t, this.end)) {
       this.domElement.currentTime = (t - this.start) / 1000;
 
@@ -142,7 +142,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     }
   }
 
-  onTimeUpdate(t: number) {
+  onTimeUpdate(t: number): void {
     if (between(this.start, t, this.end)) {
       if (!this.domElement.paused || this.domElement.ended) return;
 
@@ -154,12 +154,12 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     }
   }
 
-  onVolumeChange() {
+  onVolumeChange(): void {
     this.domElement.volume = this.playback.volume;
     this.domElement.muted = this.playback.muted;
   }
 
-  onDomPlay() {
+  onDomPlay(): void {
     if (this.playback.paused) {
       this.playback.off("play", this.onPlay);
       this.playback.play();
@@ -167,7 +167,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     }
   }
 
-  onDomPause() {
+  onDomPause(): void {
     if (!this.playback.seeking && !this.playback.paused && !this.domElement.ended) {
       this.playback.off("pause", this.pause);
       this.playback.pause();

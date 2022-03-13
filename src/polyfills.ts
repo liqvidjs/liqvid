@@ -25,7 +25,7 @@ export const isFullScreen = () =>
   .map(_ => document[_] as boolean)
   .find(_ => _ !== undefined);
 
-export function onFullScreenChange(callback: EventListener) {
+export function onFullScreenChange(callback: EventListener): void {
   for (const event of ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"])
     document.addEventListener(event, callback);
 }

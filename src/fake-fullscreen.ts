@@ -9,7 +9,7 @@ import {
 let __isFullScreen = false;
 const __callbacks: (() => void)[] = [];
 
-export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : () => {
+export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : (): void => {
   window.parent.postMessage({type: "fake-fullscreen", value: true}, location.origin);
 
   if (!__isFullScreen) {
@@ -18,7 +18,7 @@ export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : () => 
   }
 };
 
-export const exitFullScreen = fullscreenEnabled ? $exitFullScreen : () => {
+export const exitFullScreen = fullscreenEnabled ? $exitFullScreen : (): void => {
   window.parent.postMessage({type: "fake-fullscreen", value: false}, location.origin);
 
   if (__isFullScreen) {
@@ -27,10 +27,10 @@ export const exitFullScreen = fullscreenEnabled ? $exitFullScreen : () => {
   }
 };
 
-export const isFullScreen = fullscreenEnabled ? $isFullScreen : () => {
+export const isFullScreen = fullscreenEnabled ? $isFullScreen : (): boolean => {
   return __isFullScreen;
 };
 
-export const onFullScreenChange = fullscreenEnabled ? $onFullScreenChange : (callback: () => void) => {
+export const onFullScreenChange = fullscreenEnabled ? $onFullScreenChange : (callback: () => void): void => {
   __callbacks.push(callback);
 };

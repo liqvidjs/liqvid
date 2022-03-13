@@ -59,24 +59,24 @@ export class Script
   }
 
   /** @deprecated */
-  get hub() {
+  get hub(): this {
     return this;
   }
 
   /** Name of the active marker. */
-  get markerName() {
+  get markerName(): string {
     return this.markers[this.markerIndex][0];
   }
 
   // public methods
 
   /** Seek playback to the previous marker. */
-  back() {
+  back(): void {
     this.playback.seek(this.markers[Math.max(0, this.markerIndex - 1)][1]);
   }
 
   /** Advance playback to the next marker. */
-  forward() {
+  forward(): void {
     this.playback.seek(this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]);
   }
   
@@ -84,7 +84,7 @@ export class Script
    * Returns the first marker with the given name.
    * @throws {Error} If no marker named `name` exists.
    */
-  markerByName(name: string) {
+  markerByName(name: string): Marker {
     return this.markers[this.markerNumberOf(name)];
   }
 
@@ -92,7 +92,7 @@ export class Script
    * Returns the first index of a marker named `name`.
    * @throws {Error} If no marker named `name` exists.
    */ 
-  markerNumberOf(name: string) {
+  markerNumberOf(name: string): number {
     for (let i = 0; i < this.markers.length; ++i) {
       if (this.markers[i][0] === name) return i;
     }
@@ -100,7 +100,7 @@ export class Script
   }
 
   /** If `start` is a string, returns the starting time of the marker with that name. Otherwise, returns `start`. */
-  parseStart(start: number | string) {
+  parseStart(start: number | string): number {
     if (typeof start === "string") {
       if (start.match(timeRegexp))
         return parseTime(start);
@@ -112,7 +112,7 @@ export class Script
   }
 
   /** If `end` is a string, returns the ending time of the marker with that name. Otherwise, returns `end`. */
-  parseEnd(end: number | string) {
+  parseEnd(end: number | string): number {
     if (typeof end === "string") {
       if (end.match(timeRegexp))
         return parseTime(end);
@@ -123,8 +123,8 @@ export class Script
     }
   }
 
-  // update marker
-  __updateMarker(t: number) {
+  /** Update marker */
+  __updateMarker(t: number): void {
     let newIndex;
     for (let i = 0; i < this.markers.length; ++i) {
       const [, begin, end] = this.markers[i];

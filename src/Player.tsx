@@ -174,25 +174,28 @@ export class Player extends React.PureComponent<Props> {
     }
   }
 
-  private updateTree() {
+  private updateTree(): void {
     const {script} = this;
 
     recurse(this.dag);
 
-    function hide(leaf: DAGLeaf) {
+    /** Hide element */
+    function hide(leaf: DAGLeaf): void {
       leaf.element.style.opacity = "0";
       leaf.element.style["pointer-events"] = "none";
       leaf.element.setAttribute("aria-hidden", "true");
     }
 
-    function show(leaf: DAGLeaf) {
+    /** Show element */
+    function show(leaf: DAGLeaf): void {
       leaf.element.style.removeProperty("opacity");
       leaf.element.style.removeProperty("pointer-events");
       leaf.element.removeAttribute("aria-hidden");
       return leaf.children.forEach(recurse);
     }
 
-    function recurse(leaf: DAGLeaf) {
+    /** Recurse through DAG */
+    function recurse(leaf: DAGLeaf): void {
       if (typeof leaf.first !== "undefined") {
         if (leaf.first <= script.markerIndex && (!leaf.last || script.markerIndex < leaf.last)) {
           return show(leaf);
@@ -211,7 +214,7 @@ export class Player extends React.PureComponent<Props> {
     }
   }
 
-  private canvasClick() {
+  private canvasClick(): void {
     const allow = this.hub.listeners("canvasClick").every(_ => _() ?? true);
     if (allow) {
       this.playback.paused ? this.playback.play() : this.playback.pause();
@@ -219,8 +222,8 @@ export class Player extends React.PureComponent<Props> {
 
     this.hub.emit("canvasClick");
   }
-
-  onMouseUp(e: React.MouseEvent<HTMLDivElement>) {
+  
+  onMouseUp(e: React.MouseEvent<HTMLDivElement>): void {
     // ignore clicks on input tags
     if ([
       "a", "area",
@@ -246,7 +249,7 @@ export class Player extends React.PureComponent<Props> {
     this.canvasClick();
   }
 
-  static allowScroll(e: React.TouchEvent | TouchEvent) {
+  static allowScroll(e: React.TouchEvent | TouchEvent): void {
     ("nativeEvent" in e ? e.nativeEvent : e)[allowScroll] = true;
   }
 
@@ -255,22 +258,22 @@ export class Player extends React.PureComponent<Props> {
    * @param e Click event on video canvas
    * @deprecated Use data-affords="click" instead
    */
-  static preventCanvasClick(e: React.MouseEvent | MouseEvent) {
+  static preventCanvasClick(e: React.MouseEvent | MouseEvent): void {
     ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
   }
 
   /** Suspends keyboard controls so that components can receive keyboard input. */
-  suspendKeyCapture() {
+  suspendKeyCapture(): void {
     this.captureKeys = false;
   }
 
   /** Resumes keyboard controls. */
-  resumeKeyCapture() {
+  resumeKeyCapture(): void {
     this.captureKeys = true;
   }
 
   /** @deprecated */
-  ready() {
+  ready(): void {
     console.info(".ready() is a noop in v2.1");
   }
 
@@ -278,7 +281,7 @@ export class Player extends React.PureComponent<Props> {
    * Reparse a section of the document for `during()` and `from()`
    * @param node Element to reparse
    */
-  reparseTree(node: HTMLElement | SVGElement) {
+  reparseTree(node: HTMLElement | SVGElement): void {
     const root = findClosest(node, this.dag);
     if (!root) {
       throw new Error("Could not find node in tree");
@@ -288,15 +291,15 @@ export class Player extends React.PureComponent<Props> {
     this.updateTree();
   }
 
-  registerBuffer(elt: HTMLMediaElement) {
+  registerBuffer(elt: HTMLMediaElement): void {
     this.buffers.set(elt, []);
   }
 
-  unregisterBuffer(elt: HTMLMediaElement) {
+  unregisterBuffer(elt: HTMLMediaElement): void {
     this.buffers.delete(elt);
   }
 
-  updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]) {
+  updateBuffer(elt: HTMLMediaElement, buffers: [number, number][]): void {
     this.buffers.set(elt, buffers);
     this.playback.emit("bufferupdate");
   }
@@ -306,7 +309,7 @@ export class Player extends React.PureComponent<Props> {
    * @param event Which event type to obstruct
    * @param task Promise to append
    */
-  obstruct(event: "canplay" | "canplaythrough", task: Promise<unknown>) {
+  obstruct(event: "canplay" | "canplaythrough", task: Promise<unknown>): void {
     if (event === "canplay") {
       this.__canPlayTasks.push(task);
     } else {

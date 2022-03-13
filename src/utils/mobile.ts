@@ -20,7 +20,7 @@ export const onClick = <T extends HTMLElement | SVGElement>(
         target: T & EventTarget;
 
     // touchstart handler
-    const onTouchStart = (e: TouchEvent) => {
+    const onTouchStart = (e: TouchEvent): void => {
       if (typeof touchId === "number")
         return;
       target = e.currentTarget as T;
@@ -28,7 +28,7 @@ export const onClick = <T extends HTMLElement | SVGElement>(
     };
 
     // touchend handler
-    const onTouchEnd = (e: TouchEvent) => {
+    const onTouchEnd = (e: TouchEvent): void => {
       if (typeof touchId !== "number")
         return;
 
@@ -69,13 +69,13 @@ export const attachClickHandler = (node: HTMLElement | SVGElement, callback: (e:
   let touchId: number;
 
   // touchstart handler
-  const touchStart = (e: TouchEvent) => {
+  const touchStart = (e: TouchEvent): void => {
     if (typeof touchId === "number") return;
     touchId = e.changedTouches[0].identifier;
   };
 
   // touchend handler
-  const touchEnd = (e: TouchEvent) => {
+  const touchEnd = (e: TouchEvent): void => {
     if (typeof touchId !== "number") return;
     for (const touch of Array.from(e.changedTouches)) {
       if (touch.identifier !== touchId) continue;
