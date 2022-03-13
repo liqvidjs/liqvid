@@ -1,4 +1,4 @@
-## 2.1.0 (???)
+## 2.1.0 (March 12, 2022)
 
 ### New features
 
@@ -13,6 +13,8 @@
 * add `useKeymap`, `usePlayback`, `useScript` hooks
 
 * add `useTime` hook
+
+* distribute as ES module
 
 ### Ease-of-use
 
