@@ -3,8 +3,8 @@
 (() => {
 
 const setDims = () => {
-  document.body.style.setProperty("--vh", `${document.documentElement.clientHeight}px`);
-  document.body.style.setProperty("--vw", `${document.documentElement.clientWidth}px`);
+  document.body.style.setProperty("--vh", `${window.innerHeight}px`);
+  document.body.style.setProperty("--vw", `${window.innerWidth}px`);
   document.body.style.setProperty("--scroll-y", `${window.scrollY || 0}px`);
 };
 
