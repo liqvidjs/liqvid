@@ -1,6 +1,5 @@
 import {dragHelper as htmlDragHelper} from "@liqvid/utils/interactivity";
 import {captureRef} from "@liqvid/utils/react";
-import {Player} from "../Player";
 
 type Move = Parameters<typeof htmlDragHelper>[0];
 type Down = Parameters<typeof dragHelper>[1];
@@ -76,14 +75,14 @@ export function dragHelperReact<T extends HTMLElement | SVGElement>(move: Move, 
   if (innerRef) {
     const intercept = captureRef(ref => (ref.addEventListener as AEL)("touchstart", listener, {passive: false}), innerRef);
     return {
+      "data-affords": "click",
       onMouseDown: listener,
-      onMouseUp: Player.preventCanvasClick,
       ref: intercept
     };
   } else {
     return {
+      "data-affords": "click",
       onMouseDown: listener,
-      onMouseUp: Player.preventCanvasClick,
       onTouchStart: listener
     };
   }
