@@ -1,13 +1,23 @@
 import {createContext, useContext, useEffect, useRef} from "react";
 import type {Playback} from ".";
 
+type GlobalThis = {
+  [symbol]: React.Context<Playback>;
+}
+
+const symbol = Symbol.for("@lqv/playback");
+
+if (!(symbol in globalThis)) {
+  (globalThis as unknown as GlobalThis)[symbol] = createContext<Playback>(null);
+}
+
 /**
  * {@link React.Context} used to access ambient {@link Playback}
  */
-export const PlaybackContext = createContext<Playback>(null);
+export const PlaybackContext = (globalThis as unknown as GlobalThis)[symbol];
 
 /** Access the ambient {@link Playback} */
-export function usePlayback() {
+export function usePlayback(): Playback {
   return useContext(PlaybackContext);
 }
 
