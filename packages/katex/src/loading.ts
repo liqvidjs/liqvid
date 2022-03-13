@@ -35,8 +35,9 @@ const KaTeXMacros = new Promise<{[key: string]: string;}>((resolve) => {
 export const KaTeXReady = Promise.all([KaTeXLoad, KaTeXMacros]);
 
 /**
-Parse \newcommand macros in a file.
-Also supports \ktxnewcommand (for use in conjunction with MathJax).
+ * Parse \newcommand macros in a file.
+ * Also supports \ktxnewcommand (for use in conjunction with MathJax).
+ * @param file TeX file to parse
 */
 function parseMacros(file: string) {
   const macros: Record<string, string> = {};
