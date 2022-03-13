@@ -75,19 +75,22 @@ export class Player extends React.PureComponent<Props> {
 
   /** {@link React.Context} used to access ambient Player */
   static Context = React.createContext<Player>(null);
-
+  
   /**
-   * Symbol to access the player instance attached to a DOM element
+   * Symbol to access the {@link Player} instance attached to a DOM element
    * 
    * `player.canvas.parentElement[Player.symbol] === player`
    */
   static symbol = Symbol();
 
+  /** Default controls appearing on the left */
   static defaultControlsLeft = (<>
     <PlayPause/>
     <Volume/>
     <TimeDisplay/>
   </>);
+
+  /** Default controls appearing on the right */
   static defaultControlsRight = (<>
     <Captions/>
     <Settings/>
@@ -247,6 +250,11 @@ export class Player extends React.PureComponent<Props> {
     ("nativeEvent" in e ? e.nativeEvent : e)[allowScroll] = true;
   }
 
+  /**
+   * Prevent canvas clicks from pausing the video.
+   * @param e Click event on video canvas
+   * @deprecated Use data-affords="click" instead
+   */
   static preventCanvasClick(e: React.MouseEvent | MouseEvent) {
     ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
   }
@@ -266,25 +274,17 @@ export class Player extends React.PureComponent<Props> {
     console.info(".ready() is a noop in v2.1");
   }
 
+  /**
+   * Reparse a section of the document for `during()` and `from()`
+   * @param node Element to reparse
+   */
   reparseTree(node: HTMLElement | SVGElement) {
-    // find where to update the tree from
-    function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf): [DAGLeaf, number] {
-      if (!haystack.element.contains(needle)) {
-        return null;
-      }
-      for (let i = 0; i < haystack.children.length; ++i) {
-        if (haystack.children[i].element.contains(needle)) {
-          return findClosest(needle, haystack.children[i]) ?? [haystack, i];
-        }
-      }
-    }
-
-    const [root, index] = findClosest(node, this.dag);
+    const root = findClosest(node, this.dag);
     if (!root) {
       throw new Error("Could not find node in tree");
     }
-    root.children[index].children = toposort(root.children[index].element, this.script.markerNumberOf).children;
-
+    root.children = toposort(root.element, this.script.markerNumberOf).children;
+    
     this.updateTree();
   }
 
@@ -401,4 +401,22 @@ function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => nu
   }
 
   return dag;
+}
+
+/**
+ * Find element's closest ancestor in DAG
+ * @param needle Element to find
+ * @param haystack DAG leaf to search
+ * @returns Closest ancestor
+ */
+function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf): DAGLeaf {
+  if (!haystack.element.contains(needle)) {
+    return null;
+  }
+  for (let i = 0; i < haystack.children.length; ++i) {
+    if (haystack.children[i].element.contains(needle)) {
+      return findClosest(needle, haystack.children[i]) ?? haystack;
+    }
+  }
+  return haystack;
 }
