@@ -40,16 +40,21 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", setDims);
   setDims();
 
-  const iframes = Array.from(document.querySelectorAll("iframe")).filter(_ => _.allowFullscreen && !document.fullscreenEnabled);
+  // live collection of iframes
+  const iframes = document.getElementsByTagName("iframe");
 
   const listener = (e) => {
-    const iframe = iframes.find(_ => _.contentWindow === e.source);
-    if (!iframe) return;
-
-    if ("type" in e.data && e.data.type === "fake-fullscreen") {
-      // resize event doesn't work reliably in iOS...
-      setDims();
-      iframe.classList.toggle("fake-fullscreen", e.data.value);
+    for (let i = 0; i < iframes.length; ++i) {
+      const iframe = iframes.item(i);
+      if (iframe.allowFullscreen && !document.fullscreenEnabled && iframe.contentWindow === e.source) {
+        // handle the resize event
+        if ("type" in e.data && e.data.type === "fake-fullscreen") {
+          // resize event doesn't work reliably in iOS...
+          setDims();
+          iframe.classList.toggle("fake-fullscreen", e.data.value);
+        }
+        return;
+      }
     }
   };
 
