@@ -1,6 +1,6 @@
 {
   "name": "liqvid",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": [
     "dist/*"

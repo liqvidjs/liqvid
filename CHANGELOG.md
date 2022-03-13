@@ -1,3 +1,18 @@
+
+## 2.1.3 (March 13, 2022)
+
+* fix `fake-fullscreen` origin
+
+## 2.1.2 (March 13, 2022)
+
+* use Rollup instead of Webpack
+
+* correctly transpile dependencies for old browsers
+
+## 2.1.1 (March 12, 2022)
+
+* fix typings in `package.json`
+
 ## 2.1.0 (March 12, 2022)
 
 ### New features

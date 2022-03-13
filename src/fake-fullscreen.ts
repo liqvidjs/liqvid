@@ -10,7 +10,7 @@ let __isFullScreen = false;
 const __callbacks: (() => void)[] = [];
 
 export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : (): void => {
-  window.parent.postMessage({type: "fake-fullscreen", value: true}, location.origin);
+  window.parent.postMessage({type: "fake-fullscreen", value: true}, window.parent.origin);
 
   if (!__isFullScreen) {
     __isFullScreen = true;
@@ -19,7 +19,7 @@ export const requestFullScreen = fullscreenEnabled ? $requestFullScreen : (): vo
 };
 
 export const exitFullScreen = fullscreenEnabled ? $exitFullScreen : (): void => {
-  window.parent.postMessage({type: "fake-fullscreen", value: false}, location.origin);
+  window.parent.postMessage({type: "fake-fullscreen", value: false}, window.parent.origin);
 
   if (__isFullScreen) {
     __isFullScreen = false;
