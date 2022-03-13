@@ -44,6 +44,24 @@
 
 * move most internals to `@liqvid` namespace
 
+## 2.0.10 (Jul 19, 2021)
+
+* add `playsInline` to `<Video>`
+
+## 2.0.9 (Jul 19, 2021)
+
+* fix bug introduced in 2.0.6 where Media ending would pause playback
+
+## 2.0.8 (Jul 19, 2021)
+
+* fix bug where scrubber keys could not be properly reassigned
+
+* fix normalization in Script constructor
+
+## 2.0.7 (Jul 7, 2021)
+
+* package as UMD
+
 ## 2.0.6 (Jun 7, 2021)
 
 * work correctly with keyboard play/pause buttons
