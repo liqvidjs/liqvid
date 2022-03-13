@@ -4,9 +4,9 @@ export const scripts: Record<string, ScriptData> = {
   "host": "https://unpkg.com/@liqvid/host/lv-host.js",
   "liqvid": {
     "crossorigin": true,
-    "development": "https://unpkg.com/liqvid@2.1.1/dist/liqvid.js",
-    "production": "https://unpkg.com/liqvid@2.1.1/dist/liqvid.min.js",
-    "integrity": "sha384-wDhCTW+TfRMgBLpDxz3jMWcoi5tyMRiTNAxQ4NYc56lJSqSVy4hUmErhkQivaZkH"
+    "development": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.js",
+    "production": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.min.js",
+    "integrity": "sha384-PF1Q6/ZHWULtuwe8ef5LK49usEuK4uCYtOM8l+u4Wu0hpZw5r0WDgDe9slKjNIwj"
   },
   "livereload": {},
   "polyfills": "https://unpkg.com/@liqvid/polyfills/dist/waapi.js",
@@ -36,7 +36,7 @@ export const scripts: Record<string, ScriptData> = {
 
 export const styles: Record<string, StyleData> = {
   "liqvid": {
-    "development": "https://unpkg.com/liqvid@2.1.1/dist/liqvid.css",
-    "production": "https://unpkg.com/liqvid@2.1.1/dist/liqvid.min.css"
+    "development": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.css",
+    "production": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.min.css"
   }
 };
