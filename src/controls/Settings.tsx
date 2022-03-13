@@ -3,7 +3,7 @@ import * as React from "react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {usePlayer} from "../hooks";
 import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "../utils/react-utils";
+import {useForceUpdate} from "@liqvid/utils/react";
 
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 

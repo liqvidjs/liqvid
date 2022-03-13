@@ -4,7 +4,7 @@ import * as React from "react";
 import {useEffect, useMemo} from "react";
 import {strings} from "../i18n";
 import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "../utils/react-utils";
+import {useForceUpdate} from "@liqvid/utils/react";
 
 /** Control for playing/pausing */
 export function PlayPause() {

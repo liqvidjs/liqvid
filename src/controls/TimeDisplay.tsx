@@ -2,7 +2,7 @@ import {formatTime} from "@liqvid/utils/time";
 import * as React from "react";
 import {useEffect} from "react";
 import {usePlayback} from "../hooks";
-import {useForceUpdate} from "../utils/react-utils";
+import {useForceUpdate} from "@liqvid/utils/react";
 
 export function TimeDisplay() {
   const playback = usePlayback();

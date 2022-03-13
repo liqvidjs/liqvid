@@ -1,4 +1,4 @@
-import {captureRef} from "./react-utils";
+import {captureRef} from "@liqvid/utils/react";
 
 /**
 	Whether any available input mechanism can hover over elements. This is used as a standin for desktop/mobile.

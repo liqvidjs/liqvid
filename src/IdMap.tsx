@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {bind} from "@liqvid/utils/misc";
-import {recursiveMap} from "./utils/react-utils";
+import {recursiveMap} from "@liqvid/utils/react";
 
 interface Props {
   map?: Record<string, unknown>;
@@ -45,7 +45,7 @@ export class IdMap extends React.PureComponent<Props> {
       const attrs = {};
 
       if (node.props.hasOwnProperty("id")) {
-        const {id} = node.props;
+        const {id} = (node as React.ReactElement<{id: string}>).props;
         foundIds.add(id);
         if (map[id] !== undefined)
           Object.assign(attrs, map[id]);

@@ -4,7 +4,7 @@ import {useCallback, useEffect, useMemo, useRef} from "react";
 import {useKeymap, usePlayback} from "../hooks";
 import {strings} from "../i18n";
 import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "../utils/react-utils";
+import {useForceUpdate} from "@liqvid/utils/react";
 
 /** Volume control */
 export function Volume() {

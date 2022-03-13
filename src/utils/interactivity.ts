@@ -1,6 +1,6 @@
 import {dragHelper as htmlDragHelper} from "@liqvid/utils/interactivity";
+import {captureRef} from "@liqvid/utils/react";
 import {Player} from "../Player";
-import {captureRef} from "./react-utils";
 
 type Move = Parameters<typeof htmlDragHelper>[0];
 type Down = Parameters<typeof dragHelper>[1];

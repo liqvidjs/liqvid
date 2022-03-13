@@ -5,9 +5,9 @@ import {ThumbnailBox, ThumbData} from "./ThumbnailBox";
 
 import {useKeymap, usePlayback, useScript} from "../hooks";
 import {dragHelper} from "../utils/interactivity";
-import {between, constrain} from "@liqvid/utils/misc";
+import {between, clamp} from "@liqvid/utils/misc";
 import {anyHover} from "../utils/mobile";
-import {captureRef} from "../utils/react-utils";
+import {captureRef} from "@liqvid/utils/react";
 
 export {ThumbData};
 
@@ -117,7 +117,7 @@ export function ScrubberBar(props: {
       // move
       (e: MouseEvent, {x}: {x: number}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (x - rect.left) / rect.width, 1);
+              progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
         playback.seek(progress * playback.duration);
@@ -127,7 +127,7 @@ export function ScrubberBar(props: {
         playback.seeking = true;
 
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
+              progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
         playback.seek(progress * playback.duration);
@@ -148,7 +148,7 @@ export function ScrubberBar(props: {
         onMouseOver: () => setShowThumb(true),
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
           const rect = scrubberBar.current.getBoundingClientRect(),
-                progress = constrain(0, (e.clientX - rect.left) / rect.width, 1);
+                progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
 
           setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
         },
@@ -160,7 +160,7 @@ export function ScrubberBar(props: {
       // move
       (e: TouchEvent, {x}: {x: number}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (x - rect.left) / rect.width, 1);
+              progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
@@ -175,7 +175,7 @@ export function ScrubberBar(props: {
       (e: TouchEvent, {x}: {x: number}) => {
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (x - rect.left) / rect.width, 1);
+              progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setShowThumb(false);
         playback.seeking = false;
@@ -198,7 +198,7 @@ export function ScrubberBar(props: {
       // move
       (e: TouchEvent, {x}: {x: number}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (x - rect.left) / rect.width, 1);
+              progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
@@ -213,7 +213,7 @@ export function ScrubberBar(props: {
       (e: TouchEvent, {x}: {x: number}) => {
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = constrain(0, (x - rect.left) / rect.width, 1);
+              progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setShowThumb(false);
         playback.seeking = false;
