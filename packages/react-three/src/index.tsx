@@ -4,6 +4,9 @@ import {Canvas as ThreeCanvas, useThree} from "@react-three/fiber";
 import {Player, PlaybackContext, KeymapContext} from "liqvid";
 import {useEffect} from "react";
 
+/** Default affordances: click and arrow keys */
+const defaultAffords = "click keys(ArrowUp,ArrowDown,ArrowLeft,ArrowRight)";
+
 /**
  * Liqvid-aware Canvas component @react-three/fiber
  */
@@ -24,8 +27,9 @@ function Fixes(props: {
 }): null {
   const {gl} = useThree();
   useEffect(() => {
-    if ("data-affords" in props) {
-      gl.domElement.setAttribute("data-affords", props["data-affords"]);
+    const affords = props["data-affords"] ?? defaultAffords;
+    if (affords) {
+      gl.domElement.setAttribute("data-affords", affords);
     }
     gl.domElement.setAttribute("touch-action", "none");
   }, []);
