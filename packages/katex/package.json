@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/katex",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "KaTeX integration for Liqvid",
   "files": [
     "dist/*"
@@ -43,7 +43,7 @@
   "peerDependencies": {
     "@types/katex": "^0.11.1",
     "@types/react": ">=17.0.0",
-    "liqvid": ">=2.1.0-beta.4",
+    "liqvid": "^2.1.1",
     "react": ">=17.0.0"
   },
   "peerDependenciesMeta": {
@@ -52,13 +52,13 @@
     }
   },
   "devDependencies": {
-    "@types/react": "^17.0.11",
-    "@typescript-eslint/eslint-plugin": "^5.13.0",
-    "@typescript-eslint/parser": "^5.13.0",
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
     "@yuri/eslint-config": "^1.0.1",
-    "eslint": "^8.10.0",
+    "eslint": "^8.11.0",
     "eslint-plugin-react": "^7.29.3",
-    "liqvid": ">=2.1.0-beta.4",
+    "liqvid": "^2.1.1",
     "react": "^17.0.2",
     "rollup": "^2.70.0",
     "typescript": "^4.6.2"
