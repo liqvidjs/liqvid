@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/keymap",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Key binding for Liqvid",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*"
+        "./dist/types/*"
       ]
     }
   },
@@ -32,10 +32,9 @@
     "build:cjs": "npm=$npm_execpath; $npm build:cjs:tsc && $npm build:cjs:rename",
     "build:cjs:tsc": "tsc --module commonjs --outDir dist/cjs",
     "build:cjs:rename": "for i in ./dist/cjs/*.js; do mv -- \"$i\" \"${i%.js}.cjs\"; done",
-    "build:esm": "npm=$npm_execpath; $npm build:esm:tsc && $npm build:esm:rename && $npm build:esm:fix",
+    "build:esm": "npm=$npm_execpath; $npm build:esm:tsc && $npm build:esm:fix",
     "build:esm:tsc": "tsc --module esnext --outDir dist/esm",
-    "build:esm:rename": "for i in ./dist/esm/*.js; do mv -- \"$i\" \"${i%.js}.mjs\"; done",
-    "build:esm:fix": "sed --in-place --expression 's/mixedCaseVals\"/mixedCaseVals.mjs\"/g' ./dist/esm/index.mjs",
+    "build:esm:fix": "node ../../build.mjs",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
     "test": "eslint src --ext ts,tsx && jest --coverage"
