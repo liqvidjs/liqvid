@@ -30,7 +30,10 @@ export class Playback extends CorePlayback {
    * @param options Either an integer representing the animation's duration (in milliseconds), or {@link KeyframeEffectOptions}
    * @returns A callback to attach the animation to a target
    */
-  newAnimation<T extends Element>(keyframes: Keyframe[] | PropertyIndexedKeyframes, options?: number | KeyframeEffectOptions) {
+  newAnimation<T extends Element>(
+    keyframes: Keyframe[] | PropertyIndexedKeyframes,
+    options?: number | KeyframeEffectOptions
+  ): (target: T) => Animation {
     let anim: Animation;
 
     return (target: T) => {
