@@ -231,8 +231,7 @@ export class Player extends React.PureComponent<Props> {
       "input",
       "option",
       "select",
-      "textarea",
-      "video"
+      "textarea"
     ].includes((e.target as Element).nodeName.toLowerCase()))
       return;
     
