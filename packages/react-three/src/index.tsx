@@ -31,7 +31,7 @@ function Fixes(props: {
     if (affords) {
       gl.domElement.setAttribute("data-affords", affords);
     }
-    gl.domElement.setAttribute("touch-action", "none");
+    gl.domElement.style.touchAction = "none";
   }, []);
   return null;
 }
