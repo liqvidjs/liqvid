@@ -43,7 +43,7 @@
   "peerDependencies": {
     "@types/katex": "^0.11.1",
     "@types/react": ">=17.0.0",
-    "liqvid": "^2.1.1",
+    "liqvid": "workspace:^",
     "react": ">=17.0.0"
   },
   "peerDependenciesMeta": {
@@ -52,18 +52,9 @@
     }
   },
   "devDependencies": {
-    "@types/react": "^17.0.40",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "@yuri/eslint-config": "^1.0.1",
-    "eslint": "^8.11.0",
-    "eslint-plugin-react": "^7.29.3",
-    "liqvid": "^2.1.1",
-    "react": "^17.0.2",
-    "rollup": "^2.70.0",
-    "typescript": "^4.6.2"
+    "liqvid": "workspace:^"
   },
   "dependencies": {
-    "@liqvid/utils": "^1.3.0"
+    "@liqvid/utils": "workspace:^"
   }
 }
