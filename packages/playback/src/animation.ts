@@ -81,6 +81,10 @@ export class Playback extends CorePlayback {
    * @listens seek
    */
   private __createTimeline(): void {
+    // don't crash old browsers when not polyfilled
+    if (typeof window.DocumentTimeline === "undefined") {
+      return;
+    }
     this.timeline = new DocumentTimeline();
 
     // pause
