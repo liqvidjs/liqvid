@@ -4,9 +4,9 @@ export const scripts: Record<string, ScriptData> = {
   "host": "https://unpkg.com/@liqvid/host/lv-host.js",
   "liqvid": {
     "crossorigin": true,
-    "development": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.js",
-    "production": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.min.js",
-    "integrity": "sha384-PF1Q6/ZHWULtuwe8ef5LK49usEuK4uCYtOM8l+u4Wu0hpZw5r0WDgDe9slKjNIwj"
+    "development": "https://unpkg.com/liqvid@2.1.4/dist/liqvid.js",
+    "production": "https://unpkg.com/liqvid@2.1.4/dist/liqvid.min.js",
+    "integrity": "sha384-o8Svf9aNpbI8MzaCkJ0rPo5OxnnZ9Zf86Z18azwsy6rPuenc22zYvNwyv49wIgWa"
   },
   "livereload": {},
   "polyfills": "https://unpkg.com/@liqvid/polyfills/dist/waapi.js",
@@ -18,15 +18,15 @@ export const scripts: Record<string, ScriptData> = {
   },
   "react": {
     "crossorigin": true,
-    "development": "https://cdnjs.cloudflare.com/ajax/libs/react/17.0.1/umd/react.development.js",
-    "integrity": "sha384-YF0qbrX3+TW1Oyow2MYZpkEMq34QcYzbTJbSb9K0sdeykm4i4kTCSrsYeH8HX11w",
-    "production": "https://cdnjs.cloudflare.com/ajax/libs/react/17.0.1/umd/react.production.min.js"
+    "development": "https://unpkg.com/react@17.0.2/umd/react.development.js",
+    "production": "https://unpkg.com/react@17.0.2/umd/react.production.min.js",
+    "integrity": "sha384-7Er69WnAl0+tY5MWEvnQzWHeDFjgHSnlQfDDeWUvv8qlRXtzaF/pNo18Q2aoZNiO"
   },
   "react-dom": {
     "crossorigin": true,
-    "development": "https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.1/umd/react-dom.development.js",
-    "production": "https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.1/umd/react-dom.production.min.js",
-    "integrity": "sha384-DHlzXk2aXirrhqAkoaI5lzdgwWB07jUHz7DJGmS4Vlvt5U/ztRy+Yr8oSgQw5QaE"
+    "development": "https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js",
+    "production": "https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js",
+    "integrity": "sha384-vj2XpC1SOa8PHrb0YlBqKN7CQzJYO72jz4CkDQ+ePL1pwOV4+dn05rPrbLGUuvCv"
   },
   "recording": {
     "crossorigin": true,
@@ -36,7 +36,7 @@ export const scripts: Record<string, ScriptData> = {
 
 export const styles: Record<string, StyleData> = {
   "liqvid": {
-    "development": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.css",
-    "production": "https://unpkg.com/liqvid@2.1.3/dist/liqvid.min.css"
+    "development": "https://unpkg.com/liqvid@2.1.4/dist/liqvid.css",
+    "production": "https://unpkg.com/liqvid@2.1.4/dist/liqvid.min.css"
   }
 };

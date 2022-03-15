@@ -30,21 +30,16 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "dependencies": {
     "@types/events": "^3.0.0",
-    "@types/react-reconciler": "^0.26.3"
+    "@types/react-reconciler": "^0.26.4"
   },
   "devDependencies": {
-    "@types/react": "^17.0.14",
-    "@types/react-dom": "^17.0.9",
     "events": "^3.3.0",
-    "liqvid": "^2.0.10",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
     "strict-event-emitter-types": "^2.0.0"
   },
   "peerDependencies": {
-    "liqvid": "^2.0.10",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "liqvid": "workspace:^",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
   "sideEffects": false
 }

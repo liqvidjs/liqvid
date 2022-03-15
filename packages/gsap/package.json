@@ -2,7 +2,11 @@
   "name": "@liqvid/gsap",
   "version": "1.0.1",
   "description": "GSAP bindings for Liqvid",
-  "keywords": ["animation", "GSAP", "Liqvid"],
+  "keywords": [
+    "animation",
+    "GSAP",
+    "Liqvid"
+  ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
@@ -23,7 +27,10 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "peerDependencies": {
     "gsap": "^3.9.0",
-    "liqvid": "^2.0.10"
+    "liqvid": "workspace:^"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "gsap": "^3.9.1"
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Development server for Liqvid",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "@liqvid/magic": "^1.0.0",
+    "@liqvid/magic": "workspace:^",
     "@types/express": "^4.17.13",
     "@types/node": "^16.11.13",
     "body-parser": "^1.19.1",
@@ -25,8 +25,6 @@
   "devDependencies": {
     "@types/compression": "^1.7.2",
     "@types/cookie-parser": "^1.4.2",
-    "@types/livereload": "^0.9.1",
-    "eslint": "^8.4.1",
-    "eslint-plugin-react": "^7.27.1"
+    "@types/livereload": "^0.9.1"
   }
 }
