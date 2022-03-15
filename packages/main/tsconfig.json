@@ -2,15 +2,18 @@
   "compilerOptions": {
     "alwaysStrict": true,
     "declaration": true,
-    "esModuleInterop": true,
+    "declarationDir": "./dist/types",
     "incremental": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "lib": ["esnext", "dom"],
-    "module": "commonjs",
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
+    "outDir": "./dist/esm",
     "pretty": true,
     "removeComments": false,
-    "target": "es2021"
-  }
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "esnext"
+  },
+  "files": ["./src/index.ts"]
 }

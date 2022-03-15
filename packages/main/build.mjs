@@ -45,12 +45,13 @@ async function walkDir(dirname, callback) {
 async function fixImports(filename) {
   let content = await fsp.readFile(filename, "utf8");
   content = content.replaceAll(/^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm, (match, head, q, name, tail) => {
+    // already has extension
+    if (name.match(/\.[cm]?js$/)) {
+      return match;
+    }
+
     // relative imports
     if (name.startsWith(".")) {
-      // already has extension
-      if (name.match(/\.[cm]?js$/)) {
-        return match;
-      }
       // figure out which file it's referring to
       const target = findExtension(path.dirname(filename), name);
       return (head + q + target + tail);
@@ -58,7 +59,11 @@ async function fixImports(filename) {
       try {
         const json = JSON.parse(readFileSync(path.join(NODE_MODULES, getPackageName(name), "package.json"), "utf8"));
         if (json.exports) {
+<<<<<<< HEAD
+
+=======
           
+>>>>>>> main-copy
         }
       } catch (e) {
 
