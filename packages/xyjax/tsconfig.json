@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "declaration": true,
+    "jsx": "react",
+    "lib": ["es2015", "es2016", "es2017", "dom"],
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "pretty": true,
+    "removeComments": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "ES2017"
+  },
+  "files": ["./src/index.ts"]
+}

@@ -1,0 +1,69 @@
+{
+  "name": "@liqvid/katex",
+  "version": "0.0.3",
+  "description": "KaTeX integration for Liqvid",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./plain": {
+      "import": "./dist/plain.mjs",
+      "require": "./dist/plain.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "keywords": [
+    "liqvid",
+    "katex"
+  ],
+  "scripts": {
+    "build": "tsc --build --force",
+    "lint": "eslint --ext ts,tsx --fix src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
+  "license": "MIT",
+  "peerDependencies": {
+    "@types/katex": "^0.11.1",
+    "@types/react": ">=17.0.0",
+    "liqvid": "^2.1.1",
+    "react": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "liqvid": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "@yuri/eslint-config": "^1.0.1",
+    "eslint": "^8.11.0",
+    "eslint-plugin-react": "^7.29.3",
+    "liqvid": "^2.1.1",
+    "react": "^17.0.2",
+    "rollup": "^2.70.0",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "@liqvid/utils": "^1.3.0"
+  }
+}

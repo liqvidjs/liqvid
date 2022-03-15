@@ -1,0 +1,49 @@
+{
+  "name": "@liqvid/utils",
+  "version": "1.3.0",
+  "description": "Utility functions for Liqvid",
+  "exports": {
+    "./*": {
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsc --build --force",
+    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "test": "eslint src --ext ts,tsx && jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@types/react": "^17.0.39",
+    "@yuri/eslint-config": "^1.0.1",
+    "eslint": "^8.10.0",
+    "jest": "^27.5.1",
+    "react": "^17.0.2",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "bezier-easing": "^2.1.0"
+  }
+}

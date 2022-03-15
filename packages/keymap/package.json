@@ -1,0 +1,69 @@
+{
+  "name": "@liqvid/keymap",
+  "version": "1.1.2",
+  "description": "Key binding for Liqvid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./react": {
+      "import": "./dist/esm/react.mjs",
+      "require": "./dist/cjs/react.cjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "npm=$npm_execpath; $npm build:clean && $npm build:cjs && $npm build:esm && $npm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:cjs": "npm=$npm_execpath; $npm build:cjs:tsc && $npm build:cjs:rename",
+    "build:cjs:tsc": "tsc --module commonjs --outDir dist/cjs",
+    "build:cjs:rename": "for i in ./dist/cjs/*.js; do mv -- \"$i\" \"${i%.js}.cjs\"; done",
+    "build:esm": "npm=$npm_execpath; $npm build:esm:tsc && $npm build:esm:fix",
+    "build:esm:tsc": "tsc --module esnext --outDir dist/esm",
+    "build:esm:fix": "node ../../build.mjs",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "test": "eslint src --ext ts,tsx && jest --coverage"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.11.0",
+    "jest": "^27.5.1",
+    "react": "^17.0.2",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "@types/react": "^17.0.40",
+    "react": "^17.0.2"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

@@ -59,7 +59,11 @@ async function fixImports(filename) {
       try {
         const json = JSON.parse(readFileSync(path.join(NODE_MODULES, getPackageName(name), "package.json"), "utf8"));
         if (json.exports) {
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> main-copy
         }
       } catch (e) {
 
