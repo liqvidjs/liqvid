@@ -80,7 +80,7 @@ export class Playback extends CorePlayback {
    * @listens ratechange
    * @listens seek
    */
-  private __createTimeline() {
+  private __createTimeline(): void {
     this.timeline = new DocumentTimeline();
 
     // pause

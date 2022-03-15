@@ -31,17 +31,17 @@ export function useTime<T = number>(callback: (value: T) => void, transform?: ((
   useEffect(() => {
     const listener =
       typeof transform === "function" ?
-      (t: number) => {
-        const value = transform(t);
-        if (value !== prev.current)
-          callback(value);
-        prev.current = value;
-      } :
-      (t: number & T) => {
-        if (t !== prev.current)
-          callback(t);
-        prev.current = t;
-      };
+        (t: number) => {
+          const value = transform(t);
+          if (value !== prev.current)
+            callback(value);
+          prev.current = value;
+        } :
+        (t: number & T) => {
+          if (t !== prev.current)
+            callback(t);
+          prev.current = t;
+        };
 
     // subscriptions
     playback.on("seek", listener);

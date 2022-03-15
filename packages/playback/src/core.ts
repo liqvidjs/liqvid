@@ -82,12 +82,12 @@ export class Playback
   /* magic properties */
 
   /** Gets or sets the current captions */
-  get captions() {
+  get captions(): DocumentFragment[] {
     return this.__captions;
   }
 
   /** @emits cuechange */
-  set captions(captions) {
+  set captions(captions: DocumentFragment[]) {
     this.__captions = captions;
 
     this.emit("cuechange");
@@ -98,12 +98,12 @@ export class Playback
     * 
     * **Warning:** {@link HTMLMediaElement.duration} measures this in *seconds*.
   */
-  get duration() {
+  get duration(): number {
     return this.__duration;
   }
 
   /** @emits durationchange */
-  set duration(duration) {
+  set duration(duration: number) {
     if (duration === this.__duration)
       return;
 
@@ -113,12 +113,12 @@ export class Playback
   }
 
   /** Gets or sets a flag that indicates whether playback is muted. */
-  get muted() {
+  get muted(): boolean {
     return this.__muted;
   }
 
   /** @emits volumechange */
-  set muted(val) {
+  set muted(val: boolean) {
     if (val === this.__muted)
       return;
 
@@ -136,12 +136,12 @@ export class Playback
   }
 
   /** Gets or sets the current rate of speed for the playback. */
-  get playbackRate() {
+  get playbackRate(): number {
     return this.__playbackRate;
   }
 
   /** @emits ratechange */
-  set playbackRate(val) {
+  set playbackRate(val: number) {
     if (val === this.__playbackRate)
       return;
 
@@ -152,7 +152,7 @@ export class Playback
   }
 
   /** Gets or sets a flag that indicates whether the playback is currently moving to a new position. */
-  get seeking() {
+  get seeking(): boolean {
     return this.__seeking;
   }
 
@@ -160,7 +160,7 @@ export class Playback
    * @emits seeking
    * @emits seeked
    */
-  set seeking(val) {
+  set seeking(val: boolean) {
     if (val === this.__seeking)
       return;
 
@@ -174,7 +174,7 @@ export class Playback
    * 
    * @emits pause
    */
-  pause() {
+  pause(): void {
     this.paused = true;
     this.__playingFrom = this.currentTime;
 
@@ -186,7 +186,7 @@ export class Playback
    * 
    * @emits play
    */
-  play() {
+  play(): void {
     this.paused = false;
 
     // this is necessary for currentTime to be correct when playing from stop state
@@ -201,7 +201,7 @@ export class Playback
    * 
    * @emits seek
    */
-  seek(t: number) {
+  seek(t: number): void {
     t = constrain(0, t, this.duration);
 
     this.currentTime = this.__playingFrom = t;
@@ -211,7 +211,7 @@ export class Playback
   }
 
   /** Gets or sets the volume level for the playback. */
-  get volume() {
+  get volume(): number {
     return this.__volume;
   }
 
@@ -237,7 +237,7 @@ export class Playback
    * 
    * @emits stop
    */
-  stop() {
+  stop(): void {
     this.paused = true;
     this.__playingFrom = 0;
 
@@ -249,7 +249,7 @@ export class Playback
   /**
    * @emits timeupdate
    */
-  private __advance(t: number) {
+  private __advance(t: number): void {
     // paused
     if (this.paused || this.__seeking) {
       this.__startTime = t;
@@ -275,8 +275,8 @@ export class Playback
    * @listens keydown
    * @listens touchstart
    */
-  private __initAudio() {
-    const requestAudioContext = () => {
+  private __initAudio(): void {
+    const requestAudioContext = (): void => {
       try {
         this.audioContext = new (window.AudioContext || webkitAudioContext)();
         this.audioNode = this.audioContext.createGain();
@@ -288,7 +288,7 @@ export class Playback
       } catch (e) {
         // console.log("Failed to create audio context");
       }
-    }
+    };
     window.addEventListener("click", requestAudioContext);
     window.addEventListener("keydown", requestAudioContext);
     window.addEventListener("touchstart", requestAudioContext);
