@@ -1,3 +1,8 @@
+## 2.1.4 (March 15, 2022)
+
+* don't crash when `Playback` isn't polyfilled
+
+* update repository URL
 
 ## 2.1.3 (March 13, 2022)
 
