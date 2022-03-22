@@ -1,4 +1,5 @@
 /* Horrifying fixer-upper for ESM imports */
+import * as fs from "fs";
 import {existsSync, promises as fsp, readFileSync} from "fs";
 import * as path from "path";
 
@@ -45,23 +46,29 @@ async function walkDir(dirname, callback) {
 async function fixImports(filename) {
   let content = await fsp.readFile(filename, "utf8");
   content = content.replaceAll(/^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm, (match, head, q, name, tail) => {
+    // already has extension
+    if (name.match(/\.[cm]?js$/)) {
+      return match;
+    }
+
     // relative imports
     if (name.startsWith(".")) {
-      // already has extension
-      if (name.match(/\.[cm]?js$/)) {
-        return match;
-      }
       // figure out which file it's referring to
       const target = findExtension(path.dirname(filename), name);
       return (head + q + target + tail);
     } else {
       try {
-        const json = JSON.parse(readFileSync(path.join(NODE_MODULES, getPackageName(name), "package.json"), "utf8"));
+        const json = JSON.parse(readFileSync(findPackageJson(name), "utf8"));
         if (json.exports) {
+          // ARGH
+          if (name === "react/jsx-runtime") {
+            return head + q + "react/jsx-runtime.js" + tail;
+          }
+        } else {
           
         }
       } catch (e) {
-
+        console.error(e);
       }
     }
     return match;
@@ -85,6 +92,20 @@ function findExtension(pathname, relative) {
     }
   }
   throw new Error(`Could not resolve ${filename}`);
+}
+
+/** Find package.json */
+function findPackageJson(name) {
+  const packageName = getPackageName(name);
+  let dirname = NODE_MODULES;
+  while (true) {
+    const filename = path.join(dirname, packageName, "package.json");
+    if (fs.existsSync(filename))
+      return filename;
+    dirname = path.normalize(path.join(dirname, ".."));
+    if (dirname === "/")
+      throw new Error(`Could not find package.json for ${name}`);
+  }
 }
 
 /** Get name of NPM package */

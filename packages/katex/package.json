@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/katex",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "KaTeX integration for Liqvid",
   "files": [
     "dist/*"
@@ -8,11 +8,11 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./plain": {
       "import": "./dist/plain.mjs",
-      "require": "./dist/plain.js"
+      "require": "./dist/plain.cjs"
     }
   },
   "typesVersions": {
@@ -28,7 +28,10 @@
     "katex"
   ],
   "scripts": {
-    "build": "tsc --build --force",
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc && node ../../build.mjs && rollup -c",
+    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src"
   },
   "repository": {

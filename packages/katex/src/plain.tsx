@@ -1,6 +1,6 @@
+import {usePromise} from "@liqvid/utils/react";
 import {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
 import {KaTeXReady} from "./loading";
-import {usePromise} from "@liqvid/utils/react";
 
 /**
  * KTX element API

@@ -3,8 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "declarationDir": "./dist/types",
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "module": "esnext",
+    "outDir": "./dist/esm",
+    "rootDir": "./src",
+    "target": "esnext"
   },
   "include": ["./src"]
 }

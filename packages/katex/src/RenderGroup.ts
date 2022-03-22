@@ -1,6 +1,6 @@
 import {recursiveMap, usePromise} from "@liqvid/utils/react";
 import {usePlayer} from "liqvid";
-import React, {cloneElement, forwardRef, isValidElement, ReactElement, useEffect, useImperativeHandle, useRef} from "react";
+import {cloneElement, forwardRef, isValidElement, useEffect, useImperativeHandle, useRef} from "react";
 import {KTX} from "./fancy";
 import {Handle as KTXHandle, KTX as KTXPlain} from "./plain";
 
