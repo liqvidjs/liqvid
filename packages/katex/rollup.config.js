@@ -7,7 +7,6 @@ export default [
   {
     external: [...external, "liqvid"],
     input: "dist/esm/index.mjs",
-    // plugins: [nodeResolve({preferBuiltins: false}), commonjs()],
 
     output: [
       // ESM
@@ -20,7 +19,6 @@ export default [
   {
     external,
     input: "dist/esm/plain.mjs",
-    // plugins: [nodeResolve({preferBuiltins: false}), commonjs()],
 
     output: [
       // ESM
