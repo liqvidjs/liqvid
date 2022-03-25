@@ -1,0 +1,46 @@
+{
+  "name": "@liqvid/recording",
+  "version": "0.0.1",
+  "description": "Recording functionality for Liqvid",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "scripts": {
+    "css": "stylus -c -w -o style.css styl/recording.styl"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
+  "devDependencies": {
+    "liqvid": "workspace:^",
+    "nib": "^1.1.2",
+    "stylus": "^0.56.0"
+  },
+  "peerDependencies": {
+    "liqvid": "workspace:^"
+  },
+  "dependencies": {
+    "@liqvid/keymap": "workspace:^",
+    "@liqvid/utils": "workspace:^",
+    "@types/events": "^3.0.0",
+    "events": "^3.3.0",
+    "strict-event-emitter-types": "^2.0.0"
+  }
+}
