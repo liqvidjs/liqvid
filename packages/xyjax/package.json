@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/xyjax",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "XyJax animation helpers for Liqvid",
   "exports": {
     ".": {
