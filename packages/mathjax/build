@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-tsc --module esnext --outDir dist/esm --target esnext
-rollup main.js --file bundle.js --format iife
