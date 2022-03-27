@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/react-three",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "@react-three integration for Liqvid",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -9,11 +9,11 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "npm=$npm_execpath; $npm build:clean && $npm build:cjs && $npm build:esm && $npm build:fix-esm",
+    "build": "pnpm build:clean && pnpm build:cjs && pnpm build:esm && pnpm build:fix-esm",
     "build:clean": "rm -fr dist",
     "build:cjs": "tsc --module commonjs && mv dist/index.js dist/index.cjs",
     "build:esm": "tsc --module esnext && mv dist/index.js dist/index.mjs",
-    "build:fix-esm": "sed --in-place --expression 's/useContextBridge\"/useContextBridge.js\"/g' ./dist/index.mjs",
+    "build:fix-esm": "sed --in-place --expression 's/useContextBridge\"/useContextBridge.js\"/g' --expression 's/jsx-runtime/jsx-runtime.js/g' dist/index.mjs",
     "lint": "eslint --ext ts,tsx --fix src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -29,17 +29,17 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/react-three",
   "dependencies": {
     "@juggle/resize-observer": "^3.3.1",
-    "@react-three/drei": "^8.16.5",
+    "@react-three/drei": "^8.19.4",
     "@types/events": "^3.0.0",
     "@types/react-reconciler": "^0.26.4"
   },
   "devDependencies": {
     "@react-three/fiber": "^7.0.26",
-    "@types/three": "^0.138.0",
+    "@types/three": "^0.139.0",
     "events": "^3.3.0",
     "liqvid": "workspace:^",
     "strict-event-emitter-types": "^2.0.0",
-    "three": "^0.138.3"
+    "three": "^0.139.0"
   },
   "peerDependencies": {
     "@react-three/fiber": "^7.0.0",
