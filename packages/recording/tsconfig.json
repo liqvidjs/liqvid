@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
-    "outDir": "./dist",
+    "declarationDir": "./dist/types",
+    "outDir": "./dist/esm",
     "removeComments": false,
     "rootDir": "./src"
   },

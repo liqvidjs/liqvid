@@ -1,12 +1,6 @@
 import {Recorder, IntransigentReturn} from "../recorder";
 import type {RecorderPlugin} from "../types";
 
-interface RecordData {
-  startDelay: number;
-  stopDelay: number;
-  url: string;
-}
-
 const icon = (
   <g transform="scale(0.126261032057) translate(164.575)">
     <g
@@ -83,8 +77,8 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
   beginRecording() {
     if (!this.stream)
       throw new Error("Navigator stream not available");
-    
-    this.promise = new Promise(async (resolve, reject) => {
+
+    this.promise = new Promise(async (resolve) => {
       // record the video
       this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: "video/webm"});
 
@@ -127,11 +121,11 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
 export function VideoSaveComponent(props: {data: Blob}) {
   return (
     <>
-    {props.data ?
-      <a download="video.webm" href={URL.createObjectURL(props.data)}>Download Video</a>
-      :
-      "Video not yet available"
-    }
+      {props.data ?
+        <a download="video.webm" href={URL.createObjectURL(props.data)}>Download Video</a>
+        :
+        "Video not yet available"
+      }
     </>
   );
 }

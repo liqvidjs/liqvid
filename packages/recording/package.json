@@ -1,17 +1,12 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Recording functionality for Liqvid",
   "exports": {
-    ".": "./dist/index.js"
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.cjs"
   },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*"
-      ]
-    }
-  },
+  "typings": "./dist/index.d.ts",
   "files": [
     "dist/*"
   ],
@@ -25,7 +20,14 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "scripts": {
-    "css": "stylus -c -w -o style.css styl/recording.styl"
+    "build": "pnpm build:clean && pnpm build:css && pnpm build:js && pnpm build:postclean",
+    "build:css": "stylus -o dist/style.css styl/style.styl; stylus -c -o dist/style.min.css styl/style.styl",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc; rollup -c;",
+    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
+    "lint": "eslint --ext ts,tsx --fix src",
+    
+    "css": "stylus -c -w -o dist/style.css styl/recording.styl"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
   "devDependencies": {

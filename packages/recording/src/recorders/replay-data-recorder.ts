@@ -3,23 +3,20 @@ import {Recorder} from "../recorder";
 
 export class ReplayDataRecorder<T> extends Recorder<[number, T], ReplayData<T>> {
   private duration: number;
-  private index: number;
 
   constructor() {
     super();
     this.duration = 0;
-    this.index = -1;
   }
 
   beginRecording(): void {
     this.duration = 0;
-    this.index = -1;
   }
 
-  finalizeRecording(data: ReplayData<T>, startDelay = 0, stopDelay = 0) {
+  finalizeRecording(data: ReplayData<T>, startDelay = 0, stopDelay = 0): ReplayData<T> {
     // for (let sum = 0, i = 0; i < data.length && sum < startDelay; ++i) {
     //   const dur = data[i][0];
-      
+
     //   if (dur === 0) {
     //     continue;
     //   }
@@ -33,7 +30,7 @@ export class ReplayDataRecorder<T> extends Recorder<[number, T], ReplayData<T>> 
     // }
     // console.log(JSON.stringify(data, null, 2));
 
-    return data;
+    return compress(data);
   }
 
   capture(time = this.manager.getTime(), data: T): void {
@@ -46,8 +43,22 @@ export class ReplayDataRecorder<T> extends Recorder<[number, T], ReplayData<T>> 
 }
 
 /**
-Limit number to 2 decimal places to reduce filesize.
-*/
-function formatNum(x: number): number {
-  return parseFloat(x.toFixed(2));
+ * Truncate numerical precision to reduce filesize.
+ * @param o Data to compress.
+ * @param precision Number of decimal points to include.
+ */
+export function compress<T>(o: T, precision = 2): T {
+  switch (typeof o) {
+    case "object":
+      if (o instanceof Array) {
+        return o.map(val => compress(val, precision)) as unknown[] & T;
+      }
+      return Object.fromEntries(
+        (Object.keys(o) as (keyof typeof o)[]).map(key => [key, compress(o[key], precision)])
+      ) as Record<string, unknown> & T;
+    case "number":
+      return parseFloat(o.toFixed(precision)) as number & T;
+    default:
+      return o;
+  }
 }

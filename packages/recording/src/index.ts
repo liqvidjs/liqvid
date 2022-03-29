@@ -1,11 +1,7 @@
-export type {RecorderPlugin} from "./types";
-
 export {RecordingControl} from "./Control";
-
-export {RecordingManager} from "./RecordingManager";
-
 export {Recorder} from "./recorder";
-export {ReplayDataRecorder} from "./recorders/replay-data-recorder";
-
-export {AudioRecording, AudioRecorder} from "./recorders/audio-recorder";
-export {VideoRecording, VideoRecorder} from "./recorders/video-recorder";
+export {AudioRecorder, AudioRecording} from "./recorders/audio-recorder";
+export {compress, ReplayDataRecorder} from "./recorders/replay-data-recorder";
+export {VideoRecorder, VideoRecording} from "./recorders/video-recorder";
+export {RecordingManager} from "./RecordingManager";
+export type {RecorderPlugin} from "./types";
