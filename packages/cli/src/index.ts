@@ -38,11 +38,11 @@ import type {transcribe} from "@liqvid/captioning";
  * Configuration object
  */
 export interface LiqvidConfig {
-  audio: {
+  audio?: {
     transcribe: Partial<Parameters<typeof transcribe>[0]>;
   }
-  build: Partial<Parameters<typeof buildProject>[0]>;
-  render: Partial<Parameters<typeof solidify>[0]>;
-  serve: Partial<Parameters<typeof createServer>[0]>;
-  thumbs: Partial<Parameters<typeof captureThumbs>[0]>;
+  build?: Partial<Parameters<typeof buildProject>[0]>;
+  render?: Partial<Parameters<typeof solidify>[0]>;
+  serve?: Partial<Parameters<typeof createServer>[0]>;
+  thumbs?: Partial<Parameters<typeof captureThumbs>[0]>;
 }
