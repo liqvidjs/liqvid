@@ -1,12 +1,6 @@
 import {Recorder, IntransigentReturn} from "../recorder";
 import type {RecorderPlugin} from "../types";
 
-interface RecordData {
-  startDelay: number;
-  stopDelay: number;
-  url: string;
-}
-
 const icon = (
   <g transform="scale(0.126261032057) translate(164.575)">
     <g

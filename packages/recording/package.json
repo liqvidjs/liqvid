@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Recording functionality for Liqvid",
   "exports": {
     "import": "./dist/index.mjs",
@@ -23,7 +23,7 @@
     "build": "pnpm build:clean && pnpm build:css && pnpm build:js && pnpm build:postclean",
     "build:css": "stylus -o dist/style.css styl/style.styl; stylus -c -o dist/style.min.css styl/style.styl",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc; rollup -c;",
+    "build:js": "tsc;  node ../../build.mjs; rollup -c;",
     "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src",
     

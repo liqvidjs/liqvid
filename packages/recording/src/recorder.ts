@@ -2,6 +2,9 @@ import type {RecordingManager} from "./RecordingManager";
 
 export type IntransigentReturn = [number, number];
 
+/**
+ * Abstract class for recording interactions.
+ */
 export abstract class Recorder<T = unknown, F = T[]> {
   protected manager: RecordingManager;
 

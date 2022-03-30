@@ -1,12 +1,15 @@
 import dts from "rollup-plugin-dts";
 
-const external = ["@liqvid/utils/react", "react", "react/jsx-runtime.js"];
+const external = [
+  "@liqvid/utils/misc", "@liqvid/utils/react",
+  "events", "liqvid", "react", "react/jsx-runtime.js"
+];
 
 export default [
   // index
   {
     external,
-    input: "dist/esm/index.js",
+    input: "dist/esm/index.mjs",
 
     output: [
       // ESM

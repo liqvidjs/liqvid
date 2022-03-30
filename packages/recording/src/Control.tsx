@@ -16,7 +16,7 @@ interface Props {
 }
 
 interface Action {
-  command: string;
+  command: keyof State;
   seq: string;
 }
 
@@ -33,6 +33,9 @@ const bindings = {
   discard: mac ? "Alt+Meta+4" : "Ctrl+Alt+4"
 };
 
+/**
+ * Liqvid recording control.
+ */
 export function RecordingControl(props: Props) {
   const keymap = useKeymap();
 
@@ -62,7 +65,7 @@ export function RecordingControl(props: Props) {
 
   // plugins dictionary
   const [pluginsByKey] = useState(() => {
-    const dict = {};
+    const dict: Record<string, RecorderPlugin> = {};
     for (const plugin of props.plugins) {
       dict[plugin.key] = plugin;
     }
@@ -114,7 +117,7 @@ export function RecordingControl(props: Props) {
   }, []);
 
   /* keyboard controls */
-  const callbacks = useMemo(() => ({start, pause, discard}), []);
+  const callbacks: Record<keyof State, (e: KeyboardEvent) => void> = useMemo(() => ({start, pause, discard}), []);
 
   const reducer: React.Reducer<State, Action> = useCallback((state, action) => {
     // rebind
@@ -133,7 +136,7 @@ export function RecordingControl(props: Props) {
   // initial bind
   useEffect(() => {
     for (const key in state) {
-      keymap.bind(state[key], callbacks[key]);
+      keymap.bind(state[key as keyof State], callbacks[key as keyof State]);
     }
   }, []);
 
@@ -141,7 +144,7 @@ export function RecordingControl(props: Props) {
   const onBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     e.preventDefault();
 
-    const name = e.currentTarget.getAttribute("name");
+    const name = e.currentTarget.getAttribute("name") as keyof State;
 
     // bind sequence
     const seq = e.currentTarget.dataset.value;
@@ -186,7 +189,7 @@ export function RecordingControl(props: Props) {
   }), []);
 
   /* render */
-  const commands = [
+  const commands: [string, keyof State][] = [
     ["Start/Stop recording", "start"],
     ["Pause recording", "pause"],
     ["Discard recording", "discard"]

@@ -4,6 +4,7 @@
     "composite": true,
     "jsx": "react-jsx",
     "declarationDir": "./dist/types",
+    "module": "esnext",
     "outDir": "./dist/esm",
     "removeComments": false,
     "rootDir": "./src"
