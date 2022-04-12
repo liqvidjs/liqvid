@@ -1,4 +1,4 @@
-import {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
+import React, {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
 import {anyHover} from "./interaction";
 
 /**
@@ -43,8 +43,8 @@ export function combineRefs<T>(...args: React.Ref<T>[]): (o: T) => void {
  * @returns Props to attach to event target.
 */
 export function onClick<T extends HTMLElement | SVGElement>(
-  callback: (e: React.MouseEvent<T> | (TouchEvent & {currentTarget: T})) => void
-): {onClick: typeof callback} | {onTouchStart: (e: TouchEvent) => void; onTouchEnd: (e: TouchEvent) => void} {
+  callback: (e: React.MouseEvent<T> | React.TouchEvent<T>) => void
+): {onClick: typeof callback} | {onTouchStart: React.TouchEventHandler<T>; onTouchEnd: React.TouchEventHandler<T>;} {
   if (anyHover) {
     return {onClick: callback};
   } else {
@@ -52,7 +52,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
         target: T & EventTarget;
 
     // touchstart handler
-    const onTouchStart = (e: TouchEvent): void => {
+    const onTouchStart: React.TouchEventHandler<T> = (e) => {
       if (typeof touchId === "number")
         return;
       target = e.currentTarget as T;
@@ -60,7 +60,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
     };
 
     // touchend handler
-    const onTouchEnd = (e: TouchEvent): void => {
+    const onTouchEnd: React.TouchEventHandler<T> = (e) => {
       if (typeof touchId !== "number")
         return;
 
@@ -69,7 +69,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
           continue;
 
         if (target.contains(document.elementFromPoint(touch.clientX, touch.clientY))) {
-          callback(e as TouchEvent & {currentTarget: T});
+          callback(e);
         }
 
         touchId = undefined;
