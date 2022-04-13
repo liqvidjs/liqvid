@@ -155,7 +155,7 @@ export function dragHelper(
  * @param callback Event listener.
  * @returns A function to remove the event listener.
 */
-export function attachClickHandler<T extends HTMLElement | SVGElement>(
+export function onClick<T extends HTMLElement | SVGElement>(
   node: T, callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void
 ): () => void {
   if (anyHover) {

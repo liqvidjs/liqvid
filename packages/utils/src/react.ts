@@ -1,4 +1,4 @@
-import React, {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
+import {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
 import {anyHover} from "./interaction";
 
 /**
