@@ -1,7 +1,7 @@
 import cliProgress from "cli-progress";
 import type puppeteer from "puppeteer-core";
 
-import type {Pool} from "./pool";
+import type {Pool} from "./pool.mjs";
 import {ImageFormat} from "../types";
 
 import {promises as fsp} from "fs";
@@ -29,10 +29,10 @@ export async function capture({
     quality: type === "jpeg" ? quality : undefined
   };
 
-  const {data} = await client.send('Page.captureScreenshot', options);
+  const {data} = await client.send("Page.captureScreenshot", options);
   const base64Data = data.replace(/^data:image\/png;base64,/, "");
 
-  return fsp.writeFile(path, base64Data, 'base64');
+  return fsp.writeFile(path, base64Data, "base64");
 
   return page.screenshot({
     omitBackground: type === "png",

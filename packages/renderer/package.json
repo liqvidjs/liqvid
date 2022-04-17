@@ -1,12 +1,38 @@
 {
   "name": "@liqvid/renderer",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
   "files": [
     "dist/*"
   ],
-  "typings": "./dist/index.d.ts",
-  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs"
+    },
+    "./convert": {
+      "import": "./dist/tasks/convert.mjs"
+    },
+    "./join": {
+      "import": "./dist/tasks/join.mjs"
+    },
+    "./solidify": {
+      "import": "./dist/tasks/solidify.mjs"
+    },
+    "./thumbs": {
+      "import": "./dist/tasks/thumbs.mjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "index": [
+        "./dist/index.d.mts"
+      ],
+      "*": [
+        "./dist/tasks/*.d.mts"
+      ]
+    }
+  },
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
@@ -26,7 +52,7 @@
     "cli-progress": "^3.10.0",
     "execa": "^6.1.0",
     "jimp": "^0.16.1",
-    "puppeteer-core": "13.4.1",
+    "puppeteer-core": "^13.5.2",
     "puppeteer-mass-screenshots": "^1.0.15",
     "puppeteer-video-recorder": "^1.0.5",
     "yargs-parser": "^21.0.1"

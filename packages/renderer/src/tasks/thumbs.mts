@@ -7,11 +7,11 @@ import puppeteer from "puppeteer-core";
 
 import {ImageFormat} from "../types";
 
-import {getEnsureChrome} from "../utils/binaries";
-import {captureRange} from "../utils/capture";
-import {validateConcurrency} from "../utils/concurrency";
-import {getPages} from "../utils/connect";
-import {Pool} from "../utils/pool";
+import {getEnsureChrome} from "../utils/binaries.mjs";
+import {captureRange} from "../utils/capture.mjs";
+import {validateConcurrency} from "../utils/concurrency.mjs";
+import {getPages} from "../utils/connect.mjs";
+import {Pool} from "../utils/pool.mjs";
 
 /**
 Create thumbnail sheets for a Liqvid video.

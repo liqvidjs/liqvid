@@ -1,9 +1,9 @@
-import execa from "execa";
+import {formatTime, parseTime} from "@liqvid/utils/time";
+import cliProgress from "cli-progress";
+import {execa} from "execa";
 import fs, {promises as fsp} from "fs";
 import path from "path";
-import cliProgress from "cli-progress";
-import {ffmpegExists} from "../utils/binaries";
-import {formatTime, parseTime} from "@liqvid/utils/time";
+import {ffmpegExists} from "../utils/binaries.mjs";
 
 /** Repair and convert audio files */
 export async function convert({filename}: {

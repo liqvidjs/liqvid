@@ -1,4 +1,4 @@
-import execa from "execa";
+import {execa} from "execa";
 import fs from "fs";
 import os from "os";
 // sillyness

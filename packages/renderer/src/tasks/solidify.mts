@@ -3,12 +3,12 @@ import fs, {promises as fsp} from "fs";
 import os from "os";
 import path from "path";
 
-import {ffmpegExists, getEnsureChrome} from "../utils/binaries";
-import {captureRange} from "../utils/capture";
-import {validateConcurrency} from "../utils/concurrency";
-import {getPages} from "../utils/connect";
-import {Pool} from "../utils/pool";
-import {stitch} from "../utils/stitch";
+import {ffmpegExists, getEnsureChrome} from "../utils/binaries.mjs";
+import {captureRange} from "../utils/capture.mjs";
+import {validateConcurrency} from "../utils/concurrency.mjs";
+import {getPages} from "../utils/connect.mjs";
+import {Pool} from "../utils/pool.mjs";
+import {stitch} from "../utils/stitch.mjs";
 import {formatTime, parseTime} from "@liqvid/utils/time";
 
 import {ImageFormat} from "../types";
@@ -28,7 +28,7 @@ export async function solidify({
   url,
   width,
   ...o // passthrough parameters
-}: Parameters<typeof assembleVideo>[0] & {
+}: Omit<Parameters<typeof assembleVideo>[0], "framesDir"  | "padLen"> & {
   browserExecutable: string;
   colorScheme: "light" | "dark";
   concurrency: number;
@@ -159,7 +159,7 @@ Assemble frames into a video.
 async function assembleVideo({
   padLen,
   ...o // passthrough parameters
-}: Parameters<typeof stitch>[0] & {
+}: Omit<Parameters<typeof stitch>[0], "pattern"> & {
   imageFormat: ImageFormat;
   padLen: number;
 }) {
