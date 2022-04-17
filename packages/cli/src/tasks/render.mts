@@ -116,7 +116,7 @@ export const render = (yargs: typeof Yargs) => yargs.command(
     })
     .version(false),
   async (argv) => {
-    const {solidify} = await import("@liqvid/renderer");
+    const {solidify} = await import("@liqvid/renderer/solidify");
     await solidify(argv);
     process.exit(0);
   }

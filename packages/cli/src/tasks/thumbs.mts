@@ -83,7 +83,7 @@ export const thumbs = (yargs: typeof Yargs) => yargs.command(
     })
     .version(false),
   async (argv) => {
-    const {thumbs: renderThumbs} = await import("@liqvid/renderer");
+    const {thumbs: renderThumbs} = await import("@liqvid/renderer/thumbs");
     await renderThumbs(argv);
     process.exit(0);
   });

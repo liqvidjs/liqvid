@@ -20,7 +20,7 @@ export const audio = (yargs: typeof Yargs) => yargs.command(
           type: "string"
         }),
         async (opts) => {
-          const {convert} = await import("@liqvid/renderer");
+          const {convert} = await import("@liqvid/renderer/convert");
           await convert(opts);
         }
       )
@@ -39,7 +39,7 @@ export const audio = (yargs: typeof Yargs) => yargs.command(
             coerce: (output?: string) => output ? path.resolve(output) : output
           }),
         async (opts) => {
-          const {join} = await import("@liqvid/renderer");
+          const {join} = await import("@liqvid/renderer/join");
           await join(opts);
         })
       // transcribe command
