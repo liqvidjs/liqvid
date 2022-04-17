@@ -1,11 +1,11 @@
+import {ScriptData, scripts as defaultScripts, StyleData, styles as defaultStyles, transform} from "@liqvid/magic";
 import {promises as fsp} from "fs";
-import fs from "fs";
-import type Yargs from "yargs";
 import path from "path";
-
-import {parseConfig, DEFAULT_CONFIG} from "./config.js";
 import webpack from "webpack";
-import {transform, scripts as defaultScripts, styles as defaultStyles, ScriptData, StyleData} from "@liqvid/magic";
+import type Yargs from "yargs";
+import {DEFAULT_CONFIG, parseConfig} from "./config.mjs";
+// @ts-expect-error TypeScript complains about this not being a module
+import loadSync from "./load-sync.cjs";
 
 /**
  * Build project
@@ -47,7 +47,7 @@ export const build = (yargs: typeof Yargs) =>
     );
   }, (args) => {
     return buildProject(args);
-  })
+  });
 
 export async function buildProject(config: {
   /** Clean build directory */
@@ -101,7 +101,7 @@ async function buildStatic(config: {
     // apply html magic
     if (filename.endsWith(".html")) {
       const file = await fsp.readFile(filename, "utf8");
-      await idemWrite(dest, transform(file, {mode: "production", scripts, styles}))
+      await idemWrite(dest, transform(file, {mode: "production", scripts, styles}));
     } else if (relative === "bundle.js") {
       
     } else {
@@ -119,7 +119,7 @@ async function buildBundle(config: {
 }) {
   // configure webpack
   process.env.NODE_ENV = "production";
-  const webpackConfig = require(path.join(process.cwd(), "webpack.config.js"));
+  const webpackConfig = loadSync(path.join(process.cwd(), "webpack.config.js"));
   webpackConfig.mode = "production";
   webpackConfig.output.path = config.out;
 

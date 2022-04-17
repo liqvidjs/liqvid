@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-import * as pkg from "./dist/index.js";
+import * as pkg from "./dist/index.mjs";
 
 pkg.main()
   .then(() => process.exit(0))

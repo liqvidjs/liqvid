@@ -1,15 +1,14 @@
-import {createServer} from "@liqvid/server";
 import path from "path";
 import type Yargs from "yargs";
-import {DEFAULT_CONFIG, parseConfig} from "./config.js";
+import {DEFAULT_CONFIG, parseConfig} from "./config.mjs";
 
 /**
 * Run preview server
-*/ 
-export const serve = (yargs: typeof Yargs) =>
-yargs
-.command("serve", "Run preview server", (yargs) => {
-  return (yargs
+*/
+export const serve = (yargs: typeof Yargs) => yargs.command(
+  "serve",
+  "Run preview server",
+  yargs => yargs
     .config("config", parseConfig("serve"))
     .default("config", DEFAULT_CONFIG)
     .option("build", {
@@ -41,11 +40,11 @@ yargs
     .option("styles", {
       desc: "Style aliases",
       default: {}
-    })
-    );
-  }, (args) => {
-    return new Promise((resolve, reject) => {
-      const app = createServer(args);
-    })
-  })
-  
+    }),
+  async (argv) => {
+    const {createServer} = await import("@liqvid/server");
+    // await so script doesn't close
+    await new Promise(() => {
+      createServer(argv);
+    });
+  });

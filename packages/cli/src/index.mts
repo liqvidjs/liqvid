@@ -1,21 +1,25 @@
+import {readFile} from "fs/promises";
+import * as path from "path";
+import {fileURLToPath} from "url";
 import yargs from "yargs";
+import {hideBin} from "yargs/helpers";
 
 // shared options
 
-import {audio} from "./tasks/audio.js";
-import {build} from "./tasks/build.js";
-import {serve} from "./tasks/serve.js";
-import {render} from "./tasks/render.js";
-import {thumbs} from "./tasks/thumbs.js";
+import {audio} from "./tasks/audio.mjs";
+import {build} from "./tasks/build.mjs";
+import {serve} from "./tasks/serve.mjs";
+import {render} from "./tasks/render.mjs";
+import {thumbs} from "./tasks/thumbs.mjs";
 
 // entry
 export async function main() {
   let config = // WTF
-    yargs
+    yargs(hideBin(process.argv))
     .scriptName("liqvid")
     .strict()
     .usage("$0 <cmd> [args]")
-    .demandCommand(1, 'Must specify a command');
+    .demandCommand(1, "Must specify a command");
 
   config = audio(config);
   config = build(config);
@@ -24,14 +28,16 @@ export async function main() {
   config = thumbs(config);
 
   // version
-  config.version(require("../package.json").version);
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const {version} = JSON.parse(await readFile(path.join(__dirname, "..", "package.json"), "utf8"));
+  config.version(version);
   
   return config.help().argv;
 }
 
 import type {createServer} from "@liqvid/server";
 import type {solidify, thumbs as captureThumbs} from "@liqvid/renderer";
-import type {buildProject} from "./tasks/build";
+import type {buildProject} from "./tasks/build.mjs";
 import type {transcribe} from "@liqvid/captioning";
 
 /**

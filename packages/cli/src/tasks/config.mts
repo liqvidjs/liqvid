@@ -1,16 +1,16 @@
+import "ts-node/register/transpile-only";
 import os from "os";
 import path from "path";
-import yargs from "yargs";
+// @ts-expect-error TypeScript complains about this not being a module
+import loadSync from "./load-sync.cjs";
 
 export const DEFAULT_LIST = ["liqvid.config.ts", "liqvid.config.js", "liqvid.config.json"];
 export const DEFAULT_CONFIG = DEFAULT_LIST[0];
 
 export function parseConfig(...keys: string[]) {
-  require("ts-node/register/transpile-only");
-  
   return (configPath: string) => {
     try {
-      return access(require(configPath), keys);
+      return access(loadSync(configPath), keys);
     } catch (e) {
       if (e.code === "MODULE_NOT_FOUND") {
         // default value => assume not specified
@@ -25,6 +25,10 @@ export function parseConfig(...keys: string[]) {
   };
 }
 
+// function require(filename: string) {
+//   return JSON.parse(readFileSync(path.resolve(process.cwd(), filename), "utf8"));
+// }
+
 function access(o: any, keys: string[]): any {
   if (keys.length === 0)
     return o;
@@ -34,15 +38,16 @@ function access(o: any, keys: string[]): any {
   return access(o[key], keys);
 }
 
-export const BROWSER_EXECUTABLE: yargs.Options = {
+export const BROWSER_EXECUTABLE = {
   alias: "x",
   desc: "Path to a Chrome/ium executable. If not specified and a suitable executable cannot be found, one will be downloaded during rendering.",
-  normalize: true
-};
+  normalize: true,
+  type: "string"
+} as const;
 
-export const CONCURRENCY: yargs.Options = {
+export const CONCURRENCY = {
   alias: "n",
   default: Math.floor(os.cpus().length / 2),
   desc: "How many threads to use",
   type: "number"
-};
+} as const;
