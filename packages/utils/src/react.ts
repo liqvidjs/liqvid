@@ -1,5 +1,5 @@
 import {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
-import {anyHover} from "./interaction";
+import {anyHover, onDrag as htmlOnDrag} from "./interaction";
 
 /**
   Helper for the https://github.com/facebook/react/issues/2043 workaround. Use to intercept refs and
@@ -82,6 +82,28 @@ export function onClick<T extends HTMLElement | SVGElement>(
 }
 
 /**
+ * Helper for implementing drag functionality, abstracting over mouse vs touch events.
+ * @returns An object of event handlers which should be added to a React element with {...}
+ */
+export function onDrag(
+  move: Parameters<typeof htmlOnDrag>[0],
+  down: Parameters<typeof htmlOnDrag>[1],
+  up: Parameters<typeof htmlOnDrag>[2]
+): {
+    "data-affords": "click";
+    onMouseDown: React.MouseEventHandler;
+    onTouchStart: React.TouchEventHandler;
+  } {
+  const listener = htmlOnDrag(move, down, up);
+
+  return {
+    "data-affords": "click",
+    onMouseDown: e => listener(e.nativeEvent),
+    onTouchStart: e => listener(e.nativeEvent)
+  };
+}
+
+/**
  * Recursive version of {@link React.Children.map}
  * @param children Children to iterate over
  * @param fn Callback function
@@ -112,7 +134,7 @@ export function recursiveMap(
  * @returns A forceUpdate() function
  */
 export function useForceUpdate(): () => void {
-  return useReducer((c: number) => c+1, 0)[1];
+  return useReducer((c: number) => c + 1, 0)[1];
 }
 
 /**

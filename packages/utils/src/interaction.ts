@@ -14,7 +14,7 @@ export const anyHover = window?.matchMedia?.("(any-hover: hover)")?.matches;
  * Helper for implementing drag functionality, abstracting over mouse vs touch events.
  * @returns An event listener which should be added to both `mousedown` and `touchstart` events.
  */
-export function dragHelper(
+export function onDrag(
   /** Callback for dragging (pointer is moved while down). */
   move: (
     /** The underlying `mousemove` or `touchmove` event */
