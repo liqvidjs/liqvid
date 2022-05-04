@@ -34,13 +34,13 @@ export class Script
     let time = 0;
     for (const marker of markers) {
       if (marker.length === 2) {
-        const [, duration] = marker as [string, string];
+        const [, duration] = marker;
         marker[1] = time;
-        (marker as (string | number)[])[2] = time + parseTime(duration);
+        (marker as unknown as Marker)[2] = time + (typeof duration === "string" ? parseTime(duration) : duration);
       } else {
-        const [, begin, end] = marker as [string, string, string];
-        marker[1] = parseTime(begin);
-        marker[2] = parseTime(end);
+        const [, begin, end] = marker;
+        marker[1] = (typeof begin === "string" ? parseTime(begin) : begin);
+        marker[2] = (typeof end === "string" ? parseTime(end) : end);
       }
 
       time = marker[2] as number;

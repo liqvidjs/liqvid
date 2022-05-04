@@ -1,7 +1,7 @@
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
-import {Playback, Player, Script} from "..";
+import {Playback, Script} from "..";
 
 describe("Script", () => {
   let script: Script;
@@ -15,6 +15,20 @@ describe("Script", () => {
   });
 
   test("constructor", () => {
+    expect(script.markers).toEqual([["A", 0, 20000], ["B", 20000, 40000], ["C", 40000, 60000]]);
+    expect(script.markerIndex).toBe(0);
+    expect(script.markerName).toBe("A");
+
+    expect(script.playback).toBeInstanceOf(Playback);
+    expect(script.playback.duration).toBe(60000);
+  });
+
+  test("constructor with numeric durations", () => {
+    script = new Script([
+      ["A", 20000],
+      ["B", 20000],
+      ["C", 20000]
+    ]);
     expect(script.markers).toEqual([["A", 0, 20000], ["B", 20000, 40000], ["C", 40000, 60000]]);
     expect(script.markerIndex).toBe(0);
     expect(script.markerName).toBe("A");
