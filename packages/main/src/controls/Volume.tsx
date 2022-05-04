@@ -1,10 +1,8 @@
+import {onClick, useForceUpdate} from "@liqvid/utils/react";
 import * as React from "react";
 import {useCallback, useEffect, useMemo, useRef} from "react";
-
 import {useKeymap, usePlayback} from "../hooks";
 import {strings} from "../i18n";
-import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "@liqvid/utils/react";
 
 /** Volume control */
 export function Volume() {

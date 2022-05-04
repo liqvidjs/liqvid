@@ -1,10 +1,9 @@
 import {useKeymap} from "@liqvid/keymap/react";
 import {usePlayback} from "@liqvid/playback/react";
+import {onClick, useForceUpdate} from "@liqvid/utils/react";
 import * as React from "react";
 import {useEffect, useMemo} from "react";
 import {strings} from "../i18n";
-import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "@liqvid/utils/react";
 
 /** Control for playing/pausing */
 export function PlayPause() {

@@ -4,9 +4,8 @@ import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {ThumbnailBox, ThumbData} from "./ThumbnailBox";
 
 import {useKeymap, usePlayback, useScript} from "../hooks";
-import {dragHelper} from "../utils/interactivity";
 import {between, clamp} from "@liqvid/utils/misc";
-import {anyHover} from "../utils/mobile";
+import {anyHover, onDrag} from "@liqvid/utils/interaction";
 import {captureRef} from "@liqvid/utils/react";
 
 export {ThumbData};
@@ -113,9 +112,9 @@ export function ScrubberBar(props: {
   // event handlers
   const divEvents = useMemo(() => {
     if (!anyHover) return {};
-    return {onMouseDown: dragHelper(
+    const listener = onDrag(
       // move
-      (e: MouseEvent, {x}: {x: number}) => {
+      (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = clamp(0, (x - rect.left) / rect.width, 1);
 
@@ -123,7 +122,7 @@ export function ScrubberBar(props: {
         playback.seek(progress * playback.duration);
       },
       // down
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: MouseEvent) => {
         playback.seeking = true;
 
         const rect = scrubberBar.current.getBoundingClientRect(),
@@ -134,7 +133,10 @@ export function ScrubberBar(props: {
       },
       // up
       () => playback.seeking = false
-    )};
+    );
+    return {
+      onMouseDown: (e: React.MouseEvent) => listener(e.nativeEvent)
+    };
   }, []);
 
   // events to attach on the wrapper
@@ -156,16 +158,16 @@ export function ScrubberBar(props: {
       });
     }
 
-    const listener = dragHelper(
+    const listener = onDrag(
       // move
-      (e: TouchEvent, {x}: {x: number}) => {
+      (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
       // start
-      (e: React.TouchEvent<HTMLDivElement>) => {
+      (e) => {
         e.preventDefault();
         e.stopPropagation();
         playback.seeking = true;
@@ -194,23 +196,23 @@ export function ScrubberBar(props: {
   const scrubberEvents = useMemo(() => {
     // if (anyHover) return {};
 
-    const listener = dragHelper(
+    const listener = onDrag(
       // move
-      (e: TouchEvent, {x}: {x: number}) => {
+      (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
       // start
-      (e: React.TouchEvent<SVGSVGElement>) => {
+      (e) => {
         e.preventDefault();
         e.stopPropagation();
         playback.seeking = true;
         setShowThumb(true);
       },
       // end
-      (e: TouchEvent, {x}: {x: number}) => {
+      (e, {x}) => {
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
               progress = clamp(0, (x - rect.left) / rect.width, 1);
@@ -241,13 +243,13 @@ export function ScrubberBar(props: {
           {...props.thumbs}
           progress={progress.thumb}
           show={showThumb}
-          title={thumbTitle}/>
+          title={thumbTitle} />
       }
 
       <div className="lv-controls-scrub-wrap" {...wrapEvents}>
         <svg className="lv-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
-          <rect className="lv-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100}/>
-          <rect className="lv-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100}/>
+          <rect className="lv-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100} />
+          <rect className="lv-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100} />
 
           {/*ranges.map(([start, end]) => (
             <rect
@@ -267,7 +269,7 @@ export function ScrubberBar(props: {
           ))}
         </svg>
         <svg className="lv-scrubber" style={{left: `calc(${progress.scrubber * 100}% - 6px)`}} viewBox="0 0 100 100" {...scrubberEvents}>
-          <circle cx="50" cy="50" r="50" stroke="none"/>
+          <circle cx="50" cy="50" r="50" stroke="none" />
         </svg>
       </div>
     </div>

@@ -1,15 +1,15 @@
+import {onClick} from "@liqvid/utils/react";
 import * as React from "react";
 import {useCallback, useEffect, useMemo, useState} from "react";
-
 import {useKeymap, usePlayer} from "../hooks";
-import {onClick} from "../utils/mobile";
 
+/** Captions control. */
 export function Captions() {
   const player = usePlayer();
   const keymap = useKeymap();
   const [visible, setVisible] = useState(false);
 
-  const toggleCaptions = useCallback((e: KeyboardEvent | TouchEvent | React.MouseEvent<HTMLButtonElement>) => {
+  const toggleCaptions = useCallback((e: KeyboardEvent | React.TouchEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>) => {
     player.canvas.parentElement.classList.toggle("lv-captions");
 
     // blur or keyboard controls will get snagged

@@ -2,8 +2,7 @@ import * as React from "react";
 import {useEffect} from "react";
 import {exitFullScreen, isFullScreen, onFullScreenChange, requestFullScreen} from "../fake-fullscreen";
 import {strings} from "../i18n";
-import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "@liqvid/utils/react";
+import {onClick, useForceUpdate} from "@liqvid/utils/react";
 import {useKeymap} from "@liqvid/keymap/react";
 
 const toggleFullScreen = () => isFullScreen() ? exitFullScreen() : requestFullScreen();

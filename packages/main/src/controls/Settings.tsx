@@ -2,8 +2,7 @@ import {clamp} from "@liqvid/utils/misc";
 import * as React from "react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {usePlayer} from "../hooks";
-import {onClick} from "../utils/mobile";
-import {useForceUpdate} from "@liqvid/utils/react";
+import {onClick, useForceUpdate} from "@liqvid/utils/react";
 
 export const PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -60,10 +59,10 @@ export function Settings() {
   }, []);
   const toggle = useMemo(() => onClick(() => setDialog(prev => (prev === Dialogs.None ? Dialogs.Main : Dialogs.None))), []);
 
-  const toggleSubtitles = useMemo(() => onClick(() => {
-    document.body.classList.toggle("lv-captions");
-    forceUpdate();
-  }), []);
+  // const toggleSubtitles = useMemo(() => onClick(() => {
+  //   document.body.classList.toggle("lv-captions");
+  //   forceUpdate();
+  // }), []);
 
   // event handlers
   const openMain = onClick(() => setDialog(Dialogs.Main));

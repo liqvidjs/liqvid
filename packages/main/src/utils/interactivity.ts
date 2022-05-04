@@ -1,10 +1,10 @@
-import {dragHelper as htmlDragHelper} from "@liqvid/utils/interactivity";
+import {onDrag} from "@liqvid/utils/interaction";
 import {captureRef} from "@liqvid/utils/react";
 
-type Move = Parameters<typeof htmlDragHelper>[0];
+type Move = Parameters<typeof onDrag>[0];
 type Down = Parameters<typeof dragHelper>[1];
-type DownArgs = Parameters<typeof htmlDragHelper>[1] extends (arg0: any, ...args: infer T) => void ? T : never;
-type Up = Parameters<typeof htmlDragHelper>[2];
+type DownArgs = Parameters<typeof onDrag>[1] extends (arg0: any, ...args: infer T) => void ? T : never;
+type Up = Parameters<typeof onDrag>[2];
 
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
@@ -38,14 +38,14 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
   up: Up = () => {}
 ) {
   /*
-    We can't directly use the version from @liqvid/utils/interactivity because down() might want to use React types.
+    We can't directly use the version from @liqvid/utils/interaction because down() might want to use React types.
     Hence this goofiness.
   */
   let args: DownArgs;
-  const __down: Parameters<typeof htmlDragHelper>[1] = (e, ...captureArgs) => {
+  const __down: Parameters<typeof onDrag>[1] = (e, ...captureArgs) => {
     args = captureArgs;
   };
-  const listener = htmlDragHelper(move, __down, up);
+  const listener = onDrag(move, __down, up);
 
   return (e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>) => {
     if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)

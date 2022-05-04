@@ -18,7 +18,7 @@ import {Settings} from "./controls/Settings";
 import {TimeDisplay} from "./controls/TimeDisplay";
 import {Volume} from "./controls/Volume";
 import {bind} from "@liqvid/utils/misc";
-import {anyHover} from "./utils/mobile";
+import {anyHover} from "@liqvid/utils/interaction";
 
 interface PlayerEvents {
   "canplay": void;
