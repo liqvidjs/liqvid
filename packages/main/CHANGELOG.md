@@ -1,3 +1,7 @@
+## 2.1.5 (May 4, 2022)
+
+* allow passing numeric durations to `Script` (fixes #26)
+
 ## 2.1.4 (March 15, 2022)
 
 * don't crash when `Playback` isn't polyfilled

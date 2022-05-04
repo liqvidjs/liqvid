@@ -1,6 +1,6 @@
 {
   "name": "liqvid",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": [
     "dist/*"
@@ -42,10 +42,13 @@
     "@liqvid/utils": "workspace:^",
     "@types/events": "^3.0.0",
     "@types/node": "^17.0.21",
+    "events": "^3.3.0",
+    "strict-event-emitter-types": "^2.0.0"
+  },
+  "peerDependencies": {
     "@types/react": "^17.0.40",
     "@types/react-dom": "^17.0.13",
-    "events": "^3.3.0",
     "react": "^17.0.2",
-    "strict-event-emitter-types": "^2.0.0"
+    "react-dom": "^17.0.2"
   }
 }
