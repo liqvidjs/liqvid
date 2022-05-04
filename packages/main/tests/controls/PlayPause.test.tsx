@@ -1,6 +1,5 @@
 import * as React from "react";
 import {fireEvent, render} from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
