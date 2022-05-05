@@ -43,7 +43,7 @@ const icon = (
   </g>
 );
 
-export class VideoRecorder extends Recorder<Blob, Blob> {
+export class AudioRecorder extends Recorder<Blob, Blob> {
   private mediaRecorder: MediaRecorder;
   private promise: Promise<IntransigentReturn>;
 
@@ -51,36 +51,19 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
   private blob: Blob;
 
   stream: MediaStream;
+  private requested = false;
   private startTime: number;
   private endTime: number;
 
   intransigent = true;
 
-  constructor() {
-    super();
-
-    const requestRecording = async () => {
-      // Only need to do this once...
-      window.removeEventListener("click", requestRecording);
-      try {
-        this.stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-      } catch (e) {
-        // User said no or browser rejected request due to insecure context
-        console.log("no recording allowed");
-      }
-    };
-
-    // Need user interaction to request media
-    window.addEventListener("click", requestRecording);
-  }
-
   beginRecording() {
     if (!this.stream)
       throw new Error("Navigator stream not available");
 
-    this.promise = new Promise(async (resolve) => {
-      // record the video
-      this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: "video/webm"});
+    this.promise = new Promise(async (resolve, reject) => {
+      // record the audio
+      this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: "audio/webm"});
 
       // subscribe to events
       this.mediaRecorder.addEventListener("dataavailable", e => {
@@ -114,29 +97,56 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
   }
 
   finalizeRecording(chunks: Blob[]) {
-    return new Blob(chunks, {type: "video/webm"});
+    return new Blob(chunks, {type: "audio/webm"});
+  }
+
+  requestRecording() {
+    // be idempotent
+    if (this.requested)
+      return;
+    
+    const request = async () => {
+      // Only need to do this once...
+      window.removeEventListener("click", request);
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
+      } catch (e) {
+        // User said no or browser rejected request due to insecure context
+        console.log("no recording allowed");
+      }
+    };
+
+    // Need user interaction to request media
+    window.addEventListener("click", request);
+    this.requested = true;
   }
 }
 
-export function VideoSaveComponent(props: {data: Blob}) {
+export function AudioSaveComponent(props: {data: Blob}) {
   return (
     <>
       {props.data ?
-        <a download="video.webm" href={URL.createObjectURL(props.data)}>Download Video</a>
+        <a download="audio.webm" href={URL.createObjectURL(props.data)}>Download Audio</a>
         :
-        "Video not yet available"
+        "Audio not yet available"
       }
     </>
   );
 }
 
-const recorder = new VideoRecorder();
-export const VideoRecording: RecorderPlugin<Blob, Blob, VideoRecorder> = {
-  enabled: () => typeof recorder.stream !== "undefined",
+const recorder = new AudioRecorder();
+export const AudioRecording: RecorderPlugin<Blob, Blob, AudioRecorder> = {
+  enabled: () => {
+    if (typeof recorder.stream === "undefined") {
+      recorder.requestRecording();
+      return false;
+    }
+    return true;
+  },
   icon,
-  key: "video",
-  name: "Video",
+  key: "audio",
+  name: "Audio",
   recorder,
-  saveComponent: VideoSaveComponent,
-  title: "Record video"
+  saveComponent: AudioSaveComponent,
+  title: "Record audio"
 };
