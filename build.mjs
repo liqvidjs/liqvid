@@ -3,24 +3,31 @@ import * as fs from "fs";
 import {existsSync, promises as fsp, readFileSync} from "fs";
 import * as path from "path";
 
-const ESM = path.join(process.cwd(), "dist", "esm");
+const DIST = path.join(process.cwd(), "dist");
 const NODE_MODULES = path.join(process.cwd(), "node_modules");
 
 build();
 
 async function build() {
-  // rename files first
-  await walkDir(ESM, async filename => {
-    if (!filename.endsWith(".js"))
-      return;
-    await renameExtension(filename);
-  });
-  // now fix imports
-  await walkDir(ESM, async filename => {
-    if (!filename.endsWith(".mjs"))
-      return;
-    await fixImports(filename);
-  });
+  for (const type of ["esm", "cjs"]) {
+    const dir = path.join(DIST, type);
+    const extn = type === "esm" ? "mjs" : "cjs";
+
+    // rename files first
+    await walkDir(dir, async filename => {
+      if (!filename.endsWith(".js"))
+        return;
+      await renameExtension(filename, extn);
+    });
+
+
+    // now fix imports
+    await walkDir(dir, async filename => {
+      if (!filename.endsWith(`.${extn}`))
+        return;
+      await fixImports(filename, type);
+    });
+  }
 }
 
 /**
@@ -42,10 +49,18 @@ async function walkDir(dirname, callback) {
   }));
 }
 
-/** Add extensions to relative imports */
-async function fixImports(filename) {
+/**
+ * Add extensions to relative imports
+ * @param {string} filename File to operate on.
+ * @param {"esm" | "cjs"} type Javascript module system in use.
+ */
+async function fixImports(filename, type = "esm") {
   let content = await fsp.readFile(filename, "utf8");
-  content = content.replaceAll(/^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm, (match, head, q, name, tail) => {
+  const regex = (type === "esm" ?
+    /^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm :
+    /(require\()(['"])(.+?)(\2\))/gm
+  );
+  content = content.replaceAll(regex, (match, head, q, name, tail) => {
     // already has extension
     if (name.match(/\.[cm]?js$/)) {
       return match;
@@ -61,11 +76,11 @@ async function fixImports(filename) {
         const json = JSON.parse(readFileSync(findPackageJson(name), "utf8"));
         if (json.exports) {
           // ARGH
-          if (name === "react/jsx-runtime") {
+          if (name === "react/jsx-runtime" && type === "esm") {
             return head + q + "react/jsx-runtime.js" + tail;
           }
         } else {
-          
+
         }
       } catch (e) {
         console.error(e);
@@ -77,7 +92,9 @@ async function fixImports(filename) {
   await fsp.writeFile(filename, content);
 }
 
-/** Find extension */
+/**
+ * Find extension
+ */
 function findExtension(pathname, relative) {
   const filename = path.resolve(pathname, relative);
   for (const extn of ["mjs", "js", "cjs"]) {
@@ -94,7 +111,10 @@ function findExtension(pathname, relative) {
   throw new Error(`Could not resolve ${filename}`);
 }
 
-/** Find package.json */
+/**
+ * Find package.json
+ * @param {string} name Name of package.
+ */
 function findPackageJson(name) {
   const packageName = getPackageName(name);
   let dirname = NODE_MODULES;
@@ -108,7 +128,10 @@ function findPackageJson(name) {
   }
 }
 
-/** Get name of NPM package */
+/**
+ * Get name of NPM package
+ * @param {string} name Import string to resolve.
+ */
 function getPackageName(name) {
   const parts = name.split("/");
   if (name.startsWith("@")) {
@@ -117,7 +140,9 @@ function getPackageName(name) {
   return parts[0];
 }
 
-/** Change file extension */
+/**
+ * Change file extension
+ */
 async function renameExtension(filename, extn = "mjs") {
   await fsp.rename(filename, filename.replace(/\.js$/, `.${extn}`));
 }
