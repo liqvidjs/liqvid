@@ -19,8 +19,8 @@ export class RecordingManager
 extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, EventTypes>) {
   /** Whether recording is currently in progress. */
   active: boolean;
-
   
+  /** Duration of recording. */
   duration: number;
 
   /** Whether recording is currently paused. */
@@ -31,7 +31,8 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
 
   private captureData: {
     [key: string]: unknown[];
-  }
+  };
+  
   private plugins: Record<string, Recorder<unknown, unknown>>;
 
   private intransigentRecorder: Recorder<unknown, unknown>;
@@ -70,7 +71,6 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
     // dependency injection for plugins
     for (const key in this.plugins) {
       const recorder = this.plugins[key];
-      console.log(recorder);
 
       recorder.provide({
         push: (value: unknown) => this.capture(key, value),

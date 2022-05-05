@@ -1,12 +1,12 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Recording functionality for Liqvid",
   "exports": {
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.cjs"
+    "import": "./dist/esm/index.mjs",
+    "require": "./dist/cjs/index.cjs"
   },
-  "typings": "./dist/index.d.ts",
+  "typings": "./dist/types/index.d.ts",
   "files": [
     "dist/*"
   ],
@@ -23,8 +23,8 @@
     "build": "pnpm build:clean && pnpm build:css && pnpm build:js && pnpm build:postclean",
     "build:css": "stylus -o dist/style.css styl/style.styl; stylus -c -o dist/style.min.css styl/style.styl",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc;  node ../../build.mjs; rollup -c;",
-    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
+    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src",
     
     "css": "stylus -c -w -o dist/style.css styl/recording.styl"
@@ -35,14 +35,19 @@
     "nib": "^1.1.2",
     "stylus": "^0.56.0"
   },
-  "peerDependencies": {
-    "liqvid": "workspace:^"
-  },
   "dependencies": {
     "@liqvid/keymap": "workspace:^",
     "@liqvid/utils": "workspace:^",
     "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
+  },
+  "peerDependencies": {
+    "liqvid": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "liqvid": {
+      "optional": true
+    }
   }
 }

@@ -1,4 +1,4 @@
-import type {RecordingManager} from "./RecordingManager";
+import type {RecordingManager} from "./RecordingManager.js";
 
 export type IntransigentReturn = [number, number];
 

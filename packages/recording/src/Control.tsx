@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useReducer, useRef, useState} from "react";
 
-import {Keymap, Utils, useKeymap} from "liqvid";
-const {onClick} = Utils.mobile;
-import {useForceUpdate} from "@liqvid/utils/react";
+import {Keymap} from "@liqvid/keymap";
+import {useKeymap} from "@liqvid/keymap/react";
+import {onClick, useForceUpdate} from "@liqvid/utils/react";
 
 import type {RecorderPlugin} from "./types";
 import {RecordingManager} from "./RecordingManager";
@@ -12,7 +12,7 @@ import {Recorder} from "./recorder";
 
 interface Props {
   manager?: RecordingManager;
-  plugins?: RecorderPlugin<unknown>[];
+  plugins?: RecorderPlugin<any, any>[];
 }
 
 interface Action {
@@ -61,11 +61,11 @@ export function RecordingControl(props: Props) {
     for (const plugin of props.plugins) {
       activePlugins.current[plugin.key] = false;
     }
-  };
+  }
 
   // plugins dictionary
   const [pluginsByKey] = useState(() => {
-    const dict: Record<string, RecorderPlugin> = {};
+    const dict: Record<string, RecorderPlugin<unknown, unknown>> = {};
     for (const plugin of props.plugins) {
       dict[plugin.key] = plugin;
     }
@@ -76,9 +76,12 @@ export function RecordingControl(props: Props) {
   const start = useCallback(() => {
     const {active, beginRecording, endRecording} = manager.current;
     if (active) {
-      endRecording().then(recording => setRecordings(prev => prev.concat(recording)));
+      endRecording().then((recording: Record<string, unknown>) => {
+        recording.duration = manager.current.duration;
+        setRecordings(prev => prev.concat(recording));
+      });
     } else {
-      const recorders: Record<string, Recorder> = {};
+      const recorders: Record<string, Recorder<unknown, unknown>> = {};
       for (const plugin of props.plugins) {
         if (activePlugins.current[plugin.key]) {
           recorders[plugin.key] = plugin.recorder;
@@ -217,7 +220,7 @@ export function RecordingControl(props: Props) {
         </table>
 
         <h3>Configuration</h3>
-        {props.plugins.map((plugin, i) => {
+        {props.plugins.map((plugin) => {
           const classNames = ["recorder-plugin-icon"];
 
           if (activePlugins.current[plugin.key])
@@ -270,7 +273,7 @@ function fmtSeq(str: string) {
     if (k === "Ctrl")
       return "^";
     else if (k === "Alt")
-      return "⌥"
+      return "⌥";
     if (k === "Shift")
       return "⇧";
     if (k === "Meta")
