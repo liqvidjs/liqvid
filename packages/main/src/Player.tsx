@@ -19,6 +19,7 @@ import {TimeDisplay} from "./controls/TimeDisplay";
 import {Volume} from "./controls/Volume";
 import {bind} from "@liqvid/utils/misc";
 import {anyHover} from "@liqvid/utils/interaction";
+import {createUniqueContext} from "@liqvid/utils/react";
 
 interface PlayerEvents {
   "canplay": void;
@@ -74,7 +75,7 @@ export class Player extends React.PureComponent<Props> {
   private dag: DAGLeaf;
 
   /** {@link React.Context} used to access ambient Player */
-  static Context = React.createContext<Player>(null);
+  static Context = createUniqueContext<Player>("@liqvid/player", null);
   
   /**
    * Symbol to access the {@link Player} instance attached to a DOM element

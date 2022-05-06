@@ -1,3 +1,7 @@
+## 2.1.6 (May 6, 2022)
+
+* ensure `Player.Context` is always the same even if multiple versions of Liqvid are accidentally loaded
+
 ## 2.1.5 (May 4, 2022)
 
 * allow passing numeric durations to `Script` (fixes #26)
