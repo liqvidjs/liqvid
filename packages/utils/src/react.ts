@@ -1,4 +1,4 @@
-import {Children, cloneElement, isValidElement, useMemo, useReducer, useRef} from "react";
+import {Children, cloneElement, createContext, isValidElement, useMemo, useReducer, useRef} from "react";
 import {anyHover, onDrag as htmlOnDrag} from "./interaction";
 
 /**
@@ -18,6 +18,22 @@ export const captureRef = <T>(callback: (ref: T) => void, innerRef?: React.Ref<T
     (innerRef as React.MutableRefObject<T>).current = ref;
   }
 };
+
+/**
+ * Create a context guaranteed to be unique. Useful in case multiple versions of package are accidentally loaded.
+ * @param name Unique key for context.
+ * @param defaultValue Initial value for context.
+ * @returns React context which is guaranteed to be stable.
+*/
+export function createUniqueContext<T>(key: string, defaultValue: T = undefined): React.Context<T> {
+  const symbol = Symbol.for(key);
+
+  if (!(symbol in globalThis)) {
+    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] = createContext<T>(defaultValue);
+  }
+
+  return (globalThis as unknown as {[symbol]: React.Context<T>})[symbol];
+}
 
 /**
  * Combine multiple refs into one
