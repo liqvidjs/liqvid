@@ -1,6 +1,6 @@
 import {recursiveMap, usePromise} from "@liqvid/utils/react";
 import {usePlayer} from "liqvid";
-import {cloneElement, forwardRef, isValidElement, useEffect, useImperativeHandle, useRef} from "react";
+import React, {cloneElement, forwardRef, isValidElement, useEffect, useImperativeHandle, useRef} from "react";
 import {KTX} from "./fancy";
 import {Handle as KTXHandle, KTX as KTXPlain} from "./plain";
 
@@ -11,6 +11,8 @@ interface Handle {
 }
 
 interface Props {
+  children?: React.ReactNode;
+  
   /**
    * Whether to reparse descendants for `during()` and `from()`
    * @default false
