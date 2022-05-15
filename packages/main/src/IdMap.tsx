@@ -4,6 +4,7 @@ import {bind} from "@liqvid/utils/misc";
 import {recursiveMap} from "@liqvid/utils/react";
 
 interface Props {
+  children?: React.ReactNode;
   map?: Record<string, unknown>;
 }
 

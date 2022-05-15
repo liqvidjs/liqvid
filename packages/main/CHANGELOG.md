@@ -1,3 +1,7 @@
+## 2.1.7 (May 14, 2022)
+
+* support React 18
+
 ## 2.1.6 (May 6, 2022)
 
 * ensure `Player.Context` is always the same even if multiple versions of Liqvid are accidentally loaded
