@@ -1,11 +1,11 @@
 {
   "name": "@liqvid/utils",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Utility functions for Liqvid",
   "exports": {
     "./*": {
       "import": "./dist/esm/*.mjs",
-      "require": "./dist/cjs/*.js"
+      "require": "./dist/cjs/*.cjs"
     }
   },
   "typesVersions": {

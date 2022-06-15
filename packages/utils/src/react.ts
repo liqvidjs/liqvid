@@ -139,8 +139,7 @@ export function recursiveMap(
         children: recursiveMap(child.props.children, fn)
       });
     }
-
-    // @ts-expect-error Not sure how to type this correctly.
+    
     return fn(child);
   });
 }
