@@ -8,7 +8,7 @@ declare global {
 /**
   Whether any available input mechanism can hover over elements. This is used as a standin for desktop/mobile.
 */
-export const anyHover = window?.matchMedia?.("(any-hover: hover)")?.matches;
+export const anyHover = (typeof window !== "undefined") ? window.matchMedia?.("(any-hover: hover)")?.matches : undefined;
 
 /**
  * Helper for implementing drag functionality, abstracting over mouse vs touch events.
