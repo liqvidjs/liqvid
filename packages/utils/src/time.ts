@@ -86,5 +86,9 @@ export function formatTimeMs(time: number): string {
   }
   const milliseconds = Math.floor(time % 1000);
 
+  if (milliseconds === 0) {
+    return formatTime(time);
+  }
+  
   return formatTime(time) + "." + String(milliseconds).padStart(3, "0").replace(/0+$/, "");
 }

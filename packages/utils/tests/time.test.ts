@@ -48,6 +48,10 @@ describe("time/formatTime", () => {
 });
 
 describe("time/formatTimeMs", () => {
+  test("no milliseconds", () => {
+    expect(formatTimeMs(2000)).toBe("0:02");
+  });
+
   test(".00x", () => {
     expect(formatTimeMs(3)).toBe("0:00.003");
   });
