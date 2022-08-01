@@ -52,8 +52,8 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
 });
 
 export const MJXText = forwardRef<
-  {},
-  React.ComponentProps<typeof MJXTextPlain>
+{},
+React.ComponentProps<typeof MJXTextPlain>
 >(function MJXText(props, ref) {
   const {...attrs} = props;
   return <MJXTextPlain tagName="p" {...attrs} />;

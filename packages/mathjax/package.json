@@ -1,21 +1,21 @@
 {
   "name": "@liqvid/mathjax",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "description": "MathJax integration for Liqvid",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs"
     },
     "./plain": {
-      "import": "./dist/plain.mjs",
-      "require": "./dist/plain.cjs"
+      "import": "./dist/esm/plain.mjs",
+      "require": "./dist/cjs/plain.cjs"
     }
   },
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*.d.ts"
+        "./dist/types/*.d.ts"
       ]
     }
   },
@@ -30,8 +30,8 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc; node ../../build.mjs; rollup -c",
-    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
+    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src"
   },
   "repository": {
@@ -44,10 +44,10 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/mathjax",
   "license": "MIT",
   "peerDependencies": {
-    "@types/react": ">=17.0.0",
+    "@types/react": ">=18.0.0",
     "liqvid": "workspace:^",
     "mathjax": "^3.2.0",
-    "react": ">=17.0.0"
+    "react": ">=18.1.0"
   },
   "peerDependenciesMeta": {
     "liqvid": {

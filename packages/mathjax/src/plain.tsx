@@ -53,6 +53,9 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
       if (!span) {
         const element = spanRef.current.firstElementChild as HTMLElement;
 
+        // copy id
+        element.id = spanRef.current.id;
+
         // copy classes
         for (let i = 0, len = spanRef.current.classList.length; i < len; ++i) {
           element.classList.add(spanRef.current.classList.item(i));
@@ -92,10 +95,10 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
   );
 });
 
-function onFullScreenChange(callback: EventListener): void {
-  for (const event of ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"])
-    document.addEventListener(event, callback);
-}
+// function onFullScreenChange(callback: EventListener): void {
+//   for (const event of ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"])
+//     document.addEventListener(event, callback);
+// }
 
 //   constructor(props: Props) {
 //     super(props);
@@ -212,15 +215,15 @@ export const MJXText = forwardRef<unknown, {
    */
   tagName?: keyof (HTMLElementTagNameMap & JSX.IntrinsicElements);
 } & React.HTMLAttributes<HTMLElement>>(function MJXText(props, ref) {
-  const elt = useRef<HTMLElement>();
-  const combined = combineRefs(elt, ref);
+      const elt = useRef<HTMLElement>();
+      const combined = combineRefs(elt, ref);
 
-  useEffect(() => {
-    MathJax.startup.promise.then(() => {
-      MathJax.typeset([elt.current]);
+      useEffect(() => {
+        MathJax.startup.promise.then(() => {
+          MathJax.typeset([elt.current]);
+        });
+      }, []);
+
+      const {tagName = "p", children, ...attrs} = props;
+      return createElement(tagName, {...attrs, ref: combined}, children);
     });
-  }, []);
-
-  const {tagName = "p", children, ...attrs} = props;
-  return createElement(tagName, {...attrs, ref: combined}, children);
-});

@@ -10,8 +10,10 @@ interface Handle {
 }
 
 interface Props {
+  children?: React.ReactNode;
+
   /**
-   * 
+   * Whether to reparse descendants for `during()` and `from()`
    * @default false
   */
   reparse?: boolean;
@@ -20,7 +22,7 @@ interface Props {
 /**
  * Wait for a bunch of things to be rendered
  */
-// @ts-ignore we don't know how to type `recursiveMap` yet
+// @ts-expect-error we don't know how to type `recursiveMap` yet
 export const RenderGroup = forwardRef<Handle, Props>(function RenderGroup(props, ref) {
   const [ready, resolve] = usePromise();
 
