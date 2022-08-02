@@ -71,7 +71,7 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
 
       resolve();
     });
-  }, [children]);
+  }, [String(children)]);
 
   // handle
   useImperativeHandle(ref, () => ({
