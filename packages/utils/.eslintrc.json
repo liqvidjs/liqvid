@@ -1,6 +1,0 @@
-{
-  "extends": "@yuri",
-  "rules": {
-    "@typescript-eslint/no-empty-function": ["off"]
-  }
-}
