@@ -1,4 +1,9 @@
-import {formatTime, formatTimeMs, parseTime} from "../src/time";
+import {
+  formatTimeDuration,
+  formatTime,
+  formatTimeMs,
+  parseTime
+} from "../src/time";
 
 /* time constants */
 const SECONDS = 1000;
@@ -8,6 +13,24 @@ const DAYS = 24 * HOURS;
 
 const MINUS_SIGN = "\u2212";
 
+describe("time/formatTimeDuration", () => {
+  test("formats multi-day durations", () => {
+    expect(formatTimeDuration(10 * DAYS)).toBe("P10D");
+    expect(formatTimeDuration(10 * DAYS + 2 * HOURS)).toBe("P10DT2H");
+    expect(formatTimeDuration(10 * DAYS + 1 * HOURS + 3 * MINUTES)).toBe("P10DT1H3M");
+    expect(formatTimeDuration(10 * DAYS + 1 * HOURS + 10 * MINUTES + 3 * SECONDS)).toBe("P10DT1H10M3S");
+    expect(formatTimeDuration(2 * DAYS + 23 * HOURS + 3 * MINUTES + 20 * SECONDS + 337)).toBe("P2DT23H3M20.337S");
+  });
+
+  test("formats sub-day durations", () => {
+    expect(formatTimeDuration(1 * HOURS)).toBe("PT1H");
+    expect(formatTimeDuration(10 * MINUTES)).toBe("PT10M");
+    expect(formatTimeDuration(17 * HOURS + 23 * SECONDS)).toBe("PT17H23S");
+    expect(formatTimeDuration(5 * MINUTES + 18 * SECONDS + 1)).toBe("PT5M18.001S");
+    expect(formatTimeDuration(5 * SECONDS)).toBe("PT5S");
+    expect(formatTimeDuration(1 * SECONDS + 50)).toBe("PT1.05S");
+  });
+});
 describe("time/formatTime", () => {
   // seconds
   test("0:ss", () => {
@@ -33,7 +56,9 @@ describe("time/formatTime", () => {
   });
 
   test("hh:mm:ss", () => {
-    expect(formatTime(14 * HOURS + 25 * MINUTES + 1 * SECONDS)).toBe("14:25:01");
+    expect(formatTime(14 * HOURS + 25 * MINUTES + 1 * SECONDS)).toBe(
+      "14:25:01"
+    );
   });
 
   // days
