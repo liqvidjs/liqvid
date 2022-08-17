@@ -103,8 +103,8 @@ export function onClick<T extends HTMLElement | SVGElement>(
  */
 export function onDrag(
   move: Parameters<typeof htmlOnDrag>[0],
-  down: Parameters<typeof htmlOnDrag>[1],
-  up: Parameters<typeof htmlOnDrag>[2]
+  down?: Parameters<typeof htmlOnDrag>[1],
+  up?: Parameters<typeof htmlOnDrag>[2]
 ): {
     "data-affords": "click";
     onMouseDown: React.MouseEventHandler;
