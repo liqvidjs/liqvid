@@ -1,0 +1,51 @@
+{
+  "name": "@liqvid/prompt",
+  "version": "1.0.0",
+  "description": "Liqvid plugin providing prompts to read from",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:css && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:css": "stylus -o dist/style.css style.styl; stylus -c -o dist/style.min.css style.styl",
+    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "css": "stylus -c -w -o dist/style.css style.styl",
+    "lint": "eslint --ext ts,tsx --fix src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/prompt",
+  "license": "MIT",
+  "peerDependencies": {
+    "@types/react": ">=18.0.0",
+    "liqvid": "workspace:^",
+    "react": ">=18.1.0"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "liqvid": "workspace:^",
+    "style-loader": "^3.3.1",
+    "stylus": "^0.58.1",
+    "ts-loader": "^9.3.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  }
+}

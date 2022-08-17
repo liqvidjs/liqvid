@@ -1,0 +1,41 @@
+$ns = lv-prompt
+
+.{$ns}
+  border-radius 2px
+  color #FFF
+  position absolute
+  width 35em
+  
+  > :first-child, > .{$ns}-cue.active
+    border-radius 2px 2px 0 0
+    
+  > :last-child
+    border-radius 0 0 2px 2px
+    
+  > *
+    display none
+  
+  > .active, .active ~ *
+    display block
+    
+  > :not(.active)
+    opacity 0.2
+  
+.{$ns}-cue
+  background orange
+  font-family monospace
+  font-size .625em
+  padding 2px 0 2px 1em
+
+.{$ns}-line
+  padding .1em .5em
+  
+.{$ns}-line:nth-of-type(odd)
+    background #555
+  
+.{$ns}-line:nth-of-type(even)
+    background #333
+
+.{$ns}-measure
+  display block !important
+  padding .1em .5em
