@@ -19,7 +19,7 @@ interface AnimateOptions {
   /** Start time for animation. */
   startTime: number;
 
-  /** Duration of animation in milliseconds. */
+  /** Duration of animation. */
   duration: number;
 
   /** Easing function. Defaults to the identity function, i.e. linear easing. */
@@ -27,13 +27,19 @@ interface AnimateOptions {
 }
 
 /**
- * Returns a function that takes in a time in milliseconds and returns a numeric value.
+ * Returns a function that takes in a time and returns a numeric value.
  * The function will return `startValue` whenever t is less than `startTime`, and similarly
  * will return `endValue` whenever t is greater than `startTime + duration`.
- * 
+ *
+ * You can use any time unit (seconds, milliseconds, days, …), as long as you
+ * are consistent: `startTime`, `duration`, and the time parameter `t` must all
+ * use the same units.
+ *
  * If an array is passed, the functions are combined.
-*/
-export function animate(options: AnimateOptions | AnimateOptions[]) {
+ */
+export function animate(
+  options: AnimateOptions | AnimateOptions[]
+): (t: number) => number {
   if (options instanceof Array) {
     options.sort((a, b) => a.startTime - b.startTime);
     const fns = options.map(animate);
@@ -42,10 +48,9 @@ export function animate(options: AnimateOptions | AnimateOptions[]) {
       let i = 0;
       for (; i < fns.length; ++i) {
         if (options[i].startTime > t) {
-          if (i === 0)
-            return options[0].startValue;
+          if (i === 0) return options[0].startValue;
 
-          return fns[i-1](t);
+          return fns[i - 1](t);
         }
       }
       return fns[options.length - 1](t);
@@ -57,8 +62,9 @@ export function animate(options: AnimateOptions | AnimateOptions[]) {
   if (!("easing" in options)) options.easing = (x: number) => x;
 
   const {startValue, endValue, startTime, duration, easing} = options;
-  
-  return (t: number) => lerp(startValue, endValue, easing(clamp(0, (t - startTime) / duration, 1)));
+
+  return (t: number) =>
+    lerp(startValue, endValue, easing(clamp(0, (t - startTime) / duration, 1)));
 }
 
 /** Cubic Bezier curve function */
@@ -89,13 +95,21 @@ export const easings = {
   easeInOutCirc: [0.785, 0.135, 0.15, 0.86],
   easeInBack: [0.6, -0.28, 0.735, 0.045],
   easeOutBack: [0.175, 0.885, 0.32, 1.275],
-  easeInOutBack: [0.68, -0.55, 0.265, 1.55]
+  easeInOutBack: [0.68, -0.55, 0.265, 1.55],
 } as const;
 
 /**
  * Returns a function that takes in a time (in milliseconds) and returns the "active" replay datum. Useful for writing replay plugins.
  */
-export function replay<K>({data, start, end, active, inactive, compressed}: {
+export function replay<K>({
+  data,
+  start,
+  end,
+  active,
+  inactive,
+  compressed,
+  units = 1,
+}: {
   /** Recording data to iterate through. */
   data: ReplayData<K>;
 
@@ -110,6 +124,8 @@ export function replay<K>({data, start, end, active, inactive, compressed}: {
 
   /**
    * If true, times are interpreted as relative. Otherwise, they are interpreted as absolute times.
+   *
+   * In a future release, this will likely default to `true`.
    * @default false
    */
   compressed?: boolean;
@@ -119,22 +135,34 @@ export function replay<K>({data, start, end, active, inactive, compressed}: {
 
   /** Callback called when replay is inactive. Doesn't get called repeatedly. */
   inactive: () => void;
+
+  /**
+   * Scaling factor to convert time units to milliseconds. This affects {@link start},
+   * {@link end}, and the parameter of the returned function. When {@link compressed}
+   * is true, durations in {@link ReplayData} are **always** assumed to be in milliseconds.
+   * When {@link compressed} is false, this option has no effect.
+   *
+   * For example, if you wanted to measure time in seconds, you would pass 1000.
+   * @default 1
+   * @since 1.8.0
+   */
+  units?: number;
 }): (t: number) => void {
   if (typeof compressed === "undefined") compressed = false;
+  if (typeof start === "undefined") start = 0;
 
-  const times = data.map(d => d[0]);
+  const times = data.map(compressed ? (d) => d[0] / units : (d) => d[0]);
   if (compressed) {
     for (let i = 1; i < times.length; ++i) {
-      times[i] += times[i-1];
+      times[i] += times[i - 1];
     }
   }
 
-  if (typeof start === "undefined") start = 0;
   if (typeof end === "undefined") end = start + times[times.length - 1];
 
   let lastTime = 0,
-      i = 0,
-      isActive = true;
+    i = 0,
+    isActive = true;
 
   function listener(t: number) {
     // don't call inactive() repeatedly
@@ -156,11 +184,11 @@ export function replay<K>({data, start, end, active, inactive, compressed}: {
       if (start + times[i] < t) maxI = i;
       else break;
     }
-    
+
     const [, current] = data[maxI];
 
     active(current, maxI);
   }
-  
+
   return listener;
 }

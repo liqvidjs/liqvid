@@ -14,7 +14,7 @@ describe("animation/animate", () => {
       startTime: 1000,
       duration: 1000,
       startValue: 2,
-      endValue: 4
+      endValue: 4,
     });
 
     expect(fn(500)).toBe(2);
@@ -25,7 +25,7 @@ describe("animation/animate", () => {
   test("called with array", () => {
     const fn = animate([
       {startTime: 500, duration: 500, startValue: 2, endValue: 4},
-      {startTime: 1500, duration: 1000, startValue: 6, endValue: 8}
+      {startTime: 1500, duration: 1000, startValue: 6, endValue: 8},
     ]);
 
     expect(fn(0)).toBe(2);
@@ -43,7 +43,11 @@ describe("animation/bezier", () => {
 
 describe("animation/replay", () => {
   test("compressed", () => {
-    const data: ReplayData<string> = [[0, "a"], [500, "b"], [500, "c"]];
+    const data: ReplayData<string> = [
+      [0, "a"],
+      [500, "b"],
+      [500, "c"],
+    ];
     const active = jest.fn();
     const inactive = jest.fn();
 
@@ -53,7 +57,7 @@ describe("animation/replay", () => {
       end: 2000,
       compressed: true,
       active,
-      inactive
+      inactive,
     });
 
     // functions shouldn't be called yet
@@ -76,7 +80,7 @@ describe("animation/replay", () => {
     expect(active).toHaveBeenLastCalledWith("b", 1);
     fn(1700);
     expect(active).toHaveBeenLastCalledWith("c", 2);
-    
+
     // inactive again
     fn(2000);
     fn(2000);
@@ -84,7 +88,11 @@ describe("animation/replay", () => {
   });
 
   test("uncompressed", () => {
-    const data: ReplayData<string> = [[0, "a"], [500, "b"], [1000, "c"]];
+    const data: ReplayData<string> = [
+      [0, "a"],
+      [500, "b"],
+      [1000, "c"],
+    ];
     const active = jest.fn();
     const inactive = jest.fn();
 
@@ -94,7 +102,7 @@ describe("animation/replay", () => {
       end: 2000,
       compressed: false,
       active,
-      inactive
+      inactive,
     });
 
     // functions shouldn't be called yet
@@ -117,10 +125,56 @@ describe("animation/replay", () => {
     expect(active).toHaveBeenLastCalledWith("b", 1);
     fn(1700);
     expect(active).toHaveBeenLastCalledWith("c", 2);
-    
+
     // inactive again
     fn(2000);
     fn(2000);
+    expect(inactive).toHaveBeenCalledTimes(2);
+  });
+
+  test("units", () => {
+    const data: ReplayData<string> = [
+      [0, "a"],
+      [500, "b"],
+      [500, "c"],
+    ];
+    const active = jest.fn();
+    const inactive = jest.fn();
+
+    const fn = replay({
+      data,
+      start: 0.5,
+      end: 2,
+      compressed: true,
+      active,
+      inactive,
+      units: 1000,
+    });
+
+    // functions shouldn't be called yet
+    expect(active).not.toHaveBeenCalled();
+    expect(inactive).not.toHaveBeenCalled();
+
+    // before start
+    fn(0);
+    expect(active).not.toHaveBeenCalled();
+    expect(inactive).toHaveBeenCalled();
+
+    // don't call inactive repeatedly
+    fn(0);
+    expect(inactive).toHaveBeenCalledTimes(1);
+
+    // active tests
+    fn(0.6);
+    expect(active).toHaveBeenLastCalledWith("a", 0);
+    fn(1);
+    expect(active).toHaveBeenLastCalledWith("b", 1);
+    fn(1.7);
+    expect(active).toHaveBeenLastCalledWith("c", 2);
+
+    // inactive again
+    fn(2);
+    fn(2);
     expect(inactive).toHaveBeenCalledTimes(2);
   });
 });
