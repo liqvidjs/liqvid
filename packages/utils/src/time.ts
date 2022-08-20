@@ -50,6 +50,7 @@ export function parseTime(str: string): number {
  * for use as a {@link https://html.spec.whatwg.org/multipage/text-level-semantics.html#attr-time-datetime datetime} attribute.
  * @param time Duration in milliseconds.
  * @returns A duration string such as "PT4H18M3S".
+ * @since 1.7.0
  */
 export function formatTimeDuration(time: number): string {
   const parts = ["P"];
