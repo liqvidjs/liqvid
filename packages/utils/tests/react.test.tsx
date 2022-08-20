@@ -17,11 +17,11 @@ describe("react/createUniqueContext", () => {
 
   test("provides correct default value", () => {
     const context = createUniqueContext<number>("D", 4);
-    
+
     function Component(): null {
       expect(useContext(context)).toBe(4);
       return null;
     }
-    render(<Component/>);
+    render(<Component />);
   });
 });

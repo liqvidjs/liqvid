@@ -8,7 +8,10 @@ declare global {
 /**
   Whether any available input mechanism can hover over elements. This is used as a standin for desktop/mobile.
 */
-export const anyHover = (typeof window !== "undefined") ? window.matchMedia?.("(any-hover: hover)")?.matches : undefined;
+export const anyHover =
+  typeof window !== "undefined"
+    ? window.matchMedia?.("(any-hover: hover)")?.matches
+    : undefined;
 
 /**
  * Helper for implementing drag functionality, abstracting over mouse vs touch events.
@@ -28,8 +31,9 @@ export function onDrag(
       /** Horizontal displacement since last call */
       dx: number;
       /** Vertical displacement since last call */
-      dy: number
-    }) => void,
+      dy: number;
+    }
+  ) => void,
   /** Callback for when dragging begins (pointer is touched). */
   down: (
     /** The underlying `mousedown` or `touchstart` event */
@@ -60,7 +64,8 @@ export function onDrag(
       dx: number;
       /** Vertical displacement since last call */
       dy: number;
-    }) => void = () => {}
+    }
+  ) => void = () => {}
 ) {
   return (e: MouseEvent | TouchEvent) => {
     /* click events */
@@ -68,12 +73,12 @@ export function onDrag(
       if (e.button !== 0) return;
 
       let lastX = e.clientX,
-          lastY = e.clientY;
+        lastY = e.clientY;
 
       // up
       const upHandler = (e: MouseEvent) => {
         const dx = e.clientX - lastX,
-              dy = e.clientY - lastY;
+          dy = e.clientY - lastY;
 
         document.body.removeEventListener("mousemove", moveHandler);
         window.removeEventListener("mouseup", upHandler);
@@ -84,7 +89,7 @@ export function onDrag(
       // move
       const moveHandler = (e: MouseEvent) => {
         const dx = e.clientX - lastX,
-              dy = e.clientY - lastY;
+          dy = e.clientY - lastY;
 
         lastX = e.clientX;
         lastY = e.clientY;
@@ -92,7 +97,9 @@ export function onDrag(
         return move(e, {x: e.clientX, y: e.clientY, dx, dy});
       };
 
-      document.body.addEventListener("mousemove", moveHandler, {passive: false});
+      document.body.addEventListener("mousemove", moveHandler, {
+        passive: false,
+      });
       window.addEventListener("mouseup", upHandler, {passive: false});
 
       return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
@@ -104,7 +111,7 @@ export function onDrag(
       const touchId = touches[0].identifier;
 
       let lastX = touches[0].clientX,
-          lastY = touches[0].clientY;
+        lastY = touches[0].clientY;
 
       // up
       const upHandler = (e: TouchEvent) => {
@@ -114,11 +121,20 @@ export function onDrag(
           if (touch.identifier !== touchId) continue;
 
           const dx = touch.clientX - lastX,
-                dy = touch.clientY - lastY;
+            dy = touch.clientY - lastY;
 
-          window.removeEventListener("touchend", upHandler, {capture: false, passive: false});
-          window.removeEventListener("touchcancel", upHandler, {capture: false, passive: false});
-          window.removeEventListener("touchmove", moveHandler, {capture: false, passive: false});
+          window.removeEventListener("touchend", upHandler, {
+            capture: false,
+            passive: false,
+          });
+          window.removeEventListener("touchcancel", upHandler, {
+            capture: false,
+            passive: false,
+          });
+          window.removeEventListener("touchmove", moveHandler, {
+            capture: false,
+            passive: false,
+          });
 
           return up(e, {x: touch.clientX, y: touch.clientY, dx, dy});
         }
@@ -131,7 +147,7 @@ export function onDrag(
           if (touch.identifier !== touchId) continue;
 
           const dx = touch.clientX - lastX,
-                dy = touch.clientY - lastY;
+            dy = touch.clientY - lastY;
 
           lastX = touch.clientX;
           lastY = touch.clientY;
@@ -140,9 +156,18 @@ export function onDrag(
         }
       };
 
-      window.addEventListener("touchend", upHandler, {capture: false, passive: false});
-      window.addEventListener("touchcancel", upHandler, {capture: false, passive: false});
-      window.addEventListener("touchmove", moveHandler, {capture: false, passive: false});
+      window.addEventListener("touchend", upHandler, {
+        capture: false,
+        passive: false,
+      });
+      window.addEventListener("touchcancel", upHandler, {
+        capture: false,
+        passive: false,
+      });
+      window.addEventListener("touchmove", moveHandler, {
+        capture: false,
+        passive: false,
+      });
 
       return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
     }
@@ -154,9 +179,10 @@ export function onDrag(
  * @param node Event target.
  * @param callback Event listener.
  * @returns A function to remove the event listener.
-*/
+ */
 export function onClick<T extends HTMLElement | SVGElement>(
-  node: T, callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void
+  node: T,
+  callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void
 ): () => void {
   if (anyHover) {
     node.addEventListener("click", callback);
@@ -179,7 +205,9 @@ export function onClick<T extends HTMLElement | SVGElement>(
     for (const touch of Array.from(e.changedTouches)) {
       if (touch.identifier !== touchId) continue;
 
-      if (node.contains(document.elementFromPoint(touch.clientX, touch.clientY))) {
+      if (
+        node.contains(document.elementFromPoint(touch.clientX, touch.clientY))
+      ) {
         callback(e as TouchEvent & {currentTarget: T});
       }
 

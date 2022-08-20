@@ -1,9 +1,14 @@
 {
-  "extends": ["@yuri", "plugin:react/recommended"],
+  "extends": ["@yuri", "plugin:react/recommended", "plugin:prettier/recommended"],
   "plugins": [
     "react"
   ],
   "rules": {
+    "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }],
+
+    "react/react-in-jsx-scope": "off",
+    "react/self-closing-comp": "off",
+
     "@typescript-eslint/explicit-function-return-type": ["off", {
       "allowExpressions": true,
       "allowTypedFunctionExpressions": true,
@@ -14,13 +19,6 @@
       "allowTypedFunctionExpressions": true,
       "allowedNames": ["componentDidMount", "componentWillUnmount", "render", "Captions", "Controls", "FullScreen", "IdMap", "PlayPause", "Settings", "Player", "ScrubberBar", "TimeDisplay", "ThumbnailBox", "Volume"]
     }],
-    "react/react-in-jsx-scope": "off",
-    "react/self-closing-comp": "off",
-    "@typescript-eslint/indent": ["error", 2, {
-      "MemberExpression": 0,
-      "VariableDeclarator": { "var": 2, "let": 2, "const": 3 }
-    }],
-    "@typescript-eslint/no-empty-function": "off",
-    "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }]
+    "@typescript-eslint/no-empty-function": "off"
   }
 }

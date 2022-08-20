@@ -57,9 +57,9 @@ export function formatTimeDuration(time: number): string {
   const timeParts: string[] = [];
 
   const days = Math.floor(time / DAYS),
-        hours = Math.floor((time / HOURS) % 24),
-        minutes = Math.floor((time / MINUTES) % 60),
-        seconds = (time / SECONDS) % 60;
+    hours = Math.floor((time / HOURS) % 24),
+    minutes = Math.floor((time / MINUTES) % 60),
+    seconds = (time / SECONDS) % 60;
 
   if (days > 0) {
     parts.push(`${days}D`);
@@ -94,9 +94,9 @@ export function formatTime(time: number): string {
     return MINUS_SIGN + formatTime(-time);
   }
   const days = Math.floor(time / DAYS),
-        hours = Math.floor((time / HOURS) % 24),
-        minutes = Math.floor((time / MINUTES) % 60),
-        seconds = Math.floor((time / SECONDS) % 60);
+    hours = Math.floor((time / HOURS) % 24),
+    minutes = Math.floor((time / MINUTES) % 60),
+    seconds = Math.floor((time / SECONDS) % 60);
 
   let firstNonzero = true;
   let str = "";

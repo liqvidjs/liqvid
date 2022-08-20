@@ -1,6 +1,6 @@
 /** Equivalent to `(min <= val) && (val < max)`. */
 export function between(min: number, val: number, max: number) {
-  return (min <= val) && (val < max);
+  return min <= val && val < max;
 }
 
 /**
@@ -9,10 +9,12 @@ export function between(min: number, val: number, max: number) {
  * @param methods Method names to bind
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function bind<T extends {[P in K]: Function}, K extends keyof T>(o: T, methods: K[]) {
-  for (const method of methods)
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    o[method] = (o[method] as Function).bind(o);
+export function bind<T extends {[P in K]: Function}, K extends keyof T>(
+  o: T,
+  methods: K[]
+) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  for (const method of methods) o[method] = (o[method] as Function).bind(o);
 }
 
 /**
@@ -49,7 +51,7 @@ export function range(a: number, b?: number): number[] {
   if (b === void 0) {
     return range(0, a);
   }
-  return new Array(b - a).fill(null).map((_, i) => a+i);
+  return new Array(b - a).fill(null).map((_, i) => a + i);
 }
 
 /** Returns a Promise that resolves in `time` milliseconds. */

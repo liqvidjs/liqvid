@@ -1,4 +1,13 @@
-import {between, bind, clamp, constrain, lerp, range, wait, waitFor} from "../src/misc";
+import {
+  between,
+  bind,
+  clamp,
+  constrain,
+  lerp,
+  range,
+  wait,
+  waitFor,
+} from "../src/misc";
 
 jest.useFakeTimers();
 jest.spyOn(global, "setTimeout");
@@ -30,13 +39,13 @@ describe("misc/bind", () => {
     const o = {
       a() {
         return this;
-      }
+      },
     };
     const p = {};
     bind(o, ["a"]);
 
     expect(o.a.call(p)).toBe(o);
-  });  
+  });
 });
 
 describe("misc/lerp", () => {
@@ -64,7 +73,7 @@ describe("misc/clamp", () => {
 
 describe("misc/range", () => {
   test("two arguments", () => {
-    expect(range(1, 4)).toEqual([1,2,3]);
+    expect(range(1, 4)).toEqual([1, 2, 3]);
   });
 
   test("one argument", () => {
@@ -75,7 +84,7 @@ describe("misc/range", () => {
 describe("misc/wait", () => {
   test("waits 1 second", () => {
     let resolved = false;
-    const promise = wait(1000).then(() => resolved = true);
+    const promise = wait(1000).then(() => (resolved = true));
 
     // setTimeout should have been called but not resolved
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -83,7 +92,7 @@ describe("misc/wait", () => {
     expect(resolved).toBe(false);
 
     jest.runAllTimers();
-   
+
     // now callback should have been called
     expect(promise).resolves.toBe(true);
   });
@@ -95,7 +104,7 @@ describe("misc/waitFor", () => {
     let resolved = false;
     const callback = jest.fn(() => val === 1);
 
-    const promise = waitFor(callback).then(() => resolved = true);
+    const promise = waitFor(callback).then(() => (resolved = true));
 
     // should be called once initially
     expect(callback).toHaveBeenCalledTimes(1);

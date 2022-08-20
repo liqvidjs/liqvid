@@ -28,5 +28,5 @@ export function concat<T>(...args: [ReplayData<T>, number][]) {
  * @returns Duration of replay data
  */
 export function length<T>(data: ReplayData<T>) {
-  return data.map(_ => _[0]).reduce((a, b) => a+b, 0);
+  return data.map((_) => _[0]).reduce((a, b) => a + b, 0);
 }
