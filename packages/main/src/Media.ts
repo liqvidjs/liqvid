@@ -12,7 +12,11 @@ interface Props extends React.HTMLAttributes<HTMLMediaElement> {
   start?: number;
 }
 
-export class Media extends React.PureComponent<Props, Record<string, never>, Player> {
+export class Media extends React.PureComponent<
+  Props,
+  Record<string, never>,
+  Player
+> {
   protected playback: Playback;
   protected player: Player;
   protected domElement: HTMLMediaElement;
@@ -22,7 +26,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
 
   static defaultProps = {
     obstructCanPlay: false,
-    obstructCanPlayThrough: false
+    obstructCanPlayThrough: false,
   };
 
   static contextType = Player.Context;
@@ -35,7 +39,17 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     // get the time right
     this.start = this.props.start ?? 0;
 
-    bind(this, ["pause", "play", "onPlay", "onRateChange", "onSeek", "onTimeUpdate", "onVolumeChange", "onDomPlay", "onDomPause"]);
+    bind(this, [
+      "pause",
+      "play",
+      "onPlay",
+      "onRateChange",
+      "onSeek",
+      "onTimeUpdate",
+      "onVolumeChange",
+      "onDomPlay",
+      "onDomPause",
+    ]);
   }
 
   componentDidMount() {
@@ -47,7 +61,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     this.playback.on("seeking", this.pause);
     this.playback.on("timeupdate", this.onTimeUpdate);
     this.playback.on("volumechange", this.onVolumeChange);
-    
+
     this.domElement.addEventListener("play", this.onDomPlay);
     this.domElement.addEventListener("pause", this.onDomPause);
 
@@ -56,13 +70,16 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
       this.player.obstruct("canplay", awaitMediaCanPlay(this.domElement));
     }
     if (this.props.obstructCanPlayThrough) {
-      this.player.obstruct("canplaythrough", awaitMediaCanPlayThrough(this.domElement));
+      this.player.obstruct(
+        "canplaythrough",
+        awaitMediaCanPlayThrough(this.domElement)
+      );
     }
 
     // need to call this once initially
     this.onVolumeChange();
 
-    // progress updater?    
+    // progress updater?
     /*const getBuffers = () => {
       const ranges = this.domElement.buffered;
 
@@ -95,7 +112,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     this.playback.off("seeking", this.pause);
     this.playback.off("timeupdate", this.onTimeUpdate);
     this.playback.off("volumechange", this.onVolumeChange);
-    
+
     this.domElement.removeEventListener("pause", this.onDomPause);
     this.domElement.removeEventListener("play", this.onDomPlay);
 
@@ -106,7 +123,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
   get end(): number {
     return this.start + this.domElement.duration * 1000;
   }
-  
+
   pause(): void {
     if (!this.domElement.ended) {
       this.domElement.removeEventListener("pause", this.onDomPause);
@@ -134,11 +151,14 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
     if (between(this.start, t, this.end)) {
       this.domElement.currentTime = (t - this.start) / 1000;
 
-      if (this.domElement.paused && !this.playback.paused && !this.playback.seeking)
+      if (
+        this.domElement.paused &&
+        !this.playback.paused &&
+        !this.playback.seeking
+      )
         this.play().catch(this.playback.pause);
     } else {
-      if (!this.domElement.paused)
-        this.pause();
+      if (!this.domElement.paused) this.pause();
     }
   }
 
@@ -149,8 +169,7 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
       this.domElement.currentTime = (t - this.start) / 1000;
       this.play().catch(this.playback.pause);
     } else {
-      if (!this.domElement.paused)
-        this.pause();
+      if (!this.domElement.paused) this.pause();
     }
   }
 
@@ -168,10 +187,26 @@ export class Media extends React.PureComponent<Props, Record<string, never>, Pla
   }
 
   onDomPause(): void {
-    if (!this.playback.seeking && !this.playback.paused && !this.domElement.ended) {
+    if (
+      !this.playback.seeking &&
+      !this.playback.paused &&
+      !hasEnded(this.domElement)
+    ) {
       this.playback.off("pause", this.pause);
       this.playback.pause();
       this.playback.on("pause", this.pause);
     }
   }
+}
+
+/**
+ * Guess whether a media element has ended.
+ * (`paused` fires before `ended`, and `currentTime` may be >100ms
+ * behind `duration` when this happens).
+ * @param media Media element to check.
+ * @param threshold How far from the end of the media should be considered "ended".
+ * @returns Whether the media element has reached its end.
+ */
+function hasEnded(media: HTMLMediaElement, threshold = 0.5): boolean {
+  return media.ended || media.duration - media.currentTime < threshold;
 }

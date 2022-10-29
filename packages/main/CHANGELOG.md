@@ -1,3 +1,7 @@
+## 2.1.8 (October 29, 2022)
+
+* fix `<Audio>`/`<Video>` pausing playback on end (#31)
+
 ## 2.1.7 (May 14, 2022)
 
 * support React 18
