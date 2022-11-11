@@ -10,12 +10,16 @@ describe("Script", () => {
     script = new Script([
       ["A", "20"],
       ["B", "20"],
-      ["C", "20"]
+      ["C", "20"],
     ]);
   });
 
   test("constructor", () => {
-    expect(script.markers).toEqual([["A", 0, 20000], ["B", 20000, 40000], ["C", 40000, 60000]]);
+    expect(script.markers).toEqual([
+      ["A", 0, 20000],
+      ["B", 20000, 40000],
+      ["C", 40000, 60000],
+    ]);
     expect(script.markerIndex).toBe(0);
     expect(script.markerName).toBe("A");
 
@@ -27,9 +31,13 @@ describe("Script", () => {
     script = new Script([
       ["A", 20000],
       ["B", 20000],
-      ["C", 20000]
+      ["C", 20000],
     ]);
-    expect(script.markers).toEqual([["A", 0, 20000], ["B", 20000, 40000], ["C", 40000, 60000]]);
+    expect(script.markers).toEqual([
+      ["A", 0, 20000],
+      ["B", 20000, 40000],
+      ["C", 40000, 60000],
+    ]);
     expect(script.markerIndex).toBe(0);
     expect(script.markerName).toBe("A");
 

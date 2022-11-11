@@ -12,7 +12,10 @@ export function usePlayer(): Player {
 }
 
 /** Register a callback for when the marker changes */
-export function useMarkerUpdate(callback: (prevIndex: number) => void, deps?: React.DependencyList): void {
+export function useMarkerUpdate(
+  callback: (prevIndex: number) => void,
+  deps?: React.DependencyList
+): void {
   const script = useScript();
 
   useEffect(() => {
@@ -30,7 +33,10 @@ export function useScript(): Script {
 }
 
 /** Register a callback for when the time changes */
-export function useTimeUpdate(callback: (t: number) => void, deps?: React.DependencyList): void {
+export function useTimeUpdate(
+  callback: (t: number) => void,
+  deps?: React.DependencyList
+): void {
   const playback = usePlayback();
 
   useEffect(() => {

@@ -9,7 +9,7 @@ import {act} from "react-dom/test-utils";
 
 describe("Time display button", () => {
   let display: HTMLButtonElement;
-  
+
   const playback = new Playback({duration: 60000});
 
   beforeEach(() => {

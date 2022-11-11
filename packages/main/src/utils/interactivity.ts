@@ -3,13 +3,18 @@ import {captureRef} from "@liqvid/utils/react";
 
 type Move = Parameters<typeof onDrag>[0];
 type Down = Parameters<typeof dragHelper>[1];
-type DownArgs = Parameters<typeof onDrag>[1] extends (arg0: any, ...args: infer T) => void ? T : never;
+type DownArgs = Parameters<typeof onDrag>[1] extends (
+  arg0: unknown,
+  ...args: infer T
+) => void
+  ? T
+  : never;
 type Up = Parameters<typeof onDrag>[2];
 
 function isReactMouseEvent<T>(
   e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
 ): e is React.MouseEvent<T> {
-  return ("nativeEvent" in e) && e.nativeEvent instanceof MouseEvent;
+  return "nativeEvent" in e && e.nativeEvent instanceof MouseEvent;
 }
 
 /**
@@ -47,7 +52,9 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
   };
   const listener = onDrag(move, __down, up);
 
-  return (e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>) => {
+  return (
+    e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
+  ) => {
     if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)
       return;
 
@@ -66,24 +73,33 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
  * @param innerRef Any `ref` that you want attached to the element, since this method attaches its own `ref` attribute. This is a hack around https://github.com/facebook/react/issues/2043.
  * @returns An object of event handlers which should be added to a React element with {...}
  */
-export function dragHelperReact<T extends HTMLElement | SVGElement>(move: Move, down?: Down, up?: Up, innerRef?: React.Ref<T>) {
+export function dragHelperReact<T extends HTMLElement | SVGElement>(
+  move: Move,
+  down?: Down,
+  up?: Up,
+  innerRef?: React.Ref<T>
+) {
   const listener = dragHelper(move, down, up);
-  
+
   /* https://github.com/microsoft/TypeScript/issues/46819 */
   type AEL = HTMLElement["addEventListener"];
 
   if (innerRef) {
-    const intercept = captureRef(ref => (ref.addEventListener as AEL)("touchstart", listener, {passive: false}), innerRef);
+    const intercept = captureRef(
+      (ref) =>
+        (ref.addEventListener as AEL)("touchstart", listener, {passive: false}),
+      innerRef
+    );
     return {
       "data-affords": "click",
       onMouseDown: listener,
-      ref: intercept
+      ref: intercept,
     };
   } else {
     return {
       "data-affords": "click",
       onMouseDown: listener,
-      onTouchStart: listener
+      onTouchStart: listener,
     };
   }
 }

@@ -9,10 +9,16 @@ export class Video extends Media {
 
   // render method
   render() {
-    const {start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} = this.props;
+    const {start, children, obstructCanPlay, obstructCanPlayThrough, ...attrs} =
+      this.props;
 
     return (
-      <video playsInline preload="auto" ref={node => this.domElement = node} {...attrs}>
+      <video
+        playsInline
+        preload="auto"
+        ref={(node) => (this.domElement = node)}
+        {...attrs}
+      >
         {children}
       </video>
     );

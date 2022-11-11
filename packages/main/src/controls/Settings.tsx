@@ -10,13 +10,13 @@ enum Dialogs {
   None,
   Main,
   Speed,
-  Captions
+  Captions,
 }
 
 /** Settings menu */
 export function Settings() {
   const player = usePlayer(),
-        {keymap, playback} = player;
+    {keymap, playback} = player;
 
   const [dialog, setDialog] = useState<Dialogs>(Dialogs.None);
   const [currentRate, setRate] = useState(playback.playbackRate);
@@ -26,8 +26,16 @@ export function Settings() {
     const ratechange = () => setRate(playback.playbackRate);
     const canvasClick = () => setDialog(Dialogs.None);
 
-    const slowDown = () => playback.playbackRate = get(PLAYBACK_RATES, PLAYBACK_RATES.indexOf(playback.playbackRate) - 1);
-    const speedUp = () => playback.playbackRate = get(PLAYBACK_RATES, PLAYBACK_RATES.indexOf(playback.playbackRate) + 1);
+    const slowDown = () =>
+      (playback.playbackRate = get(
+        PLAYBACK_RATES,
+        PLAYBACK_RATES.indexOf(playback.playbackRate) - 1
+      ));
+    const speedUp = () =>
+      (playback.playbackRate = get(
+        PLAYBACK_RATES,
+        PLAYBACK_RATES.indexOf(playback.playbackRate) + 1
+      ));
 
     // subscribe
     playback.on("ratechange", ratechange);
@@ -39,7 +47,7 @@ export function Settings() {
 
     return () => {
       playback.off("ratechange", ratechange);
-      player.hub.off("canvasClick",canvasClick);
+      player.hub.off("canvasClick", canvasClick);
 
       keymap.unbind("Shift+<", slowDown);
       keymap.unbind("Shift+>", speedUp);
@@ -57,7 +65,15 @@ export function Settings() {
     }
     return map;
   }, []);
-  const toggle = useMemo(() => onClick(() => setDialog(prev => (prev === Dialogs.None ? Dialogs.Main : Dialogs.None))), []);
+  const toggle = useMemo(
+    () =>
+      onClick(() =>
+        setDialog((prev) =>
+          prev === Dialogs.None ? Dialogs.Main : Dialogs.None
+        )
+      ),
+    []
+  );
 
   // const toggleSubtitles = useMemo(() => onClick(() => {
   //   document.body.classList.toggle("lv-captions");
@@ -70,15 +86,24 @@ export function Settings() {
   const openCaptions = onClick(() => setDialog(Dialogs.Captions));
 
   // styles
-  const dialogStyle = useMemo(() => ({
-    display: dialog === Dialogs.Main ? "block" : "none"
-  }), [dialog === Dialogs.Main]);
-  const speedDialogStyle = useMemo(() => ({
-    display: dialog === Dialogs.Speed ? "block" : "none"
-  }), [dialog === Dialogs.Speed]);
-  const captionDialogStyle = useMemo(() => ({
-    display: dialog === Dialogs.Captions ? "block" : "none"
-  }), [dialog === Dialogs.Captions]);
+  const dialogStyle = useMemo(
+    () => ({
+      display: dialog === Dialogs.Main ? "block" : "none",
+    }),
+    [dialog === Dialogs.Main]
+  );
+  const speedDialogStyle = useMemo(
+    () => ({
+      display: dialog === Dialogs.Speed ? "block" : "none",
+    }),
+    [dialog === Dialogs.Speed]
+  );
+  const captionDialogStyle = useMemo(
+    () => ({
+      display: dialog === Dialogs.Captions ? "block" : "none",
+    }),
+    [dialog === Dialogs.Captions]
+  );
 
   // captions, ugh
   const mainAudio = useRef<HTMLAudioElement>();
@@ -89,37 +114,42 @@ export function Settings() {
     }
   }, []);
   const tracks = useRef<TextTrack[]>([]);
-  const selectedTrack = tracks.current.find(t => t.mode === "showing");
-  const setTrack = useMemo(() => onClick<HTMLElement>(e => {
-    // get index, this is kind of ugly
-    let i = -1;
-    let temp = e.currentTarget as Element;
-    while (temp = temp.previousElementSibling) i++;
+  const selectedTrack = tracks.current.find((t) => t.mode === "showing");
+  const setTrack = useMemo(
+    () =>
+      onClick<HTMLElement>((e) => {
+        // get index, this is kind of ugly
+        let i = -1;
+        let temp = e.currentTarget as Element;
+        while ((temp = temp.previousElementSibling)) i++;
 
-    // hide old tracks
-    for (let j = 0; j < tracks.current.length; ++j) {
-      if (j !== i) {
-        // this is absurd but necessary to dispatch cuechange???
-        tracks.current[j].mode = "disabled";
-        tracks.current[j].mode = "hidden";
-        tracks.current[j].mode = "disabled";
-      }
-    }
+        // hide old tracks
+        for (let j = 0; j < tracks.current.length; ++j) {
+          if (j !== i) {
+            // this is absurd but necessary to dispatch cuechange???
+            tracks.current[j].mode = "disabled";
+            tracks.current[j].mode = "hidden";
+            tracks.current[j].mode = "disabled";
+          }
+        }
 
-    // activate new track
-    if (i >= 0)
-      tracks.current[i].mode = "showing";
+        // activate new track
+        if (i >= 0) tracks.current[i].mode = "showing";
 
-    // refresh
-    forceUpdate();
-  }), []);
+        // refresh
+        forceUpdate();
+      }),
+    []
+  );
 
   return (
     <div className="lv-controls-settings">
       <div className="lv-settings-speed-dialog" style={speedDialogStyle}>
-        <span className="lv-dialog-subtitle" {...openMain}>&lt; Speed</span>
+        <span className="lv-dialog-subtitle" {...openMain}>
+          &lt; Speed
+        </span>
         <ul>
-          {PLAYBACK_RATES.map(rate => (
+          {PLAYBACK_RATES.map((rate) => (
             <li
               className={rate === currentRate ? "selected" : ""}
               key={rate}
@@ -131,10 +161,14 @@ export function Settings() {
         </ul>
       </div>
       <div className="lv-settings-captions-dialog" style={captionDialogStyle}>
-        <span className="lv-dialog-subtitle" {...openMain}>&lt; Captions</span>
+        <span className="lv-dialog-subtitle" {...openMain}>
+          &lt; Captions
+        </span>
         <ul>
-          <li className={selectedTrack ? "" : "selected"} {...setTrack}>Off</li>
-          {tracks.current.map(track => (
+          <li className={selectedTrack ? "" : "selected"} {...setTrack}>
+            Off
+          </li>
+          {tracks.current.map((track) => (
             <li
               className={track === selectedTrack ? "selected" : ""}
               key={track.id || track.label || track.language}
@@ -152,10 +186,12 @@ export function Settings() {
               <th scope="row">Speed</th>
               <td>{currentRate === 1 ? "Normal" : currentRate} &gt;</td>
             </tr>
-            {tracks.current.length > 0 && <tr {...openCaptions}>
-              <th scope="row">Subtitles ({tracks.current.length})</th>
-              <td>{trackLabel(selectedTrack)} &gt;</td>
-            </tr>}
+            {tracks.current.length > 0 && (
+              <tr {...openCaptions}>
+                <th scope="row">Subtitles ({tracks.current.length})</th>
+                <td>{trackLabel(selectedTrack)} &gt;</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -171,19 +207,19 @@ export function Settings() {
 
 function getMainAudio(elt: HTMLDivElement): HTMLAudioElement {
   for (const audio of Array.from(elt.querySelectorAll("audio"))) {
-    if (captionsAndSubtitles(audio).length > 0)
-      return audio;
+    if (captionsAndSubtitles(audio).length > 0) return audio;
   }
 }
 
 function trackLabel(track?: TextTrack): string {
-  if (track === undefined)
-    return "Off";
+  if (track === undefined) return "Off";
   return track.label || track.language;
 }
 
 function captionsAndSubtitles(audio: HTMLAudioElement): TextTrack[] {
-  return Array.from(audio.textTracks).filter(t => ["captions", "subtitles"].includes(t.kind));
+  return Array.from(audio.textTracks).filter((t) =>
+    ["captions", "subtitles"].includes(t.kind)
+  );
 }
 
 function get<T>(arr: T[], i: number): T {

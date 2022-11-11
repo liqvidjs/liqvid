@@ -23,10 +23,8 @@ export default function Controls(props: Props) {
 
   // reset the hiding timer
   const resetTimer = useCallback(() => {
-    if (playback.paused)
-      return;
-    if (timer.current !== undefined)
-      clearTimeout(timer.current);
+    if (playback.paused) return;
+    if (timer.current !== undefined) clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setVisible(false), TIMEOUT);
     setVisible(true);
   }, []);
@@ -58,14 +56,13 @@ export default function Controls(props: Props) {
   }, []);
 
   const classNames = ["rp-controls", "lv-controls"];
-  if (!visible)
-    classNames.push("hidden");
+  if (!visible) classNames.push("hidden");
 
   return (
     <div className={classNames.join(" ")}>
-      <ScrubberBar thumbs={props.thumbs}/>
+      <ScrubberBar thumbs={props.thumbs} />
       <div className="lv-controls-buttons">
-        {props.controls instanceof Array ?
+        {props.controls instanceof Array ? (
           <>
             {Player.defaultControlsLeft}
 
@@ -73,7 +70,10 @@ export default function Controls(props: Props) {
               {...props.controls}
               {Player.defaultControlsRight}
             </div>
-          </> : props.controls}
+          </>
+        ) : (
+          props.controls
+        )}
       </div>
     </div>
   );

@@ -8,12 +8,13 @@ import {Playback} from "./playback";
 export type Marker = [string, number, number];
 
 interface ScriptEvents {
-  "markerupdate": number;
+  markerupdate: number;
 }
 
-export class Script
-  extends (EventEmitter as new () => StrictEventEmitter<EventEmitter, ScriptEvents>)
-{
+export class Script extends (EventEmitter as new () => StrictEventEmitter<
+  EventEmitter,
+  ScriptEvents
+>) {
   /** The underlying {@link Playback} instance. */
   playback: Playback;
 
@@ -23,12 +24,25 @@ export class Script
   /** Index of the active marker. */
   markerIndex: number;
 
-  constructor(markers: ([string, string | number] | [string, string | number, string | number])[]) {
+  constructor(
+    markers: (
+      | [string, string | number]
+      | [string, string | number, string | number]
+    )[]
+  ) {
     super();
     this.setMaxListeners(0);
 
     // bind methods
-    bind(this, ["back", "forward", "markerByName", "markerNumberOf", "parseStart", "parseEnd", "__updateMarker"]);
+    bind(this, [
+      "back",
+      "forward",
+      "markerByName",
+      "markerNumberOf",
+      "parseStart",
+      "parseEnd",
+      "__updateMarker",
+    ]);
 
     // parse times
     let time = 0;
@@ -36,11 +50,13 @@ export class Script
       if (marker.length === 2) {
         const [, duration] = marker;
         marker[1] = time;
-        (marker as unknown as Marker)[2] = time + (typeof duration === "string" ? parseTime(duration) : duration);
+        (marker as unknown as Marker)[2] =
+          time +
+          (typeof duration === "string" ? parseTime(duration) : duration);
       } else {
         const [, begin, end] = marker;
-        marker[1] = (typeof begin === "string" ? parseTime(begin) : begin);
-        marker[2] = (typeof end === "string" ? parseTime(end) : end);
+        marker[1] = typeof begin === "string" ? parseTime(begin) : begin;
+        marker[2] = typeof end === "string" ? parseTime(end) : end;
       }
 
       time = marker[2] as number;
@@ -51,7 +67,7 @@ export class Script
 
     // create playback object
     this.playback = new Playback({
-      duration: this.markers[this.markers.length - 1][2]
+      duration: this.markers[this.markers.length - 1][2],
     });
 
     this.playback.on("seek", this.__updateMarker);
@@ -77,9 +93,11 @@ export class Script
 
   /** Advance playback to the next marker. */
   forward(): void {
-    this.playback.seek(this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]);
+    this.playback.seek(
+      this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]
+    );
   }
-  
+
   /**
    * Returns the first marker with the given name.
    * @throws {Error} If no marker named `name` exists.
@@ -91,7 +109,7 @@ export class Script
   /**
    * Returns the first index of a marker named `name`.
    * @throws {Error} If no marker named `name` exists.
-   */ 
+   */
   markerNumberOf(name: string): number {
     for (let i = 0; i < this.markers.length; ++i) {
       if (this.markers[i][0] === name) return i;
@@ -102,10 +120,8 @@ export class Script
   /** If `start` is a string, returns the starting time of the marker with that name. Otherwise, returns `start`. */
   parseStart(start: number | string): number {
     if (typeof start === "string") {
-      if (start.match(timeRegexp))
-        return parseTime(start);
-      else
-        return this.markerByName(start)[1];
+      if (start.match(timeRegexp)) return parseTime(start);
+      else return this.markerByName(start)[1];
     } else {
       return start;
     }
@@ -114,10 +130,8 @@ export class Script
   /** If `end` is a string, returns the ending time of the marker with that name. Otherwise, returns `end`. */
   parseEnd(end: number | string): number {
     if (typeof end === "string") {
-      if (end.match(timeRegexp))
-        return parseTime(end);
-      else
-        return this.markerByName(end)[2];
+      if (end.match(timeRegexp)) return parseTime(end);
+      else return this.markerByName(end)[2];
     } else {
       return end;
     }
@@ -134,8 +148,7 @@ export class Script
       }
     }
 
-    if (newIndex === undefined)
-      newIndex = this.markers.length - 1;
+    if (newIndex === undefined) newIndex = this.markers.length - 1;
 
     if (newIndex !== this.markerIndex) {
       const prevIndex = this.markerIndex;

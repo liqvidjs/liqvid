@@ -8,11 +8,11 @@ import {Playback, Player} from "..";
 
 describe("Player", () => {
   let player: Player;
-  
+
   const playback = new Playback({duration: 60000});
 
   beforeEach(() => {
-    render(<Player playback={playback} ref={ref => player = ref}></Player>);
+    render(<Player playback={playback} ref={(ref) => (player = ref)}></Player>);
   });
 
   test("canvas", () => {

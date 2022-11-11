@@ -9,7 +9,7 @@ import {act} from "react-dom/test-utils";
 
 describe("Play/pause button", () => {
   let button: HTMLButtonElement;
-  
+
   const playback = new Playback({duration: 60000});
 
   beforeEach(() => {

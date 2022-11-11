@@ -22,7 +22,9 @@ export function TimeDisplay() {
 
   return (
     <span className="lv-controls-time">
-      <span className="lv-current-time">{formatTime(playback.currentTime)}</span>
+      <span className="lv-current-time">
+        {formatTime(playback.currentTime)}
+      </span>
       <span className="lv-time-separator">/</span>
       <span className="lv-total-time">{formatTime(playback.duration)}</span>
     </span>

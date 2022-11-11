@@ -11,7 +11,7 @@ describe("Scrubber bar", () => {
   const script = new Script([
     ["A", "20"],
     ["B", "20"],
-    ["C", "20"]
+    ["C", "20"],
   ]);
   const playback = script.playback;
 
@@ -38,7 +38,7 @@ describe("Scrubber bar", () => {
 
     for (let i = 0; i <= 9; ++i) {
       fireEvent.keyDown(document.body, {key: String(i), code: `Digit${i}`});
-      expect(playback.currentTime).toBe(60000 * i / 10);
+      expect(playback.currentTime).toBe((60000 * i) / 10);
     }
   });
 

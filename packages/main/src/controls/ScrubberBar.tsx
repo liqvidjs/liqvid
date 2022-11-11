@@ -10,16 +10,14 @@ import {captureRef} from "@liqvid/utils/react";
 
 export {ThumbData};
 
-export function ScrubberBar(props: {
-  thumbs: ThumbData;
-}) {
+export function ScrubberBar(props: {thumbs: ThumbData}) {
   const keymap = useKeymap();
   const playback = usePlayback();
   const script = useScript();
 
   const [progress, setProgress] = useState({
     scrubber: playback.currentTime / playback.duration,
-    thumb: playback.currentTime / playback.duration
+    thumb: playback.currentTime / playback.duration,
   });
   const [showThumb, setShowThumb] = useState(false);
 
@@ -35,23 +33,35 @@ export function ScrubberBar(props: {
 
   const seeked = useCallback(() => {
     const progress = playback.currentTime / playback.duration;
-    setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+    setProgress((prev) => ({scrubber: progress, thumb: prev.thumb}));
   }, []);
 
   const timeupdate = useCallback(() => {
     const progress = playback.currentTime / playback.duration;
-    setProgress(prev => ({scrubber: progress, thumb: prev.thumb}));
+    setProgress((prev) => ({scrubber: progress, thumb: prev.thumb}));
   }, []);
 
-  const back5 = useCallback(() => playback.seek(playback.currentTime - 5000), []);
-  const fwd5 = useCallback(() => playback.seek(playback.currentTime + 5000), []);
-  const back10 = useCallback(() => playback.seek(playback.currentTime - 10000), []);
-  const fwd10 = useCallback(() => playback.seek(playback.currentTime + 10000), []);
+  const back5 = useCallback(
+    () => playback.seek(playback.currentTime - 5000),
+    []
+  );
+  const fwd5 = useCallback(
+    () => playback.seek(playback.currentTime + 5000),
+    []
+  );
+  const back10 = useCallback(
+    () => playback.seek(playback.currentTime - 10000),
+    []
+  );
+  const fwd10 = useCallback(
+    () => playback.seek(playback.currentTime + 10000),
+    []
+  );
 
   const seekPercent = useCallback((e: KeyboardEvent) => {
     const num = parseInt(e.key, 10);
     if (!isNaN(num)) {
-      playback.seek(playback.duration * num / 10);
+      playback.seek((playback.duration * num) / 10);
     }
   }, []);
 
@@ -116,7 +126,7 @@ export function ScrubberBar(props: {
       // move
       (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (x - rect.left) / rect.width, 1);
+          progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
         playback.seek(progress * playback.duration);
@@ -126,35 +136,35 @@ export function ScrubberBar(props: {
         playback.seeking = true;
 
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
+          progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
         playback.seek(progress * playback.duration);
       },
       // up
-      () => playback.seeking = false
+      () => (playback.seeking = false)
     );
     return {
-      onMouseDown: (e: React.MouseEvent) => listener(e.nativeEvent)
+      onMouseDown: (e: React.MouseEvent) => listener(e.nativeEvent),
     };
   }, []);
 
   // events to attach on the wrapper
   const wrapEvents = useMemo(() => {
-    const props = {} as React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>;
+    const props = {} as React.HTMLAttributes<HTMLDivElement> &
+      React.RefAttributes<HTMLDivElement>;
 
     if (anyHover) {
       Object.assign(props, {
-
         // show thumb preview on hover
         onMouseOver: () => setShowThumb(true),
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
           const rect = scrubberBar.current.getBoundingClientRect(),
-                progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
+            progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
 
-          setProgress(prev => ({scrubber: prev.scrubber, thumb: progress}));
+          setProgress((prev) => ({scrubber: prev.scrubber, thumb: progress}));
         },
-        onMouseOut: () => setShowThumb(false)
+        onMouseOut: () => setShowThumb(false),
       });
     }
 
@@ -162,7 +172,7 @@ export function ScrubberBar(props: {
       // move
       (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (x - rect.left) / rect.width, 1);
+          progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
@@ -177,7 +187,7 @@ export function ScrubberBar(props: {
       (e: TouchEvent, {x}: {x: number}) => {
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (x - rect.left) / rect.width, 1);
+          progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setShowThumb(false);
         playback.seeking = false;
@@ -200,7 +210,7 @@ export function ScrubberBar(props: {
       // move
       (e, {x}) => {
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (x - rect.left) / rect.width, 1);
+          progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setProgress({scrubber: progress, thumb: progress});
       },
@@ -215,7 +225,7 @@ export function ScrubberBar(props: {
       (e, {x}) => {
         e.preventDefault();
         const rect = scrubberBar.current.getBoundingClientRect(),
-              progress = clamp(0, (x - rect.left) / rect.width, 1);
+          progress = clamp(0, (x - rect.left) / rect.width, 1);
 
         setShowThumb(false);
         playback.seeking = false;
@@ -226,30 +236,51 @@ export function ScrubberBar(props: {
     return {
       ref: captureRef((ref: SVGSVGElement) => {
         ref.addEventListener("touchstart", listener, {passive: false});
-      })
+      }),
     };
   }, []);
 
   const highlights = (props.thumbs && props.thumbs.highlights) || [];
-  const activeHighlight = highlights.find(
-    _ => between(_.time / playback.duration, progress.thumb, _.time / playback.duration + 0.01)
+  const activeHighlight = highlights.find((_) =>
+    between(
+      _.time / playback.duration,
+      progress.thumb,
+      _.time / playback.duration + 0.01
+    )
   );
   const thumbTitle = activeHighlight ? activeHighlight.title : null;
 
   return (
     <div className="lv-controls-scrub" ref={scrubberBar} {...divEvents}>
-      {props.thumbs &&
+      {props.thumbs && (
         <ThumbnailBox
           {...props.thumbs}
           progress={progress.thumb}
           show={showThumb}
-          title={thumbTitle} />
-      }
+          title={thumbTitle}
+        />
+      )}
 
       <div className="lv-controls-scrub-wrap" {...wrapEvents}>
-        <svg className="lv-controls-scrub-progress" preserveAspectRatio="none" viewBox="0 0 100 10">
-          <rect className="lv-progress-elapsed" x="0" y="0" height="10" width={progress.scrubber * 100} />
-          <rect className="lv-progress-remaining" x={progress.scrubber * 100} y="0" height="10" width={(1 - progress.scrubber) * 100} />
+        <svg
+          className="lv-controls-scrub-progress"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 10"
+        >
+          <rect
+            className="lv-progress-elapsed"
+            x="0"
+            y="0"
+            height="10"
+            width={progress.scrubber * 100}
+          />
+          <rect
+            className="lv-progress-remaining"
+            x={progress.scrubber * 100}
+            y="0"
+            height="10"
+            width={(1 - progress.scrubber) * 100}
+          />
 
           {/*ranges.map(([start, end]) => (
             <rect
@@ -260,15 +291,22 @@ export function ScrubberBar(props: {
           {highlights.map(({time}) => (
             <rect
               key={time}
-              className={["lv-thumb-highlight"].concat(time <= playback.currentTime ? "past" : []).join(" ")}
-              x={time / playback.duration * 100}
+              className={["lv-thumb-highlight"]
+                .concat(time <= playback.currentTime ? "past" : [])
+                .join(" ")}
+              x={(time / playback.duration) * 100}
               y="0"
               width="1"
               height="10"
             />
           ))}
         </svg>
-        <svg className="lv-scrubber" style={{left: `calc(${progress.scrubber * 100}% - 6px)`}} viewBox="0 0 100 100" {...scrubberEvents}>
+        <svg
+          className="lv-scrubber"
+          style={{left: `calc(${progress.scrubber * 100}% - 6px)`}}
+          viewBox="0 0 100 100"
+          {...scrubberEvents}
+        >
           <circle cx="50" cy="50" r="50" stroke="none" />
         </svg>
       </div>

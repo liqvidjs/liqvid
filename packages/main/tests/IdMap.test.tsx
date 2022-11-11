@@ -18,23 +18,31 @@ function Component() {
 
 describe("IdMap", () => {
   const objects = {
-    "a": {
+    a: {
       className: "demo-a",
       style: {
-        color: "red"
-      }
-    }
+        color: "red",
+      },
+    },
   };
 
   test("root works", () => {
-    render(<IdMap map={objects}><h1 id="a">Hello World</h1></IdMap>);
+    render(
+      <IdMap map={objects}>
+        <h1 id="a">Hello World</h1>
+      </IdMap>
+    );
     const h1 = document.querySelector("h1");
     expect(h1.className).toBe("demo-a");
     expect(h1.style.color).toBe("red");
   });
 
   test("nested works", () => {
-    render(<IdMap map={objects}><Component/></IdMap>);
+    render(
+      <IdMap map={objects}>
+        <Component />
+      </IdMap>
+    );
     const h1 = document.querySelector("h1");
     expect(h1.className).toBe("demo-a");
     expect(h1.style.color).toBe("red");

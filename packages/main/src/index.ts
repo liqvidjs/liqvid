@@ -25,7 +25,15 @@ import {ScrubberBar} from "./controls/ScrubberBar";
 import {TimeDisplay} from "./controls/TimeDisplay";
 import {Volume} from "./controls/Volume";
 
-export const Controls = {Captions, FullScreen, PlayPause, ScrubberBar, Settings, TimeDisplay, Volume};
+export const Controls = {
+  Captions,
+  FullScreen,
+  PlayPause,
+  ScrubberBar,
+  Settings,
+  TimeDisplay,
+  Volume,
+};
 
 // alias
 if (!window.hasOwnProperty("RactivePlayer")) {
@@ -34,12 +42,20 @@ if (!window.hasOwnProperty("RactivePlayer")) {
       if (typeof window.Liqvid !== "undefined") {
         return window.Liqvid;
       }
-    }
+    },
   });
 }
 
 // export type
-import type {useKeymap, useMarkerUpdate, usePlayback, usePlayer, useScript, useTime, useTimeUpdate} from "./hooks";
+import type {
+  useKeymap,
+  useMarkerUpdate,
+  usePlayback,
+  usePlayer,
+  useScript,
+  useTime,
+  useTimeUpdate,
+} from "./hooks";
 
 interface Liqvid {
   Audio: typeof Audio;
@@ -52,7 +68,7 @@ interface Liqvid {
   Script: typeof Script;
   Utils: typeof Utils;
   Video: typeof Video;
-  
+
   useKeymap: typeof useKeymap;
   useMarkerUpdate: typeof useMarkerUpdate;
   usePlayback: typeof usePlayback;

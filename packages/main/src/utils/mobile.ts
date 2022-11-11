@@ -1,7 +1,10 @@
 import {anyHover} from "@liqvid/utils/interaction";
 import {captureRef} from "@liqvid/utils/react";
 
-export {anyHover, onClick as attachClickHandler} from "@liqvid/utils/interaction";
+export {
+  anyHover,
+  onClick as attachClickHandler,
+} from "@liqvid/utils/interaction";
 
 /**
 	Drop-in replacement for onClick handlers which works better on mobile.
@@ -14,27 +17,27 @@ export const onClick = <T extends HTMLElement | SVGElement>(
   if (anyHover) {
     return {onClick: callback};
   } else {
-    let touchId: number,
-        target: T & EventTarget;
+    let touchId: number, target: T & EventTarget;
 
     // touchstart handler
     const onTouchStart = (e: TouchEvent): void => {
-      if (typeof touchId === "number")
-        return;
+      if (typeof touchId === "number") return;
       target = e.currentTarget as T;
       touchId = e.changedTouches[0].identifier;
     };
 
     // touchend handler
     const onTouchEnd = (e: TouchEvent): void => {
-      if (typeof touchId !== "number")
-        return;
+      if (typeof touchId !== "number") return;
 
       for (const touch of Array.from(e.changedTouches)) {
-        if (touch.identifier !== touchId)
-          continue;
+        if (touch.identifier !== touchId) continue;
 
-        if (target.contains(document.elementFromPoint(touch.clientX, touch.clientY))) {
+        if (
+          target.contains(
+            document.elementFromPoint(touch.clientX, touch.clientY)
+          )
+        ) {
           callback(e);
         }
 
@@ -44,10 +47,18 @@ export const onClick = <T extends HTMLElement | SVGElement>(
     };
 
     return {
-      ref: captureRef<T>(ref => {
-        ref.addEventListener("touchstart", onTouchStart as (e: TouchEvent) => void, {passive: false});
-        ref.addEventListener("touchend", onTouchEnd as (e: TouchEvent) => void, {passive: false});
-      }, innerRef)
+      ref: captureRef<T>((ref) => {
+        ref.addEventListener(
+          "touchstart",
+          onTouchStart as (e: TouchEvent) => void,
+          {passive: false}
+        );
+        ref.addEventListener(
+          "touchend",
+          onTouchEnd as (e: TouchEvent) => void,
+          {passive: false}
+        );
+      }, innerRef),
     };
   }
 };

@@ -13,13 +13,11 @@ export class Audio extends Media {
 
     // tracks
     for (const track of Array.from(this.domElement.textTracks)) {
-      if (!["captions", "subtitles"].includes(track.kind))
-        continue;
+      if (!["captions", "subtitles"].includes(track.kind)) continue;
       let mode = track.mode;
       track.addEventListener("cuechange", () => {
         if (track.mode !== "showing") {
-          if (mode === "showing")
-            this.playback.captions = [];
+          if (mode === "showing") this.playback.captions = [];
           mode = track.mode;
           return;
         }
@@ -37,10 +35,11 @@ export class Audio extends Media {
 
   // render method
   render() {
-    const {start, obstructCanPlay, obstructCanPlayThrough, children, ...attrs} = this.props;
+    const {start, obstructCanPlay, obstructCanPlayThrough, children, ...attrs} =
+      this.props;
 
     return (
-      <audio preload="auto" ref={node => this.domElement = node} {...attrs}>
+      <audio preload="auto" ref={(node) => (this.domElement = node)} {...attrs}>
         {children}
       </audio>
     );

@@ -3,20 +3,20 @@ export function awaitMediaCanPlay(media: HTMLMediaElement): Promise<void> {
   return new Promise((resolve) => {
     if (media.readyState === media.HAVE_FUTURE_DATA) {
       return resolve();
-    }
-    else {
+    } else {
       media.addEventListener("canplay", () => resolve());
     }
   });
 }
 
 /** Promisified version of [`canplaythrough`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplaythrough_event) event. */
-export function awaitMediaCanPlayThrough(media: HTMLMediaElement): Promise<void> {
+export function awaitMediaCanPlayThrough(
+  media: HTMLMediaElement
+): Promise<void> {
   return new Promise((resolve) => {
     if (media.readyState === media.HAVE_ENOUGH_DATA) {
       return resolve();
-    }
-    else {
+    } else {
       media.addEventListener("canplaythrough", () => resolve());
     }
   });

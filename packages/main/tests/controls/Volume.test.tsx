@@ -49,7 +49,7 @@ describe("Volume button", () => {
     fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
     fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
     expect(playback.volume).toBeCloseTo(0.9, 5);
-    
+
     fireEvent.keyDown(document.body, {key: "ArrowUp", code: "ArrowUp"});
     expect(playback.volume).toBeCloseTo(0.95, 5);
 

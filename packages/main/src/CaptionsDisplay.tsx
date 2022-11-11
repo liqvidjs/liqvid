@@ -16,7 +16,5 @@ export default function Captions() {
     });
   }, []);
 
-  return (
-    <div className="lv-captions-display" ref={domElement}/>
-  );
+  return <div className="lv-captions-display" ref={domElement} />;
 }

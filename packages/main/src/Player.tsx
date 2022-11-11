@@ -22,9 +22,9 @@ import {anyHover} from "@liqvid/utils/interaction";
 import {createUniqueContext} from "@liqvid/utils/react";
 
 interface PlayerEvents {
-  "canplay": void;
-  "canplaythrough": void;
-  "canvasClick": void;
+  canplay: void;
+  canplaythrough: void;
+  canvasClick: void;
 }
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -55,7 +55,7 @@ export class Player extends React.PureComponent<Props> {
 
   /** Whether keyboard controls are currently being handled. */
   captureKeys: boolean;
-  
+
   hub: StrictEventEmitter<EventEmitter, PlayerEvents>;
 
   /** {@link Keymap} attached to the player */
@@ -76,42 +76,49 @@ export class Player extends React.PureComponent<Props> {
 
   /** {@link React.Context} used to access ambient Player */
   static Context = createUniqueContext<Player>("@liqvid/player", null);
-  
+
   /**
    * Symbol to access the {@link Player} instance attached to a DOM element
-   * 
+   *
    * `player.canvas.parentElement[Player.symbol] === player`
    */
   static symbol = Symbol();
 
   /** Default controls appearing on the left */
-  static defaultControlsLeft = (<>
-    <PlayPause/>
-    <Volume/>
-    <TimeDisplay/>
-  </>);
+  static defaultControlsLeft = (
+    <>
+      <PlayPause />
+      <Volume />
+      <TimeDisplay />
+    </>
+  );
 
   /** Default controls appearing on the right */
-  static defaultControlsRight = (<>
-    <Captions/>
-    <Settings/>
-    <FullScreen/>
-  </>);
+  static defaultControlsRight = (
+    <>
+      <Captions />
+      <Settings />
+      <FullScreen />
+    </>
+  );
 
   static defaultProps = {
-    controls: (<>
-      {Player.defaultControlsLeft}
+    controls: (
+      <>
+        {Player.defaultControlsLeft}
 
-      <div className="lv-controls-right">
-        {Player.defaultControlsRight}
-      </div>
-    </>),
-    style: {}
+        <div className="lv-controls-right">{Player.defaultControlsRight}</div>
+      </>
+    ),
+    style: {},
   };
 
   constructor(props: Props) {
     super(props);
-    this.hub = new EventEmitter() as StrictEventEmitter<EventEmitter, PlayerEvents>;
+    this.hub = new EventEmitter() as StrictEventEmitter<
+      EventEmitter,
+      PlayerEvents
+    >;
     this.__canPlayTasks = [];
     this.__canPlayThroughTasks = [];
 
@@ -127,7 +134,12 @@ export class Player extends React.PureComponent<Props> {
 
     this.buffers = new Map();
 
-    bind(this, ["onMouseUp", "suspendKeyCapture", "resumeKeyCapture", "reparseTree"]);
+    bind(this, [
+      "onMouseUp",
+      "suspendKeyCapture",
+      "resumeKeyCapture",
+      "reparseTree",
+    ]);
     this.updateTree = this.updateTree.bind(this);
   }
 
@@ -144,9 +156,8 @@ export class Player extends React.PureComponent<Props> {
     // element.classList.toggle("lv-frame", client);
 
     // keyboard events
-    document.body.addEventListener("keydown", e => {
-      if (!this.captureKeys || document.activeElement !== document.body)
-        return;
+    document.body.addEventListener("keydown", (e) => {
+      if (!this.captureKeys || document.activeElement !== document.body) return;
       this.keymap.handle(e);
     });
 
@@ -198,7 +209,10 @@ export class Player extends React.PureComponent<Props> {
     /** Recurse through DAG */
     function recurse(leaf: DAGLeaf): void {
       if (typeof leaf.first !== "undefined") {
-        if (leaf.first <= script.markerIndex && (!leaf.last || script.markerIndex < leaf.last)) {
+        if (
+          leaf.first <= script.markerIndex &&
+          (!leaf.last || script.markerIndex < leaf.last)
+        ) {
           return show(leaf);
         }
 
@@ -216,26 +230,23 @@ export class Player extends React.PureComponent<Props> {
   }
 
   private canvasClick(): void {
-    const allow = this.hub.listeners("canvasClick").every(_ => _() ?? true);
+    const allow = this.hub.listeners("canvasClick").every((_) => _() ?? true);
     if (allow) {
       this.playback.paused ? this.playback.play() : this.playback.pause();
     }
 
     this.hub.emit("canvasClick");
   }
-  
+
   onMouseUp(e: React.MouseEvent<HTMLDivElement>): void {
     // ignore clicks on input tags
-    if ([
-      "a", "area",
-      "button",
-      "input",
-      "option",
-      "select",
-      "textarea"
-    ].includes((e.target as Element).nodeName.toLowerCase()))
+    if (
+      ["a", "area", "button", "input", "option", "select", "textarea"].includes(
+        (e.target as Element).nodeName.toLowerCase()
+      )
+    )
       return;
-    
+
     // data-affords markup
     if ((e.target as Element)?.closest(`*[data-affords~="click"]`)) {
       return;
@@ -287,7 +298,7 @@ export class Player extends React.PureComponent<Props> {
       throw new Error("Could not find node in tree");
     }
     root.children = toposort(root.element, this.script.markerNumberOf).children;
-    
+
     this.updateTree();
   }
 
@@ -319,7 +330,7 @@ export class Player extends React.PureComponent<Props> {
 
   render() {
     const attrs = {
-      style: this.props.style
+      style: this.props.style,
     };
     const canvasAttrs = anyHover ? {onMouseUp: this.onMouseUp} : {};
 
@@ -330,14 +341,18 @@ export class Player extends React.PureComponent<Props> {
         <PlaybackContext.Provider value={this.playback}>
           <KeymapContext.Provider value={this.keymap}>
             <div className={classNames.join(" ")} {...attrs}>
-              <div className="rp-canvas lv-canvas"
+              <div
+                className="rp-canvas lv-canvas"
                 {...canvasAttrs}
-                ref={canvas => this.canvas = canvas}
+                ref={(canvas) => (this.canvas = canvas)}
               >
                 {this.props.children}
               </div>
               <CaptionsDisplay />
-              <Controls controls={this.props.controls} thumbs={this.props.thumbs}/>
+              <Controls
+                controls={this.props.controls}
+                thumbs={this.props.thumbs}
+              />
             </div>
           </KeymapContext.Provider>
         </PlaybackContext.Provider>
@@ -355,10 +370,13 @@ interface DAGLeaf {
 }
 
 /* topological sort */
-function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => number): DAGLeaf {
-  const nodes = Array.from(root.querySelectorAll(
-    "*[data-from-first], *[data-during]"
-  )) as (HTMLElement | SVGElement)[];
+function toposort(
+  root: HTMLElement | SVGElement,
+  mn: (markerName: string) => number
+): DAGLeaf {
+  const nodes = Array.from(
+    root.querySelectorAll("*[data-from-first], *[data-during]")
+  ) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
   const path: DAGLeaf[] = [dag];
@@ -385,7 +403,7 @@ function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => nu
     // build the leaf
     const leaf: DAGLeaf = {
       children: [],
-      element: node
+      element: node,
     };
     if (during) leaf.during = during;
     if (firstMarkerName) leaf.first = mn(firstMarkerName);
@@ -412,7 +430,10 @@ function toposort(root: HTMLElement | SVGElement, mn: (markerName: string) => nu
  * @param haystack DAG leaf to search
  * @returns Closest ancestor
  */
-function findClosest(needle: HTMLElement | SVGElement, haystack: DAGLeaf): DAGLeaf {
+function findClosest(
+  needle: HTMLElement | SVGElement,
+  haystack: DAGLeaf
+): DAGLeaf {
   if (!haystack.element.contains(needle)) {
     return null;
   }

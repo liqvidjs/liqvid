@@ -11,20 +11,20 @@ interface Props {
 /**
  * This class gives a way to automagically attach data loaded from a file as attributes on elements.
  * This is provided to facilitate the development of—and provide a standard interface for—GUI tools.
- */ 
+ */
 export class IdMap extends React.PureComponent<Props> {
   static Context = React.createContext([]);
 
   /** IDs found within the IdMap */
   foundIds: Set<string>;
-  
+
   constructor(props: Props) {
     super(props);
     bind(this, ["renderContent"]);
 
     this.foundIds = new Set();
   }
-  
+
   render() {
     if (this.props.hasOwnProperty("map")) {
       return (
@@ -34,22 +34,19 @@ export class IdMap extends React.PureComponent<Props> {
       );
     } else {
       return (
-        <IdMap.Context.Consumer>
-          {this.renderContent}
-        </IdMap.Context.Consumer>
+        <IdMap.Context.Consumer>{this.renderContent}</IdMap.Context.Consumer>
       );
     }
   }
-  
+
   renderContent([foundIds, map]: [Set<string>, unknown]) {
-    return recursiveMap(this.props.children, node => {
+    return recursiveMap(this.props.children, (node) => {
       const attrs = {};
 
       if (node.props.hasOwnProperty("id")) {
         const {id} = (node as React.ReactElement<{id: string}>).props;
         foundIds.add(id);
-        if (map[id] !== undefined)
-          Object.assign(attrs, map[id]);
+        if (map[id] !== undefined) Object.assign(attrs, map[id]);
       }
 
       if (Object.keys(attrs).length === 0) {

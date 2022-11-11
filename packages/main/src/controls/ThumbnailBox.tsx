@@ -55,15 +55,25 @@ interface VideoHighlight {
 
 export function ThumbnailBox(props: Props) {
   const player = usePlayer(),
-        {playback} = player;
+    {playback} = player;
 
-  const {cols = 5, rows = 5, frequency = 4, path, progress, show, title, height = 100, width = 160} = props;
+  const {
+    cols = 5,
+    rows = 5,
+    frequency = 4,
+    path,
+    progress,
+    show,
+    title,
+    height = 100,
+    width = 160,
+  } = props;
   const count = cols * rows;
 
   useEffect(() => {
     // preload thumbs (once more important loading has taken place)
     const maxSlide = Math.floor(playback.duration / frequency / 1000),
-          maxSheet = Math.floor(maxSlide / count);
+      maxSheet = Math.floor(maxSlide / count);
 
     player.hub.on("canplay", () => {
       for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
@@ -73,12 +83,12 @@ export function ThumbnailBox(props: Props) {
     });
   }, []);
 
-  const time = progress * playback.duration / 1000,
-        markerNum = Math.floor(time / frequency),
-        sheetNum = Math.floor(markerNum / count),
-        markerNumOnSheet = markerNum % count,
-        row = Math.floor(markerNumOnSheet / rows),
-        col = markerNumOnSheet % rows;
+  const time = (progress * playback.duration) / 1000,
+    markerNum = Math.floor(time / frequency),
+    sheetNum = Math.floor(markerNum / count),
+    markerNumOnSheet = markerNum % count,
+    row = Math.floor(markerNumOnSheet / rows),
+    col = markerNumOnSheet % rows;
 
   const sheetName = path.replace("%s", sheetNum.toString());
 
@@ -87,15 +97,16 @@ export function ThumbnailBox(props: Props) {
       className="lv-controls-thumbnail"
       style={{
         display: show ? "block" : "none",
-        left: `calc(${progress * 100}%)`
-      }}>
+        left: `calc(${progress * 100}%)`,
+      }}
+    >
       {title && <span className="lv-thumbnail-title">{title}</span>}
       <div className="lv-thumbnail-box">
         <img
           src={sheetName}
           style={{
             left: `-${col * width}px`,
-            top: `-${row * height}px`
+            top: `-${row * height}px`,
           }}
         />
         <span className="lv-thumbnail-time">{formatTime(time * 1000)}</span>
