@@ -17,7 +17,8 @@
     "lint": "eslint --ext ts,tsx --fix src; eslint --ext ts,tsx --fix tests",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
-    "test": "pnpm test:jest && pnpm test:playwright",
+    "test": "pnpm test:jest && pnpm test:build-e2e && pnpm test:playwright",
+    "test:build-e2e": "cd e2e/app && pnpm build && cd ../..",
     "test:jest": "jest",
     "test:playwright": "npx playwright test"
   },

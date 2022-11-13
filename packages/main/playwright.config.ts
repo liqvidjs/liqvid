@@ -15,7 +15,7 @@ const config: PlaywrightTestConfig = {
     video: "off",
   },
   webServer: {
-    command: "cd e2e/app && pnpm build && pnpm serve",
+    command: "cd e2e/app && pnpm serve",
     url: process.env.PLAYWRIGHT_HOST,
     reuseExistingServer: !process.env.CI,
   },

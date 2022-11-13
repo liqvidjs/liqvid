@@ -165,12 +165,13 @@ export class Media extends React.PureComponent<
 
   onTimeUpdate(t: number): void {
     if (between(this.start, t, this.end)) {
-      if (!this.domElement.paused || this.domElement.ended) return;
+      if (!this.domElement.paused) return;
 
       this.domElement.currentTime = (t - this.start) / 1000;
       this.play().catch(this.playback.pause);
     } else {
       if (!this.domElement.paused) this.pause();
+      this.domElement.currentTime = (t - this.start) / 1000;
     }
   }
 

@@ -11,7 +11,7 @@ const playback = new Playback({duration: 60000});
 function Lesson() {
   return (
     <Player playback={playback}>
-      <Video>
+      <Video start={10000}>
         <source src={process.env.PLAYWRIGHT_TEST_VIDEO} type="video/mp4" />
       </Video>
     </Player>
