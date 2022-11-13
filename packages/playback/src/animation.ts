@@ -1,6 +1,6 @@
 import {Playback as CorePlayback} from "./core";
 
-declare global { 
+declare global {
   interface Animation {
     /**
      * Explicitly persists an animation, when it would otherwise be removed due to the browser's
@@ -23,7 +23,7 @@ export class Playback extends CorePlayback {
 
     this.__createTimeline();
   }
-  
+
   /**
    * Create an {@link Animation} (factory) synced to this playback
    * @param keyframes A [keyframes object](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats) or `null`
@@ -42,12 +42,21 @@ export class Playback extends CorePlayback {
         anim = undefined;
         return;
       } else if (anim !== undefined) {
-        console.warn("Animations should not be reused as they will not cancel properly. Check animations attached to ", target);
+        console.warn(
+          "Animations should not be reused as they will not cancel properly. Check animations attached to ",
+          target
+        );
       }
 
       // create animation
-      anim = new Animation(new KeyframeEffect(target, keyframes, options), this.timeline);
-      if (typeof options === "object" && (options.fill === "forwards" || options.fill === "both")) {
+      anim = new Animation(
+        new KeyframeEffect(target, keyframes, options),
+        this.timeline
+      );
+      if (
+        typeof options === "object" &&
+        (options.fill === "forwards" || options.fill === "both")
+      ) {
         anim.persist();
       }
       /* adopt animation */
@@ -74,7 +83,7 @@ export class Playback extends CorePlayback {
 
   /**
    * Create our timeline
-   * 
+   *
    * @listens pause
    * @listens play
    * @listens ratechange
@@ -101,7 +110,8 @@ export class Playback extends CorePlayback {
         anim.play();
         anim.startTime =
           this.timeline.currentTime +
-          (this.__delays.get(anim.effect) - this.currentTime) / this.playbackRate;
+          (this.__delays.get(anim.effect) - this.currentTime) /
+            this.playbackRate;
       }
     });
 
@@ -115,7 +125,9 @@ export class Playback extends CorePlayback {
     // seek
     this.on("seek", () => {
       for (const anim of this.__animations) {
-        const offset = (this.__delays.get(anim.effect) - this.currentTime) / this.playbackRate;
+        const offset =
+          (this.__delays.get(anim.effect) - this.currentTime) /
+          this.playbackRate;
         if (this.paused) {
           // anim.startTime = this.timeline.currentTime + offset
           anim.currentTime = -offset;

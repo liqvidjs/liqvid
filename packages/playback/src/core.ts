@@ -3,30 +3,31 @@ import type StrictEventEmitter from "strict-event-emitter-types";
 import {bind, constrain} from "@liqvid/utils/misc";
 
 interface PlaybackEvents {
-  "bufferupdate": void;
-  "cuechange": void;
-  "durationchange": void;
-  "pause": void;
-  "play": void;
-  "seek": number;
-  "seeked": void;
-  "seeking": void;
-  "stop": void;
-  "ratechange": void;
-  "timeupdate": number;
-  "volumechange": void;
+  bufferupdate: void;
+  cuechange: void;
+  durationchange: void;
+  pause: void;
+  play: void;
+  seek: number;
+  seeked: void;
+  seeking: void;
+  stop: void;
+  ratechange: void;
+  timeupdate: number;
+  volumechange: void;
 }
 
 declare let webkitAudioContext: typeof AudioContext;
 
 /**
  * Class pretending to be a media element advancing in time.
- * 
+ *
  * Imitates {@link HTMLMediaElement} to a certain extent, although it does not implement that interface.
  */
-export class Playback
-  extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, PlaybackEvents>)
-{
+export class Playback extends (EventEmitter as unknown as new () => StrictEventEmitter<
+  EventEmitter,
+  PlaybackEvents
+>) {
   /** Audio context owned by this playback */
   audioContext: AudioContext;
 
@@ -44,8 +45,8 @@ export class Playback
   paused = true;
 
   /* private fields */
-  private __playingFrom:  number;
-  private __startTime:    number;
+  private __playingFrom: number;
+  private __startTime: number;
 
   /* private fields exposed by getters */
   private __captions: DocumentFragment[] = [];
@@ -54,7 +55,7 @@ export class Playback
   private __muted = false;
   private __seeking = false;
   private __volume = 1;
-  
+
   constructor(options: {
     /** Duration of the playback in milliseconds */
     duration: number;
@@ -78,7 +79,7 @@ export class Playback
     // initiate playback loop
     requestAnimationFrame(this.__advance);
   }
-  
+
   /* magic properties */
 
   /** Gets or sets the current captions */
@@ -94,21 +95,20 @@ export class Playback
   }
 
   /**
-    * Length of the playback in milliseconds.
-    * 
-    * **Warning:** {@link HTMLMediaElement.duration} measures this in *seconds*.
-  */
+   * Length of the playback in milliseconds.
+   *
+   * **Warning:** {@link HTMLMediaElement.duration} measures this in *seconds*.
+   */
   get duration(): number {
     return this.__duration;
   }
 
   /** @emits durationchange */
   set duration(duration: number) {
-    if (duration === this.__duration)
-      return;
+    if (duration === this.__duration) return;
 
     this.__duration = duration;
-    
+
     this.emit("durationchange");
   }
 
@@ -119,8 +119,7 @@ export class Playback
 
   /** @emits volumechange */
   set muted(val: boolean) {
-    if (val === this.__muted)
-      return;
+    if (val === this.__muted) return;
 
     this.__muted = val;
 
@@ -128,10 +127,13 @@ export class Playback
       if (this.__muted) {
         this.audioNode.gain.value = 0;
       } else {
-        this.audioNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+        this.audioNode.gain.setValueAtTime(
+          this.volume,
+          this.audioContext.currentTime
+        );
       }
     }
-    
+
     this.emit("volumechange");
   }
 
@@ -142,8 +144,7 @@ export class Playback
 
   /** @emits ratechange */
   set playbackRate(val: number) {
-    if (val === this.__playbackRate)
-      return;
+    if (val === this.__playbackRate) return;
 
     this.__playbackRate = val;
     this.__playingFrom = this.currentTime;
@@ -161,8 +162,7 @@ export class Playback
    * @emits seeked
    */
   set seeking(val: boolean) {
-    if (val === this.__seeking)
-      return;
+    if (val === this.__seeking) return;
 
     this.__seeking = val;
     if (this.__seeking) this.emit("seeking");
@@ -171,7 +171,7 @@ export class Playback
 
   /**
    * Pause playback.
-   * 
+   *
    * @emits pause
    */
   pause(): void {
@@ -183,7 +183,7 @@ export class Playback
 
   /**
    * Start or resume playback.
-   * 
+   *
    * @emits play
    */
   play(): void {
@@ -198,7 +198,7 @@ export class Playback
 
   /**
    * Seek playback to a specific time.
-   * 
+   *
    * @emits seek
    */
   seek(t: number): void {
@@ -225,7 +225,10 @@ export class Playback
       if (prevVolume === 0 || this.__volume === 0) {
         this.audioNode.gain.setValueAtTime(0, this.audioContext.currentTime);
       } else {
-        this.audioNode.gain.exponentialRampToValueAtTime(this.__volume, this.audioContext.currentTime + 2);
+        this.audioNode.gain.exponentialRampToValueAtTime(
+          this.__volume,
+          this.audioContext.currentTime + 2
+        );
       }
     }
 
@@ -234,7 +237,7 @@ export class Playback
 
   /**
    * Stop playback and reset pointer to start
-   * 
+   *
    * @emits stop
    */
   stop(): void {
@@ -245,7 +248,7 @@ export class Playback
   }
 
   /* private methods */
-  
+
   /**
    * @emits timeupdate
    */
@@ -254,8 +257,10 @@ export class Playback
     if (this.paused || this.__seeking) {
       this.__startTime = t;
     } else {
-    // playing
-      this.currentTime = this.__playingFrom + Math.max((t - this.__startTime) * this.__playbackRate, 0);
+      // playing
+      this.currentTime =
+        this.__playingFrom +
+        Math.max((t - this.__startTime) * this.__playbackRate, 0);
 
       if (this.currentTime >= this.duration) {
         this.currentTime = this.duration;
@@ -270,7 +275,7 @@ export class Playback
 
   /**
    * Try to initiate audio
-   * 
+   *
    * @listens click
    * @listens keydown
    * @listens touchstart

@@ -1,24 +1,23 @@
 {
-  "extends": ["@yuri", "plugin:react/recommended", "plugin:prettier/recommended"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "prettier"
+  ],
   "plugins": [
-    "react"
+    "react",
+    "prettier"
   ],
   "rules": {
-    "quotes": ["error", "double", {"allowTemplateLiterals": true, "avoidEscape": true }],
-
+    "prettier/prettier": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "ignoreRestSiblings": true
+      }
+    ],
+    "@typescript-eslint/no-empty-function": "off",
     "react/react-in-jsx-scope": "off",
-    "react/self-closing-comp": "off",
-
-    "@typescript-eslint/explicit-function-return-type": ["off", {
-      "allowExpressions": true,
-      "allowTypedFunctionExpressions": true,
-      "allowConciseArrowFunctionExpressionsStartingWithVoid": true,
-      "allowedNames": ["componentDidMount", "componentWillUnmount", "render", "Volume", "PlayPause", "Settings", "Player", "TimeDisplay", "ThumbnailBox"]
-    }],
-    "@typescript-eslint/explicit-module-boundary-types": ["off", {
-      "allowTypedFunctionExpressions": true,
-      "allowedNames": ["componentDidMount", "componentWillUnmount", "render", "Captions", "Controls", "FullScreen", "IdMap", "PlayPause", "Settings", "Player", "ScrubberBar", "TimeDisplay", "ThumbnailBox", "Volume"]
-    }],
-    "@typescript-eslint/no-empty-function": "off"
+    "react/self-closing-comp": "off"
   }
 }
