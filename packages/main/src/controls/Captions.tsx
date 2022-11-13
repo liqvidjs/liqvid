@@ -13,8 +13,8 @@ export function Captions() {
     (
       e:
         | KeyboardEvent
-        | React.TouchEvent<HTMLButtonElement>
         | React.MouseEvent<HTMLButtonElement>
+        | React.TouchEvent<HTMLButtonElement>
     ) => {
       player.canvas.parentElement.classList.toggle("lv-captions");
 

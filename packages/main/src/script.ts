@@ -26,8 +26,8 @@ export class Script extends (EventEmitter as new () => StrictEventEmitter<
 
   constructor(
     markers: (
-      | [string, string | number]
-      | [string, string | number, string | number]
+      | [string, number | string, number | string]
+      | [string, number | string]
     )[]
   ) {
     super();

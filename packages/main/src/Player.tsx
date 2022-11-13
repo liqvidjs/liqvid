@@ -269,7 +269,7 @@ export class Player extends React.PureComponent<Props> {
    * @param e Click event on video canvas
    * @deprecated Use data-affords="click" instead
    */
-  static preventCanvasClick(e: React.MouseEvent | MouseEvent): void {
+  static preventCanvasClick(e: MouseEvent | React.MouseEvent): void {
     ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
   }
 

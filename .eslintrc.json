@@ -4,10 +4,7 @@
     "plugin:react/recommended",
     "prettier"
   ],
-  "plugins": [
-    "react",
-    "prettier"
-  ],
+  "plugins": ["react", "prettier"],
   "rules": {
     "prettier/prettier": "warn",
     "@typescript-eslint/no-unused-vars": [
@@ -17,7 +14,12 @@
       }
     ],
     "@typescript-eslint/no-empty-function": "off",
-    "react/react-in-jsx-scope": "off",
-    "react/self-closing-comp": "off"
+    "@typescript-eslint/sort-type-constituents": "error",
+    "react/react-in-jsx-scope": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }

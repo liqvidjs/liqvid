@@ -17,7 +17,7 @@ export const onClick = <T extends HTMLElement | SVGElement>(
   if (anyHover) {
     return {onClick: callback};
   } else {
-    let touchId: number, target: T & EventTarget;
+    let touchId: number, target: EventTarget & T;
 
     // touchstart handler
     const onTouchStart = (e: TouchEvent): void => {

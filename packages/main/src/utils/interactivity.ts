@@ -12,7 +12,7 @@ type DownArgs = Parameters<typeof onDrag>[1] extends (
 type Up = Parameters<typeof onDrag>[2];
 
 function isReactMouseEvent<T>(
-  e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
+  e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent
 ): e is React.MouseEvent<T> {
   return "nativeEvent" in e && e.nativeEvent instanceof MouseEvent;
 }
@@ -26,7 +26,7 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
   /** Callback for when dragging begins (pointer is touched). */
   down: (
     /** The underlying `mousedown` or `touchstart` event */
-    e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>,
+    e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent,
     /** Information about the pointer location */
     hit: {
       /** Horizontal coordinate of pointer */
@@ -53,7 +53,7 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
   const listener = onDrag(move, __down, up);
 
   return (
-    e: MouseEvent | React.MouseEvent<T> | TouchEvent | React.TouchEvent<T>
+    e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent
   ) => {
     if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)
       return;

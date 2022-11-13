@@ -14,7 +14,7 @@
     "build:js": "tsc && rollup -c",
     "build:css": "stylus -o dist/liqvid.css styl/liqvid.styl; stylus -c -o dist/liqvid.min.css styl/liqvid.styl",
     "build:postclean": "rm -rf dist/esm dist/types",
-    "lint": "eslint --ext ts,tsx --fix src; eslint --ext ts,tsx --fix tests",
+    "lint": "eslint --ext ts,tsx --fix e2e src tests",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
     "test": "pnpm test:jest && pnpm test:build-e2e && pnpm test:playwright",
