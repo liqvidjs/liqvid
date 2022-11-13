@@ -10,7 +10,7 @@ const modifierMap = {
   Control: "Ctrl",
   Alt: "Alt",
   Shift: "Shift",
-  Meta: "Meta"
+  Meta: "Meta",
 };
 
 const mixedCase: {[key: string]: string} = {};
@@ -18,14 +18,11 @@ for (const key of mixedCaseVals) {
   mixedCase[key.toLowerCase()] = key;
 }
 
-const modifierOrder = (Object.keys(modifierMap) as (keyof typeof modifierMap)[]).map(k => modifierMap[k]);
+const modifierOrder = (
+  Object.keys(modifierMap) as (keyof typeof modifierMap)[]
+).map((k) => modifierMap[k]);
 
-const useCode = [
-  "Backspace",
-  "Enter",
-  "Space",
-  "Tab"
-];
+const useCode = ["Backspace", "Enter", "Space", "Tab"];
 
 /** Maps keyboard shortcuts to actions */
 export class Keymap {
@@ -58,30 +55,33 @@ export class Keymap {
 
   /** Returns a canonical form of the shortcut sequence. */
   static normalize(seq: string) {
-    return seq.split("+").map(str => {
-      const lower = str.toLowerCase();
+    return seq
+      .split("+")
+      .map((str) => {
+        const lower = str.toLowerCase();
 
-      if (str === "")
-        return "";
+        if (str === "") return "";
 
-      if (mixedCase[lower]) {
-        return mixedCase[lower];
-      }
-
-      return str[0].toUpperCase() + lower.slice(1);
-    }).sort((a, b) => {
-      if (modifierOrder.includes(a)) {
-        if (modifierOrder.includes(b)) {
-          return modifierOrder.indexOf(a) - modifierOrder.indexOf(b);
-        } else {
-          return -1;
+        if (mixedCase[lower]) {
+          return mixedCase[lower];
         }
-      } else if (modifierOrder.includes(b)) {
-        return 1;
-      } else {
-        return cmp(a, b);
-      }
-    }).join("+");
+
+        return str[0].toUpperCase() + lower.slice(1);
+      })
+      .sort((a, b) => {
+        if (modifierOrder.includes(a)) {
+          if (modifierOrder.includes(b)) {
+            return modifierOrder.indexOf(a) - modifierOrder.indexOf(b);
+          } else {
+            return -1;
+          }
+        } else if (modifierOrder.includes(b)) {
+          return 1;
+        } else {
+          return cmp(a, b);
+        }
+      })
+      .join("+");
   }
 
   /**
@@ -135,21 +135,19 @@ export class Keymap {
 
   /** Get the list of handlers for a given shortcut sequence. */
   getHandlers(seq: string) {
-    if (!this.__bindings.hasOwnProperty(seq))
-      return [];
+    if (!this.__bindings.hasOwnProperty(seq)) return [];
     return this.__bindings[seq].slice();
   }
-  
+
   /** Dispatches all handlers matching the given event. */
   handle(e: KeyboardEvent) {
     const seq = Keymap.identify(e);
 
-    if (!this.__bindings[seq] && !this.__bindings["*"])
-      return;
+    if (!this.__bindings[seq] && !this.__bindings["*"]) return;
 
     if (this.__bindings[seq]) {
       e.preventDefault();
-      
+
       for (const cb of this.__bindings[seq]) {
         cb(e);
       }
@@ -167,9 +165,7 @@ export class Keymap {
  * Returns -1 if a < b, 0 if a === b, and 1 if a > b.
  */
 function cmp<T>(a: T, b: T) {
-  if (a < b)
-    return -1;
-  else if (a === b)
-    return 0;
+  if (a < b) return -1;
+  else if (a === b) return 0;
   return 1;
 }

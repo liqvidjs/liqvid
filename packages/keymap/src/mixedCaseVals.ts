@@ -169,5 +169,5 @@ export const mixedCaseVals = [
   "BrowserHome",
   "BrowserRefresh",
   "BrowserSearch",
-  "BrowserStop"
+  "BrowserStop",
 ];

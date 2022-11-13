@@ -27,14 +27,16 @@ describe("Keymap bind handling", () => {
     expect(keymap.getHandlers("A")).toEqual([cb]);
     expect(keymap.getHandlers("B")).toEqual([cb2]);
   });
-  
+
   test("getKeys", () => {
     expect(keymap.getKeys()).toEqual(["A", "B"]);
   });
 
   test("unbind", () => {
     expect(() => keymap.unbind("C", cb)).toThrow("C is not bound");
-    expect(() => keymap.unbind("B", cb)).toThrow(`B is not bound to ${cb.name}`);
+    expect(() => keymap.unbind("B", cb)).toThrow(
+      `B is not bound to ${cb.name}`
+    );
     keymap.unbind("A", cb);
     expect(keymap.getHandlers("A")).toEqual([]);
   });
