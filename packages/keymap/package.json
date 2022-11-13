@@ -32,7 +32,7 @@
     "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
-    "test": "eslint src --ext ts,tsx && jest --coverage"
+    "test": "jest"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",

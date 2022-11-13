@@ -33,10 +33,8 @@ describe("Keymap bind handling", () => {
   });
 
   test("unbind", () => {
-    expect(() => keymap.unbind("C", cb)).toThrow("C is not bound");
-    expect(() => keymap.unbind("B", cb)).toThrow(
-      `B is not bound to ${cb.name}`
-    );
+    expect(() => keymap.unbind("C", cb)).not.toThrow();
+    expect(() => keymap.unbind("B", cb)).not.toThrow();
     keymap.unbind("A", cb);
     expect(keymap.getHandlers("A")).toEqual([]);
   });

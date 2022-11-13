@@ -116,11 +116,12 @@ export class Keymap {
       return;
     }
     seq = Keymap.normalize(seq);
-    if (!this.__bindings.hasOwnProperty(seq))
-      throw new Error(`${seq} is not bound`);
+    if (!this.__bindings.hasOwnProperty(seq)) {
+      return;
+    }
     const index = this.__bindings[seq].indexOf(cb);
     if (index < 0) {
-      throw new Error(`${seq} is not bound to ${cb.name ?? "callback"}`);
+      return;
     }
     this.__bindings[seq].splice(index, 1);
     if (this.__bindings[seq].length === 0) {
