@@ -148,15 +148,16 @@ export class Media extends React.PureComponent<
   }
 
   onSeek(t: number): void {
-    if (between(this.start, t, this.end)) {
-      this.domElement.currentTime = (t - this.start) / 1000;
+    this.domElement.currentTime = (t - this.start) / 1000;
 
+    if (between(this.start, t, this.end)) {
       if (
         this.domElement.paused &&
         !this.playback.paused &&
         !this.playback.seeking
-      )
+      ) {
         this.play().catch(this.playback.pause);
+      }
     } else {
       if (!this.domElement.paused) this.pause();
     }
