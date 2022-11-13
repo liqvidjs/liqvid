@@ -1,12 +1,24 @@
+packages/**/LICENSE
+
+# Node
 node_modules
 dist
 coverage
 tsconfig.tsbuildinfo
-lerna-debug.log
-.DS_Store
-*.code-*
-*.sublime-*
 *.log
+
+# Configuration
 .env
 
-packages/**/LICENSE
+# Editors
+*.code-*
+*.sublime-*
+
+# Generated
+bundle.js
+
+# Operating system
+.DS_Store
+
+# static files
+*.mp4
