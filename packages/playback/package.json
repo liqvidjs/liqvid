@@ -27,7 +27,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
     "build:postclean": "find . -name tsconfig.tsbuildinfo -delete",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests"
+    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "test": "jest"
   },
   "repository": {
     "type": "git",

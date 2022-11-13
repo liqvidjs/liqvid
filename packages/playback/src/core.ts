@@ -208,6 +208,10 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
     this.__startTime = performance.now();
 
     this.emit("seek", t);
+
+    if (this.currentTime >= this.duration) {
+      this.stop();
+    }
   }
 
   /** Gets or sets the volume level for the playback. */
