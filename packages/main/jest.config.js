@@ -1,6 +1,6 @@
 module.exports = {
-	preset: 'ts-jest',
-	testEnvironment: 'jsdom',
-	testPathIgnorePatterns: ['dist'],
-	transform: {}
+  preset: "ts-jest",
+  testEnvironment: "jsdom",
+  testPathIgnorePatterns: ["dist", "e2e"],
+  transform: {},
 };

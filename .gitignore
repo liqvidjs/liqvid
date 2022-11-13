@@ -7,5 +7,6 @@ lerna-debug.log
 *.code-*
 *.sublime-*
 *.log
+.env
 
 packages/**/LICENSE

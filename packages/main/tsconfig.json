@@ -19,7 +19,6 @@
     "target": "esnext"
   },
   "include": [
-    "./src/index.ts",
-    "tests/**/*.ts*"
+    "./src/index.ts"
   ]
 }
