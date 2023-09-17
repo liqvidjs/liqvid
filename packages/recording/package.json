@@ -1,10 +1,13 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Recording functionality for Liqvid",
   "exports": {
-    "import": "./dist/esm/index.mjs",
-    "require": "./dist/cjs/index.cjs"
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
   },
   "typings": "./dist/types/index.d.ts",
   "files": [
@@ -26,7 +29,6 @@
     "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src",
-    
     "css": "stylus -c -w -o dist/style.css styl/recording.styl"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
