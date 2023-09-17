@@ -37,13 +37,15 @@ export const captureRef =
  */
 export function createUniqueContext<T>(
   key: string,
-  defaultValue: T = undefined
+  defaultValue: T = undefined,
+  displayName?: string
 ): React.Context<T> {
   const symbol = Symbol.for(key);
 
   if (!(symbol in globalThis)) {
-    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] =
-      createContext<T>(defaultValue);
+    const context = createContext<T>(defaultValue);
+    context.displayName = displayName;
+    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] = context;
   }
 
   return (globalThis as unknown as {[symbol]: React.Context<T>})[symbol];
@@ -75,15 +77,15 @@ export function combineRefs<T>(...args: React.Ref<T>[]): (o: T) => void {
 export function onClick<T extends HTMLElement | SVGElement>(
   callback: (e: React.MouseEvent<T> | React.TouchEvent<T>) => void
 ):
-  | {onClick: typeof callback}
   | {
       onTouchStart: React.TouchEventHandler<T>;
       onTouchEnd: React.TouchEventHandler<T>;
-    } {
+    }
+  | {onClick: typeof callback} {
   if (anyHover) {
     return {onClick: callback};
   } else {
-    let touchId: number, target: T & EventTarget;
+    let touchId: number, target: EventTarget & T;
 
     // touchstart handler
     const onTouchStart: React.TouchEventHandler<T> = (e) => {
@@ -155,6 +157,7 @@ export function recursiveMap(
 
     if ("children" in child.props) {
       child = cloneElement(child, {
+        // @ts-expect-error TODO this used to work
         children: recursiveMap(child.props.children, fn),
       });
     }
