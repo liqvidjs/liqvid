@@ -37,13 +37,15 @@ export const captureRef =
  */
 export function createUniqueContext<T>(
   key: string,
-  defaultValue: T = undefined
+  defaultValue: T = undefined,
+  displayName?: string
 ): React.Context<T> {
   const symbol = Symbol.for(key);
 
   if (!(symbol in globalThis)) {
-    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] =
-      createContext<T>(defaultValue);
+    const context = createContext<T>(defaultValue);
+    context.displayName = displayName;
+    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] = context;
   }
 
   return (globalThis as unknown as {[symbol]: React.Context<T>})[symbol];
