@@ -4,22 +4,24 @@ import type StrictEventEmitter from "strict-event-emitter-types";
 import type {IntransigentReturn, Recorder} from "./recorder";
 
 interface EventTypes {
-  "cancel": void;
-  "capture": (key: string, data: unknown) => void;
-  "finalize": (key: string, data: unknown) => void;
-  "pause": void;
-  "resume": void;
-  "start": void;
+  cancel: void;
+  capture: (key: string, data: unknown) => void;
+  finalize: (key: string, data: unknown) => void;
+  pause: void;
+  resume: void;
+  start: void;
 }
 
 /**
  * Class for managing recording sessions.
  */
-export class RecordingManager
-extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, EventTypes>) {
+export class RecordingManager extends (EventEmitter as unknown as new () => StrictEventEmitter<
+  EventEmitter,
+  EventTypes
+>) {
   /** Whether recording is currently in progress. */
   active: boolean;
-  
+
   /** Duration of recording. */
   duration: number;
 
@@ -32,7 +34,7 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
   private captureData: {
     [key: string]: unknown[];
   };
-  
+
   private plugins: Record<string, Recorder<unknown, unknown>>;
 
   private intransigentRecorder: Recorder<unknown, unknown>;
@@ -53,12 +55,18 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
     this.paused = false;
     this.active = false;
 
-    bind(this, ["beginRecording", "endRecording", "pauseRecording", "resumeRecording", "capture"]);
+    bind(this, [
+      "beginRecording",
+      "endRecording",
+      "pauseRecording",
+      "resumeRecording",
+      "capture",
+    ]);
   }
 
   /**
    * Begin recording.
-   * 
+   *
    * @emits start
    */
   beginRecording(plugins: Record<string, Recorder<unknown, unknown>>): void {
@@ -74,9 +82,9 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
 
       recorder.provide({
         push: (value: unknown) => this.capture(key, value),
-        manager: this
+        manager: this,
       });
-      
+
       this.captureData[key] = [];
 
       if (recorder.intransigent) {
@@ -102,7 +110,7 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
    * Commit a piece of recording data.
    * @param key Key for recording source.
    * @param value Data to record.
-   * 
+   *
    * @emits capture
    */
   capture(key: string, value: unknown): void {
@@ -113,7 +121,7 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
 
   /**
    * End recording and collect finalized data from recorders.
-   * 
+   *
    * @emits finalize
    */
   async endRecording(): Promise<unknown> {
@@ -122,19 +130,19 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
     const recording: Record<string, unknown> = {};
 
     let startDelay = 0,
-        stopDelay = 0;
+      stopDelay = 0;
 
     let promise;
 
     // stop intransigentRecorder
     if (this.intransigentRecorder) {
-      promise = this.intransigentRecorder.endRecording() as Promise<IntransigentReturn>;
+      promise =
+        this.intransigentRecorder.endRecording() as Promise<IntransigentReturn>;
     }
 
     // stop other recorders
     for (const key in this.plugins) {
-      if (this.plugins[key] === this.intransigentRecorder)
-        continue;
+      if (this.plugins[key] === this.intransigentRecorder) continue;
       this.plugins[key].endRecording();
     }
 
@@ -143,7 +151,7 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
       try {
         const [startTime, stopTime] = await promise;
         startDelay = startTime;
-        stopDelay = stopTime - endTime;      
+        stopDelay = stopTime - endTime;
         this.duration = this.duration + stopDelay - startDelay;
       } catch (e) {
         startDelay = 0;
@@ -154,7 +162,11 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
 
     // finalize
     for (const key in this.plugins) {
-      recording[key] = this.plugins[key].finalizeRecording(this.captureData[key], startDelay, stopDelay);
+      recording[key] = this.plugins[key].finalizeRecording(
+        this.captureData[key],
+        startDelay,
+        stopDelay
+      );
       this.emit("finalize", key, recording[key]);
     }
 
@@ -172,7 +184,7 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
 
   /**
    * Pause recording.
-   * 
+   *
    * @emits pause
    */
   pauseRecording(): void {
@@ -185,10 +197,10 @@ extends (EventEmitter as unknown as new () => StrictEventEmitter<EventEmitter, E
     this.paused = true;
     this.emit("pause");
   }
-  
+
   /**
    * Resume recording from paused state.
-   * 
+   *
    * @emits resume
    */
   resumeRecording(): void {

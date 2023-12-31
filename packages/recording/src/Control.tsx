@@ -1,4 +1,11 @@
-import {useCallback, useEffect, useMemo, useReducer, useRef, useState} from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import {Keymap} from "@liqvid/keymap";
 import {useKeymap} from "@liqvid/keymap/react";
@@ -12,7 +19,7 @@ import {Recorder} from "./recorder";
 
 interface Props {
   manager?: RecordingManager;
-  plugins?: RecorderPlugin<any, any>[];
+  plugins?: RecorderPlugin<unknown, unknown>[];
 }
 
 interface Action {
@@ -30,7 +37,7 @@ const mac = navigator.platform === "MacIntel";
 const bindings = {
   start: mac ? "Alt+Meta+2" : "Ctrl+Alt+2",
   pause: mac ? "Alt+Meta+3" : "Ctrl+Alt+3",
-  discard: mac ? "Alt+Meta+4" : "Ctrl+Alt+4"
+  discard: mac ? "Alt+Meta+4" : "Ctrl+Alt+4",
 };
 
 /**
@@ -47,14 +54,22 @@ export function RecordingControl(props: Props) {
 
   useEffect(() => {
     manager.current = props.manager ?? new RecordingManager();
-    manager.current.on("finalize", forceUpdate);
-    manager.current.on("start", forceUpdate);
-    manager.current.on("pause", forceUpdate);
-    manager.current.on("resume", forceUpdate);
-  }, []);
+
+    const eventNames = ["finalize", "start", "pause", "resume"] as const;
+
+    for (const eventName of eventNames) {
+      manager.current.on(eventName, forceUpdate);
+    }
+
+    return () => {
+      for (const eventName of eventNames) {
+        manager.current.off(eventName, forceUpdate);
+      }
+    };
+  }, [forceUpdate, props.manager]);
 
   // active plugins
-  const activePlugins = useRef<{[key: string]: boolean;}>(null);
+  const activePlugins = useRef<{[key: string]: boolean}>(null);
   if (activePlugins.current === null) {
     activePlugins.current = {};
 
@@ -78,7 +93,7 @@ export function RecordingControl(props: Props) {
     if (active) {
       endRecording().then((recording: Record<string, unknown>) => {
         recording.duration = manager.current.duration;
-        setRecordings(prev => prev.concat(recording));
+        setRecordings((prev) => prev.concat(recording));
       });
     } else {
       const recorders: Record<string, Recorder<unknown, unknown>> = {};
@@ -89,7 +104,7 @@ export function RecordingControl(props: Props) {
       }
       beginRecording(recorders);
     }
-  }, []);
+  }, [props.plugins]);
 
   const pause = useCallback(() => {
     const {active, paused, pauseRecording, resumeRecording} = manager.current;
@@ -101,7 +116,9 @@ export function RecordingControl(props: Props) {
   const discard = useCallback(async () => {
     const {active, endRecording} = manager.current;
     if (active) {
-      const listeners = manager.current.listeners("finalize") as (Parameters<typeof manager.current.on>[1])[];
+      const listeners = manager.current.listeners("finalize") as Parameters<
+        typeof manager.current.on
+      >[1][];
       for (const listener of listeners) {
         manager.current.off("finalize", listener);
       }
@@ -117,31 +134,36 @@ export function RecordingControl(props: Props) {
 
       forceUpdate();
     }
-  }, []);
+  }, [forceUpdate]);
 
   /* keyboard controls */
-  const callbacks: Record<keyof State, (e: KeyboardEvent) => void> = useMemo(() => ({start, pause, discard}), []);
+  const callbacks: Record<keyof State, (e: KeyboardEvent) => void> = useMemo(
+    () => ({start, pause, discard}),
+    [discard, pause, start]
+  );
 
   const reducer: React.Reducer<State, Action> = useCallback((state, action) => {
-    // rebind
-    keymap.unbind(state[action.command], callbacks[action.command]);
-    keymap.bind(action.seq, callbacks[action.command]);
-
     // return new state
     return {
       ...state,
-      [action.command]: action.seq
+      [action.command]: action.seq,
     };
   }, []);
 
   const [state, dispatch] = useReducer(reducer, bindings);
 
-  // initial bind
+  // bind
   useEffect(() => {
-    for (const key in state) {
-      keymap.bind(state[key as keyof State], callbacks[key as keyof State]);
+    for (const key of Object.keys(state) as (keyof State)[]) {
+      keymap.bind(state[key], callbacks[key]);
     }
-  }, []);
+
+    return () => {
+      for (const key of Object.keys(state) as (keyof State)[]) {
+        keymap.unbind(state[key], callbacks[key]);
+      }
+    };
+  }, [callbacks, keymap, state]);
 
   // onBlur event, triggers rebind
   const onBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -153,15 +175,18 @@ export function RecordingControl(props: Props) {
     const seq = e.currentTarget.dataset.value;
     dispatch({command: name, seq});
   }, []);
-  
-  // display shortcut sequence
-  const identifyKey = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
 
-    const seq = Keymap.identify(e as unknown as KeyboardEvent);
-    e.currentTarget.dataset.value = seq;
-    e.currentTarget.value = fmtSeq(seq);
-  }, []);
+  // display shortcut sequence
+  const identifyKey = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      e.preventDefault();
+
+      const seq = Keymap.identify(e as unknown as KeyboardEvent);
+      e.currentTarget.dataset.value = seq;
+      e.currentTarget.value = fmtSeq(seq);
+    },
+    []
+  );
 
   // warn before closing if recordings exist
   const warn = useRef(false);
@@ -169,33 +194,40 @@ export function RecordingControl(props: Props) {
 
   useEffect(() => {
     window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
-      if (warn.current)
-        e.returnValue = "You have recording data";
+      if (warn.current) e.returnValue = "You have recording data";
     });
   }, []);
 
   // show/hide control pane
   const [paneOpen, setPaneOpen] = useState(false);
-  const togglePane = useMemo(() => onClick(() => {
-    setPaneOpen(prev => !prev);
-  }), []);
+  const togglePane = useMemo(
+    () =>
+      onClick(() => {
+        setPaneOpen((prev) => !prev);
+      }),
+    []
+  );
 
   const dialogStyle = {
-    display: paneOpen ? "block" : "none"
+    display: paneOpen ? "block" : "none",
   };
 
   // toggle plugin
-  const setActive = useMemo(() => onClick<SVGSVGElement>((e) => {
-    const key = e.currentTarget.dataset.plugin;
-    activePlugins.current[key] = !activePlugins.current[key];
-    forceUpdate();
-  }), []);
+  const setActive = useMemo(
+    () =>
+      onClick<SVGSVGElement>((e) => {
+        const key = e.currentTarget.dataset.plugin;
+        activePlugins.current[key] = !activePlugins.current[key];
+        forceUpdate();
+      }),
+    [forceUpdate]
+  );
 
   /* render */
   const commands: [string, keyof State][] = [
     ["Start/Stop recording", "start"],
     ["Pause recording", "pause"],
-    ["Discard recording", "discard"]
+    ["Discard recording", "discard"],
   ];
 
   return (
@@ -211,8 +243,14 @@ export function RecordingControl(props: Props) {
                 <th scope="row">{desc}</th>
                 <td>
                   <input
-                    onBlur={onBlur} readOnly onKeyDown={identifyKey}
-                    className="shortcut" name={key} type="text" value={fmtSeq(state[key])}/>
+                    onBlur={onBlur}
+                    readOnly
+                    onKeyDown={identifyKey}
+                    className="shortcut"
+                    name={key}
+                    type="text"
+                    value={fmtSeq(state[key])}
+                  />
                 </td>
               </tr>
             ))}
@@ -223,22 +261,35 @@ export function RecordingControl(props: Props) {
         {props.plugins.map((plugin) => {
           const classNames = ["recorder-plugin-icon"];
 
-          if (activePlugins.current[plugin.key])
-            classNames.push("active");
+          if (activePlugins.current[plugin.key]) classNames.push("active");
 
           const styles: React.CSSProperties = {};
-          const enabled = typeof plugin.enabled === "undefined" || plugin.enabled();
+          const enabled =
+            typeof plugin.enabled === "undefined" || plugin.enabled();
           if (!enabled) {
             styles.opacity = 0.3;
           }
 
           return (
-            <div className="recorder-plugin" key={plugin.key} title={plugin.title} style={styles}>
+            <div
+              className="recorder-plugin"
+              key={plugin.key}
+              title={plugin.title}
+              style={styles}
+            >
               <svg
-                className={classNames.join(" ")} height="36" width="36" viewBox="0 0 100 100"
-                data-plugin={plugin.key} {...(enabled ? setActive : {})}
+                className={classNames.join(" ")}
+                height="36"
+                width="36"
+                viewBox="0 0 100 100"
+                data-plugin={plugin.key}
+                {...(enabled ? setActive : {})}
               >
-                <rect height="100" width="100" fill={activePlugins.current[plugin.key] ? "red" : "#222"}/>
+                <rect
+                  height="100"
+                  width="100"
+                  fill={activePlugins.current[plugin.key] ? "red" : "#222"}
+                />
                 {plugin.icon}
               </svg>
               <span className="recorder-plugin-name">{plugin.name}</span>
@@ -249,14 +300,28 @@ export function RecordingControl(props: Props) {
         <h3>Saved data</h3>
         <ol className="recordings">
           {recordings.map((recording, i) => (
-            <RecordingRow key={i} data={recording} pluginsByKey={pluginsByKey}/>
+            <RecordingRow
+              key={i}
+              data={recording}
+              pluginsByKey={pluginsByKey}
+            />
           ))}
         </ol>
       </div>
       <svg height="36" width="36" viewBox="-50 -50 100 100" {...togglePane}>
         <circle
-          cx="0" cy="0" r="35" stroke="white" strokeWidth="5"
-          fill={manager.current?.active ? (manager.current?.paused ? "yellow" : "red") : "#666"}
+          cx="0"
+          cy="0"
+          r="35"
+          stroke="white"
+          strokeWidth="5"
+          fill={
+            manager.current?.active
+              ? manager.current?.paused
+                ? "yellow"
+                : "red"
+              : "#666"
+          }
         />
       </svg>
     </div>
@@ -265,19 +330,16 @@ export function RecordingControl(props: Props) {
 
 /** Format key sequences with special characters on Mac */
 function fmtSeq(str: string) {
-  if (navigator.platform !== "MacIntel")
-    return str;
-  if (str === void 0)
-    return str;
-  return str.split("+").map(k => {
-    if (k === "Ctrl")
-      return "^";
-    else if (k === "Alt")
-      return "⌥";
-    if (k === "Shift")
-      return "⇧";
-    if (k === "Meta")
-      return "⌘";
-    return k;
-  }).join("");
+  if (navigator.platform !== "MacIntel") return str;
+  if (str === void 0) return str;
+  return str
+    .split("+")
+    .map((k) => {
+      if (k === "Ctrl") return "^";
+      else if (k === "Alt") return "⌥";
+      if (k === "Shift") return "⇧";
+      if (k === "Meta") return "⌘";
+      return k;
+    })
+    .join("");
 }

@@ -9,8 +9,8 @@ export abstract class Recorder<T = unknown, F = T[]> {
   protected manager: RecordingManager;
 
   /**
-  A recorder is intransigent if it cannot be started immediately (e.g. AudioRecorder).
-  */
+   * A recorder is intransigent if it cannot be started immediately (e.g. AudioRecorder).
+   */
   intransigent = false;
 
   /** Begin recording. */
@@ -21,17 +21,21 @@ export abstract class Recorder<T = unknown, F = T[]> {
 
   /** Resume recording from paused. */
   resumeRecording(): void {}
-  
+
   /** End recording. */
   endRecording(): Promise<IntransigentReturn> | void {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   finalizeRecording(data: T[], startDelay = 0, stopDelay = 0): F {
     return data as unknown as F;
   }
 
   push: (value: T) => void;
 
-  provide({push, manager}: {
+  provide({
+    push,
+    manager,
+  }: {
     push: (value: T) => void;
     manager: RecordingManager;
   }) {
@@ -39,5 +43,6 @@ export abstract class Recorder<T = unknown, F = T[]> {
     this.manager = manager;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getUpdate(data: T[], lastDuration: number) {}
 }

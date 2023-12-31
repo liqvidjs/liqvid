@@ -3,10 +3,7 @@ import type {RecorderPlugin} from "../types";
 
 const icon = (
   <g transform="scale(0.126261032057) translate(164.575)">
-    <g
-      stroke="#FFF"
-      transform="translate(-140.62 -173.21)"
-    >
+    <g stroke="#FFF" transform="translate(-140.62 -173.21)">
       <path
         d="m568.57 620.93c0 116.77-94.66 211.43-211.43 211.43s-211.43-94.66-211.43-211.43v-0.00001"
         fillOpacity="0"
@@ -21,11 +18,7 @@ const icon = (
         strokeLinecap="round"
         strokeWidth="40"
       />
-      <path
-        d="m372.05 832.36v114.29"
-        strokeWidth="30"
-        fill="none"
-      />
+      <path d="m372.05 832.36v114.29" strokeWidth="30" fill="none" />
       <path
         fill="#FFF"
         d="m197.14 920.93c0.00001-18.935 59.482-34.286 132.86-34.286 73.375 0 132.86 15.35 132.86 34.286z"
@@ -58,15 +51,16 @@ export class AudioRecorder extends Recorder<Blob, Blob> {
   intransigent = true;
 
   beginRecording() {
-    if (!this.stream)
-      throw new Error("Navigator stream not available");
+    if (!this.stream) throw new Error("Navigator stream not available");
 
-    this.promise = new Promise(async (resolve, reject) => {
+    this.promise = new Promise(async (resolve) => {
       // record the audio
-      this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: "audio/webm"});
+      this.mediaRecorder = new MediaRecorder(this.stream, {
+        mimeType: "audio/webm",
+      });
 
       // subscribe to events
-      this.mediaRecorder.addEventListener("dataavailable", e => {
+      this.mediaRecorder.addEventListener("dataavailable", (e) => {
         this.push(e.data);
       });
 
@@ -102,9 +96,8 @@ export class AudioRecorder extends Recorder<Blob, Blob> {
 
   requestRecording() {
     // be idempotent
-    if (this.requested)
-      return;
-    
+    if (this.requested) return;
+
     const request = async () => {
       // Only need to do this once...
       window.removeEventListener("click", request);
@@ -125,11 +118,13 @@ export class AudioRecorder extends Recorder<Blob, Blob> {
 export function AudioSaveComponent(props: {data: Blob}) {
   return (
     <>
-      {props.data ?
-        <a download="audio.webm" href={URL.createObjectURL(props.data)}>Download Audio</a>
-        :
+      {props.data ? (
+        <a download="audio.webm" href={URL.createObjectURL(props.data)}>
+          Download Audio
+        </a>
+      ) : (
         "Audio not yet available"
-      }
+      )}
     </>
   );
 }
@@ -148,5 +143,5 @@ export const AudioRecording: RecorderPlugin<Blob, Blob, AudioRecorder> = {
   name: "Audio",
   recorder,
   saveComponent: AudioSaveComponent,
-  title: "Record audio"
+  title: "Record audio",
 };

@@ -30,18 +30,24 @@ export default function RecordingRow(props: Props) {
         value={name}
       />
       <table className="recording-results">
-        <caption>Duration: {data.duration} ({formatTimeMs(data.duration)})</caption>
+        <caption>
+          Duration: {data.duration} ({formatTimeMs(data.duration)})
+        </caption>
         <tbody>
-          {Object.keys(data).map(pluginKey => {
-            if (pluginKey === "duration")
-              return null;
+          {Object.keys(data).map((pluginKey) => {
+            if (pluginKey === "duration") return null;
             const plugin = pluginsByKey[pluginKey],
               SaveComponent = plugin.saveComponent;
 
             return (
               <tr key={pluginKey}>
                 <th key="head" scope="row" title={plugin.name}>
-                  <svg className="recorder-plugin-icon" height="36" width="36" viewBox="0 0 100 100">
+                  <svg
+                    className="recorder-plugin-icon"
+                    height="36"
+                    width="36"
+                    viewBox="0 0 100 100"
+                  >
                     <rect height="100" width="100" fill="#222" />
                     {plugin.icon}
                   </svg>
@@ -49,7 +55,8 @@ export default function RecordingRow(props: Props) {
                 <td key="cell">
                   <SaveComponent data={data[pluginKey]} />
                 </td>
-              </tr>);
+              </tr>
+            );
           })}
         </tbody>
       </table>

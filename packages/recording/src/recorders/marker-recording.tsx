@@ -9,8 +9,15 @@ type MarkerFormatted = [string, string];
 
 const icon = (
   <text
-    fill="#FFF" fontFamily="Helvetica" fontSize="75"
-    textAnchor="middle" x="50" y="75">M</text>
+    fill="#FFF"
+    fontFamily="Helvetica"
+    fontSize="75"
+    textAnchor="middle"
+    x="50"
+    y="75"
+  >
+    M
+  </text>
 );
 
 export class MarkerRecorder extends Recorder<Marker, MarkerFormatted[]> {
@@ -36,12 +43,11 @@ export class MarkerRecorder extends Recorder<Marker, MarkerFormatted[]> {
     data[0][1] -= startDelay;
     data[data.length - 1][1] += stopDelay;
 
-    return data.map(cue => [cue[0], formatTimeMs(cue[1])] as MarkerFormatted);
+    return data.map((cue) => [cue[0], formatTimeMs(cue[1])] as MarkerFormatted);
   }
 
   onMarkerUpdate(prevIndex: number) {
-    if (this.manager.paused)
-      return;
+    if (this.manager.paused) return;
 
     this.captureMarker(this.script.markers[prevIndex][0]);
   }
@@ -62,14 +68,21 @@ export function MarkerSaveComponent(props: {data: MarkerFormatted[]}) {
   );
 }
 
-export const MarkerRecording: RecorderPlugin<Marker, MarkerFormatted[], MarkerRecorder> = {
+export const MarkerRecording: RecorderPlugin<
+  Marker,
+  MarkerFormatted[],
+  MarkerRecorder
+> = {
   icon,
   key: "markers",
   name: "Markers",
-  recorder: new MarkerRecorder,
-  saveComponent: MarkerSaveComponent
+  recorder: new MarkerRecorder(),
+  saveComponent: MarkerSaveComponent,
 };
 
 function format(data: unknown) {
-  return JSON.stringify(data, null, 2).replace(/\[\s+"(.+?)",\s+"(.+?)"\s+\]/g, "[\"$1\", \"$2\"]");
+  return JSON.stringify(data, null, 2).replace(
+    /\[\s+"(.+?)",\s+"(.+?)"\s+\]/g,
+    '["$1", "$2"]'
+  );
 }

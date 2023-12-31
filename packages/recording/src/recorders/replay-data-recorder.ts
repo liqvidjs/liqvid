@@ -1,7 +1,10 @@
 import type {ReplayData} from "@liqvid/utils/replay-data";
 import {Recorder} from "../recorder";
 
-export class ReplayDataRecorder<T> extends Recorder<[number, T], ReplayData<T>> {
+export class ReplayDataRecorder<T> extends Recorder<
+  [number, T],
+  ReplayData<T>
+> {
   private duration: number;
 
   constructor() {
@@ -13,7 +16,11 @@ export class ReplayDataRecorder<T> extends Recorder<[number, T], ReplayData<T>> 
     this.duration = 0;
   }
 
-  finalizeRecording(data: ReplayData<T>, startDelay = 0, stopDelay = 0): ReplayData<T> {
+  finalizeRecording(
+    data: ReplayData<T>
+    // startDelay = 0,
+    // stopDelay = 0
+  ): ReplayData<T> {
     // for (let sum = 0, i = 0; i < data.length && sum < startDelay; ++i) {
     //   const dur = data[i][0];
 
@@ -51,13 +58,19 @@ export function compress<T>(o: T, precision = 2): T {
   switch (typeof o) {
     case "object":
       if (o instanceof Array) {
-        return o.map(val => compress(val, precision)) as unknown[] & T;
+        return o.map((val) => compress(val, precision)) as T & unknown[];
+      }
+      if (o === null) {
+        return o;
       }
       return Object.fromEntries(
-        (Object.keys(o) as (keyof typeof o)[]).map(key => [key, compress(o[key], precision)])
+        (Object.keys(o) as (keyof typeof o)[]).map((key) => [
+          key,
+          compress(o[key], precision),
+        ])
       ) as Record<string, unknown> & T;
     case "number":
-      return parseFloat(o.toFixed(precision)) as number & T;
+      return parseFloat(o.toFixed(precision)) as T & number;
     default:
       return o;
   }
