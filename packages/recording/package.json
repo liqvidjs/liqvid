@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.0.7",
+  "version": "0.2.0",
   "description": "Recording functionality for Liqvid",
   "exports": {
     ".": {
@@ -26,7 +26,10 @@
     "build": "pnpm build:clean && pnpm build:css && pnpm build:js && pnpm build:postclean",
     "build:css": "stylus -o dist/style.css styl/style.styl; stylus -c -o dist/style.min.css styl/style.styl",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs; pnpm build:js:fix",
+    "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:js:esm": "tsc --module esnext --outDir dist/esm",
+    "build:js:fix": "node ../../build.mjs",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "eslint --ext ts,tsx --fix src",
     "css": "stylus -c -w -o dist/style.css styl/recording.styl"
@@ -45,7 +48,8 @@
     "strict-event-emitter-types": "^2.0.0"
   },
   "peerDependencies": {
-    "liqvid": "workspace:^"
+    "liqvid": "workspace:^",
+    "react": ">=18"
   },
   "peerDependenciesMeta": {
     "liqvid": {
