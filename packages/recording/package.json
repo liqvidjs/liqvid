@@ -1,13 +1,14 @@
 {
   "name": "@liqvid/recording",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Recording functionality for Liqvid",
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs",
       "types": "./dist/types/index.d.ts"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "typings": "./dist/types/index.d.ts",
   "files": [
