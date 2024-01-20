@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/keymap",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Key binding for Liqvid",
   "repository": {
     "type": "git",
