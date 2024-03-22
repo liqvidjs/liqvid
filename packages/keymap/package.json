@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/keymap",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Key binding for Liqvid",
   "repository": {
     "type": "git",
@@ -9,11 +9,13 @@
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
     },
     "./react": {
       "import": "./dist/esm/react.mjs",
-      "require": "./dist/cjs/react.cjs"
+      "require": "./dist/cjs/react.cjs",
+      "types": "./dist/types/react.d.ts"
     }
   },
   "typesVersions": {
