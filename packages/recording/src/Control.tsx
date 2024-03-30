@@ -1,3 +1,5 @@
+"use client";
+
 import {
   useCallback,
   useEffect,
@@ -32,13 +34,6 @@ interface State {
   pause: string;
   discard: string;
 }
-
-const mac = navigator.platform === "MacIntel";
-const bindings = {
-  start: mac ? "Alt+Meta+2" : "Ctrl+Alt+2",
-  pause: mac ? "Alt+Meta+3" : "Ctrl+Alt+3",
-  discard: mac ? "Alt+Meta+4" : "Ctrl+Alt+4",
-};
 
 /**
  * Liqvid recording control.
@@ -150,7 +145,11 @@ export function RecordingControl(props: Props) {
     };
   }, []);
 
-  const [state, dispatch] = useReducer(reducer, bindings);
+  const [state, dispatch] = useReducer(reducer, null, () => ({
+    start: isMac() ? "Alt+Meta+2" : "Ctrl+Alt+2",
+    pause: isMac() ? "Alt+Meta+3" : "Ctrl+Alt+3",
+    discard: isMac() ? "Alt+Meta+4" : "Ctrl+Alt+4",
+  }));
 
   // bind
   useEffect(() => {
