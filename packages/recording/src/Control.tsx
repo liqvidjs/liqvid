@@ -330,7 +330,7 @@ export function RecordingControl(props: Props) {
 
 /** Format key sequences with special characters on Mac */
 function fmtSeq(str: string) {
-  if (navigator.platform !== "MacIntel") return str;
+  if (!isMac()) return str;
   if (str === void 0) return str;
   return str
     .split("+")
@@ -342,4 +342,11 @@ function fmtSeq(str: string) {
       return k;
     })
     .join("");
+}
+
+function isMac() {
+  return (
+    typeof globalThis.navigator !== "undefined" &&
+    navigator.platform === "MacIntel"
+  );
 }
