@@ -1,0 +1,44 @@
+{
+  "name": "@liqvid/diff",
+  "version": "1.0.0",
+  "description": "Object-diffing utility",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc --outDir dist/esm --module esnext; tsc --outDir dist/cjs --module commonjs; node ../../build.mjs",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "test": "eslint src --ext ts,tsx && jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/diff#readme",
+  "dependencies": {
+    "@liqvid/utils": "workspace:^"
+  },
+  "sideEffects": false
+}
