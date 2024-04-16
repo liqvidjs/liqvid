@@ -46,12 +46,12 @@ export function cmp(a: unknown, b: unknown): boolean {
 /**
  * Pattern-match on an item diff.
  */
-export function matchItemDiff<R>(
-  [offset, item]: ItemDiff,
+export function matchItemDiff<T, R>(
+  [offset, item]: ItemDiff<T>,
   fns: {
     set?: (offset: number, value: unknown) => R;
-    array?: (offset: number, value: ArrayDiff) => R;
-    object?: (offset: number, value: ObjectDiff) => R;
+    array?: (offset: number, value: ArrayDiff<T[number & keyof T]>) => R;
+    object?: (offset: number, value: ObjectDiff<T[string & keyof T]>) => R;
   }
 ): R | undefined {
   if (typeof offset === "number") {
@@ -61,10 +61,10 @@ export function matchItemDiff<R>(
   const numeric = getOffset(offset);
 
   if (isRune(offset, runes.array)) {
-    assertType<ArrayDiff>(item);
+    assertType<ArrayDiff<T[number & keyof T]>>(item);
     return fns?.array?.(numeric, item);
   } else if (isRune(offset, runes.object)) {
-    assertType<ObjectDiff>(item);
+    assertType<ObjectDiff<T[string & keyof T]>>(item);
     return fns?.object?.(numeric, item);
   }
 }
@@ -77,11 +77,14 @@ export function isRune<R extends Rune>(
 }
 
 /** Pattern-match on an object diff. */
-export function matchRunes<R>(
-  diff: ObjectDiff,
-  key: keyof ObjectDiff,
+export function matchRunes<T, R>(
+  diff: ObjectDiff<T>,
+  key: keyof ObjectDiff<T>,
   fns: {
-    [name in RuneName]?: (key: string, rkey: ObjectDiff[RunedKey<name>]) => R;
+    [name in RuneName]?: (
+      key: string & keyof T,
+      rkey: ObjectDiff<T>[RunedKey<name>]
+    ) => R;
   }
 ): R | undefined {
   for (const name of Object.keys(fns) as RuneName[]) {
@@ -89,19 +92,22 @@ export function matchRunes<R>(
     if (key.startsWith(rune)) {
       const fn = fns[name];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return fn(key.slice(rune.length), diff[key] as any);
+      return fn(key.slice(rune.length) as any, diff[key] as any);
     }
   }
 }
 
-export function consume(
-  a: ObjectDiff,
+export function consume<T>(
+  a: ObjectDiff<T>,
   key: string,
   fns: {
     [$name in RuneName | "else" | "none"]?: $name extends RuneName
-      ? (value: ObjectDiff[RunedKey<$name>]) => unknown
+      ? (value: ObjectDiff<T>[RunedKey<$name>]) => unknown
       : $name extends "else"
-      ? <K extends RuneName>(name: K, value: ObjectDiff[RunedKey<K>]) => unknown
+      ? <K extends RuneName>(
+          name: K,
+          value: ObjectDiff<T>[RunedKey<K>]
+        ) => unknown
       : () => unknown;
   } = {}
 ) {
@@ -129,7 +135,7 @@ export function consume(
   return fns.none?.();
 }
 
-export function getOffset(offset: ItemDiff[0]): number {
+export function getOffset(offset: ItemDiff<unknown>[0]): number {
   if (typeof offset === "number") return offset;
 
   if (isRune(offset, runes.array)) {
@@ -141,24 +147,24 @@ export function getOffset(offset: ItemDiff[0]): number {
   throw new Error(`Invalid index: ${offset}`);
 }
 
-export function addToOffset<T extends ItemDiff[0]>(
-  offset: T,
+export function addToOffset<O extends ItemDiff<unknown>[0]>(
+  offset: O,
   delta: number
-): T {
+): O {
   const result = getOffset(offset) + delta;
-  if (typeof offset === "number") return result as T;
+  if (typeof offset === "number") return result as O;
 
   if (isRune(offset, runes.array)) {
-    return `${runes.array}${result}` as T;
+    return `${runes.array}${result}` as O;
   }
 
-  return `${runes.object}${result}` as T;
+  return `${runes.object}${result}` as O;
 }
 
 /**
  * Invert a diff with respect to an object.
  * Note that it is not possible to invert a lone diff.
  */
-export function invertDiff(state: object, diff: ObjectDiff): ObjectDiff {
+export function invertDiff<T>(state: T, diff: ObjectDiff<T>): ObjectDiff<T> {
   return diffObjects(applyDiff(state, diff), state);
 }

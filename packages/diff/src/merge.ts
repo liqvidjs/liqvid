@@ -20,14 +20,17 @@ import {
 } from "./utils";
 
 /** Merge two array diffs. */
-export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
+export function mergeArrayDiffs<T>(
+  a: ArrayDiff<T>,
+  b: ArrayDiff<T>
+): ArrayDiff<T> {
   const [deltaA, itemDiffsA = [], ...tailA] = a;
   const [deltaB, itemDiffsB = [], ...tailB] = b;
 
   const delta = deltaA + deltaB;
 
   // combine item diffs
-  const itemDiffs: ItemDiff[] = [];
+  const itemDiffs: ItemDiff<T>[] = [];
 
   let iterA = 0;
   let iterB = 0;
@@ -72,10 +75,10 @@ export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
             },
           });
         } else {
-          itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff);
+          itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff<T>);
         }
       } else {
-        itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff);
+        itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff<T>);
       }
 
       iterB++;
@@ -88,20 +91,23 @@ export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
           matchItemDiff(itemB, {
             // change(a) * change(b) = change(b)
             set(_, valueB) {
-              itemDiffs.push(changeItemDiff(offsetA, valueB));
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
             },
             // change(a) * array(b) = change(a*b)
             array(_, valueB) {
               assertType<unknown[]>(valueA);
               itemDiffs.push(
-                changeItemDiff(offsetA, applyArrayDiff(valueA, valueB))
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                changeItemDiff<any>(offsetA, applyArrayDiff(valueA, valueB))
               );
             },
             // change(a) * object(b) = change(a*b)
             object(_, valueB) {
               assertType<object>(valueA);
               itemDiffs.push(
-                changeItemDiff(offsetA, applyDiff(valueA, valueB))
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                changeItemDiff<any>(offsetA, applyDiff(valueA, valueB))
               );
             },
           });
@@ -110,12 +116,14 @@ export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
           matchItemDiff(itemB, {
             // array(a) * change(b) = change(b)
             set(_, valueB) {
-              itemDiffs.push(changeItemDiff(offsetA, valueB));
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
             },
             // array(a) * array(b) = array(a*b)
             array(_, valueB) {
               itemDiffs.push(
-                arrayItemDiff(offsetA, mergeArrayDiffs(valueA, valueB))
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                arrayItemDiff<any>(offsetA, mergeArrayDiffs(valueA, valueB))
               );
             },
           });
@@ -124,7 +132,8 @@ export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
           matchItemDiff(itemB, {
             // object(a) * change(b) = change(b)
             set(_, valueB) {
-              itemDiffs.push(changeItemDiff(offsetA, valueB));
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
             },
             // object(a) * object(b) = object(a*b)
             object(_, valueB) {
@@ -151,8 +160,11 @@ export function mergeArrayDiffs(a: ArrayDiff, b: ArrayDiff): ArrayDiff {
 }
 
 /** Merge two object diffs. */
-export function mergeDiffs(a: ObjectDiff, b: ObjectDiff): ObjectDiff {
-  const ret: ObjectDiff = {};
+export function mergeDiffs<T>(
+  a: ObjectDiff<T>,
+  b: ObjectDiff<T>
+): ObjectDiff<T> {
+  const ret: ObjectDiff<T> = {};
 
   for (const rKeyB of objectKeys(b)) {
     matchRunes(b, rKeyB, {

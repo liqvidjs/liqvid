@@ -34,7 +34,7 @@ export function deletionDiff<K extends string>(key: K) {
  * @param key Key to use.
  * @param diff Array diff to apply.
  */
-export function arrayDiff<K extends string, D extends ArrayDiff>(
+export function arrayDiff<K extends string, T, D extends ArrayDiff<T>>(
   key: K,
   diff: D
 ) {
@@ -46,7 +46,7 @@ export function arrayDiff<K extends string, D extends ArrayDiff>(
  * @param key Key to use.
  * @param diff Object diff to apply.
  */
-export function objectDiff<K extends string, D extends ObjectDiff>(
+export function objectDiff<K extends string, T, D extends ObjectDiff<T>>(
   key: K,
   diff: D
 ) {
@@ -69,7 +69,7 @@ export function changeDiff<K extends string, V>(key: string, value: V) {
  * @param offset Offset from the end to change.
  * @param value Value to change to.
  */
-export function changeItemDiff(offset: number, value: unknown): ChangeItemDiff {
+export function changeItemDiff<T>(offset: number, value: T): ChangeItemDiff<T> {
   return [offset, value];
 }
 
@@ -78,7 +78,10 @@ export function changeItemDiff(offset: number, value: unknown): ChangeItemDiff {
  * @param offset Offset from the end to change.
  * @param diff Array diff to apply.
  */
-export function arrayItemDiff(offset: number, diff: ArrayDiff): ArrayItemDiff {
+export function arrayItemDiff<T>(
+  offset: number,
+  diff: ArrayDiff<T>
+): ArrayItemDiff<T> {
   return [`${runes.array}${offset}`, diff];
 }
 
@@ -87,6 +90,9 @@ export function arrayItemDiff(offset: number, diff: ArrayDiff): ArrayItemDiff {
  * @param index Index to change.
  * @param diff Object diff to apply.
  */
-export function objectItemDiff<D extends ObjectDiff>(offset: number, diff: D) {
+export function objectItemDiff<T, D extends ObjectDiff<T>>(
+  offset: number,
+  diff: D
+) {
   return [`${runes.object}${offset}`, diff] as [RunedKey<"object">, D];
 }

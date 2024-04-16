@@ -12,9 +12,9 @@ import type {ArrayDiff, ObjectDiff} from "./types";
 import {cmp} from "./utils";
 
 /** Compute the diff between two arrays. */
-export function diffArrays(a: unknown[], b: unknown[]): ArrayDiff {
+export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
   // diffs
-  const itemDiffs: Exclude<ArrayDiff[1], undefined> = [];
+  const itemDiffs: Exclude<ArrayDiff<T>[1], undefined> = [];
 
   for (let i = 0; i < Math.min(a.length, b.length); ++i) {
     const itemA = a[i];
@@ -40,7 +40,8 @@ export function diffArrays(a: unknown[], b: unknown[]): ArrayDiff {
 
       if (Array.isArray(itemA)) {
         assertType<unknown[]>(itemB);
-        itemDiffs.push(arrayItemDiff(offset, diffArrays(itemA, itemB)));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        itemDiffs.push(arrayItemDiff<any>(offset, diffArrays(itemA, itemB)));
       } else {
         assertType<Record<string, unknown>>(itemA);
         assertType<Record<string, unknown>>(itemB);
@@ -62,11 +63,11 @@ export function diffArrays(a: unknown[], b: unknown[]): ArrayDiff {
 /**
  * Compute the diff between two objects.
  */
-export function diffObjects(a: object, b: object): ObjectDiff {
+export function diffObjects<T>(a: T, b: T): ObjectDiff<T> {
   assertType<Record<string, unknown>>(a);
   assertType<Record<string, unknown>>(b);
 
-  const ret: ObjectDiff = {};
+  const ret: ObjectDiff<T> = {};
 
   const keysA = Object.keys(a);
   const keysB = new Set(Object.keys(b));

@@ -8,13 +8,14 @@ import {matchItemDiff, matchRunes, objectKeys} from "./utils";
  * @returns A new object with the diff applied.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function applyDiff(a: any, b: ObjectDiff): any {
+export function applyDiff<T>(a: T, b: ObjectDiff<T>): T {
   const copy = structuredClone(a);
 
   for (const rkey of objectKeys(b)) {
     matchRunes(b, rkey, {
       create(key, item) {
-        copy[key] = item;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        copy[key] = item as any;
       },
       delete(key) {
         delete copy[key];
@@ -26,7 +27,8 @@ export function applyDiff(a: any, b: ObjectDiff): any {
           throw new TypeError("Expected array");
         }
 
-        copy[key] = applyArrayDiff(target, item);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        copy[key] = applyArrayDiff(target, item) as any;
       },
       object(key, item) {
         const target = copy[key];
@@ -38,7 +40,8 @@ export function applyDiff(a: any, b: ObjectDiff): any {
         copy[key] = applyDiff(target, item);
       },
       change(key, item) {
-        copy[key] = item;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        copy[key] = item as any;
       },
     });
   }
@@ -52,7 +55,7 @@ export function applyDiff(a: any, b: ObjectDiff): any {
  * @param diff - The diff to apply.
  * @returns A new array with the diff applied.
  */
-export function applyArrayDiff<T>(arr: T[], diff: ArrayDiff): T[] {
+export function applyArrayDiff<T>(arr: T[], diff: ArrayDiff<T>): T[] {
   const [delta, itemDiffs = [], ...appends] = diff;
   const copy = arr.slice();
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {applyDiff, diffObjects} from "../src";
 
 describe("diffObjects and applyDiff", () => {
@@ -65,7 +66,7 @@ describe("diffObjects and applyDiff", () => {
     const a = {x: {fruit: "apple", color: "red"}};
     const b = {x: {fruit: "potato", kind: "mashed"}};
 
-    const diff = diffObjects(a, b);
+    const diff = diffObjects<any>(a, b);
 
     expect(diff).toEqual({
       "@x": {"=fruit": "potato", "+kind": "mashed", "-color": 0},
@@ -126,7 +127,7 @@ describe("diffObjects and applyDiff", () => {
       obj: {fruit: "potato", kind: "mashed"},
     };
 
-    const diff = diffObjects(a, b);
+    const diff = diffObjects<any>(a, b);
 
     expect(diff).toEqual({
       "=x": 3,

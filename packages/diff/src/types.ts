@@ -9,21 +9,27 @@ export type RunedKey<
 > = `${typeof runes[K]}${Name}`;
 
 // array diffs
-export type ChangeItemDiff = [offset: number, value: unknown];
-export type ObjectItemDiff = [offset: RunedKey<"object">, diff: ObjectDiff];
-export type ArrayItemDiff = [offset: RunedKey<"array">, diff: ArrayDiff];
+export type ChangeItemDiff<T> = [offset: number, value: T];
+export type ObjectItemDiff<T> = [
+  offset: RunedKey<"object">,
+  diff: ObjectDiff<T>
+];
+export type ArrayItemDiff<T> = [offset: RunedKey<"array">, diff: ArrayDiff<T>];
 
 /**
  * Note that offsets are relative to the **end** of the array.
  */
-export type ItemDiff = ArrayItemDiff | ChangeItemDiff | ObjectItemDiff;
+export type ItemDiff<T> =
+  | ArrayItemDiff<T>
+  | ChangeItemDiff<T>
+  | ObjectItemDiff<T>;
 
 /**
  * A record describing how to make changes to an array.
  */
-export type ArrayDiff = [
+export type ArrayDiff<T> = [
   delta: number,
-  itemDiffs?: ItemDiff[],
+  itemDiffs?: ItemDiff<T>[],
   ...tail: unknown[]
 ];
 
@@ -33,10 +39,11 @@ export type DeletePlaceholder = typeof deletePlaceholder;
 /**
  * A record describing how to make changes to an object.
  */
-export type ObjectDiff = {
-  [key: RunedKey<"array">]: ArrayDiff;
+export type ObjectDiff<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: RunedKey<"array">]: ArrayDiff<any>;
   [key: RunedKey<"change">]: unknown;
   [key: RunedKey<"create">]: unknown;
   [key: RunedKey<"delete">]: DeletePlaceholder;
-  [key: RunedKey<"object">]: ObjectDiff;
+  [key: RunedKey<"object">]: ObjectDiff<T>;
 };
