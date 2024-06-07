@@ -52,7 +52,7 @@ export function Settings() {
       keymap.unbind("Shift+<", slowDown);
       keymap.unbind("Shift+>", speedUp);
     };
-  }, []);
+  }, [keymap, playback, player.hub]);
 
   /* handlers */
   const setSpeed = useMemo(() => {
@@ -64,7 +64,7 @@ export function Settings() {
       });
     }
     return map;
-  }, []);
+  }, [playback]);
   const toggle = useMemo(
     () =>
       onClick(() =>
@@ -90,19 +90,19 @@ export function Settings() {
     () => ({
       display: dialog === Dialogs.Main ? "block" : "none",
     }),
-    [dialog === Dialogs.Main]
+    [dialog]
   );
   const speedDialogStyle = useMemo(
     () => ({
       display: dialog === Dialogs.Speed ? "block" : "none",
     }),
-    [dialog === Dialogs.Speed]
+    [dialog]
   );
   const captionDialogStyle = useMemo(
     () => ({
       display: dialog === Dialogs.Captions ? "block" : "none",
     }),
-    [dialog === Dialogs.Captions]
+    [dialog]
   );
 
   // captions, ugh
@@ -112,7 +112,7 @@ export function Settings() {
     if (mainAudio.current) {
       tracks.current = captionsAndSubtitles(mainAudio.current);
     }
-  }, []);
+  }, [player.canvas]);
   const tracks = useRef<TextTrack[]>([]);
   const selectedTrack = tracks.current.find((t) => t.mode === "showing");
   const setTrack = useMemo(
@@ -139,7 +139,7 @@ export function Settings() {
         // refresh
         forceUpdate();
       }),
-    []
+    [forceUpdate]
   );
 
   return (

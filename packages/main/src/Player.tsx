@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import {EventEmitter} from "events";
 import type StrictEventEmitter from "strict-event-emitter-types";

@@ -36,7 +36,8 @@ export const Controls = {
 };
 
 // alias
-if (!window.hasOwnProperty("RactivePlayer")) {
+import {isClient} from "./utils/rsc";
+if (isClient && !window.hasOwnProperty("RactivePlayer")) {
   Object.defineProperty(window, "RactivePlayer", {
     get() {
       if (typeof window.Liqvid !== "undefined") {

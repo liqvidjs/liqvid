@@ -14,7 +14,7 @@ export default function Captions() {
         domElement.current.appendChild(cue);
       }
     });
-  }, []);
+  }, [playback]);
 
   return <div className="lv-captions-display" ref={domElement} />;
 }

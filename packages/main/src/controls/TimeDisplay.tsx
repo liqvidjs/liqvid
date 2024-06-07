@@ -18,7 +18,7 @@ export function TimeDisplay() {
       playback.off("seek", forceUpdate);
       playback.off("timeupdate", forceUpdate);
     };
-  }, []);
+  }, [forceUpdate, playback]);
 
   return (
     <span className="lv-controls-time">

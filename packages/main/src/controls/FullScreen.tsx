@@ -29,7 +29,7 @@ export function FullScreen() {
     return () => {
       keymap.unbind("F", toggleFullScreen);
     };
-  }, []);
+  }, [forceUpdate, keymap]);
 
   const full = isFullScreen();
   const label =

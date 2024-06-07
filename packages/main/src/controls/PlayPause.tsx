@@ -10,17 +10,24 @@ export function PlayPause() {
   const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
-
+  console.log("render?");
   useEffect(() => {
     // subscribe to events
     const events = ["pause", "play", "seeking", "seeked", "stop"] as const;
 
-    for (const e of events) playback.on(e, forceUpdate);
+    for (const e of events)
+      playback.on(e, () => {
+        console.log(e);
+        forceUpdate();
+      });
 
     // keyboard controls
     const toggle = () => playback[playback.paused ? "play" : "pause"]();
     keymap.bind("K", toggle);
-    keymap.bind("Space", toggle);
+    keymap.bind("Space", () => {
+      console.log("space");
+      toggle();
+    });
 
     return () => {
       // unbind playback listeners
@@ -30,12 +37,12 @@ export function PlayPause() {
       keymap.unbind("K", toggle);
       keymap.unbind("Space", toggle);
     };
-  }, []);
+  }, [forceUpdate, keymap, playback]);
 
   // event handler
   const events = useMemo(
     () => onClick(() => (playback.paused ? playback.play() : playback.pause())),
-    []
+    [playback]
   );
   const label =
     (playback.paused || playback.seeking ? strings.PLAY : strings.PAUSE) +

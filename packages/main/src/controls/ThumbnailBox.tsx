@@ -81,7 +81,7 @@ export function ThumbnailBox(props: Props) {
         img.src = path.replace("%s", sheetNum.toString());
       }
     });
-  }, []);
+  }, [count, frequency, path, playback.duration, player]);
 
   const time = (progress * playback.duration) / 1000,
     markerNum = Math.floor(time / frequency),

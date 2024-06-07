@@ -1,3 +1,7 @@
+## 2.1.10 (June 6, 2024)
+
+- make compatible with Next.js / SSR
+
 ## 2.1.9 (November 13, 2022)
 
 - `<Audio>`/`<Video>` will seek to their end when `Playback` is seeked past their end

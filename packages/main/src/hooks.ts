@@ -24,7 +24,7 @@ export function useMarkerUpdate(
     return () => {
       script.off("markerupdate", callback);
     };
-  }, deps);
+  }, [callback, script, ...deps]);
 }
 
 /** Access the ambient {@link Script} */
@@ -47,5 +47,5 @@ export function useTimeUpdate(
       playback.off("seek", callback);
       playback.off("timeupdate", callback);
     };
-  }, deps);
+  }, [callback, playback, ...deps]);
 }

@@ -27,7 +27,7 @@ export default function Controls(props: Props) {
     if (timer.current !== undefined) clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setVisible(false), TIMEOUT);
     setVisible(true);
-  }, []);
+  }, [playback]);
 
   // mount subscriptions
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function Controls(props: Props) {
       if (playback.paused) return;
       setVisible(false);
     });
-  }, []);
+  }, [keymap, playback, resetTimer]);
 
   const classNames = ["rp-controls", "lv-controls"];
   if (!visible) classNames.push("hidden");

@@ -29,41 +29,44 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
     if (playback.seeking) return;
     const progress = playback.currentTime / playback.duration;
     setProgress({scrubber: progress, thumb: progress});
-  }, []);
+  }, [playback]);
 
   const seeked = useCallback(() => {
     const progress = playback.currentTime / playback.duration;
     setProgress((prev) => ({scrubber: progress, thumb: prev.thumb}));
-  }, []);
+  }, [playback]);
 
   const timeupdate = useCallback(() => {
     const progress = playback.currentTime / playback.duration;
     setProgress((prev) => ({scrubber: progress, thumb: prev.thumb}));
-  }, []);
+  }, [playback]);
 
   const back5 = useCallback(
     () => playback.seek(playback.currentTime - 5000),
-    []
+    [playback]
   );
   const fwd5 = useCallback(
     () => playback.seek(playback.currentTime + 5000),
-    []
+    [playback]
   );
   const back10 = useCallback(
     () => playback.seek(playback.currentTime - 10000),
-    []
+    [playback]
   );
   const fwd10 = useCallback(
     () => playback.seek(playback.currentTime + 10000),
-    []
+    [playback]
   );
 
-  const seekPercent = useCallback((e: KeyboardEvent) => {
-    const num = parseInt(e.key, 10);
-    if (!isNaN(num)) {
-      playback.seek((playback.duration * num) / 10);
-    }
-  }, []);
+  const seekPercent = useCallback(
+    (e: KeyboardEvent) => {
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num)) {
+        playback.seek((playback.duration * num) / 10);
+      }
+    },
+    [playback]
+  );
 
   /*
     Set up subscriptions.
@@ -117,7 +120,19 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
       }
       subscribed.current = false;
     };
-  }, []);
+  }, [
+    back10,
+    back5,
+    fwd10,
+    fwd5,
+    keymap,
+    playback,
+    script,
+    seek,
+    seekPercent,
+    seeked,
+    timeupdate,
+  ]);
 
   // event handlers
   const divEvents = useMemo(() => {
@@ -147,7 +162,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
     return {
       onMouseDown: (e: React.MouseEvent) => listener(e.nativeEvent),
     };
-  }, []);
+  }, [playback]);
 
   // events to attach on the wrapper
   const wrapEvents = useMemo(() => {
@@ -200,7 +215,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
     });
 
     return props;
-  }, []);
+  }, [playback]);
 
   // events to be attached to the scrubber
   const scrubberEvents = useMemo(() => {
@@ -238,7 +253,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         ref.addEventListener("touchstart", listener, {passive: false});
       }),
     };
-  }, []);
+  }, [playback]);
 
   const highlights = (props.thumbs && props.thumbs.highlights) || [];
   const activeHighlight = highlights.find((_) =>

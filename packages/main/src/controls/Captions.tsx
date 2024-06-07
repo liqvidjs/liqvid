@@ -21,7 +21,7 @@ export function Captions() {
       // blur or keyboard controls will get snagged
       if (e.currentTarget instanceof HTMLButtonElement) e.currentTarget.blur();
     },
-    []
+    [player.canvas.parentElement]
   );
 
   useEffect(() => {
@@ -34,9 +34,9 @@ export function Captions() {
     return () => {
       keymap.unbind("C", toggleCaptions);
     };
-  }, []);
+  }, [keymap, player.canvas, toggleCaptions]);
 
-  const events = useMemo(() => onClick(toggleCaptions), []);
+  const events = useMemo(() => onClick(toggleCaptions), [toggleCaptions]);
 
   const style: React.CSSProperties = useMemo(
     () => (visible ? {} : {display: "none"}),

@@ -13,13 +13,16 @@ export function Volume() {
   // keyboard controls
   const incrementVolume = useCallback(
     () => (playback.volume = playback.volume + 0.05),
-    []
+    [playback]
   );
   const decrementVolume = useCallback(
     () => (playback.volume = playback.volume - 0.05),
-    []
+    [playback]
   );
-  const toggleMute = useCallback(() => (playback.muted = !playback.muted), []);
+  const toggleMute = useCallback(
+    () => (playback.muted = !playback.muted),
+    [playback]
+  );
 
   /*
     Set up subscriptions.
@@ -43,16 +46,26 @@ export function Volume() {
       keymap.unbind("ArrowDown", decrementVolume);
       keymap.unbind("M", toggleMute);
     };
-  }, []);
+  }, [
+    decrementVolume,
+    forceUpdate,
+    incrementVolume,
+    keymap,
+    playback,
+    toggleMute,
+  ]);
 
   // input
-  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    playback.volume = parseFloat(e.target.value) / 100;
-  }, []);
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      playback.volume = parseFloat(e.target.value) / 100;
+    },
+    [playback]
+  );
 
   const events = useMemo(
     () => onClick(() => (playback.muted = !playback.muted)),
-    []
+    [playback]
   );
   const label = (playback.muted ? strings.UNMUTE : strings.MUTE) + " (m)";
 
