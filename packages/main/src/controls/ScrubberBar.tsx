@@ -1,12 +1,12 @@
 import * as React from "react";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-import {ThumbnailBox, ThumbData} from "./ThumbnailBox";
+import {ThumbData, ThumbnailBox} from "./ThumbnailBox";
 
-import {useKeymap, usePlayback, useScript} from "../hooks";
-import {between, clamp} from "@liqvid/utils/misc";
 import {anyHover, onDrag} from "@liqvid/utils/interaction";
+import {between, clamp} from "@liqvid/utils/misc";
 import {captureRef} from "@liqvid/utils/react";
+import {useKeymap, usePlayback, useScript} from "../hooks";
 
 export {ThumbData};
 
@@ -68,13 +68,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
     [playback]
   );
 
-  /*
-    Set up subscriptions.
-    We don't do this in useEffect() because it needs to run
-    before useEffect()s in the video content.
-  */
-  const subscribed = useRef(false);
-  if (!subscribed.current) {
+  useEffect(() => {
     /* playback listeners */
     playback.on("seek", seek);
     playback.on("seeked", seeked);
@@ -98,10 +92,6 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
       keymap.bind("E", script.forward);
     }
 
-    subscribed.current = true;
-  }
-
-  useEffect(() => {
     return () => {
       playback.off("seek", seek);
       playback.off("seeked", seeked);
@@ -118,7 +108,6 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         keymap.unbind("W", script.back);
         keymap.unbind("E", script.forward);
       }
-      subscribed.current = false;
     };
   }, [
     back10,

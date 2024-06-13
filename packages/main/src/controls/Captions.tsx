@@ -21,7 +21,8 @@ export function Captions() {
       // blur or keyboard controls will get snagged
       if (e.currentTarget instanceof HTMLButtonElement) e.currentTarget.blur();
     },
-    [player.canvas.parentElement]
+    // note that player.canvas may not have loaded yet
+    [player.canvas]
   );
 
   useEffect(() => {

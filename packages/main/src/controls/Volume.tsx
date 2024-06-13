@@ -1,6 +1,6 @@
 import {onClick, useForceUpdate} from "@liqvid/utils/react";
 import * as React from "react";
-import {useCallback, useEffect, useMemo, useRef} from "react";
+import {useCallback, useEffect, useMemo} from "react";
 import {useKeymap, usePlayback} from "../hooks";
 import {strings} from "../i18n";
 
@@ -24,22 +24,12 @@ export function Volume() {
     [playback]
   );
 
-  /*
-    Set up subscriptions.
-    We don't do this in useEffect() because it needs to run
-    before useEffect()s in the video content.
-  */
-  const subscribed = useRef(false);
-  if (!subscribed.current) {
+  useEffect(() => {
     playback.on("volumechange", forceUpdate);
     keymap.bind("ArrowUp", incrementVolume);
     keymap.bind("ArrowDown", decrementVolume);
     keymap.bind("M", toggleMute);
-    subscribed.current = true;
-  }
 
-  useEffect(() => {
-    // unsubscriptions
     return () => {
       playback.off("volumechange", forceUpdate);
       keymap.unbind("ArrowUp", incrementVolume);

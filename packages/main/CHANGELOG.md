@@ -1,3 +1,7 @@
+## 2.1.12 (June 12, 2024)
+
+- Strict Mode fixes
+
 ## 2.1.10 (June 6, 2024)
 
 - make compatible with Next.js / SSR
