@@ -10,14 +10,12 @@ export function PlayPause() {
   const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
-  console.log("render?");
   useEffect(() => {
     // subscribe to events
     const events = ["pause", "play", "seeking", "seeked", "stop"] as const;
 
     for (const e of events)
       playback.on(e, () => {
-        console.log(e);
         forceUpdate();
       });
 
@@ -25,7 +23,6 @@ export function PlayPause() {
     const toggle = () => playback[playback.paused ? "play" : "pause"]();
     keymap.bind("K", toggle);
     keymap.bind("Space", () => {
-      console.log("space");
       toggle();
     });
 
