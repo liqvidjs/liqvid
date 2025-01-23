@@ -39,7 +39,7 @@ export function PlayPause() {
   // event handler
   const events = useMemo(
     () => onClick(() => (playback.paused ? playback.play() : playback.pause())),
-    [playback]
+    [playback],
   );
   const label =
     (playback.paused || playback.seeking ? strings.PLAY : strings.PAUSE) +

@@ -13,7 +13,7 @@ declare module "../src/json" {
 global.fetch = jest.fn((href: string) =>
   Promise.resolve({
     json: () => Promise.resolve({value: href}),
-  })
+  }),
 );
 
 beforeEach(() => {

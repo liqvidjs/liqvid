@@ -14,7 +14,7 @@ export const requestFullScreen = fullscreenEnabled
   : (): void => {
       window.parent.postMessage(
         {type: "fake-fullscreen", value: true},
-        window.parent.origin
+        window.parent.origin,
       );
 
       if (!__isFullScreen) {
@@ -28,7 +28,7 @@ export const exitFullScreen = fullscreenEnabled
   : (): void => {
       window.parent.postMessage(
         {type: "fake-fullscreen", value: false},
-        window.parent.origin
+        window.parent.origin,
       );
 
       if (__isFullScreen) {

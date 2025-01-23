@@ -21,7 +21,7 @@ test.describe("Media", () => {
     const locator = page.locator("video");
     await locator.waitFor();
     await locator.evaluate<void, HTMLVideoElement>((video) =>
-      window.Liqvid.Utils.media.awaitMediaCanPlay(video)
+      window.Liqvid.Utils.media.awaitMediaCanPlay(video),
     );
 
     // create handle
@@ -31,7 +31,7 @@ test.describe("Media", () => {
   test("seeking past video.duration should seek to video end", async () => {
     await playback.evaluate((p) => p.seek(p.duration));
     expect(await video.evaluate((v) => v.currentTime === v.duration)).toBe(
-      true
+      true,
     );
   });
 
@@ -40,7 +40,7 @@ test.describe("Media", () => {
       p.seek(p.duration);
     });
     expect(await video.evaluate((v) => v.currentTime === v.duration)).toBe(
-      true
+      true,
     );
     // don't batch with the previous evaluate or else video won't have time to update
     await playback.evaluate((p) => p.play());

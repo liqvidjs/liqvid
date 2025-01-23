@@ -38,7 +38,7 @@ export const captureRef =
 export function createUniqueContext<T>(
   key: string,
   defaultValue: T = undefined,
-  displayName?: string
+  displayName?: string,
 ): React.Context<T> {
   const symbol = Symbol.for(key);
 
@@ -75,7 +75,7 @@ export function combineRefs<T>(...args: React.Ref<T>[]): (o: T) => void {
  * @returns Props to attach to event target.
  */
 export function onClick<T extends HTMLElement | SVGElement>(
-  callback: (e: React.MouseEvent<T> | React.TouchEvent<T>) => void
+  callback: (e: React.MouseEvent<T> | React.TouchEvent<T>) => void,
 ):
   | {
       onTouchStart: React.TouchEventHandler<T>;
@@ -103,7 +103,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
 
         if (
           target.contains(
-            document.elementFromPoint(touch.clientX, touch.clientY)
+            document.elementFromPoint(touch.clientX, touch.clientY),
           )
         ) {
           callback(e);
@@ -125,7 +125,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
 export function onDrag(
   move: Parameters<typeof htmlOnDrag>[0],
   down?: Parameters<typeof htmlOnDrag>[1],
-  up?: Parameters<typeof htmlOnDrag>[2]
+  up?: Parameters<typeof htmlOnDrag>[2],
 ): {
   "data-affords": "click";
   onMouseDown: React.MouseEventHandler;
@@ -148,7 +148,7 @@ export function onDrag(
  */
 export function recursiveMap(
   children: React.ReactNode,
-  fn: (child: React.ReactElement<unknown>) => React.ReactElement<unknown>
+  fn: (child: React.ReactElement<unknown>) => React.ReactElement<unknown>,
 ): React.ReactNode[] {
   return Children.map(children, (child) => {
     if (!isValidElement<unknown>(child)) {
@@ -180,7 +180,7 @@ export function useForceUpdate(): () => void {
  * @returns [promise, resolve, reject]
  */
 export function usePromise(
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): [Promise<void>, () => void, () => void] {
   const resolve = useRef<() => void>();
   const reject = useRef<() => void>();
@@ -191,7 +191,7 @@ export function usePromise(
         resolve.current = res;
         reject.current = rej;
       }),
-    deps
+    deps,
   );
 
   return [promise, resolve.current, reject.current];

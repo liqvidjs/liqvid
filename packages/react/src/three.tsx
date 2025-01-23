@@ -1,12 +1,12 @@
 import {Canvas, useThree} from "@react-three/fiber";
-import {ResizeObserver} from '@juggle/resize-observer';
+import {ResizeObserver} from "@juggle/resize-observer";
 import {Player, usePlayer} from "liqvid";
 
 export function ThreeCanvas(props: React.ComponentProps<typeof Canvas>) {
   return (
     <Canvas resize={{polyfill: ResizeObserver}} {...props}>
       <Player.Context.Provider value={usePlayer()}>
-        <Fixes/>
+        <Fixes />
         {props.children}
       </Player.Context.Provider>
     </Canvas>

@@ -12,8 +12,8 @@ export default [
       // ESM
       {file: "./dist/index.mjs", format: "esm"},
       // CJS
-      {file: "./dist/index.cjs", format: "cjs"}
-    ]
+      {file: "./dist/index.cjs", format: "cjs"},
+    ],
   },
   // plain
   {
@@ -24,8 +24,8 @@ export default [
       // ESM
       {file: "./dist/plain.mjs", format: "esm"},
       // CJS
-      {file: "./dist/plain.cjs", format: "cjs"}
-    ]
+      {file: "./dist/plain.cjs", format: "cjs"},
+    ],
   },
   // index types
   {
@@ -33,8 +33,8 @@ export default [
     plugins: [dts()],
     output: {
       file: "dist/index.d.ts",
-      format: "es"
-    }
+      format: "es",
+    },
   },
   // plain types
   {
@@ -42,7 +42,7 @@ export default [
     plugins: [dts()],
     output: {
       file: "dist/plain.d.ts",
-      format: "es"
-    }
-  }
-]
+      format: "es",
+    },
+  },
+];

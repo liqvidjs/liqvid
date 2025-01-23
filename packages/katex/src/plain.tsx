@@ -30,7 +30,7 @@ export const KTX = forwardRef<Handle, Props>(function KTX(props, ref) {
   // handle
   useImperativeHandle(ref, () => ({
     domElement: spanRef.current,
-    ready
+    ready,
   }));
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const KTX = forwardRef<Handle, Props>(function KTX(props, ref) {
         macros,
         strict: "ignore",
         throwOnError: false,
-        trust: true
+        trust: true,
       });
 
       /* move katex into placeholder element */
@@ -66,12 +66,9 @@ export const KTX = forwardRef<Handle, Props>(function KTX(props, ref) {
 
   // Google Chrome fails without this
   if (display) {
-    if (!attrs.style)
-      attrs.style = {};
+    if (!attrs.style) attrs.style = {};
     attrs.style.display = "block";
   }
 
-  return (
-    <span {...attrs} ref={spanRef}/>
-  );
+  return <span {...attrs} ref={spanRef} />;
 });

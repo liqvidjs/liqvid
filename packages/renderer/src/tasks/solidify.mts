@@ -28,7 +28,7 @@ export async function solidify({
   url,
   width,
   ...o // passthrough parameters
-}: Omit<Parameters<typeof assembleVideo>[0], "framesDir"  | "padLen"> & {
+}: Omit<Parameters<typeof assembleVideo>[0], "framesDir" | "padLen"> & {
   browserExecutable: string;
   colorScheme: "light" | "dark";
   concurrency: number;
@@ -49,7 +49,9 @@ export async function solidify({
 
   // check that ffmpeg exists
   if (!sequence && !(await ffmpegExists())) {
-    console.error("ffmpeg must be installed and in your PATH. Download it from");
+    console.error(
+      "ffmpeg must be installed and in your PATH. Download it from",
+    );
     console.error("https://ffmpeg.org/download.html");
     process.exit(1);
   }
@@ -78,7 +80,12 @@ export async function solidify({
   // pool of puppeteer instances
   console.log(`(${step++}/${total}) Connecting to players...`);
   const pages = await getPages({
-    colorScheme, concurrency, executablePath, url, height, width,
+    colorScheme,
+    concurrency,
+    executablePath,
+    url,
+    height,
+    width,
   });
   for (const page of pages) {
     (page as any).client = await page.target().createCDPSession();
@@ -105,13 +112,12 @@ export async function solidify({
   })();
 
   // frames dir
-  const framesDir =
-    sequence ?
-      o.output :
-      await fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.render"));
+  const framesDir = sequence
+    ? o.output
+    : await fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.render"));
 
   // calculate how many frames
-  const count = Math.ceil(o.fps * realDuration / 1000);
+  const count = Math.ceil((o.fps * realDuration) / 1000);
   const padLen = String(count - 1).length;
 
   /* capture and assemble */
@@ -119,14 +125,15 @@ export async function solidify({
   console.log(`(${step++}/${total}) Capturing frames...`);
   await captureRange({
     count,
-    filename: i => path.join(
-      framesDir,
-      String(i).padStart(padLen, "0") + `.${o.imageFormat}`
-    ),
+    filename: (i) =>
+      path.join(
+        framesDir,
+        String(i).padStart(padLen, "0") + `.${o.imageFormat}`,
+      ),
     imageFormat: o.imageFormat,
     pool,
     quality,
-    time: i => o.start + i * 1000 / o.fps
+    time: (i) => o.start + (i * 1000) / o.fps,
   });
 
   // close chrome instances
@@ -141,7 +148,7 @@ export async function solidify({
       duration: realDuration,
       framesDir,
       padLen,
-      ...o
+      ...o,
     });
 
     // clean up tmp files
@@ -164,26 +171,29 @@ async function assembleVideo({
   padLen: number;
 }) {
   // progress bar
-  const stitchingBar = new cliProgress.SingleBar({
-    autopadding: true,
-    clearOnComplete: true,
-    etaBuffer: 50,
-    format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-    formatValue: (v, options, type) => {
-      if (type === "value" || type === "total") {
-        return formatTime(v);
-      }
-      return cliProgress.Format.ValueFormat(v, options, type);
+  const stitchingBar = new cliProgress.SingleBar(
+    {
+      autopadding: true,
+      clearOnComplete: true,
+      etaBuffer: 50,
+      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      formatValue: (v, options, type) => {
+        if (type === "value" || type === "total") {
+          return formatTime(v);
+        }
+        return cliProgress.Format.ValueFormat(v, options, type);
+      },
+      hideCursor: true,
     },
-    hideCursor: true
-  }, cliProgress.Presets.shades_classic);
+    cliProgress.Presets.shades_classic,
+  );
 
   stitchingBar.start(o.duration, 0);
-  
+
   // ffmpeg stitch job
   const job = stitch({
     pattern: `%0${padLen}d.${o.imageFormat}`,
-    ...o
+    ...o,
   });
 
   // parse ffmpeg progress

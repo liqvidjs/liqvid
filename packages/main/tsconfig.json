@@ -5,10 +5,7 @@
     "declarationDir": "./dist/types",
     "incremental": true,
     "jsx": "react",
-    "lib": [
-      "esnext",
-      "dom"
-    ],
+    "lib": ["esnext", "dom"],
     "esModuleInterop": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -18,7 +15,5 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "esnext"
   },
-  "include": [
-    "./src/index.ts"
-  ]
+  "include": ["./src/index.ts"]
 }

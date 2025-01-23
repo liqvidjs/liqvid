@@ -29,12 +29,12 @@ export function Settings() {
     const slowDown = () =>
       (playback.playbackRate = get(
         PLAYBACK_RATES,
-        PLAYBACK_RATES.indexOf(playback.playbackRate) - 1
+        PLAYBACK_RATES.indexOf(playback.playbackRate) - 1,
       ));
     const speedUp = () =>
       (playback.playbackRate = get(
         PLAYBACK_RATES,
-        PLAYBACK_RATES.indexOf(playback.playbackRate) + 1
+        PLAYBACK_RATES.indexOf(playback.playbackRate) + 1,
       ));
 
     // subscribe
@@ -69,10 +69,10 @@ export function Settings() {
     () =>
       onClick(() =>
         setDialog((prev) =>
-          prev === Dialogs.None ? Dialogs.Main : Dialogs.None
-        )
+          prev === Dialogs.None ? Dialogs.Main : Dialogs.None,
+        ),
       ),
-    []
+    [],
   );
 
   // const toggleSubtitles = useMemo(() => onClick(() => {
@@ -90,19 +90,19 @@ export function Settings() {
     () => ({
       display: dialog === Dialogs.Main ? "block" : "none",
     }),
-    [dialog]
+    [dialog],
   );
   const speedDialogStyle = useMemo(
     () => ({
       display: dialog === Dialogs.Speed ? "block" : "none",
     }),
-    [dialog]
+    [dialog],
   );
   const captionDialogStyle = useMemo(
     () => ({
       display: dialog === Dialogs.Captions ? "block" : "none",
     }),
-    [dialog]
+    [dialog],
   );
 
   // captions, ugh
@@ -139,7 +139,7 @@ export function Settings() {
         // refresh
         forceUpdate();
       }),
-    [forceUpdate]
+    [forceUpdate],
   );
 
   return (
@@ -218,7 +218,7 @@ function trackLabel(track?: TextTrack): string {
 
 function captionsAndSubtitles(audio: HTMLAudioElement): TextTrack[] {
   return Array.from(audio.textTracks).filter((t) =>
-    ["captions", "subtitles"].includes(t.kind)
+    ["captions", "subtitles"].includes(t.kind),
   );
 }
 

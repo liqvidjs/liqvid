@@ -10,20 +10,12 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*"
-      ]
+      "*": ["./dist/*"]
     }
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": [
-    "liqvid",
-    "mathjax",
-    "xyjax"
-  ],
+  "keywords": ["liqvid", "mathjax", "xyjax"],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",

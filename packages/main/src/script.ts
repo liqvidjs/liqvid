@@ -28,7 +28,7 @@ export class Script extends (EventEmitter as new () => StrictEventEmitter<
     markers: (
       | [string, number | string, number | string]
       | [string, number | string]
-    )[]
+    )[],
   ) {
     super();
     this.setMaxListeners(0);
@@ -94,7 +94,7 @@ export class Script extends (EventEmitter as new () => StrictEventEmitter<
   /** Advance playback to the next marker. */
   forward(): void {
     this.playback.seek(
-      this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1]
+      this.markers[Math.min(this.markers.length - 1, this.markerIndex + 1)][1],
     );
   }
 

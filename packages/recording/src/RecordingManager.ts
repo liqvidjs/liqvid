@@ -165,7 +165,7 @@ export class RecordingManager extends (EventEmitter as unknown as new () => Stri
       recording[key] = this.plugins[key].finalizeRecording(
         this.captureData[key],
         startDelay,
-        stopDelay
+        stopDelay,
       );
       this.emit("finalize", key, recording[key]);
     }

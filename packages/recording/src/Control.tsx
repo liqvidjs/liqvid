@@ -134,7 +134,7 @@ export function RecordingControl(props: Props) {
   /* keyboard controls */
   const callbacks: Record<keyof State, (e: KeyboardEvent) => void> = useMemo(
     () => ({start, pause, discard}),
-    [discard, pause, start]
+    [discard, pause, start],
   );
 
   const reducer: React.Reducer<State, Action> = useCallback((state, action) => {
@@ -184,7 +184,7 @@ export function RecordingControl(props: Props) {
       e.currentTarget.dataset.value = seq;
       e.currentTarget.value = fmtSeq(seq);
     },
-    []
+    [],
   );
 
   // warn before closing if recordings exist
@@ -204,7 +204,7 @@ export function RecordingControl(props: Props) {
       onClick(() => {
         setPaneOpen((prev) => !prev);
       }),
-    []
+    [],
   );
 
   const dialogStyle = {
@@ -219,7 +219,7 @@ export function RecordingControl(props: Props) {
         activePlugins.current[key] = !activePlugins.current[key];
         forceUpdate();
       }),
-    [forceUpdate]
+    [forceUpdate],
   );
 
   /* render */

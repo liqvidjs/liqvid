@@ -129,7 +129,7 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
       } else {
         this.audioNode.gain.setValueAtTime(
           this.volume,
-          this.audioContext.currentTime
+          this.audioContext.currentTime,
         );
       }
     }
@@ -231,7 +231,7 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
       } else {
         this.audioNode.gain.exponentialRampToValueAtTime(
           this.__volume,
-          this.audioContext.currentTime + 2
+          this.audioContext.currentTime + 2,
         );
       }
     }

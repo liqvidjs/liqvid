@@ -1,5 +1,11 @@
 import {combineRefs, usePromise} from "@liqvid/utils/react";
-import {createElement, forwardRef, useEffect, useImperativeHandle, useRef} from "react";
+import {
+  createElement,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import {MathJaxReady} from "./loading";
 
 /**
@@ -37,7 +43,9 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
   const {
     children,
-    display = false, resize = false, span = false,
+    display = false,
+    resize = false,
+    span = false,
     ...attrs
   } = props;
 
@@ -78,7 +86,7 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
     get domElement() {
       return spanRef.current;
     },
-    ready
+    ready,
   }));
 
   const [open, close] = display ? ["\\[", "\\]"] : ["\\(", "\\)"];
@@ -91,7 +99,9 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
   // }
 
   return (
-    <span {...attrs} ref={spanRef}>{open + children + close}</span>
+    <span {...attrs} ref={spanRef}>
+      {open + children + close}
+    </span>
   );
 });
 
@@ -209,21 +219,24 @@ export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
 /**
  * Element which will render any MathJax contained inside
  */
-export const MJXText = forwardRef<unknown, {
-  /** HTML tag to insert.
-   * @default "p"
-   */
-  tagName?: keyof (HTMLElementTagNameMap & JSX.IntrinsicElements);
-} & React.HTMLAttributes<HTMLElement>>(function MJXText(props, ref) {
-      const elt = useRef<HTMLElement>();
-      const combined = combineRefs(elt, ref);
+export const MJXText = forwardRef<
+  unknown,
+  {
+    /** HTML tag to insert.
+     * @default "p"
+     */
+    tagName?: keyof (HTMLElementTagNameMap & JSX.IntrinsicElements);
+  } & React.HTMLAttributes<HTMLElement>
+>(function MJXText(props, ref) {
+  const elt = useRef<HTMLElement>();
+  const combined = combineRefs(elt, ref);
 
-      useEffect(() => {
-        MathJax.startup.promise.then(() => {
-          MathJax.typeset([elt.current]);
-        });
-      }, []);
-
-      const {tagName = "p", children, ...attrs} = props;
-      return createElement(tagName, {...attrs, ref: combined}, children);
+  useEffect(() => {
+    MathJax.startup.promise.then(() => {
+      MathJax.typeset([elt.current]);
     });
+  }, []);
+
+  const {tagName = "p", children, ...attrs} = props;
+  return createElement(tagName, {...attrs, ref: combined}, children);
+});

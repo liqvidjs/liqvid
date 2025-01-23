@@ -17,7 +17,7 @@ export class ReplayDataRecorder<T> extends Recorder<
   }
 
   finalizeRecording(
-    data: ReplayData<T>
+    data: ReplayData<T>,
     // startDelay = 0,
     // stopDelay = 0
   ): ReplayData<T> {
@@ -67,7 +67,7 @@ export function compress<T>(o: T, precision = 2): T {
         (Object.keys(o) as (keyof typeof o)[]).map((key) => [
           key,
           compress(o[key], precision),
-        ])
+        ]),
       ) as Record<string, unknown> & T;
     case "number":
       return parseFloat(o.toFixed(precision)) as T & number;

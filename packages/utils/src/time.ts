@@ -11,7 +11,7 @@ const MINUS_SIGN = "\u2212";
  * Regular expression used to match times
  */
 export const timeRegexp = new RegExp(
-  "^" + "(?:(\\d+):)?".repeat(3) + "(\\d+)(?:\\.(\\d+))?$"
+  "^" + "(?:(\\d+):)?".repeat(3) + "(\\d+)(?:\\.(\\d+))?$",
 );
 
 /**

@@ -13,15 +13,15 @@ export function Volume() {
   // keyboard controls
   const incrementVolume = useCallback(
     () => (playback.volume = playback.volume + 0.05),
-    [playback]
+    [playback],
   );
   const decrementVolume = useCallback(
     () => (playback.volume = playback.volume - 0.05),
-    [playback]
+    [playback],
   );
   const toggleMute = useCallback(
     () => (playback.muted = !playback.muted),
-    [playback]
+    [playback],
   );
 
   useEffect(() => {
@@ -50,18 +50,18 @@ export function Volume() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       playback.volume = parseFloat(e.target.value) / 100;
     },
-    [playback]
+    [playback],
   );
 
   const events = useMemo(
     () => onClick(() => (playback.muted = !playback.muted)),
-    [playback]
+    [playback],
   );
   const label = (playback.muted ? strings.UNMUTE : strings.MUTE) + " (m)";
 
   const volumeText =
     new Intl.NumberFormat(undefined, {style: "percent"}).format(
-      playback.volume
+      playback.volume,
     ) + " volume";
 
   return (

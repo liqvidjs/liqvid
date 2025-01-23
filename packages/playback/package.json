@@ -14,14 +14,10 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/types/*"
-      ]
+      "*": ["./dist/types/*"]
     }
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",

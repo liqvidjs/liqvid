@@ -11,7 +11,7 @@ export async function capture({
   path,
   quality,
   time,
-  type
+  type,
 }: {
   page: puppeteer.Page;
   path: string;
@@ -26,7 +26,7 @@ export async function capture({
   const client = (page as any).client as puppeteer.CDPSession;
   const options = {
     format: type,
-    quality: type === "jpeg" ? quality : undefined
+    quality: type === "jpeg" ? quality : undefined,
   };
 
   const {data} = await client.send("Page.captureScreenshot", options);
@@ -39,7 +39,7 @@ export async function capture({
     path,
     // puppeteer will throw error if quality is passed for png
     quality: type === "jpeg" ? quality : undefined,
-    type
+    type,
   });
 }
 
@@ -52,7 +52,7 @@ export async function captureRange({
   imageFormat,
   pool,
   quality,
-  time
+  time,
 }: {
   count: number;
   filename: (i: number) => string;
@@ -62,19 +62,20 @@ export async function captureRange({
   time: (i: number) => number;
 }) {
   // progress bar
-  const captureBar = new cliProgress.SingleBar({
-    autopadding: true,
-    clearOnComplete: true,
-    format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-    hideCursor: true
-  }, cliProgress.Presets.shades_classic);
+  const captureBar = new cliProgress.SingleBar(
+    {
+      autopadding: true,
+      clearOnComplete: true,
+      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      hideCursor: true,
+    },
+    cliProgress.Presets.shades_classic,
+  );
   captureBar.start(count, 0);
 
   // grab the thumbs
   await Promise.all(
-    new Array(count)
-    .fill(null)
-    .map(async (_, i) => {
+    new Array(count).fill(null).map(async (_, i) => {
       // get available puppeteer instance
       const page = await pool.acquire();
 
@@ -84,13 +85,13 @@ export async function captureRange({
         time: time(i),
         type: imageFormat,
         path: filename(i),
-        quality
+        quality,
       });
       captureBar.increment();
 
       // release puppeteer instance
       pool.release(page);
-    })
+    }),
   );
 
   captureBar.stop();

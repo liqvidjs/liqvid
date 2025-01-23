@@ -22,7 +22,7 @@ import {
 /** Merge two array diffs. */
 export function mergeArrayDiffs<T>(
   a: ArrayDiff<T>,
-  b: ArrayDiff<T>
+  b: ArrayDiff<T>,
 ): ArrayDiff<T> {
   const [deltaA, itemDiffsA = [], ...tailA] = a;
   const [deltaB, itemDiffsB = [], ...tailB] = b;
@@ -99,7 +99,7 @@ export function mergeArrayDiffs<T>(
               assertType<unknown[]>(valueA);
               itemDiffs.push(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                changeItemDiff<any>(offsetA, applyArrayDiff(valueA, valueB))
+                changeItemDiff<any>(offsetA, applyArrayDiff(valueA, valueB)),
               );
             },
             // change(a) * object(b) = change(a*b)
@@ -107,7 +107,7 @@ export function mergeArrayDiffs<T>(
               assertType<object>(valueA);
               itemDiffs.push(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                changeItemDiff<any>(offsetA, applyDiff(valueA, valueB))
+                changeItemDiff<any>(offsetA, applyDiff(valueA, valueB)),
               );
             },
           });
@@ -123,7 +123,7 @@ export function mergeArrayDiffs<T>(
             array(_, valueB) {
               itemDiffs.push(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                arrayItemDiff<any>(offsetA, mergeArrayDiffs(valueA, valueB))
+                arrayItemDiff<any>(offsetA, mergeArrayDiffs(valueA, valueB)),
               );
             },
           });
@@ -138,7 +138,7 @@ export function mergeArrayDiffs<T>(
             // object(a) * object(b) = object(a*b)
             object(_, valueB) {
               itemDiffs.push(
-                objectItemDiff(offsetA, mergeDiffs(valueA, valueB))
+                objectItemDiff(offsetA, mergeDiffs(valueA, valueB)),
               );
             },
           });
@@ -162,7 +162,7 @@ export function mergeArrayDiffs<T>(
 /** Merge two object diffs. */
 export function mergeDiffs<T>(
   a: ObjectDiff<T>,
-  b: ObjectDiff<T>
+  b: ObjectDiff<T>,
 ): ObjectDiff<T> {
   const ret: ObjectDiff<T> = {};
 
@@ -220,7 +220,7 @@ export function mergeDiffs<T>(
             assertType<unknown[]>(valueA);
             Object.assign(
               ret,
-              creationDiff(key, applyArrayDiff(valueA, valueB))
+              creationDiff(key, applyArrayDiff(valueA, valueB)),
             );
           },
           // set(a) * array(b) = set(a*b)

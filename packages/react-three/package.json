@@ -5,9 +5,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:cjs && pnpm build:esm",
     "build:clean": "rm -fr dist",

@@ -43,19 +43,19 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
 
   const back5 = useCallback(
     () => playback.seek(playback.currentTime - 5000),
-    [playback]
+    [playback],
   );
   const fwd5 = useCallback(
     () => playback.seek(playback.currentTime + 5000),
-    [playback]
+    [playback],
   );
   const back10 = useCallback(
     () => playback.seek(playback.currentTime - 10000),
-    [playback]
+    [playback],
   );
   const fwd10 = useCallback(
     () => playback.seek(playback.currentTime + 10000),
-    [playback]
+    [playback],
   );
 
   const seekPercent = useCallback(
@@ -65,7 +65,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         playback.seek((playback.duration * num) / 10);
       }
     },
-    [playback]
+    [playback],
   );
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         playback.seek(progress * playback.duration);
       },
       // up
-      () => (playback.seeking = false)
+      () => (playback.seeking = false),
     );
     return {
       onMouseDown: (e: React.MouseEvent) => listener(e.nativeEvent),
@@ -196,7 +196,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         setShowThumb(false);
         playback.seeking = false;
         playback.seek(progress * playback.duration);
-      }
+      },
     );
 
     props.ref = captureRef((ref: HTMLDivElement) => {
@@ -234,7 +234,7 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
         setShowThumb(false);
         playback.seeking = false;
         playback.seek(progress * playback.duration);
-      }
+      },
     );
 
     return {
@@ -249,8 +249,8 @@ export function ScrubberBar(props: {thumbs: ThumbData}) {
     between(
       _.time / playback.duration,
       progress.thumb,
-      _.time / playback.duration + 0.01
-    )
+      _.time / playback.duration + 0.01,
+    ),
   );
   const thumbTitle = activeHighlight ? activeHighlight.title : null;
 

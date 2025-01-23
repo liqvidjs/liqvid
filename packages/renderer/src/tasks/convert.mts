@@ -6,12 +6,16 @@ import path from "path";
 import {ffmpegExists} from "../utils/binaries.mjs";
 
 /** Repair and convert audio files */
-export async function convert({filename}: {
+export async function convert({
+  filename,
+}: {
   filename?: string;
 }) {
   // check that ffmpeg exists
   if (!(await ffmpegExists())) {
-    console.error("ffmpeg must be installed and in your PATH. Download it from");
+    console.error(
+      "ffmpeg must be installed and in your PATH. Download it from",
+    );
     console.error("https://ffmpeg.org/download.html");
     process.exit(1);
   }
@@ -42,24 +46,26 @@ async function fixWebm(src: string, tmp: string) {
   const duration = await getDuration(src);
 
   // progress bar
-  const bar = new cliProgress.SingleBar({
-    autopadding: true,
-    clearOnComplete: true,
-    etaBuffer: 50,
-    format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-    formatValue: (v, options, type) => {
-      if (type === "value" || type === "total") {
-        return formatTime(v);
-      }
-      return cliProgress.Format.ValueFormat(v, options, type);
+  const bar = new cliProgress.SingleBar(
+    {
+      autopadding: true,
+      clearOnComplete: true,
+      etaBuffer: 50,
+      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      formatValue: (v, options, type) => {
+        if (type === "value" || type === "total") {
+          return formatTime(v);
+        }
+        return cliProgress.Format.ValueFormat(v, options, type);
+      },
+      hideCursor: true,
     },
-    hideCursor: true
-  }, cliProgress.Presets.shades_classic);
-  
+    cliProgress.Presets.shades_classic,
+  );
 
   /* ffmpeg job */
   const job = execa("ffmpeg", ["-y", "-i", src, "-strict", "-2", tmp]);
-  
+
   // parse ffmpeg progress
   job.stderr.on("data", (msg: Buffer) => {
     const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
@@ -67,7 +73,7 @@ async function fixWebm(src: string, tmp: string) {
       bar.update(parseTime($_[1]));
     }
   });
-  
+
   bar.start(duration, 0);
   await job;
   bar.stop();
@@ -81,23 +87,26 @@ async function convertMp4(src: string, dest: string) {
   const duration = await getDuration(src);
 
   // progress bar
-  const bar = new cliProgress.SingleBar({
-    autopadding: true,
-    clearOnComplete: true,
-    etaBuffer: 50,
-    format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-    formatValue: (v, options, type) => {
-      if (type === "value" || type === "total") {
-        return formatTime(v);
-      }
-      return cliProgress.Format.ValueFormat(v, options, type);
+  const bar = new cliProgress.SingleBar(
+    {
+      autopadding: true,
+      clearOnComplete: true,
+      etaBuffer: 50,
+      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      formatValue: (v, options, type) => {
+        if (type === "value" || type === "total") {
+          return formatTime(v);
+        }
+        return cliProgress.Format.ValueFormat(v, options, type);
+      },
+      hideCursor: true,
     },
-    hideCursor: true
-  }, cliProgress.Presets.shades_classic);
+    cliProgress.Presets.shades_classic,
+  );
 
   /* ffmpeg job */
   const job = execa("ffmpeg", ["-y", "-i", src, dest]);
-  
+
   // parse ffmpeg progress
   job.stderr.on("data", (msg: Buffer) => {
     const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
@@ -105,7 +114,7 @@ async function convertMp4(src: string, dest: string) {
       bar.update(parseTime($_[1]));
     }
   });
-  
+
   bar.start(duration, 0);
   await job;
   bar.stop();
@@ -117,6 +126,15 @@ async function convertMp4(src: string, dest: string) {
  * @returns Duration in milliseconds
  */
 async function getDuration(filename: string) {
-  const res = await execa("ffprobe", ["-i", filename, "-show_entries", "format=duration", "-v", "quiet", "-of", "csv=p=0"]);
+  const res = await execa("ffprobe", [
+    "-i",
+    filename,
+    "-show_entries",
+    "format=duration",
+    "-v",
+    "quiet",
+    "-of",
+    "csv=p=0",
+  ]);
   return parseFloat(res.stdout) * 1000;
 }

@@ -72,7 +72,7 @@ export class Media extends React.PureComponent<
     if (this.props.obstructCanPlayThrough) {
       this.player.obstruct(
         "canplaythrough",
-        awaitMediaCanPlayThrough(this.domElement)
+        awaitMediaCanPlayThrough(this.domElement),
       );
     }
 

@@ -6,16 +6,16 @@ declare global {
     Utils: {
       misc: {
         waitFor(callback: () => boolean, interval?: number): Promise<void>;
-      }
-    }
-  }
+      };
+    };
+  };
   var player: {
     canPlay: Promise<void>;
     playback: {
       duration: number;
       play(): Promise<void>;
       seek: (t: number) => void;
-    }
+    };
   };
 }
 

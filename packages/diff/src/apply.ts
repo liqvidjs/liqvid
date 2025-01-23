@@ -67,13 +67,13 @@ export function applyArrayDiff<T>(arr: T[], diff: ArrayDiff<T>): T[] {
       array(offset, item) {
         copy[copy.length - offset] = applyArrayDiff(
           copy[copy.length - offset] as unknown[],
-          item
+          item,
         ) as T;
       },
       object(offset, item) {
         copy[copy.length - offset] = applyDiff(
           copy[copy.length - offset],
-          item
+          item,
         ) as T;
       },
     });

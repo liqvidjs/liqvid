@@ -14,17 +14,14 @@ async function build() {
     const extn = type === "esm" ? "mjs" : "cjs";
 
     // rename files first
-    await walkDir(dir, async filename => {
-      if (!filename.endsWith(".js"))
-        return;
+    await walkDir(dir, async (filename) => {
+      if (!filename.endsWith(".js")) return;
       await renameExtension(filename, extn);
     });
 
-
     // now fix imports
-    await walkDir(dir, async filename => {
-      if (!filename.endsWith(`.${extn}`))
-        return;
+    await walkDir(dir, async (filename) => {
+      if (!filename.endsWith(`.${extn}`)) return;
       await fixImports(filename, type);
     });
   }
@@ -36,17 +33,21 @@ async function build() {
  * @param {(filename: string) => Promise<void>} callback Callback
  */
 async function walkDir(dirname, callback) {
-  const files = (await fsp.readdir(dirname)).map(filename => path.join(dirname, filename));
+  const files = (await fsp.readdir(dirname)).map((filename) =>
+    path.join(dirname, filename),
+  );
 
   /* first rename all files */
 
-  await Promise.all(files.map(async filename => {
-    const stat = await fsp.stat(filename);
-    if (stat.isDirectory()) {
-      return walkDir(filename, callback);
-    }
-    await callback(filename);
-  }));
+  await Promise.all(
+    files.map(async (filename) => {
+      const stat = await fsp.stat(filename);
+      if (stat.isDirectory()) {
+        return walkDir(filename, callback);
+      }
+      await callback(filename);
+    }),
+  );
 }
 
 /**
@@ -56,10 +57,10 @@ async function walkDir(dirname, callback) {
  */
 async function fixImports(filename, type = "esm") {
   let content = await fsp.readFile(filename, "utf8");
-  const regex = (type === "esm" ?
-    /^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm :
-    /(require\()(['"])(.+?)(\2\))/gm
-  );
+  const regex =
+    type === "esm"
+      ? /^((?:ex|im)port .+? from\s+)(["'])(.+?)(\2;?)$/gm
+      : /(require\()(['"])(.+?)(\2\))/gm;
   content = content.replaceAll(regex, (match, head, q, name, tail) => {
     // already has extension
     if (name.match(/\.[cm]?js$/)) {
@@ -70,7 +71,7 @@ async function fixImports(filename, type = "esm") {
     if (name.startsWith(".")) {
       // figure out which file it's referring to
       const target = findExtension(path.dirname(filename), name);
-      return (head + q + target + tail);
+      return head + q + target + tail;
     } else {
       try {
         const json = JSON.parse(readFileSync(findPackageJson(name), "utf8"));
@@ -80,7 +81,6 @@ async function fixImports(filename, type = "esm") {
             return head + q + "react/jsx-runtime.js" + tail;
           }
         } else {
-
         }
       } catch (e) {
         console.error(e);
@@ -120,8 +120,7 @@ function findPackageJson(name) {
   let dirname = NODE_MODULES;
   while (true) {
     const filename = path.join(dirname, packageName, "package.json");
-    if (fs.existsSync(filename))
-      return filename;
+    if (fs.existsSync(filename)) return filename;
     dirname = path.normalize(path.join(dirname, ".."));
     if (dirname === "/")
       throw new Error(`Could not find package.json for ${name}`);

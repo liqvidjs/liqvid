@@ -2,9 +2,7 @@
   "name": "@liqvid/captioning",
   "version": "1.0.0",
   "description": "Audio transcription and captioning for Liqvid",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "main": "dist/index.js",
   "repository": {
     "type": "git",

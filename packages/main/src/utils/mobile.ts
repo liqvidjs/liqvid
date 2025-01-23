@@ -12,7 +12,7 @@ export {
 */
 export const onClick = <T extends HTMLElement | SVGElement>(
   callback: (e: React.MouseEvent<T> | TouchEvent) => void,
-  innerRef?: React.Ref<T>
+  innerRef?: React.Ref<T>,
 ) => {
   if (anyHover) {
     return {onClick: callback};
@@ -35,7 +35,7 @@ export const onClick = <T extends HTMLElement | SVGElement>(
 
         if (
           target.contains(
-            document.elementFromPoint(touch.clientX, touch.clientY)
+            document.elementFromPoint(touch.clientX, touch.clientY),
           )
         ) {
           callback(e);
@@ -51,12 +51,12 @@ export const onClick = <T extends HTMLElement | SVGElement>(
         ref.addEventListener(
           "touchstart",
           onTouchStart as (e: TouchEvent) => void,
-          {passive: false}
+          {passive: false},
         );
         ref.addEventListener(
           "touchend",
           onTouchEnd as (e: TouchEvent) => void,
-          {passive: false}
+          {passive: false},
         );
       }, innerRef),
     };

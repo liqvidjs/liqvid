@@ -30,7 +30,7 @@ export async function thumbs({
   quality,
   rows,
   url,
-  width
+  width,
 }: {
   browserExecutable: string;
   browserHeight: number;
@@ -54,10 +54,12 @@ export async function thumbs({
   const executablePath = await getEnsureChrome(browserExecutable);
 
   if (path.extname(output) !== `.${imageFormat}`) {
-    console.error(`Error: File pattern '${output}' does not match format '${imageFormat}'.`);
+    console.error(
+      `Error: File pattern '${output}' does not match format '${imageFormat}'.`,
+    );
     process.exit(1);
   }
-  
+
   concurrency = validateConcurrency(concurrency);
 
   // browserHeight / browserWidth default to height/width
@@ -67,16 +69,18 @@ export async function thumbs({
   // make directories
   const [tmpDir] = await Promise.all([
     fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.thumbs")),
-    fsp.mkdir(path.dirname(output), {recursive: true})
+    fsp.mkdir(path.dirname(output), {recursive: true}),
   ]);
 
   // pool of puppeteer instances
   console.log(`(${step++}/${total}) Connecting to players...`);
   const pages = await getPages({
     colorScheme,
-    concurrency, url,
+    concurrency,
+    url,
     executablePath,
-    height: browserHeight, width: browserWidth
+    height: browserHeight,
+    width: browserWidth,
   });
   const pool = new Pool(pages);
   for (const page of pages) {
@@ -94,17 +98,28 @@ export async function thumbs({
   console.log(`(${step++}/${total}) Capturing thumbs...`);
   await captureRange({
     count: numThumbs,
-    filename: i => path.join(tmpDir, `${i}.${imageFormat}`),
+    filename: (i) => path.join(tmpDir, `${i}.${imageFormat}`),
     imageFormat,
     pool,
-    time: i => i * frequency * 1000
+    time: (i) => i * frequency * 1000,
   });
 
   // close chrome instances
   pages[0].browser().close();
 
   console.log(`(${step++}/${total}) Assembling sheets...`);
-  await assembleSheets({cols, height, imageFormat, numThumbs, output, pool, quality, rows, tmpDir, width});
+  await assembleSheets({
+    cols,
+    height,
+    imageFormat,
+    numThumbs,
+    output,
+    pool,
+    quality,
+    rows,
+    tmpDir,
+    width,
+  });
 
   // clean up tmp files
   console.log("Cleaning up...");
@@ -127,7 +142,7 @@ async function assembleSheets({
   quality,
   rows,
   tmpDir,
-  width
+  width,
 }: {
   cols: number;
   height: number;
@@ -143,20 +158,20 @@ async function assembleSheets({
   const numSheets = Math.ceil(numThumbs / cols / rows);
 
   // progress bar
-  const sheetsBar = new cliProgress.SingleBar({
-    autopadding: true,
-    clearOnComplete: true,
-    format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-    hideCursor: true
-  }, cliProgress.Presets.shades_classic);
+  const sheetsBar = new cliProgress.SingleBar(
+    {
+      autopadding: true,
+      clearOnComplete: true,
+      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      hideCursor: true,
+    },
+    cliProgress.Presets.shades_classic,
+  );
 
   sheetsBar.start(numThumbs, 0);
 
   await Promise.all(
-    new Array(numSheets)
-    .fill(null)
-    .map(async (_, sheetNum) => {
-
+    new Array(numSheets).fill(null).map(async (_, sheetNum) => {
       // get available puppeteer instance
       const page = await pool.acquire();
 
@@ -164,27 +179,31 @@ async function assembleSheets({
 
       // blit thumbs into here
       await Promise.all(
-        new Array(cols * rows)
-        .fill(null)
-        .map(async (_, i) => {
+        new Array(cols * rows).fill(null).map(async (_, i) => {
           const index = sheetNum * cols * rows + i;
           if (index >= numThumbs) return;
 
-          const thumb = await jimp.read(path.join(tmpDir, `${index}.${imageFormat}`));
+          const thumb = await jimp.read(
+            path.join(tmpDir, `${index}.${imageFormat}`),
+          );
           if (imageFormat === "jpeg") {
             thumb.quality(quality);
           }
           await thumb.resize(width, height);
-          await sheet.blit(thumb, (i % cols) * width, Math.floor(i / rows) * height);
+          await sheet.blit(
+            thumb,
+            (i % cols) * width,
+            Math.floor(i / rows) * height,
+          );
           sheetsBar.increment();
-        })
+        }),
       );
 
       await sheet.writeAsync(output.replace("%s", sheetNum.toString()));
 
       // release puppeteer instance
       pool.release(page);
-    })
+    }),
   );
   sheetsBar.stop();
 }

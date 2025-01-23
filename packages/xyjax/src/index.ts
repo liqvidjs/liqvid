@@ -17,36 +17,38 @@ interface Coords {
 /**
  * Animate XyJax arrows
  */
-export function useAnimateArrows(o: {
-  /** CSS selector for arrow head */
-  head: string;
+export function useAnimateArrows(
+  o: {
+    /** CSS selector for arrow head */
+    head: string;
 
-  /** CSS selector for arrow tail */
-  tail: string;
+    /** CSS selector for arrow tail */
+    tail: string;
 
-  /** CSS selector for arrow label */
-  label?: string;
+    /** CSS selector for arrow label */
+    label?: string;
 
-  /** Reference to container {@link MJX} */
-  ref: React.MutableRefObject<Handle>;
+    /** Reference to container {@link MJX} */
+    ref: React.MutableRefObject<Handle>;
 
-  /** Animation function for arrow tail */
-  tailFn: (t: number) => number;
+    /** Animation function for arrow tail */
+    tailFn: (t: number) => number;
 
-  /** Fade options for arrow head */
-  headFade: KeyframeEffectOptions;
+    /** Fade options for arrow head */
+    headFade: KeyframeEffectOptions;
 
-  /** Fade options for arrow label */
-  labelFade: KeyframeEffectOptions;
-}, deps?: React.DependencyList): void {
+    /** Fade options for arrow label */
+    labelFade: KeyframeEffectOptions;
+  },
+  deps?: React.DependencyList,
+): void {
   const playback = usePlayback();
   const tail = useRef<SVGLineElement>();
   const init = useRef<Coords>({});
 
   /* fading function */
   const fadeTail = useCallback((u: number) => {
-    if (!tail.current)
-      return;
+    if (!tail.current) return;
 
     const {x1, x2, y1, y2} = init.current;
 
@@ -72,13 +74,17 @@ export function useAnimateArrows(o: {
       fadeTail(o.tailFn(playback.currentTime));
 
       /* head animation */
-      const headNodes = Array.from(o.ref.current.domElement.querySelectorAll(o.head));
+      const headNodes = Array.from(
+        o.ref.current.domElement.querySelectorAll(o.head),
+      );
       for (const head of headNodes) {
         playback.newAnimation([{opacity: 0}, {opacity: 1}], o.headFade)(head);
       }
 
       /* label animation */
-      const labelNodes = Array.from(o.ref.current.domElement.querySelectorAll(o.label));
+      const labelNodes = Array.from(
+        o.ref.current.domElement.querySelectorAll(o.label),
+      );
       for (const label of labelNodes) {
         playback.newAnimation([{opacity: 0}, {opacity: 1}], o.labelFade)(label);
       }
@@ -102,8 +108,8 @@ Object.defineProperty(MathJax, "AST", {
       extendXY();
       extended = true;
     }
-    return this.__xypic = value;
-  }
+    return (this.__xypic = value);
+  },
 });
 
 export function extendXY(): void {
@@ -137,19 +143,33 @@ export function extendXY(): void {
   };
 
   // color
-  modifierRepository.put("color", new class extends AST.Modifier.Shape.ChangeColor {
-    modifyShape(context: unknown, objectShape: unknown, restModifiers: unknown, color: string) {
-      this.colorName = xyDecodeColor(color);
-      return super.modifyShape(context, objectShape, restModifiers);
-    }
-  });
+  modifierRepository.put(
+    "color",
+    new (class extends AST.Modifier.Shape.ChangeColor {
+      modifyShape(
+        context: unknown,
+        objectShape: unknown,
+        restModifiers: unknown,
+        color: string,
+      ) {
+        this.colorName = xyDecodeColor(color);
+        return super.modifyShape(context, objectShape, restModifiers);
+      }
+    })(),
+  );
 
   class ChangeDataShape {
-    constructor(public data: string, public shape: any) {}
+    constructor(
+      public data: string,
+      public shape: any,
+    ) {}
 
     draw(svg: any) {
       const g = svg.createGroup();
-      Object.assign(g.drawArea.dataset, JSON.parse("{" + fromb52(this.data) + "}"));
+      Object.assign(
+        g.drawArea.dataset,
+        JSON.parse("{" + fromb52(this.data) + "}"),
+      );
       this.shape.draw(g);
     }
 
@@ -159,28 +179,44 @@ export function extendXY(): void {
   }
 
   // data
-  modifierRepository.put("data", new class extends AST.Modifier {
-    preprocess() {}
+  modifierRepository.put(
+    "data",
+    new (class extends AST.Modifier {
+      preprocess() {}
 
-    modifyShape(context: unknown, objectShape: unknown, restModifiers: unknown, data: string) {
-      objectShape = this.proceedModifyShape(context, objectShape, restModifiers);
-      return new ChangeDataShape(data, objectShape);
-    }
-  });
+      modifyShape(
+        context: unknown,
+        objectShape: unknown,
+        restModifiers: unknown,
+        data: string,
+      ) {
+        objectShape = this.proceedModifyShape(
+          context,
+          objectShape,
+          restModifiers,
+        );
+        return new ChangeDataShape(data, objectShape);
+      }
+    })(),
+  );
 }
 
 const MAP = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 function to_b58(B: Uint8Array, A: string) {
   let d: number[] = [],
     s = "",
-    j: number, c: number, n: number;
+    j: number,
+    c: number,
+    n: number;
   for (let i = 0; i < B.length; ++i) {
-    j = 0, c = B[i];
+    (j = 0), (c = B[i]);
     s += c || s.length ^ i ? "" : 1;
     while (j in d || c) {
       n = d[j];
-      n = n ? n * 256 + c : c; c = n / A.length | 0;
-      d[j] = n % A.length; j++;
+      n = n ? n * 256 + c : c;
+      c = (n / A.length) | 0;
+      d[j] = n % A.length;
+      j++;
     }
   }
   while (j--) s += A[d[j]];
@@ -190,16 +226,19 @@ function to_b58(B: Uint8Array, A: string) {
 function from_b58(S: string, A: string) {
   let d: number[] = [],
     b = [],
-    j: number, c: number, n: number;
+    j: number,
+    c: number,
+    n: number;
   for (let i = 0; i < S.length; ++i) {
-    j = 0, c = A.indexOf(S[i]);
+    (j = 0), (c = A.indexOf(S[i]));
     if (c < 0) return undefined;
     c || b.length ^ i ? i : b.push(0);
     while (j in d || c) {
       n = d[j];
       n = n ? n * A.length + c : c;
       c = n >> 8;
-      d[j] = n % 256; j++;
+      d[j] = n % 256;
+      j++;
     }
   }
   while (j--) b.push(d[j]);
@@ -211,8 +250,7 @@ function from_b58(S: string, A: string) {
  */
 export function xyEncodeColor(color: string): string {
   return color.toUpperCase().replace(/[#0-9]/g, (char) => {
-    if (char === "#")
-      return "";
+    if (char === "#") return "";
     return String.fromCharCode("G".charCodeAt(0) + parseInt(char));
   });
 }
@@ -221,9 +259,12 @@ export function xyEncodeColor(color: string): string {
  * Decode a hex color for XyJax
  */
 export function xyDecodeColor(color: string): string {
-  return "#" + color.replace(/[G-P]/g, (digit) => {
-    return (digit.charCodeAt(0) - "G".charCodeAt(0)).toString();
-  });
+  return (
+    "#" +
+    color.replace(/[G-P]/g, (digit) => {
+      return (digit.charCodeAt(0) - "G".charCodeAt(0)).toString();
+    })
+  );
 }
 
 /**

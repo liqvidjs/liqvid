@@ -38,7 +38,7 @@ interface AnimateOptions {
  * If an array is passed, the functions are combined.
  */
 export function animate(
-  options: AnimateOptions | AnimateOptions[]
+  options: AnimateOptions | AnimateOptions[],
 ): (t: number) => number {
   if (options instanceof Array) {
     options.sort((a, b) => a.startTime - b.startTime);

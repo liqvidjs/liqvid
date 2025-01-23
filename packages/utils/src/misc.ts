@@ -11,7 +11,7 @@ export function between(min: number, val: number, max: number) {
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function bind<T extends {[P in K]: Function}, K extends keyof T>(
   o: T,
-  methods: K[]
+  methods: K[],
 ) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   for (const method of methods) o[method] = (o[method] as Function).bind(o);

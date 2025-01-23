@@ -14,7 +14,7 @@ export function Captions() {
       e:
         | KeyboardEvent
         | React.MouseEvent<HTMLButtonElement>
-        | React.TouchEvent<HTMLButtonElement>
+        | React.TouchEvent<HTMLButtonElement>,
     ) => {
       player.canvas.parentElement.classList.toggle("lv-captions");
 
@@ -22,7 +22,7 @@ export function Captions() {
       if (e.currentTarget instanceof HTMLButtonElement) e.currentTarget.blur();
     },
     // note that player.canvas may not have loaded yet
-    [player.canvas]
+    [player.canvas],
   );
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function Captions() {
 
   const style: React.CSSProperties = useMemo(
     () => (visible ? {} : {display: "none"}),
-    [visible]
+    [visible],
   );
 
   return (

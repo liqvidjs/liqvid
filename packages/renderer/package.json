@@ -2,9 +2,7 @@
   "name": "@liqvid/renderer",
   "version": "1.1.0",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "exports": {
     ".": {
       "import": "./dist/index.mjs"
@@ -24,12 +22,8 @@
   },
   "typesVersions": {
     "*": {
-      "index": [
-        "./dist/index.d.mts"
-      ],
-      "*": [
-        "./dist/tasks/*.d.mts"
-      ]
+      "index": ["./dist/index.d.mts"],
+      "*": ["./dist/tasks/*.d.mts"]
     }
   },
   "sideEffects": false,

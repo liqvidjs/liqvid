@@ -32,7 +32,7 @@ export class Playback extends CorePlayback {
    */
   newAnimation<T extends Element>(
     keyframes: Keyframe[] | PropertyIndexedKeyframes,
-    options?: number | KeyframeEffectOptions
+    options?: number | KeyframeEffectOptions,
   ): (target: T) => Animation {
     let anim: Animation;
 
@@ -44,14 +44,14 @@ export class Playback extends CorePlayback {
       } else if (anim !== undefined) {
         console.warn(
           "Animations should not be reused as they will not cancel properly. Check animations attached to ",
-          target
+          target,
         );
       }
 
       // create animation
       anim = new Animation(
         new KeyframeEffect(target, keyframes, options),
-        this.timeline
+        this.timeline,
       );
       if (
         typeof options === "object" &&

@@ -30,7 +30,7 @@ describe("IdMap", () => {
     render(
       <IdMap map={objects}>
         <h1 id="a">Hello World</h1>
-      </IdMap>
+      </IdMap>,
     );
     const h1 = document.querySelector("h1");
     expect(h1.className).toBe("demo-a");
@@ -41,7 +41,7 @@ describe("IdMap", () => {
     render(
       <IdMap map={objects}>
         <Component />
-      </IdMap>
+      </IdMap>,
     );
     const h1 = document.querySelector("h1");
     expect(h1.className).toBe("demo-a");

@@ -27,7 +27,7 @@ function syncTimeline(playback: Playback) {
   const tl = gsap.timeline({paused: true});
 
   playback.hub.on("play", () => tl.resume());
-  playback.hub.on("pause", () => tl.pause())
+  playback.hub.on("pause", () => tl.pause());
   playback.hub.on("ratechange", () => tl.timeScale(playback.playbackRate));
   playback.hub.on("seek", () => tl.seek(playback.currentTime / 1000));
 

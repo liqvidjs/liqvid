@@ -1,6 +1,8 @@
 // option of loading KaTeX asynchronously
 const KaTeXLoad = new Promise<typeof katex>((resolve) => {
-  const script = document.querySelector("script[src*=\"katex.js\"], script[src*=\"katex.min.js\"]");
+  const script = document.querySelector(
+    'script[src*="katex.js"], script[src*="katex.min.js"]',
+  );
   if (!script) return;
 
   if (window.hasOwnProperty("katex")) {
@@ -11,21 +13,22 @@ const KaTeXLoad = new Promise<typeof katex>((resolve) => {
 });
 
 // load macros from <head>
-const KaTeXMacros = new Promise<{[key: string]: string;}>((resolve) => {
-  const macros: {[key: string]: string;} = {};
-  const scripts: HTMLScriptElement[] = Array.from(document.querySelectorAll("head > script[type='math/tex']"));
+const KaTeXMacros = new Promise<{[key: string]: string}>((resolve) => {
+  const macros: {[key: string]: string} = {};
+  const scripts: HTMLScriptElement[] = Array.from(
+    document.querySelectorAll("head > script[type='math/tex']"),
+  );
   return Promise.all(
-    scripts.map(script =>
+    scripts.map((script) =>
       fetch(script.src)
-      .then(res => {
-        if (res.ok)
-          return res.text();
-        throw new Error(`${res.status} ${res.statusText}: ${script.src}`);
-      })
-      .then(tex => {
-        Object.assign(macros, parseMacros(tex));
-      })
-    )
+        .then((res) => {
+          if (res.ok) return res.text();
+          throw new Error(`${res.status} ${res.statusText}: ${script.src}`);
+        })
+        .then((tex) => {
+          Object.assign(macros, parseMacros(tex));
+        }),
+    ),
   ).then(() => resolve(macros));
 });
 
@@ -38,28 +41,31 @@ export const KaTeXReady = Promise.all([KaTeXLoad, KaTeXMacros]);
  * Parse \newcommand macros in a file.
  * Also supports \ktxnewcommand (for use in conjunction with MathJax).
  * @param file TeX file to parse
-*/
+ */
 function parseMacros(file: string) {
   const macros: Record<string, string> = {};
   const rgx = /\\(?:ktx)?newcommand\{(.+?)\}(?:\[\d+\])?\{/g;
   let match: RegExpExecArray;
-  
-  while (match = rgx.exec(file)) {
+
+  while ((match = rgx.exec(file))) {
     let body = "";
 
     const macro = match[1];
     let braceCount = 1;
 
-    for (let i = match.index + match[0].length; (braceCount > 0) && (i < file.length); ++i) {
+    for (
+      let i = match.index + match[0].length;
+      braceCount > 0 && i < file.length;
+      ++i
+    ) {
       const char = file[i];
       if (char === "{") {
         braceCount++;
       } else if (char === "}") {
         braceCount--;
-        if (braceCount === 0)
-          break;
+        if (braceCount === 0) break;
       } else if (char === "\\") {
-        body += file.slice(i, i+2);
+        body += file.slice(i, i + 2);
         ++i;
         continue;
       }

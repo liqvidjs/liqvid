@@ -52,7 +52,7 @@ export function matchItemDiff<T, R>(
     set?: (offset: number, value: unknown) => R;
     array?: (offset: number, value: ArrayDiff<T[number & keyof T]>) => R;
     object?: (offset: number, value: ObjectDiff<T[string & keyof T]>) => R;
-  }
+  },
 ): R | undefined {
   if (typeof offset === "number") {
     return fns.set?.(offset, item);
@@ -71,7 +71,7 @@ export function matchItemDiff<T, R>(
 
 export function isRune<R extends Rune>(
   key: string,
-  rune: R
+  rune: R,
 ): key is `${R}${string}` {
   return key.startsWith(rune as string);
 }
@@ -83,9 +83,9 @@ export function matchRunes<T, R>(
   fns: {
     [name in RuneName]?: (
       key: string & keyof T,
-      rkey: ObjectDiff<T>[RunedKey<name>]
+      rkey: ObjectDiff<T>[RunedKey<name>],
     ) => R;
-  }
+  },
 ): R | undefined {
   for (const name of Object.keys(fns) as RuneName[]) {
     const rune = runes[name];
@@ -104,12 +104,12 @@ export function consume<T>(
     [$name in RuneName | "else" | "none"]?: $name extends RuneName
       ? (value: ObjectDiff<T>[RunedKey<$name>]) => unknown
       : $name extends "else"
-      ? <K extends RuneName>(
-          name: K,
-          value: ObjectDiff<T>[RunedKey<K>]
-        ) => unknown
-      : () => unknown;
-  } = {}
+        ? <K extends RuneName>(
+            name: K,
+            value: ObjectDiff<T>[RunedKey<K>],
+          ) => unknown
+        : () => unknown;
+  } = {},
 ) {
   for (const name of objectKeys(runes)) {
     const rune = runes[name];
@@ -149,7 +149,7 @@ export function getOffset(offset: ItemDiff<unknown>[0]): number {
 
 export function addToOffset<O extends ItemDiff<unknown>[0]>(
   offset: O,
-  delta: number
+  delta: number,
 ): O {
   const result = getOffset(offset) + delta;
   if (typeof offset === "number") return result as O;

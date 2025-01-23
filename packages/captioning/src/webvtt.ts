@@ -10,14 +10,17 @@ export function toWebVTT(transcript: Transcript) {
 
   for (let i = 0; i < transcript.length; ++i) {
     const line = transcript[i];
-    if (line.length === 0)
-      continue;
-    captions.push(String(i+1));
-    captions.push(formatTimeMs(line[0][1]) + " --> " + formatTimeMs(line[line.length - 1][2]));
-    captions.push(line.map(_ => _[0]).join(" "));
+    if (line.length === 0) continue;
+    captions.push(String(i + 1));
+    captions.push(
+      formatTimeMs(line[0][1]) +
+        " --> " +
+        formatTimeMs(line[line.length - 1][2]),
+    );
+    captions.push(line.map((_) => _[0]).join(" "));
     captions.push("");
   }
-  
+
   return captions.join("\n");
 }
 
@@ -27,7 +30,7 @@ function formatTime(time: number): string {
     return "-" + formatTime(-time);
   }
   const minutes = Math.floor(time / 60 / 1000),
-        seconds = Math.floor(time / 1000 % 60);
+    seconds = Math.floor((time / 1000) % 60);
 
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }

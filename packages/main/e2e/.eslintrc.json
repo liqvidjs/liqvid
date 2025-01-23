@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "../.eslintrc.json"
-  ],
+  "extends": ["../.eslintrc.json"],
   "rules": {
     "react/react-in-jsx-scope": "off"
   }

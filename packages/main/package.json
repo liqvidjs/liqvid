@@ -2,9 +2,7 @@
   "name": "liqvid",
   "version": "2.1.13",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "main": "./dist/liqvid.js",
   "module": "./dist/liqvid.mjs",
   "typings": "./dist/liqvid.d.ts",

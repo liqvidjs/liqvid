@@ -16,7 +16,10 @@ export function usePlayback() {
 /**
  * Register a callback for time update. Returns the current time.
  */
-export function useTime(callback: (t: number) => void, deps?: React.DependencyList) {
+export function useTime(
+  callback: (t: number) => void,
+  deps?: React.DependencyList,
+) {
   const {playback} = useContext(Player.Context);
 
   useEffect(() => {

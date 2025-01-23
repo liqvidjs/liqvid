@@ -32,7 +32,7 @@ export function onDrag(
       dx: number;
       /** Vertical displacement since last call */
       dy: number;
-    }
+    },
   ) => void,
   /** Callback for when dragging begins (pointer is touched). */
   down: (
@@ -48,7 +48,7 @@ export function onDrag(
     /** The upHandler used internally by this method */
     upHandler: (e: MouseEvent | TouchEvent) => void,
     /** The moveHandler used internally by this method */
-    moveHandler: (e: MouseEvent | TouchEvent) => void
+    moveHandler: (e: MouseEvent | TouchEvent) => void,
   ) => void = () => {},
   /** Callback for when dragging ends (pointer is lifted). */
   up: (
@@ -64,8 +64,8 @@ export function onDrag(
       dx: number;
       /** Vertical displacement since last call */
       dy: number;
-    }
-  ) => void = () => {}
+    },
+  ) => void = () => {},
 ) {
   return (e: MouseEvent | TouchEvent) => {
     /* click events */
@@ -182,7 +182,7 @@ export function onDrag(
  */
 export function onClick<T extends HTMLElement | SVGElement>(
   node: T,
-  callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void
+  callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void,
 ): () => void {
   if (anyHover) {
     node.addEventListener("click", callback);

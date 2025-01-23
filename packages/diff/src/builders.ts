@@ -36,7 +36,7 @@ export function deletionDiff<K extends string>(key: K) {
  */
 export function arrayDiff<K extends string, T, D extends ArrayDiff<T>>(
   key: K,
-  diff: D
+  diff: D,
 ) {
   return {[`${runes.array}${key}`]: diff} as Record<RunedKey<"array", K>, D>;
 }
@@ -48,7 +48,7 @@ export function arrayDiff<K extends string, T, D extends ArrayDiff<T>>(
  */
 export function objectDiff<K extends string, T, D extends ObjectDiff<T>>(
   key: K,
-  diff: D
+  diff: D,
 ) {
   return {[`${runes.object}${key}`]: diff} as Record<RunedKey<"object", K>, D>;
 }
@@ -80,7 +80,7 @@ export function changeItemDiff<T>(offset: number, value: T): ChangeItemDiff<T> {
  */
 export function arrayItemDiff<T>(
   offset: number,
-  diff: ArrayDiff<T>
+  diff: ArrayDiff<T>,
 ): ArrayItemDiff<T> {
   return [`${runes.array}${offset}`, diff];
 }
@@ -92,7 +92,7 @@ export function arrayItemDiff<T>(
  */
 export function objectItemDiff<T, D extends ObjectDiff<T>>(
   offset: number,
-  diff: D
+  diff: D,
 ) {
   return [`${runes.object}${offset}`, diff] as [RunedKey<"object">, D];
 }

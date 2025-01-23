@@ -2,9 +2,7 @@
   "name": "@liqvid/katex",
   "version": "0.1.0",
   "description": "KaTeX integration for Liqvid",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
@@ -17,16 +15,11 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
+      "*": ["./dist/types/*.d.ts"]
     }
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": [
-    "liqvid",
-    "katex"
-  ],
+  "keywords": ["liqvid", "katex"],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",

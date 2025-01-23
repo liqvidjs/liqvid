@@ -16,10 +16,10 @@ import {thumbs} from "./tasks/thumbs.mjs";
 export async function main() {
   let config = // WTF
     yargs(hideBin(process.argv))
-    .scriptName("liqvid")
-    .strict()
-    .usage("$0 <cmd> [args]")
-    .demandCommand(1, "Must specify a command");
+      .scriptName("liqvid")
+      .strict()
+      .usage("$0 <cmd> [args]")
+      .demandCommand(1, "Must specify a command");
 
   config = audio(config);
   config = build(config);
@@ -29,9 +29,11 @@ export async function main() {
 
   // version
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const {version} = JSON.parse(await readFile(path.join(__dirname, "..", "package.json"), "utf8"));
+  const {version} = JSON.parse(
+    await readFile(path.join(__dirname, "..", "package.json"), "utf8"),
+  );
   config.version(version);
-  
+
   return config.help().argv;
 }
 
@@ -46,7 +48,7 @@ import type {transcribe} from "@liqvid/captioning";
 export interface LiqvidConfig {
   audio?: {
     transcribe: Partial<Parameters<typeof transcribe>[0]>;
-  }
+  };
   build?: Partial<Parameters<typeof buildProject>[0]>;
   render?: Partial<Parameters<typeof solidify>[0]>;
   serve?: Partial<Parameters<typeof createServer>[0]>;

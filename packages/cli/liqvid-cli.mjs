@@ -1,7 +1,8 @@
 #! /usr/bin/env node
 import * as pkg from "./dist/index.mjs";
 
-pkg.main()
+pkg
+  .main()
   .then(() => process.exit(0))
   .catch((err) => {
     // eslint-disable-next-line no-console

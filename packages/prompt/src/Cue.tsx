@@ -23,7 +23,7 @@ export class Cue extends React.PureComponent<Props, State> {
     super(props);
 
     this.state = {
-      lines: null
+      lines: null,
     };
   }
 
@@ -79,12 +79,17 @@ export class Cue extends React.PureComponent<Props, State> {
       <React.Fragment>
         <span className={spanClasses.join(" ")}>{this.props.on}</span>
 
-        {this.state.lines ?
+        {this.state.lines ? (
           this.state.lines.map((line, n) => (
-            <div className={divClasses.join(" ")} key={n}>{line}</div>
-          )) :
-          (<div className={`${NS}-measure`} ref={ref => this.ref = ref}>{this.props.children}</div>)
-        }
+            <div className={divClasses.join(" ")} key={n}>
+              {line}
+            </div>
+          ))
+        ) : (
+          <div className={`${NS}-measure`} ref={(ref) => (this.ref = ref)}>
+            {this.props.children}
+          </div>
+        )}
       </React.Fragment>
     );
   }

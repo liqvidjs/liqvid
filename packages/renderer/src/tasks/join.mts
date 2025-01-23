@@ -6,10 +6,10 @@ import path from "path";
 /**
  * Join multiple audio files into one.
  */
- export async function join({
-   filenames,
-   output
- }: {
+export async function join({
+  filenames,
+  output,
+}: {
   /** Files to join. */
   filenames: string[];
 
@@ -30,23 +30,32 @@ import path from "path";
   }
 
   // create join list
-  const tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.audio.join"));
+  const tempDir = await fsp.mkdtemp(
+    path.join(os.tmpdir(), "liqvid.audio.join"),
+  );
   const myList = path.join(tempDir, "mylist.txt");
-  await fsp.writeFile(myList, filenames.map(name => `file '${name}'`).join("\n"));
+  await fsp.writeFile(
+    myList,
+    filenames.map((name) => `file '${name}'`).join("\n"),
+  );
 
   // ffmpeg command
   const ext = path.extname(output);
 
   const opts = [
-    "-f", "concat",
-    "-safe", "0",
-    "-i", myList,
-    "-c", "copy",
+    "-f",
+    "concat",
+    "-safe",
+    "0",
+    "-i",
+    myList,
+    "-c",
+    "copy",
     // special args for webm
     ...(ext === ".webm" ? ["-strict", "-2"] : []),
-    output
+    output,
   ];
-  
+
   const job = execa("ffmpeg", opts);
   await job;
 

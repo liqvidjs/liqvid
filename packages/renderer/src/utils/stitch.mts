@@ -38,7 +38,7 @@ export function stitch({
 
     // frames
     "-i",
-    path.join(framesDir, pattern)
+    path.join(framesDir, pattern),
   ];
 
   /* audio */
@@ -57,7 +57,7 @@ export function stitch({
 
       // audio file
       "-i",
-      audioFile
+      audioFile,
     );
   }
 
@@ -73,29 +73,23 @@ export function stitch({
     // video args
     ...splitArgs(videoArgs),
 
-    output
+    output,
   );
   return execa("ffmpeg", args.filter(Boolean));
 }
 
 // fuck
 function splitArgs(combined: string) {
-  if (!combined)
-    return [];
+  if (!combined) return [];
 
   const parsed = parser(combined, {
     configuration: {
-      "short-option-groups": false
-    }
+      "short-option-groups": false,
+    },
   });
-  return (
-    Object.keys(parsed)
-    .reduce((opts, key) => {
-      if(key === "_")
-        return opts;
-      if (typeof parsed[key] === "boolean")
-        return opts.concat([`-${key}`]);
-      return opts.concat([`-${key}`, parsed[key]]);
-    }, [])
-  );
+  return Object.keys(parsed).reduce((opts, key) => {
+    if (key === "_") return opts;
+    if (typeof parsed[key] === "boolean") return opts.concat([`-${key}`]);
+    return opts.concat([`-${key}`, parsed[key]]);
+  }, []);
 }

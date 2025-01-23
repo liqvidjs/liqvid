@@ -12,7 +12,7 @@ type DownArgs = Parameters<typeof onDrag>[1] extends (
 type Up = Parameters<typeof onDrag>[2];
 
 function isReactMouseEvent<T>(
-  e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent
+  e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent,
 ): e is React.MouseEvent<T> {
   return "nativeEvent" in e && e.nativeEvent instanceof MouseEvent;
 }
@@ -37,10 +37,10 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
     /** The upHandler used internally by this method */
     upHandler: (e: MouseEvent | TouchEvent) => void,
     /** The moveHandler used internally by this method */
-    moveHandler: (e: MouseEvent | TouchEvent) => void
+    moveHandler: (e: MouseEvent | TouchEvent) => void,
   ) => void = () => {},
   /** Callback for when dragging ends (pointer is lifted). */
-  up: Up = () => {}
+  up: Up = () => {},
 ) {
   /*
     We can't directly use the version from @liqvid/utils/interaction because down() might want to use React types.
@@ -53,7 +53,7 @@ export function dragHelper<T extends HTMLElement | SVGElement>(
   const listener = onDrag(move, __down, up);
 
   return (
-    e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent
+    e: MouseEvent | React.MouseEvent<T> | React.TouchEvent<T> | TouchEvent,
   ) => {
     if ((e instanceof MouseEvent || isReactMouseEvent(e)) && e.button !== 0)
       return;
@@ -77,7 +77,7 @@ export function dragHelperReact<T extends HTMLElement | SVGElement>(
   move: Move,
   down?: Down,
   up?: Up,
-  innerRef?: React.Ref<T>
+  innerRef?: React.Ref<T>,
 ) {
   const listener = dragHelper(move, down, up);
 
@@ -88,7 +88,7 @@ export function dragHelperReact<T extends HTMLElement | SVGElement>(
     const intercept = captureRef(
       (ref) =>
         (ref.addEventListener as AEL)("touchstart", listener, {passive: false}),
-      innerRef
+      innerRef,
     );
     return {
       "data-affords": "click",

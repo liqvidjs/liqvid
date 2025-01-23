@@ -30,7 +30,7 @@ export function useKeyboardShortcut(
   seq: string,
 
   /** Callback to handle the shortcut */
-  callback: (e: KeyboardEvent) => unknown
+  callback: (e: KeyboardEvent) => unknown,
 ) {
   const keymap = useKeymap();
 

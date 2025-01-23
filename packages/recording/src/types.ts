@@ -3,7 +3,7 @@ import type {Recorder} from "./recorder";
 export interface RecordingPlugin<
   T = unknown,
   F = T[],
-  R extends Recorder<T, F> = Recorder<T, F>
+  R extends Recorder<T, F> = Recorder<T, F>,
 > {
   enabled?: () => boolean;
 

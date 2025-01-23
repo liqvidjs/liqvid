@@ -11,14 +11,14 @@ export function loadAllJSON() {
     (
       Array.from(
         document.querySelectorAll(
-          "link[data-name][rel='preload'][type='application/json']"
-        )
+          "link[data-name][rel='preload'][type='application/json']",
+        ),
       ) as HTMLLinkElement[]
     ).map((link) =>
       fetch(link.href)
         .then((res) => res.json())
-        .then((json) => (results[link.dataset.name] = json))
-    )
+        .then((json) => (results[link.dataset.name] = json)),
+    ),
   ).then();
 }
 
@@ -26,7 +26,7 @@ export function loadAllJSON() {
  * Load a JSON record asynchronously.
  */
 export function loadJSON<K extends keyof GetJSONMap>(
-  key: K
+  key: K,
 ): Promise<GetJSONMap[K]> {
   return new Promise((resolve, reject) => {
     // check for cached result
@@ -34,7 +34,7 @@ export function loadJSON<K extends keyof GetJSONMap>(
       return resolve(results[key] as GetJSONMap[K]);
     }
     const link = document.querySelector(
-      `link[data-name="${key}"][rel='preload'][type='application/json']`
+      `link[data-name="${key}"][rel='preload'][type='application/json']`,
     ) as HTMLLinkElement;
     if (!link) {
       return reject(`JSON record "${key}" not found`);

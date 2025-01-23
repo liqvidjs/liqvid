@@ -5,7 +5,7 @@ const external = [
   "@liqvid/utils/animation",
   "@liqvid/utils/misc",
   "liqvid",
-  "react"
+  "react",
 ];
 
 export default [
@@ -18,8 +18,8 @@ export default [
       // ESM
       {file: "./dist/index.mjs", format: "esm"},
       // CJS
-      {file: "./dist/index.cjs", format: "cjs"}
-    ]
+      {file: "./dist/index.cjs", format: "cjs"},
+    ],
   },
   // types
   {
@@ -27,7 +27,7 @@ export default [
     plugins: [dts()],
     output: {
       file: "dist/index.d.ts",
-      format: "es"
-    }
-  }
+      format: "es",
+    },
+  },
 ];

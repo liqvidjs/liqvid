@@ -14,19 +14,12 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
+      "*": ["./dist/types/*.d.ts"]
     }
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": [
-    "liqvid",
-    "mathjax"
-  ],
+  "keywords": ["liqvid", "mathjax"],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",

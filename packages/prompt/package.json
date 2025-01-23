@@ -7,14 +7,10 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*"
-      ]
+      "*": ["./dist/*"]
     }
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:css && pnpm build:postclean",

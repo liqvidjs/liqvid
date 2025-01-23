@@ -11,7 +11,7 @@ export function awaitMediaCanPlay(media: HTMLMediaElement): Promise<void> {
 
 /** Promisified version of [`canplaythrough`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplaythrough_event) event. */
 export function awaitMediaCanPlayThrough(
-  media: HTMLMediaElement
+  media: HTMLMediaElement,
 ): Promise<void> {
   return new Promise((resolve) => {
     if (media.readyState === media.HAVE_ENOUGH_DATA) {

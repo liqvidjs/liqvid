@@ -34,7 +34,7 @@ describe("Hooks", () => {
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
         <Test hook={useKeymap} return={o} />
-      </Player>
+      </Player>,
     );
     expect(o.value).toBe(player.keymap);
   });
@@ -45,7 +45,7 @@ describe("Hooks", () => {
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
         <Test hook={usePlayback} return={o} />
-      </Player>
+      </Player>,
     );
     expect(o.value).toBe(player.playback);
   });
@@ -56,7 +56,7 @@ describe("Hooks", () => {
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
         <Test hook={usePlayer} return={o} />
-      </Player>
+      </Player>,
     );
     expect(o.value).toBe(player);
   });
@@ -67,7 +67,7 @@ describe("Hooks", () => {
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
         <Test hook={useScript} return={o} />
-      </Player>
+      </Player>,
     );
     expect(o.value).toBe(player.script);
   });

@@ -2,17 +2,17 @@ import type {deletePlaceholder, runes} from "./runes";
 
 // runes
 export type RuneName = keyof typeof runes;
-export type Rune = typeof runes[RuneName];
+export type Rune = (typeof runes)[RuneName];
 export type RunedKey<
   K extends RuneName,
-  Name extends string = string
-> = `${typeof runes[K]}${Name}`;
+  Name extends string = string,
+> = `${(typeof runes)[K]}${Name}`;
 
 // array diffs
 export type ChangeItemDiff<T> = [offset: number, value: T];
 export type ObjectItemDiff<T> = [
   offset: RunedKey<"object">,
-  diff: ObjectDiff<T>
+  diff: ObjectDiff<T>,
 ];
 export type ArrayItemDiff<T> = [offset: RunedKey<"array">, diff: ArrayDiff<T>];
 
@@ -30,7 +30,7 @@ export type ItemDiff<T> =
 export type ArrayDiff<T> = [
   delta: number,
   itemDiffs?: ItemDiff<T>[],
-  ...tail: unknown[]
+  ...tail: unknown[],
 ];
 
 // delete placeholder

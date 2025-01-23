@@ -18,15 +18,15 @@ describe("time/formatTimeDuration", () => {
     expect(formatTimeDuration(10 * DAYS)).toBe("P10D");
     expect(formatTimeDuration(10 * DAYS + 2 * HOURS)).toBe("P10DT2H");
     expect(formatTimeDuration(10 * DAYS + 1 * HOURS + 3 * MINUTES)).toBe(
-      "P10DT1H3M"
+      "P10DT1H3M",
     );
     expect(
-      formatTimeDuration(10 * DAYS + 1 * HOURS + 10 * MINUTES + 3 * SECONDS)
+      formatTimeDuration(10 * DAYS + 1 * HOURS + 10 * MINUTES + 3 * SECONDS),
     ).toBe("P10DT1H10M3S");
     expect(
       formatTimeDuration(
-        2 * DAYS + 23 * HOURS + 3 * MINUTES + 20 * SECONDS + 337
-      )
+        2 * DAYS + 23 * HOURS + 3 * MINUTES + 20 * SECONDS + 337,
+      ),
     ).toBe("P2DT23H3M20.337S");
   });
 
@@ -35,7 +35,7 @@ describe("time/formatTimeDuration", () => {
     expect(formatTimeDuration(10 * MINUTES)).toBe("PT10M");
     expect(formatTimeDuration(17 * HOURS + 23 * SECONDS)).toBe("PT17H23S");
     expect(formatTimeDuration(5 * MINUTES + 18 * SECONDS + 1)).toBe(
-      "PT5M18.001S"
+      "PT5M18.001S",
     );
     expect(formatTimeDuration(5 * SECONDS)).toBe("PT5S");
     expect(formatTimeDuration(1 * SECONDS + 50)).toBe("PT1.05S");
@@ -67,7 +67,7 @@ describe("time/formatTime", () => {
 
   test("hh:mm:ss", () => {
     expect(formatTime(14 * HOURS + 25 * MINUTES + 1 * SECONDS)).toBe(
-      "14:25:01"
+      "14:25:01",
     );
   });
 

@@ -24,17 +24,17 @@ export function usePlayback(): Playback {
 /** Register a callback for time update. */
 export function useTime(
   callback: (value: number) => void,
-  deps?: React.DependencyList
+  deps?: React.DependencyList,
 ): void;
 export function useTime<T = number>(
   callback: (value: T) => void,
   transform?: (t: number) => T,
-  deps?: React.DependencyList
+  deps?: React.DependencyList,
 ): void;
 export function useTime<T = number>(
   callback: (value: T) => void,
   transform?: ((t: number) => T) | React.DependencyList,
-  deps?: React.DependencyList
+  deps?: React.DependencyList,
 ): void {
   const playback = usePlayback();
   const prev = useRef<T>();
@@ -66,6 +66,6 @@ export function useTime<T = number>(
         playback.off("timeupdate", listener);
       };
     },
-    typeof transform === "function" ? deps : transform
+    typeof transform === "function" ? deps : transform,
   );
 }

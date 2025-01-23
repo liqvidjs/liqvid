@@ -83,6 +83,6 @@ export const MarkerRecording: RecorderPlugin<
 function format(data: unknown) {
   return JSON.stringify(data, null, 2).replace(
     /\[\s+"(.+?)",\s+"(.+?)"\s+\]/g,
-    '["$1", "$2"]'
+    '["$1", "$2"]',
   );
 }

@@ -244,7 +244,7 @@ export class Player extends React.PureComponent<Props> {
     // ignore clicks on input tags
     if (
       ["a", "area", "button", "input", "option", "select", "textarea"].includes(
-        (e.target as Element).nodeName.toLowerCase()
+        (e.target as Element).nodeName.toLowerCase(),
       )
     )
       return;
@@ -374,10 +374,10 @@ interface DAGLeaf {
 /* topological sort */
 function toposort(
   root: HTMLElement | SVGElement,
-  mn: (markerName: string) => number
+  mn: (markerName: string) => number,
 ): DAGLeaf {
   const nodes = Array.from(
-    root.querySelectorAll("*[data-from-first], *[data-during]")
+    root.querySelectorAll("*[data-from-first], *[data-during]"),
   ) as (HTMLElement | SVGElement)[];
 
   const dag: DAGLeaf = {children: [], element: root};
@@ -434,7 +434,7 @@ function toposort(
  */
 function findClosest(
   needle: HTMLElement | SVGElement,
-  haystack: DAGLeaf
+  haystack: DAGLeaf,
 ): DAGLeaf {
   if (!haystack.element.contains(needle)) {
     return null;

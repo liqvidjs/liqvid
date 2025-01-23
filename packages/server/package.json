@@ -4,9 +4,7 @@
   "description": "Development server for Liqvid",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
   "private": false,

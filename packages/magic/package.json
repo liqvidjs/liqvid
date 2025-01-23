@@ -4,9 +4,7 @@
   "description": "Templating functions for Liqvid",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"

@@ -11,9 +11,7 @@
     "./style.css": "./dist/style.css"
   },
   "typings": "./dist/types/index.d.ts",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"

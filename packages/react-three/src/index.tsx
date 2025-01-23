@@ -10,12 +10,18 @@ const defaultAffords = "click keys(ArrowUp,ArrowDown,ArrowLeft,ArrowRight)";
 /**
  * Liqvid-aware Canvas component @react-three/fiber
  */
-export function Canvas(props: React.ComponentProps<typeof ThreeCanvas & {"data-affords"?: string;}>) {
-  const ContextBridge = useContextBridge(Player.Context, PlaybackContext, KeymapContext);
+export function Canvas(
+  props: React.ComponentProps<typeof ThreeCanvas & {"data-affords"?: string}>,
+) {
+  const ContextBridge = useContextBridge(
+    Player.Context,
+    PlaybackContext,
+    KeymapContext,
+  );
   return (
     <ThreeCanvas resize={{polyfill: ResizeObserver}} {...props}>
       <ContextBridge>
-        <Fixes {...props}/>
+        <Fixes {...props} />
         {props.children}
       </ContextBridge>
     </ThreeCanvas>

@@ -1,4 +1,10 @@
-import {ScriptData, scripts as defaultScripts, StyleData, styles as defaultStyles, transform} from "@liqvid/magic";
+import {
+  ScriptData,
+  scripts as defaultScripts,
+  StyleData,
+  styles as defaultStyles,
+  transform,
+} from "@liqvid/magic";
 import bodyParser from "body-parser";
 import {exec} from "child_process";
 import compression from "compression";
@@ -12,31 +18,31 @@ import type {AddressInfo} from "ws";
 
 /**
  * Create Express app to run Liqvid development server.
- */ 
+ */
 export function createServer(config: {
   /**
    * Build directory.
-   */ 
+   */
   build?: string;
 
   /**
    * Port to run LiveReload on.
-   */ 
+   */
   livereloadPort?: number;
 
   /**
    * Port to run the server on.
-   */ 
+   */
   port?: number;
 
   /**
    * Static directory.
    */
-   static?: string;
+  static?: string;
 
-   scripts?: Record<string, ScriptData>;
+  scripts?: Record<string, ScriptData>;
 
-   styles?: Record<string, StyleData>;
+  styles?: Record<string, StyleData>;
 }) {
   const app = express();
 
@@ -46,9 +52,11 @@ export function createServer(config: {
   /* body parsing? */
   app.use(cookieParser(/*process.env.SECURE_KEY*/));
   app.use(bodyParser.json({limit: "50mb"}));
-  app.use(bodyParser.urlencoded({
-    extended: true
-  }));
+  app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    }),
+  );
 
   // vars
   app.set("static", config.static);
@@ -60,15 +68,15 @@ export function createServer(config: {
 
   // magic
   const scripts = Object.assign({}, defaultScripts, config.scripts ?? {}, {
-    "livereload": {
+    livereload: {
       development() {
         return (
-          "document.write(`<script src=\"${location.protocol}//${(location.host || 'localhost').split(':')[0]}:" + 
+          "document.write(`<script src=\"${location.protocol}//${(location.host || 'localhost').split(':')[0]}:" +
           lrPort +
           "/livereload.js?snipver=1\"></` + 'script>');"
         );
-      }
-    }
+      },
+    },
   });
   const styles = Object.assign({}, defaultStyles, config.styles ?? {});
 
@@ -87,7 +95,7 @@ export function createServer(config: {
 
     runWebpack(port);
   });
-  server.on("error", err => {
+  server.on("error", (err) => {
     console.error(err);
     process.exit(1);
   });
@@ -95,7 +103,10 @@ export function createServer(config: {
   return app;
 }
 
-function htmlMagic(scripts: Record<string, ScriptData>, styles: Record<string, StyleData>): express.RequestHandler {
+function htmlMagic(
+  scripts: Record<string, ScriptData>,
+  styles: Record<string, StyleData>,
+): express.RequestHandler {
   return async (req, res, next) => {
     let filename;
     if (req.path.endsWith("/")) {
@@ -108,12 +119,15 @@ function htmlMagic(scripts: Record<string, ScriptData>, styles: Record<string, S
 
     // content files
     try {
-      const file = await fsp.readFile(path.join(req.app.get("static"), filename), "utf8");
+      const file = await fsp.readFile(
+        path.join(req.app.get("static"), filename),
+        "utf8",
+      );
       res.send(transform(file, {mode: "development", scripts, styles}));
-    } catch(e) {
+    } catch (e) {
       next();
     }
-  }
+  };
 }
 
 /**
@@ -124,9 +138,9 @@ function createLivereload(port: number, staticDir: string) {
   /* livereload */
   const lrHttpServer = livereload.createServer({
     exts: ["html", "css", "png", "gif", "jpg", "svg"],
-    port
+    port,
   });
-  
+
   lrHttpServer.watch(staticDir);
 
   return lrHttpServer;
@@ -137,16 +151,18 @@ function createLivereload(port: number, staticDir: string) {
  */
 function runWebpack(port: number) {
   const webpackConfig = require(path.join(process.cwd(), "webpack.config.js"));
-  
+
   const compiler = webpack(webpackConfig);
 
   // watch
   let firstRun = true;
 
   compiler.watch({}, (err, stats) => {
-    console.info(stats.toString({
-      colors: true
-    }));
+    console.info(
+      stats.toString({
+        colors: true,
+      }),
+    );
 
     // open in browser
     if (firstRun) {

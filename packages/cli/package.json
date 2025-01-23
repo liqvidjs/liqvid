@@ -6,10 +6,7 @@
   "bin": {
     "liqvid": "liqvid-cli.mjs"
   },
-  "files": [
-    "dist/*",
-    "liqvid-cli.mjs"
-  ],
+  "files": ["dist/*", "liqvid-cli.mjs"],
   "sideEffects": false,
   "repository": {
     "type": "git",

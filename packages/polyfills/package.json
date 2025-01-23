@@ -2,9 +2,7 @@
   "name": "@liqvid/polyfills",
   "version": "0.0.1",
   "description": "Polyfills used by Liqvid",
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"

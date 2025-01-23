@@ -1,4 +1,10 @@
-import {ScriptData, scripts as defaultScripts, StyleData, styles as defaultStyles, transform} from "@liqvid/magic";
+import {
+  ScriptData,
+  scripts as defaultScripts,
+  StyleData,
+  styles as defaultStyles,
+  transform,
+} from "@liqvid/magic";
 import {promises as fsp} from "fs";
 import path from "path";
 import webpack from "webpack";
@@ -9,50 +15,53 @@ import loadSync from "./load-sync.cjs";
 
 /**
  * Build project
-*/ 
+ */
 export const build = (yargs: typeof Yargs) =>
-  yargs
-  .command("build", "Build project", (yargs) => {
-    return (yargs
-      .config("config", parseConfig("build"))
-      .default("config", DEFAULT_CONFIG)
-      .option("clean", {
-        alias: "C",
-        default: false,
-        desc: "Delete old dist directory before starting",
-        type: "boolean"
-      })
-      .option("out", {
-        alias: "o",
-        coerce: path.resolve,
-        desc: "Output directory",
-        default: "./dist",
-        normalize: true
-      })
-      .option("static", {
-        alias: "s",
-        coerce: path.resolve,
-        desc: "Static directory",
-        default: "./static"
-      })
-      .option("scripts", {
-        coerce: coerceScripts,
-        desc: "Script aliases",
-        default: {}
-      })
-      .option("styles", {
-        desc: "Style aliases",
-        default: {}
-      })
-    );
-  }, (args) => {
-    return buildProject(args);
-  });
+  yargs.command(
+    "build",
+    "Build project",
+    (yargs) => {
+      return yargs
+        .config("config", parseConfig("build"))
+        .default("config", DEFAULT_CONFIG)
+        .option("clean", {
+          alias: "C",
+          default: false,
+          desc: "Delete old dist directory before starting",
+          type: "boolean",
+        })
+        .option("out", {
+          alias: "o",
+          coerce: path.resolve,
+          desc: "Output directory",
+          default: "./dist",
+          normalize: true,
+        })
+        .option("static", {
+          alias: "s",
+          coerce: path.resolve,
+          desc: "Static directory",
+          default: "./static",
+        })
+        .option("scripts", {
+          coerce: coerceScripts,
+          desc: "Script aliases",
+          default: {},
+        })
+        .option("styles", {
+          desc: "Style aliases",
+          default: {},
+        });
+    },
+    (args) => {
+      return buildProject(args);
+    },
+  );
 
 export async function buildProject(config: {
   /** Clean build directory */
   clean: boolean;
-  
+
   /** Output directory */
   out: string;
 
@@ -97,13 +106,15 @@ async function buildStatic(config: {
   await walkDir(staticDir, async (filename) => {
     const relative = path.relative(staticDir, filename);
     const dest = path.join(config.out, relative);
-    
+
     // apply html magic
     if (filename.endsWith(".html")) {
       const file = await fsp.readFile(filename, "utf8");
-      await idemWrite(dest, transform(file, {mode: "production", scripts, styles}));
+      await idemWrite(
+        dest,
+        transform(file, {mode: "production", scripts, styles}),
+      );
     } else if (relative === "bundle.js") {
-      
     } else {
       await fsp.mkdir(path.dirname(dest), {recursive: true});
       await fsp.copyFile(filename, dest);
@@ -126,10 +137,9 @@ async function buildBundle(config: {
   const compiler = webpack(webpackConfig);
 
   // watch
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     compiler.run((err, stats) => {
-      if (err)
-        console.error(err);
+      if (err) console.error(err);
       else {
         console.info(stats.toString({color: true}));
       }
@@ -140,15 +150,13 @@ async function buildBundle(config: {
   });
 }
 
-
 /**
  * Write a file idempotently.
- */ 
+ */
 async function idemWrite(filename: string, data: string) {
   try {
     const old = await fsp.readFile(filename, "utf8");
-    if (old !== data)
-      await fsp.writeFile(filename, data);
+    if (old !== data) await fsp.writeFile(filename, data);
   } catch (e) {
     await fsp.mkdir(path.dirname(filename), {recursive: true});
     await fsp.writeFile(filename, data);
@@ -157,31 +165,45 @@ async function idemWrite(filename: string, data: string) {
 
 /**
  * Recursively walk a directory.
- */ 
-async function walkDir(dirname: string, callback: (filename: string) => Promise<void>) {
-  const files = (await fsp.readdir(dirname)).map(_ => path.join(dirname, _));
-  await Promise.all(files.map(async file => {
-    const stats = await fsp.stat(file);
-    if (stats.isDirectory()) {
-      return walkDir(file, callback);
-    } else {
-      return callback(file);
-    }
-  }));
+ */
+async function walkDir(
+  dirname: string,
+  callback: (filename: string) => Promise<void>,
+) {
+  const files = (await fsp.readdir(dirname)).map((_) => path.join(dirname, _));
+  await Promise.all(
+    files.map(async (file) => {
+      const stats = await fsp.stat(file);
+      if (stats.isDirectory()) {
+        return walkDir(file, callback);
+      } else {
+        return callback(file);
+      }
+    }),
+  );
 }
 
 /**
  * Fix files.
  */
-function coerceScripts(json: Record<string, {
-  crossorigin?: boolean | string;
-  development?: string;
-  production?: string;
-} | string>) {
+function coerceScripts(
+  json: Record<
+    string,
+    | {
+        crossorigin?: boolean | string;
+        development?: string;
+        production?: string;
+      }
+    | string
+  >,
+) {
   for (const key in json) {
     const record = json[key];
     if (typeof record === "object") {
-      if (typeof record.crossorigin === "string" && ["true","false"].includes(record.crossorigin)) {
+      if (
+        typeof record.crossorigin === "string" &&
+        ["true", "false"].includes(record.crossorigin)
+      ) {
         record.crossorigin = record.crossorigin === "true";
       }
     }

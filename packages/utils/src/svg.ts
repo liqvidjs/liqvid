@@ -8,7 +8,7 @@
 export function screenToSVG(
   elt: SVGElement,
   x: number,
-  y: number
+  y: number,
 ): [number, number] {
   let graphicsElt = elt;
 
@@ -43,7 +43,7 @@ export function screenToSVG(
 export function screenToSVGVector(
   svg: SVGSVGElement,
   dx: number,
-  dy: number
+  dy: number,
 ): [number, number] {
   const rect = svg.getBoundingClientRect(),
     viewBox = svg.viewBox.baseVal,
