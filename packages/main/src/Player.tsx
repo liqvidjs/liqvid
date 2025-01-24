@@ -84,7 +84,7 @@ export class Player extends React.PureComponent<Props> {
    *
    * `player.canvas.parentElement[Player.symbol] === player`
    */
-  static symbol = Symbol();
+  static symbol = Symbol.for("@liqvid/player/element");
 
   /** Default controls appearing on the left */
   static defaultControlsLeft = (
@@ -147,7 +147,8 @@ export class Player extends React.PureComponent<Props> {
 
   componentDidMount() {
     const element = this.canvas.parentElement;
-    element[Player.symbol] = this;
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    (element as any)[Player.symbol] = this;
 
     // inline or frame?
     // const client =
