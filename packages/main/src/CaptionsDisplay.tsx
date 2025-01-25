@@ -8,12 +8,18 @@ export default function Captions() {
   const domElement = useRef<HTMLDivElement>();
 
   useEffect(() => {
-    playback.on("cuechange", () => {
+    const updateCaptions = () => {
       domElement.current.innerHTML = "";
       for (const cue of playback.captions) {
         domElement.current.appendChild(cue);
       }
-    });
+    };
+
+    playback.on("cuechange", updateCaptions);
+
+    return () => {
+      playback.off("cuechange", updateCaptions);
+    };
   }, [playback]);
 
   return <div className="lv-captions-display" ref={domElement} />;

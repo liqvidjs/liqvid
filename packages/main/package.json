@@ -1,6 +1,6 @@
 {
   "name": "liqvid",
-  "version": "2.1.13",
+  "version": "2.1.15",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": ["dist/*"],
   "main": "./dist/liqvid.js",
@@ -42,7 +42,7 @@
     "@liqvid/playback": "workspace:^",
     "@liqvid/utils": "workspace:^",
     "@types/events": "^3.0.0",
-    "@types/node": "^17.0.33",
+    "@types/node": "^22.10.10",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
   },

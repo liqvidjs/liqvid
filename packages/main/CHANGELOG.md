@@ -1,3 +1,11 @@
+## 2.1.15 (January 24, 2025)
+
+- fix `StrictMode` error in `<CaptionsDisplay>`
+
+## 2.1.14 (January 23, 2025)
+
+- make `Player.symbol` indexable via `@liqvid/player/element`
+
 ## 2.1.12 (June 12, 2024)
 
 - Strict Mode fixes
