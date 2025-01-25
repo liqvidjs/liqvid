@@ -46,7 +46,10 @@ export class IdMap extends React.PureComponent<Props> {
       if (node.props.hasOwnProperty("id")) {
         const {id} = (node as React.ReactElement<{id: string}>).props;
         foundIds.add(id);
-        if (map[id] !== undefined) Object.assign(attrs, map[id]);
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        if ((map as any)[id] !== undefined)
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          Object.assign(attrs, (map as any)[id]);
       }
 
       if (Object.keys(attrs).length === 0) {

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {EventEmitter} from "events";
 import type StrictEventEmitter from "strict-event-emitter-types";
@@ -197,7 +195,7 @@ export class Player extends React.PureComponent<Props> {
     /** Hide element */
     function hide(leaf: DAGLeaf): void {
       leaf.element.style.opacity = "0";
-      leaf.element.style["pointer-events"] = "none";
+      leaf.element.style.pointerEvents = "none";
       leaf.element.setAttribute("aria-hidden", "true");
     }
 
@@ -258,13 +256,15 @@ export class Player extends React.PureComponent<Props> {
     // the reason for this escape hatch is that this gets called in between an element's onMouseUp
     // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
     // onMouseUp or else the dragging won't release.
-    if (e.nativeEvent[ignoreCanvasClick]) return;
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    if ((e.nativeEvent as any)[ignoreCanvasClick]) return;
 
     this.canvasClick();
   }
 
   static allowScroll(e: React.TouchEvent | TouchEvent): void {
-    ("nativeEvent" in e ? e.nativeEvent : e)[allowScroll] = true;
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    (("nativeEvent" in e ? e.nativeEvent : e) as any)[allowScroll] = true;
   }
 
   /**
@@ -273,7 +273,8 @@ export class Player extends React.PureComponent<Props> {
    * @deprecated Use data-affords="click" instead
    */
   static preventCanvasClick(e: MouseEvent | React.MouseEvent): void {
-    ("nativeEvent" in e ? e.nativeEvent : e)[ignoreCanvasClick] = true;
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    (("nativeEvent" in e ? e.nativeEvent : e) as any)[ignoreCanvasClick] = true;
   }
 
   /** Suspends keyboard controls so that components can receive keyboard input. */

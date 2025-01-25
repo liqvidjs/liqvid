@@ -109,7 +109,7 @@ export class Playback extends CorePlayback {
         anim.startTime = null;
         anim.play();
         anim.startTime =
-          this.timeline.currentTime +
+          (this.timeline.currentTime as number) +
           (this.__delays.get(anim.effect) - this.currentTime) /
             this.playbackRate;
       }
@@ -133,7 +133,7 @@ export class Playback extends CorePlayback {
           anim.currentTime = -offset;
           anim.pause();
         } else {
-          anim.startTime = this.timeline.currentTime + offset;
+          anim.startTime = (this.timeline.currentTime as number) + offset;
         }
       }
     });

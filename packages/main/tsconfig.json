@@ -12,7 +12,6 @@
     "outDir": "./dist/esm",
     "pretty": true,
     "removeComments": false,
-    "suppressImplicitAnyIndexErrors": true,
     "target": "esnext"
   },
   "include": ["./src/index.ts"]

@@ -56,7 +56,8 @@ export function Settings() {
 
   /* handlers */
   const setSpeed = useMemo(() => {
-    const map = {};
+    // biome-ignore lint/suspicious/noExplicitAny: ReturnType<typeof onClick> not working for some reason
+    const map: Record<number, any> = {};
     for (const rate of PLAYBACK_RATES) {
       map[rate] = onClick(() => {
         playback.playbackRate = rate;

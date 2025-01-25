@@ -5,9 +5,14 @@ import * as fs from "fs";
 import dts from "rollup-plugin-dts";
 import {terser} from "rollup-plugin-terser";
 
+// banner
+const licenseComment = "/*!" + fs.readFileSync("./LICENSE", "utf8") + "*/";
+const useClientDirective = '"use client";';
+const banner = `${licenseComment}\n${useClientDirective}`;
+
 /* shared UMD config --- don't put plugins here bc array will get copied by reference */
 const umdConfig = {
-  banner: "/*!" + fs.readFileSync("./LICENSE", "utf8") + "*/",
+  banner,
   format: "esm",
   globals: {
     react: "React",
@@ -42,7 +47,11 @@ export default [
 
     output: [
       // ESM
-      {file: "./dist/liqvid.mjs", format: "esm"},
+      {
+        banner,
+        file: "./dist/liqvid.mjs",
+        format: "esm",
+      },
       // UMD development
       {
         ...umdConfig,
