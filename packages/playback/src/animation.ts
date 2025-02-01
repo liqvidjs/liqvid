@@ -1,3 +1,4 @@
+import {isClient} from "@liqvid/utils/ssr";
 import {Playback as CorePlayback} from "./core";
 
 declare global {
@@ -21,7 +22,9 @@ export class Playback extends CorePlayback {
   constructor(options: ConstructorParameters<typeof CorePlayback>[0]) {
     super(options);
 
-    this.__createTimeline();
+    if (isClient) {
+      this.__createTimeline();
+    }
   }
 
   /**

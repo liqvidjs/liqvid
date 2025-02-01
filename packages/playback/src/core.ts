@@ -1,6 +1,7 @@
 import {EventEmitter} from "events";
-import type StrictEventEmitter from "strict-event-emitter-types";
 import {bind, constrain} from "@liqvid/utils/misc";
+import {isClient} from "@liqvid/utils/ssr";
+import type StrictEventEmitter from "strict-event-emitter-types";
 
 interface PlaybackEvents {
   bufferupdate: void;
@@ -66,18 +67,21 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
     this.__playingFrom = 0;
     this.__startTime = performance.now();
 
-    // audio
-    this.__initAudio();
-
     // we will have lots of listeners, turn off warning
     this.setMaxListeners(0);
 
-    // bind
+    // bind methods
     bind(this, ["pause", "play"]);
     this.__advance = this.__advance.bind(this);
 
-    // initiate playback loop
-    requestAnimationFrame(this.__advance);
+    // browser-only
+    if (isClient) {
+      // audio
+      this.__initAudio();
+
+      // initiate playback loop
+      requestAnimationFrame(this.__advance);
+    }
   }
 
   /* magic properties */

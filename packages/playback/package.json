@@ -1,15 +1,17 @@
 {
   "name": "@liqvid/playback",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Playback class for Liqvid",
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
     },
     "./react": {
       "import": "./dist/esm/react.mjs",
-      "require": "./dist/cjs/react.cjs"
+      "require": "./dist/cjs/react.cjs",
+      "types": "./dist/types/react.d.ts"
     }
   },
   "typesVersions": {
@@ -21,9 +23,9 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --moduleResolution node --outDir dist/cjs; node ../../build.mjs",
     "build:postclean": "find . -name tsconfig.tsbuildinfo -delete",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "lint": "pnpm biome check --fix",
     "test": "jest"
   },
   "repository": {
@@ -41,14 +43,14 @@
   },
   "dependencies": {
     "@liqvid/utils": "workspace:^",
-    "@lqv/playback": "^0.0.1",
+    "@lqv/playback": "^0.2.2",
     "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
   },
   "sideEffects": false,
   "peerDependencies": {
-    "react": ">=17.0.0"
+    "react": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
