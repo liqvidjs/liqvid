@@ -1,3 +1,5 @@
+import {isClient} from "@liqvid/utils/ssr";
+
 import {Recorder, IntransigentReturn} from "../recorder";
 import type {RecorderPlugin} from "../types";
 
@@ -12,13 +14,8 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
   private mediaRecorder: MediaRecorder;
   private promise: Promise<IntransigentReturn>;
 
-  private baseTime: number;
-  private blob: Blob;
-
   stream: MediaStream;
   private requested = false;
-  private startTime: number;
-  private endTime: number;
 
   intransigent = true;
 
@@ -66,18 +63,18 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
     return new Blob(chunks, {type: "video/webm"});
   }
 
-  requestRecording() {
+  requestRecording(
+    constraints: MediaStreamConstraints = {audio: true, video: true},
+  ) {
     // be idempotent
     if (this.requested) return;
 
     const request = async () => {
       // Only need to do this once...
       window.removeEventListener("click", request);
+
       try {
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true,
-        });
+        this.stream = await navigator.mediaDevices.getUserMedia(constraints);
       } catch (e) {
         // User said no or browser rejected request due to insecure context
         console.log("no recording allowed");
@@ -86,6 +83,7 @@ export class VideoRecorder extends Recorder<Blob, Blob> {
 
     // Need user interaction to request media
     window.addEventListener("click", request);
+    this.requested = true;
   }
 }
 
@@ -107,7 +105,7 @@ const recorder = new VideoRecorder();
 export const VideoRecording: RecorderPlugin<Blob, Blob, VideoRecorder> = {
   enabled: () => {
     if (typeof recorder.stream === "undefined") {
-      recorder.requestRecording();
+      if (isClient) recorder.requestRecording();
       return false;
     }
     return true;

@@ -1,5 +1,6 @@
 import {formatTimeMs} from "@liqvid/utils/time";
 import {useCallback, useState} from "react";
+
 import type {RecorderPlugin} from "./types";
 
 interface Props {

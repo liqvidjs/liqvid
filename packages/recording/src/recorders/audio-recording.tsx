@@ -1,3 +1,5 @@
+import {isClient} from "@liqvid/utils/ssr";
+
 import {Recorder, IntransigentReturn} from "../recorder";
 import type {RecorderPlugin} from "../types";
 
@@ -40,13 +42,8 @@ export class AudioRecorder extends Recorder<Blob, Blob> {
   private mediaRecorder: MediaRecorder;
   private promise: Promise<IntransigentReturn>;
 
-  private baseTime: number;
-  private blob: Blob;
-
   stream: MediaStream;
   private requested = false;
-  private startTime: number;
-  private endTime: number;
 
   intransigent = true;
 
@@ -94,15 +91,16 @@ export class AudioRecorder extends Recorder<Blob, Blob> {
     return new Blob(chunks, {type: "audio/webm"});
   }
 
-  requestRecording() {
+  requestRecording(constraints: MediaStreamConstraints = {audio: true}) {
     // be idempotent
     if (this.requested) return;
 
     const request = async () => {
       // Only need to do this once...
       window.removeEventListener("click", request);
+
       try {
-        this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        this.stream = await navigator.mediaDevices.getUserMedia(constraints);
       } catch (e) {
         // User said no or browser rejected request due to insecure context
         console.log("no recording allowed");
@@ -133,7 +131,7 @@ const recorder = new AudioRecorder();
 export const AudioRecording: RecorderPlugin<Blob, Blob, AudioRecorder> = {
   enabled: () => {
     if (typeof recorder.stream === "undefined") {
-      recorder.requestRecording();
+      if (isClient) recorder.requestRecording();
       return false;
     }
     return true;
