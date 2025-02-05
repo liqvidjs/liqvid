@@ -1,17 +1,27 @@
 {
   "name": "liqvid",
-  "version": "2.1.15",
+  "version": "2.1.16",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": ["dist/*"],
   "main": "./dist/liqvid.js",
   "module": "./dist/liqvid.mjs",
-  "typings": "./dist/liqvid.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:css && pnpm build:js && pnpm build:postclean",
+    "build": "pnpm build:clean && pnpm build:css && pnpm build:js",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc && rollup -c",
     "build:css": "stylus -o dist/liqvid.css styl/liqvid.styl; stylus -c -o dist/liqvid.min.css styl/liqvid.styl",
-    "build:postclean": "rm -rf dist/esm dist/types",
+    "build:js": "pnpm build:js:bundle; pnpm build:js:cjs; pnpm build:js:esm; pnpm build:js:fix",
+    "build:js:bundle": "tsc && rollup -c && rm -rf dist/esm",
+    "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:js:esm": "tsc --module esnext --outDir dist/esm",
+    "build:js:fix": "node ../../build.mjs",
     "lint": "eslint --ext ts,tsx --fix e2e src tests",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",

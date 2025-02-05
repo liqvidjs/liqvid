@@ -138,10 +138,10 @@ importers:
         specifier: ^5.70.0
         version: 5.97.1(webpack-cli@4.10.0)
       yargs:
-        specifier: ^17.4.1
+        specifier: ^17.7.2
         version: 17.7.2
       yargs-parser:
-        specifier: ^21.0.1
+        specifier: ^21.1.1
         version: 21.1.1
     devDependencies:
       '@types/cli-progress':
@@ -489,7 +489,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5
       yargs-parser:
-        specifier: ^21.0.1
+        specifier: ^21.1.1
         version: 21.1.1
     devDependencies:
       '@types/cli-progress':
@@ -531,7 +531,13 @@ importers:
       webpack:
         specifier: ^5.65.0
         version: 5.97.1(webpack-cli@4.10.0)
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     devDependencies:
+      '@types/body-parser':
+        specifier: ^1.19.5
+        version: 1.19.5
       '@types/compression':
         specifier: ^1.7.2
         version: 1.7.5

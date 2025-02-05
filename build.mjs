@@ -73,18 +73,6 @@ async function fixImports(filename, type = "esm") {
       const target = findExtension(path.dirname(filename), name);
       return head + q + target + tail;
     } else {
-      try {
-        const json = JSON.parse(readFileSync(findPackageJson(name), "utf8"));
-        if (json.exports) {
-          // ARGH
-          if (name === "react/jsx-runtime" && type === "esm") {
-            return head + q + "react/jsx-runtime.js" + tail;
-          }
-        } else {
-        }
-      } catch (e) {
-        console.error(e);
-      }
     }
     return match;
   });
