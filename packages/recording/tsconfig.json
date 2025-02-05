@@ -2,10 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "jsx": "react-jsx",
     "declarationDir": "./dist/types",
-    "module": "esnext",
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     "removeComments": false,
     "rootDir": "./src"
   },

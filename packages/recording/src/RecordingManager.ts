@@ -1,5 +1,5 @@
-import {bind} from "@liqvid/utils/misc";
 import {EventEmitter} from "events";
+import {bind} from "@liqvid/utils/misc";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
 import type {IntransigentReturn, Recorder} from "./recorder";

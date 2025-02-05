@@ -1,6 +1,6 @@
 import {isClient} from "@liqvid/utils/ssr";
 
-import {Recorder, IntransigentReturn} from "../recorder";
+import {type IntransigentReturn, Recorder} from "../recorder";
 import type {RecorderPlugin} from "../types";
 
 const icon = (

@@ -13,8 +13,8 @@ import {Keymap} from "@liqvid/keymap";
 import {useKeymap} from "@liqvid/keymap/react";
 import {onClick, useForceUpdate} from "@liqvid/utils/react";
 
-import type {RecorderPlugin} from "./types";
 import {RecordingManager} from "./RecordingManager";
+import type {RecorderPlugin} from "./types";
 
 import RecordingRow from "./RecordingRow";
 import {Recorder} from "./recorder";
