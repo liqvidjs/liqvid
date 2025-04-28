@@ -1,17 +1,19 @@
 import {EventEmitter} from "events";
-import StrictEventEmitter from "strict-event-emitter-types";
 import {between, bind} from "@liqvid/utils/misc";
 import {parseTime, timeRegexp} from "@liqvid/utils/time";
+import type StrictEventEmitter from "strict-event-emitter-types";
 
 import {Playback} from "./playback";
 
-export type Marker = [string, number, number];
+export type Marker<M extends string = string> = [M, number, number];
 
 interface ScriptEvents {
   markerupdate: number;
 }
 
-export class Script extends (EventEmitter as new () => StrictEventEmitter<
+export class Script<
+  M extends string = string,
+> extends (EventEmitter as new () => StrictEventEmitter<
   EventEmitter,
   ScriptEvents
 >) {
@@ -19,15 +21,15 @@ export class Script extends (EventEmitter as new () => StrictEventEmitter<
   playback: Playback;
 
   /** The array of markers, in the form [name, startTime, endTime]. */
-  markers: Marker[];
+  markers: Marker<M>[];
 
   /** Index of the active marker. */
   markerIndex: number;
 
   constructor(
-    markers: (
-      | [string, number | string, number | string]
-      | [string, number | string]
+    markers: readonly (
+      | readonly [M, number | string, number | string]
+      | readonly [M, number | string]
     )[],
   ) {
     super();
@@ -46,22 +48,30 @@ export class Script extends (EventEmitter as new () => StrictEventEmitter<
 
     // parse times
     let time = 0;
+    this.markers = [];
+
     for (const marker of markers) {
       if (marker.length === 2) {
         const [, duration] = marker;
-        marker[1] = time;
-        (marker as unknown as Marker)[2] =
+
+        this.markers.push([
+          marker[0],
+          time,
           time +
-          (typeof duration === "string" ? parseTime(duration) : duration);
+            (typeof duration === "string" ? parseTime(duration) : duration),
+        ]);
       } else {
         const [, begin, end] = marker;
-        marker[1] = typeof begin === "string" ? parseTime(begin) : begin;
-        marker[2] = typeof end === "string" ? parseTime(end) : end;
+
+        this.markers.push([
+          marker[0],
+          typeof begin === "string" ? parseTime(begin) : begin,
+          typeof end === "string" ? parseTime(end) : end,
+        ]);
       }
 
       time = marker[2] as number;
     }
-    this.markers = markers as Marker[];
 
     this.markerIndex = 0;
 

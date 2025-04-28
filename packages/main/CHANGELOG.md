@@ -1,3 +1,11 @@
+## 2.1.18 (April 27, 2025)
+
+- fix `Script` type to be readonly + allow narrowing the marker name
+
+## 2.1.17 (February 4, 2025)
+
+- fix ESM exports
+
 ## 2.1.15 (January 24, 2025)
 
 - fix `StrictMode` error in `<CaptionsDisplay>`

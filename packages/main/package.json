@@ -1,6 +1,6 @@
 {
   "name": "liqvid",
-  "version": "2.1.16",
+  "version": "2.1.18",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
   "files": ["dist/*"],
   "main": "./dist/liqvid.js",
@@ -11,7 +11,10 @@
       "require": "./dist/cjs/index.cjs",
       "types": "./dist/types/index.d.ts"
     },
-    "./style.css": "./dist/style.css"
+    "./dist/liqvid.css": "./dist/liqvid.css",
+    "./dist/liqvid.min.css": "./dist/liqvid.min.css",
+    "./liqvid.css": "./dist/liqvid.css",
+    "./liqvid.min.css": "./dist/liqvid.min.css"
   },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:css && pnpm build:js",
@@ -57,9 +60,9 @@
     "strict-event-emitter-types": "^2.0.0"
   },
   "peerDependencies": {
-    "@types/react": ">=17.0.0",
-    "@types/react-dom": ">=17.0.0",
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0"
+    "@types/react": ">=17",
+    "@types/react-dom": ">=17",
+    "react": ">=17",
+    "react-dom": ">=17"
   }
 }
