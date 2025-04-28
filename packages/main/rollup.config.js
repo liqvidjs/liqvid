@@ -1,7 +1,7 @@
+import * as fs from "fs";
 import {getBabelOutputPlugin} from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import {nodeResolve} from "@rollup/plugin-node-resolve";
-import * as fs from "fs";
 import dts from "rollup-plugin-dts";
 import {terser} from "rollup-plugin-terser";
 

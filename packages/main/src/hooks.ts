@@ -1,9 +1,10 @@
 import {usePlayback} from "@liqvid/playback/react";
 import {useContext, useEffect} from "react";
-import {Player} from "./Player";
 
 export {KeymapContext, useKeymap} from "@liqvid/keymap/react";
 export {PlaybackContext, usePlayback, useTime} from "@liqvid/playback/react";
+
+import {Player} from "./Player";
 import type {Script} from "./script";
 
 /** Access the ambient {@link Player} */
@@ -28,8 +29,8 @@ export function useMarkerUpdate(
 }
 
 /** Access the ambient {@link Script} */
-export function useScript(): Script {
-  return usePlayer().script;
+export function useScript<M extends string = string>(): Script<M> {
+  return usePlayer().script as Script<M>;
 }
 
 /** Register a callback for when the time changes */

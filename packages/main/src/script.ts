@@ -70,7 +70,7 @@ export class Script<
         ]);
       }
 
-      time = marker[2] as number;
+      time = this.markers[this.markers.length - 1][2];
     }
 
     this.markerIndex = 0;

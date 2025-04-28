@@ -1,11 +1,11 @@
 import {Audio} from "./Audio";
 import {IdMap} from "./IdMap";
 import {Media} from "./Media";
-import {Playback} from "./playback";
 import {Player} from "./Player";
+import {Video} from "./Video";
+import {Playback} from "./playback";
 import {Script} from "./script";
 import * as Utils from "./utils";
-import {Video} from "./Video";
 export * from "./hooks";
 
 export {ReplayData} from "@liqvid/utils/replay-data";
@@ -20,8 +20,8 @@ export {Keymap, KeyMap};
 import {Captions} from "./controls/Captions";
 import {FullScreen} from "./controls/FullScreen";
 import {PlayPause} from "./controls/PlayPause";
-import {Settings} from "./controls/Settings";
 import {ScrubberBar} from "./controls/ScrubberBar";
+import {Settings} from "./controls/Settings";
 import {TimeDisplay} from "./controls/TimeDisplay";
 import {Volume} from "./controls/Volume";
 
