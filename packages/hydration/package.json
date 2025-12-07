@@ -1,0 +1,58 @@
+{
+  "name": "@liqvid/hydration",
+  "version": "0.0.1",
+  "description": "Hydration magic for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "pnpm build:js:cjs; pnpm build:js:esm; pnpm build:js:fix",
+    "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:js:esm": "tsc --module esnext --outDir dist/esm",
+    "build:js:fix": "node ../../build.mjs",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
+  "dependencies": {
+    "@liqvid/ssr": "workspace:",
+    "@radix-ui/react-slot": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,59 @@
+{
+  "name": "@liqvid/ssr",
+  "version": "0.0.1",
+  "description": "Server-side rendering helpers for Liqvid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react.mjs",
+      "require": "./dist/cjs/react.cjs",
+      "types": "./dist/types/react.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "lint": "biome check --fix",
+    "test": "jest"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
+  "sideEffects": false,
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}
