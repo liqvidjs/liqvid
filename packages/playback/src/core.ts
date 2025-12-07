@@ -226,7 +226,6 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
 
   /** @emits volumechange */
   set volume(volume: number) {
-    this.muted = false;
     const prevVolume = this.__volume;
     this.__volume = constrain(0, volume, 1);
 

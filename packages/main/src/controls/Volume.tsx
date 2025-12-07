@@ -48,6 +48,7 @@ export function Volume() {
   // input
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      playback.muted = false;
       playback.volume = parseFloat(e.target.value) / 100;
     },
     [playback],
