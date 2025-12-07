@@ -1,2 +1,2 @@
-export {Playback} from "./animation";
-export {Playback as CorePlayback} from "./core";
+export { Playback } from "./animation";
+export { Playback as CorePlayback } from "./core";

@@ -1,5 +1,6 @@
-import {isClient} from "@liqvid/utils/ssr";
-import {Playback as CorePlayback} from "./core";
+import { isClient } from "@liqvid/utils/ssr";
+
+import { Playback as CorePlayback } from "./core";
 
 declare global {
   interface Animation {
@@ -71,7 +72,7 @@ export class Playback extends CorePlayback {
       anim.pause();
 
       if (delay !== 0) {
-        anim.effect.updateTiming({delay: 0.1});
+        anim.effect.updateTiming({ delay: 0.1 });
       }
 
       this.__animations.push(anim);

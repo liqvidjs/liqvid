@@ -1,6 +1,7 @@
-import {EventEmitter} from "events";
-import {bind, constrain} from "@liqvid/utils/misc";
-import {isClient} from "@liqvid/utils/ssr";
+import { EventEmitter } from "events";
+
+import { bind, constrain } from "@liqvid/utils/misc";
+import { isClient } from "@liqvid/utils/ssr";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
 interface PlaybackEvents {

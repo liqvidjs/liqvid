@@ -1,5 +1,6 @@
-import {createContext, useContext, useEffect, useRef} from "react";
-import type {Playback} from ".";
+import { createContext, useContext, useEffect, useRef } from "react";
+
+import type { Playback } from ".";
 
 type GlobalThis = {
   [symbol]: React.Context<Playback>;
