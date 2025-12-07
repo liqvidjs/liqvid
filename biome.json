@@ -1,137 +1,111 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
-  "files": { "ignoreUnknown": false, "ignore": [] },
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+
+              ":ALIAS:",
+              ":BLANK_LINE:",
+
+              ["../**", "!**/*.css", "!**/*.json", "!**/*.scss"],
+              ":BLANK_LINE:",
+
+              ["./**", "!**/*.css", "!**/*.json", "!**/*.scss"],
+              ":BLANK_LINE:",
+
+              ["**/*.css", "**/*.scss"],
+              ":BLANK_LINE:",
+
+              "**/*.json"
+            ]
+          }
+        },
+        "useSortedAttributes": "on",
+        "useSortedKeys": "on"
+      }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!build",
+      "!**/dist",
+      "!**/package.json",
+      "!**/package-lock.json",
+      "!**/node_modules",
+      "!public/vendor/mathjax/*",
+      "!**/recordings/*.json",
+      "!**/recordings.json",
+      "!**/bundle.js"
+    ]
+  },
   "formatter": {
+    "attributePosition": "auto",
+    "bracketSpacing": true,
     "enabled": true,
-    "useEditorconfig": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 80,
-    "attributePosition": "auto",
-    "bracketSpacing": true
-  },
-  "organizeImports": { "enabled": true },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": false,
-      "a11y": { "noBlankTarget": "error" },
-      "complexity": {
-        "noBannedTypes": "error",
-        "noUselessThisAlias": "error",
-        "noUselessTypeConstraint": "error"
-      },
-      "correctness": {
-        "noChildrenProp": "error",
-        "noPrecisionLoss": "error",
-        "noUnusedVariables": "off",
-        "useArrayLiterals": "off",
-        "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error",
-        "useJsxKeyInIterable": "error"
-      },
-      "security": { "noDangerouslySetInnerHtmlWithChildren": "error" },
-      "style": {
-        "noInferrableTypes": "error",
-        "noNamespace": "error",
-        "noNonNullAssertion": "warn",
-        "useAsConstAssertion": "error",
-        "useBlockStatements": "off"
-      },
-      "suspicious": {
-        "noCommentText": "error",
-        "noDuplicateJsxProps": "error",
-        "noEmptyBlockStatements": "off",
-        "noEmptyInterface": "error",
-        "noExplicitAny": "warn",
-        "noExtraNonNullAssertion": "error",
-        "noMisleadingInstantiator": "error",
-        "useNamespaceKeyword": "error"
-      }
-    }
+    "useEditorconfig": true
   },
   "javascript": {
     "formatter": {
+      "arrowParentheses": "always",
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
-      "trailingCommas": "all",
-      "semicolons": "always",
-      "arrowParentheses": "always",
-      "bracketSameLine": false,
       "quoteStyle": "double",
-      "attributePosition": "auto",
-      "bracketSpacing": false
+      "semicolons": "always",
+      "trailingCommas": "all"
     }
   },
-  "overrides": [
-    {
-      "include": ["*.ts", "*.tsx", "*.mts", "*.cts"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noConstAssign": "off",
-            "noGlobalObjectCalls": "off",
-            "noInvalidConstructorSuper": "off",
-            "noNewSymbol": "off",
-            "noSetterReturn": "off",
-            "noUndeclaredVariables": "off",
-            "noUnreachable": "off",
-            "noUnreachableSuper": "off"
-          },
-          "style": {
-            "noArguments": "error",
-            "noVar": "error",
-            "useConst": "error"
-          },
-          "suspicious": {
-            "noDuplicateClassMembers": "off",
-            "noDuplicateObjectKeys": "off",
-            "noDuplicateParameters": "off",
-            "noFunctionAssign": "off",
-            "noImportAssign": "off",
-            "noRedeclare": "off",
-            "noUnsafeNegation": "off",
-            "useGetterReturn": "off",
-            "useValidTypeof": "off"
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "error",
+        "useUniqueElementIds": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "info",
+          "options": {
+            "functions": ["clsx", "cva", "tw", "classNames"]
           }
         }
-      }
-    },
-    {
-      "include": ["*.ts", "*.tsx", "*.mts", "*.cts"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noConstAssign": "off",
-            "noGlobalObjectCalls": "off",
-            "noInvalidConstructorSuper": "off",
-            "noNewSymbol": "off",
-            "noSetterReturn": "off",
-            "noUndeclaredVariables": "off",
-            "noUnreachable": "off",
-            "noUnreachableSuper": "off"
-          },
-          "style": {
-            "noArguments": "error",
-            "noVar": "error",
-            "useConst": "error"
-          },
-          "suspicious": {
-            "noDuplicateClassMembers": "off",
-            "noDuplicateObjectKeys": "off",
-            "noDuplicateParameters": "off",
-            "noFunctionAssign": "off",
-            "noImportAssign": "off",
-            "noRedeclare": "off",
-            "noUnsafeNegation": "off",
-            "useGetterReturn": "off",
-            "useValidTypeof": "off"
-          }
-        }
+      },
+      "recommended": true,
+      "style": {
+        "useTemplate": "off"
+      },
+      "suspicious": {
+        "noUnknownAtRules": "off"
       }
     }
-  ]
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": false,
+    "useIgnoreFile": true
+  }
 }
