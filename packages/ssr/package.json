@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/ssr",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Server-side rendering helpers for Liqvid",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
   "sideEffects": false,
   "devDependencies": {
     "@biomejs/biome": "catalog:",
