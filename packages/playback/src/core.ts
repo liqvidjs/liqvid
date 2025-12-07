@@ -1,10 +1,11 @@
+/** biome-ignore-all lint/suspicious/noConfusingVoidType: event emitter types */
 import { EventEmitter } from "events";
 
 import { bind, constrain } from "@liqvid/utils/misc";
 import { isClient } from "@liqvid/utils/ssr";
 import type StrictEventEmitter from "strict-event-emitter-types";
 
-interface PlaybackEvents {
+export interface PlaybackEventMap {
   bufferupdate: void;
   cuechange: void;
   durationchange: void;
@@ -19,6 +20,20 @@ interface PlaybackEvents {
   volumechange: void;
 }
 
+export type PlaybackEvent =
+  | "bufferupdate"
+  | "cuechange"
+  | "durationchange"
+  | "pause"
+  | "play"
+  | "ratechange"
+  | "seek"
+  | "seeked"
+  | "seeking"
+  | "stop"
+  | "timeupdate"
+  | "volumechange";
+
 declare let webkitAudioContext: typeof AudioContext;
 
 /**
@@ -28,7 +43,7 @@ declare let webkitAudioContext: typeof AudioContext;
  */
 export class Playback extends (EventEmitter as unknown as new () => StrictEventEmitter<
   EventEmitter,
-  PlaybackEvents
+  PlaybackEventMap
 >) {
   /** Audio context owned by this playback */
   audioContext: AudioContext;
@@ -298,7 +313,7 @@ export class Playback extends (EventEmitter as unknown as new () => StrictEventE
         window.removeEventListener("click", requestAudioContext);
         window.removeEventListener("keydown", requestAudioContext);
         window.removeEventListener("touchstart", requestAudioContext);
-      } catch (e) {
+      } catch (_e) {
         // console.log("Failed to create audio context");
       }
     };

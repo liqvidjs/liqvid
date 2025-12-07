@@ -1,3 +1,8 @@
+## 1.2.0 (December 7, 2025)
+
+- setting volume programmatically should not unmute
+- add `usePlaybackEvent()`
+
 ## 1.1.7 (February 1, 2025)
 
 - add types to `exports` field

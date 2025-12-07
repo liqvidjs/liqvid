@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useRef } from "react";
 
+import type { PlaybackEvent } from "./core";
+
 import type { Playback } from ".";
 
 type GlobalThis = {
@@ -67,6 +69,30 @@ export function useTime<T = number>(
         playback.off("timeupdate", listener);
       };
     },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: this is magic that will be removed in next version
     typeof transform === "function" ? deps : transform,
   );
+}
+
+/** Subscribe to playback events. */
+export function usePlaybackEvent(
+  /** Event to subscribe to */
+  eventName: PlaybackEvent,
+
+  /** Event callback to register */
+  callback: () => unknown,
+
+  /** Playback to subscribe to. Defaults to loading from context. */
+  playback?: Playback,
+) {
+  const contextPlayback = usePlayback();
+  playback ??= contextPlayback;
+
+  useEffect(() => {
+    playback.on(eventName, callback);
+
+    return () => {
+      playback.off(eventName, callback);
+    };
+  }, [callback, eventName, playback]);
 }

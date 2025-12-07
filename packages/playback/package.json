@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/playback",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "Playback class for Liqvid",
   "exports": {
     ".": {
@@ -16,10 +16,14 @@
   },
   "typesVersions": {
     "*": {
-      "*": ["./dist/types/*"]
+      "*": [
+        "./dist/types/*"
+      ]
     }
   },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -43,14 +47,14 @@
   },
   "dependencies": {
     "@liqvid/utils": "workspace:^",
-    "@lqv/playback": "^0.2.2",
+    "@lqv/playback": "catalog:",
     "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "strict-event-emitter-types": "^2.0.0"
   },
   "sideEffects": false,
   "peerDependencies": {
-    "react": ">=18.0.0"
+    "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "react": {
