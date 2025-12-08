@@ -4,8 +4,16 @@ const SECONDS = 1000,
   DAYS = 24 * HOURS,
   WEEKS = 7 * DAYS;
 
+/**
+ * Convenience type representing either a {@link Duration}
+ * or creation options for one
+ */
 export type DurationLike = Duration | DurationOptions;
 
+/**
+ * These are additive, e.g. passing `{seconds: 20, minutes: 5}` is
+ * equivalent to passing `{seconds: 320}`.
+ */
 export interface DurationOptions {
   milliseconds?: number;
   seconds?: number;
@@ -36,6 +44,33 @@ export class Duration {
       minutes * MINUTES +
       seconds * SECONDS +
       milliseconds;
+  }
+
+  /**
+   * Coerce a DurationLike into a Duration
+   */
+  static from(val: DurationLike): Duration {
+    if (val instanceof Duration) return val;
+    return new Duration(val);
+  }
+
+  /**
+   * Create a new {@link Duration} object and receive a callback
+   * to imperatively set its value. This is useful when you need
+   * to keep a {@link Duration} object in sync with some changing
+   * value (e.g. wrapping `currentTime` on a `<video>` element),
+   * and want to avoid allocating lots of new objects. Keeping the
+   * setter separate ensures that consumers of your wrapped value
+   * cannot change it.
+   */
+  static withSetter(
+    options?: DurationOptions,
+  ): [Duration, { setMilliseconds: (ms: number) => void }] {
+    const d = new Duration(options);
+    const setMilliseconds = (ms: number) => {
+      d.__valueMs = ms;
+    };
+    return [d, { setMilliseconds }];
   }
 
   /* extractors */
@@ -70,9 +105,7 @@ export class Duration {
   }
 
   equals(other: DurationLike): boolean {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
+    other = Duration.from(other);
     return this.__valueMs === other.__valueMs;
   }
 
@@ -85,42 +118,30 @@ export class Duration {
   }
 
   lessThan(other: DurationLike): boolean {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
+    other = Duration.from(other);
     return this.__valueMs < other.__valueMs;
   }
 
   lessThanOrEqual(other: DurationLike): boolean {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
+    other = Duration.from(other);
     return this.__valueMs <= other.__valueMs;
   }
 
   /* arithmetic */
   dividedBy(other: DurationLike): number {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
+    other = Duration.from(other);
     return this.__valueMs / other.__valueMs;
   }
 
   minus(other: DurationLike): Duration {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
-
+    other = Duration.from(other);
     return new Duration({
       milliseconds: this.__valueMs - other.__valueMs,
     });
   }
 
   plus(other: DurationLike): Duration {
-    if (!(other instanceof Duration)) {
-      other = new Duration(other);
-    }
-
+    other = Duration.from(other);
     return new Duration({
       milliseconds: this.__valueMs + other.__valueMs,
     });
@@ -128,17 +149,5 @@ export class Duration {
 
   times(factor: number): Duration {
     return new Duration({ milliseconds: this.__valueMs * factor });
-  }
-
-  /* setters */
-
-  /** Imperatively set this Duration from milliseconds. Mainly used to avoid the cost of creating a new object. */
-  setMilliseconds(ms: number): void {
-    this.__valueMs = ms;
-  }
-
-  /** Imperatively set this Duration from seconds. Mainly used to avoid the cost of creating a new object. */
-  setSeconds(s: number): void {
-    this.__valueMs = s * SECONDS;
   }
 }
