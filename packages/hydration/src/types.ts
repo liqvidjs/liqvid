@@ -26,7 +26,11 @@ export interface VariantsMap {
   string: StringVariant[];
 }
 
-export type ClientValueSource = "cookie" | "localStorage" | "search";
+export type ClientValueSource =
+  | "cookie"
+  | "localStorage"
+  | "search"
+  | "sessionStorage";
 
 /* configuration */
 interface BaseValueConfig {

@@ -36,6 +36,7 @@ export function HydrateOnClient<Config extends readonly LocalValueConfig[]>({
 
   let hasCookies = false;
   let hasLocalStorage = false;
+  let hasSessionStorage = false;
   let hasSearchParams = false;
 
   const args = from
@@ -50,6 +51,10 @@ export function HydrateOnClient<Config extends readonly LocalValueConfig[]>({
         case "localStorage":
           hasLocalStorage = true;
           value = `${golf.localStorage}.getItem(${JSON.stringify(lvc.name)})`;
+          break;
+        case "sessionStorage":
+          hasSessionStorage = true;
+          value = `${golf.sessionStorage}.getItem(${JSON.stringify(lvc.name)})`;
           break;
         case "search":
           hasSearchParams = true;
@@ -88,6 +93,7 @@ export function HydrateOnClient<Config extends readonly LocalValueConfig[]>({
           `${golf.getElementById}=${golf.document}.getElementById.bind(d)`,
           hasCookies && cookieScript,
           hasLocalStorage && localStorageScript,
+          hasSessionStorage && sessionStorageScript,
           hasSearchParams && searchScript,
         ) + ";"}
         {`(${hydrationFn})(${args})`}
@@ -98,4 +104,5 @@ export function HydrateOnClient<Config extends readonly LocalValueConfig[]>({
 
 const cookieScript = `${golf.cookies}=Object.fromEntries(${golf.document}.cookie?.split(/;\\s*/).map(x=>x.split("="))??[]);`;
 const localStorageScript = `${golf.localStorage}=localStorage`;
+const sessionStorageScript = `${golf.sessionStorage}=sessionStorage`;
 const searchScript = `${golf.url}=new URLSearchParams(location.search)`;

@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/hydration",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Hydration magic for Liqvid",
   "exports": {
     ".": {
