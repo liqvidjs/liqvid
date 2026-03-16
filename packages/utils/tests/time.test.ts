@@ -1,6 +1,6 @@
 import {
-  formatTimeDuration,
   formatTime,
+  formatTimeDuration,
   formatTimeMs,
   parseTime,
 } from "../src/time";

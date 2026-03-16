@@ -1,7 +1,5 @@
-import {audio} from "./audio.mjs";
-import {build} from "./build.mjs";
-import {serve} from "./serve.mjs";
-import {render} from "./render.mjs";
-import {thumbs} from "./thumbs.mjs";
+import { build } from "./build.mts";
+import { render } from "./render.mts";
+import { thumbs } from "./thumbs.mts";
 
-export const commands = [audio, build, render, serve, thumbs];
+export const commands = [build, render, thumbs];

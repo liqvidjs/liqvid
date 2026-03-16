@@ -69,9 +69,5 @@ export type ArgType<C extends LocalValueConfig> = C["type"] extends "boolean"
   : C["type"] extends "number"
     ? number | ("default" extends keyof C ? never : null)
     :
-        | ("enum" extends keyof C
-            ? C["enum"] extends ReadonlyArray<infer E>
-              ? E
-              : never
-            : string)
+        | (C extends StringValueConfig<infer E> ? E : string)
         | ("default" extends keyof C ? never : null);

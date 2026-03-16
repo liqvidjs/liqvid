@@ -1,0 +1,54 @@
+.RadioTabs {
+  display: inline-flex;
+  background-color: var(--gray-ui);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 2px;
+  width: max-content;
+}
+
+.RadioTabsItem {
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--gray-solid);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 6px 10px;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background-color: var(--gray-hover);
+    color: var(--gray-normal);
+  }
+
+  &[data-checked] {
+    background-color: var(--accent-solid);
+    color: var(--accent-contrast);
+
+    .iconRegular {
+      display: none;
+    }
+
+    .iconFill {
+      display: block;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-focus);
+    outline-offset: 1px;
+  }
+}
+
+.iconRegular {
+  display: block;
+}
+
+.iconFill {
+  display: none;
+}

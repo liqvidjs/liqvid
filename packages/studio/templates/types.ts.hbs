@@ -1,0 +1,20 @@
+{{#*inline "directory"}}
+  {
+  {{#each this}}
+    "{{ @key }}":
+      {{#if this}}
+        {{> directory this}}
+      {{else}}
+        null
+      {{/if}},
+  {{/each}}
+  }
+{{/inline}}
+/** This file is automatically @generated. */
+import type { Directory, FileNames } from "@liqvid/assets";
+
+export const PROJECT_DIRECTORY_STRUCTURE = ({{~> directory directoryStructure~}}) as const satisfies Directory;
+
+export type ProjectDirectoryStructure = typeof PROJECT_DIRECTORY_STRUCTURE;
+
+export type ProjectAssetsDir = FileNames<ProjectDirectoryStructure>;

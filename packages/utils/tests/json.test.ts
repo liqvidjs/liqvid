@@ -1,9 +1,9 @@
-import {getJSON, loadAllJSON, loadJSON} from "../src/json";
+import { getJSON, loadAllJSON, loadJSON } from "../src/json";
 
 declare module "../src/json" {
   interface GetJSONMap {
-    A: {value: string};
-    B: {value: string};
+    A: { value: string };
+    B: { value: string };
     C: never;
   }
 }
@@ -12,7 +12,7 @@ declare module "../src/json" {
 // @ts-expect-error fetch is read-only
 global.fetch = jest.fn((href: string) =>
   Promise.resolve({
-    json: () => Promise.resolve({value: href}),
+    json: () => Promise.resolve({ value: href }),
   }),
 );
 
@@ -38,7 +38,9 @@ describe("json/*", () => {
   });
 
   test("async found", () => {
-    expect(loadJSON("A")).resolves.toEqual({value: "http://localhost/A.json"});
+    expect(loadJSON("A")).resolves.toEqual({
+      value: "http://localhost/A.json",
+    });
   });
 
   test("async preload", () => {
@@ -46,8 +48,8 @@ describe("json/*", () => {
       return [getJSON("A"), getJSON("B")];
     });
     expect(promise).resolves.toEqual([
-      {value: "http://localhost/A.json"},
-      {value: "http://localhost/B.json"},
+      { value: "http://localhost/A.json" },
+      { value: "http://localhost/B.json" },
     ]);
   });
 });

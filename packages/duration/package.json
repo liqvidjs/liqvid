@@ -1,19 +1,15 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "description": "Class for unitless time intervals",
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs",
-      "types": "./dist/types/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
+      "types": "./dist/types/index.d.mts"
+    },
+    "./zod": {
+      "import": "./dist/esm/zod.mjs",
+      "types": "./dist/types/zod.d.mts"
     }
   },
   "files": [
@@ -22,10 +18,7 @@
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:cjs; pnpm build:js:esm; pnpm build:js:fix",
-    "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "build:js:esm": "tsc --module esnext --outDir dist/esm",
-    "build:js:fix": "node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "biome check --fix"
   },
@@ -41,7 +34,17 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "zod": "catalog:"
   },
-  "sideEffects": false
+  "peerDependencies": {
+    "zod": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

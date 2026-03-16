@@ -1,0 +1,79 @@
+{
+  "name": "@liqvid/script",
+  "version": "0.0.1",
+  "description": "Script class for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    },
+    "./react": {
+      "import": "./dist/esm/react.mjs",
+      "types": "./dist/types/react.d.mts"
+    },
+    "./recording": {
+      "import": "./dist/esm/recording.js",
+      "types": "./dist/types/recording.d.ts"
+    },
+    "./liqvid-studio-server-plugin": {
+      "import": "./dist/esm/liqvid-studio-server-plugin.mjs",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "find . -name tsconfig.tsbuildinfo -delete",
+    "lint": "pnpm biome check --fix",
+    "test": "jest",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/script#readme",
+  "dependencies": {
+    "@liqvid/duration": "workspace:",
+    "@liqvid/event-emitter": "workspace:^",
+    "@liqvid/playback": "workspace:^",
+    "@liqvid/recording": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^",
+    "@liqvid/utils": "workspace:^",
+    "@radix-ui/react-slot": "catalog:",
+    "classnames": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}

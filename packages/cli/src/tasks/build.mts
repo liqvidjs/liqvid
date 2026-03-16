@@ -1,212 +1,58 @@
-import {
-  ScriptData,
-  scripts as defaultScripts,
-  StyleData,
-  styles as defaultStyles,
-  transform,
-} from "@liqvid/magic";
-import {promises as fsp} from "fs";
-import path from "path";
-import webpack from "webpack";
-import type Yargs from "yargs";
-import {DEFAULT_CONFIG, parseConfig} from "./config.mjs";
-// @ts-expect-error TypeScript complains about this not being a module
-import loadSync from "./load-sync.cjs";
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+import { execa } from "execa";
+import type { CommandModule } from "yargs";
+
+const ERROR_LOG_PATH = path.join(process.cwd(), "logs/build-errors.log");
+
+function getErrorLogStream(): fs.WriteStream {
+  const logsDir = path.dirname(ERROR_LOG_PATH);
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+  return fs.createWriteStream(ERROR_LOG_PATH, { flags: "a" });
+}
 
 /**
  * Build project
  */
-export const build = (yargs: typeof Yargs) =>
-  yargs.command(
-    "build",
-    "Build project",
-    (yargs) => {
-      return yargs
-        .config("config", parseConfig("build"))
-        .default("config", DEFAULT_CONFIG)
-        .option("clean", {
-          alias: "C",
-          default: false,
-          desc: "Delete old dist directory before starting",
-          type: "boolean",
-        })
-        .option("out", {
-          alias: "o",
-          coerce: path.resolve,
-          desc: "Output directory",
-          default: "./dist",
-          normalize: true,
-        })
-        .option("static", {
-          alias: "s",
-          coerce: path.resolve,
-          desc: "Static directory",
-          default: "./static",
-        })
-        .option("scripts", {
-          coerce: coerceScripts,
-          desc: "Script aliases",
-          default: {},
-        })
-        .option("styles", {
-          desc: "Style aliases",
-          default: {},
-        });
-    },
-    (args) => {
-      return buildProject(args);
-    },
-  );
-
-export async function buildProject(config: {
-  /** Clean build directory */
-  clean: boolean;
-
-  /** Output directory */
-  out: string;
-
-  /** Static directory */
-  static: string;
-
-  scripts: Record<string, ScriptData>;
-
-  styles: Record<string, StyleData>;
-}) {
-  // clean build directory
-  if (config.clean) {
-    console.log("Cleaning build directory...");
-    await fsp.rm(config.out, {force: true, recursive: true});
-  }
-
-  // ensure build directory exists
-  await fsp.mkdir(config.out, {recursive: true});
-
-  // copy static files
-  console.log("Copying files...");
-  await buildStatic(config);
-
-  // webpack
-  console.log("Creating production bundle...");
-  await buildBundle(config);
-}
-
-/**
- * Copy over static files.
- */
-async function buildStatic(config: {
-  out: string;
-  static: string;
-  scripts: Record<string, ScriptData>;
-  styles: Record<string, StyleData>;
-}) {
-  const staticDir = path.resolve(process.cwd(), config.static);
-  const scripts = Object.assign({}, defaultScripts, config.scripts);
-  const styles = Object.assign({}, defaultStyles, config.styles);
-
-  await walkDir(staticDir, async (filename) => {
-    const relative = path.relative(staticDir, filename);
-    const dest = path.join(config.out, relative);
-
-    // apply html magic
-    if (filename.endsWith(".html")) {
-      const file = await fsp.readFile(filename, "utf8");
-      await idemWrite(
-        dest,
-        transform(file, {mode: "production", scripts, styles}),
-      );
-    } else if (relative === "bundle.js") {
-    } else {
-      await fsp.mkdir(path.dirname(dest), {recursive: true});
-      await fsp.copyFile(filename, dest);
-    }
-  });
-}
-
-/**
- * Compile bundle in production mode.
- */
-async function buildBundle(config: {
-  out: string;
-}) {
-  // configure webpack
-  process.env.NODE_ENV = "production";
-  const webpackConfig = loadSync(path.join(process.cwd(), "webpack.config.js"));
-  webpackConfig.mode = "production";
-  webpackConfig.output.path = config.out;
-
-  const compiler = webpack(webpackConfig);
-
-  // watch
-  return new Promise<void>((resolve) => {
-    compiler.run((err, stats) => {
-      if (err) console.error(err);
-      else {
-        console.info(stats.toString({color: true}));
-      }
-      compiler.close((err, stats) => {
-        resolve();
-      });
-    });
-  });
-}
-
-/**
- * Write a file idempotently.
- */
-async function idemWrite(filename: string, data: string) {
-  try {
-    const old = await fsp.readFile(filename, "utf8");
-    if (old !== data) await fsp.writeFile(filename, data);
-  } catch (e) {
-    await fsp.mkdir(path.dirname(filename), {recursive: true});
-    await fsp.writeFile(filename, data);
-  }
-}
-
-/**
- * Recursively walk a directory.
- */
-async function walkDir(
-  dirname: string,
-  callback: (filename: string) => Promise<void>,
-) {
-  const files = (await fsp.readdir(dirname)).map((_) => path.join(dirname, _));
-  await Promise.all(
-    files.map(async (file) => {
-      const stats = await fsp.stat(file);
-      if (stats.isDirectory()) {
-        return walkDir(file, callback);
-      } else {
-        return callback(file);
-      }
+export const build: CommandModule = {
+  builder: (yargs) =>
+    yargs.option("cwd", {
+      alias: "C",
+      coerce: path.resolve,
+      default: process.cwd(),
+      desc: "Working directory",
     }),
-  );
+  command: "build",
+  describe: "Build project",
+  handler: async (args) => {
+    await runNextBuild({ cwd: args.cwd as string });
+  },
+};
+
+export interface BuildOptions {
+  /** Working directory */
+  cwd?: string;
 }
 
 /**
- * Fix files.
+ * Run Next.js build
  */
-function coerceScripts(
-  json: Record<
-    string,
-    | {
-        crossorigin?: boolean | string;
-        development?: string;
-        production?: string;
-      }
-    | string
-  >,
-) {
-  for (const key in json) {
-    const record = json[key];
-    if (typeof record === "object") {
-      if (
-        typeof record.crossorigin === "string" &&
-        ["true", "false"].includes(record.crossorigin)
-      ) {
-        record.crossorigin = record.crossorigin === "true";
-      }
-    }
-  }
-  return json;
+export async function runNextBuild(options: BuildOptions = {}): Promise<void> {
+  const cwd = options.cwd ?? process.cwd();
+
+  console.log("Running 'next build'...");
+  const errorLogStream = getErrorLogStream();
+
+  const buildProcess = execa("npx", ["next", "build"], {
+    cwd,
+    env: { ...process.env, NODE_ENV: "production" },
+    stderr: "pipe",
+    stdout: "inherit",
+  });
+  buildProcess.stderr?.pipe(errorLogStream, { end: false });
+  await buildProcess;
+  console.log("'next build' completed.");
 }

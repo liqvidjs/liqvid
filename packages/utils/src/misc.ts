@@ -1,47 +1,23 @@
-/** Equivalent to `(min <= val) && (val < max)`. */
-export function between(min: number, val: number, max: number) {
-  return min <= val && val < max;
-}
-
 /**
  * Bind methods on an object.
  * @param o Object on which to bind methods
  * @param methods Method names to bind
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function bind<T extends {[P in K]: Function}, K extends keyof T>(
-  o: T,
-  methods: K[],
-) {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  for (const method of methods) o[method] = (o[method] as Function).bind(o);
+export function bind<
+  T extends { [P in K]: CallableFunction },
+  K extends keyof T,
+>(o: T, methods: K[]) {
+  for (const method of methods) {
+    // biome-ignore lint/suspicious/noExplicitAny: some craziness going on here
+    o[method] = (o[method] as any).bind(o);
+  }
 }
 
-/**
- * Linear interpolation from a to b.
- */
-export function lerp(a: number, b: number, t: number) {
-  return a + t * (b - a);
-}
-
-/**
- * Clamps a value between a lower and upper bound. Aliased as {@link constrain}.
- * @param min Lower bound
- * @param val Value to clamp
- * @param max Upper bound
- */
-export function clamp(min: number, val: number, max: number) {
-  return Math.min(max, Math.max(min, val));
-}
-
-/**
- * Clamps a value between a lower and upper bound. Alias for {@link clamp}.
- * @param min Lower bound
- * @param val Value to clamp
- * @param max Upper bound
- */
-export function constrain(min: number, val: number, max: number) {
-  return clamp(min, val, max);
+/** comparison function to use when sorting */
+export function compare<T extends string | number | Date>(a: T, b: T) {
+  if (a < b) return -1;
+  if (b > a) return 1;
+  return 0;
 }
 
 /**
@@ -74,4 +50,18 @@ export function waitFor(callback: () => boolean, interval = 10): Promise<void> {
 
     checkCondition();
   });
+}
+
+/**
+ * Truncate a number to a specified number of decimal points,
+ * omitting unnecessary decimal points.
+ *
+ * @example
+ * ```
+ * truncate(6.283185, 2) === 6.28;
+ *     truncate(4.05, 1) === 4;
+ * ```
+ */
+export function truncate(value: number, length: number): number {
+  return parseFloat(value.toFixed(length));
 }

@@ -1,27 +1,24 @@
 {
   "name": "@liqvid/utils",
-  "version": "1.10.0",
+  "version": "2.0.0",
   "description": "Utility functions for Liqvid",
   "exports": {
-    "./*": {
-      "import": "./dist/esm/*.mjs",
-      "require": "./dist/cjs/*.cjs",
-      "types": "./dist/types/*.d.ts"
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
-  "typesVersions": {
-    "*": {
-      "*": ["./dist/types/*.d.ts"]
-    }
-  },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --outDir dist/esm --module esnext; tsc --outDir dist/cjs --module commonjs; node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
-    "test": "eslint src --ext ts,tsx && jest --coverage"
+    "lint": "biome check --fix",
+    "test": "jest --coverage",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -34,7 +31,27 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
   "dependencies": {
-    "bezier-easing": "^2.1.0"
+    "bezier-easing": "^2.1.0",
+    "@liqvid/duration": "workspace:"
   },
-  "sideEffects": false
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/react": "catalog:",
+    "jest": "catalog:",
+    "react": "catalog:",
+    "ts-jest": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

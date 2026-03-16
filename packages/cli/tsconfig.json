@@ -1,12 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "esModuleInterop": true,
-    "outDir": "./dist",
+    "declarationDir": "./dist/types",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "./dist/esm",
     "rootDir": "./src",
-    "module": "esnext",
     "target": "esnext"
   },
+  "extends": "../../tsconfig.json",
   "include": ["./src"]
 }

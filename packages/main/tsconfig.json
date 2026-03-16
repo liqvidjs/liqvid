@@ -3,16 +3,17 @@
     "alwaysStrict": true,
     "declaration": true,
     "declarationDir": "./dist/types",
+    "esModuleInterop": true,
     "incremental": true,
     "jsx": "react",
     "lib": ["esnext", "dom"],
-    "esModuleInterop": true,
-    "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "./dist/esm",
     "pretty": true,
     "removeComments": false,
+    "rootDir": "./src",
     "target": "esnext"
   },
-  "include": ["./src/index.ts"]
+  "extends": "../../tsconfig.json",
+  "include": ["./src"]
 }

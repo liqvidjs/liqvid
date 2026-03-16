@@ -45,33 +45,9 @@ export async function connect({
   // set player as global variable
   // HA HA HA THIS IS HORRIBLE
   await page.evaluate(async () => {
-    const searchKeys = ["child", "stateNode", "current"];
-
-    function searchTree(obj: any, depth = 0): unknown {
-      if (depth > 5) return;
-      for (const key of searchKeys) {
-        if (!obj[key]) continue;
-
-        if ("playback" in obj[key]) {
-          return obj[key];
-        } else if (typeof obj[key] === "object") {
-          const result = searchTree(obj[key], depth + 1);
-          if (result) return result;
-        }
-      }
-    }
-
-    const root = document.querySelector(".ractive-player").parentNode;
-    const key = Object.keys(root).find((key) =>
-      key.startsWith("__reactContainer"),
-    );
-
-    await Liqvid.Utils.misc.waitFor(
-      () =>
-        ((window as any).player = searchTree(
-          root[key as keyof typeof root],
-        ) as boolean),
-    );
+    const playerElement = document.querySelector(".lv-player");
+    const symbol = Symbol.for("@liqvid/player/element");
+    window.player = playerElement[symbol];
   });
 
   return page;

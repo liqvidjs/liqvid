@@ -1,0 +1,71 @@
+{
+  "name": "@liqvid/media",
+  "version": "1.0.0",
+  "description": "Audio/video functionality for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./recording": {
+      "import": "./dist/esm/recording.mjs",
+      "types": "./dist/types/recording.d.mts"
+    },
+    "./liqvid-studio": {
+      "import": "./dist/esm/liqvid-studio.js",
+      "types": "./dist/types/liqvid-studio.d.ts"
+    },
+    "./liqvid-studio-server-plugin": {
+      "import": "./dist/esm/liqvid-studio-server-plugin.mjs",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "scripts": {
+    "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
+    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
+    "build:clean": "rm -rf dist",
+    "build:js": "pnpm build:js:esm",
+    "build:js:esm": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/media#readme",
+  "dependencies": {
+    "@liqvid/duration": "workspace:^",
+    "@liqvid/event-emitter": "workspace:^",
+    "@liqvid/playback": "workspace:^",
+    "@liqvid/recording": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^",
+    "@liqvid/utils": "workspace:^",
+    "execa": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "type": "module"
+}

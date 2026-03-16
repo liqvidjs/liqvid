@@ -1,17 +1,17 @@
-import cliProgress from "cli-progress";
-import fs, {promises as fsp} from "fs";
+import fs, { promises as fsp } from "fs";
 import os from "os";
 import path from "path";
 
-import {ffmpegExists, getEnsureChrome} from "../utils/binaries.mjs";
-import {captureRange} from "../utils/capture.mjs";
-import {validateConcurrency} from "../utils/concurrency.mjs";
-import {getPages} from "../utils/connect.mjs";
-import {Pool} from "../utils/pool.mjs";
-import {stitch} from "../utils/stitch.mjs";
-import {formatTime, parseTime} from "@liqvid/utils/time";
+import { formatTime, parseTime } from "@liqvid/utils";
+import cliProgress from "cli-progress";
 
-import {ImageFormat} from "../types";
+import type { ImageFormat } from "../types";
+import { ffmpegExists, getEnsureChrome } from "../utils/binaries.mjs";
+import { captureRange } from "../utils/capture.mjs";
+import { validateConcurrency } from "../utils/concurrency.mjs";
+import { getPages } from "../utils/connect.mjs";
+import { Pool } from "../utils/pool.mjs";
+import { stitch } from "../utils/stitch.mjs";
 
 /**
   Render an interactive ("liquid") video as a static ("solid") video.
@@ -73,7 +73,7 @@ export async function solidify({
 
   // make sure output directory exists
   if (sequence) {
-    await fsp.mkdir(o.output, {recursive: true});
+    await fsp.mkdir(o.output, { recursive: true });
   }
 
   /* calculate other values */
@@ -83,8 +83,8 @@ export async function solidify({
     colorScheme,
     concurrency,
     executablePath,
-    url,
     height,
+    url,
     width,
   });
   for (const page of pages) {
@@ -153,7 +153,7 @@ export async function solidify({
 
     // clean up tmp files
     console.log("Cleaning up...");
-    await fsp.rm(framesDir, {recursive: true});
+    await fsp.rm(framesDir, { recursive: true });
   }
 
   // done

@@ -1,0 +1,9 @@
+#!/bin/bash
+tsc --build
+
+../cli/liqvid-cli.mjs thumbs \
+	--browser-width 640 \
+	--browser-height 400 \
+	--image-format png \
+	--output "./thumbs/%.png" \
+	--url https://studio.liqvidjs.org/recordings/7867ba76-ea6f-4d28-831b-f1ca7e6b6f8b

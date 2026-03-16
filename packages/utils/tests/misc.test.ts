@@ -10,7 +10,7 @@ import {
 } from "../src/misc";
 
 jest.useFakeTimers();
-jest.spyOn(global, "setTimeout");
+jest.spyOn(globalThis, "setTimeout");
 
 describe("misc/between", () => {
   test("Lower bound inclusive", () => {
@@ -84,7 +84,9 @@ describe("misc/range", () => {
 describe("misc/wait", () => {
   test("waits 1 second", () => {
     let resolved = false;
-    const promise = wait(1000).then(() => (resolved = true));
+    const promise = wait(1000).then(() => {
+      resolved = true;
+    });
 
     // setTimeout should have been called but not resolved
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -104,7 +106,9 @@ describe("misc/waitFor", () => {
     let resolved = false;
     const callback = jest.fn(() => val === 1);
 
-    const promise = waitFor(callback).then(() => (resolved = true));
+    const promise = waitFor(callback).then(() => {
+      resolved = true;
+    });
 
     // should be called once initially
     expect(callback).toHaveBeenCalledTimes(1);

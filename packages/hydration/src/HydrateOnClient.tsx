@@ -1,10 +1,12 @@
 import { isClient } from "@liqvid/ssr";
 
-import { golf } from "./golf";
+import { golf } from "./golf.ts";
 import { SneakyScript } from "./SneakyScript";
-import type { ArgType, LocalValueConfig } from "./types";
+import type { ArgType, LocalValueConfig } from "./types.ts";
 
-export function HydrateOnClient<Config extends readonly LocalValueConfig[]>({
+export function HydrateOnClient<
+  const Config extends readonly LocalValueConfig[],
+>({
   children,
   from,
   hydrationFn,

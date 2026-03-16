@@ -1,8 +1,10 @@
 {
   "name": "@liqvid/renderer",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.mjs"
@@ -22,11 +24,18 @@
   },
   "typesVersions": {
     "*": {
-      "index": ["./dist/index.d.mts"],
-      "*": ["./dist/tasks/*.d.mts"]
+      "index": [
+        "./dist/index.d.mts"
+      ],
+      "*": [
+        "./dist/tasks/*.d.mts"
+      ]
     }
   },
   "sideEffects": false,
+  "scripts": {
+    "build": "tsc --build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
@@ -37,18 +46,17 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/renderer#readme",
-  "devDependencies": {
-    "@types/cli-progress": "^3.9.2",
-    "@types/puppeteer-core": "^5.4.0"
-  },
   "dependencies": {
-    "@liqvid/utils": "workspace:*",
-    "cli-progress": "^3.10.0",
-    "execa": "^6.1.0",
-    "jimp": "^0.16.1",
-    "puppeteer-core": "^13.5.2",
-    "puppeteer-mass-screenshots": "^1.0.15",
-    "puppeteer-video-recorder": "^1.0.5",
-    "yargs-parser": "^21.0.1"
+    "@liqvid/utils": "workspace:^",
+    "cli-progress": "catalog:",
+    "execa": "catalog:",
+    "jimp": "catalog:",
+    "puppeteer-core": "catalog:",
+    "yargs-parser": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/cli-progress": "catalog:",
+    "typescript": "catalog:"
   }
 }

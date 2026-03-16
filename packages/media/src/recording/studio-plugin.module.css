@@ -1,0 +1,32 @@
+.row {
+	background: #0002;
+	display: flex;
+	padding: 2px 0;
+	gap: 4px;
+
+	input[type="checkbox"] {
+		margin-right: 0.5em;
+	}
+
+	select {
+		margin-left: auto;
+		text-align: right;
+	}
+}
+
+.spinner {
+	animation: spin 1s linear infinite;
+	border: 2px solid transparent;
+	border-radius: 50%;
+	border-top-color: currentColor;
+	display: inline-block;
+	height: 14px;
+	margin-left: auto;
+	width: 14px;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

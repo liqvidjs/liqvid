@@ -16,10 +16,12 @@ export function screenToSVG(
     graphicsElt = graphicsElt.parentNode as SVGElement;
 
   const svgElt = elt instanceof SVGSVGElement ? elt : elt.ownerSVGElement;
+  if (!svgElt) throw new Error("could not find SVG element");
 
-  const transform = graphicsElt.getScreenCTM().inverse();
+  const transform = graphicsElt.getScreenCTM()?.inverse();
   let pt = svgElt.createSVGPoint();
-  (pt.x = x), (pt.y = y);
+  pt.x = x;
+  pt.y = y;
 
   pt = pt.matrixTransform(transform);
   return [pt.x, pt.y];

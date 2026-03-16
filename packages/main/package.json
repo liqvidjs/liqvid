@@ -2,7 +2,9 @@
   "name": "liqvid",
   "version": "2.1.19",
   "description": "Library for playing interactive videos using HTML/CSS/Javascript",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "main": "./dist/liqvid.js",
   "module": "./dist/liqvid.mjs",
   "exports": {
@@ -43,26 +45,39 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/master/packages/main#readme",
+  "dependencies": {
+    "@liqvid/color-scheme": "workspace:^",
+    "@liqvid/controls": "workspace:^",
+    "@liqvid/duration": "workspace:^",
+    "@liqvid/event-emitter": "workspace:^",
+    "@liqvid/helpers": "workspace:^",
+    "@liqvid/hydration": "workspace:^",
+    "@liqvid/keymap": "workspace:^",
+    "@liqvid/media": "workspace:^",
+    "@liqvid/playback": "workspace:^",
+    "@liqvid/player": "workspace:^",
+    "@liqvid/script": "workspace:^",
+    "@liqvid/ssr": "workspace:^",
+    "@liqvid/utils": "workspace:^"
+  },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/react": "catalog:",
+    "jest": "catalog:",
     "nib": "^1.1.2",
+    "react": "catalog:",
     "stylus": "^0.57.0",
+    "ts-jest": "catalog:",
     "tslib": "^2.4.0",
     "typedoc": "^0.22.15",
-    "typedoc-plugin-markdown": "^3.12.1"
-  },
-  "dependencies": {
-    "@liqvid/keymap": "workspace:^",
-    "@liqvid/playback": "workspace:^",
-    "@liqvid/utils": "workspace:^",
-    "@types/events": "^3.0.0",
-    "@types/node": "^22.10.10",
-    "events": "^3.3.0",
-    "strict-event-emitter-types": "^2.0.0"
+    "typedoc-plugin-markdown": "^3.12.1",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
-    "@types/react": ">=17",
-    "@types/react-dom": ">=17",
-    "react": ">=17",
-    "react-dom": ">=17"
+    "@types/react": "catalog:peer",
+    "@types/react-dom": "catalog:peer",
+    "react": "catalog:peer",
+    "react-dom": "catalog:peer"
   }
 }

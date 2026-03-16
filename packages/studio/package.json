@@ -1,0 +1,94 @@
+{
+  "name": "@liqvid/studio",
+  "version": "1.0.0",
+  "description": "Helpers for Liqvid asset storage",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    },
+    "./next/api": {
+      "import": "./dist/esm/next/api.mjs",
+      "types": "./dist/types/next/api.d.mts"
+    },
+    "./next/page": {
+      "import": "./dist/esm/next/page.js",
+      "types": "./dist/types/next/page.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean ; pnpm build:js ; pnpm build:hbs ; pnpm build:css ; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
+    "build:hbs": "cp -R templates dist",
+    "build:js": "tsc",
+    "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
+    "lint": "biome check --fix",
+    "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
+    "watch:css": "watch -n1 pnpm build:css",
+    "watch:hbs": "watch -n1 pnpm build:hbs",
+    "watch:tsc": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
+  "dependencies": {
+    "@base-ui/react": "catalog:",
+    "@liqvid/assets": "workspace:^",
+    "@liqvid/cli": "workspace:^",
+    "@liqvid/color-scheme": "workspace:^",
+    "@liqvid/duration": "workspace:^",
+    "@liqvid/event-emitter": "workspace:^",
+    "@liqvid/hydration": "workspace:^",
+    "@liqvid/keymap": "workspace:^",
+    "@liqvid/recording": "workspace:^",
+    "@liqvid/ssr": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^",
+    "@liqvid/utils": "workspace:^",
+    "@phosphor-icons/react": "catalog:",
+    "@radix-ui/react-portal": "catalog:",
+    "chalk": "catalog:",
+    "classnames": "catalog:",
+    "execa": "catalog:",
+    "handlebars": "catalog:",
+    "have-fun": "catalog:",
+    "http-status-codes": "catalog:",
+    "lodash.debounce": "catalog:",
+    "serve": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "concurrently": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:peer"
+  },
+  "sideEffects": false,
+  "type": "module"
+}

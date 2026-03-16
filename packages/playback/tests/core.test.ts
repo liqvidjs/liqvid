@@ -1,4 +1,4 @@
-import { Playback } from "../src/index";
+import { Playback } from "../src/index.mts";
 
 it("should stop() when seeked to end", () => {
   const playback = new Playback({ duration: 60000 });

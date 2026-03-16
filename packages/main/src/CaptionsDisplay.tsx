@@ -1,26 +1,19 @@
-import * as React from "react";
-import {useEffect, useRef} from "react";
+"use client";
 
-import {usePlayback} from "@liqvid/playback/react";
+import { usePlaybackEvent } from "@liqvid/playback/react";
+import { useRef } from "react";
 
-export default function Captions() {
-  const playback = usePlayback();
-  const domElement = useRef<HTMLDivElement>();
+export function Captions() {
+  const domElement = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const updateCaptions = () => {
-      domElement.current.innerHTML = "";
-      for (const cue of playback.captions) {
-        domElement.current.appendChild(cue);
-      }
-    };
+  usePlaybackEvent("cuechange", ({ target: playback }) => {
+    if (!domElement.current) return;
 
-    playback.on("cuechange", updateCaptions);
-
-    return () => {
-      playback.off("cuechange", updateCaptions);
-    };
-  }, [playback]);
+    domElement.current.innerHTML = "";
+    for (const cue of playback.captions) {
+      domElement.current.appendChild(cue);
+    }
+  });
 
   return <div className="lv-captions-display" ref={domElement} />;
 }

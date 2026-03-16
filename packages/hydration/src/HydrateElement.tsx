@@ -3,9 +3,11 @@ import { Root as Slot } from "@radix-ui/react-slot";
 import { useId } from "react";
 
 import { HydrateOnClient } from "./HydrateOnClient";
-import type { ArgType, LocalValueConfig } from "./types";
+import type { ArgType, LocalValueConfig } from "./types.ts";
 
-export function HydrateElement<Config extends readonly LocalValueConfig[]>({
+export function HydrateElement<
+  const Config extends readonly LocalValueConfig[],
+>({
   children,
   hydrationFn,
   ...props

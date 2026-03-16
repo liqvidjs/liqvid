@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -16,13 +16,13 @@
               ":ALIAS:",
               ":BLANK_LINE:",
 
-              ["../**", "!**/*.css", "!**/*.json", "!**/*.scss"],
+              ["../**", "!**/*.css", "!**/*.json"],
               ":BLANK_LINE:",
 
-              ["./**", "!**/*.css", "!**/*.json", "!**/*.scss"],
+              ["./**", "!**/*.css", "!**/*.json"],
               ":BLANK_LINE:",
 
-              ["**/*.css", "**/*.scss"],
+              ["**/*.css"],
               ":BLANK_LINE:",
 
               "**/*.json"
@@ -44,11 +44,12 @@
     "includes": [
       "**",
       "!build",
+      "!opencode.json",
       "!**/dist",
       "!**/package.json",
       "!**/package-lock.json",
       "!**/node_modules",
-      "!public/vendor/mathjax/*",
+      "!**/public/vendor/mathjax/*",
       "!**/recordings/*.json",
       "!**/recordings.json",
       "!**/bundle.js"
@@ -82,6 +83,7 @@
     "enabled": true,
     "rules": {
       "correctness": {
+        "noPrivateImports": "error",
         "useExhaustiveDependencies": "error",
         "useUniqueElementIds": "off"
       },
@@ -96,6 +98,7 @@
       },
       "recommended": true,
       "style": {
+        "noNonNullAssertion": "off",
         "useTemplate": "off"
       },
       "suspicious": {
@@ -103,6 +106,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/.liqvid/**/*.json"]
+    }
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": false,

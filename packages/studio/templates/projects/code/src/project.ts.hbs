@@ -1,0 +1,23 @@
+/**
+ * @file This file contains various helpers with type safety
+ * for the markers for this particular project.
+ */
+
+import { Script } from "liqvid";
+
+import { markers } from "./markers";
+
+/** @package */
+export type { MarkerName as M } from "./markers";
+
+/** @package */
+export const script = new Script(markers);
+
+/** @package */
+export const playback = script.playback;
+
+/**
+* @package
+* Get marker by name
+*/
+export const $m = script.markers.get.bind(script.markers.get);

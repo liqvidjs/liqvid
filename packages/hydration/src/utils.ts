@@ -1,5 +1,5 @@
-import { golf } from "./golf";
-import type { ComparisonVariant, StringVariant } from "./types";
+import { golf } from "./golf.ts";
+import type { ComparisonVariant, StringVariant } from "./types.ts";
 
 // type Joinable = boolean | undefined | null | string | Joinable[];
 

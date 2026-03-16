@@ -1,0 +1,9 @@
+.Toaster {
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right: 36px;
+  row-gap: 8px;
+  z-index: 50;
+}

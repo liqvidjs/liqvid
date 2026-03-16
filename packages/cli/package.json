@@ -1,12 +1,26 @@
 {
   "name": "@liqvid/cli",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Liqvid command line utility",
-  "main": "dist/index.js",
+  "main": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    },
+    "./build": {
+      "import": "./dist/esm/tasks/build.mjs",
+      "types": "./dist/types/tasks/build.d.mts"
+    }
+  },
   "bin": {
     "liqvid": "liqvid-cli.mjs"
   },
-  "files": ["dist/*", "liqvid-cli.mjs"],
+  "files": [
+    "dist/*",
+    "liqvid-cli.mjs",
+    "templates/*"
+  ],
   "sideEffects": false,
   "repository": {
     "type": "git",
@@ -19,24 +33,25 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
-    "lint": "eslint --ext mts,ts --fix src/"
+    "lint": "biome lint --fix",
+    "build": "tsc --build",
+    "watch": "tsc --watch",
+    "test": "jest --coverage"
   },
   "devDependencies": {
-    "@types/cli-progress": "^3.9.2",
-    "@types/yargs": "^17.0.10"
+    "@biomejs/biome": "catalog:",
+    "@types/cli-progress": "catalog:",
+    "@types/yargs": "catalog:",
+    "typescript": "catalog:"
   },
   "dependencies": {
-    "@liqvid/captioning": "workspace:^",
-    "@liqvid/magic": "workspace:^",
     "@liqvid/renderer": "workspace:^",
-    "@liqvid/server": "workspace:^",
     "@liqvid/utils": "workspace:^",
-    "@types/node": "^17.0.23",
-    "cli-progress": "^3.10.0",
-    "execa": "^6.1.0",
-    "ts-node": "^10.7.0",
-    "webpack": "^5.70.0",
-    "yargs": "^17.4.1",
-    "yargs-parser": "^21.0.1"
+    "@types/node": "catalog:",
+    "cli-progress": "catalog:",
+    "execa": "catalog:",
+    "handlebars": "catalog:",
+    "yargs": "catalog:",
+    "yargs-parser": "catalog:"
   }
 }

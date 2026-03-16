@@ -1,0 +1,62 @@
+{
+  "name": "@liqvid/color-scheme",
+  "version": "0.0.1",
+  "description": "Color scheme helpers for Liqvid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "exports": {
+    "./react": {
+      "import": "./dist/esm/react.js",
+      "types": "./dist/types/react.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "lint": "biome check --fix",
+    "test": "jest"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
+  "dependencies": {
+    "@liqvid/hydration": "workspace:^",
+    "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}

@@ -1,17 +1,17 @@
-import cliProgress from "cli-progress";
-import {promises as fsp} from "fs";
-import jimp from "jimp";
+import { promises as fsp } from "fs";
 import os from "os";
 import path from "path";
-import puppeteer from "puppeteer-core";
 
-import {ImageFormat} from "../types";
+import cliProgress from "cli-progress";
+import jimp from "jimp";
+import type puppeteer from "puppeteer-core";
 
-import {getEnsureChrome} from "../utils/binaries.mjs";
-import {captureRange} from "../utils/capture.mjs";
-import {validateConcurrency} from "../utils/concurrency.mjs";
-import {getPages} from "../utils/connect.mjs";
-import {Pool} from "../utils/pool.mjs";
+import type { ImageFormat } from "../types";
+import { getEnsureChrome } from "../utils/binaries.mjs";
+import { captureRange } from "../utils/capture.mjs";
+import { validateConcurrency } from "../utils/concurrency.mjs";
+import { getPages } from "../utils/connect.mjs";
+import { Pool } from "../utils/pool.mjs";
 
 /**
 Create thumbnail sheets for a Liqvid video.
@@ -69,7 +69,7 @@ export async function thumbs({
   // make directories
   const [tmpDir] = await Promise.all([
     fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.thumbs")),
-    fsp.mkdir(path.dirname(output), {recursive: true}),
+    fsp.mkdir(path.dirname(output), { recursive: true }),
   ]);
 
   // pool of puppeteer instances
@@ -77,9 +77,9 @@ export async function thumbs({
   const pages = await getPages({
     colorScheme,
     concurrency,
-    url,
     executablePath,
     height: browserHeight,
+    url,
     width: browserWidth,
   });
   const pool = new Pool(pages);
@@ -101,7 +101,7 @@ export async function thumbs({
     filename: (i) => path.join(tmpDir, `${i}.${imageFormat}`),
     imageFormat,
     pool,
-    time: (i) => i * frequency * 1000,
+    time: (i) => i * frequency,
   });
 
   // close chrome instances
@@ -123,7 +123,7 @@ export async function thumbs({
 
   // clean up tmp files
   console.log("Cleaning up...");
-  await fsp.rm(tmpDir, {recursive: true});
+  await fsp.rm(tmpDir, { recursive: true });
 
   // done
   console.log("Done!");

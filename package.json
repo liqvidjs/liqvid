@@ -1,43 +1,16 @@
 {
-  "name": "root",
-  "private": true,
-  "workspaces": ["packages/*"],
+  "name": "liqvid-vite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501",
   "devDependencies": {
-    "@babel/core": "^7.17.10",
-    "@babel/plugin-transform-modules-umd": "^7.16.7",
-    "@babel/preset-env": "^7.17.10",
-    "@biomejs/biome": "1.9.4",
-    "@playwright/experimental-ct-react": "^1.27.1",
-    "@playwright/test": "^1.27.1",
-    "@rollup/plugin-babel": "^5.3.1",
-    "@rollup/plugin-commonjs": "^22.0.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@testing-library/dom": "^8.13.0",
-    "@testing-library/react": "^13.2.0",
-    "@testing-library/user-event": "^14.2.0",
-    "@types/jest": "^27.5.1",
-    "@types/node": "^22.10.10",
-    "@types/react": "^18.0.9",
-    "@types/react-dom": "^18.0.4",
-    "concurrently": "^7.5.0",
-    "dotenv": "^16.0.3",
-    "jest": "^28.1.0",
-    "jest-environment-jsdom": "^28.1.0",
-    "playwright": "^1.27.1",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "rollup": "^2.73.0",
-    "rollup-plugin-dts": "^4.2.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "serve": "^14.1.1",
-    "ts-jest": "^28.0.2",
-    "ts-node": "^10.7.0",
-    "typescript": "^5.7.3"
-  },
-  "overrides": {
-    "@types/node": "^22.10.10",
-    "yargs": "^17.7.2",
-    "yargs-parser": "^21.1.1"
-  },
-  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+    "turbo": "^2.8.17"
+  }
 }

@@ -1,6 +1,7 @@
-import {render} from "@testing-library/react";
-import {useContext} from "react";
-import {createUniqueContext} from "../src/react";
+import { render } from "@testing-library/react";
+import { useContext } from "react";
+
+import { createUniqueContext } from "../src/react";
 
 describe("react/createUniqueContext", () => {
   test("returns same value for same key", () => {

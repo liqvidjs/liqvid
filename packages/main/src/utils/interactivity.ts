@@ -1,5 +1,4 @@
-import {onDrag} from "@liqvid/utils/interaction";
-import {captureRef} from "@liqvid/utils/react";
+import { onDrag } from "@liqvid/utils";
 
 type Move = Parameters<typeof onDrag>[0];
 type Down = Parameters<typeof dragHelper>[1];
@@ -81,25 +80,10 @@ export function dragHelperReact<T extends HTMLElement | SVGElement>(
 ) {
   const listener = dragHelper(move, down, up);
 
-  /* https://github.com/microsoft/TypeScript/issues/46819 */
-  type AEL = HTMLElement["addEventListener"];
-
-  if (innerRef) {
-    const intercept = captureRef(
-      (ref) =>
-        (ref.addEventListener as AEL)("touchstart", listener, {passive: false}),
-      innerRef,
-    );
-    return {
-      "data-affords": "click",
-      onMouseDown: listener,
-      ref: intercept,
-    };
-  } else {
-    return {
-      "data-affords": "click",
-      onMouseDown: listener,
-      onTouchStart: listener,
-    };
-  }
+  return {
+    "data-affords": "click",
+    onMouseDown: listener,
+    onTouchStart: listener,
+    ref: innerRef,
+  };
 }

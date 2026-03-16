@@ -1,10 +1,9 @@
-import {anyHover} from "@liqvid/utils/interaction";
-import {captureRef} from "@liqvid/utils/react";
+import { anyHover } from "@liqvid/utils";
 
 export {
   anyHover,
   onClick as attachClickHandler,
-} from "@liqvid/utils/interaction";
+} from "@liqvid/utils";
 
 /**
 	Drop-in replacement for onClick handlers which works better on mobile.
@@ -15,7 +14,7 @@ export const onClick = <T extends HTMLElement | SVGElement>(
   innerRef?: React.Ref<T>,
 ) => {
   if (anyHover) {
-    return {onClick: callback};
+    return { onClick: callback };
   } else {
     let touchId: number, target: EventTarget & T;
 
@@ -47,18 +46,8 @@ export const onClick = <T extends HTMLElement | SVGElement>(
     };
 
     return {
-      ref: captureRef<T>((ref) => {
-        ref.addEventListener(
-          "touchstart",
-          onTouchStart as (e: TouchEvent) => void,
-          {passive: false},
-        );
-        ref.addEventListener(
-          "touchend",
-          onTouchEnd as (e: TouchEvent) => void,
-          {passive: false},
-        );
-      }, innerRef),
+      onTouchEnd,
+      onTouchStart,
     };
   }
 };

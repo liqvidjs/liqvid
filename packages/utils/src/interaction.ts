@@ -1,3 +1,5 @@
+import { assertType } from "./types";
+
 /* https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener#matching_event_listeners_for_removal */
 declare global {
   interface EventListenerOptions {
@@ -17,11 +19,11 @@ export const anyHover =
  * Helper for implementing drag functionality, abstracting over mouse vs touch events.
  * @returns An event listener which should be added to both `mousedown` and `touchstart` events.
  */
-export function onDrag(
+export function onDrag<E extends MouseEvent | TouchEvent>(
   /** Callback for dragging (pointer is moved while down). */
   move: (
     /** The underlying `mousemove` or `touchmove` event */
-    e: MouseEvent | TouchEvent,
+    e: E,
     /** Information about the pointer location */
     hit: {
       /** Horizontal coordinate of pointer */
@@ -37,7 +39,7 @@ export function onDrag(
   /** Callback for when dragging begins (pointer is touched). */
   down: (
     /** The underlying `mousedown` or `touchstart` event */
-    e: MouseEvent | TouchEvent,
+    e: E,
     /** Information about the pointer location */
     hit: {
       /** Horizontal coordinate of pointer */
@@ -46,14 +48,14 @@ export function onDrag(
       y: number;
     },
     /** The upHandler used internally by this method */
-    upHandler: (e: MouseEvent | TouchEvent) => void,
+    upHandler: (e: E) => void,
     /** The moveHandler used internally by this method */
-    moveHandler: (e: MouseEvent | TouchEvent) => void,
+    moveHandler: (e: E) => void,
   ) => void = () => {},
   /** Callback for when dragging ends (pointer is lifted). */
   up: (
     /** The underlying `mouseup` or `touchcancel`/`touchend` event */
-    e: MouseEvent | TouchEvent,
+    e: E,
     /** Information about the pointer location */
     hit: {
       /** Horizontal coordinate of pointer */
@@ -67,7 +69,7 @@ export function onDrag(
     },
   ) => void = () => {},
 ) {
-  return (e: MouseEvent | TouchEvent) => {
+  return (e: E) => {
     /* click events */
     if (e instanceof MouseEvent) {
       if (e.button !== 0) return;
@@ -76,33 +78,35 @@ export function onDrag(
         lastY = e.clientY;
 
       // up
-      const upHandler = (e: MouseEvent) => {
+      const upHandler = (e: MouseEvent | TouchEvent) => {
+        assertType<MouseEvent>(e);
         const dx = e.clientX - lastX,
           dy = e.clientY - lastY;
 
         document.body.removeEventListener("mousemove", moveHandler);
         window.removeEventListener("mouseup", upHandler);
 
-        return up(e, {x: e.clientX, y: e.clientY, dx, dy});
+        return up(e as E, { dx, dy, x: e.clientX, y: e.clientY });
       };
 
       // move
-      const moveHandler = (e: MouseEvent) => {
+      const moveHandler = (e: MouseEvent | TouchEvent) => {
+        assertType<MouseEvent>(e);
         const dx = e.clientX - lastX,
           dy = e.clientY - lastY;
 
         lastX = e.clientX;
         lastY = e.clientY;
 
-        return move(e, {x: e.clientX, y: e.clientY, dx, dy});
+        return move(e as E, { dx, dy, x: e.clientX, y: e.clientY });
       };
 
       document.body.addEventListener("mousemove", moveHandler, {
         passive: false,
       });
-      window.addEventListener("mouseup", upHandler, {passive: false});
+      window.addEventListener("mouseup", upHandler, { passive: false });
 
-      return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
+      return down(e, { x: e.clientX, y: e.clientY }, upHandler, moveHandler);
     } else {
       /* touch events */
       e.preventDefault();
@@ -114,7 +118,8 @@ export function onDrag(
         lastY = touches[0].clientY;
 
       // up
-      const upHandler = (e: TouchEvent) => {
+      const upHandler = (e: MouseEvent | TouchEvent) => {
+        assertType<TouchEvent>(e);
         e.preventDefault();
 
         for (const touch of Array.from(e.changedTouches)) {
@@ -136,12 +141,13 @@ export function onDrag(
             passive: false,
           });
 
-          return up(e, {x: touch.clientX, y: touch.clientY, dx, dy});
+          return up(e as E, { dx, dy, x: touch.clientX, y: touch.clientY });
         }
       };
 
       // move
-      const moveHandler = (e: TouchEvent) => {
+      const moveHandler = (e: MouseEvent | TouchEvent) => {
+        assertType<TouchEvent>(e);
         e.preventDefault();
         for (const touch of Array.from(e.changedTouches)) {
           if (touch.identifier !== touchId) continue;
@@ -152,7 +158,7 @@ export function onDrag(
           lastX = touch.clientX;
           lastY = touch.clientY;
 
-          return move(e, {x: touch.clientX, y: touch.clientY, dx, dy});
+          return move(e as E, { dx, dy, x: touch.clientX, y: touch.clientY });
         }
       };
 
@@ -169,7 +175,12 @@ export function onDrag(
         passive: false,
       });
 
-      return down(e, {x: lastX, y: lastY}, upHandler, moveHandler);
+      return down(
+        e,
+        { x: touches[0].clientX, y: touches[0].clientY },
+        upHandler,
+        moveHandler,
+      );
     }
   };
 }
@@ -182,16 +193,18 @@ export function onDrag(
  */
 export function onClick<T extends HTMLElement | SVGElement>(
   node: T,
-  callback: (e: (MouseEvent | TouchEvent) & {currentTarget: T}) => void,
+  callback: (e: (MouseEvent | TouchEvent) & { currentTarget: T }) => void,
 ): () => void {
   if (anyHover) {
+    // @ts-expect-error TODO: sort this out
     node.addEventListener("click", callback);
     return () => {
+      // @ts-expect-error TODO: sort this out
       node.removeEventListener("click", callback);
     };
   }
 
-  let touchId: number;
+  let touchId: number | undefined;
 
   // touchstart handler
   const touchStart = (e: TouchEvent): void => {
@@ -208,18 +221,22 @@ export function onClick<T extends HTMLElement | SVGElement>(
       if (
         node.contains(document.elementFromPoint(touch.clientX, touch.clientY))
       ) {
-        callback(e as TouchEvent & {currentTarget: T});
+        callback(e as TouchEvent & { currentTarget: T });
       }
 
       touchId = undefined;
     }
   };
 
+  // @ts-expect-error TODO: sort this out
   node.addEventListener("touchstart", touchStart);
+  // @ts-expect-error TODO: sort this out
   node.addEventListener("touchend", touchEnd);
 
   return () => {
+    // @ts-expect-error TODO: sort this out
     node.removeEventListener("touchstart", touchStart);
+    // @ts-expect-error TODO: sort this out
     node.removeEventListener("touchend", touchEnd);
   };
 }

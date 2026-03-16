@@ -1,0 +1,194 @@
+.Recordings {
+  --radius: 4px;
+
+  background-color: var(--gray-ui);
+  border: 1px solid var(--gray-sep);
+  border-radius: var(--radius);
+
+  margin: 4px 0;
+
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+  }
+}
+
+.RecordingRow {
+  &:first-child {
+    &,
+    & > .RecordingRowTrigger {
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+  }
+
+  &:last-child {
+    &,
+    & > .RecordingRowTrigger {
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+  }
+}
+
+.RecordingRowTrigger {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  padding: 4px 8px;
+  width: 100%;
+
+  &:hover {
+    background-color: var(--gray-hover);
+  }
+
+  &[data-panel-open] {
+    background-color: var(--gray-active);
+  }
+}
+
+.recordingName {
+  font-family: monospace;
+}
+
+.pluginIcons {
+  margin-left: auto;
+
+  svg {
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.recordingDuration {
+  font-family: monospace;
+  font-size: 16px;
+  text-align: right;
+  width: 4em;
+}
+
+.RecordingRowExpand {
+  background-color: var(--gray-subtle);
+  overflow: hidden;
+
+  &[data-open] {
+    animation: slideDown 150ms ease-out;
+  }
+
+  &[data-closed] {
+    animation: slideUp 150ms ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--collapsible-panel-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--collapsible-panel-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.details {
+  padding: 4px 4px 4px 16px;
+}
+
+.togglePlugins {
+  display: flex;
+  gap: 0.5em;
+}
+
+.recordingToggle {
+  background-color: var(--gray-ui);
+  border-radius: 4px;
+  cursor: pointer;
+  height: 36px;
+  width: 36px;
+
+  transition: unset;
+
+  &[aria-checked="true"] {
+    background-color: red;
+  }
+
+  > svg {
+    height: 36px;
+    width: 36px;
+  }
+}
+
+.configurationTable {
+  border: 1px solid #000;
+  margin: 1em auto;
+  width: 100%;
+
+  > tbody > tr > th {
+    text-align: right;
+    padding: 4px;
+    width: calc(36px + 8px);
+  }
+
+  > tbody > tr > td {
+    padding: 4px;
+    text-align: left;
+  }
+}
+
+.shortcutsTable {
+  border: 1px solid var(--gray-sep);
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  width: 100%;
+
+  th,
+  td {
+    border: 1px solid var(--gray-sep);
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  thead th {
+    background-color: var(--gray-ui);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  tbody tr:hover {
+    background-color: var(--gray-hover);
+  }
+}
+
+.shortcutInput {
+  background-color: var(--gray-subtle);
+  border: 1px solid var(--gray-sep);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 4px 8px;
+  text-align: center;
+  width: 100%;
+
+  &:focus {
+    border-color: var(--blue-focus, #0066cc);
+    outline: none;
+  }
+
+  &[data-recording] {
+    background-color: var(--yellow-subtle, #fffbe6);
+    border-color: var(--yellow-border, #d9a600);
+  }
+
+  &::placeholder {
+    color: var(--gray-text-muted, #888);
+    font-style: italic;
+  }
+}

@@ -1,9 +1,9 @@
-import {animate, bezier, replay} from "../src/animation";
-import {ReplayData} from "../src/replay-data";
+import { animate, bezier, replay } from "../src/animation";
+import type { ReplayData } from "../src/replay-data";
 
 describe("animation/animate", () => {
   test("defaults", () => {
-    const fn = animate({startTime: 0, duration: 1000});
+    const fn = animate({ duration: 1000, startTime: 0 });
     expect(fn(0)).toBe(0);
     expect(fn(1000)).toBe(1);
     expect(fn(500)).toBe(0.5);
@@ -11,10 +11,10 @@ describe("animation/animate", () => {
 
   test("basic test", () => {
     const fn = animate({
-      startTime: 1000,
       duration: 1000,
-      startValue: 2,
       endValue: 4,
+      startTime: 1000,
+      startValue: 2,
     });
 
     expect(fn(500)).toBe(2);
@@ -24,8 +24,8 @@ describe("animation/animate", () => {
 
   test("called with array", () => {
     const fn = animate([
-      {startTime: 500, duration: 500, startValue: 2, endValue: 4},
-      {startTime: 1500, duration: 1000, startValue: 6, endValue: 8},
+      { duration: 500, endValue: 4, startTime: 500, startValue: 2 },
+      { duration: 1000, endValue: 8, startTime: 1500, startValue: 6 },
     ]);
 
     expect(fn(0)).toBe(2);
@@ -52,12 +52,12 @@ describe("animation/replay", () => {
     const inactive = jest.fn();
 
     const fn = replay({
-      data,
-      start: 500,
-      end: 2000,
-      compressed: true,
       active,
+      compressed: true,
+      data,
+      end: 2000,
       inactive,
+      start: 500,
     });
 
     // functions shouldn't be called yet
@@ -97,12 +97,12 @@ describe("animation/replay", () => {
     const inactive = jest.fn();
 
     const fn = replay({
-      data,
-      start: 500,
-      end: 2000,
-      compressed: false,
       active,
+      compressed: false,
+      data,
+      end: 2000,
       inactive,
+      start: 500,
     });
 
     // functions shouldn't be called yet
@@ -142,12 +142,12 @@ describe("animation/replay", () => {
     const inactive = jest.fn();
 
     const fn = replay({
-      data,
-      start: 0.5,
-      end: 2,
-      compressed: true,
       active,
+      compressed: true,
+      data,
+      end: 2,
       inactive,
+      start: 0.5,
       units: 1000,
     });
 

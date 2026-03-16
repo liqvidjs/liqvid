@@ -1,3 +1,5 @@
+import { Duration, type DurationLike } from "@liqvid/duration";
+
 /* time constants */
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
@@ -33,16 +35,26 @@ export function parseTime(str: string): number {
   // ms
   const $_ = str.match(/\.(\d{0,3})/);
   if ($_) {
-    parts.push(parseInt($_[1].padEnd(3, "0")));
+    parts.push(parseInt($_[1]!.padEnd(3, "0"), 10));
   } else {
     parts.push(0);
   }
 
-  const [days, hours, minutes, seconds, milliseconds] = parts;
+  const [days, hours, minutes, seconds, milliseconds] = parts as [
+    number,
+    number,
+    number,
+    number,
+    number,
+  ];
 
   return (
     milliseconds + 1000 * (seconds + 60 * (minutes + 60 * (hours + 24 * days)))
   );
+}
+
+export function parseTime$(str: string): Duration {
+  return new Duration({ milliseconds: parseTime(str) });
 }
 
 /**
@@ -52,7 +64,10 @@ export function parseTime(str: string): number {
  * @returns A duration string such as "PT4H18M3S".
  * @since 1.7.0
  */
-export function formatTimeDuration(time: number): string {
+export function formatTimeDuration(time: number | DurationLike): string {
+  if (typeof time === "object") {
+    return formatTimeDuration(Duration.from(time).inMilliseconds());
+  }
   const parts = ["P"];
   const timeParts: string[] = [];
 
@@ -89,7 +104,10 @@ export function formatTimeDuration(time: number): string {
  * @param time Time in milliseconds
  * @returns Formatted time
  */
-export function formatTime(time: number): string {
+export function formatTime(time: number | DurationLike): string {
+  if (typeof time === "object") {
+    return formatTime(Duration.from(time).inMilliseconds());
+  }
   if (time < 0) {
     return MINUS_SIGN + formatTime(-time);
   }
@@ -123,7 +141,10 @@ export function formatTime(time: number): string {
  * @param time Time in milliseconds
  * @returns Formatted time
  */
-export function formatTimeMs(time: number): string {
+export function formatTimeMs(time: number | DurationLike): string {
+  if (typeof time === "object") {
+    return formatTimeMs(Duration.from(time).inMilliseconds());
+  }
   if (time < 0) {
     return MINUS_SIGN + formatTimeMs(-time);
   }

@@ -1,11 +1,11 @@
-import {Keymap} from "../src/index";
+import { Keymap } from "../dist/index.mts";
 
 /* Modifier keys cannot be tested in Keymap::identify and Keymap.handle
    due to a bug in jsdom: https://github.com/jsdom/jsdom/issues/3126
 */
 
 test("Keymap::identify", () => {
-  const e = new KeyboardEvent("keyup", {key: "a", code: "KeyA"});
+  const e = new KeyboardEvent("keyup", { code: "KeyA", key: "a" });
   expect(Keymap.identify(e)).toBe("A");
 });
 
@@ -40,7 +40,7 @@ describe("Keymap bind handling", () => {
   });
 
   test("handle", () => {
-    const e = new KeyboardEvent("keyup", {key: "B", code: "KeyB"});
+    const e = new KeyboardEvent("keyup", { code: "KeyB", key: "B" });
     keymap.handle(e);
     expect(cb2).toHaveBeenCalledTimes(1);
     expect(cb2).toHaveBeenCalledWith(e);

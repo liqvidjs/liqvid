@@ -2,7 +2,7 @@ import { isClient } from "@liqvid/ssr";
 import * as Slot from "@radix-ui/react-slot";
 import { useId } from "react";
 
-import { golf } from "./golf";
+import { golf } from "./golf.ts";
 import { HydrateOnClient } from "./HydrateOnClient";
 import type {
   BooleanValueConfig,
@@ -11,8 +11,8 @@ import type {
   NumericVariant,
   StringValueConfig,
   StringVariant,
-} from "./types";
-import { comparisonCondition, matches, stringCondition } from "./utils";
+} from "./types.ts";
+import { comparisonCondition, matches, stringCondition } from "./utils.ts";
 
 interface BooleanVariantConfig extends BooleanValueConfig {
   variants: {
@@ -79,7 +79,7 @@ export function HydrateVariants(props: VariantConfig) {
 
   return (
     <HydrateOnClient
-      from={[props] as const}
+      from={[props]}
       hydrationFn={
         (props.type === "boolean" && booleanScript(id)) ||
         (props.type === "number" && numberScript(id, props.variants)) ||

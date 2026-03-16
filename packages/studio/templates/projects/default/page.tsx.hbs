@@ -1,0 +1,23 @@
+import "@/styles/liqvid-theme.css";
+import "@/styles/input.css";
+
+import { splitCode } from "liqvid";
+import type { Metadata } from "next";
+
+import { ClientContent } from "./src/client";
+
+import project from "./project.json";
+
+const projectPath = splitCode(
+  () => import.meta.url,
+  () => "",
+);
+
+export default function Project() {
+  return <ClientContent projectPath={projectPath} />;
+}
+
+export const metadata: Metadata = {
+  description: project.description,
+  title: project.name,
+};

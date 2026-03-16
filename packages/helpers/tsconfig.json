@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declarationDir": "./dist/types",
+    "outDir": "./dist/esm",
+    "removeComments": false,
+    "rootDir": "./src"
+  },
+  "exclude": ["./dist/**/*"],
+  "extends": "../../tsconfig.json",
+  "include": ["./src"]
+}

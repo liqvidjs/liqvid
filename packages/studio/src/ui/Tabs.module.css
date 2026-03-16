@@ -1,0 +1,31 @@
+.TabsList {
+  height: min-content;
+  margin: 0 auto;
+}
+
+.TabsTrigger {
+  background-color: light-dark(#0002, #fff2);
+  color: #fff;
+  font-family: "Inter Variable", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 1px 8px;
+
+  &[disabled] {
+    pointer-events: none;
+    opacity: 50%;
+  }
+
+  &[data-active] {
+    background-color: var(--accent-solid);
+  }
+
+  &:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  &:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+  /*  data-[state=active]:bg-background data-[state=active]:shadow-sm dark:text-muted-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground */
+}

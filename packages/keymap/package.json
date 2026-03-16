@@ -9,27 +9,29 @@
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.mts"
     },
     "./react": {
-      "import": "./dist/esm/react.mjs",
-      "require": "./dist/cjs/react.cjs",
+      "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }
   },
   "typesVersions": {
     "*": {
-      "*": ["./dist/types/*"]
+      "*": [
+        "./dist/types/*"
+      ]
     }
   },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "lint": "biome check --fix",
     "test": "jest"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
@@ -38,14 +40,24 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
-  "sideEffects": false,
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/react": "catalog:",
+    "jest": "catalog:",
+    "react": "catalog:",
+    "ts-jest": "catalog:",
+    "typescript": "catalog:"
+  },
   "peerDependencies": {
-    "@types/react": ">=17.0.0",
-    "react": ">=17.0.0"
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

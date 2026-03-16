@@ -1,33 +1,8 @@
-import {
-  Children,
-  cloneElement,
-  createContext,
-  isValidElement,
-  useMemo,
-  useReducer,
-  useRef,
-} from "react";
-import {anyHover, onDrag as htmlOnDrag} from "./interaction";
+"use client";
 
-/**
-  Helper for the https://github.com/facebook/react/issues/2043 workaround. Use to intercept refs and
-  attach events.
-*/
-export const captureRef =
-  <T>(callback: (ref: T) => void, innerRef?: React.Ref<T>) =>
-  (ref: T) => {
-    if (ref !== null) {
-      callback(ref);
-    }
+import { createContext, useReducer, useRef, useState } from "react";
 
-    if (innerRef === null) {
-      return;
-    } else if (typeof innerRef === "function") {
-      innerRef(ref);
-    } else if (typeof innerRef === "object") {
-      (innerRef as React.MutableRefObject<T>).current = ref;
-    }
-  };
+import { anyHover, onDrag as htmlOnDrag } from "./interaction";
 
 /**
  * Create a context guaranteed to be unique. Useful in case multiple versions of package are accidentally loaded.
@@ -37,7 +12,7 @@ export const captureRef =
  */
 export function createUniqueContext<T>(
   key: string,
-  defaultValue: T = undefined,
+  defaultValue: T = undefined as T,
   displayName?: string,
 ): React.Context<T> {
   const symbol = Symbol.for(key);
@@ -45,10 +20,10 @@ export function createUniqueContext<T>(
   if (!(symbol in globalThis)) {
     const context = createContext<T>(defaultValue);
     context.displayName = displayName;
-    (globalThis as unknown as {[symbol]: React.Context<T>})[symbol] = context;
+    (globalThis as unknown as { [symbol]: React.Context<T> })[symbol] = context;
   }
 
-  return (globalThis as unknown as {[symbol]: React.Context<T>})[symbol];
+  return (globalThis as unknown as { [symbol]: React.Context<T> })[symbol];
 }
 
 /**
@@ -56,14 +31,17 @@ export function createUniqueContext<T>(
  * @param args Refs to combine
  * @returns A ref which applies all the passed refs
  */
-export function combineRefs<T>(...args: React.Ref<T>[]): (o: T) => void {
+export function combineRefs<T>(
+  ...args: (React.Ref<T> | undefined)[]
+): (o: T) => void {
   return (o: T) => {
     for (const ref of args) {
       if (typeof ref === "function") {
         ref(o);
       } else if (ref === null) {
-      } else if (typeof ref === "object" && ref.hasOwnProperty("current")) {
-        (ref as React.MutableRefObject<T>).current = o;
+      } else if (ref === undefined) {
+      } else if (typeof ref === "object" && Object.hasOwn(ref, "current")) {
+        ref.current = o;
       }
     }
   };
@@ -74,18 +52,18 @@ export function combineRefs<T>(...args: React.Ref<T>[]): (o: T) => void {
  * @param callback Event listener.
  * @returns Props to attach to event target.
  */
-export function onClick<T extends HTMLElement | SVGElement>(
+export function onClickReact<T extends HTMLElement | SVGElement>(
   callback: (e: React.MouseEvent<T> | React.TouchEvent<T>) => void,
 ):
   | {
       onTouchStart: React.TouchEventHandler<T>;
       onTouchEnd: React.TouchEventHandler<T>;
     }
-  | {onClick: typeof callback} {
+  | { onClick: typeof callback } {
   if (anyHover) {
-    return {onClick: callback};
+    return { onClick: callback };
   } else {
-    let touchId: number, target: EventTarget & T;
+    let touchId: number | undefined, target: EventTarget & T;
 
     // touchstart handler
     const onTouchStart: React.TouchEventHandler<T> = (e) => {
@@ -114,7 +92,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
       }
     };
 
-    return {onTouchStart, onTouchEnd};
+    return { onTouchEnd, onTouchStart };
   }
 }
 
@@ -122,7 +100,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
  * Helper for implementing drag functionality, abstracting over mouse vs touch events.
  * @returns An object of event handlers which should be added to a React element with {...}
  */
-export function onDrag(
+export function onDragReact(
   move: Parameters<typeof htmlOnDrag>[0],
   down?: Parameters<typeof htmlOnDrag>[1],
   up?: Parameters<typeof htmlOnDrag>[2],
@@ -141,32 +119,6 @@ export function onDrag(
 }
 
 /**
- * Recursive version of {@link React.Children.map}
- * @param children Children to iterate over
- * @param fn Callback function
- * @returns Transformed nodes
- */
-export function recursiveMap(
-  children: React.ReactNode,
-  fn: (child: React.ReactElement<unknown>) => React.ReactElement<unknown>,
-): React.ReactNode[] {
-  return Children.map(children, (child) => {
-    if (!isValidElement<unknown>(child)) {
-      return child;
-    }
-
-    if ("children" in child.props) {
-      child = cloneElement(child, {
-        // @ts-expect-error TODO this used to work
-        children: recursiveMap(child.props.children, fn),
-      });
-    }
-
-    return fn(child);
-  });
-}
-
-/**
  * Get a function to force the component to update
  * @returns A forceUpdate() function
  */
@@ -179,20 +131,17 @@ export function useForceUpdate(): () => void {
  * @param deps React dependency list
  * @returns [promise, resolve, reject]
  */
-export function usePromise(
-  deps: React.DependencyList = [],
-): [Promise<void>, () => void, () => void] {
-  const resolve = useRef<() => void>();
-  const reject = useRef<() => void>();
+export function usePromise(): [Promise<void>, () => void, () => void] {
+  const resolve = useRef<() => void>(null);
+  const reject = useRef<() => void>(null);
 
-  const promise = useMemo(
+  const [promise] = useState(
     () =>
       new Promise<void>((res, rej) => {
         resolve.current = res;
         reject.current = rej;
       }),
-    deps,
   );
 
-  return [promise, resolve.current, reject.current];
+  return [promise, resolve.current!, reject.current!];
 }

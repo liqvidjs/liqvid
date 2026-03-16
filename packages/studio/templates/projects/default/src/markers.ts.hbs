@@ -1,0 +1,13 @@
+import { withTimings } from "liqvid";
+
+export const markerNames = [
+  "intro/"
+] as const;
+
+const timings = {};
+
+/** @package */
+export const markers = withTimings(markerNames, timings);
+
+/** Marker name */
+export type MarkerName = (typeof markerNames)[number];

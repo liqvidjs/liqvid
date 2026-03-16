@@ -1,0 +1,51 @@
+{
+  "name": "@liqvid/helpers",
+  "version": "1.0.0",
+  "description": "Convenience components for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "scripts": {
+    "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/helpers#readme",
+  "dependencies": {
+    "@liqvid/duration": "workspace:^",
+    "@liqvid/playback": "workspace:^",
+    "@liqvid/script": "workspace:^",
+    "@liqvid/utils": "workspace:^",
+    "@radix-ui/react-slot": "catalog:",
+    "classnames": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "csstype": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:peer"
+  },
+  "type": "module"
+}

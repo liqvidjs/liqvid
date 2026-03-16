@@ -1,0 +1,21 @@
+/**
+ * @file This file contains various helpers with type safety
+ * for the markers for this particular project.
+ */
+"use client";
+
+import { UniversalHelper } from "liqvid";
+
+import type { M } from "./project";
+
+/* -------------------- helpers -------------------- */
+
+/**
+ * @package
+ * General-purpose helper component for:
+ * - creating `<Segment>`s, when passed `during`, `from`, or `to`
+ * - positioning, when passed `b`ottom, `r`ight `x` (= left), or `y` (= top)
+ * - sizing, when passed `h`eight or `w`idth
+ */
+export const $ = UniversalHelper<M>;
+

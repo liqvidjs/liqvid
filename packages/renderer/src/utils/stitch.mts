@@ -1,8 +1,8 @@
-import {execa} from "execa";
 import path from "path";
-import parser from "yargs-parser";
 
-import {formatTimeMs} from "@liqvid/utils/time";
+import { formatTimeMs } from "@liqvid/utils";
+import { execa } from "execa";
+import parser from "yargs-parser";
 
 /**
   Stitch frames together into a video.

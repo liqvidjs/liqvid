@@ -2,7 +2,9 @@
   "name": "@liqvid/captioning",
   "version": "1.0.0",
   "description": "Audio transcription and captioning for Liqvid",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -13,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/renderer#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/captioning#readme",
   "devDependencies": {
     "ibm-watson": "^6.2.1"
   },

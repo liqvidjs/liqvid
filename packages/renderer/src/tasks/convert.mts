@@ -1,16 +1,14 @@
-import {formatTime, parseTime} from "@liqvid/utils/time";
-import cliProgress from "cli-progress";
-import {execa} from "execa";
-import fs, {promises as fsp} from "fs";
+import fs, { promises as fsp } from "fs";
 import path from "path";
-import {ffmpegExists} from "../utils/binaries.mjs";
+
+import { formatTime, parseTime } from "@liqvid/utils";
+import cliProgress from "cli-progress";
+import { execa } from "execa";
+
+import { ffmpegExists } from "../utils/binaries.mjs";
 
 /** Repair and convert audio files */
-export async function convert({
-  filename,
-}: {
-  filename?: string;
-}) {
+export async function convert({ filename }: { filename?: string }) {
   // check that ffmpeg exists
   if (!(await ffmpegExists())) {
     console.error(

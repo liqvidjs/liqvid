@@ -1,10 +1,11 @@
+import { promises as fsp } from "fs";
+
 import cliProgress from "cli-progress";
 import type puppeteer from "puppeteer-core";
 
-import type {Pool} from "./pool.mjs";
-import {ImageFormat} from "../types";
+import type { ImageFormat } from "../types";
 
-import {promises as fsp} from "fs";
+import type { Pool } from "./pool.mjs";
 
 export async function capture({
   page,
@@ -20,7 +21,7 @@ export async function capture({
   type: ImageFormat;
 }) {
   await page.evaluate((time) => {
-    player.playback.seek(time);
+    player.playback.currentTime = time;
   }, time);
 
   const client = (page as any).client as puppeteer.CDPSession;
@@ -29,7 +30,7 @@ export async function capture({
     quality: type === "jpeg" ? quality : undefined,
   };
 
-  const {data} = await client.send("Page.captureScreenshot", options);
+  const { data } = await client.send("Page.captureScreenshot", options);
   const base64Data = data.replace(/^data:image\/png;base64,/, "");
 
   return fsp.writeFile(path, base64Data, "base64");
@@ -82,10 +83,10 @@ export async function captureRange({
       // capture frame
       await capture({
         page,
-        time: time(i),
-        type: imageFormat,
         path: filename(i),
         quality,
+        time: time(i),
+        type: imageFormat,
       });
       captureBar.increment();
 

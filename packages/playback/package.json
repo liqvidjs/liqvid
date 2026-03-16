@@ -5,12 +5,10 @@
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.mts"
     },
     "./react": {
-      "import": "./dist/esm/react.mjs",
-      "require": "./dist/cjs/react.cjs",
+      "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }
   },
@@ -27,10 +25,11 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --moduleResolution node --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "find . -name tsconfig.tsbuildinfo -delete",
     "lint": "pnpm biome check --fix",
-    "test": "jest"
+    "test": "jest",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -42,17 +41,20 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/playback#readme",
-  "devDependencies": {
-    "babel-jest": "^27.4.6"
-  },
   "dependencies": {
+    "@liqvid/duration": "workspace:",
+    "@liqvid/event-emitter": "workspace:^",
+    "@liqvid/ssr": "workspace:",
+    "@liqvid/studio-plugin-api": "workspace:^",
     "@liqvid/utils": "workspace:^",
-    "@lqv/playback": "catalog:",
-    "@types/events": "^3.0.0",
-    "events": "^3.3.0",
-    "strict-event-emitter-types": "^2.0.0"
+    "@lqv/playback": "catalog:"
   },
-  "sideEffects": false,
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "babel-jest": "catalog:",
+    "tsd": "catalog:",
+    "typescript": "catalog:"
+  },
   "peerDependencies": {
     "react": "catalog:peer"
   },
@@ -60,5 +62,7 @@
     "react": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }
