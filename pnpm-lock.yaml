@@ -70,8 +70,8 @@ catalogs:
       specifier: ^4.7.8
       version: 4.7.8
     have-fun:
-      specifier: ^0.0.1
-      version: 0.0.1
+      specifier: ^0.0.2
+      version: 0.0.2
     http-status-codes:
       specifier: ^2.3.0
       version: 2.3.0
@@ -986,7 +986,7 @@ importers:
         version: 4.7.8
       have-fun:
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.0.2(zod@4.1.13)
       http-status-codes:
         specifier: 'catalog:'
         version: 2.3.0
@@ -3348,8 +3348,13 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  have-fun@0.0.1:
-    resolution: {integrity: sha512-I8aG0jObF7iUhsSJAgJ77cdPQUFPcrID+1LdhXCaxD3NKwoVlaShBNeEjOntfo+aUmJLb4IVJJc5Sf4hWmW8pA==}
+  have-fun@0.0.2:
+    resolution: {integrity: sha512-MopesA4mmQEzFC6iWnFGZzWWGTtPHgFJdblUesMKRQ4M2uk6DU4YUPdB6vLgXkhr8kcUJNKn55oGVVmuqLNx6A==}
+    peerDependencies:
+      zod: ^4.1
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   hls.js@1.6.15:
     resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==}
@@ -7659,7 +7664,9 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  have-fun@0.0.1: {}
+  have-fun@0.0.2(zod@4.1.13):
+    optionalDependencies:
+      zod: 4.1.13
 
   hls.js@1.6.15: {}
 
