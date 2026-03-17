@@ -2,7 +2,7 @@
 
 import { createContext, useReducer, useRef, useState } from "react";
 
-import { anyHover, onDrag as htmlOnDrag } from "./interaction";
+import { anyHover, onDrag as htmlOnDrag } from "./interaction.ts";
 
 /**
  * Create a context guaranteed to be unique. Useful in case multiple versions of package are accidentally loaded.

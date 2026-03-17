@@ -1,4 +1,4 @@
-import { assertType } from "./types";
+import { assertType } from "./types.ts";
 
 /* https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener#matching_event_listeners_for_removal */
 declare global {

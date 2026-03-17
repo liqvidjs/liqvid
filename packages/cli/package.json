@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/cli",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "Liqvid command line utility",
   "main": "dist/esm/index.mjs",
   "exports": {
