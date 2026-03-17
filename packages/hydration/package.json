@@ -1,56 +1,56 @@
 {
-	"name": "@liqvid/hydration",
-	"version": "0.0.2",
-	"description": "Hydration magic for Liqvid",
-	"exports": {
-		".": {
-			"import": "./dist/esm/index.js",
-			"types": "./dist/types/index.d.ts"
-		}
-	},
-	"typesVersions": {
-		"*": {
-			"*": [
-				"./dist/types/*.d.ts"
-			]
-		}
-	},
-	"files": [
-		"dist/*"
-	],
-	"scripts": {
-		"build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
-		"build:clean": "rm -rf dist",
-		"build:js": "tsc",
-		"build:postclean": "rm dist/tsconfig.tsbuildinfo",
-		"lint": "biome check --fix"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/liqvidjs/liqvid.git"
-	},
-	"author": "Yuri Sulyma <yuri@liqvidjs.org>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/liqvidjs/liqvid/issues"
-	},
-	"homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
-	"dependencies": {
-		"@liqvid/ssr": "workspace:",
-		"@radix-ui/react-slot": "catalog:",
-		"universal-cookie": "catalog:"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:",
-		"react": "catalog:",
-		"react-dom": "catalog:",
-		"typescript": "catalog:"
-	},
-	"peerDependencies": {
-		"react": ">=18"
-	},
-	"sideEffects": false,
-	"type": "module"
+  "name": "@liqvid/hydration",
+  "version": "1.0.0-alpha.0",
+  "description": "Hydration magic for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
+  "dependencies": {
+    "@liqvid/ssr": "workspace:",
+    "@radix-ui/react-slot": "catalog:",
+    "universal-cookie": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "sideEffects": false,
+  "type": "module"
 }

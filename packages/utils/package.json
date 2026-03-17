@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/utils",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha.0",
   "description": "Utility functions for Liqvid",
   "exports": {
     ".": {
