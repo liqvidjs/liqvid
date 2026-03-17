@@ -1,7 +1,7 @@
 {
   "name": "liqvid",
-  "version": "2.1.19",
-  "description": "Library for playing interactive videos using HTML/CSS/Javascript",
+  "version": "3.0.0-alpha.0",
+  "description": "Framework for interactive videos in React",
   "files": [
     "dist/*"
   ],
