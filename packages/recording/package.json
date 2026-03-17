@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/recording",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Recording functionality for Liqvid",
   "exports": {
     ".": {
@@ -33,12 +33,6 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
   "dependencies": {
-    "@liqvid/duration": "workspace:^",
-    "@liqvid/event-emitter": "workspace:^",
-    "@liqvid/hydration": "workspace:^",
-    "@liqvid/ssr": "workspace:^",
-    "@liqvid/keymap": "catalog:",
-    "@liqvid/utils": "workspace:^",
     "@phosphor-icons/react": "catalog:"
   },
   "devDependencies": {
@@ -48,6 +42,12 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.3.0",
+    "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {

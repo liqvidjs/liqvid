@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/media",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Audio/video functionality for Liqvid",
   "exports": {
     ".": {
@@ -43,15 +43,6 @@
     "watch": "tsc --watch"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/media#readme",
-  "dependencies": {
-    "@liqvid/duration": "workspace:^",
-    "@liqvid/event-emitter": "workspace:^",
-    "@liqvid/playback": "workspace:^",
-    "@liqvid/recording": "workspace:^",
-    "@liqvid/studio-plugin-api": "workspace:^",
-    "@liqvid/utils": "workspace:^",
-    "execa": "catalog:"
-  },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
@@ -60,12 +51,23 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.3.0",
+    "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
+    "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
+    "execa": "catalog:",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
+    "execa": {
+      "optional": true
+    },
     "react": {
       "optional": true
     }
   },
+  "sideEffects": false,
   "type": "module"
 }

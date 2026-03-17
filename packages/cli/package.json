@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/cli",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "description": "Liqvid command line utility",
   "main": "dist/esm/index.mjs",
   "exports": {
@@ -38,12 +38,6 @@
     "watch": "tsc --watch",
     "test": "jest --coverage"
   },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/cli-progress": "catalog:",
-    "@types/yargs": "catalog:",
-    "typescript": "catalog:"
-  },
   "dependencies": {
     "@liqvid/renderer": "workspace:^",
     "@liqvid/utils": "workspace:^",
@@ -53,5 +47,11 @@
     "handlebars": "catalog:",
     "yargs": "catalog:",
     "yargs-parser": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/cli-progress": "catalog:",
+    "@types/yargs": "catalog:",
+    "typescript": "catalog:"
   }
 }

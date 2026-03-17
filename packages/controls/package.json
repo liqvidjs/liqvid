@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/controls",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Controls for Liqvid",
   "exports": {
     ".": {
@@ -30,13 +30,6 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/controls#readme",
   "dependencies": {
-    "@liqvid/color-scheme": "workspace:^",
-    "@liqvid/duration": "workspace:^",
-    "@liqvid/keymap": "workspace:^",
-    "@liqvid/playback": "workspace:^",
-    "@liqvid/player": "workspace:^",
-    "@liqvid/ssr": "workspace:^",
-    "@liqvid/utils": "workspace:^",
     "classnames": "catalog:"
   },
   "devDependencies": {
@@ -45,6 +38,13 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/color-scheme": "workspace:^1.0.0-alpha.0",
+    "@liqvid/duration": "workspace:^1.3.0",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
+    "@liqvid/player": "workspace:^1.0.0-alpha.0",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
   },
   "type": "module"

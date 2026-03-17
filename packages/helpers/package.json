@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/helpers",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Convenience components for Liqvid",
   "exports": {
     ".": {
@@ -30,10 +30,6 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/helpers#readme",
   "dependencies": {
-    "@liqvid/duration": "workspace:^",
-    "@liqvid/playback": "workspace:^",
-    "@liqvid/script": "workspace:^",
-    "@liqvid/utils": "workspace:^",
     "@radix-ui/react-slot": "catalog:",
     "classnames": "catalog:"
   },
@@ -45,7 +41,12 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.3.0",
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
+    "@liqvid/script": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
   },
+  "sideEffects": false,
   "type": "module"
 }

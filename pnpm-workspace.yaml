@@ -22,16 +22,6 @@ catalog:
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
-  "@liqvid/duration": ^1.1.0
-  "@liqvid/hydration": ^0.0.1
-  "@liqvid/katex": ^0.1.0
-  "@liqvid/keymap": ^1.2.2
-  "@liqvid/mathjax": ^0.0.2
-  "@liqvid/playback": ^1.2.0
-  "@liqvid/react-three": ^2.0.0
-  "@liqvid/ssr": ^0.0.2
-  "@liqvid/utils": ^1.10
-  "@liqvid/xyjax": ^0.0.2
   "@lqv/codebooth": ^0.5.1
   "@lqv/codemirror": ^0.6.0
   "@lqv/cursor": ^0.2.1

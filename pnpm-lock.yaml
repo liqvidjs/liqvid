@@ -33,6 +33,9 @@ catalogs:
     '@types/jest':
       specifier: ^30.0.0
       version: 30.0.0
+    '@types/katex':
+      specifier: ^0.16.8
+      version: 0.16.8
     '@types/node':
       specifier: ^24
       version: 24.10.1
@@ -388,19 +391,25 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^
         version: link:../utils
-      '@types/katex':
-        specifier: '>=0.14.0'
-        version: 0.16.8
-      '@types/react':
-        specifier: '>=18.0.0'
-        version: 19.2.14
       react:
-        specifier: '>=18.1.0'
+        specifier: catalog:peer
         version: 19.2.4
     devDependencies:
-      liqvid:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.4.4
+      '@liqvid/player':
         specifier: workspace:^
-        version: link:../main
+        version: link:../player
+      '@types/katex':
+        specifier: 'catalog:'
+        version: 0.16.8
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/keymap:
     devDependencies:

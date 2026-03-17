@@ -1,18 +1,11 @@
 {
   "name": "@liqvid/hydration",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "description": "Hydration magic for Liqvid",
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
     }
   },
   "files": [
@@ -36,7 +29,6 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
   "dependencies": {
-    "@liqvid/ssr": "workspace:",
     "@radix-ui/react-slot": "catalog:",
     "universal-cookie": "catalog:"
   },
@@ -49,7 +41,8 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
+    "react": "catalog:peer"
   },
   "sideEffects": false,
   "type": "module"

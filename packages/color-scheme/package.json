@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/color-scheme",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "description": "Color scheme helpers for Liqvid",
   "repository": {
     "type": "git",
@@ -36,16 +36,14 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
-  "dependencies": {
-    "@liqvid/hydration": "workspace:^",
-    "@liqvid/utils": "workspace:^"
-  },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@types/react": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "@types/react": "catalog:peer",
     "react": "catalog:peer"
   },
