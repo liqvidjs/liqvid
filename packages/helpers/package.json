@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/helpers",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "Convenience components for Liqvid",
   "exports": {
     ".": {

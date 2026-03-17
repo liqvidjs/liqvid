@@ -1,7 +1,7 @@
 {
   "name": "@liqvid/studio",
-  "version": "1.0.0",
-  "description": "Helpers for Liqvid asset storage",
+  "version": "1.0.0-alpha.0",
+  "description": "Production suite for Liqvid videos",
   "exports": {
     ".": {
       "import": "./dist/esm/index.mjs",
