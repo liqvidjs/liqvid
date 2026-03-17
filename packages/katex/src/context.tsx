@@ -23,9 +23,9 @@ export function KaTeXProvider({
   maxSize,
   minRuleThickness,
   output,
-  strict,
-  throwOnError,
-  trust,
+  strict = "ignore",
+  throwOnError = false,
+  trust = true,
 }: {
   children?: React.ReactNode;
   macros?: string | Record<string, string>;
