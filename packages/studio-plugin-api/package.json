@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/studio-plugin-api",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "API for Liqvid Studio plugins",
   "exports": {
     ".": {

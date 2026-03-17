@@ -1,59 +1,59 @@
 {
-	"name": "@liqvid/event-emitter",
-	"version": "0.0.1",
-	"description": "Typed event emitter and helpers",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/liqvidjs/liqvid.git"
-	},
-	"exports": {
-		".": {
-			"import": "./dist/esm/index.mjs",
-			"types": "./dist/types/index.d.mts"
-		},
-		"./react": {
-			"import": "./dist/esm/react.mjs",
-			"types": "./dist/types/react.d.mts"
-		}
-	},
-	"typesVersions": {
-		"*": {
-			"*": [
-				"./dist/types/*"
-			]
-		}
-	},
-	"files": [
-		"dist/*"
-	],
-	"scripts": {
-		"build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
-		"build:clean": "rm -rf dist",
-		"build:js": "tsc",
-		"build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
-		"lint": "biome check --fix",
-		"test": "jest"
-	},
-	"author": "Yuri Sulyma <yuri@liqvidjs.org>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/liqvidjs/liqvid/issues"
-	},
-	"homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
-	"sideEffects": false,
-	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@types/react": "catalog:",
-		"typescript": "catalog:"
-	},
-	"peerDependencies": {
-		"@types/react": "catalog:peer",
-		"react": "catalog:peer"
-	},
-	"peerDependenciesMeta": {
-		"react": {
-			"optional": true
-		}
-	},
-	"type": "module"
+  "name": "@liqvid/event-emitter",
+  "version": "1.0.0-alpha.0",
+  "description": "Typed event emitter and helpers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    },
+    "./react": {
+      "import": "./dist/esm/react.mjs",
+      "types": "./dist/types/react.d.mts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "lint": "biome check --fix",
+    "test": "jest"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
+  "sideEffects": false,
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "type": "module"
 }

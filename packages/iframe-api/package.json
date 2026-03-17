@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/iframe-api",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.0",
   "description": "Cross-iframe communication API",
   "repository": {
     "type": "git",
