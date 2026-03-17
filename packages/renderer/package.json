@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/renderer",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha.0",
   "description": "Audio utilities, static video rendering, and thumbnail generation for Liqvid",
   "files": [
     "dist/*"
