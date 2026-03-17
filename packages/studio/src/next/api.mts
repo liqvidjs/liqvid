@@ -1,6 +1,8 @@
 import * as url from "node:url";
 
+import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { StatusCodes } from "http-status-codes";
+import { notFound } from "next/navigation";
 
 import {
   listRecordingsOperation,
@@ -20,62 +22,108 @@ interface RequestContext {
   }>;
 }
 
+export type DynamicImports = Record<
+  string,
+  () => Promise<
+    {
+      default?: LiqvidStudioServerPlugin;
+    } & LiqvidStudioServerPlugin
+  >
+>;
+
 /**
  * Liqvid server GET handler
  */
-export async function GET(req: Request, { params }: RequestContext) {
-  const paramsObject = await params;
-  const keys = Object.keys(paramsObject);
-  const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
+export function getHandler(_dynamicImports: DynamicImports) {
+  return async function GET(req: Request, { params }: RequestContext) {
+    const paramsObject = await params;
+    const keys = Object.keys(paramsObject);
+    const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
 
-  const route = "/" + routeParams.join("/");
+    const route = "/" + routeParams.join("/");
 
-  const { search } = url.parse(req.url, true);
+    const { search } = url.parse(req.url, true);
 
-  const searchParams = new URLSearchParams(search ?? "");
+    const searchParams = new URLSearchParams(search ?? "");
 
-  await initializeServer();
+    await initializeServer();
 
-  switch (route) {
-    case "/":
-      return getRoot();
-    case listRecordingsOperation.endpoint:
-      return listRecordings(searchParams);
-    case staticFileOperation.endpoint:
-      return serveStaticFile(searchParams);
-  }
+    switch (route) {
+      case "/":
+        return getRoot();
+      case listRecordingsOperation.endpoint:
+        return listRecordings(searchParams);
+      case staticFileOperation.endpoint:
+        return serveStaticFile(searchParams);
+    }
 
-  return Response.json(
-    { error: "not_found" },
-    { status: StatusCodes.NOT_FOUND },
-  );
+    return Response.json(
+      { error: "not_found" },
+      { status: StatusCodes.NOT_FOUND },
+    );
+  };
 }
 
 /**
  * Liqvid server POST handler
  */
-export async function POST(req: Request, { params }: RequestContext) {
-  const paramsObject = await params;
-  const keys = Object.keys(paramsObject);
-  const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
+export function postHandler(dynamicImports: DynamicImports) {
+  return async function POST(req: Request, { params }: RequestContext) {
+    const paramsObject = await params;
+    const keys = Object.keys(paramsObject);
+    const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
 
-  const route = "/" + routeParams.join("/");
+    const route = "/" + routeParams.join("/");
 
-  const { search } = url.parse(req.url, true);
+    const { search } = url.parse(req.url, true);
 
-  const searchParams = new URLSearchParams(search ?? "");
+    const searchParams = new URLSearchParams(search ?? "");
 
-  await initializeServer();
+    await initializeServer();
 
-  switch (route) {
-    case setProjectMetaOperation.endpoint:
-      return setProjectMeta(searchParams, await req.json());
-    case saveRecordingOperation.endpoint:
-      return saveRecording(searchParams, await req.formData());
-  }
+    switch (route) {
+      case setProjectMetaOperation.endpoint:
+        return setProjectMeta(searchParams, await req.json());
+      case saveRecordingOperation.endpoint:
+        return saveRecording(
+          searchParams,
+          await req.formData(),
+          dynamicImports,
+        );
+    }
 
-  return Response.json(
-    { error: "not_found" },
-    { status: StatusCodes.NOT_FOUND },
-  );
+    return Response.json(
+      { error: "not_found" },
+      { status: StatusCodes.NOT_FOUND },
+    );
+  };
+}
+
+/* -------------------- unsupported methods -------------------- */
+
+/**
+ * Liqvid server DELETE handler
+ */
+export function deleteHandler(_dynamicImports: DynamicImports) {
+  return async function DELETE(_req: Request, _ctx: RequestContext) {
+    notFound();
+  };
+}
+
+/**
+ * Liqvid server PUT handler
+ */
+export function putHandler(_dynamicImports: DynamicImports) {
+  return async function PUT(_req: Request, _ctx: RequestContext) {
+    notFound();
+  };
+}
+
+/**
+ * Liqvid server PATCH handler
+ */
+export function patchHandler(_dynamicImports: DynamicImports) {
+  return async function PATCH(_req: Request, _ctx: RequestContext) {
+    notFound();
+  };
 }

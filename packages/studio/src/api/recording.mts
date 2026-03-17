@@ -9,6 +9,7 @@ import { safeGet } from "have-fun";
 import { StatusCodes } from "http-status-codes";
 
 import { RECORDING_META_FILE } from "../conventions.mts";
+import type { DynamicImports } from "../next/api.mts";
 import type {
   RecordingMeta,
   RecordingMetaFile,
@@ -95,6 +96,7 @@ function packageToDir(packageName: string): string {
 export async function saveRecording(
   searchParams: URLSearchParams,
   formData: FormData,
+  dynamicImports: DynamicImports,
 ): Promise<Response> {
   const $url = safeGet(searchParams, "url");
   if ($url.isNone) {
@@ -179,7 +181,7 @@ export async function saveRecording(
   }
 
   // Run post-processing plugins
-  await runPostProcessing(recordingDir, metadata.plugins);
+  await runPostProcessing(recordingDir, metadata.plugins, dynamicImports);
 
   return new Response(null, { status: StatusCodes.CREATED });
 }
@@ -190,10 +192,8 @@ export async function saveRecording(
 async function runPostProcessing(
   recordingDir: string,
   plugins: SaveRecordingMetadata["plugins"],
+  dynamicImports: DynamicImports,
 ): Promise<void> {
-  // @ts-expect-error this file is provided by the client
-  const dynamicImports = (await import("@/.dynamic-imports")).default;
-
   for (const pluginInfo of plugins) {
     const pluginDir = path.join(recordingDir, packageToDir(pluginInfo.key));
 
