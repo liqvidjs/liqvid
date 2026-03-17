@@ -8,6 +8,7 @@ export type {
   LiqvidStudioRecordingPlugin,
 } from "@liqvid/studio-plugin-api";
 
+export * from "./assets.mts";
 export {
   LiqvidDevToolsProvider as LiqvidDevToolsProviderProd,
   useProjectContext,
