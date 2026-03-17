@@ -127,6 +127,11 @@ export function useInvisibleClassName() {
   useEffect(() => {
     if (added) return;
 
+    // previous check prevents this instance from re-running but doesn't
+    // de-dupe other instances (all the useEffect's will run at the
+    // same time after page load)
+    if (document.querySelector(`style#${className}`)) return;
+
     const style = document.createElement("style");
     style.setAttribute("id", className);
     style.setAttribute("type", "text/css");
