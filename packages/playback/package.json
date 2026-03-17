@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/playback",
-  "version": "1.2.0",
+  "version": "2.0.0-alpha.0",
   "description": "Playback class for Liqvid",
   "exports": {
     ".": {

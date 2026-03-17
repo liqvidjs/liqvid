@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/color-scheme",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.0",
   "description": "Color scheme helpers for Liqvid",
   "repository": {
     "type": "git",
