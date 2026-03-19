@@ -3,7 +3,7 @@ packages:
 
 catalog:
   "@base-ui/react": ^1.2.0
-  "@biomejs/biome": 2.4.4
+  "@biomejs/biome": 2.4.8
   "@builder.io/react-hydration-overlay": ^0.3.0
   "@codemirror/autocomplete": ^6.20.0
   "@codemirror/commands": ^6.10.3

@@ -286,7 +286,7 @@ export const installTemplate = async ({
   if (biome) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      "@biomejs/biome": "2.4.4",
+      "@biomejs/biome": "2.4.8",
     };
   }
 
