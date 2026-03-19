@@ -243,7 +243,7 @@ async function run(): Promise<void> {
       eslint: false,
       importAlias: "@/*",
       linter: "biome",
-      reactCompiler: false,
+      reactCompiler: true,
       srcDir: false,
       tailwind: true,
       typescript: true,

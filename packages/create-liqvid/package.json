@@ -55,6 +55,4 @@
   "engines": {
     "node": ">=20.9.0"
   },
-  "sideEffects": false,
-  "type": "module"
 }

@@ -48,9 +48,6 @@ const nextConfig: NextConfig = {
     ? [...basePageExtensions, "dev-only.ts", "dev-only.tsx"]
     : basePageExtensions,
 
-  // react
-  reactCompiler: true,
-
   turbopack: {
     // enable importing .tex files
     rules: {
@@ -64,6 +61,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  /* config options here */
 };
 
 export default nextConfig;

@@ -1,18 +1,11 @@
 {
   "compilerOptions": {
-    "declarationDir": "./dist/types",
-    "outDir": "./dist/esm",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "rootDir": "."
+    "skipLibCheck": false,
+    "strict": true,
+    "target": "es2019"
   },
-  "exclude": ["dist", "templates"],
-  "extends": "../../tsconfig.json",
-  "include": [
-    "./index.ts",
-    "./create-app.ts",
-    "./helpers",
-    "./package.json",
-    "./templates/index.ts",
-    "./templates/types.ts"
-  ]
+  "exclude": ["templates", "dist"]
 }
