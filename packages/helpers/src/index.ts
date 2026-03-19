@@ -1,3 +1,4 @@
+export { Animate } from "./Animate";
 export { Segment, type SegmentProps } from "./Segment";
 export {
   type HidingStrategy,
