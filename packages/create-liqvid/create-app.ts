@@ -36,12 +36,10 @@ export async function createApp({
   tailwind,
   eslint,
   biome,
-  app,
   srcDir,
   importAlias,
   skipInstall,
   empty,
-  api,
   bundler,
   disableGit,
   reactCompiler,
@@ -55,12 +53,10 @@ export async function createApp({
   tailwind: boolean;
   eslint: boolean;
   biome: boolean;
-  app: boolean;
   srcDir: boolean;
   importAlias: string;
   skipInstall: boolean;
   empty: boolean;
-  api?: boolean;
   bundler: Bundler;
   disableGit?: boolean;
   reactCompiler: boolean;
@@ -68,7 +64,7 @@ export async function createApp({
 }): Promise<void> {
   let repoInfo: RepoInfo | undefined;
   const mode: TemplateMode = typescript ? "ts" : "js";
-  const template: TemplateType = `${app ? "app" : "default"}${tailwind ? "-tw" : ""}${empty ? "-empty" : ""}`;
+  const template: TemplateType = `app${tailwind ? "-tw" : ""}${empty ? "-empty" : ""}`;
 
   if (example) {
     let repoUrl: URL | undefined;
@@ -256,7 +252,7 @@ export async function createApp({
       skipInstall,
       srcDir,
       tailwind,
-      template: api ? "app-api" : template,
+      template,
     });
   }
 

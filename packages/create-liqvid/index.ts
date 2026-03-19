@@ -2,7 +2,6 @@
 import { existsSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
-/* eslint-disable import/no-extraneous-dependencies */
 import ciInfo from "ci-info";
 import { Command } from "commander";
 import Conf from "conf";
@@ -63,7 +62,6 @@ const program = new Command(packageJson.name)
     "--import-alias <prefix/*>",
     'Specify import alias to use (default "@/*").',
   )
-  .option("--api", "Initialize a headless API using the App Router.")
   .option("--empty", "Initialize an empty project.")
   .option(
     "--use-npm",
@@ -83,7 +81,7 @@ const program = new Command(packageJson.name)
   )
   .option(
     "--reset, --reset-preferences",
-    "Reset the preferences saved for create-next-app.",
+    "Reset the preferences saved for create-liqvid.",
   )
   .option(
     "--skip-install",
@@ -139,7 +137,7 @@ const packageManager: PackageManager = opts.useNpm
         : getPkgManager();
 
 async function run(): Promise<void> {
-  const conf = new Conf({ projectName: "create-next-app" });
+  const conf = new Conf({ projectName: "create-liqvid" });
 
   if (opts.resetPreferences) {
     const { resetPreferences } = await prompts({
@@ -244,7 +242,7 @@ async function run(): Promise<void> {
       empty: false,
       eslint: false,
       importAlias: "@/*",
-      linter: "eslint",
+      linter: "biome",
       reactCompiler: false,
       srcDir: false,
       tailwind: true,
@@ -265,7 +263,6 @@ async function run(): Promise<void> {
       { key: "reactCompiler", values: { true: "React Compiler" } },
       { key: "tailwind", values: { true: "Tailwind CSS" } },
       { key: "srcDir", values: { true: "src/ dir" } },
-      { key: "app", values: { false: "Pages Router", true: "App Router" } },
       { key: "agentsMd", values: { true: "AGENTS.md" } },
     ];
 
@@ -333,7 +330,7 @@ async function run(): Promise<void> {
         {
           choices,
           initial: 0,
-          message: "Would you like to use the recommended Next.js defaults?",
+          message: "Would you like to use the recommended Liqvid defaults?",
           name: "setupChoice",
           type: "select",
         },
@@ -410,7 +407,7 @@ async function run(): Promise<void> {
     const noLinter =
       args.includes("--no-linter") || args.includes("--no-eslint");
 
-    if (!opts.eslint && !opts.biome && !noLinter && !opts.api) {
+    if (!opts.eslint && !opts.biome && !noLinter) {
       if (skipPrompt) {
         const preferredLinter = getPrefOrDefault("linter");
         opts.eslint = preferredLinter === "eslint";
@@ -418,21 +415,21 @@ async function run(): Promise<void> {
         // No need to set noLinter flag since we check args at runtime
       } else {
         const linterIndexMap = {
-          biome: 1,
-          eslint: 0,
+          biome: 0,
+          eslint: 1,
           none: 2,
         };
         const { linter } = await prompts({
           choices: [
             {
-              description: "More comprehensive lint rules",
-              title: "ESLint",
-              value: "eslint",
-            },
-            {
               description: "Fast formatter and linter (fewer rules)",
               title: "Biome",
               value: "biome",
+            },
+            {
+              description: "More comprehensive lint rules",
+              title: "ESLint",
+              value: "eslint",
             },
             {
               description: "Skip linter configuration",
@@ -472,11 +469,7 @@ async function run(): Promise<void> {
       preferences.eslint = false;
     }
 
-    if (
-      !opts.reactCompiler &&
-      !args.includes("--no-react-compiler") &&
-      !opts.api
-    ) {
+    if (!opts.reactCompiler && !args.includes("--no-react-compiler")) {
       if (skipPrompt) {
         opts.reactCompiler = getPrefOrDefault("reactCompiler");
       } else {
@@ -495,7 +488,7 @@ async function run(): Promise<void> {
       }
     }
 
-    if (!opts.tailwind && !args.includes("--no-tailwind") && !opts.api) {
+    if (!opts.tailwind && !args.includes("--no-tailwind")) {
       if (skipPrompt) {
         opts.tailwind = getPrefOrDefault("tailwind");
       } else {
@@ -530,25 +523,6 @@ async function run(): Promise<void> {
         });
         opts.srcDir = Boolean(srcDir);
         preferences.srcDir = Boolean(srcDir);
-      }
-    }
-
-    if (!opts.app && !args.includes("--no-app") && !opts.api) {
-      if (skipPrompt) {
-        opts.app = getPrefOrDefault("app");
-      } else {
-        const styledAppDir = blue("App Router");
-        const { app } = await prompts({
-          active: "Yes",
-          inactive: "No",
-          initial: getPrefOrDefault("app"),
-          message: `Would you like to use ${styledAppDir}? (recommended)`,
-          name: "app",
-          onState: onPromptState,
-          type: "toggle",
-        });
-        opts.app = Boolean(app);
-        preferences.app = Boolean(app);
       }
     }
 
@@ -608,7 +582,7 @@ async function run(): Promise<void> {
             inactive: "No",
             initial: getPrefOrDefault("agentsMd"),
             message:
-              "Would you like to include AGENTS.md to guide coding agents to write up-to-date Next.js code?",
+              "Would you like to include AGENTS.md to guide coding agents to write up-to-date Next.js and Liqvid code?",
             name: "agentsMd",
             type: "toggle",
           },
@@ -630,8 +604,6 @@ async function run(): Promise<void> {
   try {
     await createApp({
       agentsMd: opts.agentsMd,
-      api: opts.api,
-      app: opts.app,
       appPath,
       biome: opts.biome,
       bundler,
@@ -668,7 +640,6 @@ async function run(): Promise<void> {
 
     await createApp({
       agentsMd: opts.agentsMd,
-      app: opts.app,
       appPath,
       biome: opts.biome,
       bundler,
@@ -711,9 +682,9 @@ async function notifyUpdate(): Promise<void> {
       };
       const distTag = getDistTag(packageJson.version);
       const pkgTag = distTag === "latest" ? "" : `@${distTag}`;
-      const updateMessage = `${global[packageManager]} create-next-app${pkgTag}`;
+      const updateMessage = `${global[packageManager]} create-liqvid${pkgTag}`;
       console.log(
-        yellow(bold("A new version of `create-next-app` is available!")) +
+        yellow(bold("A new version of `create-liqvid` is available!")) +
           "\n" +
           "You can update by running: " +
           cyan(updateMessage) +

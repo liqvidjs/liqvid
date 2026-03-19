@@ -1,17 +1,23 @@
-import { install } from "../helpers/install";
-import { runTypegen } from "../helpers/typegen";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+
+import { Sema } from "async-sema";
+import { async as glob } from "fast-glob";
+import { bold, cyan } from "picocolors";
+
 import { copy } from "../helpers/copy";
 import { getPnpmMajorVersion } from "../helpers/get-pkg-manager";
+import { install } from "../helpers/install";
+import { runTypegen } from "../helpers/typegen";
 
-import { async as glob } from "fast-glob";
-import os from "os";
-import fs from "fs/promises";
-import path from "path";
-import { cyan, bold } from "picocolors";
-import { Sema } from "async-sema";
+import {
+  Bundler,
+  type GetTemplateFileArgs,
+  type InstallTemplateArgs,
+} from "./types";
+
 import pkg from "../package.json";
-
-import { Bundler, GetTemplateFileArgs, InstallTemplateArgs } from "./types";
 
 // Do not rename or format. sync-react script relies on this line.
 // prettier-ignore
@@ -72,8 +78,8 @@ export const installTemplate = async ({
   if (!tailwind) copySource.push("!postcss.config.mjs");
 
   await copy(copySource, root, {
-    parents: true,
     cwd: templatePath,
+    parents: true,
     rename(name) {
       switch (name) {
         case "gitignore": {
@@ -140,7 +146,6 @@ export const installTemplate = async ({
     const files = await glob("**/*", {
       cwd: root,
       dot: true,
-      stats: false,
       // We don't want to modify compiler options in [ts/js]config.json
       // and none of the files in the .git folder
       // TODO: Refactor this to be an allowlist, rather than a denylist,
@@ -153,6 +158,7 @@ export const installTemplate = async ({
         "**/fonts/**",
         "**/favicon.ico",
       ],
+      stats: false,
     });
     const writeSema = new Sema(8, { capacity: files.length });
     await Promise.all(
@@ -213,25 +219,25 @@ export const installTemplate = async ({
 
   /** Create a package.json for the new project and write it to disk. */
   const packageJson: any = {
-    name: appName,
-    version: "0.1.0",
-    private: true,
-    scripts: {
-      dev: `next dev${bundlerFlags}`,
-      build: `next build${bundlerFlags}`,
-      start: "next start",
-      ...(eslint && { lint: "eslint" }),
-      ...(biome && { lint: "biome check", format: "biome format --write" }),
-    },
     /**
      * Default dependencies.
      */
     dependencies: {
+      next: version,
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,
-      next: version,
     },
     devDependencies: {},
+    name: appName,
+    private: true,
+    scripts: {
+      build: `next build${bundlerFlags}`,
+      dev: `next dev${bundlerFlags}`,
+      start: "next start",
+      ...(eslint && { lint: "eslint" }),
+      ...(biome && { format: "biome format --write", lint: "biome check" }),
+    },
+    version: "0.1.0",
   };
 
   if (bundler === Bundler.Rspack) {
@@ -259,10 +265,10 @@ export const installTemplate = async ({
   if (mode === "ts") {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      typescript: "^5",
       "@types/node": "^20",
       "@types/react": "^19",
       "@types/react-dom": "^19",
+      typescript: "^5",
     };
   }
 
