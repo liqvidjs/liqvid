@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "declarationDir": "./dist/types",
+    "outDir": "./dist/esm",
+    "rootDir": "./src"
+  },
+  "exclude": ["dist", "templates"],
+  "extends": "../../tsconfig.json",
+  "include": ["./src"]
+}

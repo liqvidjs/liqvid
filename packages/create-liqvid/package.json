@@ -1,0 +1,59 @@
+{
+  "name": "create-liqvid",
+  "version": "1.0.0-alpha.0",
+  "keywords": [
+    "liqvid",
+    "react",
+    "next",
+    "next.js"
+  ],
+  "description": "Create Liqvid projects with one command",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liqvidjs/liqvid",
+    "directory": "packages/create-liqvid"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bin": {
+    "create-liqvid": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
+    "dev": "ncc build ./index.ts -w -o dist/",
+    "lint": "biome check --fix",
+    "prebuild": "node ../../scripts/rm.mjs dist",
+    "prepublishOnly": "cd ../../ && turbo run build",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/async-retry": "1.4.9",
+    "@types/cross-spawn": "6.0.6",
+    "@types/node": "25.5.0",
+    "@types/prompts": "2.4.9",
+    "@types/validate-npm-package-name": "4.0.2",
+    "@vercel/ncc": "0.38.4",
+    "async-retry": "1.3.3",
+    "ci-info": "4.4.0",
+    "commander": "14.0.3",
+    "conf": "15.1.0",
+    "cross-spawn": "7.0.6",
+    "fast-glob": "3.3.3",
+    "picocolors": "1.1.1",
+    "prettier-plugin-tailwindcss": "0.7.2",
+    "prompts": "2.4.2",
+    "tar": "7.5.11",
+    "typescript": "catalog:",
+    "update-check": "1.5.4",
+    "validate-npm-package-name": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "sideEffects": false,
+  "type": "module"
+}
