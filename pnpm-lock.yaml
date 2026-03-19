@@ -245,6 +245,10 @@ importers:
         version: 5.9.3
 
   packages/create-liqvid:
+    dependencies:
+      create-next-app:
+        specifier: ^16.2.0
+        version: 16.2.0
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -2966,6 +2970,11 @@ packages:
   cosmiconfig@7.1.0:
     resolution: {integrity: sha512-AdmX6xUzdNASswsFtmwSt7Vj8po9IuqXm0UXz7QKPuEUmPB4XyjGfaAr2PSuELMwkRMVH1EpIkX5bTZGRB3eCA==}
     engines: {node: '>=10'}
+
+  create-next-app@16.2.0:
+    resolution: {integrity: sha512-S+jgFKcwnyi2s/shUsZ+4GvRbjQJ289m1PodV6tZJjfgnVWAsOy+DuYyrJCDqj47EuOngy8bZNF5kyL3pmDQwg==}
+    engines: {node: '>=20.9.0'}
+    hasBin: true
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
@@ -7074,7 +7083,7 @@ snapshots:
       stubborn-fs: 2.0.0
       when-exit: 2.1.5
 
-  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4):
+  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4):
     dependencies:
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
@@ -7456,6 +7465,8 @@ snapshots:
       path-type: 4.0.0
       yaml: 1.10.2
     optional: true
+
+  create-next-app@16.2.0: {}
 
   create-require@1.1.1:
     optional: true
@@ -8010,7 +8021,7 @@ snapshots:
       '@types/node': 10.14.22
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
-      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4)
+      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4)
       camelcase: 5.3.1
       debug: 4.4.3
       dotenv: 6.2.0
@@ -8024,7 +8035,7 @@ snapshots:
       mime-types: 2.1.35
       object.omit: 3.0.0
       object.pick: 1.3.0
-      retry-axios: 2.6.0(axios@0.26.1(debug@4.4.3))
+      retry-axios: 2.6.0(axios@0.26.1)
       semver: 6.3.1
       tough-cookie: 4.1.4
     transitivePeerDependencies:
@@ -9241,7 +9252,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-axios@2.6.0(axios@0.26.1(debug@4.4.3)):
+  retry-axios@2.6.0(axios@0.26.1):
     dependencies:
       axios: 0.26.1(debug@4.4.3)
 

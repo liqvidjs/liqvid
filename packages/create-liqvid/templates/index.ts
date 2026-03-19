@@ -80,8 +80,7 @@ export const installTemplate = async ({
   /**
    * Copy the template files to the target directory.
    */
-  console.log("\nInitializing project with template:", template, "\n");
-  const templatePath = path.join(__dirname, template, mode);
+  const templatePath = path.join(__dirname, "templates", template, mode);
   const copySource = ["**"];
   if (!eslint) copySource.push("!eslint.config.mjs");
   if (!biome) copySource.push("!biome.json");
@@ -214,6 +213,7 @@ export const installTemplate = async ({
      */
     dependencies: {
       "@base-ui/react": "^1.3.0",
+      "@liqvid/katex": "^1.0.0-alpha.0",
       "@liqvid/media": "^1.0.0-alpha.1",
       "@liqvid/prompts": "^1.0.0-alpha.1",
       "@liqvid/script": "^1.0.0-alpha.1",
