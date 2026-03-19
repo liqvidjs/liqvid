@@ -33,7 +33,7 @@
     "@biomejs/biome": "catalog:",
     "@types/async-retry": "1.4.9",
     "@types/cross-spawn": "6.0.6",
-    "@types/node": "25.5.0",
+    "@types/node": "catalog:",
     "@types/prompts": "2.4.9",
     "@types/validate-npm-package-name": "4.0.2",
     "@vercel/ncc": "0.38.4",

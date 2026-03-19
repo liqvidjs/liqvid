@@ -17,7 +17,14 @@ import {
   type InstallTemplateArgs,
 } from "./types";
 
-import pkg from "../package.json";
+interface PackageJson {
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+  scripts: Record<string, string>;
+  name: string;
+  private: boolean;
+  version: string;
+}
 
 // Do not rename or format. sync-react script relies on this line.
 // prettier-ignore
@@ -70,7 +77,6 @@ export const installTemplate = async ({
    * Copy the template files to the target directory.
    */
   console.log("\nInitializing project with template:", template, "\n");
-  const isApi = template === "app-api";
   const templatePath = path.join(__dirname, template, mode);
   const copySource = ["**"];
   if (!eslint) copySource.push("!eslint.config.mjs");
@@ -192,38 +198,23 @@ export const installTemplate = async ({
           });
       }),
     );
-
-    if (!isApi) {
-      const isAppTemplate = template.startsWith("app");
-
-      // Change the `Get started by editing pages/index` / `app/page` to include `src`
-      const indexPageFile = path.join(
-        "src",
-        isAppTemplate ? "app" : "pages",
-        `${isAppTemplate ? "page" : "index"}.${mode === "ts" ? "tsx" : "js"}`,
-      );
-
-      await fs.writeFile(
-        indexPageFile,
-        (await fs.readFile(indexPageFile, "utf8")).replace(
-          isAppTemplate ? "app/page" : "pages/index",
-          isAppTemplate ? "src/app/page" : "src/pages/index",
-        ),
-      );
-    }
   }
 
   /** Copy the version from package.json or override for tests. */
-  const version = process.env.NEXT_PRIVATE_TEST_VERSION ?? pkg.version;
   const bundlerFlags = bundler === Bundler.Webpack ? " --webpack" : "";
 
   /** Create a package.json for the new project and write it to disk. */
-  const packageJson: any = {
+  const packageJson: PackageJson = {
     /**
      * Default dependencies.
      */
     dependencies: {
-      next: version,
+      "@base-ui/react": "^1.3.0",
+      "@liqvid/media": "^1.0.0-alpha.1",
+      "@liqvid/prompts": "^1.0.0-alpha.1",
+      "@liqvid/script": "^1.0.0-alpha.1",
+      "@liqvid/studio": "^1.0.0-alpha.4",
+      next: "16.2.0",
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,
     },
@@ -233,6 +224,7 @@ export const installTemplate = async ({
     scripts: {
       build: `next build${bundlerFlags}`,
       dev: `next dev${bundlerFlags}`,
+      postinstall: "npx @liqvid/cli generate-imports",
       start: "next start",
       ...(eslint && { lint: "eslint" }),
       ...(biome && { format: "biome format --write", lint: "biome check" }),
@@ -251,7 +243,7 @@ export const installTemplate = async ({
         "../next-rspack/next-rspack-packed.tgz",
       );
     } else {
-      packageJson.dependencies["next-rspack"] = version;
+      packageJson.dependencies["next-rspack"] = nextVersion;
     }
   }
 
@@ -286,7 +278,7 @@ export const installTemplate = async ({
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
       eslint: "^9",
-      "eslint-config-next": version,
+      "eslint-config-next": nextVersion,
     };
   }
 
@@ -294,24 +286,8 @@ export const installTemplate = async ({
   if (biome) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      "@biomejs/biome": "2.2.0",
+      "@biomejs/biome": "2.4.4",
     };
-  }
-
-  if (isApi) {
-    delete packageJson.dependencies.react;
-    delete packageJson.dependencies["react-dom"];
-    // We cannot delete `@types/react` now since it is used in
-    // route type definitions e.g. `.next/types/app/page.ts`.
-    // TODO(jiwon): Implement this when we added logic to
-    // auto-install `react` and `react-dom` if page.tsx was used.
-    // We can achieve this during verify-typescript stage and see
-    // if a type error was thrown at `distDir/types/app/page.ts`.
-    delete packageJson.devDependencies["@types/react-dom"];
-
-    // Remove linting scripts for API-only templates
-    delete packageJson.scripts.lint;
-    delete packageJson.scripts.format;
   }
 
   const devDeps = Object.keys(packageJson.devDependencies).length;

@@ -79,7 +79,7 @@ catalog:
   lodash: ^4.17.21
   lodash.debounce: ^4.0.8
   mathjax: ^3.2.2
-  next: 16.1.6
+  next: 16.2.0
   no-private-imports: ^0.0.1
   postcss: ^8.5.6
   prism-react-renderer: ^2.4.1
