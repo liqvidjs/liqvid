@@ -1,31 +1,35 @@
 {
   "name": "@liqvid/katex",
-  "version": "0.1.0",
+  "version": "1.0.0-alpha.0",
   "description": "KaTeX integration for Liqvid",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
-    },
-    "./plain": {
-      "import": "./dist/esm/plain.mjs",
-      "require": "./dist/cjs/plain.cjs"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
-      "*": ["./dist/types/*.d.ts"]
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
     }
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": ["liqvid", "katex"],
+  "keywords": [
+    "liqvid",
+    "katex"
+  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "lint": "eslint --ext ts,tsx --fix src"
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -36,22 +40,27 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
   "license": "MIT",
-  "peerDependencies": {
-    "@types/katex": ">=0.14.0",
-    "@types/react": ">=18.0.0",
-    "liqvid": "workspace:^",
-    "react": ">=18.1.0"
-  },
-  "peerDependenciesMeta": {
-    "liqvid": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "liqvid": "workspace:^"
-  },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/katex": "catalog:",
+    "@types/react": "catalog:",
+    "@liqvid/player": "workspace:^",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "katex": "catalog:peer",
+    "@types/katex": "catalog:peer",
+    "@types/react": "catalog:peer",
+    "@liqvid/player": "workspace:^1.0.0-alpha.0",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@liqvid/player": {
+      "optional": true
+    }
   },
   "sideEffects": false,
   "type": "module"
