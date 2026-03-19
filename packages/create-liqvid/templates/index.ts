@@ -213,12 +213,15 @@ export const installTemplate = async ({
      */
     dependencies: {
       "@base-ui/react": "^1.3.0",
+      "@liqvid/cli": "^2.0.0-alpha.0",
       "@liqvid/katex": "^1.0.0-alpha.0",
       "@liqvid/media": "^1.0.0-alpha.1",
       "@liqvid/prompts": "^1.0.0-alpha.1",
       "@liqvid/script": "^1.0.0-alpha.1",
-      "@liqvid/studio": "^1.0.0-alpha.4",
+      "@liqvid/studio": "^1.0.0-alpha.6",
       "@liqvid/utils": "^2.0.0-alpha.2",
+      katex: "0.16.39",
+      liqvid: "^3.0.0-alpha.1",
       next: nextVersion,
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,
