@@ -1,13 +1,21 @@
 "use client";
 
 import { Duration, type DurationLike } from "@liqvid/duration";
+import { usePlaybackEvent, usePlaybackOptional } from "@liqvid/playback/react";
 import { type RecordingPlugin, RecordingProvider } from "@liqvid/recording";
 import {
   type LiqvidStudioPlugin,
   LiqvidStudioPluginApiProvider,
   type PluginContext,
 } from "@liqvid/studio-plugin-api";
-import { createContext, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { setProjectMeta } from "./client.mts";
 import type { ToastPropsWithTime } from "./ui/Toast";
@@ -40,7 +48,7 @@ export function LiqvidDevToolsProvider({
 
   const [toasts, setToasts] = useState<ToastPropsWithTime[]>([]);
   const api = useMemo(
-    (): Partial<PluginContext> => ({
+    (): Omit<PluginContext, "plugins"> => ({
       makeToast(toast) {
         setToasts((prev) => [...prev, { ...toast, time: Date.now() }]);
       },
@@ -69,6 +77,18 @@ export function LiqvidDevToolsProvider({
       }, [] as RecordingPlugin[]),
     [plugins],
   );
+
+  // update duration
+  const playback = usePlaybackOptional();
+
+  const updateDuration = useCallback(() => {
+    if (!playback) return;
+    api.setDuration(playback.duration$);
+  }, [api, playback]);
+
+  useEffect(() => updateDuration(), [updateDuration]);
+
+  usePlaybackEvent("durationchange", updateDuration);
 
   return (
     <LiqvidStudioPluginApiProvider plugins={plugins} value={api}>
