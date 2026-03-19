@@ -2,9 +2,10 @@
   "compilerOptions": {
     "declarationDir": "./dist/types",
     "outDir": "./dist/esm",
-    "rootDir": "./src"
+    "resolveJsonModule": true,
+    "rootDir": "."
   },
   "exclude": ["dist", "templates"],
   "extends": "../../tsconfig.json",
-  "include": ["./src"]
+  "include": ["./index.ts", "./create-app.ts", "./helpers", "./package.json"]
 }
