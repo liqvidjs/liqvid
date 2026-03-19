@@ -17,14 +17,17 @@ import {
   type InstallTemplateArgs,
 } from "./types";
 
-interface PackageJson {
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-  scripts: Record<string, string>;
-  name: string;
-  private: boolean;
-  version: string;
-}
+// interface PackageJson {
+//   dependencies?: Record<string, string>;
+//   devDependencies?: Record<string, string>;
+//   ignoreScripts?: string[];
+//   name: string;
+//   private: boolean;
+//   scripts: Record<string, string>;
+//   trustedDependencies?: string[];
+//   version: string;
+// }
+type PackageJson = any;
 
 // Do not rename or format. sync-react script relies on this line.
 // prettier-ignore
@@ -52,6 +55,7 @@ export const getTemplateFile = ({
 
 export const SRC_DIR_NAMES = ["app", "pages", "styles"];
 
+const nextVersion = "16.2.0";
 /**
  * Install a Next.js internal template to a given `root` directory.
  */
@@ -214,7 +218,8 @@ export const installTemplate = async ({
       "@liqvid/prompts": "^1.0.0-alpha.1",
       "@liqvid/script": "^1.0.0-alpha.1",
       "@liqvid/studio": "^1.0.0-alpha.4",
-      next: "16.2.0",
+      "@liqvid/utils": "^2.0.0-alpha.2",
+      next: nextVersion,
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,
     },
