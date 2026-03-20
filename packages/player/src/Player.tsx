@@ -9,7 +9,7 @@ import type { Playback } from "@liqvid/playback";
 import { usePlaybackOptional } from "@liqvid/playback/react";
 import { combineRefs } from "@liqvid/utils";
 import classNames from "classnames";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   type AspectRatioSpecifier,
@@ -17,7 +17,7 @@ import {
 } from "./aspect-ratio";
 import { Canvas } from "./Canvas";
 import { Controls } from "./Controls";
-import { PlayerContext } from "./hooks";
+import { PlayerContext, type RenderingTask } from "./hooks";
 import { playerApiDeclaration } from "./iframe-api";
 
 export function Root({
@@ -41,6 +41,10 @@ export function Root({
   const contextPlayback = usePlaybackOptional();
   const playback = propsPlayback ?? contextPlayback;
 
+  const [renderingTasks, setRenderingTasks] = useState<Set<RenderingTask>>(
+    () => new Set(),
+  );
+
   // keymap
   const ambientKeymap = useKeymapOptional();
   const ownKeymap = useRef<Keymap>(null);
@@ -54,14 +58,27 @@ export function Root({
   // ref
   const ref = useRef<HTMLDivElement>(null);
 
+  const registerRenderingTask = useCallback((task: RenderingTask) => {
+    setRenderingTasks((prev) => new Set(prev).add(task));
+
+    return () => {
+      setRenderingTasks((prev) => {
+        prev.delete(task);
+        return new Set(prev);
+      });
+    };
+  }, []);
+
   const context = useMemo(
     (): PlayerContext => ({
       aspectRatio,
       get domElement() {
         return ref.current;
       },
+      registerRenderingTask,
+      renderingTasks,
     }),
-    [aspectRatio],
+    [aspectRatio, renderingTasks, registerRenderingTask],
   );
 
   const { colorScheme, persistence, setColorScheme } = useColorScheme();

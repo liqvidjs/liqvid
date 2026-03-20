@@ -155,9 +155,7 @@ export class Playback extends CorePlayback {
         anim.startTime = null;
         anim.play();
         anim.startTime =
-          // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist on client
           (this.timeline!.currentTime as number) +
-          // biome-ignore lint/style/noNonNullAssertion: this is fine
           (this.__delays.get(anim.effect)! - this.currentTime) /
             this.playbackRate;
       }
@@ -174,7 +172,6 @@ export class Playback extends CorePlayback {
     this.addEventListener("seek", () => {
       for (const anim of this.__animations) {
         const offset =
-          // biome-ignore lint/style/noNonNullAssertion: this is fine
           (this.__delays.get(anim.effect!)! - this.currentTime) /
           this.playbackRate;
         if (this.paused) {
@@ -182,7 +179,6 @@ export class Playback extends CorePlayback {
           anim.currentTime = -offset;
           anim.pause();
         } else {
-          // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist on client
           anim.startTime = (this.timeline!.currentTime as number) + offset;
         }
       }

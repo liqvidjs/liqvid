@@ -1,13 +1,24 @@
+import { waitFor } from "@liqvid/utils";
+
 /**
  * Ready Promise
  */
-const packages = MathJax._.components.package.Package.packages;
-// output/svg doesn't load reliably for some reason...
-const packageNames = Array.from(packages.keys()).filter(
-  (name) => name !== "output/svg",
-);
+export const MathJaxReady = waitFor(
+  () =>
+    typeof window !== "undefined" &&
+    "MathJax" in window &&
+    typeof window.MathJax === "object" &&
+    window.MathJax !== null &&
+    "_" in window.MathJax,
+).then(async () => {
+  const packages = MathJax._.components.package.Package.packages;
+  const packageNames = Array.from(packages.keys()).filter((name) => {
+    const pkg = packages.get(name)!;
+    return pkg.isLoading || pkg.isLoaded;
+  });
 
-export const MathJaxReady = Promise.all([
-  MathJax.loader.ready(...packageNames),
-  MathJax.startup.promise,
-]);
+  await Promise.all([
+    MathJax.loader.ready(...packageNames),
+    MathJax.startup.promise,
+  ]);
+});

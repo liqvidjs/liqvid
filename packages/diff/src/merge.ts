@@ -1,5 +1,7 @@
-import {assertDefined, assertType} from "@liqvid/utils/types";
-import {applyArrayDiff, applyDiff} from "./apply";
+/** biome-ignore-all lint/suspicious/noExplicitAny: very complicated types here */
+import { assertDefined, assertType } from "@liqvid/utils";
+
+import { applyArrayDiff, applyDiff } from "./apply";
 import {
   arrayDiff,
   arrayItemDiff,
@@ -10,7 +12,7 @@ import {
   objectDiff,
   objectItemDiff,
 } from "./builders";
-import type {ArrayDiff, ItemDiff, ObjectDiff} from "./types";
+import type { ArrayDiff, ItemDiff, ObjectDiff } from "./types";
 import {
   consume,
   getOffset,
@@ -60,10 +62,6 @@ export function mergeArrayDiffs<T>(
           const valueA = tailA[tailOffset];
 
           matchItemDiff(itemB, {
-            // set
-            set(_, valueB) {
-              tailA[tailOffset] = valueB;
-            },
             // array
             array(_, valueB) {
               assertType<unknown[]>(valueA);
@@ -72,6 +70,10 @@ export function mergeArrayDiffs<T>(
             object(_, valueB) {
               assertType<Record<string, unknown>>(valueA);
               tailA[tailOffset] = applyDiff(valueA, valueB);
+            },
+            // set
+            set(_, valueB) {
+              tailA[tailOffset] = valueB;
             },
           });
         } else {
@@ -87,18 +89,40 @@ export function mergeArrayDiffs<T>(
       assertDefined(itemB);
       // offsetA === newOffsetB
       matchItemDiff(itemA, {
-        set(_, valueA) {
+        array(_, valueA) {
           matchItemDiff(itemB, {
-            // change(a) * change(b) = change(b)
+            // array(a) * array(b) = array(a*b)
+            array(_, valueB) {
+              itemDiffs.push(
+                arrayItemDiff<any>(offsetA, mergeArrayDiffs(valueA, valueB)),
+              );
+            },
+            // array(a) * change(b) = change(b)
             set(_, valueB) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
             },
+          });
+        },
+        object(_, valueA) {
+          matchItemDiff(itemB, {
+            // object(a) * object(b) = object(a*b)
+            object(_, valueB) {
+              itemDiffs.push(
+                objectItemDiff(offsetA, mergeDiffs(valueA, valueB)),
+              );
+            },
+            // object(a) * change(b) = change(b)
+            set(_, valueB) {
+              itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
+            },
+          });
+        },
+        set(_, valueA) {
+          matchItemDiff(itemB, {
             // change(a) * array(b) = change(a*b)
             array(_, valueB) {
               assertType<unknown[]>(valueA);
               itemDiffs.push(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 changeItemDiff<any>(offsetA, applyArrayDiff(valueA, valueB)),
               );
             },
@@ -106,40 +130,12 @@ export function mergeArrayDiffs<T>(
             object(_, valueB) {
               assertType<object>(valueA);
               itemDiffs.push(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 changeItemDiff<any>(offsetA, applyDiff(valueA, valueB)),
               );
             },
-          });
-        },
-        array(_, valueA) {
-          matchItemDiff(itemB, {
-            // array(a) * change(b) = change(b)
+            // change(a) * change(b) = change(b)
             set(_, valueB) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
-            },
-            // array(a) * array(b) = array(a*b)
-            array(_, valueB) {
-              itemDiffs.push(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                arrayItemDiff<any>(offsetA, mergeArrayDiffs(valueA, valueB)),
-              );
-            },
-          });
-        },
-        object(_, valueA) {
-          matchItemDiff(itemB, {
-            // object(a) * change(b) = change(b)
-            set(_, valueB) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              itemDiffs.push(changeItemDiff<any>(offsetA, valueB));
-            },
-            // object(a) * object(b) = object(a*b)
-            object(_, valueB) {
-              itemDiffs.push(
-                objectItemDiff(offsetA, mergeDiffs(valueA, valueB)),
-              );
             },
           });
         },
@@ -168,29 +164,32 @@ export function mergeDiffs<T>(
 
   for (const rKeyB of objectKeys(b)) {
     matchRunes(b, rKeyB, {
-      // create
-      create(key, valueB) {
+      // array
+      array(key, valueB) {
         consume(a, key, {
-          // delete * create(b) = set(b)
-          delete() {
-            Object.assign(ret, changeDiff(key, valueB));
+          array(valueA) {
+            Object.assign(ret, arrayDiff(key, mergeArrayDiffs(valueA, valueB)));
           },
-          none() {
-            Object.assign(ret, creationDiff(key, valueB));
+          // set(a) * array(b) = set(a*b)
+          change(valueA) {
+            assertType<unknown[]>(valueA);
+            Object.assign(ret, changeDiff(key, applyArrayDiff(valueA, valueB)));
+          },
+          // create(a) * array(b) = create(a*b)
+          create(valueA) {
+            assertType<unknown[]>(valueA);
+            Object.assign(
+              ret,
+              creationDiff(key, applyArrayDiff(valueA, valueB)),
+            );
           },
           else(name) {
-            throw new Error(`Invalid merge: ${name}-add`);
+            throw new Error(`Invalid merge: ${name}-array`);
+          },
+          none() {
+            Object.assign(ret, arrayDiff(key, valueB));
           },
         });
-      },
-      // delete
-      delete(key) {
-        consume(a, key, {
-          delete() {
-            throw new Error("Invalid merge: delete-delete");
-          },
-        });
-        Object.assign(ret, deletionDiff(key));
       },
       // set
       change(key, valueB) {
@@ -212,55 +211,52 @@ export function mergeDiffs<T>(
           },
         });
       },
-      // array
-      array(key, valueB) {
+      // create
+      create(key, valueB) {
         consume(a, key, {
-          // create(a) * array(b) = create(a*b)
-          create(valueA) {
-            assertType<unknown[]>(valueA);
-            Object.assign(
-              ret,
-              creationDiff(key, applyArrayDiff(valueA, valueB)),
-            );
-          },
-          // set(a) * array(b) = set(a*b)
-          change(valueA) {
-            assertType<unknown[]>(valueA);
-            Object.assign(ret, changeDiff(key, applyArrayDiff(valueA, valueB)));
+          // delete * create(b) = set(b)
+          delete() {
+            Object.assign(ret, changeDiff(key, valueB));
           },
           else(name) {
-            throw new Error(`Invalid merge: ${name}-array`);
-          },
-          array(valueA) {
-            Object.assign(ret, arrayDiff(key, mergeArrayDiffs(valueA, valueB)));
+            throw new Error(`Invalid merge: ${name}-add`);
           },
           none() {
-            Object.assign(ret, arrayDiff(key, valueB));
+            Object.assign(ret, creationDiff(key, valueB));
           },
         });
+      },
+      // delete
+      delete(key) {
+        consume(a, key, {
+          delete() {
+            throw new Error("Invalid merge: delete-delete");
+          },
+        });
+        Object.assign(ret, deletionDiff(key));
       },
       // object
       object(key, valueB) {
         consume(a, key, {
-          // create(a) * object(b) = object(a*b)
-          create(valueA) {
-            assertType<object>(valueA);
-            Object.assign(ret, creationDiff(key, applyDiff(valueA, valueB)));
-          },
           // set(a) * object(b) = set(a*b)
           change(valueA) {
             assertType<object>(valueA);
             Object.assign(ret, changeDiff(key, applyDiff(valueA, valueB)));
           },
+          // create(a) * object(b) = object(a*b)
+          create(valueA) {
+            assertType<object>(valueA);
+            Object.assign(ret, creationDiff(key, applyDiff(valueA, valueB)));
+          },
           else(name) {
             throw new Error(`Invalid merge: ${name}-array`);
+          },
+          none() {
+            Object.assign(ret, objectDiff(key, valueB));
           },
           // object(a) * object(b) = object(a*b)
           object(valueA) {
             Object.assign(ret, objectDiff(key, mergeDiffs(valueA, valueB)));
-          },
-          none() {
-            Object.assign(ret, objectDiff(key, valueB));
           },
         });
       },

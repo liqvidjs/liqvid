@@ -9,13 +9,13 @@ catalog:
   "@codemirror/commands": ^6.10.3
   "@codemirror/lang-css": ^6.3.1
   "@codemirror/lang-html": ^6.4.11
-  "@codemirror/lang-javascript": 6.2.4
+  "@codemirror/lang-javascript": 6.2.5
   "@codemirror/lang-python": 6.2.1
   "@codemirror/language": ^6.12.1
   "@codemirror/lint": ^6.9.4
   "@codemirror/search": ^6.6.0
   "@codemirror/state": 6.6.0
-  "@codemirror/view": 6.39.4
+  "@codemirror/view": 6.40.0
   "@dnd-kit/core": ^6.3.1
   "@dnd-kit/sortable": ^10.0.0
   "@dnd-kit/utilities": ^3.2.2
@@ -105,10 +105,24 @@ catalog:
   universal-cookie: ^8.0.1
   yargs: ^18.0.0
   yargs-parser: ^21.1.1
-  zod: 4.1.13
+  zod: ^4.3
   zustand: ^5
 
 catalogs:
+  dev:
+    "@biomejs/biome": 2.4.8
+    "@types/cli-progress": ^3.11.6
+    "@types/jest": ^30.0.0
+    "@types/katex": ^0.16.8
+    "@types/lodash": ^4.17.21
+    "@types/lodash.debounce": ^4.0.9
+    "@types/node": ^24
+    "@types/react": ^19
+    "@types/react-dom": ^19
+    "@types/three": ^0.183.1
+    "@types/yargs": ^17.0.35
+    typescript: ^5.9
+
   peer:
     "@codemirror/autocomplete": ">=6"
     "@codemirror/commands": ">=6"
@@ -124,6 +138,7 @@ catalogs:
     "@types/react": ">=18"
     "@types/react-dom": ">=18"
     katex: ">=0.16"
+    mathjax: ">=3"
     next: ">=16"
     react: ">=18"
     react-dom: ">=18"

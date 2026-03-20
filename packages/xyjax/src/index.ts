@@ -2,10 +2,10 @@
   XyJax shenanigans
 */
 
-import {lerp} from "@liqvid/utils/misc";
-import {usePlayback, useTime} from "liqvid";
-import {useCallback, useEffect, useRef} from "react";
-import {Handle} from "@liqvid/mathjax";
+import type { Handle } from "@liqvid/mathjax";
+import { lerp } from "@liqvid/utils";
+import { usePlayback, useTime } from "liqvid";
+import { useCallback, useEffect, useRef } from "react";
 
 interface Coords {
   x1?: number;
@@ -50,7 +50,7 @@ export function useAnimateArrows(
   const fadeTail = useCallback((u: number) => {
     if (!tail.current) return;
 
-    const {x1, x2, y1, y2} = init.current;
+    const { x1, x2, y1, y2 } = init.current;
 
     if (u === 0) {
       tail.current.style.opacity = "0";
@@ -78,7 +78,10 @@ export function useAnimateArrows(
         o.ref.current.domElement.querySelectorAll(o.head),
       );
       for (const head of headNodes) {
-        playback.newAnimation([{opacity: 0}, {opacity: 1}], o.headFade)(head);
+        playback.newAnimation(
+          [{ opacity: 0 }, { opacity: 1 }],
+          o.headFade,
+        )(head);
       }
 
       /* label animation */
@@ -86,7 +89,10 @@ export function useAnimateArrows(
         o.ref.current.domElement.querySelectorAll(o.label),
       );
       for (const label of labelNodes) {
-        playback.newAnimation([{opacity: 0}, {opacity: 1}], o.labelFade)(label);
+        playback.newAnimation(
+          [{ opacity: 0 }, { opacity: 1 }],
+          o.labelFade,
+        )(label);
       }
     });
   }, deps);
@@ -115,7 +121,7 @@ Object.defineProperty(MathJax, "AST", {
 export function extendXY(): void {
   const AST = MathJax.AST;
   const xypic = MathJax.xypicGlobalContext;
-  const {modifierRepository} = xypic.repositories;
+  const { modifierRepository } = xypic.repositories;
 
   /* inject ourselves into xypic */
   const prototype = AST.Modifier.Shape.Alphabets.prototype;

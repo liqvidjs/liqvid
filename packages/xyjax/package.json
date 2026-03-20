@@ -10,12 +10,20 @@
   },
   "typesVersions": {
     "*": {
-      "*": ["./dist/*"]
+      "*": [
+        "./dist/*"
+      ]
     }
   },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": ["liqvid", "mathjax", "xyjax"],
+  "keywords": [
+    "liqvid",
+    "mathjax",
+    "xyjax"
+  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -32,17 +40,19 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/xyjax",
   "license": "MIT",
-  "peerDependencies": {
-    "@liqvid/mathjax": "workspace:^",
-    "@types/react": ">=17.0.0",
-    "liqvid": "workspace:^",
-    "react": ">=17.0.0"
-  },
-  "devDependencies": {
-    "@liqvid/mathjax": "workspace:^",
-    "liqvid": "workspace:^"
-  },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@liqvid/mathjax": "workspace:^",
+    "@types/react": "catalog:dev",
+    "liqvid": "workspace:^",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
+    "@liqvid/mathjax": "workspace:^1.0.0-alpha.0",
+    "react": "catalog:peer"
   }
 }

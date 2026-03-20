@@ -105,7 +105,7 @@ export function Segment<M extends string>({
               (props as { className?: string }).className,
             )}
             ref={ref}
-            style={{ opacity: 0, pointerEvents: "none", ...props.style }}
+            // style={{ opacity: 0, pointerEvents: "none", ...props.style }}
           />
         );
       case "unmount":

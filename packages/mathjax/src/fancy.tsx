@@ -1,60 +1,48 @@
-import {combineRefs} from "@liqvid/utils/react";
-import {usePlayer} from "liqvid";
-import {forwardRef, useEffect, useRef} from "react";
-import {Handle, MJX as MJXPlain, MJXText as MJXTextPlain} from "./plain";
+import { usePlayer } from "@liqvid/player";
+import { combineRefs } from "@liqvid/utils";
+import { useEffect, useRef } from "react";
 
-interface Props extends React.ComponentProps<typeof MJXPlain> {
-  /**
-   * Player events to obstruct.
-   * @default "canplay canplaythrough"
-   */
-  obstruct?: string;
-
-  /**
-   * Whether to reparse the canvas.
-   * @default false
-   */
-  reparse?: boolean;
-}
+import { type Handle, MJX as MJXPlain } from "./plain";
 
 /** Component for MathJax code */
-export const MJX = forwardRef<Handle, Props>(function MJX(props, ref) {
-  const {
-    obstruct = "canplay canplaythrough",
-    reparse = false,
-    ...attrs
-  } = props;
+export function MJX({ ref, ...props }: React.ComponentProps<typeof MJXPlain>) {
+  const { ...attrs } = props;
 
-  const plain = useRef<Handle>();
-  const combined = combineRefs(plain, ref);
+  const plainRef = useRef<Handle>(null);
+  const combined = combineRefs(plainRef, ref);
 
-  const player = usePlayer();
+  const { registerRenderingTask } = usePlayer();
 
   useEffect(() => {
-    // obstruction
-    const obstructions = obstruct.split(" ");
-    if (obstructions.includes("canplay")) {
-      player.obstruct("canplay", plain.current.ready);
-    }
-    if (obstructions.includes("canplaythrough")) {
-      player.obstruct("canplaythrough", plain.current.ready);
-    }
+    const plain = plainRef.current;
+    if (!plain?.domElement) return;
 
-    // reparsing
-    if (reparse) {
-      plain.current.ready.then(() =>
-        player.reparseTree(plain.current.domElement),
-      );
-    }
-  }, []);
+    const task = { visible: isVisible(plain.domElement) };
+    let unsubscribe: null | (() => void) = registerRenderingTask(task);
+
+    const onStart = () => {
+      unsubscribe?.();
+      if (!plain.domElement) return;
+      unsubscribe = registerRenderingTask({
+        visible: isVisible(plain.domElement),
+      });
+    };
+    const onDone = () => {
+      unsubscribe?.();
+      unsubscribe = null;
+    };
+
+    plain.hub.addEventListener("start", onStart);
+    plain.hub.addEventListener("done", onDone);
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [registerRenderingTask]);
 
   return <MJXPlain ref={combined} {...attrs} />;
-});
+}
 
-export const MJXText = forwardRef<
-  {},
-  React.ComponentProps<typeof MJXTextPlain>
->(function MJXText(props, ref) {
-  const {...attrs} = props;
-  return <MJXTextPlain tagName="p" {...attrs} />;
-});
+function isVisible(elt: Element) {
+  return elt.checkVisibility() && !elt.closest("lv-script-invisible");
+}

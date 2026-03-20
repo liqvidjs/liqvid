@@ -1,31 +1,32 @@
 {
   "name": "@liqvid/mathjax",
-  "version": "0.1.2",
+  "version": "1.0.0-alpha.0",
   "description": "MathJax integration for Liqvid",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
     },
     "./plain": {
-      "import": "./dist/esm/plain.mjs",
-      "require": "./dist/cjs/plain.cjs"
+      "import": "./dist/esm/plain.js",
+      "types": "./dist/types/plain.d.ts"
     }
   },
-  "typesVersions": {
-    "*": {
-      "*": ["./dist/types/*.d.ts"]
-    }
-  },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": ["liqvid", "mathjax"],
+  "keywords": [
+    "liqvid",
+    "mathjax"
+  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc --module esnext --outDir dist/esm; tsc --module commonjs --outDir dist/cjs; node ../../build.mjs",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "lint": "eslint --ext ts,tsx --fix src"
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -36,11 +37,21 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/mathjax",
   "license": "MIT",
-  "peerDependencies": {
-    "@types/react": ">=18.0.0",
-    "liqvid": "workspace:^",
+  "dependencies": {
+    "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "@liqvid/player": "workspace:^",
     "mathjax": "^3.2.0",
-    "react": ">=18.1.0"
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
+    "@liqvid/player": "workspace:^1.0.0-alpha.0",
+    "mathjax": "catalog:peer",
+    "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "liqvid": {
@@ -49,12 +60,5 @@
     "mathjax": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "liqvid": "workspace:^",
-    "mathjax": "^3.2.0"
-  },
-  "dependencies": {
-    "@liqvid/utils": "workspace:^"
   }
 }

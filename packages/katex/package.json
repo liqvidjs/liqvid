@@ -51,7 +51,6 @@
   },
   "peerDependencies": {
     "katex": "catalog:peer",
-    "@types/react": "catalog:peer",
     "@liqvid/player": "workspace:^1.0.0-alpha.0",
     "react": "catalog:peer"
   },

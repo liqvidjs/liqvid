@@ -281,8 +281,6 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
         this.audioNode = this.audioContext.createGain();
         this.audioNode.connect(this.audioContext.destination);
 
-        console.log("created audio context");
-
         window.removeEventListener("click", requestAudioContext);
         window.removeEventListener("load", requestAudioContext);
         window.removeEventListener("mousemove", requestAudioContext);
