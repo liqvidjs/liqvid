@@ -48,15 +48,18 @@ export function Animate<M extends string>({
   return (
     <Slot
       {...props}
-      ref={playback.newAnimation(keyframes, {
-        delay: at + delay,
-        duration:
-          typeof duration === "number"
-            ? duration
-            : Duration.from(duration).inMilliseconds(),
-        easing,
-        fill,
-      })}
+      ref={
+        playback.newAnimation(keyframes, {
+          delay: at + delay,
+          duration:
+            typeof duration === "number"
+              ? duration
+              : Duration.from(duration).inMilliseconds(),
+          easing,
+          fill,
+          // biome-ignore lint/suspicious/noExplicitAny: Radix types don't accept SVG
+        }) as any
+      }
     >
       {children}
     </Slot>
