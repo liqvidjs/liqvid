@@ -43,6 +43,8 @@ import {
 	persistColorScheme,
 	persistMute,
 	persistVolume,
+	usePersistMute,
+	usePersistVolume,
 } from "@/lib/persistence";
 
 import { KeyboardShortcuts } from "./controls/KeyboardShortcuts";
@@ -80,6 +82,9 @@ export function LiqvidPlayer<M extends string>({
 
 		script: Script<M>;
 	}) {
+  usePersistMute(persistMute, script.playback);
+  usePersistVolume(persistVolume, script.playback);
+
 	return (
 		<ColorSchemeProvider from={persistColorScheme}>
 			<ScriptProvider script={script}>

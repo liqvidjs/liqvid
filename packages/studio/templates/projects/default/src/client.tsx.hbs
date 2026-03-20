@@ -1,19 +1,11 @@
 "use client";
 
 import { LiqvidPlayer } from "@/components/liqvid/player";
-import {
-  usePersistMute,
-  usePersistVolume,
-} from "@/components/liqvid/persistence";
-import { persistMute, persistVolume } from "@/lib/persistence";
 
 import { script } from "./project";
 
 
 export function ClientContent({ projectPath }: { projectPath: string }) {
-  usePersistMute(persistMute, script.playback);
-  usePersistVolume(persistVolume, script.playback);
-
   return (
     <LiqvidPlayer projectPath={projectPath} script={script}>
       {/* content */}
