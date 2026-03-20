@@ -501,10 +501,10 @@ importers:
   packages/main:
     dependencies:
       '@liqvid/color-scheme':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.2
         version: link:../color-scheme
       '@liqvid/controls':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.1
         version: link:../controls
       '@liqvid/duration':
         specifier: workspace:^1.3.0
@@ -513,31 +513,31 @@ importers:
         specifier: workspace:^1.0.0-alpha.0
         version: link:../event-emitter
       '@liqvid/helpers':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.2
         version: link:../helpers
       '@liqvid/hydration':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.2
         version: link:../hydration
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../keymap
       '@liqvid/media':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.1
         version: link:../media
       '@liqvid/playback':
-        specifier: workspace:^2.0.0-alpha.0
+        specifier: workspace:^2.0.0-alpha.1
         version: link:../playback
       '@liqvid/player':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.1
         version: link:../player
       '@liqvid/script':
-        specifier: workspace:^1.0.0-alpha.0
+        specifier: workspace:^1.0.0-alpha.1
         version: link:../script
       '@liqvid/ssr':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../ssr
       '@liqvid/utils':
-        specifier: workspace:^2.0.0-alpha.0
+        specifier: workspace:^2.0.0-alpha.2
         version: link:../utils
       '@types/react-dom':
         specifier: catalog:peer

@@ -29,6 +29,8 @@ import {
 // }
 type PackageJson = any;
 
+import versions from "../versions.json";
+
 // Do not rename or format. sync-react script relies on this line.
 // prettier-ignore
 const nextjsReactPeerVersion = "19.2.4";
@@ -213,15 +215,15 @@ export const installTemplate = async ({
      */
     dependencies: {
       "@base-ui/react": "^1.3.0",
-      "@liqvid/cli": "^2.0.0-alpha.0",
-      "@liqvid/katex": "^1.0.0-alpha.0",
-      "@liqvid/media": "^1.0.0-alpha.1",
-      "@liqvid/prompts": "^1.0.0-alpha.1",
-      "@liqvid/script": "^1.0.0-alpha.1",
-      "@liqvid/studio": "^1.0.0-alpha.6",
-      "@liqvid/utils": "^2.0.0-alpha.2",
+      "@liqvid/cli": `^${versions.cli}`,
+      "@liqvid/katex": `^${versions.katex}`,
+      "@liqvid/media": `^${versions.media}`,
+      "@liqvid/prompts": `^${versions.prompts}`,
+      "@liqvid/script": `^${versions.script}`,
+      "@liqvid/studio": `^${versions.studio}`,
+      "@liqvid/utils": `^${versions.utils}`,
       katex: "0.16.39",
-      liqvid: "^3.0.0-alpha.1",
+      liqvid: `^${versions.main}`,
       next: nextVersion,
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,

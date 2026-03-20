@@ -27,6 +27,7 @@
     "lint": "biome check --fix",
     "prebuild": "rm -rf dist",
     "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate",
+    "versions": "node --disable-warning=ExperimentalWarning --experimental-strip-types versions.mts versions.json",
     "watch": "tsc --watch"
   },
   "devDependencies": {
