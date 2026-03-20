@@ -33,7 +33,7 @@ export const persistVolume = {
 	type: "number",
 } satisfies LocalValueConfig;
 
-/* ------------------------------ hooks ------------------------------ */
+/* -------------------- hooks -------------------- */
 // TODO: these should be handled automatically
 export function usePersistMute(
 	storage: BooleanValueConfig,

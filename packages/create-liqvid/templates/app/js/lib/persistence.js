@@ -6,7 +6,7 @@ import {
 } from "liqvid";
 import { useCallback, useRef } from "react";
 
-/* ------------------------------ configure persistent settings  ------------------------------ */
+/* -------------------- configure persistent settings -------------------- */
 export const persistColorScheme = {
 	default: "light" ,
 	enum: ["light", "dark"] ,
@@ -29,7 +29,7 @@ export const persistVolume = {
 	type: "number",
 } ;
 
-/* ------------------------------ hooks ------------------------------ */
+/* -------------------- hooks -------------------- */
 // TODO: these should be handled automatically
 export function usePersistMute(
 	storage,

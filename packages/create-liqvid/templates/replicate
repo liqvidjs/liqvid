@@ -2,12 +2,16 @@
 
 KIND=$1
 FILE=$2
+EMPTY=$3
 
 if [ "$FILE" == "" ]; then
   echo "Usage: replicate [js|ts] [filename]"
   exit 1
 fi
 
-cp "app/$KIND/$FILE" "app-empty/$KIND/$FILE"
 cp "app/$KIND/$FILE" "app-tw/$KIND/$FILE"
-cp "app/$KIND/$FILE" "app-tw-empty/$KIND/$FILE"
+
+if [ "$EMPTY" == "empty" ]; then
+  cp "app/$KIND/$FILE" "app-empty/$KIND/$FILE"
+  cp "app/$KIND/$FILE" "app-tw-empty/$KIND/$FILE"
+fi
