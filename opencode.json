@@ -1,0 +1,51 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "disabled_providers": ["amazon-bedrock"],
+  "permission": {
+    "external_directory": "deny",
+    "bash": {
+      "*": "ask",
+      "cat *": "allow",
+      "cd *": "allow",
+      "echo *": "allow",
+      "git *": "deny",
+      "grep *": "allow",
+      "head *": "allow",
+      "ls *": "allow",
+      "mkdir *": "allow",
+      "node --version": "allow",
+      "npm *": "ask",
+      "npm list": "allow",
+      "npm run build *": "allow",
+      "npx biome *": "allow",
+      "npx tsc --noEmit *": "allow",
+      "pnpm add *": "allow",
+      "pnpm build *": "allow",
+      "pnpm exec biome *": "allow",
+      "pnpm exec tsc --noEmit *": "allow",
+      "pnpm filter *": "allow",
+      "pnpm info *": "allow",
+      "pnpm install *": "allow",
+      "pnpm lint *": "allow",
+      "rm *": "deny",
+      "rtk find *": "allow",
+      "rtk grep *": "allow",
+      "rtk lint biome": "allow",
+      "rtk ls *": "allow",
+      "rtk tsc *": "allow",
+      "tail *": "deny",
+      "tsc --noEmit *": "allow"
+    }
+  },
+  "provider": {
+    "anthropic": {
+      "models": {},
+      "options": {
+        "apiKey": "{env:ANTHROPIC_API_KEY}"
+      }
+    }
+  },
+  "watcher": {
+    "ignore": ["node_modules/**", "dist/**", ".git/**"]
+  }
+}
