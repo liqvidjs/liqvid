@@ -26,7 +26,7 @@
     "dev": "ncc build ./index.ts -w -o dist/",
     "lint": "biome check --fix",
     "prebuild": "rm -rf dist",
-    "prepublishOnly": "cp -R templates dist",
+    "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate",
     "watch": "tsc --watch"
   },
   "devDependencies": {
