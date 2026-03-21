@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useCallback } from "react";
 
 import { ignoreCanvasClickSymbol } from "./symbols";
+import { isInteractiveElement } from "./utils";
 
 /**
  * Player canvas where all the content goes.
@@ -32,22 +33,15 @@ export function Canvas({
       }
 
       // ignore clicks on input tags
-      if (
-        [
-          "a",
-          "area",
-          "button",
-          "input",
-          "option",
-          "select",
-          "textarea",
-        ].includes((e.target as Element).nodeName.toLowerCase())
-      ) {
+      if (e.target instanceof Element && isInteractiveElement(e.target)) {
         return;
       }
 
       // data-affords markup
-      if ((e.target as Element)?.closest(`*[data-affords~="click"]`)) {
+      if (
+        e.target instanceof Element &&
+        e.target.closest(`*[data-affords~="click"]`)
+      ) {
         return;
       }
 

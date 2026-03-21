@@ -2,13 +2,13 @@
 
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
-import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import classNames from "classnames";
-import { useCallback, useRef, useState } from "react";
+import { type JSX, useCallback, useRef, useState } from "react";
+
+import { isInteractiveElement } from "./utils";
 
 /** Container for the player controls */
-
 export function Controls({
   className,
   children,
@@ -24,21 +24,36 @@ export function Controls({
   const timer = useRef(0);
 
   /** reset the hiding timer */
-  const resetTimer = useCallback(() => {
-    if (playback.paused || !hideAfter) return;
+  const resetTimer = useCallback(
+    (e: unknown) => {
+      if (playback.paused || !hideAfter) return;
 
-    if (timer.current !== undefined) clearTimeout(timer.current);
+      // allow keyboard input on elements
+      if (e instanceof KeyboardEvent) {
+        if (
+          !(e.altKey || e.ctrlKey || e.metaKey) &&
+          e.target &&
+          e.target instanceof Element &&
+          isInteractiveElement(e.target)
+        ) {
+          return;
+        }
+      }
 
-    timer.current = window.setTimeout(
-      () => setVisible(false),
-      Duration.from(hideAfter).inMilliseconds(),
-    );
+      if (timer.current !== undefined) clearTimeout(timer.current);
 
-    setVisible(true);
-  }, [playback, hideAfter]);
+      timer.current = window.setTimeout(
+        () => setVisible(false),
+        Duration.from(hideAfter).inMilliseconds(),
+      );
+
+      setVisible(true);
+    },
+    [playback, hideAfter],
+  );
 
   /* ------------------------- subscriptions ------------------------- */
-  useKeyboardShortcut("*", resetTimer);
+  useEventListener(globalThis.document?.body, "keydown", resetTimer);
 
   useEventListener(globalThis.document?.body, "touchstart", resetTimer);
   useEventListener(globalThis.document?.body, "mousemove", resetTimer);

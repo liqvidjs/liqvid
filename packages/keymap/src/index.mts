@@ -159,18 +159,12 @@ export class Keymap {
   handle(e: KeyboardEvent) {
     const seq = Keymap.identify(e);
 
-    if (!this.__bindings[seq] && !this.__bindings["*"]) return;
+    if (!this.__bindings[seq]) return;
 
     if (this.__bindings[seq]) {
       e.preventDefault();
 
       for (const cb of this.__bindings[seq]) {
-        cb(e, { seq });
-      }
-    }
-
-    if (this.__bindings["*"]) {
-      for (const cb of this.__bindings["*"]) {
         cb(e, { seq });
       }
     }
