@@ -1,43 +1,24 @@
-import {ResizeObserver} from "@juggle/resize-observer";
-import {useContextBridge} from "@react-three/drei/core/useContextBridge.js";
-import {Canvas as ThreeCanvas, useThree} from "@react-three/fiber";
-import {Player, PlaybackContext, KeymapContext} from "liqvid";
-import {useEffect} from "react";
+import { ResizeObserver } from "@juggle/resize-observer";
+import { Canvas as ThreeCanvas } from "@react-three/fiber";
+
+import { Fixes } from "./fixes";
 
 /** Default affordances: click and arrow keys */
-const defaultAffords = "click keys(ArrowUp,ArrowDown,ArrowLeft,ArrowRight)";
+export const defaultAffords =
+  "click keys(ArrowUp,ArrowDown,ArrowLeft,ArrowRight)";
 
 /**
  * Liqvid-aware Canvas component @react-three/fiber
  */
-export function Canvas(
-  props: React.ComponentProps<typeof ThreeCanvas & {"data-affords"?: string}>,
-) {
-  const ContextBridge = useContextBridge(
-    Player.Context,
-    PlaybackContext,
-    KeymapContext,
-  );
+export function Canvas({
+  children,
+  "data-affords": dataAffords,
+  ...props
+}: React.ComponentProps<typeof ThreeCanvas> & { "data-affords"?: string }) {
   return (
-    <ThreeCanvas resize={{polyfill: ResizeObserver}} {...props}>
-      <ContextBridge>
-        <Fixes {...props} />
-        {props.children}
-      </ContextBridge>
+    <ThreeCanvas resize={{ polyfill: ResizeObserver }} {...props}>
+      <Fixes dataAffords={dataAffords} />
+      {children}
     </ThreeCanvas>
   );
-}
-
-function Fixes(props: {
-  "data-affords"?: string;
-}): null {
-  const {gl} = useThree();
-  useEffect(() => {
-    const affords = props["data-affords"] ?? defaultAffords;
-    if (affords) {
-      gl.domElement.setAttribute("data-affords", affords);
-    }
-    gl.domElement.style.touchAction = "none";
-  }, []);
-  return null;
 }

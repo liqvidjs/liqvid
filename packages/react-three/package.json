@@ -1,18 +1,23 @@
 {
   "name": "@liqvid/react-three",
-  "version": "2.0.0",
+  "version": "3.0.0-alpha.0",
   "description": "@react-three integration for Liqvid",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "files": ["dist/*"],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:cjs && pnpm build:esm",
+    "build": "pnpm build:clean && pnpm build:js",
     "build:clean": "rm -fr dist",
-    "build:cjs": "tsc --module commonjs && mv dist/index.js dist/index.cjs",
-    "build:esm": "tsc --module esnext && mv dist/index.js dist/index.mjs",
-    "lint": "eslint --ext ts,tsx --fix src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:js": "tsc",
+    "lint": "biome check --fix",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -24,25 +29,16 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/react-three",
-  "dependencies": {
-    "@juggle/resize-observer": "^3.3.1",
-    "@react-three/drei": "^9.8.1",
-    "@types/events": "^3.0.0",
-    "@types/react-reconciler": "^0.26.7"
-  },
   "devDependencies": {
-    "@react-three/fiber": "^8.0.16",
-    "@types/three": "^0.140.0",
-    "events": "^3.3.0",
-    "liqvid": "workspace:^",
-    "strict-event-emitter-types": "^2.0.0",
-    "three": "^0.140.2"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/three": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@react-three/fiber": "^8.0.16",
-    "liqvid": "workspace:^",
-    "react": ">=18.1.0",
-    "react-dom": ">=18.1.0"
+    "@juggle/resize-observer": "catalog:peer",
+    "@react-three/fiber": "catalog:peer",
+    "react": "catalog:peer"
   },
   "sideEffects": false,
   "type": "module"

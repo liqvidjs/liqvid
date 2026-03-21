@@ -26,7 +26,6 @@ catalog:
   "@lqv/codemirror": ^0.6.0
   "@lqv/cursor": ^0.2.1
   "@lqv/playback": ^0.2.2
-  "@phosphor-icons/react": ^2.1.10
   "@radix-ui/react-collapsible": ^1.1.12
   "@radix-ui/react-dialog": ^1.1.15
   "@radix-ui/react-portal": 1.1.10
@@ -39,7 +38,7 @@ catalog:
   "@react-router/node": ^7.9.6
   "@react-router/serve": ^7.9.6
   "@react-three/drei": ^10.7.4
-  "@react-three/fiber": ^9.3.0
+  "@react-three/fiber": ^9.5.0
   "@tailwindcss/postcss": ^4.1.12
   "@tailwindcss/vite": ^4.1.12
   "@tanstack/react-query": ^5.85.3
@@ -78,6 +77,7 @@ catalog:
   liqvid: ^2.1.19
   lodash: ^4.17.21
   lodash.debounce: ^4.0.8
+  lucide-react: ^0.511.0
   mathjax: ^3.2.2
   next: 16.2.0
   no-private-imports: ^0.0.1
@@ -119,10 +119,9 @@ catalogs:
     "@types/node": ^24
     "@types/react": ^19
     "@types/react-dom": ^19
-    "@types/three": ^0.183.1
+    "@types/three": ">=0.183"
     "@types/yargs": ^17.0.35
     typescript: ^5.9
-
   peer:
     "@codemirror/autocomplete": ">=6"
     "@codemirror/commands": ">=6"
@@ -135,6 +134,9 @@ catalogs:
     "@codemirror/search": ">=6"
     "@codemirror/state": ">=6"
     "@codemirror/view": ">=6"
+    "@juggle/resize-observer": ">=3.4"
+    "@react-three/drei": ">=10"
+    "@react-three/fiber": ">=9"
     "@types/react": ">=18"
     "@types/react-dom": ">=18"
     katex: ">=0.16"
@@ -143,4 +145,5 @@ catalogs:
     react: ">=18"
     react-dom: ">=18"
     skulpt: ^1.2
+    three: ">=0.183"
     zod: ">=4"
