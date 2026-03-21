@@ -104,9 +104,9 @@ export class Keymap {
    * @param seq Shortcut sequence
    * @param cb Callback function
    */
-  bind(seq: string, cb: ShortcutHandler) {
-    if (seq.indexOf(",") > -1) {
-      for (const atomic of seq.split(",")) {
+  bind(seq: string | string[], cb: ShortcutHandler) {
+    if (Array.isArray(seq)) {
+      for (const atomic of seq) {
         this.bind(atomic, cb);
       }
       return;
@@ -123,9 +123,9 @@ export class Keymap {
    * @param seq Shortcut sequence
    * @param cb Handler to unbind
    */
-  unbind(seq: string, cb: ShortcutHandler) {
-    if (seq.indexOf(",") > -1) {
-      for (const atomic of seq.split(",")) {
+  unbind(seq: string | string[], cb: ShortcutHandler) {
+    if (Array.isArray(seq)) {
+      for (const atomic of seq) {
         this.unbind(atomic, cb);
       }
       return;

@@ -50,22 +50,14 @@ export function useKeyboardShortcut(
   const keymap = useKeymap();
 
   useEffect(() => {
-    if (typeof seqOrSeqs === "string") {
-      keymap.bind(seqOrSeqs, callback);
-      return () => {
-        keymap.unbind(seqOrSeqs, callback);
-      };
-    } else if (Array.isArray(seqOrSeqs)) {
-      for (const seq of seqOrSeqs) {
-        keymap.bind(seq, callback);
-      }
-
-      return () => {
-        for (const seq of seqOrSeqs) {
-          keymap.unbind(seq, callback);
-        }
-      };
+    if (!seqOrSeqs) {
+      return;
     }
+
+    keymap.bind(seqOrSeqs, callback);
+    return () => {
+      keymap.unbind(seqOrSeqs, callback);
+    };
   }, [callback, keymap, seqOrSeqs]);
 }
 
@@ -82,7 +74,7 @@ export function KeymapProvider({
    */
   shouldHandle?: (e: KeyboardEvent) => boolean;
 
-  value?: Keymap;
+  value?: Keymap | null;
 }) {
   const ownKeymap = useRef<Keymap>(null);
   if (!propsKeymap && !ownKeymap.current) {
