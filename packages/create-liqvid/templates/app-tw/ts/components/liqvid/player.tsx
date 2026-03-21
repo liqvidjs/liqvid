@@ -34,8 +34,6 @@ import {
 	type Script,
 	ScriptProvider,
 	SegmentProvider,
-	useKeyboardShortcut,
-	useScript,
 } from "liqvid";
 
 import {
@@ -86,7 +84,7 @@ export function LiqvidPlayer<M extends string>({
 
 	return (
 		<ColorSchemeProvider from={persistColorScheme}>
-			<ScriptProvider script={script}>
+			<ScriptProvider script={script} shortcuts={shortcuts.script}>
 				<LiqvidDevToolsProvider
 					plugins={[MediaRecording, MarkerRecording, ...(plugins ?? [])]}
 					projectPath={projectPath}
@@ -131,12 +129,6 @@ export function LiqvidPlayer<M extends string>({
 const iconClassName = "h-[calc(var(--lv-controls-height)*0.45)] w-auto";
 
 function Buttons() {
-	// script keyboard shortcuts
-	// TODO: move these somewhere else
-	const script = useScript();
-	useKeyboardShortcut(shortcuts.script.back, script.back);
-	useKeyboardShortcut(shortcuts.script.forward, script.forward);
-
 	return (
 		<div className="lv-controls-buttons h-(--lv-controls-height)">
 			<PlayPause />

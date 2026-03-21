@@ -1,3 +1,10 @@
+"use client";
+
+import {
+  KeymapProvider,
+  useKeyboardShortcut,
+  useKeymapOptional,
+} from "@liqvid/keymap/react";
 import { PlaybackProvider } from "@liqvid/playback/react";
 import { createContext, useContext } from "react";
 
@@ -21,14 +28,28 @@ export function useScript<M extends string = string>(): Script<M> {
   return script;
 }
 
+/** Shortcuts for navigating between markers. */
+export interface ScriptShortcuts {
+  /** Go to the previous marker. */
+  back?: string | string[];
+
+  /** Go to the next marker. */
+  forward?: string | string[];
+}
+
 export function ScriptProvider<M extends string>({
   children,
   script: propsScript,
+  shortcuts,
 }: {
   children?: React.ReactNode;
   script?: Script<M>;
+
+  /** Keyboard shortcuts for navigating between markers. */
+  shortcuts?: ScriptShortcuts;
 }) {
   const inheritedValue = useScriptOptional();
+  const keymap = useKeymapOptional();
 
   const context = propsScript ?? inheritedValue;
 
@@ -41,7 +62,24 @@ export function ScriptProvider<M extends string>({
 
   const content = (
     <ScriptContext.Provider value={context as unknown as Script<string>}>
-      <PlaybackProvider value={context.playback}>{children}</PlaybackProvider>
+      <PlaybackProvider value={context.playback}>
+        {shortcuts && <ScriptShortcutsHandler shortcuts={shortcuts} />}
+        {children}
+      </PlaybackProvider>
     </ScriptContext.Provider>
   );
+
+  if (needsKeymap) {
+    return <KeymapProvider>{content}</KeymapProvider>;
+  }
+
+  return content;
+}
+
+function ScriptShortcutsHandler({ shortcuts }: { shortcuts: ScriptShortcuts }) {
+  const script = useScript();
+  useKeyboardShortcut(shortcuts.back, script.back);
+  useKeyboardShortcut(shortcuts.forward, script.forward);
+
+  return null;
 }
