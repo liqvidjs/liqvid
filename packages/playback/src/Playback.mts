@@ -107,7 +107,8 @@ export class Playback extends CorePlayback {
       if (delay === undefined) return;
       this.__delays.set(anim.effect, delay);
 
-      anim.currentTime = (this.currentTime - delay) / this.playbackRate;
+      anim.currentTime =
+        (this.currentTime$.inMilliseconds() - delay) / this.playbackRate;
       anim.startTime = null;
       anim.pause();
 
@@ -156,7 +157,8 @@ export class Playback extends CorePlayback {
         anim.play();
         anim.startTime =
           (this.timeline!.currentTime as number) +
-          (this.__delays.get(anim.effect)! - this.currentTime) /
+          (this.__delays.get(anim.effect)! -
+            this.currentTime$.inMilliseconds()) /
             this.playbackRate;
       }
     });
@@ -169,10 +171,11 @@ export class Playback extends CorePlayback {
     });
 
     // seek
-    this.addEventListener("seek", () => {
+    this.addEventListener("seeked", () => {
       for (const anim of this.__animations) {
         const offset =
-          (this.__delays.get(anim.effect!)! - this.currentTime) /
+          (this.__delays.get(anim.effect!)! -
+            this.currentTime$.inMilliseconds()) /
           this.playbackRate;
         if (this.paused) {
           // anim.startTime = this.timeline.currentTime + offset
