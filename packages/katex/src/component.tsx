@@ -45,7 +45,7 @@ export const KTX = function KTX({
 
     katex.render(children, ref.current, {
       colorIsTextColor: colorIsTextColor ?? defaults.colorIsTextColor,
-      displayMode: displayMode,
+      displayMode: displayMode ?? defaults.displayMode,
       errorColor: errorColor ?? defaults.errorColor,
       fleqn: fleqn ?? defaults.fleqn,
       globalGroup: globalGroup ?? defaults.globalGroup,
@@ -85,7 +85,7 @@ export const KTX = function KTX({
   if (isFirstRender) {
     const tex = katex.renderToString(children, {
       colorIsTextColor: colorIsTextColor ?? defaults.colorIsTextColor,
-      displayMode: displayMode,
+      displayMode: displayMode ?? defaults.displayMode,
       errorColor: errorColor ?? defaults.errorColor,
       fleqn: fleqn ?? defaults.fleqn,
       globalGroup: globalGroup ?? defaults.globalGroup,
