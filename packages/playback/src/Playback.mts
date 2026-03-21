@@ -13,9 +13,21 @@ declare global {
   }
 }
 
+interface CommittedAnimation {
+  delay: number;
+  keyframes: Keyframe[] | PropertyIndexedKeyframes;
+  options: number | KeyframeEffectOptions | undefined;
+  target: Element;
+}
+
+const supportsCommitStyles =
+  typeof Animation !== "undefined" &&
+  typeof Animation.prototype.commitStyles === "function";
+
 /** Extended {@link CorePlayback Playback} supporting rich durations and the Web Animation API */
 export class Playback extends CorePlayback {
   private __animations: Animation[] = [];
+  private __committed: CommittedAnimation[] = [];
   private __delays = new WeakMap<AnimationEffect, number>();
 
   private __$currentTime: Duration;
@@ -89,42 +101,76 @@ export class Playback extends CorePlayback {
         );
       }
 
-      // create animation
-      anim = new Animation(
-        new KeyframeEffect(target, keyframes, options),
-        this.timeline,
-      );
-      if (
-        typeof options === "object" &&
-        (options.fill === "forwards" || options.fill === "both")
-      ) {
-        anim.persist();
-      }
-      /* adopt animation */
-      if (!anim.effect) return;
-
-      const delay = anim.effect.getTiming().delay;
-      if (delay === undefined) return;
-      this.__delays.set(anim.effect, delay);
-
-      anim.currentTime =
-        (this.currentTime$.inMilliseconds() - delay) / this.playbackRate;
-      anim.startTime = null;
-      anim.pause();
-
-      if (delay !== 0) {
-        anim.effect.updateTiming({ delay: 0.1 });
-      }
-
-      this.__animations.push(anim);
-      anim.addEventListener("cancel", () => {
-        if (!anim) return;
-        this.__animations.splice(this.__animations.indexOf(anim), 1);
-      });
-
-      // return
+      anim = this.__adoptAnimation(target, keyframes, options);
       return anim;
     };
+  }
+
+  /**
+   * Internal method to create and adopt an animation
+   */
+  private __adoptAnimation(
+    target: Element,
+    keyframes: Keyframe[] | PropertyIndexedKeyframes,
+    options?: number | KeyframeEffectOptions,
+  ): Animation | undefined {
+    // create animation
+    const anim = new Animation(
+      new KeyframeEffect(target, keyframes, options),
+      this.timeline,
+    );
+
+    const shouldFill =
+      typeof options === "object" &&
+      (options.fill === "forwards" || options.fill === "both");
+
+    if (shouldFill && supportsCommitStyles) {
+      // Use commitStyles when animation finishes, then cancel
+      anim.addEventListener("finish", () => {
+        try {
+          anim.commitStyles();
+          this.__committed.push({
+            delay: typeof options === "object" ? (options.delay ?? 0) : 0,
+            keyframes,
+            options,
+            target,
+          });
+          anim.cancel();
+        } catch {
+          // commitStyles can fail if element is not rendered; fall back to persist
+          anim.persist();
+        }
+      });
+    } else if (shouldFill) {
+      anim.persist();
+    }
+
+    /* adopt animation */
+    if (!anim.effect) return;
+
+    const delay = anim.effect.getTiming().delay;
+    if (delay === undefined) return;
+    this.__delays.set(anim.effect, delay);
+
+    anim.currentTime =
+      (this.currentTime$.inMilliseconds() - delay) / this.playbackRate;
+    anim.startTime = null;
+    anim.pause();
+
+    if (delay !== 0) {
+      anim.effect.updateTiming({ delay: 0.1 });
+    }
+
+    this.__animations.push(anim);
+    anim.addEventListener("cancel", () => {
+      const idx = this.__animations.indexOf(anim);
+      if (idx !== -1) {
+        this.__animations.splice(idx, 1);
+      }
+    });
+
+    // return
+    return anim;
   }
 
   /**
@@ -172,11 +218,20 @@ export class Playback extends CorePlayback {
 
     // seek
     this.addEventListener("seeked", () => {
+      const currentTimeMs = this.currentTime$.inMilliseconds();
+
+      // Recreate committed animations when rewound past their start
+      for (let i = this.__committed.length - 1; i >= 0; i--) {
+        const { delay, keyframes, options, target } = this.__committed[i];
+        if (currentTimeMs <= delay) {
+          this.__committed.splice(i, 1);
+          this.__adoptAnimation(target, keyframes, options);
+        }
+      }
+
       for (const anim of this.__animations) {
         const offset =
-          (this.__delays.get(anim.effect!)! -
-            this.currentTime$.inMilliseconds()) /
-          this.playbackRate;
+          (this.__delays.get(anim.effect!)! - currentTimeMs) / this.playbackRate;
         if (this.paused) {
           // anim.startTime = this.timeline.currentTime + offset
           anim.currentTime = -offset;
