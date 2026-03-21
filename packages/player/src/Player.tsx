@@ -3,8 +3,7 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { HydrateElement } from "@liqvid/hydration";
 import { provideIframeApi } from "@liqvid/iframe-api/child";
-import { Keymap } from "@liqvid/keymap";
-import { KeymapProvider, useKeymapOptional } from "@liqvid/keymap/react";
+import { KeymapProvider } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
 import { usePlaybackOptional } from "@liqvid/playback/react";
 import { combineRefs } from "@liqvid/utils";
@@ -44,14 +43,6 @@ export function Root({
   const [renderingTasks, setRenderingTasks] = useState<Set<RenderingTask>>(
     () => new Set(),
   );
-
-  // keymap
-  const ambientKeymap = useKeymapOptional();
-  const ownKeymap = useRef<Keymap>(null);
-  if (!ambientKeymap && !ownKeymap.current) {
-    ownKeymap.current = new Keymap();
-  }
-  const keymap = ambientKeymap ?? ownKeymap.current!;
 
   const captureKeys = useRef(true);
 
@@ -123,7 +114,7 @@ export function Root({
   );
 
   return (
-    <KeymapProvider shouldHandle={() => captureKeys.current} value={keymap}>
+    <KeymapProvider shouldHandle={() => captureKeys.current}>
       <PlayerContext.Provider value={context}>
         {persistence ? (
           <HydrateElement

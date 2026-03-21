@@ -1,12 +1,10 @@
-"use client";
-
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
-import { useKeymap } from "@liqvid/keymap/react";
+import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
-import { bind, convertShortcuts, unbind } from "./utils";
+import { convertShortcuts } from "./utils";
 
 export function ColorSchemeToggle({
   className,
@@ -23,16 +21,8 @@ export function ColorSchemeToggle({
   shortcuts?: string | string[];
 }) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
-  const keymap = useKeymap();
 
-  useEffect(() => {
-    // keyboard shortcut
-    bind(keymap, shortcuts, toggleColorScheme);
-
-    return () => {
-      unbind(keymap, shortcuts, toggleColorScheme);
-    };
-  }, [keymap, shortcuts, toggleColorScheme]);
+  useKeyboardShortcut(shortcuts, toggleColorScheme);
 
   const events = useMemo(
     () => onClickReact(toggleColorScheme),

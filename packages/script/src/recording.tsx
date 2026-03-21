@@ -8,9 +8,7 @@ import { useEffect } from "react";
 
 import { useScript } from "./react/useScript";
 import type { MarkerUpdateEvent, Script } from "./script.mts";
-
-type SerializedMarker = [name: string, ms: number];
-type MarkerFormatted = [name: string, formattedTime: string];
+import type { MarkerFormatted, SerializedMarker } from "./types.mts";
 
 export class MarkerRecorder extends BaseRecorder<
   SerializedMarker,

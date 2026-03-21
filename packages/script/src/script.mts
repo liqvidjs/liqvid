@@ -3,7 +3,7 @@ import { EventEmitter } from "@liqvid/event-emitter";
 import { Playback } from "@liqvid/playback";
 import { bind, parseTime } from "@liqvid/utils";
 
-import type { Marker } from "./types.mts";
+import type { Marker, MarkerFormatted } from "./types.mts";
 
 export interface MarkerUpdateEvent<M extends string = string> {
   prev: Marker<M>;
@@ -35,7 +35,15 @@ export class Script<M extends string = string> extends EventEmitter<
   playback: Playback;
 
   // constructor
-  constructor(markers: readonly (readonly [M, string])[]) {
+  constructor(
+    markers: readonly MarkerFormatted<M>[],
+
+    /**
+     * An existing Playback to attach to.
+     * If not specified, a new Playback will be created.
+     */
+    playback?: Playback,
+  ) {
     // validation
     if (markers.length === 0) {
       throw new Error("invalid");
@@ -83,8 +91,12 @@ export class Script<M extends string = string> extends EventEmitter<
     }
 
     // create playback object
-    this.playback = new Playback();
-    this.playback.duration$ = time;
+    if (playback) {
+      this.playback = playback;
+    } else {
+      this.playback = new Playback();
+      this.playback.duration$ = time;
+    }
 
     this.playback.addEventListener("seek", this.__updateMarker);
     this.playback.addEventListener("timeupdate", this.__updateMarker);
@@ -102,6 +114,18 @@ export class Script<M extends string = string> extends EventEmitter<
     const clampedPrevIndex = Math.max(0, this.__index - 1);
     const prevMarker = this.markers[clampedPrevIndex];
     this.playback.currentTime$ = prevMarker.start;
+  }
+
+  destroy() {
+    this.playback.removeEventListener("seek", this.__updateMarker);
+    this.playback.removeEventListener("timeupdate", this.__updateMarker);
+
+    this.clearEventListeners();
+
+    // @ts-expect-error destroying it
+    this.playback = undefined;
+    // @ts-expect-error destroying it
+    this.markers = undefined;
   }
 
   /** Advance playback to the next marker. */
@@ -137,8 +161,6 @@ export class Script<M extends string = string> extends EventEmitter<
 
       index = Math.floor((lower + upper) / 2);
     }
-
-    // console.log({ newIndex: index, oldIndex: this.__index, t });
 
     if (index === this.__index) return;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useKeymap } from "@liqvid/keymap/react";
+import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
 import { useEffect } from "react";
@@ -34,24 +34,15 @@ export function FullScreen({
   render,
   shortcuts,
 }: FullScreenControlProps) {
-  const keymap = useKeymap();
   const forceUpdate = useForceUpdate();
+
+  useKeyboardShortcut(shortcuts, toggleFullScreen);
 
   useEffect(() => {
     // listener
+    // TODO: remove listener
     onFullScreenChange(forceUpdate);
-
-    // keyboard shortcut
-    for (const seq of shortcuts ?? []) {
-      keymap.bind(seq, toggleFullScreen);
-    }
-
-    return () => {
-      for (const seq of shortcuts ?? []) {
-        keymap.unbind(seq, toggleFullScreen);
-      }
-    };
-  }, [forceUpdate, keymap, shortcuts]);
+  }, [forceUpdate]);
 
   return render(
     { isFullScreen: isFullScreen() ?? false },

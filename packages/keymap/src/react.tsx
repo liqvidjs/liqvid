@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 
-import { Keymap, type ShortcutHandler } from "./index.mts";
+import { Keymap, type ShortcutHandler } from "./index.mjs";
 
 const symbol = Symbol.for("@lqv/keymap");
 
@@ -64,7 +64,6 @@ export function useKeyboardShortcut(
 export function KeymapProvider({
   children,
   shouldHandle,
-  value: propsKeymap,
 }: {
   children?: React.ReactNode;
 
@@ -73,14 +72,9 @@ export function KeymapProvider({
    * If not specified, shortcuts are always handled.
    */
   shouldHandle?: (e: KeyboardEvent) => boolean;
-
-  value?: Keymap | null;
 }) {
-  const ownKeymap = useRef<Keymap>(null);
-  if (!propsKeymap && !ownKeymap.current) {
-    ownKeymap.current = new Keymap();
-  }
-  const keymap = propsKeymap ?? ownKeymap.current!;
+  const ambientKeymap = useKeymapOptional();
+  const keymap = useMemo(() => ambientKeymap ?? new Keymap(), [ambientKeymap]);
 
   const savedShouldHandle = useRef(shouldHandle);
 
@@ -90,6 +84,9 @@ export function KeymapProvider({
   }, [shouldHandle]);
 
   useEffect(() => {
+    // subscriptions already set up
+    if (ambientKeymap) return;
+
     function handle(e: KeyboardEvent) {
       if (savedShouldHandle.current?.(e) ?? true) {
         keymap.handle(e);
@@ -101,7 +98,7 @@ export function KeymapProvider({
     return () => {
       document.body.removeEventListener("keydown", handle);
     };
-  }, [keymap]);
+  }, [keymap, ambientKeymap]);
 
   return (
     <KeymapContext.Provider value={keymap}>{children}</KeymapContext.Provider>

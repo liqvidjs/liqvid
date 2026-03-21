@@ -1,12 +1,12 @@
 "use client";
 
-import { useKeymap } from "@liqvid/keymap/react";
+import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-import { bind, convertShortcuts, unbind } from "./utils";
+import { convertShortcuts } from "./utils";
 
 interface MutePropsBase {
   className?: string;
@@ -39,7 +39,6 @@ export type MuteProps = MutePropsBase &
 
 /** Mute/unmute button */
 export function Mute({ className, render, shortcuts }: MuteProps) {
-  const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
@@ -50,15 +49,7 @@ export function Mute({ className, render, shortcuts }: MuteProps) {
 
   usePlaybackEvent("volumechange", forceUpdate);
 
-  useEffect(() => {
-    // keyboard shortcuts
-    bind(keymap, shortcuts, toggleMute);
-
-    return () => {
-      // keyboard shortcuts
-      unbind(keymap, shortcuts, toggleMute);
-    };
-  }, [keymap, shortcuts, toggleMute]);
+  useKeyboardShortcut(shortcuts, toggleMute);
 
   const events = useMemo(() => onClickReact(toggleMute), [toggleMute]);
 

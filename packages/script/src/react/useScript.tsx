@@ -36,7 +36,10 @@ export function ScriptProvider<M extends string>({
     throw new Error("missing script");
   }
 
-  return (
+  // If shortcuts are passed but no keymap is available, create one
+  const needsKeymap = shortcuts;
+
+  const content = (
     <ScriptContext.Provider value={context as unknown as Script<string>}>
       <PlaybackProvider value={context.playback}>{children}</PlaybackProvider>
     </ScriptContext.Provider>
