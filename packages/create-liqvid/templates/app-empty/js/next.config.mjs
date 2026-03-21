@@ -47,11 +47,6 @@ const nextConfig = {
 	// in case you are deploying your site to a subdirectory
 	basePath: process.env.NEXT_PUBLIC_BASE_PATH,
 
-	// https://nextjs.org/docs/app/api-reference/config/next-config-js/optimizePackageImports
-	experimental: {
-		optimizePackageImports: ["@phosphor-icons/react"],
-	},
-
 	turbopack: {
 		// enable importing .tex files
 		rules: {

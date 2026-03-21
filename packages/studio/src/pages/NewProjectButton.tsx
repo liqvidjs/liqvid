@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Select } from "@base-ui/react/select";
-import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
+import { Check, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -128,7 +128,7 @@ export function NewProjectButton() {
                 >
                   <Select.Value placeholder="Select a template" />
                   <Select.Icon className={styles.selectIcon}>
-                    <CaretDownIcon />
+                    <ChevronDown />
                   </Select.Icon>
                 </Select.Trigger>
                 <Select.Portal>
@@ -145,7 +145,7 @@ export function NewProjectButton() {
                             <Select.ItemIndicator
                               className={styles.selectItemIndicator}
                             >
-                              <CheckIcon />
+                              <Check />
                             </Select.ItemIndicator>
                           </Select.Item>
                         ))}

@@ -11,18 +11,17 @@ import {
 	RecordingControl,
 } from "@liqvid/studio";
 import {
-	CornersInIcon,
-	CornersOutIcon,
-	IconContext,
-	MoonIcon,
-	PauseIcon,
-	PlayIcon,
-	SpeakerSimpleHighIcon,
-	SpeakerSimpleLowIcon,
-	SpeakerSimpleNoneIcon,
-	SpeakerSimpleXIcon,
-	SunIcon,
-} from "@phosphor-icons/react";
+	Maximize,
+	Minimize,
+	Moon,
+	Pause,
+	Play,
+	Sun,
+	Volume,
+	Volume1,
+	Volume2,
+	VolumeX,
+} from "lucide-react";
 import classNames from "classnames";
 import {
 	ColorSchemeProvider,
@@ -129,6 +128,8 @@ export function LiqvidPlayer<M extends string>({
 	);
 }
 
+const iconClassName = "h-[calc(var(--lv-controls-height)*0.45)] w-auto";
+
 function Buttons() {
 	// script keyboard shortcuts
 	// TODO: move these somewhere else
@@ -138,27 +139,20 @@ function Buttons() {
 
 	return (
 		<div className="lv-controls-buttons h-(--lv-controls-height)">
-			<IconContext.Provider
-				value={{
-					weight: "fill",
-					width: "calc(var(--lv-controls-height) * 0.45)",
-				}}
-			>
-				<PlayPause />
+			<PlayPause />
 
-				{/* left controls */}
-				<MuteButton />
-				<VolumeSlider />
-				<Controls.TimeDisplay />
-				<ShowMarkerName />
+			{/* left controls */}
+			<MuteButton />
+			<VolumeSlider />
+			<Controls.TimeDisplay />
+			<ShowMarkerName />
 
-				{/* right controls */}
-				<div className="lv-controls-right h-full">
-					<RecordingControl shortcuts={shortcuts.recording} />
-					<ColorSchemeToggle />
-					<FullScreen />
-				</div>
-			</IconContext.Provider>
+			{/* right controls */}
+			<div className="lv-controls-right h-full">
+				<RecordingControl shortcuts={shortcuts.recording} />
+				<ColorSchemeToggle />
+				<FullScreen />
+			</div>
 		</div>
 	);
 }
@@ -170,7 +164,11 @@ function PlayPause() {
 				const label = (paused || seeking ? "Play" : "Pause") + " (k)";
 				return (
 					<button aria-label={label} title={label} {...props}>
-						{paused || seeking ? <PlayIcon /> : <PauseIcon />}
+						{paused || seeking ? (
+							<Play className={iconClassName} fill="currentColor" />
+						) : (
+							<Pause className={iconClassName} fill="currentColor" />
+						)}
 					</button>
 				);
 			}}
@@ -229,16 +227,31 @@ function MuteButton() {
 										value={volume}
 										variants={[
 											{
-												children: <SpeakerSimpleHighIcon />,
+												children: (
+													<Volume2
+														className={iconClassName}
+														fill="currentColor"
+													/>
+												),
 												gte: 0.5,
 											},
 											{
-												children: <SpeakerSimpleLowIcon />,
+												children: (
+													<Volume1
+														className={iconClassName}
+														fill="currentColor"
+													/>
+												),
 												gt: 0,
 												lt: 0.5,
 											},
 											{
-												children: <SpeakerSimpleNoneIcon />,
+												children: (
+													<Volume
+														className={iconClassName}
+														fill="currentColor"
+													/>
+												),
 												eq: 0,
 											},
 										]}
@@ -251,7 +264,7 @@ function MuteButton() {
 									title={strings.unmute}
 									{...props}
 								>
-									<SpeakerSimpleXIcon />
+									<VolumeX className={iconClassName} fill="currentColor" />
 								</button>
 							),
 						}}
@@ -284,7 +297,7 @@ function ColorSchemeToggle() {
 										title={strings.dark}
 										{...props}
 									>
-										<MoonIcon />
+										<Moon className={iconClassName} fill="currentColor" />
 									</button>
 								),
 								eq: "dark",
@@ -296,7 +309,7 @@ function ColorSchemeToggle() {
 										title={strings.light}
 										{...props}
 									>
-										<SunIcon />
+										<Sun className={iconClassName} fill="currentColor" />
 									</button>
 								),
 								eq: "light",
@@ -320,9 +333,9 @@ function FullScreen() {
 				return (
 					<button aria-label={label} title={label} {...props}>
 						{isFullScreen ? (
-							<CornersInIcon weight="bold" />
+							<Minimize className={iconClassName} strokeWidth={2.5} />
 						) : (
-							<CornersOutIcon weight="bold" />
+							<Maximize className={iconClassName} strokeWidth={2.5} />
 						)}
 					</button>
 				);

@@ -32,9 +32,6 @@
     "watch": "tsc --watch"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
-  "dependencies": {
-    "@phosphor-icons/react": "catalog:"
-  },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@types/react": "catalog:",

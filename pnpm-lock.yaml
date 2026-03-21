@@ -48,9 +48,6 @@ catalogs:
     '@lqv/playback':
       specifier: ^0.2.2
       version: 0.2.2
-    '@phosphor-icons/react':
-      specifier: ^2.1.10
-      version: 2.1.10
     '@radix-ui/react-portal':
       specifier: 1.1.10
       version: 1.1.10
@@ -159,6 +156,9 @@ catalogs:
     lodash.debounce:
       specifier: ^4.0.8
       version: 4.0.8
+    lucide-react:
+      specifier: ^0.511.0
+      version: 0.511.0
     mathjax:
       specifier: ^3.2.2
       version: 3.2.2
@@ -923,9 +923,6 @@ importers:
       '@lqv/codemirror':
         specifier: 'catalog:'
         version: 0.6.0(@codemirror/state@6.6.0)(@codemirror/view@6.40.0)(@types/react@19.2.14)(liqvid@packages+main)(react@19.2.4)
-      '@phosphor-icons/react':
-        specifier: 'catalog:'
-        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-portal':
         specifier: 'catalog:'
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -986,6 +983,9 @@ importers:
       liqvid:
         specifier: workspace:^
         version: link:../main
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.511.0(react@19.2.4)
       mathjax:
         specifier: 'catalog:'
         version: 3.2.2
@@ -1313,9 +1313,6 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
-      '@phosphor-icons/react':
-        specifier: 'catalog:'
-        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -1394,6 +1391,9 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.4.8
+      '@liqvid/keymap':
+        specifier: workspace:^2.0.0-alpha.0
+        version: link:../keymap
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.1
@@ -1461,9 +1461,6 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
-      '@phosphor-icons/react':
-        specifier: 'catalog:'
-        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-portal':
         specifier: 'catalog:'
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1488,6 +1485,9 @@ importers:
       lodash.debounce:
         specifier: 'catalog:'
         version: 4.0.8
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.511.0(react@19.2.4)
       serve:
         specifier: 'catalog:'
         version: 14.2.6
@@ -2721,13 +2721,6 @@ packages:
 
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
-
-  '@phosphor-icons/react@2.1.10':
-    resolution: {integrity: sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>= 16.8'
-      react-dom: '>= 16.8'
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -5959,6 +5952,11 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
+  lucide-react@0.511.0:
+    resolution: {integrity: sha512-VK5a2ydJ7xm8GvBeKLS9mu1pVK6ucef9780JVUjw6bAjJL/QXnd4Y0p7SPeOUMC27YhzNCZvm5d/QX0Tp3rc0w==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
 
@@ -9064,11 +9062,6 @@ snapshots:
       fastq: 1.19.1
 
   '@one-ini/wasm@0.1.1': {}
-
-  '@phosphor-icons/react@2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -12486,6 +12479,10 @@ snapshots:
       yallist: 4.0.0
 
   lru-cache@7.18.3: {}
+
+  lucide-react@0.511.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   lunr@2.3.9: {}
 

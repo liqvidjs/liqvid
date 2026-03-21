@@ -1,5 +1,5 @@
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
-import { EyeIcon } from "@phosphor-icons/react/dist/ssr";
+import { Eye } from "lucide-react";
 
 import { getServerState, initializeServer } from "../initialize.mts";
 import type { ProjectMeta } from "../schemas/project.mts";
@@ -40,7 +40,7 @@ export async function Homepage() {
                   target="_blank"
                   title="Preview"
                 >
-                  <EyeIcon size={24} />
+                  <Eye size={24} />
                 </a>
               </div>
             </li>

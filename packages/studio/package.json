@@ -45,7 +45,7 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
   "dependencies": {
     "@base-ui/react": "catalog:",
-    "@phosphor-icons/react": "catalog:",
+    "lucide-react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "chalk": "catalog:",
     "classnames": "catalog:",

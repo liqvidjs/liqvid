@@ -4,7 +4,7 @@ For theming, use the CSS variables in `src/palette.css`.
 
 ## Libraries
 
-Phosphor icons need to have the `Icon` suffix, e.g. `CameraIcon` instead of `Camera`.
+Use Lucide icons from `lucide-react`. Icons are named in PascalCase without an `Icon` suffix, e.g. `Camera` instead of `CameraIcon`.
 
 For formatting times, use the `formatTime`, `formatTimeMs`, and `formatTimeDuration` functions from `@liqvid/utils/time`.
 
