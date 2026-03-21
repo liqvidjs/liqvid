@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  KeymapProvider,
-  useKeyboardShortcut,
-  useKeymapOptional,
-} from "@liqvid/keymap/react";
+import { KeymapProvider, useKeyboardShortcut } from "@liqvid/keymap/react";
 import { PlaybackProvider } from "@liqvid/playback/react";
 import { createContext, useContext } from "react";
 
@@ -49,7 +45,6 @@ export function ScriptProvider<M extends string>({
   shortcuts?: ScriptShortcuts;
 }) {
   const inheritedValue = useScriptOptional();
-  const keymap = useKeymapOptional();
 
   const context = propsScript ?? inheritedValue;
 
