@@ -45,7 +45,6 @@ export function ScriptProvider<M extends string>({
   shortcuts?: ScriptShortcuts;
 }) {
   const inheritedValue = useScriptOptional();
-  const keymap = useKeymapOptional();
 
   const context = propsScript ?? inheritedValue;
 
