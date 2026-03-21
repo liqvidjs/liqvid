@@ -27,13 +27,14 @@
     "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
     "build:js:fix": "node ../../build.mjs",
-    "lint": "eslint --ext ts,tsx --fix e2e src tests",
+    "lint": "biome check --fix",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
     "test": "pnpm test:jest && pnpm test:build-e2e && pnpm test:playwright",
     "test:build-e2e": "cd e2e/app && pnpm build && cd ../..",
     "test:jest": "jest",
-    "test:playwright": "npx playwright test"
+    "test:playwright": "npx playwright test",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -44,20 +45,16 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/master/packages/main#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/main#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/jest": "catalog:",
-    "@types/react": "catalog:",
-    "jest": "catalog:",
-    "nib": "^1.1.2",
-    "react": "catalog:",
-    "stylus": "^0.57.0",
-    "ts-jest": "catalog:",
-    "tslib": "^2.4.0",
-    "typedoc": "^0.22.15",
-    "typedoc-plugin-markdown": "^3.12.1",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/jest": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "jest": "catalog:dev",
+    "ts-jest": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/animation": "workspace:^1.0.0-alpha.0",
