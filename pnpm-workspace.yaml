@@ -26,7 +26,6 @@ catalog:
   "@lqv/codemirror": ^0.6.0
   "@lqv/cursor": ^0.2.1
   "@lqv/playback": ^0.2.2
-  "lucide-react": ^0.511.0
   "@radix-ui/react-collapsible": ^1.1.12
   "@radix-ui/react-dialog": ^1.1.15
   "@radix-ui/react-portal": 1.1.10
