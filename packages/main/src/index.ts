@@ -1,3 +1,4 @@
+export * from "@liqvid/animation";
 export {
   ColorSchemeProvider,
   useColorScheme,

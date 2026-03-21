@@ -1,5 +1,4 @@
-import type { ReplayData } from "@liqvid/utils";
-import { truncate } from "@liqvid/utils";
+import { type ReplayData, truncate } from "@liqvid/utils";
 
 import { BaseRecorder } from "../base-recorder";
 

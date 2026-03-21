@@ -1,4 +1,3 @@
-export * from "./animation.ts";
 export * from "./collections.ts";
 export * from "./interaction.ts";
 export * from "./math.ts";

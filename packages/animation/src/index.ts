@@ -1,9 +1,6 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
+import { assertType, clamp, lerp, type ReplayData } from "@liqvid/utils";
 import { default as BezierEasing } from "bezier-easing";
-
-import { clamp, lerp } from "./math.ts";
-import type { ReplayData } from "./replay-data.ts";
-import { assertType } from "./types.ts";
 
 interface AnimateOptions<T extends DurationLike | number = number> {
   /**

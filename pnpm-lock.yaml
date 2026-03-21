@@ -269,6 +269,34 @@ importers:
         specifier: ^2.8.17
         version: 2.8.17
 
+  packages/animation:
+    dependencies:
+      '@liqvid/duration':
+        specifier: workspace:^1.3.0
+        version: link:../duration
+      '@liqvid/utils':
+        specifier: workspace:^2.0.0-alpha.0
+        version: link:../utils
+      bezier-easing:
+        specifier: ^2.1.0
+        version: 2.1.0
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.4.8
+      '@types/jest':
+        specifier: 'catalog:'
+        version: 30.0.0
+      jest:
+        specifier: 'catalog:'
+        version: 30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3))
+      ts-jest:
+        specifier: 'catalog:'
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/captioning:
     devDependencies:
       ibm-watson:
@@ -630,6 +658,9 @@ importers:
 
   packages/main:
     dependencies:
+      '@liqvid/animation':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../animation
       '@liqvid/color-scheme':
         specifier: workspace:^1.0.0-alpha.2
         version: link:../color-scheme
@@ -1515,12 +1546,12 @@ importers:
 
   packages/utils:
     dependencies:
+      '@liqvid/animation':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../animation
       '@liqvid/duration':
         specifier: workspace:^1.3.0
         version: link:../duration
-      bezier-easing:
-        specifier: ^2.1.0
-        version: 2.1.0
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
