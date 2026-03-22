@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/ssr",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Server-side rendering helpers for Liqvid",
   "repository": {
     "type": "git",
@@ -32,7 +32,8 @@
     "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "biome check --fix",
-    "test": "jest"
+    "test": "jest",
+    "watch": "tsc --watch"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",

@@ -1,8 +1,12 @@
+import type { SerializedValue } from "@liqvid/ssr";
+
 const SECONDS = 1000,
   MINUTES = 60 * SECONDS,
   HOURS = 60 * MINUTES,
   DAYS = 24 * HOURS,
   WEEKS = 7 * DAYS;
+
+const serializationKey = "@liqvid/duration";
 
 /**
  * Convenience type representing either a {@link Duration}
@@ -14,7 +18,7 @@ export type DurationLike = Duration | DurationOptions;
  * These are additive, e.g. passing `{seconds: 20, minutes: 5}` is
  * equivalent to passing `{seconds: 320}`.
  */
-export interface DurationOptions {
+export type DurationOptions = {
   /** shortcut for days */
   d?: number;
   days?: number;
@@ -38,7 +42,10 @@ export interface DurationOptions {
   /** shortcut for weeks */
   w?: number;
   weeks?: number;
-}
+};
+
+export type SerializedDuration = DurationOptions &
+  SerializedValue<typeof serializationKey>;
 
 export interface DurationSetter {
   add(other: DurationOptions): void;
@@ -84,6 +91,13 @@ export class Duration {
   static from(val: DurationLike): Duration {
     if (val instanceof Duration) return val;
     return new Duration(val);
+  }
+
+  /**
+   * Hydrate a Duration value
+   */
+  static fromJSON(val: SerializedDuration): Duration {
+    return Duration.from(val);
   }
 
   /**
@@ -140,8 +154,8 @@ export class Duration {
   }
 
   /* ------------------------- serialization ------------------------- */
-  toJSON(): DurationOptions {
-    return { ms: this.__valueMs };
+  toJSON(): SerializedDuration {
+    return { __deser: serializationKey, ms: this.__valueMs };
   }
 
   /* ------------------------- extractors ------------------------- */

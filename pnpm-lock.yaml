@@ -382,6 +382,10 @@ importers:
         version: link:../utils
 
   packages/duration:
+    dependencies:
+      '@liqvid/ssr':
+        specifier: workspace:^1.0.0-alpha.1
+        version: link:../ssr
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'

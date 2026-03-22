@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Class for unitless time intervals",
   "exports": {
     ".": {
@@ -20,7 +20,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "lint": "biome check --fix"
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
     "zod": "catalog:peer"
   },
   "peerDependenciesMeta": {
