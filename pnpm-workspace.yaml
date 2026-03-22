@@ -79,7 +79,7 @@ catalog:
   lodash.debounce: ^4.0.8
   lucide-react: ^0.511.0
   mathjax: ^3.2.2
-  next: 16.2.0
+  next: 16.2.1
   no-private-imports: ^0.0.1
   postcss: ^8.5.6
   prism-react-renderer: ^2.4.1
@@ -110,44 +110,44 @@ catalog:
 
 catalogs:
   dev:
-    '@biomejs/biome': 2.4.8
-    '@types/cli-progress': ^3.11.6
-    '@types/jest': ^30.0.0
-    '@types/katex': ^0.16.8
-    '@types/lodash': ^4.17.21
-    '@types/lodash.debounce': ^4.0.9
-    '@types/node': ^24
-    '@types/react': ^19
-    '@types/react-dom': ^19
-    '@types/three': '>=0.183'
-    '@types/yargs': ^17.0.35
+    "@biomejs/biome": 2.4.8
+    "@types/cli-progress": ^3.11.6
+    "@types/jest": ^30.0.0
+    "@types/katex": ^0.16.8
+    "@types/lodash": ^4.17.21
+    "@types/lodash.debounce": ^4.0.9
+    "@types/node": ^24
+    "@types/react": ^19
+    "@types/react-dom": ^19
+    "@types/three": ">=0.183"
+    "@types/yargs": ^17.0.35
     jest: ^30.2.0
     ts-jest: ^29.4.6
     typedoc: ^0.28.17
     typedoc-plugin-markdown: ^4.11.0
     typescript: ^5.9
   peer:
-    '@codemirror/autocomplete': '>=6'
-    '@codemirror/commands': '>=6'
-    '@codemirror/lang-css': '>=6'
-    '@codemirror/lang-html': '>=6'
-    '@codemirror/lang-javascript': '>=6'
-    '@codemirror/lang-python': '>=6'
-    '@codemirror/language': '>=6'
-    '@codemirror/lint': '>=6'
-    '@codemirror/search': '>=6'
-    '@codemirror/state': '>=6'
-    '@codemirror/view': '>=6'
-    '@juggle/resize-observer': '>=3.4'
-    '@react-three/drei': '>=10'
-    '@react-three/fiber': '>=9'
-    '@types/react': '>=18'
-    '@types/react-dom': '>=18'
-    katex: '>=0.16'
-    mathjax: '>=3'
-    next: '>=16'
-    react: '>=18'
-    react-dom: '>=18'
+    "@codemirror/autocomplete": ">=6"
+    "@codemirror/commands": ">=6"
+    "@codemirror/lang-css": ">=6"
+    "@codemirror/lang-html": ">=6"
+    "@codemirror/lang-javascript": ">=6"
+    "@codemirror/lang-python": ">=6"
+    "@codemirror/language": ">=6"
+    "@codemirror/lint": ">=6"
+    "@codemirror/search": ">=6"
+    "@codemirror/state": ">=6"
+    "@codemirror/view": ">=6"
+    "@juggle/resize-observer": ">=3.4"
+    "@react-three/drei": ">=10"
+    "@react-three/fiber": ">=9"
+    "@types/react": ">=18"
+    "@types/react-dom": ">=18"
+    katex: ">=0.16"
+    mathjax: ">=3"
+    next: ">=16"
+    react: ">=18"
+    react-dom: ">=18"
     skulpt: ^1.2
-    three: '>=0.183'
-    zod: '>=4'
+    three: ">=0.183"
+    zod: ">=4"

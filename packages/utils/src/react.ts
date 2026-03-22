@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useReducer, useRef, useState } from "react";
+import { createContext, useEffect, useReducer, useRef, useState } from "react";
 
 import { anyHover, onDrag as htmlOnDrag } from "./interaction.ts";
 
@@ -116,6 +116,22 @@ export function onDragReact(
     onMouseDown: (e) => listener(e.nativeEvent),
     onTouchStart: (e) => listener(e.nativeEvent),
   };
+}
+
+/**
+ * Whether this is the first time a component has rendered.
+ *
+ * This is often useful for ensuring server-rendered content
+ * looks correct before JavaScript has run.
+ */
+export function useFirstRender() {
+  const [isFirstRender, setFirstRender] = useState(true);
+
+  useEffect(() => {
+    setFirstRender(false);
+  }, []);
+
+  return isFirstRender;
 }
 
 /**

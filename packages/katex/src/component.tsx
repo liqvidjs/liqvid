@@ -1,8 +1,8 @@
 "use client";
 
-import { combineRefs } from "@liqvid/utils";
+import { combineRefs, useFirstRender } from "@liqvid/utils";
 import katex from "katex";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { useKaTeXContext } from "./context";
 
@@ -113,13 +113,3 @@ export const KTX = function KTX({
 
   return <span ref={combineRefs(ref, propRef)} {...props} />;
 };
-
-function useFirstRender() {
-  const [isFirstRender, setFirstRender] = useState(true);
-
-  useEffect(() => {
-    setFirstRender(false);
-  }, []);
-
-  return isFirstRender;
-}

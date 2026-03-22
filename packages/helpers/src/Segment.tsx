@@ -2,6 +2,7 @@
 
 import type { Script } from "@liqvid/script";
 import { useMarker, useScript } from "@liqvid/script/react";
+import { useFirstRender } from "@liqvid/utils";
 import * as Slot from "@radix-ui/react-slot";
 import classNames from "classnames";
 import {
@@ -93,6 +94,8 @@ export function Segment<M extends string>({
   // biome-ignore lint/suspicious/noExplicitAny: avoid "union type too complex to represent" warning
   const Component = (tag ?? Slot.Root) as any;
 
+  const isFirstRender = useFirstRender();
+
   if (!isActive) {
     switch (hideWith) {
       case "invisible":
@@ -105,7 +108,11 @@ export function Segment<M extends string>({
               (props as { className?: string }).className,
             )}
             ref={ref}
-            // style={{ opacity: 0, pointerEvents: "none", ...props.style }}
+            style={
+              isFirstRender
+                ? { opacity: 0, pointerEvents: "none", ...props.style }
+                : props.style
+            }
           />
         );
       case "unmount":
@@ -116,6 +123,10 @@ export function Segment<M extends string>({
   return <Component {...props} ref={ref} />;
 }
 
+/**
+ * Although we explicitly set the opacity/pointerEvents above,
+ * we keep this class for use by TargetDescendants
+ */
 export function useInvisibleClassName() {
   const className = "lv-script-invisible";
   const [added, setAdded] = useState(

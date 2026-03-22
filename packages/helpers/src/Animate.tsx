@@ -1,9 +1,8 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { usePlayback } from "@liqvid/playback/react";
 import { useScriptOptional } from "@liqvid/script/react";
-import { omit } from "@liqvid/utils";
+import { omit, useFirstRender } from "@liqvid/utils";
 import { Slot } from "@radix-ui/react-slot";
-import { useEffect, useState } from "react";
 
 export function Animate<M extends string>({
   at = 0,
@@ -72,16 +71,6 @@ export function Animate<M extends string>({
       {children}
     </Slot>
   );
-}
-
-function useFirstRender() {
-  const [isFirstRender, setFirstRender] = useState(true);
-
-  useEffect(() => {
-    setFirstRender(false);
-  }, []);
-
-  return isFirstRender;
 }
 
 const excludeKeys = new Set(["composite", "easing", "offset"]);
