@@ -157,8 +157,8 @@ catalogs:
       specifier: ^4.0.8
       version: 4.0.8
     lucide-react:
-      specifier: ^0.511.0
-      version: 0.511.0
+      specifier: ^1.0.0-rc.1
+      version: 1.0.0-rc.1
     mathjax:
       specifier: ^3.2.2
       version: 3.2.2
@@ -1014,7 +1014,7 @@ importers:
         version: link:../main
       lucide-react:
         specifier: 'catalog:'
-        version: 0.511.0(react@19.2.4)
+        version: 1.0.0-rc.1(react@19.2.4)
       mathjax:
         specifier: 'catalog:'
         version: 3.2.2
@@ -1503,7 +1503,7 @@ importers:
         version: 4.0.8
       lucide-react:
         specifier: 'catalog:'
-        version: 0.511.0(react@19.2.4)
+        version: 1.0.0-rc.1(react@19.2.4)
       serve:
         specifier: 'catalog:'
         version: 14.2.6
@@ -5849,8 +5849,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.511.0:
-    resolution: {integrity: sha512-VK5a2ydJ7xm8GvBeKLS9mu1pVK6ucef9780JVUjw6bAjJL/QXnd4Y0p7SPeOUMC27YhzNCZvm5d/QX0Tp3rc0w==}
+  lucide-react@1.0.0-rc.1:
+    resolution: {integrity: sha512-lJEa0jq6KTjpACE/uNPlSuB/nS9edOTJ6KZ7VSu7VuLq6OFa2jM1W3C83+yfMutAE/K+xwGSBBIZ57PkgSxV/Q==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -12142,7 +12142,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@0.511.0(react@19.2.4):
+  lucide-react@1.0.0-rc.1(react@19.2.4):
     dependencies:
       react: 19.2.4
 

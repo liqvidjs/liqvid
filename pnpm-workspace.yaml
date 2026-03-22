@@ -77,7 +77,7 @@ catalog:
   liqvid: ^2.1.19
   lodash: ^4.17.21
   lodash.debounce: ^4.0.8
-  lucide-react: ^0.511.0
+  lucide-react: ^1.0.0-rc.1
   mathjax: ^3.2.2
   next: 16.2.1
   no-private-imports: ^0.0.1
