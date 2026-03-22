@@ -126,10 +126,12 @@ catalogs:
     no-private-imports: ^0.0.1
     jest: ^30.2.0
     next: 16.2.1
+    skulpt: ^1.2
     ts-jest: ^29.4.6
     typedoc: ^0.28.17
     typedoc-plugin-markdown: ^4.11.0
     typescript: ^5.9
+
   peer:
     "@codemirror/autocomplete": ">=6"
     "@codemirror/commands": ">=6"

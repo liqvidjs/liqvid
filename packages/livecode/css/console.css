@@ -1,0 +1,70 @@
+/* console */
+.lqv-console {
+  color: #000;
+  grid-area: console;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.lqv-console > header {
+  color: #fff;
+  background-color: #333;
+  font-family: sans-serif;
+  padding: 0.2em 0.4em;
+  width: 100%;
+  display: block;
+}
+.lqv-console > output > pre {
+  border-bottom: 1px solid #eee;
+  display: block;
+  padding: 0.1em 0.4em;
+  width: 100%;
+  color: #000;
+}
+.lqv-console > output > pre.error {
+  color: #f00;
+}
+.lqv-console > output > pre span {
+  display: inline-block;
+}
+.lqv-console > output > pre span.array,
+.lqv-console > output > pre span.object {
+  color: #479bee;
+}
+.lqv-console > output > pre span.number {
+  color: #008000;
+}
+.lqv-console > output > pre span.string {
+  color: #e438bc;
+}
+.lqv-console > output > pre span.undefined {
+  color: #aaa;
+}
+.lqv-console > output > pre span ol {
+  display: inline;
+  list-style-type: none;
+}
+.lqv-console > output > pre span ol > li {
+  display: inline;
+}
+.lqv-console > output > pre span ol > li:not(:last-child)::after {
+  color: #000;
+  content: ", ";
+}
+/* html preview */
+.lqv-preview {
+  background: #fff;
+  grid-area: console;
+  height: 100%;
+  width: 100%;
+  border-left: 1px solid #ddd;
+}
+/* html console */
+.lqv-preview + .lqv-console {
+  left: var(--split);
+  height: var(--v-split);
+  grid-area: none;
+  width: calc(100% - var(--split));
+  position: absolute;
+  bottom: 0;
+}

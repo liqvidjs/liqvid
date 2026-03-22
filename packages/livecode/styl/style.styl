@@ -1,0 +1,56 @@
+$ns="lqv-cb"
+
+.cm-editor.cm-focused
+  outline none !important
+
+/* editors */
+// .cm-editor
+//   background: #f1ede5;
+//   color: #000;
+@import "layout"
+@import "file-tabs"
+
+.cm-scroller
+  min-height calc(100% - var(--button-height))
+  overflow auto
+
+@import "console"
+@import "buttons"
+@import "resize"
+
+.dragging > iframe
+  pointer-events none
+
+// replay
+.{$ns}-buttons [role="tab"][aria-selected="true"]
+  background-color #AF1866
+  
+// playground
+.{$ns}-buttons [role="tab"][aria-selected="false"]
+  background-color #444
+  color #666
+  
+  &:active
+    background-color #9E165C
+    color #CCC
+
+// copy
+.{$ns}-copy
+  background-color #1a69b5
+  
+.{$ns}-copy:active
+  background-color #16599a
+
+// run
+.{$ns}-run, .lqv-cb-explain-run > th
+  background-color #18a85e
+  
+.${ns}-run:active
+  background-color #148f50
+
+// clear
+.{$ns}-clear
+  background-color #A52117
+  
+.${ns}-clear:active
+  background-color #8c1c14

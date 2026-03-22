@@ -1,0 +1,28 @@
+/* buttons */
+.lqv-cb-buttons {
+  display: flex;
+  grid-area: buttons;
+}
+.lqv-cb-buttons > [role="tablist"] {
+  display: contents;
+}
+.lqv-codebooth button {
+  border: 0 none transparent;
+  border-radius: 0;
+  color: #fff;
+  cursor: pointer;
+  flex: 1;
+  font-size: 1.5rem;
+  height: var(--button-height);
+}
+/* reset */
+.lqv-cb-reset {
+  background-color: #1a69b5;
+}
+.lqv-cb-reset:active {
+  background-color: #16599a;
+  outline: none;
+}
+/* run */
+/* clear */
+/* copy */

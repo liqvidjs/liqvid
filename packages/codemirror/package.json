@@ -1,0 +1,75 @@
+{
+  "name": "@lqv/codemirror",
+  "version": "1.0.0-alpha.0",
+  "description": "Codemirror 6 recording and replaying",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/esm/*.js",
+      "types": "./dist/types/*.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/plugins.git"
+  },
+  "keywords": [
+    "liqvid",
+    "@liqvid/recording",
+    "codemirror"
+  ],
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codemirror",
+  "scripts": {
+    "build": "pnpm build:clean; pnpm lint; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "pnpm biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@codemirror/state": "catalog:peer",
+    "@codemirror/view": "catalog:peer",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
+    "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.2",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "liqvid": "workspace:^3.0.0-alpha.0",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@liqvid/keymap": {
+      "optional": true
+    },
+    "@liqvid/recording": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "liqvid": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}

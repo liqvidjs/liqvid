@@ -1,0 +1,33 @@
+/* resizing */
+.ui-resizable {
+  position: relative;
+}
+
+.ui-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  -ms-touch-action: none;
+  touch-action: none;
+  z-index: 200;
+}
+
+.ui-resizable-disabled .ui-resizable-handle,
+.ui-resizable-autohide .ui-resizable-handle {
+  display: none;
+}
+
+.ui-resizable-ew {
+  cursor: ew-resize;
+  width: 7px;
+  left: var(--split);
+  top: 0;
+  height: 100%;
+}
+
+.ui-resizable-ns {
+  height: 7px;
+  cursor: ns-resize;
+  bottom: calc(var(--v-split) - 3.5px);
+  left: var(--split);
+  width: calc(100% - var(--split));
+}

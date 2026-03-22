@@ -1,0 +1,34 @@
+{
+  "name": "@lqv/playback",
+  "version": "1.0.0-alpha.0",
+  "description": "Playback interface for Liqvid-compatible plugins",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts"
+    },
+    "./hack": {
+      "import": "./dist/esm/hack.mjs",
+      "types": "./dist/types/hack.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react.mjs",
+      "types": "./dist/types/react.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/*/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix",
+    "test": "jest",
+    "watch": "tsc --watch"
+  },
+  "sideEffects": false,
+  "type": "module"
+}

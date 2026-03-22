@@ -1,0 +1,30 @@
+/* container */
+.lqv-codebooth
+  --button-height 2.4rem
+  --file-tabs 0%
+  --split 50%
+  --v-split 20%
+
+  display grid
+  font-size 1rem
+  grid-template unquote('
+    "files console" var(--file-tabs)
+    "editor console" calc(100% - var(--file-tabs) - var(--button-height))
+    "buttons console" var(--button-height) / var(--split)
+  ')
+  height var(--lv-canvas-height)
+  width 100%
+  position absolute
+  text-align left
+
+  &.multifile
+    --file-tabs 4%
+
+// different panel combinations
+.lqv-codebooth
+  > .cm-editor, > .lqv-editor-group, > .lqv-editor-panel
+    grid-area editor
+
+.lqv-editor-group > *, .lqv-editor-panel > *
+  height 100%
+  width 100%

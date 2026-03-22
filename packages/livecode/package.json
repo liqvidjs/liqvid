@@ -1,0 +1,95 @@
+{
+  "name": "@lqv/livecode",
+  "version": "1.0.0-alpha.0",
+  "description": "GUI for interactive coding tutorials with CodeMirror",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./interpreters/*": {
+      "import": "./dist/esm/interpreters/*.js",
+      "types": "./dist/types/interpreters/*.d.ts"
+    },
+    "./style.css": "./dist/css/style.css",
+    "./*": {
+      "import": "./dist/esm/presets/*.js",
+      "types": "./dist/types/presets/*.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/plugins.git"
+  },
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:css; pnpm lint; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -fr dist && mkdir dist",
+    "build:css": "cp -R css dist",
+    "build:js": "tsc",
+    "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codebooth",
+  "dependencies": {
+    "@liqvid/keymap": "^1.2",
+    "@liqvid/utils": "^1.10",
+    "classnames": "^2.5.1",
+    "zustand": ">=4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@lqv/codemirror": "workspace:^",
+    "@types/react": "catalog:",
+    "skulpt": "catalog:dev",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "catalog:peer",
+    "@codemirror/commands": "catalog:peer",
+    "@codemirror/lang-css": "catalog:peer",
+    "@codemirror/lang-html": "catalog:peer",
+    "@codemirror/lang-javascript": "catalog:peer",
+    "@codemirror/lang-python": "catalog:peer",
+    "@codemirror/language": "catalog:peer",
+    "@codemirror/lint": "catalog:peer",
+    "@codemirror/search": "catalog:peer",
+    "@codemirror/state": "catalog:peer",
+    "@codemirror/view": "catalog:peer",
+    "@lqv/playback": "workspace:^2.0.0-alpha.1",
+    "@liqvid/recording": "workspace:^1.0.0-alpha.1",
+    "@lqv/codemirror": "workspace:^",
+    "react": "catalog:peer",
+    "skulpt": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@codemirror/lang-css": {
+      "optional": true
+    },
+    "@codemirror/lang-html": {
+      "optional": true
+    },
+    "@codemirror/lang-javascript": {
+      "optional": true
+    },
+    "@codemirror/lang-python": {
+      "optional": true
+    },
+    "@codemirror/lang-sql": {
+      "optional": true
+    },
+    "skulpt": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}
