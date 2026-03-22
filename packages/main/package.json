@@ -57,6 +57,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",
     "@liqvid/animation": "workspace:^1.0.0-alpha.0",
     "@liqvid/color-scheme": "workspace:^1.0.0-alpha.2",
     "@liqvid/controls": "workspace:^1.0.0-alpha.1",

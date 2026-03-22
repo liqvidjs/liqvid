@@ -42,10 +42,10 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
+    "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.0",
-    "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"
   },
   "sideEffects": false,

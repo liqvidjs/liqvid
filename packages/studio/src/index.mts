@@ -1,7 +1,7 @@
 export { DockableDialog } from "./ui/DockableDialog";
 export * from "./ui/Tabs";
 
-import { devComponent, devProvider } from "@liqvid/ssr/react";
+import { devComponent, devProvider } from "@liqvid/ambidexterity/react";
 
 export type {
   LiqvidStudioPlugin,

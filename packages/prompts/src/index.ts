@@ -1,4 +1,4 @@
-import { devProvider } from "@liqvid/ssr/react";
+import { devProvider } from "@liqvid/ambidexterity/react";
 
 export { Cue } from "./Cue";
 export { Prompt } from "./Prompt";

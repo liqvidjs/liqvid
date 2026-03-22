@@ -173,6 +173,22 @@ importers:
         specifier: ^2.8.17
         version: 2.8.17
 
+  packages/ambidexterity:
+    dependencies:
+      react:
+        specifier: catalog:peer
+        version: 19.2.4
+    devDependencies:
+      '@biomejs/biome':
+        specifier: catalog:dev
+        version: 2.4.8
+      '@types/react':
+        specifier: catalog:dev
+        version: 19.2.14
+      typescript:
+        specifier: catalog:dev
+        version: 5.9.3
+
   packages/animation:
     dependencies:
       '@liqvid/duration':
@@ -566,6 +582,9 @@ importers:
 
   packages/main:
     dependencies:
+      '@liqvid/ambidexterity':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../ambidexterity
       '@liqvid/animation':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../animation
@@ -836,6 +855,9 @@ importers:
 
   packages/prompts:
     dependencies:
+      '@liqvid/ambidexterity':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../ambidexterity
       '@liqvid/hydration':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../hydration
@@ -845,9 +867,6 @@ importers:
       '@liqvid/script':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../script
-      '@liqvid/ssr':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ssr
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
@@ -917,6 +936,9 @@ importers:
 
   packages/recording:
     dependencies:
+      '@liqvid/ambidexterity':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../ambidexterity
       '@liqvid/duration':
         specifier: workspace:^1.3.0
         version: link:../duration
@@ -929,9 +951,6 @@ importers:
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../keymap
-      '@liqvid/ssr':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ssr
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
@@ -1030,19 +1049,12 @@ importers:
         version: 5.9.3
 
   packages/ssr:
-    dependencies:
-      react:
-        specifier: catalog:peer
-        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 2.4.8
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.14
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 5.9.3
 
   packages/studio:
@@ -1050,6 +1062,9 @@ importers:
       '@base-ui/react':
         specifier: 'catalog:'
         version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@liqvid/ambidexterity':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../ambidexterity
       '@liqvid/cli':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../cli

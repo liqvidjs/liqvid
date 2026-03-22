@@ -1,3 +1,5 @@
+export * from "@liqvid/ambidexterity";
+export * from "@liqvid/ambidexterity/react";
 export * from "@liqvid/animation";
 export {
   ColorSchemeProvider,
@@ -18,4 +20,3 @@ export * from "@liqvid/player";
 export * from "@liqvid/script";
 export * from "@liqvid/script/react";
 export * from "@liqvid/ssr";
-export * from "@liqvid/ssr/react";

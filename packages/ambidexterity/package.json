@@ -1,6 +1,6 @@
 {
-  "name": "@liqvid/ssr",
-  "version": "1.0.0-alpha.2",
+  "name": "@liqvid/ambidexterity",
+  "version": "1.0.0-alpha.0",
   "description": "Server-side rendering helpers for Liqvid",
   "repository": {
     "type": "git",
@@ -8,8 +8,12 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react.js",
+      "types": "./dist/types/react.d.ts"
     }
   },
   "files": [
@@ -29,11 +33,24 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
-  "sideEffects": false,
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ambidexterity#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
     "typescript": "catalog:dev"
   },
+  "peerDependencies": {
+    "@types/react": "catalog:peer",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
   "type": "module"
 }

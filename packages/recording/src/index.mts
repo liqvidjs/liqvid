@@ -1,4 +1,4 @@
-import { devProvider } from "@liqvid/ssr/react";
+import { devProvider } from "@liqvid/ambidexterity/react";
 
 export { BaseRecorder } from "./base-recorder.ts";
 export { RecordingManager } from "./RecordingManager.mts";
