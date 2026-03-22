@@ -7,6 +7,10 @@ import type { ProjectMeta } from "../schemas/project.mts";
 import { NewProjectButton } from "./NewProjectButton";
 import { RebuildButton } from "./RebuildButton";
 
+import "../palette.css";
+
+import { serialize } from "@liqvid/ssr";
+
 import styles from "./root.module.css";
 
 export async function Homepage() {
@@ -20,32 +24,10 @@ export async function Homepage() {
         <NewProjectButton />
         <RebuildButton />
       </div>
-      <ul className={styles.projectList}>
-        {Object.entries(projects)
-          .sort(([, a], [, b]) => a.path.localeCompare(b.path))
-          .map(([key, project]) => (
-            <li key={key}>
-              <a href={project.path}>
-                <Thumbnail {...project} />
-                <div className="flex flex-col">
-                  {project.name}
-                  <pre className="text-sm">{project.path}</pre>
-                </div>
-              </a>
-              <div className={styles.actions}>
-                <a
-                  className={styles.productionLink}
-                  href={`http://localhost:${productionServerPort}/${project.path}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  title="Preview"
-                >
-                  <Eye size={24} />
-                </a>
-              </div>
-            </li>
-          ))}
-      </ul>
+      <ProjectList
+        productionServerPort={productionServerPort}
+        projects={serialize(projects)}
+      />
     </main>
   );
 }

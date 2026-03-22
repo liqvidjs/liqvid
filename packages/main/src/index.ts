@@ -19,4 +19,4 @@ export * from "@liqvid/playback/react";
 export * from "@liqvid/player";
 export * from "@liqvid/script";
 export * from "@liqvid/script/react";
-export * from "@liqvid/ssr";
+export { isClient, isServer } from "@liqvid/ssr";

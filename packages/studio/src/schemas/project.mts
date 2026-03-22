@@ -42,4 +42,13 @@ export interface ProjectMeta {
   openGraph: boolean;
   path: string;
   twitter: boolean;
-}
+};
+
+export type SerializedProjectMeta = {
+  aspectRatio: AspectRatio;
+  duration: SerializedDuration;
+  name: string;
+  openGraph: boolean;
+  path: string;
+  twitter: boolean;
+};

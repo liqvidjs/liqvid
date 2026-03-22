@@ -1,62 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: lots of type magic in this file */
 
-/** Serialized value tagged with hint about how to deserialize it */
-export type SerializedValue<DeserKey extends string = string> = {
-  __deser: DeserKey;
-};
-
-/** Get the list of deserializer keys necessary to deserialize a value */
-export type DeserKeys<T extends JSONValue> =
-  T extends SerializedValue<infer DK>
-    ? DK
-    : T extends ReadonlyArray<JSONValue>
-      ? { [k in number & keyof T]: DeserKeys<T[k]> }[number & keyof T]
-      : T extends Record<string, JSONValue>
-        ? { [k in keyof T]: DeserKeys<T[k]> }[keyof T & string]
-        : never;
-
-/** Any valid JSON value */
-export type JSONValue =
-  | boolean
-  | null
-  | number
-  | string
-  | readonly JSONValue[]
-  | { readonly [key: string]: JSONValue };
-
-/** Use custom JSON serialization to send an object from server to client */
-export function serialize<T extends JSONValue = JSONValue>(obj: unknown): T {
-  switch (typeof obj) {
-    case "bigint":
-    case "symbol":
-    case "undefined":
-      throw new Error(`cannot serialize ${typeof obj} to JSON`);
-    case "boolean":
-    case "number":
-    case "string":
-      return obj as T;
-    case "function":
-      if ("toJSON" in obj && typeof obj.toJSON === "function") {
-        return obj.toJSON() as T;
-      }
-      throw new Error(`cannot serialize function ${obj.name} to JSON`);
-    case "object":
-      if (obj === null) {
-        return obj as T;
-      }
-      if (Array.isArray(obj)) {
-        return obj.map(serialize) as unknown as T;
-      }
-      if ("toJSON" in obj && typeof obj.toJSON === "function") {
-        return obj.toJSON();
-      }
-
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [key, serialize(value)]),
-      ) as T;
-  }
-}
-
 /**
  * Use custom JSON deserialization to revive a server-sent object on the client
  */
@@ -98,6 +41,32 @@ export function deserialize<
       ) as any;
   }
 }
+
+/* ------------------------------ types ------------------------------ */
+
+/** Serialized value tagged with hint about how to deserialize it */
+export type SerializedValue<DeserKey extends string = string> = {
+  __deser: DeserKey;
+};
+
+/** Any valid JSON value */
+export type JSONValue =
+  | boolean
+  | null
+  | number
+  | string
+  | readonly JSONValue[]
+  | { readonly [key: string]: JSONValue };
+
+/** Get the list of deserializer keys necessary to deserialize a value */
+export type DeserKeys<T extends JSONValue> =
+  T extends SerializedValue<infer DK>
+    ? DK
+    : T extends ReadonlyArray<JSONValue>
+      ? { [k in number & keyof T]: DeserKeys<T[k]> }[number & keyof T]
+      : T extends Record<string, JSONValue>
+        ? { [k in keyof T]: DeserKeys<T[k]> }[keyof T & string]
+        : never;
 
 /**
  * Get the result of deserializing an input value
