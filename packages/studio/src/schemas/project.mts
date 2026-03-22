@@ -1,4 +1,4 @@
-import type { Duration } from "@liqvid/duration";
+import type { Duration, SerializedDuration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/zod";
 import { z } from "zod";
 
@@ -35,7 +35,7 @@ export const AutoGenProjectMeta = z.object({
 });
 export type AutoGenProjectMeta = z.infer<typeof AutoGenProjectMeta>;
 
-export interface ProjectMeta {
+export type ProjectMeta = {
   aspectRatio: AspectRatio;
   duration: Duration;
   name: string;

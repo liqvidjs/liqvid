@@ -295,7 +295,7 @@
 }
 
 .toggleSwitch {
-  background: light-dark(#d1d5db, #4b5563);
+  background: var(--gray-solid);
   border: none;
   border-radius: 9999px;
   cursor: pointer;
@@ -306,7 +306,7 @@
   width: 2.25rem;
 
   &[data-state="checked"] {
-    background: light-dark(#2563eb, #3b82f6);
+    background: var(--accent-solid);
   }
 }
 
@@ -362,7 +362,7 @@
 }
 
 .folderIcon {
-  color: light-dark(#f59e0b, #fbbf24);
+  color: var(--accent-solid);
   flex-shrink: 0;
 }
 
