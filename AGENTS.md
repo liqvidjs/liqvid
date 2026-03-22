@@ -166,6 +166,24 @@ export function animate(options: AnimateOptions): (t: number) => number {
 - Class components used for complex stateful components (e.g., Player)
 - Custom hooks use `use*` prefix (`usePlayback`, `useTime`, `usePlayer`)
 - Use `createUniqueContext` from `@liqvid/utils/react` for context stability
+- **Do not use `forwardRef`** - it is deprecated in React 19. Instead, pass `ref` as a regular prop:
+
+```typescript
+// Good - React 19 style
+interface MyComponentProps {
+  ref?: React.Ref<HTMLDivElement>;
+  // other props...
+}
+
+export function MyComponent({ ref, ...props }: MyComponentProps) {
+  return <div ref={ref} {...props} />;
+}
+
+// Bad - deprecated
+export const MyComponent = forwardRef<HTMLDivElement, Props>((props, ref) => {
+  return <div ref={ref} {...props} />;
+});
+```
 
 ```typescript
 export function usePlayer(): Player {
