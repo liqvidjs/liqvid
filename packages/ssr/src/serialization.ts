@@ -1,15 +1,19 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: lots of type magic in this file */
+
 /** Serialized value tagged with hint about how to deserialize it */
-export interface SerializedValue<DeserKey extends string = string> {
+export type SerializedValue<DeserKey extends string = string> = {
   __deser: DeserKey;
-}
+};
 
 /** Get the list of deserializer keys necessary to deserialize a value */
-export type DeserKeys<Q> =
-  Q extends SerializedValue<infer H>
-    ? H
-    : Q extends Record<string, JSONValue>
-      ? DeserKeys<Q[keyof Q]>
-      : never;
+export type DeserKeys<T extends JSONValue> =
+  T extends SerializedValue<infer DK>
+    ? DK
+    : T extends ReadonlyArray<JSONValue>
+      ? { [k in number & keyof T]: DeserKeys<T[k]> }[number & keyof T]
+      : T extends Record<string, JSONValue>
+        ? { [k in keyof T]: DeserKeys<T[k]> }[keyof T & string]
+        : never;
 
 /** Any valid JSON value */
 export type JSONValue =
@@ -17,10 +21,8 @@ export type JSONValue =
   | null
   | number
   | string
-  | JSONValue[]
-  | {
-      [k: string]: JSONValue | undefined;
-    };
+  | readonly JSONValue[]
+  | { readonly [key: string]: JSONValue };
 
 /** Use custom JSON serialization to send an object from server to client */
 export function serialize<T extends JSONValue = JSONValue>(obj: unknown): T {
@@ -43,7 +45,7 @@ export function serialize<T extends JSONValue = JSONValue>(obj: unknown): T {
         return obj as T;
       }
       if (Array.isArray(obj)) {
-        return obj.map(serialize) as T;
+        return obj.map(serialize) as unknown as T;
       }
       if ("toJSON" in obj && typeof obj.toJSON === "function") {
         return obj.toJSON();
@@ -55,36 +57,61 @@ export function serialize<T extends JSONValue = JSONValue>(obj: unknown): T {
   }
 }
 
-/** Use custom JSON deserialization to revive a server-sent object on the client */
-export function deserialize<In extends JSONValue>(
+/**
+ * Use custom JSON deserialization to revive a server-sent object on the client
+ */
+export function deserialize<
+  In extends JSONValue,
+  DeserMap extends Record<DeserKeys<In>, (value: any) => unknown>,
+>(
   obj: In,
-  hydrators: Record<DeserKeys<In>, (value: unknown) => unknown>,
-): unknown {
+
+  deserializers: DeserMap,
+): DeserializedValue<In, DeserMap> {
   switch (typeof obj) {
     case "boolean":
     case "number":
     case "string":
-      return obj;
+      return obj as any;
     case "object":
       if (obj === null) {
-        return obj;
+        return obj as any;
       }
       if (Array.isArray(obj)) {
-        return obj.map((value) => deserialize(value as In, hydrators));
+        return obj.map((value) =>
+          deserialize(value as In, deserializers),
+        ) as any;
       }
       if ("__hydrator" in obj && typeof obj.__hydrator === "string") {
         const hydrationKey = obj.__hydrator as DeserKeys<In>;
-        if (!Object.hasOwn(hydrators, hydrationKey)) {
+        if (!Object.hasOwn(deserializers, hydrationKey)) {
           throw new Error(`missing hydrator: ${obj.__hydrator}`);
         }
-        return hydrators[hydrationKey](obj);
+        return deserializers[hydrationKey](obj) as any;
       }
 
       return Object.fromEntries(
         Object.entries(obj).map(([key, value]) => [
           key,
-          deserialize(value as In, hydrators),
+          deserialize(value as In, deserializers) as any,
         ]),
-      );
+      ) as any;
   }
 }
+
+/**
+ * Get the result of deserializing an input value
+ */
+export type DeserializedValue<
+  In extends JSONValue,
+  DeserMap extends Record<string, (value: unknown) => unknown>,
+> =
+  In extends SerializedValue<infer DK extends string & keyof DeserMap>
+    ? ReturnType<DeserMap[DK]>
+    : In extends ReadonlyArray<JSONValue> & { [key in string | symbol]: any }
+      ? {
+          [index in keyof In]: DeserializedValue<In[index], DeserMap>;
+        }
+      : In extends Record<string, JSONValue>
+        ? { [key in keyof In]: DeserializedValue<In[key], DeserMap> }
+        : In;
