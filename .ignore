@@ -1,0 +1,34 @@
+# Mac
+.DS_Store
+
+# Hide projects
+**/projects/code-python
+**/projects/cs-ualberta-may-2025
+**/talks/toronto-h2-oct-2025
+# **/projects/algtop/1-1*
+# **/projects/algtop/1.2*
+# **/projects/algtop/1.3*
+#app/_index.tsx
+#
+
+# hide packages
+#packages/cli
+packages/manim-web
+packages/react-router
+# packages/renderer
+# packages/recording
+# packages/main
+packages/next/test
+#packages/next/app/example-cursor
+
+!packages/react-router/TODO.md
+
+# XyPic is huge
+**/xypic.js
+**/_xypic.js
+
+*.ttf
+
+# **/dist
+*.d.mts
+pnpm-lock.yaml
