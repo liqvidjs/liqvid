@@ -21,6 +21,7 @@
       "npx tsc --noEmit *": "allow",
       "pnpm add *": "allow",
       "pnpm build *": "allow",
+      "pnpm generate:schemas": "allow",
       "pnpm exec biome *": "allow",
       "pnpm exec tsc --noEmit *": "allow",
       "pnpm filter *": "allow",

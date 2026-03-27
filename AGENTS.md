@@ -253,6 +253,18 @@ pnpm-workspace.yaml
 - Packages build to both ESM (`dist/esm/*.mjs`) and CJS (`dist/cjs/*.cjs`)
 - Type declarations output to `dist/types/`
 
+### Pluralization
+
+Use the `pluralize` package for pluralizing words in user-facing messages:
+
+```typescript
+import pluralize from "pluralize";
+
+// Instead of: `${count} item${count === 1 ? "" : "s"}`
+// Use:
+console.log(`Found ${count} ${pluralize("item", count)}`);
+```
+
 ## Pre-existing Errors
 
 Many parts of the codebase have pre-existing TypeScript and linting errors. When making changes, only fix errors directly related to your current changes. Ignore pre-existing errors in other parts of the codebase.
