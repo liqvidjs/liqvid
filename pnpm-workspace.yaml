@@ -59,7 +59,6 @@ catalog:
   classnames: ^2.5.1
   cli-progress: ^3.12.0
   client-only: ^0.0.1
-  concurrently: ^9.2.1
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
@@ -81,6 +80,7 @@ catalog:
   mathjax: ^3.2.2
   next: 16.2.1
   no-private-imports: ^0.0.1
+  pluralize: ^8.0.0
   postcss: ^8.5.6
   prism-react-renderer: ^2.4.1
   prismjs: ^1.30.0
@@ -121,7 +121,10 @@ catalogs:
     '@types/react-dom': ^19
     '@types/three': '>=0.183'
     '@types/yargs': ^17.0.35
+    concurrently: ^9.2.1
+    csstype: ^3.2.3
     jest: ^30.2.0
+    next: 16.2.1
     ts-jest: ^29.4.6
     typedoc: ^0.28.17
     typedoc-plugin-markdown: ^4.11.0

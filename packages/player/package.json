@@ -38,10 +38,10 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/color-scheme": "workspace:^1.0.0-alpha.0",
