@@ -194,6 +194,40 @@ function createProvider(config: LiqvidConfig): S3Provider {
   throw new Error(`Unsupported media provider: ${mediaBackend}. Currently only "s3" is supported.`);
 }
 
+/** File extensions that are considered media files for publishing */
+const MEDIA_EXTENSIONS = new Set([
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".m3u8",
+  ".mp4",
+  ".png",
+  ".ts",
+  ".webm",
+]);
+
+/**
+ * Check if a file is a media file based on its extension.
+ * Note: .ts is for HLS Transport Stream files, not TypeScript.
+ * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
+ */
+function isMediaFile(filePath: string): boolean {
+  const lowerPath = filePath.toLowerCase();
+  const basename = path.basename(lowerPath);
+
+  // Exclude TypeScript files
+  if (
+    lowerPath.endsWith(".d.ts") ||
+    lowerPath.endsWith(".d.json.ts") ||
+    basename === "types.ts"
+  ) {
+    return false;
+  }
+
+  const ext = path.extname(lowerPath);
+  return MEDIA_EXTENSIONS.has(ext);
+}
+
 /**
  * Show what would be uploaded in dry-run mode
  */
