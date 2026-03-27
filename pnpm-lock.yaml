@@ -102,9 +102,6 @@ catalogs:
     client-only:
       specifier: ^0.0.1
       version: 0.0.1
-    csstype:
-      specifier: ^3.2.3
-      version: 3.2.3
     desmos-react:
       specifier: ^1.2.0
       version: 1.2.0
@@ -953,6 +950,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
+      '@liqvid/cli':
+        specifier: workspace:^
+        version: link:../cli
       '@liqvid/katex':
         specifier: workspace:^
         version: link:../katex
@@ -1137,9 +1137,6 @@ importers:
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0
-      csstype:
-        specifier: 'catalog:'
-        version: 3.2.3
       no-private-imports:
         specifier: 'catalog:'
         version: 0.0.1
@@ -12880,7 +12877,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4):
+  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4):
     dependencies:
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
@@ -14078,7 +14075,7 @@ snapshots:
       '@types/node': 10.14.22
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
-      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4)
+      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4)
       camelcase: 5.3.1
       debug: 4.4.3
       dotenv: 6.2.0
@@ -14092,7 +14089,7 @@ snapshots:
       mime-types: 2.1.35
       object.omit: 3.0.0
       object.pick: 1.3.0
-      retry-axios: 2.6.0(axios@0.26.1)
+      retry-axios: 2.6.0(axios@0.26.1(debug@4.4.3))
       semver: 6.3.1
       tough-cookie: 4.1.4
     transitivePeerDependencies:
@@ -16018,7 +16015,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-axios@2.6.0(axios@0.26.1):
+  retry-axios@2.6.0(axios@0.26.1(debug@4.4.3)):
     dependencies:
       axios: 0.26.1(debug@4.4.3)
 
