@@ -3,5 +3,10 @@ export interface HostingProvider {
 }
 
 export interface MediaHostingProvider extends HostingProvider {
-  publishMedia(localDirs: string[]): Promise<void>;
+  /**
+   * Publish media directories to the hosting provider.
+   * @param localDirs - Absolute paths to the .liqvid directories
+   * @param rootDir - The root directory of the project (for computing relative paths)
+   */
+  publishMedia(localDirs: string[], rootDir: string): Promise<void>;
 }

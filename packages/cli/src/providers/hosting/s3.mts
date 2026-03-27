@@ -79,6 +79,40 @@ function getContentType(filePath: string): string {
   return CONTENT_TYPES[ext] ?? "application/octet-stream";
 }
 
+/** File extensions that are considered media files for publishing */
+const MEDIA_EXTENSIONS = new Set([
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".m3u8",
+  ".mp4",
+  ".png",
+  ".ts",
+  ".webm",
+]);
+
+/**
+ * Check if a file is a media file based on its extension.
+ * Note: .ts is for HLS Transport Stream files, not TypeScript.
+ * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
+ */
+function isMediaFile(filePath: string): boolean {
+  const lowerPath = filePath.toLowerCase();
+  const basename = path.basename(lowerPath);
+
+  // Exclude TypeScript files
+  if (
+    lowerPath.endsWith(".d.ts") ||
+    lowerPath.endsWith(".d.json.ts") ||
+    basename === "types.ts"
+  ) {
+    return false;
+  }
+
+  const ext = path.extname(lowerPath);
+  return MEDIA_EXTENSIONS.has(ext);
+}
+
 /** AWS S3, or other compatible provider */
 export class S3Provider implements MediaHostingProvider {
   private client: S3Client;
@@ -96,72 +130,71 @@ export class S3Provider implements MediaHostingProvider {
   private createClient(): S3Client {
     const { auth, region } = this.config;
 
-    // Debug: log auth config to understand which branch is taken
-    console.log("[S3Provider] Auth config:", JSON.stringify(auth, null, 2));
+    // Discriminated union on auth.type
+    switch (auth.type) {
+      case "profile": {
+        // AWS profile-based authentication
+        return new S3Client({
+          credentials: fromIni({ profile: auth.profile }),
+          region: region ?? "us-east-1",
+        });
+      }
 
-    // AWS profile-based authentication
-    if ("profile" in auth) {
-      const endpoint =
-        "endpoint" in auth && auth.endpoint
+      case "explicit": {
+        // Explicit credentials (accessKeyId/secretAccessKey)
+        // This is the path used for S3-compatible providers like Cloudflare R2
+        const accessKeyId = resolveEnvVar(auth.accessKeyId);
+        const secretAccessKey = resolveEnvVar(auth.secretAccessKey);
+
+        // Handle endpoint with env var interpolation (e.g., for Cloudflare R2)
+        const endpoint = auth.endpoint
           ? interpolateEnvVars(auth.endpoint)
           : undefined;
 
-      return new S3Client({
-        credentials: fromIni({ profile: auth.profile }),
-        endpoint,
-        region: endpoint ? "auto" : (region ?? "us-east-1"),
-      });
+        // When using a custom endpoint (like R2), region must be "auto"
+        // See: https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/
+        return new S3Client({
+          credentials: {
+            accessKeyId,
+            secretAccessKey,
+          },
+          endpoint,
+          region: endpoint ? "auto" : (auth.region ?? region ?? "us-east-1"),
+        });
+      }
     }
-
-    // Explicit credentials (accessKeyId/secretAccessKey)
-    if ("accessKeyId" in auth) {
-      const accessKeyId = resolveEnvVar(auth.accessKeyId);
-      const secretAccessKey = resolveEnvVar(auth.secretAccessKey);
-
-      // Handle endpoint with env var interpolation
-      const endpoint = auth.endpoint
-        ? interpolateEnvVars(auth.endpoint)
-        : undefined;
-
-      return new S3Client({
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-        endpoint,
-        // When using a custom endpoint (like R2), set region to "auto"
-        region: endpoint ? "auto" : (auth.region ?? region ?? "us-east-1"),
-      });
-    }
-
-    // Fallback to default credentials (from environment/IAM role)
-    return new S3Client({
-      region: region ?? "us-east-1",
-    });
   }
 
   async publishContent(localDir: string): Promise<void> {
     await this.uploadDirectory(localDir);
   }
 
-  async publishMedia(localDirs: string[]): Promise<void> {
+  async publishMedia(localDirs: string[], rootDir: string): Promise<void> {
+    // Collect all media files from all directories
+    const allFiles: Array<{ filePath: string; key: string }> = [];
+
     for (const localDir of localDirs) {
-      await this.uploadDirectory(localDir);
+      const files = await this.getAllFiles(localDir);
+      for (const filePath of files) {
+        // Only include media files
+        if (!isMediaFile(filePath)) {
+          continue;
+        }
+        // Compute relative path from project root (e.g., "projects/foo/.liqvid/file.mp4")
+        const relativeFromRoot = path.relative(rootDir, filePath);
+        const key = this.buildKey(relativeFromRoot);
+        allFiles.push({ filePath, key });
+      }
     }
-  }
 
-  /**
-   * Upload all files from a local directory to S3
-   */
-  private async uploadDirectory(localDir: string): Promise<void> {
-    const files = await this.getAllFiles(localDir);
+    if (allFiles.length === 0) {
+      console.log("No media files found to upload.");
+      return;
+    }
 
-    console.log(`Uploading ${files.length} files to s3://${this.bucket}...`);
+    console.log(`Uploading ${allFiles.length} files to s3://${this.bucket}...`);
 
-    for (const filePath of files) {
-      const relativePath = path.relative(localDir, filePath);
-      const key = this.buildKey(relativePath);
-
+    for (const { filePath, key } of allFiles) {
       await this.uploadFile(filePath, key);
     }
 
