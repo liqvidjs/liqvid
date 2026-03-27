@@ -37,9 +37,9 @@
     "classnames": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",

@@ -1,10 +1,11 @@
 "use client";
 
+import { Package } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { rebuildAction } from "./root-actions";
+import { IconButton } from "../ui/IconButton";
 
-import styles from "./root.module.css";
+import { rebuildAction } from "./root-actions";
 
 export function RebuildButton() {
   const [isBuilding, setIsBuilding] = useState(false);
@@ -24,14 +25,12 @@ export function RebuildButton() {
   }, []);
 
   return (
-    <button
-      className={styles.rebuildButton}
+    <IconButton
       disabled={isBuilding}
       onClick={handleRebuild}
-      title="Rebuild projects for production"
-      type="button"
+      title={isBuilding ? "Building..." : "Rebuild projects for production"}
     >
-      {isBuilding ? "🔨 Building..." : "📦 Rebuild"}
-    </button>
+      <Package />
+    </IconButton>
   );
 }

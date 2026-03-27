@@ -35,13 +35,12 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/jest": "catalog:",
-    "@types/react": "catalog:",
-    "jest": "catalog:",
-    "react": "catalog:",
-    "ts-jest": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/jest": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "jest": "catalog:dev",
+    "ts-jest": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@types/react": "catalog:peer",

@@ -54,12 +54,11 @@
     "classnames": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
+    "@biomejs/biome": "catalog:dev",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "react": "catalog:",
-    "typescript": "catalog:"
+    "@types/node": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.3.0",

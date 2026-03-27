@@ -49,12 +49,8 @@ const program = new Command(packageJson.name)
   .argument("[directory]")
   .usage("[directory] [options]")
   .helpOption("-h, --help", "Display this help message.")
-  .option("--ts, --typescript", "Initialize as a TypeScript project. (default)")
-  .option("--js, --javascript", "Initialize as a JavaScript project.")
   .option("--tailwind", "Initialize with Tailwind CSS config. (default)")
   .option("--react-compiler", "Initialize with React Compiler enabled.")
-  .option("--eslint", "Initialize with ESLint config.")
-  .option("--biome", "Initialize with Biome config.")
   .option("--app", "Initialize as an App Router project.")
   .option("--src-dir", "Initialize inside a 'src/' directory.")
   .option("--rspack", "Enable Rspack as the bundler.")
@@ -246,7 +242,6 @@ async function run(): Promise<void> {
       reactCompiler: true,
       srcDir: false,
       tailwind: true,
-      typescript: true,
     };
 
     type DisplayConfigItem = {
@@ -255,11 +250,6 @@ async function run(): Promise<void> {
     };
 
     const displayConfig: DisplayConfigItem[] = [
-      {
-        key: "typescript",
-        values: { false: "JavaScript", true: "TypeScript" },
-      },
-      { key: "linter", values: { biome: "Biome", eslint: "ESLint" } },
       { key: "reactCompiler", values: { true: "React Compiler" } },
       { key: "tailwind", values: { true: "Tailwind CSS" } },
       { key: "srcDir", values: { true: "src/ dir" } },
@@ -365,109 +355,6 @@ async function run(): Promise<void> {
       // If not using the recommended template, we prefer saved preferences, otherwise defaults.
       return preferences[field] ?? defaults[field];
     };
-
-    if (!opts.typescript && !opts.javascript) {
-      if (skipPrompt) {
-        // default to TypeScript in CI as we can't prompt to
-        // prevent breaking setup flows
-        opts.typescript = getPrefOrDefault("typescript");
-      } else {
-        const styledTypeScript = blue("TypeScript");
-        const { typescript } = await prompts(
-          {
-            active: "Yes",
-            inactive: "No",
-            initial: getPrefOrDefault("typescript"),
-            message: `Would you like to use ${styledTypeScript}?`,
-            name: "typescript",
-            type: "toggle",
-          },
-          {
-            /**
-             * User inputs Ctrl+C or Ctrl+D to exit the prompt. We should close the
-             * process and not write to the file system.
-             */
-            onCancel: () => {
-              console.error("Exiting.");
-              process.exit(1);
-            },
-          },
-        );
-        /**
-         * Depending on the prompt response, set the appropriate program flags.
-         */
-        opts.typescript = Boolean(typescript);
-        opts.javascript = !typescript;
-        preferences.typescript = Boolean(typescript);
-      }
-    }
-
-    // Determine linter choice if not specified via CLI flags
-    // Support both --no-linter (new) and --no-eslint (legacy) for backward compatibility
-    const noLinter =
-      args.includes("--no-linter") || args.includes("--no-eslint");
-
-    if (!opts.eslint && !opts.biome && !noLinter) {
-      if (skipPrompt) {
-        const preferredLinter = getPrefOrDefault("linter");
-        opts.eslint = preferredLinter === "eslint";
-        opts.biome = preferredLinter === "biome";
-        // No need to set noLinter flag since we check args at runtime
-      } else {
-        const linterIndexMap = {
-          biome: 0,
-          eslint: 1,
-          none: 2,
-        };
-        const { linter } = await prompts({
-          choices: [
-            {
-              description: "Fast formatter and linter (fewer rules)",
-              title: "Biome",
-              value: "biome",
-            },
-            {
-              description: "More comprehensive lint rules",
-              title: "ESLint",
-              value: "eslint",
-            },
-            {
-              description: "Skip linter configuration",
-              title: "None",
-              value: "none",
-            },
-          ],
-          initial:
-            linterIndexMap[
-              getPrefOrDefault("linter") as keyof typeof linterIndexMap
-            ],
-          message: "Which linter would you like to use?",
-          name: "linter",
-          onState: onPromptState,
-          type: "select",
-        });
-
-        opts.eslint = linter === "eslint";
-        opts.biome = linter === "biome";
-        preferences.linter = linter;
-
-        // Keep backwards compatibility with old eslint preference
-        preferences.eslint = linter === "eslint";
-      }
-    } else if (opts.eslint) {
-      opts.biome = false;
-      preferences.linter = "eslint";
-      preferences.eslint = true;
-    } else if (opts.biome) {
-      opts.eslint = false;
-      preferences.linter = "biome";
-      preferences.eslint = false;
-    } else if (noLinter) {
-      opts.eslint = false;
-      opts.biome = false;
-      preferences.linter = "none";
-      preferences.eslint = false;
-    }
 
     if (!opts.reactCompiler && !args.includes("--no-react-compiler")) {
       if (skipPrompt) {
@@ -605,11 +492,11 @@ async function run(): Promise<void> {
     await createApp({
       agentsMd: opts.agentsMd,
       appPath,
-      biome: opts.biome,
+      biome: true,
       bundler,
       disableGit: opts.disableGit,
       empty: opts.empty,
-      eslint: opts.eslint,
+      eslint: false,
       example: example && example !== "default" ? example : undefined,
       examplePath: opts.examplePath,
       importAlias: opts.importAlias,
@@ -618,7 +505,7 @@ async function run(): Promise<void> {
       skipInstall: opts.skipInstall,
       srcDir: opts.srcDir,
       tailwind: opts.tailwind,
-      typescript: opts.typescript,
+      typescript: true,
     });
   } catch (reason) {
     if (!(reason instanceof DownloadError)) {
@@ -641,18 +528,18 @@ async function run(): Promise<void> {
     await createApp({
       agentsMd: opts.agentsMd,
       appPath,
-      biome: opts.biome,
+      biome: true,
       bundler,
       disableGit: opts.disableGit,
       empty: opts.empty,
-      eslint: opts.eslint,
+      eslint: false,
       importAlias: opts.importAlias,
       packageManager,
       reactCompiler: opts.reactCompiler,
       skipInstall: opts.skipInstall,
       srcDir: opts.srcDir,
       tailwind: opts.tailwind,
-      typescript: opts.typescript,
+      typescript: true,
     });
   }
   conf.set("preferences", preferences);

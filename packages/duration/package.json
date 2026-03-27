@@ -34,9 +34,8 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "typescript": "catalog:",
-    "zod": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/ssr": "workspace:^1.0.0-alpha.1",

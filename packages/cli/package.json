@@ -33,25 +33,34 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
-    "lint": "biome lint --fix",
     "build": "tsc --build",
-    "watch": "tsc --watch",
-    "test": "jest --coverage"
+    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
+    "lint": "biome check --fix",
+    "test": "jest --coverage",
+    "watch": "tsc --watch"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.800.0",
+    "@aws-sdk/credential-providers": "^3.800.0",
+    "@aws-sdk/lib-storage": "^3.800.0",
+    "@liqvid/duration": "workspace:^",
     "@liqvid/renderer": "workspace:^",
     "@liqvid/utils": "workspace:^",
     "@types/node": "catalog:",
+    "chalk": "catalog:",
     "cli-progress": "catalog:",
     "execa": "catalog:",
     "handlebars": "catalog:",
+    "pluralize": "catalog:",
     "yargs": "catalog:",
-    "yargs-parser": "catalog:"
+    "yargs-parser": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/cli-progress": "catalog:",
-    "@types/yargs": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/cli-progress": "catalog:dev",
+    "@types/pluralize": "^0.0.33",
+    "@types/yargs": "catalog:dev",
+    "typescript": "catalog:dev"
   }
 }

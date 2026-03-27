@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "media": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "const": "s3"
+        },
+        "s3": {
+          "type": "object",
+          "properties": {
+            "auth": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "profile"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "cloudflareR2": {
+                      "type": "object",
+                      "properties": {
+                        "accountId": {
+                          "default": "{env:CLOUDFLARE_ACCOUNT_ID}",
+                          "type": "string",
+                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                        },
+                        "apiToken": {
+                          "default": "{env:CLOUDFLARE_API_TOKEN}",
+                          "type": "string",
+                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                        }
+                      },
+                      "required": [
+                        "accountId",
+                        "apiToken"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "bucket": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "auth",
+            "bucket"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "provider",
+        "s3"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "media"
+  ],
+  "additionalProperties": false
+}

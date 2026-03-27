@@ -37,56 +37,6 @@
   }
 }
 
-.projectList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  > li {
-    display: flex;
-    align-items: center;
-    border-radius: 4px;
-    border: 1px solid light-dark(#eee, #333);
-    font-size: 1rem;
-
-    > :link {
-      display: flex;
-      flex: 1;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.5rem;
-    }
-  }
-}
-
-.thumbnail {
-  border-radius: 4px;
-  display: flex;
-  position: relative;
-  width: 9rem;
-}
-
-.duration {
-  /* position */
-  bottom: 0;
-  position: absolute;
-  right: 0;
-
-  /* background/borders/padding */
-  background: #0001;
-  border-radius: 2px 0 0 0;
-  padding: 4px 4px;
-
-  /* text */
-  color: #fff;
-  font-size: 10px;
-  line-height: 1;
-}
-
-.actions {
-  padding: 0.5rem 1rem;
-}
-
 .productionLink {
   margin-left: auto;
   color: light-dark(#666, #999);
@@ -187,6 +137,11 @@
 
 .fieldHint {
   color: light-dark(#6b7280, #9ca3af);
+  font-size: 0.75rem;
+}
+
+.fieldError {
+  color: light-dark(#dc2626, #fca5a5);
   font-size: 0.75rem;
 }
 

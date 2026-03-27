@@ -1,10 +1,7 @@
 export * from "@liqvid/ambidexterity";
 export * from "@liqvid/ambidexterity/react";
 export * from "@liqvid/animation";
-export {
-  ColorSchemeProvider,
-  useColorScheme,
-} from "@liqvid/color-scheme/react";
+export * from "@liqvid/color-scheme/react";
 export * as Controls from "@liqvid/controls";
 export * from "@liqvid/duration";
 export * from "@liqvid/event-emitter";

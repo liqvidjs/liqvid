@@ -43,9 +43,9 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
   "sideEffects": false,
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@types/react": "catalog:peer",

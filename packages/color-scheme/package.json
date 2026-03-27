@@ -31,9 +31,9 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/hydration": "workspace:^1.0.0-alpha.0",

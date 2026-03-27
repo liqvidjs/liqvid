@@ -2,8 +2,10 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Select } from "@base-ui/react/select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+
+import { IconButton } from "../ui/IconButton";
 
 import {
   createProjectAction,
@@ -21,6 +23,12 @@ export function NewProjectButton() {
   const [templates, setTemplates] = useState<TemplateInfo[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Validation: disallow dots in project path
+  const pathHasDot = projectPath.includes(".");
+  const pathError = pathHasDot
+    ? "Project paths cannot contain dots. They will work during development but break during the build step."
+    : null;
 
   // Load templates when dialog opens
   useEffect(() => {
@@ -74,10 +82,9 @@ export function NewProjectButton() {
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger
-        className={styles.newProjectButton}
-        render={<button title="Create a new project" type="button" />}
+        render={<IconButton title="Create a new project" variant="primary" />}
       >
-        + New Project
+        <Plus />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className={styles.dialogOverlay} />
@@ -112,7 +119,11 @@ export function NewProjectButton() {
                 type="text"
                 value={projectPath}
               />
-              <span className={styles.fieldHint}>Path under app/</span>
+              {pathError ? (
+                <span className={styles.fieldError}>{pathError}</span>
+              ) : (
+                <span className={styles.fieldHint}>Path under app/</span>
+              )}
             </div>
 
             <div className={styles.formField}>
@@ -168,7 +179,9 @@ export function NewProjectButton() {
               </Dialog.Close>
               <button
                 className={styles.submitButton}
-                disabled={isCreating || !name || !projectPath || !templateId}
+                disabled={
+                  isCreating || !name || !projectPath || !templateId || pathHasDot
+                }
                 type="submit"
               >
                 {isCreating ? "Creating..." : "Create Project"}

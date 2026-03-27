@@ -41,11 +41,11 @@
     "@liqvid/utils": "workspace:^"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
     "@liqvid/player": "workspace:^",
     "mathjax": "^3.2.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",

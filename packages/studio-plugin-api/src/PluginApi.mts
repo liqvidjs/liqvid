@@ -1,3 +1,5 @@
+"use client";
+
 import type { DurationLike } from "@liqvid/duration";
 import {
   createContext,

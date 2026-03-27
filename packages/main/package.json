@@ -5,12 +5,9 @@
   "files": [
     "dist/*"
   ],
-  "main": "./dist/liqvid.js",
-  "module": "./dist/liqvid.mjs",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs",
+      "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./dist/liqvid.css": "./dist/liqvid.css",
@@ -22,11 +19,9 @@
     "build": "pnpm build:clean && pnpm build:css && pnpm build:js",
     "build:clean": "rm -rf dist",
     "build:css": "stylus -o dist/liqvid.css styl/liqvid.styl; stylus -c -o dist/liqvid.min.css styl/liqvid.styl",
-    "build:js": "pnpm build:js:bundle; pnpm build:js:cjs; pnpm build:js:esm; pnpm build:js:fix",
+    "build:js": "pnpm build:js:bundle;  pnpm build:js:esm",
     "build:js:bundle": "tsc && rollup -c && rm -rf dist/esm",
-    "build:js:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
-    "build:js:fix": "node ../../build.mjs",
     "lint": "biome check --fix",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
@@ -76,5 +71,7 @@
     "@types/react-dom": "catalog:peer",
     "react": "catalog:peer",
     "react-dom": "catalog:peer"
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

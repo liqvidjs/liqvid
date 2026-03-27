@@ -31,10 +31,10 @@
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
+    "@biomejs/biome": "catalog:dev",
     "@types/async-retry": "1.4.9",
     "@types/cross-spawn": "6.0.6",
-    "@types/node": "catalog:",
+    "@types/node": "catalog:dev",
     "@types/prompts": "2.4.9",
     "@types/validate-npm-package-name": "4.0.2",
     "@vercel/ncc": "0.38.4",
@@ -49,7 +49,7 @@
     "prettier-plugin-tailwindcss": "0.7.2",
     "prompts": "2.4.2",
     "tar": "7.5.11",
-    "typescript": "catalog:",
+    "typescript": "catalog:dev",
     "update-check": "1.5.4",
     "validate-npm-package-name": "7.0.2"
   },

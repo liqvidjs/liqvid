@@ -26,7 +26,6 @@
     "build:hbs": "cp -R templates dist",
     "build:js": "tsc",
     "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
-    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
     "lint": "biome check --fix",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
     "watch:css": "watch -n1 pnpm build:css",
@@ -55,18 +54,17 @@
     "http-status-codes": "catalog:",
     "lodash.debounce": "catalog:",
     "serve": "catalog:",
+    "universal-cookie": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "concurrently": "catalog:",
+    "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "concurrently": "catalog:dev",
     "next": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",

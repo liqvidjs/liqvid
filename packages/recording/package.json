@@ -33,10 +33,10 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",

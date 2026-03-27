@@ -34,11 +34,11 @@
     "bezier-easing": "^2.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/jest": "catalog:",
-    "jest": "catalog:",
-    "ts-jest": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/jest": "catalog:dev",
+    "jest": "catalog:dev",
+    "ts-jest": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.3.0",

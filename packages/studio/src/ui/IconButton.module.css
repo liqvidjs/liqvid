@@ -1,0 +1,74 @@
+.iconButton {
+  align-items: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+/* Sizes */
+.sm {
+  height: 1.75rem;
+  width: 1.75rem;
+
+  > svg {
+    height: 0.875rem;
+    width: 0.875rem;
+  }
+}
+
+.md {
+  height: 2.25rem;
+  width: 2.25rem;
+
+  > svg {
+    height: 1.125rem;
+    width: 1.125rem;
+  }
+}
+
+.lg {
+  height: 2.75rem;
+  width: 2.75rem;
+
+  > svg {
+    height: 1.375rem;
+    width: 1.375rem;
+  }
+}
+
+/* Variants */
+.default {
+  background: var(--gray-ui);
+  color: var(--gray-normal);
+
+  &:hover:not(:disabled) {
+    background: var(--gray-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--gray-active);
+  }
+}
+
+.primary {
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+
+  &:hover:not(:disabled) {
+    background: var(--accent-solid-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--accent-solid-hover);
+  }
+}

@@ -55,8 +55,8 @@
     "yargs-parser": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/cli-progress": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "catalog:dev",
+    "@types/cli-progress": "catalog:dev",
+    "typescript": "catalog:dev"
   }
 }

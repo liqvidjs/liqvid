@@ -44,10 +44,10 @@
     "@liqvid/utils": "workspace:^"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/react": "catalog:",
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
     "@liqvid/player": "workspace:^",
-    "typescript": "catalog:"
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "katex": "catalog:peer",

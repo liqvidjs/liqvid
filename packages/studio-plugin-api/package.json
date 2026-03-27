@@ -37,12 +37,11 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio-plugin-api#readme",
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
+    "@biomejs/biome": "catalog:dev",
     "@liqvid/duration": "workspace:",
     "@liqvid/recording": "workspace:",
-    "@types/react": "catalog:",
-    "react": "catalog:",
-    "typescript": "catalog:"
+    "@types/react": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "react": "catalog:peer"

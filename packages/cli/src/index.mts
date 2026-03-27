@@ -9,6 +9,7 @@ import { hideBin } from "yargs/helpers";
 import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
 import { generateImports } from "./tasks/generate-imports.mts";
+import { publish } from "./tasks/publish.mts";
 import { render } from "./tasks/render.mts";
 import { thumbs } from "./tasks/thumbs.mts";
 
@@ -27,6 +28,7 @@ export async function main() {
     .demandCommand(1, "Must specify a command")
     .command(build)
     .command(generateImports)
+    .command(publish)
     .command(render)
     .command(thumbs)
     .version(version)
