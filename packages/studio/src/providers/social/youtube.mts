@@ -1,12 +1,11 @@
-import { z } from "zod";
+import type { ProviderConfigYouTube } from "@liqvid/schemas/providers";
 
 import type { SocialProvider } from "../types.mts";
 
-export const ProviderConfigYouTube = z.object({
-  username: z.string(),
-});
-export type ProviderConfigYouTube = z.infer<typeof ProviderConfigYouTube>;
+export type { ProviderConfigYouTube } from "@liqvid/schemas/providers";
 
 export class YouTubeProvider implements SocialProvider {
+  constructor(_options: ProviderConfigYouTube) {}
+
   async publish() {}
 }

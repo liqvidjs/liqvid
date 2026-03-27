@@ -1,12 +1,11 @@
-import { z } from "zod";
+import type { ProviderConfigTwitter } from "@liqvid/schemas/providers";
 
 import type { SocialProvider } from "../types.mts";
 
-export const ProviderConfigTwitter = z.object({
-  username: z.string(),
-});
-export type ProviderConfigTwitter = z.infer<typeof ProviderConfigTwitter>;
+export type { ProviderConfigTwitter } from "@liqvid/schemas/providers";
 
 export class TwitterProvider implements SocialProvider {
+  constructor(_options: ProviderConfigTwitter) {}
+
   async publish() {}
 }

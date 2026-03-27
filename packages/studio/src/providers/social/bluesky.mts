@@ -1,11 +1,8 @@
-import { z } from "zod";
+import type { ProviderConfigBlueSky } from "@liqvid/schemas/providers";
 
 import type { SocialProvider } from "../types.mts";
 
-export const ProviderConfigBlueSky = z.object({
-  username: z.string(),
-});
-export type ProviderConfigBlueSky = z.infer<typeof ProviderConfigBlueSky>;
+export type { ProviderConfigBlueSky } from "@liqvid/schemas/providers";
 
 export class BlueSkyProvider implements SocialProvider {
   constructor(_options: ProviderConfigBlueSky) {}

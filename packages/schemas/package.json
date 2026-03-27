@@ -1,0 +1,67 @@
+{
+  "name": "@liqvid/schemas",
+  "version": "1.0.0-alpha.0",
+  "description": "Zod schemas and JSON Schema files for Liqvid",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    },
+    "./liqvid-config": {
+      "import": "./dist/esm/liqvid-config.mjs",
+      "types": "./dist/types/liqvid-config.d.mts"
+    },
+    "./project": {
+      "import": "./dist/esm/project.mjs",
+      "types": "./dist/types/project.d.mts"
+    },
+    "./recording-meta": {
+      "import": "./dist/esm/recording-meta.mjs",
+      "types": "./dist/types/recording-meta.d.mts"
+    },
+    "./providers": {
+      "import": "./dist/esm/providers/index.mjs",
+      "types": "./dist/types/providers/index.d.mts"
+    }
+  },
+  "files": [
+    "dist/*",
+    "json-schemas/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@liqvid/duration": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}
