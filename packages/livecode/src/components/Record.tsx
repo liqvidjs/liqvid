@@ -53,6 +53,7 @@ export const Record: React.FC<
   // the `shortcuts` Compartment will abort further handling of the sequence
   useEffect(() => {
     const state = store.getState();
+    if (!state.recorder) return;
     const { view } = state.groups[group].files.find(
       (file) => file.filename === props.filename,
     );

@@ -31,12 +31,14 @@ export function Controls({
       // allow keyboard input on elements
       if (e instanceof KeyboardEvent) {
         if (
-          !(e.altKey || e.ctrlKey || e.metaKey) &&
-          e.target &&
-          e.target instanceof Element &&
-          isInteractiveElement(e.target)
+          (!(e.altKey || e.ctrlKey || e.metaKey) &&
+            e.target &&
+            e.target instanceof HTMLElement) ||
+          e.target instanceof SVGElement
         ) {
-          return;
+          if (isInteractiveElement(e.target)) {
+            return;
+          }
         }
       }
 

@@ -44,8 +44,6 @@ export function Root({
     () => new Set(),
   );
 
-  const captureKeys = useRef(true);
-
   // ref
   const ref = useRef<HTMLDivElement>(null);
 
@@ -114,7 +112,7 @@ export function Root({
   );
 
   return (
-    <KeymapProvider shouldHandle={() => captureKeys.current}>
+    <KeymapProvider>
       <PlayerContext.Provider value={context}>
         {persistence ? (
           <HydrateElement

@@ -3,16 +3,8 @@ import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useStore } from "zustand";
 
+import { ids } from "../ids";
 import { useBoothStore } from "../store";
-import { ids } from "../utils";
-
-/** Div to hold buttons. */
-export function Buttons({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={classNames("lqv-cb-buttons", className)} {...props} />;
-}
 
 /** Button for clearing the output/console. */
 export function Clear({

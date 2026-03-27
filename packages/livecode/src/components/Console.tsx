@@ -1,17 +1,12 @@
-import classNames from "classnames";
-import { useStore } from "zustand";
+"use client";
 
-import { useBoothStore } from "../store";
+import { useBoothStore } from "@lqv/livecode";
+import { useStore } from "zustand";
 
 /** Component for displaying console logs. */
 export function Console({ className }: { className?: string }) {
   const store = useBoothStore();
   const messages = useStore(store, (state) => state.messages);
 
-  return (
-    <section className={classNames("lqv-console", className)}>
-      <header>Console</header>
-      <output>{messages}</output>
-    </section>
-  );
+  return <output className={className}>{messages}</output>;
 }

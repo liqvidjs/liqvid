@@ -10,7 +10,7 @@
 # **/projects/algtop/1.3*
 #app/_index.tsx
 #
-**/.liqvid
+# **/.liqvid
 
 *.d.json.ts
 

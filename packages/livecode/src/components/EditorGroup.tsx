@@ -2,8 +2,8 @@ import classNames from "classnames";
 import { Children, cloneElement, useEffect } from "react";
 import { useStore } from "zustand";
 
+import { ids } from "../ids";
 import { useBoothStore } from "../store";
-import { ids } from "../utils";
 
 /** Holds a group of editors. */
 export function EditorGroup({

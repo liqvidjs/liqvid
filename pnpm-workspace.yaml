@@ -131,7 +131,6 @@ catalogs:
     typedoc: ^0.28.17
     typedoc-plugin-markdown: ^4.11.0
     typescript: ^5.9
-
   peer:
     "@codemirror/autocomplete": ">=6"
     "@codemirror/commands": ">=6"

@@ -2,8 +2,8 @@ import classNames from "classnames";
 import { Children, cloneElement } from "react";
 import { useStore } from "zustand";
 
+import { ids } from "../ids";
 import { useBoothStore } from "../store";
-import { ids } from "../utils";
 
 /**
  * Tabpanel containing a single editor.
@@ -36,7 +36,6 @@ export function EditorPanel({
 
   return (
     <div
-      aria-expanded={active}
       aria-labelledby={ids.fileTab({ filename, group })}
       className={classNames("lqv-editor-panel", className)}
       hidden={!active}

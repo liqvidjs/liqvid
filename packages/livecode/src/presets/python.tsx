@@ -3,26 +3,17 @@ import type { Extension } from "@codemirror/state";
 import { CodeRecording } from "@lqv/codemirror/recording";
 import { useEffect } from "react";
 
-import {
-  Buttons,
-  Clear,
-  Copy,
-  Reset,
-  Run,
-  Tab,
-  TabList,
-} from "../components/buttons";
+import { Clear, Copy, Reset, Run, Tab, TabList } from "../components/buttons";
 import { Console } from "../components/Console";
 import { Editor } from "../components/Editor";
 import { EditorGroup } from "../components/EditorGroup";
 import { Record } from "../components/Record";
 import { Replay } from "../components/Replay";
 import { Resize } from "../components/Resize";
+import { LiveCode } from "../components/Root";
 import { basicSetup } from "../extensions";
 import { PythonInterpreter } from "../interpreters/skulpt";
 import { useBoothStore } from "../store";
-
-import { LiveCode } from "..";
 
 const interpreter = new PythonInterpreter();
 

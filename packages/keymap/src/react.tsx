@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 
 import { Keymap, type ShortcutHandler } from "./index.mjs";
 
@@ -61,34 +61,42 @@ export function useKeyboardShortcut(
   }, [callback, keymap, seqOrSeqs]);
 }
 
+/**
+ * Determine whether a keyboard event should be handled by the keymap.
+ * Returns false for events targeting elements with `data-affords="keys"`,
+ * unless a modifier key (Alt, Ctrl, Meta) is pressed.
+ */
+function shouldHandleEvent(e: KeyboardEvent): boolean {
+  // always handle if modifier keys are pressed
+  if (e.altKey || e.ctrlKey || e.metaKey) return true;
+
+  // always handle if no target
+  if (!e.target) return true;
+
+  // don't handle if target has data-affords="keys" attribute
+  if (e.target instanceof HTMLElement || e.target instanceof SVGElement) {
+    if (e.target.closest(`*[data-affords~="keys"]`)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function KeymapProvider({
   children,
-  shouldHandle,
 }: {
   children?: React.ReactNode;
-
-  /**
-   * Callback to indicate whether shortcuts should be handled.
-   * If not specified, shortcuts are always handled.
-   */
-  shouldHandle?: (e: KeyboardEvent) => boolean;
 }) {
   const ambientKeymap = useKeymapOptional();
   const keymap = useMemo(() => ambientKeymap ?? new Keymap(), [ambientKeymap]);
-
-  const savedShouldHandle = useRef(shouldHandle);
-
-  // allow consumers to omit useCallback without messing up the other useEffect
-  useEffect(() => {
-    savedShouldHandle.current = shouldHandle;
-  }, [shouldHandle]);
 
   useEffect(() => {
     // subscriptions already set up
     if (ambientKeymap) return;
 
     function handle(e: KeyboardEvent) {
-      if (savedShouldHandle.current?.(e) ?? true) {
+      if (shouldHandleEvent(e)) {
         keymap.handle(e);
       }
     }

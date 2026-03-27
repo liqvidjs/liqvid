@@ -3,9 +3,10 @@ import { selectCmd } from "@lqv/codemirror";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/shallow";
 
+import { ids } from "../ids";
 import { type State, useBoothStore } from "../store";
-import { ids } from "../utils";
 
 const selector = (state: State) => [
   state.activeGroup,
@@ -27,7 +28,7 @@ export function FileTabs({
   };
 }) {
   const store = useBoothStore();
-  const [activeGroup, activeFilename] = useStore(store, selector);
+  const [activeGroup, activeFilename] = useStore(store, useShallow(selector));
   const group = store.getState().groups[activeGroup];
   const { recorder } = store.getState();
 
