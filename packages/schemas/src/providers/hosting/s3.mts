@@ -1,31 +1,47 @@
 import { z } from "zod";
 
-/** Reference an environment variable */
-export const EnvVar = z.templateLiteral(["{env:", z.string(), "}"]);
-export type EnvVar = z.infer<typeof EnvVar>;
-
-/** Configuration for Cloudflare R2 */
-export const CloudflareR2Config = z.object({
-  accountId: EnvVar.optional().default(`{env:CLOUDFLARE_ACCOUNT_ID}`),
-  apiToken: EnvVar.optional().default(`{env:CLOUDFLARE_API_TOKEN}`),
-});
-export type CloudflareR2Config = z.infer<typeof CloudflareR2Config>;
-
-/** Non-S3 host providing an S3-compatible API, e.g. Cloudflare R2 */
-export const ExoticS3ProviderConfig = z.object({
-  cloudflareR2: CloudflareR2Config.optional(),
-});
-export type ExoticS3ProviderConfig = z.infer<typeof ExoticS3ProviderConfig>;
+import { EnvVar, StringWithEnvVars } from "../../shared.mts";
 
 /** Authentication via AWS profile */
-export const S3AuthConfig = z.object({
+export const S3ProfileConfig = z.object({
   profile: z.string(),
 });
-export type S3AuthConfig = z.infer<typeof S3AuthConfig>;
+export type S3ProfileConfig = z.infer<typeof S3ProfileConfig>;
+
+/** Explicit S3 configuration */
+export const S3ExplicitConfig = z.object({
+  /**
+   * Access key ID. For security, can only be specified via env var.
+   *
+   * @default {env:AWS_ACCESS_KEY_ID}
+   */
+  accessKeyId: EnvVar.optional().default(`{env:AWS_ACCESS_KEY_ID}`),
+
+  /**
+   * S3-compatible endpoint URL. May contain env var interpolations.
+   * E.g. `"https://{env:CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"`
+   */
+  endpoint: StringWithEnvVars.optional(),
+
+  /**
+   * AWS region
+   *
+   * @default us-east-1
+   */
+  region: z.string().optional().default("us-east-1"),
+
+  /**
+   * Secret access key. For security, can only be specified via env var.
+   *
+   * @default {env:AWS_SECRET_ACCESS_KEY}
+   */
+  secretAccessKey: EnvVar.optional().default(`{env:AWS_SECRET_ACCESS_KEY}`),
+});
+export type S3ExplicitConfig = z.infer<typeof S3ExplicitConfig>;
 
 /** Configuration for AWS S3 (or other compatible provider) */
 export const ProviderConfigS3 = z.object({
-  auth: z.union([S3AuthConfig, ExoticS3ProviderConfig]),
+  auth: z.union([S3ProfileConfig, S3ExplicitConfig]),
   bucket: z.string(),
   prefix: z.string().optional(),
   region: z.string().optional(),

@@ -4,8 +4,9 @@ import * as path from "node:path";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
+import { LiqvidConfig } from "@liqvid/schemas";
+
 import { S3Provider } from "../providers/hosting/s3.mts";
-import { LiqvidConfig } from "../schemas/liqvid-config.mts";
 
 const LIQVID_DIR = ".liqvid";
 const CONFIG_FILE = "liqvid.json";
@@ -101,8 +102,11 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig> {
         JSON.stringify(
           {
             $schema: "https://liqvidjs.org/schemas/liqvid-config.json",
-            media: {
-              provider: "s3",
+            backend: {
+              content: "s3",
+              media: "s3",
+            },
+            providers: {
               s3: {
                 auth: { profile: "default" },
                 bucket: "my-bucket",
@@ -164,12 +168,17 @@ async function findLiqvidDirs(rootDir: string): Promise<string[]> {
  * Create the appropriate provider based on config
  */
 function createProvider(config: LiqvidConfig): S3Provider {
-  if (config.media.provider === "s3") {
-    return new S3Provider(config.media.s3);
+  const mediaBackend = config.backend.media;
+
+  if (mediaBackend === "s3") {
+    const s3Config = config.providers.s3;
+    if (!s3Config) {
+      throw new Error("S3 is configured as media backend but no S3 provider configuration found");
+    }
+    return new S3Provider(s3Config);
   }
 
-  // TypeScript should prevent this, but just in case
-  throw new Error(`Unsupported provider: ${config.media.provider}`);
+  throw new Error(`Unsupported media provider: ${mediaBackend}. Currently only "s3" is supported.`);
 }
 
 /**

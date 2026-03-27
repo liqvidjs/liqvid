@@ -1,59 +1,54 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string"
     },
     "media": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "provider": {
-          "type": "string",
-          "const": "s3"
+          "const": "s3",
+          "type": "string"
         },
         "s3": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "auth": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "profile": {
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "profile"
-                  ],
-                  "additionalProperties": false
+                  "required": ["profile"],
+                  "type": "object"
                 },
                 {
-                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "cloudflareR2": {
-                      "type": "object",
+                      "additionalProperties": false,
                       "properties": {
                         "accountId": {
                           "default": "{env:CLOUDFLARE_ACCOUNT_ID}",
-                          "type": "string",
-                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
+                          "type": "string"
                         },
                         "apiToken": {
                           "default": "{env:CLOUDFLARE_API_TOKEN}",
-                          "type": "string",
-                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                          "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
+                          "type": "string"
                         }
                       },
-                      "required": [
-                        "accountId",
-                        "apiToken"
-                      ],
-                      "additionalProperties": false
+                      "required": ["accountId", "apiToken"],
+                      "type": "object"
                     }
                   },
-                  "additionalProperties": false
+                  "type": "object"
                 }
               ]
             },
@@ -67,22 +62,14 @@
               "type": "string"
             }
           },
-          "required": [
-            "auth",
-            "bucket"
-          ],
-          "additionalProperties": false
+          "required": ["auth", "bucket"],
+          "type": "object"
         }
       },
-      "required": [
-        "provider",
-        "s3"
-      ],
-      "additionalProperties": false
+      "required": ["provider", "s3"],
+      "type": "object"
     }
   },
-  "required": [
-    "media"
-  ],
-  "additionalProperties": false
+  "required": ["media"],
+  "type": "object"
 }

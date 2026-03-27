@@ -1,14 +1,7 @@
-import { z } from "zod";
+import type { ProviderConfigSFTP } from "@liqvid/schemas/providers";
 
 import { rsyncRemoteDirectory } from "../../utils/rsync.mts";
 import type { MediaHostingProvider } from "../types.mts";
-
-export const ProviderConfigSFTP = z.object({
-  host: z.string(),
-  path: z.string(),
-});
-
-export type ProviderConfigSFTP = z.infer<typeof ProviderConfigSFTP>;
 
 export class SFTPProvider implements MediaHostingProvider {
   #host: string;

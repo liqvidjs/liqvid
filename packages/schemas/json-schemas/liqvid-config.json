@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "backend": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "enum": [
+            "githubPages",
+            "liqvidStudio",
+            "s3",
+            "sftp"
+          ]
+        },
+        "media": {
+          "type": "string",
+          "enum": [
+            "liqvidStudio",
+            "s3",
+            "sftp"
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "media"
+      ],
+      "additionalProperties": false
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "bluesky": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "facebook": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "githubPages": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "root": {
+              "type": "boolean"
+            },
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "repository",
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "instagram": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "liqvidStudio": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "s3": {
+          "type": "object",
+          "properties": {
+            "auth": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "profile"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "accessKeyId": {
+                      "default": "{env:AWS_ACCESS_KEY_ID}",
+                      "type": "string",
+                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                    },
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "region": {
+                      "default": "us-east-1",
+                      "type": "string"
+                    },
+                    "secretAccessKey": {
+                      "default": "{env:AWS_SECRET_ACCESS_KEY}",
+                      "type": "string",
+                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                    }
+                  },
+                  "required": [
+                    "accessKeyId",
+                    "region",
+                    "secretAccessKey"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "bucket": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "auth",
+            "bucket"
+          ],
+          "additionalProperties": false
+        },
+        "sftp": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "host",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "twitter": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        },
+        "youtube": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "backend",
+    "providers"
+  ],
+  "additionalProperties": false
+}

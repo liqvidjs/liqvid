@@ -34,7 +34,7 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
     "build": "tsc --build",
-    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
+
     "lint": "biome check --fix",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -45,6 +45,7 @@
     "@aws-sdk/lib-storage": "^3.800.0",
     "@liqvid/duration": "workspace:^",
     "@liqvid/renderer": "workspace:^",
+    "@liqvid/schemas": "workspace:^",
     "@liqvid/utils": "workspace:^",
     "@types/node": "catalog:",
     "chalk": "catalog:",

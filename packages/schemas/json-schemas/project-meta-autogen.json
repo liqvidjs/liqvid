@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "duration": {
+      "type": "object",
+      "properties": {
+        "d": {
+          "type": "number"
+        },
+        "days": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        },
+        "hours": {
+          "type": "number"
+        },
+        "m": {
+          "type": "number"
+        },
+        "milliseconds": {
+          "type": "number"
+        },
+        "minutes": {
+          "type": "number"
+        },
+        "ms": {
+          "type": "number"
+        },
+        "s": {
+          "type": "number"
+        },
+        "seconds": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number"
+        },
+        "weeks": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "duration"
+  ],
+  "additionalProperties": false
+}
