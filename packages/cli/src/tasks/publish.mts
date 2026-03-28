@@ -105,14 +105,14 @@ export const publish: CommandModule = {
     );
     console.log();
 
-    if (dryRun) {
-      console.log("Dry run mode - no files will be uploaded.");
-      await showDryRunInfo(mediaFiles, searchDir, config);
-      process.exit(0);
-    }
-
     // Create provider based on config
     const provider = createProvider(config);
+
+    if (dryRun) {
+      console.log("Dry run mode - checking remote state...\n");
+      await showDryRunInfo(provider, mediaFiles, searchDir, config);
+      process.exit(0);
+    }
 
     // Publish all media files (paths relative to searchDir)
     await provider.publishMedia(mediaFiles, searchDir);
@@ -198,28 +198,37 @@ function createProvider(config: LiqvidConfig): S3Provider {
  * Show what would be uploaded in dry-run mode
  */
 async function showDryRunInfo(
+  provider: S3Provider,
   mediaFiles: string[],
   rootDir: string,
   config: LiqvidConfig,
 ): Promise<void> {
-  // Get the S3 prefix if configured
-  const s3Prefix = config.providers.s3?.prefix ?? "";
   const bucket = config.providers.s3?.bucket ?? "bucket";
 
-  console.log("\nMedia files that would be uploaded:\n");
+  // Check which files need to be uploaded
+  const statuses = await provider.checkFiles(mediaFiles, rootDir);
 
-  for (const file of mediaFiles) {
-    const relativeFromRoot = path.relative(rootDir, file);
-    const s3Key = s3Prefix
-      ? `${s3Prefix}/${relativeFromRoot}`.replace(/\\/g, "/")
-      : relativeFromRoot.replace(/\\/g, "/");
-    const stats = await fsp.stat(file);
-    const sizeStr = formatFileSize(stats.size);
-    console.log(`  ${relativeFromRoot} → s3://${bucket}/${s3Key} (${sizeStr})`);
+  const toUpload = statuses.filter((s) => s.needsUpload);
+  const unchanged = statuses.filter((s) => !s.needsUpload);
+
+  if (toUpload.length > 0) {
+    console.log("Files that would be uploaded:\n");
+    for (const { filePath, key, reason } of toUpload) {
+      const stats = await fsp.stat(filePath);
+      const sizeStr = formatFileSize(stats.size);
+      const reasonStr = reason === "new" ? "(new)" : "(modified)";
+      console.log(`  ${path.relative(rootDir, filePath)} → s3://${bucket}/${key} (${sizeStr}) ${reasonStr}`);
+    }
+    console.log();
   }
 
-  console.log();
-  console.log(`Total: ${mediaFiles.length} ${pluralize("file", mediaFiles.length)}`);
+  if (unchanged.length > 0) {
+    console.log(`Unchanged: ${unchanged.length} ${pluralize("file", unchanged.length)}`);
+  }
+
+  console.log(
+    `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
+  );
 }
 
 /**

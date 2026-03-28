@@ -1,12 +1,16 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import { type PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
+import {
+  HeadObjectCommand,
+  type PutObjectCommandInput,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { ProviderConfigS3 } from "@liqvid/schemas/providers";
 
-import type { MediaHostingProvider } from "../types.mts";
+import type { FileUploadStatus, MediaHostingProvider } from "../types.mts";
 
 /**
  * Resolve an environment variable reference to its actual value.
@@ -131,6 +135,22 @@ export class S3Provider implements MediaHostingProvider {
     }
   }
 
+  async checkFiles(
+    files: string[],
+    rootDir: string,
+  ): Promise<FileUploadStatus[]> {
+    const results: FileUploadStatus[] = [];
+
+    for (const filePath of files) {
+      const relativeFromRoot = path.relative(rootDir, filePath);
+      const key = this.buildKey(relativeFromRoot);
+      const status = await this.getUploadStatus(filePath, key);
+      results.push(status);
+    }
+
+    return results;
+  }
+
   getBaseUrl(): string {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
@@ -141,16 +161,67 @@ export class S3Provider implements MediaHostingProvider {
       return;
     }
 
-    console.log(`Uploading ${files.length} files to s3://${this.bucket}...`);
+    console.log(`Checking ${files.length} files against s3://${this.bucket}...`);
 
-    for (const filePath of files) {
-      // Compute relative path from project root (e.g., "projects/foo/video.mp4")
-      const relativeFromRoot = path.relative(rootDir, filePath);
-      const key = this.buildKey(relativeFromRoot);
+    const statuses = await this.checkFiles(files, rootDir);
+    const toUpload = statuses.filter((s) => s.needsUpload);
+
+    if (toUpload.length === 0) {
+      console.log("All files are up to date. Nothing to upload.");
+      return;
+    }
+
+    console.log(
+      `Uploading ${toUpload.length} files (${statuses.length - toUpload.length} unchanged)...`,
+    );
+
+    for (const { filePath, key } of toUpload) {
       await this.uploadFile(filePath, key);
     }
 
     console.log(`Upload complete.`);
+  }
+
+  /**
+   * Get the upload status for a single file.
+   */
+  private async getUploadStatus(
+    filePath: string,
+    key: string,
+  ): Promise<FileUploadStatus> {
+    try {
+      // Get remote file metadata
+      const headResponse = await this.client.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+
+      const remoteLastModified = headResponse.LastModified;
+      if (!remoteLastModified) {
+        // Can't determine remote modification time, upload to be safe
+        return { filePath, key, needsUpload: true, reason: "new" };
+      }
+
+      // Get local file modification time
+      const localStats = await fsp.stat(filePath);
+      const localLastModified = localStats.mtime;
+
+      // Upload if local file is newer than remote
+      if (localLastModified > remoteLastModified) {
+        return { filePath, key, needsUpload: true, reason: "modified" };
+      }
+
+      return { filePath, key, needsUpload: false, reason: "unchanged" };
+    } catch (err) {
+      // If the file doesn't exist (404), we need to upload it
+      if ((err as { name?: string }).name === "NotFound") {
+        return { filePath, key, needsUpload: true, reason: "new" };
+      }
+      // For other errors, rethrow
+      throw err;
+    }
   }
 
   /**
