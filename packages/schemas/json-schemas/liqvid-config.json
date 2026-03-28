@@ -32,36 +32,6 @@
       ],
       "additionalProperties": false
     },
-    "include": {
-      "type": "object",
-      "properties": {
-        "media": {
-          "default": [
-            "**/*.gif",
-            "**/*.jpeg",
-            "**/*.jpg",
-            "**/*.m3u8",
-            "**/*.mov",
-            "**/*.mp4",
-            "**/*.png",
-            "**/*.webm",
-            "!**/opengraph-image.*",
-            "!**/twitter-image.*",
-            "**/.liqvid/**/*.ts",
-            "!**/.liqvid/types.ts",
-            "!*.d.ts"
-          ],
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "media"
-      ],
-      "additionalProperties": false
-    },
     "providers": {
       "type": "object",
       "properties": {
@@ -140,31 +110,30 @@
                 {
                   "type": "object",
                   "properties": {
+                    "profile": {
+                      "type": "string"
+                    },
                     "type": {
                       "type": "string",
                       "const": "profile"
-                    },
-                    "profile": {
-                      "type": "string"
                     }
                   },
                   "required": [
-                    "type",
-                    "profile"
+                    "profile",
+                    "type"
                   ],
                   "additionalProperties": false
                 },
                 {
                   "type": "object",
                   "properties": {
-                    "type": {
-                      "type": "string",
-                      "const": "explicit"
-                    },
                     "accessKeyId": {
                       "default": "{env:AWS_ACCESS_KEY_ID}",
                       "type": "string",
                       "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                    },
+                    "domain": {
+                      "type": "string"
                     },
                     "endpoint": {
                       "type": "string"
@@ -177,13 +146,18 @@
                       "default": "{env:AWS_SECRET_ACCESS_KEY}",
                       "type": "string",
                       "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "explicit"
                     }
                   },
                   "required": [
-                    "type",
                     "accessKeyId",
+                    "domain",
                     "region",
-                    "secretAccessKey"
+                    "secretAccessKey",
+                    "type"
                   ],
                   "additionalProperties": false
                 }
@@ -246,6 +220,50 @@
           "additionalProperties": false
         }
       },
+      "additionalProperties": false
+    },
+    "publishing": {
+      "type": "object",
+      "properties": {
+        "delete": {
+          "default": false,
+          "type": "boolean"
+        },
+        "include": {
+          "type": "object",
+          "properties": {
+            "media": {
+              "default": [
+                "**/*.gif",
+                "**/*.jpeg",
+                "**/*.jpg",
+                "**/*.m3u8",
+                "**/*.mov",
+                "**/*.mp4",
+                "**/*.png",
+                "**/*.webm",
+                "!**/opengraph-image.*",
+                "!**/twitter-image.*",
+                "**/.liqvid/**/*.ts",
+                "!**/.liqvid/types.ts",
+                "!**/*.d.ts",
+                "!**/*.d.json.ts"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "media"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "delete"
+      ],
       "additionalProperties": false
     }
   },

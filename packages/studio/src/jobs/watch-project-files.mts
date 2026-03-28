@@ -3,16 +3,11 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { Duration } from "@liqvid/duration";
+import type { ProjectMeta } from "@liqvid/schemas";
 import type { Maybe } from "have-fun";
 import { ZodError } from "zod";
 
 import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
-import {
-  type AspectRatio,
-  AutoGenProjectMeta,
-  ProjectJson,
-  type ProjectMeta,
-} from "../schemas/project.mts";
 import { getBiomePath, loadJson, walkDir } from "../utils/fs.mts";
 
 import { ASSETS_DIRNAME } from "./watch-assets.mts";

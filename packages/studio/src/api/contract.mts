@@ -1,6 +1,5 @@
+import { RecordingMeta } from "@liqvid/schemas";
 import { z } from "zod";
-
-import { RecordingMeta } from "../schemas/recording-meta.mts";
 
 export type Operation<
   BodyModel extends z.ZodType,

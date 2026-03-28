@@ -1,13 +1,13 @@
 import { Collapsible } from "@base-ui/react/collapsible";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
+import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
 import { Fragment, useCallback, useEffect, useState } from "react";
 
 import { listRecordings } from "../client.mts";
 import { useProjectContext } from "../LiqvidDevToolsProvider";
-import type { RecordingMeta } from "../schemas/recording-meta.mts";
 import { DockableDialog } from "../ui/DockableDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 import { useToggle } from "../utils/react.mts";

@@ -3,6 +3,7 @@ import * as fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { compare } from "@liqvid/utils";
 import { safeGet } from "have-fun";
@@ -10,11 +11,6 @@ import { StatusCodes } from "http-status-codes";
 
 import { RECORDING_META_FILE } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
-import type {
-  RecordingMeta,
-  RecordingMetaFile,
-} from "../schemas/recording-meta.mts";
-import { RecordingMetaFile as RecordingMetaFileSchema } from "../schemas/recording-meta.mts";
 import { loadJson } from "../utils/fs.mts";
 
 export async function listRecordings(
@@ -51,7 +47,7 @@ export async function listRecordings(
     recordingNames.map(async (name) => {
       const dir = path.join(recordingsDir, name);
       const recordingMeta = await loadJson(
-        RecordingMetaFileSchema,
+        RecordingMetaFile,
         path.join(dir, RECORDING_META_FILE),
       );
       const children = await fsp.readdir(dir);
