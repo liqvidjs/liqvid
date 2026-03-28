@@ -37,4 +37,12 @@ export class DirectoryHelper<DS extends string> {
   file(filename: Files<DS>, _version?: string): string {
     return `${this.dirname}/${filename}`;
   }
+
+  interpolate(vars: Record<string, string>) {
+    let dirname = this.dirname;
+    for (const [key, value] of Object.entries(vars)) {
+      dirname = dirname.replace(`{${key}}`, value);
+    }
+    return new DirectoryHelper<DS>(dirname);
+  }
 }
