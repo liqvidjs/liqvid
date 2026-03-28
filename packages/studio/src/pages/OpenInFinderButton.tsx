@@ -6,11 +6,7 @@ import { openInFinderAction } from "./root-actions";
 
 import styles from "./root.module.css";
 
-export function OpenInFinderButton({
-  projectPath,
-}: {
-  projectPath: string;
-}) {
+export function OpenInFinderButton({ projectPath }: { projectPath: string }) {
   async function handleClick() {
     await openInFinderAction(projectPath);
   }

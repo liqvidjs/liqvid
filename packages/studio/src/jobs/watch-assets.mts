@@ -134,10 +134,7 @@ export async function watchAssets() {
 
     const biomePath = await getBiomePath(projectDir);
 
-    debounce(
-      () => generateProjectTypes({ biomePath, projectDir }),
-      projectDir,
-    );
+    debounce(() => generateProjectTypes({ biomePath, projectDir }), projectDir);
   });
 }
 
@@ -247,7 +244,9 @@ async function listProjectDir(
   );
 
   return Object.fromEntries(
-    results.filter((entry): entry is [string, Directory | null] => entry !== null),
+    results.filter(
+      (entry): entry is [string, Directory | null] => entry !== null,
+    ),
   );
 }
 

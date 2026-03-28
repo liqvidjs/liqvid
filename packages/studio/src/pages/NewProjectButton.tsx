@@ -180,7 +180,11 @@ export function NewProjectButton() {
               <button
                 className={styles.submitButton}
                 disabled={
-                  isCreating || !name || !projectPath || !templateId || pathHasDot
+                  isCreating ||
+                  !name ||
+                  !projectPath ||
+                  !templateId ||
+                  pathHasDot
                 }
                 type="submit"
               >

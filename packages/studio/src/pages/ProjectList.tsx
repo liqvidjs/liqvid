@@ -56,20 +56,44 @@ function buildFolderTree(
       }
       root.get(folderName)!.projects.push([key, project]);
     } else {
-      // Project in a folder - use first path segment as folder
-      const folderName = parts[0];
-      if (!root.has(folderName)) {
-        root.set(folderName, {
-          name: folderName,
-          projects: [],
-          subfolders: new Map(),
-        });
+      // Project in a nested folder - traverse/create the folder tree
+      // The last part is the project name, so we only use parts[0..n-1] as folders
+      const folderParts = parts.slice(0, -1);
+
+      let currentLevel = root;
+      for (let i = 0; i < folderParts.length; i++) {
+        const folderName = folderParts[i];
+        if (!currentLevel.has(folderName)) {
+          currentLevel.set(folderName, {
+            name: folderName,
+            projects: [],
+            subfolders: new Map(),
+          });
+        }
+        const folder = currentLevel.get(folderName)!;
+        if (i === folderParts.length - 1) {
+          // This is the deepest folder - add the project here
+          folder.projects.push([key, project]);
+        } else {
+          // Continue traversing deeper
+          currentLevel = folder.subfolders;
+        }
       }
-      root.get(folderName)!.projects.push([key, project]);
     }
   }
 
   return root;
+}
+
+/**
+ * Count total projects in a folder including all subfolders.
+ */
+function countTotalProjects(folder: FolderNode): number {
+  let count = folder.projects.length;
+  for (const subfolder of folder.subfolders.values()) {
+    count += countTotalProjects(subfolder);
+  }
+  return count;
 }
 
 const cookieOptions = {
@@ -167,12 +191,11 @@ export function ProjectList({
                 </ul>
               ) : (
                 <FolderItem
-                  expanded={!collapsedFolders.has(folderName)}
+                  collapsedFolders={collapsedFolders}
                   folder={folder}
+                  folderPath={folderName}
                   key={folderName}
-                  onToggle={(expanded) =>
-                    handleFolderToggle(folderName, expanded)
-                  }
+                  onToggle={handleFolderToggle}
                   productionServerPort={productionServerPort}
                 />
               ),
@@ -194,21 +217,29 @@ export function ProjectList({
 }
 
 function FolderItem({
-  expanded,
+  collapsedFolders,
   folder,
+  folderPath,
   onToggle,
   productionServerPort,
 }: {
-  expanded: boolean;
+  collapsedFolders: Set<string>;
   folder: FolderNode;
-  onToggle: (expanded: boolean) => void;
+  folderPath: string;
+  onToggle: (folderPath: string, expanded: boolean) => void;
   productionServerPort: number;
 }) {
+  const expanded = !collapsedFolders.has(folderPath);
+  const totalCount = countTotalProjects(folder);
+  const sortedSubfolders = Array.from(folder.subfolders.entries()).sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
+
   return (
     <div className={styles.folder}>
       <button
         className={styles.folderHeader}
-        onClick={() => onToggle(!expanded)}
+        onClick={() => onToggle(folderPath, !expanded)}
         type="button"
       >
         {expanded ? (
@@ -217,19 +248,35 @@ function FolderItem({
           <ChevronRight className={styles.folderChevron} size={16} />
         )}
         <Folder className={styles.folderIcon} fill="" size={18} />
-        <span className={styles.folderName}>{folder.name}</span>
-        <span className={styles.folderCount}>{folder.projects.length}</span>
+        <span className={styles.folderName}>{folderPath}</span>
+        <span className={styles.folderCount}>{totalCount}</span>
       </button>
       {expanded && (
-        <ul className={styles.projectList}>
-          {folder.projects.map(([key, project]) => (
-            <ProjectItem
-              key={key}
+        <>
+          {/* Render subfolders first */}
+          {sortedSubfolders.map(([subfolderName, subfolder]) => (
+            <FolderItem
+              collapsedFolders={collapsedFolders}
+              folder={subfolder}
+              folderPath={`${folderPath}/${subfolderName}`}
+              key={subfolderName}
+              onToggle={onToggle}
               productionServerPort={productionServerPort}
-              project={project}
             />
           ))}
-        </ul>
+          {/* Then render projects in this folder */}
+          {folder.projects.length > 0 && (
+            <ul className={styles.projectList}>
+              {folder.projects.map(([key, project]) => (
+                <ProjectItem
+                  key={key}
+                  productionServerPort={productionServerPort}
+                  project={project}
+                />
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );

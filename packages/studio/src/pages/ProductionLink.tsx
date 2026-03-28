@@ -4,11 +4,7 @@ import { Eye } from "lucide-react";
 
 import styles from "./root.module.css";
 
-export function ProductionLink({
-  href,
-}: {
-  href: string;
-}) {
+export function ProductionLink({ href }: { href: string }) {
   return (
     <a
       className={styles.productionLink}

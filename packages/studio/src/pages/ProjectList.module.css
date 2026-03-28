@@ -105,6 +105,22 @@
   border: 1px solid light-dark(#e5e7eb, #374151);
   border-radius: 6px;
   overflow: hidden;
+
+  /* Nested folders */
+  .folder {
+    border: none;
+    border-radius: 0;
+    /* margin-left: 1.5rem; */
+
+    .folderHeader {
+      background: transparent;
+      /* padding-left: 0; */
+    }
+
+    .folderHeader:hover {
+      background: light-dark(#f9fafb, #1f2937);
+    }
+  }
 }
 
 .folderHeader {
