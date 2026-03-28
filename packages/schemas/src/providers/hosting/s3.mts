@@ -19,6 +19,13 @@ export const S3ExplicitAuth = z.object({
   accessKeyId: EnvVar.optional().default(`{env:AWS_ACCESS_KEY_ID}`),
 
   /**
+   * Domain at which to access content. It is strongly recommended to use
+   * a cache (e.g. AWS CloudFront or CloudFlare R2 Custom Domain) instead
+   * of serving content directly.
+   */
+  domain: z.string(),
+
+  /**
    * S3-compatible endpoint URL. May contain env var interpolations.
    * E.g. `"https://{env:CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"`
    */
