@@ -19,13 +19,6 @@ export const S3ExplicitAuth = z.object({
   accessKeyId: EnvVar.optional().default(`{env:AWS_ACCESS_KEY_ID}`),
 
   /**
-   * Domain at which to access content. It is strongly recommended to use
-   * a cache (e.g. AWS CloudFront or CloudFlare R2 Custom Domain) instead
-   * of serving content directly.
-   */
-  domain: z.string(),
-
-  /**
    * S3-compatible endpoint URL. May contain env var interpolations.
    * E.g. `"https://{env:CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"`
    */
@@ -58,8 +51,20 @@ export type S3Auth = z.infer<typeof S3Auth>;
 /** Configuration for AWS S3 (or other compatible provider) */
 export const ProviderConfigS3 = z.object({
   auth: S3Auth,
+
+  /** Bucket name */
   bucket: z.string(),
+
+  /**
+   * Domain at which to access content. It is strongly recommended to use
+   * a cache (e.g. AWS CloudFront or CloudFlare R2 Custom Domain) instead
+   * of serving content directly.
+   */
+  domain: z.string(),
+
+  /** Prefix to apply to all content from this project */
   prefix: z.string().optional(),
+
   region: z.string().optional(),
 });
 export type ProviderConfigS3 = z.infer<typeof ProviderConfigS3>;

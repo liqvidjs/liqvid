@@ -1,14 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { runNextBuild } from "@liqvid/cli/build";
+import type { ProjectMeta } from "@liqvid/schemas";
 import { execa } from "execa";
 
 import { watchAssets } from "./jobs/watch-assets.mts";
 import { watchProjectFiles } from "./jobs/watch-project-files.mts";
-import type { ProjectMeta } from "./schemas/project.mts";
-
-export { runNextBuild };
 
 const symbol = Symbol.for("@liqvid/server");
 

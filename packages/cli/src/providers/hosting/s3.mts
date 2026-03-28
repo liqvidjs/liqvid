@@ -131,9 +131,9 @@ export class S3Provider implements MediaHostingProvider {
     }
   }
 
-  // async publishContent(localDir: string): Promise<void> {
-  //   await this.uploadDirectory(localDir);
-  // }
+  getBaseUrl(): string {
+    return `${this.config.domain}/${this.config.prefix ?? ""}`;
+  }
 
   async publishMedia(files: string[], rootDir: string): Promise<void> {
     if (files.length === 0) {
@@ -151,25 +151,6 @@ export class S3Provider implements MediaHostingProvider {
     }
 
     console.log(`Upload complete.`);
-  }
-
-  /**
-   * Recursively get all files in a directory
-   */
-  private async getAllFiles(dir: string): Promise<string[]> {
-    const files: string[] = [];
-    const entries = await fsp.readdir(dir, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        files.push(...(await this.getAllFiles(fullPath)));
-      } else if (entry.isFile()) {
-        files.push(fullPath);
-      }
-    }
-
-    return files;
   }
 
   /**

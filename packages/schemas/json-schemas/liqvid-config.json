@@ -132,9 +132,6 @@
                       "type": "string",
                       "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
                     },
-                    "domain": {
-                      "type": "string"
-                    },
                     "endpoint": {
                       "type": "string"
                     },
@@ -154,7 +151,6 @@
                   },
                   "required": [
                     "accessKeyId",
-                    "domain",
                     "region",
                     "secretAccessKey",
                     "type"
@@ -166,6 +162,9 @@
             "bucket": {
               "type": "string"
             },
+            "domain": {
+              "type": "string"
+            },
             "prefix": {
               "type": "string"
             },
@@ -175,7 +174,8 @@
           },
           "required": [
             "auth",
-            "bucket"
+            "bucket",
+            "domain"
           ],
           "additionalProperties": false
         },

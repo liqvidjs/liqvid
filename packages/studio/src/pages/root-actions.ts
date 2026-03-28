@@ -4,10 +4,9 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { runNextBuild } from "@liqvid/cli/build";
 import { execa } from "execa";
 import Handlebars from "handlebars";
-
-import { runNextBuild } from "../initialize.mts";
 
 export async function rebuildAction(): Promise<{ success: boolean }> {
   try {
