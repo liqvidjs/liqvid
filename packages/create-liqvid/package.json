@@ -22,12 +22,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
-    "dev": "ncc build ./index.ts -w -o dist/",
+    "build": "ncc build ./src/index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
+    "dev": "ncc build ./src/index.ts -w -o dist/",
     "lint": "biome check --fix",
     "prebuild": "rm -rf dist",
     "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate",
-    "versions": "node --disable-warning=ExperimentalWarning --experimental-strip-types versions.mts versions.json",
+    "versions": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/versions.mts versions.json",
     "watch": "tsc --watch"
   },
   "devDependencies": {

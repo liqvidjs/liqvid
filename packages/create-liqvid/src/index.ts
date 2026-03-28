@@ -10,14 +10,15 @@ import type { InitialReturnValue } from "prompts";
 import prompts from "prompts";
 import updateCheck from "update-check";
 
+import { Bundler } from "../templates";
+
 import { createApp, DownloadError } from "./create-app";
 import type { PackageManager } from "./helpers/get-pkg-manager";
 import { getPkgManager } from "./helpers/get-pkg-manager";
 import { isFolderEmpty } from "./helpers/is-folder-empty";
 import { validateNpmName } from "./helpers/validate-pkg";
-import { Bundler } from "./templates";
 
-import packageJson from "./package.json";
+import packageJson from "../package.json";
 
 let projectPath: string = "";
 

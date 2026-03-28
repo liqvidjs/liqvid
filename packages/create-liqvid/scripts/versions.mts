@@ -17,7 +17,7 @@ interface PackageJson {
 }
 
 async function getPackageVersions(): Promise<Record<string, string>> {
-  const packagesDir = resolve(import.meta.dirname, "..");
+  const packagesDir = resolve(import.meta.dirname, "..", "..");
   const entries = await readdir(packagesDir, { withFileTypes: true });
 
   const versions: Record<string, string> = {};

@@ -6,6 +6,9 @@ import { basename, dirname, join, resolve } from "node:path";
 import retry from "async-retry";
 import { cyan, green, red } from "picocolors";
 
+import type { Bundler, TemplateMode, TemplateType } from "../templates";
+import { getTemplateFile, installTemplate } from "../templates";
+
 import type { RepoInfo } from "./helpers/examples";
 import {
   downloadAndExtractExample,
@@ -22,8 +25,6 @@ import { isFolderEmpty } from "./helpers/is-folder-empty";
 import { getOnline } from "./helpers/is-online";
 import { isWriteable } from "./helpers/is-writeable";
 import { runTypegen } from "./helpers/typegen";
-import type { Bundler, TemplateMode, TemplateType } from "./templates";
-import { getTemplateFile, installTemplate } from "./templates";
 
 export class DownloadError extends Error {}
 

@@ -7,5 +7,6 @@
     "strict": true,
     "target": "es2019"
   },
-  "exclude": ["templates", "dist"]
+  "exclude": ["templates", "dist"],
+  "include": ["src/*"]
 }

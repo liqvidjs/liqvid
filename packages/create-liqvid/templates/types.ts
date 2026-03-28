@@ -1,4 +1,4 @@
-import type { PackageManager } from "../helpers/get-pkg-manager";
+import type { PackageManager } from "../src/helpers/get-pkg-manager";
 
 export type TemplateType =
   | "app"

@@ -6,10 +6,10 @@ import { Sema } from "async-sema";
 import { async as glob } from "fast-glob";
 import { bold, cyan } from "picocolors";
 
-import { copy } from "../helpers/copy";
-import { getPnpmMajorVersion } from "../helpers/get-pkg-manager";
-import { install } from "../helpers/install";
-import { runTypegen } from "../helpers/typegen";
+import { copy } from "../src/helpers/copy";
+import { getPnpmMajorVersion } from "../src/helpers/get-pkg-manager";
+import { install } from "../src/helpers/install";
+import { runTypegen } from "../src/helpers/typegen";
 
 import {
   Bundler,
