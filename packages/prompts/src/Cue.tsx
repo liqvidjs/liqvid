@@ -1,6 +1,9 @@
+import type { Script } from "@liqvid/script";
 import { useMarker, useScript } from "@liqvid/script/react";
 import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
+
+export type CueState = "active" | "future" | "past";
 
 /** Lines to be read at a particular marker */
 export function Cue<M extends string>({
@@ -12,9 +15,10 @@ export function Cue<M extends string>({
     active?: string;
     container?: string;
     cue?: string;
-    inactive?: string;
+    future?: string;
     line?: string;
     measure?: string;
+    past?: string;
   };
 
   children?: React.ReactNode;
@@ -74,24 +78,17 @@ export function Cue<M extends string>({
 
   const script = useScript();
 
-  const [active, setActive] = useState(
-    () => script.active.index <= script.markers.get(props.on).index,
+  const [cueState, setCueState] = useState<CueState>(() =>
+    getCueState(script, props.on),
   );
 
-  useMarker(() =>
-    setActive(script.active.index <= script.markers.get(props.on).index),
-  );
+  useMarker(() => setCueState(getCueState(script, props.on)));
 
   return (
     <div
-      className={
-        merge(
-          classes?.container,
-          active && classes?.active,
-          !active && classes?.inactive,
-        ) || undefined
-      }
-      data-active={active || undefined}
+      aria-current={cueState === "active"}
+      className={merge(classes?.container, classes?.[cueState]) || undefined}
+      data-state={cueState}
     >
       <dt className={classes?.cue}>{props.on}</dt>
 
@@ -113,4 +110,18 @@ export function Cue<M extends string>({
 
 function isText(node: Node): node is Text {
   return node.nodeType === node.TEXT_NODE;
+}
+
+function getCueState(script: Script, marker: string): CueState {
+  const cueIndex = script.markers.get(marker).index;
+
+  if (script.active.index < cueIndex) {
+    return "future";
+  }
+
+  if (script.active.index > cueIndex) {
+    return "past";
+  }
+
+  return "active";
 }

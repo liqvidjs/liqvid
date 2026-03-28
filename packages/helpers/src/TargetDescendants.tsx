@@ -44,6 +44,11 @@ type IndexedTransform = SelectorConfig & {
   toIndex?: number;
 };
 
+/**
+ * Helper to apply transforms to descendants. This is primarily for
+ * working with content managed by third-party plugins outside of React,
+ * e.g. animating equations rendered by KaTeX.
+ */
 export function TargetDescendants<M extends string = string>({
   asChild = false,
   children,

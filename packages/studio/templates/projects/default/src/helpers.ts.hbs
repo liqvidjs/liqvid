@@ -4,7 +4,7 @@
  */
 
 import { DirectoryHelper } from "@liqvid/studio";
-import { Animate, splitCode, UniversalHelper } from "liqvid";
+import { Animate, splitCode, TargetDescendants, UniversalHelper } from "liqvid";
 
 import type { ProjectDir } from "../.liqvid/types";
 
@@ -23,6 +23,13 @@ export const $u = UniversalHelper<M>;
 
 /** @package animation helper */
 export const $anim = Animate<M>;
+
+/** @package
+ * Helper to apply transforms to descendants. This is primarily for
+ * working with content managed by third-party plugins outside of React,
+ * e.g. animating equations rendered by KaTeX.
+ */
+export const $desc = TargetDescendants<M>;
 
 /* -------------------- helper functions -------------------- */
 

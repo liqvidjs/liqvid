@@ -7,4 +7,3 @@ export {
 } from "./SegmentProvider";
 export { type TargetConfig, TargetDescendants } from "./TargetDescendants";
 export { UniversalHelper } from "./UniversalHelper";
-export { usePauseAt } from "./usePause";

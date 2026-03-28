@@ -1,6 +1,6 @@
 import { devProvider } from "@liqvid/ambidexterity/react";
 
-export { Cue } from "./Cue";
+export { Cue, type CueState } from "./Cue";
 export { Prompt } from "./Prompt";
 export {
   type PromptsContext,
