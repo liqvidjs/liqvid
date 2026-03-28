@@ -31,16 +31,19 @@ export class DirectoryHelper<
 > {
   constructor(private dirname = "") {}
 
+  /** get a new DirectoryHelper for a subdirectory */
   dir<D extends Dirs<DS>>(
     dirname: D,
   ): DirectoryHelper<Exclude<StripPrefix<DS, `${D}/`>, "">, TemplateVars> {
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
   }
 
+  /** get the fully qualified name of a file */
   file(filename: Files<DS>, _version?: string): string {
     return `${this.dirname}/${filename}`;
   }
 
+  /** substitute variables into the dirname of this helper */
   interpolate<V extends TemplateVars>(
     vars: Record<V, string>,
   ): DirectoryHelper<DS, Exclude<TemplateVars, V>> {
@@ -52,5 +55,10 @@ export class DirectoryHelper<
       dirname = dirname.replace(`{${key}}`, value);
     }
     return new DirectoryHelper<DS>(dirname);
+  }
+
+  /** when you need to reference a pattern, e.g. "thumbs/%s.png", instead of a single file */
+  pattern(pattern: string): string {
+    return `${this.dirname}/${pattern}`;
   }
 }

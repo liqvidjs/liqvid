@@ -1,14 +1,16 @@
 /**
- * @file This file contains various helpers with type safety
- * for the markers for this particular project.
+ * @file This file contains various helpers with type safety for
+ * the markers and directory structure of this particular project.
  */
-"use client";
 
-import { UniversalHelper } from "liqvid";
+import { DirectoryHelper } from "@liqvid/studio";
+import { Animate, splitCode, UniversalHelper } from "liqvid";
 
-import type { M } from "./project";
+import type { ProjectDir } from "../.liqvid/types";
 
-/* -------------------- helpers -------------------- */
+import { type M, script } from "./markers";
+
+/* -------------------- helper components -------------------- */
 
 /**
  * @package
@@ -19,3 +21,18 @@ import type { M } from "./project";
  */
 export const $u = UniversalHelper<M>;
 
+/** @package animation helper */
+export const $anim = Animate<M>;
+
+/* -------------------- helper functions -------------------- */
+
+/** @package Get marker by name */
+export const $m = script.markers.get.bind(script.markers.get);
+
+/** @package Reference the files in this project with type-safety. Need to interpolate the pathname before using. */
+export const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
+	splitCode(
+		() => "/api/liqvid/static?url={pathname}",
+		() => `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
+	),
+);

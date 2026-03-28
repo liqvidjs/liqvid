@@ -1,13 +1,19 @@
-import { withTimings } from "liqvid";
+import { Script, withTimings } from "liqvid";
 
-export const markerNames = [
+const markerNames = [
   "intro/"
 ] as const;
 
 const timings = {};
 
-/** @package */
-export const markers = withTimings(markerNames, timings);
+// In development, you can use withTimings to assign a duration of 1 minute
+// to any unassigned timings.
+// When you are ready for production, use withTimingsStrict to ensure that
+// all markers have been assigned timings.
+const markers = withTimings(markerNames, timings);
 
-/** Marker name */
-export type MarkerName = (typeof markerNames)[number];
+/** @package script for this project */
+export const Script = new Script(markers);
+
+/** @package marker name */
+export type M = (typeof markerNames)[number];
