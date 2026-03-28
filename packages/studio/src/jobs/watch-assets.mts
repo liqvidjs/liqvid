@@ -7,29 +7,59 @@ import { execa } from "execa";
 import Handlebars from "handlebars";
 import type { Maybe } from "have-fun";
 
-import { PROJECT_META_FILE } from "../conventions.mts";
+import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
 import { debounce } from "../utils/misc.mts";
 
 export const ASSETS_DIRNAME = ".liqvid";
 
-/** whether a file should be omitted from the directory listing */
-function isForbidden(_filename: string, basename: string) {
+/**
+ * Files/patterns to exclude from the directory listing (relative to project dir).
+ * Code files, config files, and generated images are excluded.
+ */
+const EXCLUDE_PATTERNS = [
+  "project.json",
+  /\.(css|js|jsx|ts|tsx)$/,
+  /^opengraph-image\./,
+  /^twitter-image\./,
+];
+
+/**
+ * Special include patterns that override exclusions.
+ * Files in .liqvid/*.ts should be included.
+ */
+function isSpecialInclude(relativePath: string): boolean {
+  // Include .ts files inside .liqvid directory
+  return relativePath.startsWith(".liqvid/") && relativePath.endsWith(".ts");
+}
+
+/** Check if a file should be excluded based on patterns */
+function shouldExclude(relativePath: string, basename: string): boolean {
+  // Always exclude these
   if (basename === ".DS_Store") return true;
   if (basename === "types.ts") return true;
+
+  // Check special includes first (they override exclusions)
+  if (isSpecialInclude(relativePath)) return false;
+
+  // Check exclusion patterns
+  for (const pattern of EXCLUDE_PATTERNS) {
+    if (typeof pattern === "string") {
+      if (relativePath === pattern || basename === pattern) return true;
+    } else if (pattern.test(basename)) {
+      return true;
+    }
+  }
+
   return false;
 }
 
-function shouldIgnore({
-  basename,
-  filename,
-}: {
-  basename: string;
-  filename: string;
-}) {
+function shouldIgnoreEvent(basename: string, filename: string): boolean {
   if (filename.endsWith("~")) return true;
   if (basename === ".DS_Store") return true;
+  if (basename === "types.ts") return true;
+  if (basename === PROJECT_META_FILE) return true;
   return false;
 }
 
@@ -41,6 +71,50 @@ const TEMPLATES_DIR = path.join(
   "templates",
 );
 
+/**
+ * Check if a directory is a project directory.
+ * A project directory contains both project.json and page.tsx.
+ */
+async function isProjectDirectory(dir: string): Promise<boolean> {
+  try {
+    const [hasProjectJson, hasPageTsx] = await Promise.all([
+      fsp
+        .access(path.join(dir, PROJECT_FILE))
+        .then(() => true)
+        .catch(() => false),
+      fsp
+        .access(path.join(dir, "page.tsx"))
+        .then(() => true)
+        .catch(() => false),
+    ]);
+    return hasProjectJson && hasPageTsx;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Find the project directory that contains the given file path.
+ * Walks up the directory tree until it finds a project directory or reaches TARGET_DIR.
+ */
+async function findProjectDirectory(filePath: string): Promise<string | null> {
+  let dir = path.dirname(filePath);
+
+  while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
+    if (await isProjectDirectory(dir)) {
+      return dir;
+    }
+    dir = path.dirname(dir);
+  }
+
+  // Check if TARGET_DIR itself is a project directory
+  if (dir === TARGET_DIR && (await isProjectDirectory(dir))) {
+    return dir;
+  }
+
+  return null;
+}
+
 export async function watchAssets() {
   Handlebars.registerHelper("json", (obj) => {
     return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
@@ -50,36 +124,39 @@ export async function watchAssets() {
     if (!relPath) return;
 
     const filename = path.join(TARGET_DIR, relPath);
-
-    const dirname = path.dirname(filename);
     const basename = path.basename(filename);
 
-    if (shouldIgnore({ basename, filename })) return;
+    if (shouldIgnoreEvent(basename, filename)) return;
 
-    // assets
-    const $_ = filename.match(/^.*\/\.liqvid(?=\/)/);
-    if (!$_) return null;
-    if (basename === "types.ts" || basename === PROJECT_META_FILE) return;
+    // Find the project directory containing this file
+    const projectDir = await findProjectDirectory(filename);
+    if (!projectDir) return;
 
-    const assetsDir = $_[0];
+    const biomePath = await getBiomePath(projectDir);
 
-    const biomePath = await getBiomePath(dirname);
-
-    debounce(() => generateProjectTypes({ assetsDir, biomePath }), assetsDir);
+    debounce(
+      () => generateProjectTypes({ biomePath, projectDir }),
+      projectDir,
+    );
   });
 }
 
 /**
- * Generate the types.ts file inside the assets dir.
+ * Generate the types.ts file inside the .liqvid directory.
  */
 async function generateProjectTypes({
-  assetsDir,
   biomePath,
+  projectDir,
 }: {
-  assetsDir: string;
   biomePath: Maybe<string>;
+  projectDir: string;
 }) {
-  const directoryStructure = await listDir(assetsDir);
+  const directoryStructure = await listProjectDir(projectDir);
+  const assetsDir = path.join(projectDir, ASSETS_DIRNAME);
+
+  // Ensure .liqvid directory exists
+  await fsp.mkdir(assetsDir, { recursive: true });
+
   runTemplate({
     biomePath,
     data: {
@@ -132,6 +209,49 @@ export async function runTemplate({
   }
 }
 
+/**
+ * List a project directory, applying include/exclude patterns.
+ * @param projectDir - The root project directory
+ * @param currentDir - The current directory being listed (defaults to projectDir)
+ * @param relativePath - The path relative to projectDir (defaults to "")
+ */
+async function listProjectDir(
+  projectDir: string,
+  currentDir: string = projectDir,
+  relativePath: string = "",
+): Promise<Directory> {
+  const entries = await fsp.readdir(currentDir);
+
+  const results = await Promise.all(
+    entries.map(async (basename) => {
+      const fullPath = path.join(currentDir, basename);
+      const relPath = relativePath ? `${relativePath}/${basename}` : basename;
+
+      // Check if this entry should be excluded
+      if (shouldExclude(relPath, basename)) {
+        return null;
+      }
+
+      const stats = await fsp.stat(fullPath);
+      if (stats.isDirectory()) {
+        const subDir = await listProjectDir(projectDir, fullPath, relPath);
+        // Only include non-empty directories
+        if (Object.keys(subDir).length > 0) {
+          return [basename, subDir] as const;
+        }
+        return null;
+      } else {
+        return [basename, null] as const;
+      }
+    }),
+  );
+
+  return Object.fromEntries(
+    results.filter((entry): entry is [string, Directory | null] => entry !== null),
+  );
+}
+
+/** @deprecated Use listProjectDir instead */
 export async function listDir(dirname: string): Promise<Directory> {
   const dir = await fsp.readdir(dirname);
 
@@ -140,7 +260,7 @@ export async function listDir(dirname: string): Promise<Directory> {
       dir.reduce(
         (acc, basename) => {
           const filename = path.join(dirname, basename);
-          if (isForbidden(filename, basename)) return acc;
+          if (basename === ".DS_Store" || basename === "types.ts") return acc;
 
           const stats = fs.statSync(filename);
           if (stats.isDirectory()) {
