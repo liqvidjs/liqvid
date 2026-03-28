@@ -32,6 +32,36 @@
       ],
       "additionalProperties": false
     },
+    "include": {
+      "type": "object",
+      "properties": {
+        "media": {
+          "default": [
+            "**/*.gif",
+            "**/*.jpeg",
+            "**/*.jpg",
+            "**/*.m3u8",
+            "**/*.mov",
+            "**/*.mp4",
+            "**/*.png",
+            "**/*.webm",
+            "!**/opengraph-image.*",
+            "!**/twitter-image.*",
+            "**/.liqvid/**/*.ts",
+            "!**/.liqvid/types.ts",
+            "!*.d.ts"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "media"
+      ],
+      "additionalProperties": false
+    },
     "providers": {
       "type": "object",
       "properties": {
@@ -106,15 +136,20 @@
           "type": "object",
           "properties": {
             "auth": {
-              "anyOf": [
+              "oneOf": [
                 {
                   "type": "object",
                   "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "profile"
+                    },
                     "profile": {
                       "type": "string"
                     }
                   },
                   "required": [
+                    "type",
                     "profile"
                   ],
                   "additionalProperties": false
@@ -122,6 +157,10 @@
                 {
                   "type": "object",
                   "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "explicit"
+                    },
                     "accessKeyId": {
                       "default": "{env:AWS_ACCESS_KEY_ID}",
                       "type": "string",
@@ -141,6 +180,7 @@
                     }
                   },
                   "required": [
+                    "type",
                     "accessKeyId",
                     "region",
                     "secretAccessKey"

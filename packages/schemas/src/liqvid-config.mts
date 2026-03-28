@@ -30,6 +30,30 @@ export const LiqvidConfig = z.object({
     media: z.enum(["liqvidStudio", "s3", "sftp"]),
   }),
 
+  /** Files to include when publishing */
+  include: z
+    .object({
+      /** Glob patterns of media files to include when publishing media */
+      media: z.array(z.string()).optional().default([
+        "**/*.gif",
+        "**/*.jpeg",
+        "**/*.jpg",
+        "**/*.m3u8",
+        "**/*.mov",
+        "**/*.mp4",
+        "**/*.png",
+        "**/*.webm",
+        // omit social share images handled by Next
+        "!**/opengraph-image.*",
+        "!**/twitter-image.*",
+        // distinguish Transport Stream files from TypeScript files
+        "**/.liqvid/**/*.ts",
+        "!**/.liqvid/types.ts",
+        "!*.d.ts",
+      ]),
+    })
+    .optional(),
+
   providers: z.object({
     // social
     bluesky: ProviderConfigBlueSky.optional(),
