@@ -34,7 +34,6 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
     "build": "tsc --build",
-
     "lint": "biome check --fix",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -51,6 +50,7 @@
     "chalk": "catalog:",
     "cli-progress": "catalog:",
     "execa": "catalog:",
+    "fast-glob": "catalog:",
     "handlebars": "catalog:",
     "pluralize": "catalog:",
     "yargs": "catalog:",

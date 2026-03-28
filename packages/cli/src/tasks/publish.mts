@@ -1,6 +1,7 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
@@ -8,8 +9,27 @@ import { LiqvidConfig } from "@liqvid/schemas";
 
 import { S3Provider } from "../providers/hosting/s3.mts";
 
-const LIQVID_DIR = ".liqvid";
 const CONFIG_FILE = "liqvid.json";
+
+/** Default glob patterns for media files (matches schema defaults) */
+const DEFAULT_MEDIA_PATTERNS = [
+  "**/*.gif",
+  "**/*.jpeg",
+  "**/*.jpg",
+  "**/*.m3u8",
+  "**/*.mov",
+  "**/*.mp4",
+  "**/*.png",
+  "**/*.webm",
+  // omit social share images handled by Next
+  "!**/opengraph-image.*",
+  "!**/twitter-image.*",
+  // distinguish Transport Stream files from TypeScript files
+  "**/.liqvid/**/*.ts",
+  "!**/.liqvid/types.ts",
+  "!**/*.d.ts",
+  "!**/*.d.json.ts",
+];
 
 /** Publish media files to configured hosting provider. */
 export const publish: CommandModule = {
@@ -25,7 +45,7 @@ export const publish: CommandModule = {
       .option("cwd", {
         alias: "C",
         default: process.cwd(),
-        desc: "Working directory containing liqvid.json and .liqvid folders",
+        desc: "Working directory containing liqvid.json and media files",
         normalize: true,
       })
       .option("config", {
@@ -36,7 +56,7 @@ export const publish: CommandModule = {
       .option("base-dir", {
         alias: "b",
         default: "app",
-        desc: "Base directory containing .liqvid folders (paths are relative to this)",
+        desc: "Base directory containing media files (paths are relative to this)",
         normalize: true,
       })
       .option("dry-run", {
@@ -54,40 +74,48 @@ export const publish: CommandModule = {
     const dryRun = argv["dry-run"] as boolean;
     const configPath = (argv.config as string) ?? path.join(cwd, CONFIG_FILE);
 
-    // The base directory is where we search for .liqvid folders
+    // The base directory is where we search for media files
     // and paths are computed relative to it
     const searchDir = path.join(cwd, baseDir);
 
     // Load and parse config
     const config = await loadConfig(configPath);
 
-    // Find all .liqvid directories
-    const liqvidDirs = await findLiqvidDirs(searchDir);
+    // Get glob patterns from config, with sensible defaults
+    const patterns = config.include?.media ?? DEFAULT_MEDIA_PATTERNS;
 
-    if (liqvidDirs.length === 0) {
-      console.log(`No .liqvid directories found in ${baseDir}/. Nothing to publish.`);
+    // Find media files matching the glob patterns
+    const mediaFiles = await fg(patterns, {
+      cwd: searchDir,
+      absolute: true,
+      onlyFiles: true,
+      dot: true, // Include files in .liqvid directories
+    });
+
+    if (mediaFiles.length === 0) {
+      console.log(`No media files found in ${baseDir}/. Nothing to publish.`);
       process.exit(0);
     }
 
+    // Sort for consistent output
+    mediaFiles.sort();
+
     console.log(
-      `Found ${liqvidDirs.length} .liqvid ${pluralize("directory", liqvidDirs.length)}:`,
+      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/`,
     );
-    for (const dir of liqvidDirs) {
-      console.log(`  - ${path.relative(cwd, dir)}`);
-    }
     console.log();
 
     if (dryRun) {
       console.log("Dry run mode - no files will be uploaded.");
-      await showDryRunInfo(liqvidDirs, searchDir, config);
+      await showDryRunInfo(mediaFiles, searchDir, config);
       process.exit(0);
     }
 
     // Create provider based on config
     const provider = createProvider(config);
 
-    // Publish all .liqvid directories (paths relative to searchDir)
-    await provider.publishMedia(liqvidDirs, searchDir);
+    // Publish all media files (paths relative to searchDir)
+    await provider.publishMedia(mediaFiles, searchDir);
 
     console.log("\nPublish complete!");
     process.exit(0);
@@ -150,33 +178,6 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig> {
 }
 
 /**
- * Find all .liqvid directories recursively
- */
-async function findLiqvidDirs(rootDir: string): Promise<string[]> {
-  const liqvidDirs: string[] = [];
-
-  async function search(dir: string): Promise<void> {
-    const entries = await fsp.readdir(dir, { withFileTypes: true });
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-
-      const fullPath = path.join(dir, entry.name);
-
-      if (entry.name === LIQVID_DIR) {
-        liqvidDirs.push(fullPath);
-      } else if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
-        // Recursively search subdirectories (skip hidden dirs and node_modules)
-        await search(fullPath);
-      }
-    }
-  }
-
-  await search(rootDir);
-  return liqvidDirs.sort();
-}
-
-/**
  * Create the appropriate provider based on config
  */
 function createProvider(config: LiqvidConfig): S3Provider {
@@ -193,102 +194,32 @@ function createProvider(config: LiqvidConfig): S3Provider {
   throw new Error(`Unsupported media provider: ${mediaBackend}. Currently only "s3" is supported.`);
 }
 
-/** File extensions that are considered media files for publishing */
-const MEDIA_EXTENSIONS = new Set([
-  ".gif",
-  ".jpeg",
-  ".jpg",
-  ".m3u8",
-  ".mp4",
-  ".png",
-  ".ts",
-  ".webm",
-]);
-
-/**
- * Check if a file is a media file based on its extension.
- * Note: .ts is for HLS Transport Stream files, not TypeScript.
- * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
- */
-function isMediaFile(filePath: string): boolean {
-  const lowerPath = filePath.toLowerCase();
-  const basename = path.basename(lowerPath);
-
-  // Exclude TypeScript files
-  if (
-    lowerPath.endsWith(".d.ts") ||
-    lowerPath.endsWith(".d.json.ts") ||
-    basename === "types.ts"
-  ) {
-    return false;
-  }
-
-  const ext = path.extname(lowerPath);
-  return MEDIA_EXTENSIONS.has(ext);
-}
-
 /**
  * Show what would be uploaded in dry-run mode
  */
 async function showDryRunInfo(
-  liqvidDirs: string[],
+  mediaFiles: string[],
   rootDir: string,
   config: LiqvidConfig,
 ): Promise<void> {
   // Get the S3 prefix if configured
   const s3Prefix = config.providers.s3?.prefix ?? "";
+  const bucket = config.providers.s3?.bucket ?? "bucket";
 
   console.log("\nMedia files that would be uploaded:\n");
 
-  let totalFiles = 0;
-
-  for (const dir of liqvidDirs) {
-    const relativeDir = path.relative(rootDir, dir);
-    const files = await getAllFiles(dir);
-    const mediaFiles = files.filter(isMediaFile);
-
-    if (mediaFiles.length === 0) {
-      continue;
-    }
-
-    console.log(`${relativeDir}/`);
-    for (const file of mediaFiles) {
-      const relativeFromRoot = path.relative(rootDir, file);
-      const s3Key = s3Prefix
-        ? `${s3Prefix}/${relativeFromRoot}`.replace(/\\/g, "/")
-        : relativeFromRoot.replace(/\\/g, "/");
-      const stats = await fsp.stat(file);
-      const sizeStr = formatFileSize(stats.size);
-      console.log(`  ${path.relative(dir, file)} → s3://${config.providers.s3?.bucket}/${s3Key} (${sizeStr})`);
-      totalFiles++;
-    }
-    console.log();
+  for (const file of mediaFiles) {
+    const relativeFromRoot = path.relative(rootDir, file);
+    const s3Key = s3Prefix
+      ? `${s3Prefix}/${relativeFromRoot}`.replace(/\\/g, "/")
+      : relativeFromRoot.replace(/\\/g, "/");
+    const stats = await fsp.stat(file);
+    const sizeStr = formatFileSize(stats.size);
+    console.log(`  ${relativeFromRoot} → s3://${bucket}/${s3Key} (${sizeStr})`);
   }
 
-  if (totalFiles === 0) {
-    console.log("No media files found to upload.");
-  } else {
-    console.log(`Total: ${totalFiles} ${pluralize("file", totalFiles)}`);
-  }
-}
-
-/**
- * Recursively get all files in a directory
- */
-async function getAllFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  const entries = await fsp.readdir(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await getAllFiles(fullPath)));
-    } else if (entry.isFile()) {
-      files.push(fullPath);
-    }
-  }
-
-  return files.sort();
+  console.log();
+  console.log(`Total: ${mediaFiles.length} ${pluralize("file", mediaFiles.length)}`);
 }
 
 /**

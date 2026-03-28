@@ -49,7 +49,8 @@ export const LiqvidConfig = z.object({
         // distinguish Transport Stream files from TypeScript files
         "**/.liqvid/**/*.ts",
         "!**/.liqvid/types.ts",
-        "!*.d.ts",
+        "!**/*.d.ts",
+        "!**/*.d.json.ts",
       ]),
     })
     .optional(),
