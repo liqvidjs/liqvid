@@ -34,7 +34,7 @@ function resolveEnvVar(envVar: string): string {
  * Replaces all `{env:VAR_NAME}` patterns with their values.
  */
 function interpolateEnvVars(str: string): string {
-  return str.replace(/\{env:([^}]+)\}/g, (match, varName) => {
+  return str.replace(/\{env:([^}]+)\}/g, (_match, varName) => {
     const value = process.env[varName];
     if (value === undefined) {
       throw new Error(`Environment variable ${varName} is not set`);
@@ -161,7 +161,9 @@ export class S3Provider implements MediaHostingProvider {
       return;
     }
 
-    console.log(`Checking ${files.length} files against s3://${this.bucket}...`);
+    console.log(
+      `Checking ${files.length} files against s3://${this.bucket}...`,
+    );
 
     const statuses = await this.checkFiles(files, rootDir);
     const toUpload = statuses.filter((s) => s.needsUpload);

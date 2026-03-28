@@ -27,8 +27,8 @@ export function IconButton({
 }: IconButtonProps) {
   return (
     <button
-      ref={ref}
       className={`${styles.iconButton} ${styles[size]} ${styles[variant]} ${className ?? ""}`}
+      ref={ref}
       type="button"
       {...props}
     >
