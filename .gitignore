@@ -22,3 +22,5 @@ bundle.js
 
 # static files
 *.mp4
+*.png
+*.webm
