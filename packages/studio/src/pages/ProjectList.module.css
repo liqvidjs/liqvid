@@ -45,6 +45,8 @@
 }
 
 .actions {
+  display: flex;
+  gap: 0.2em;
   padding: 0.5rem 1rem;
 }
 

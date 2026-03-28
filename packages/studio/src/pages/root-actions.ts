@@ -4,6 +4,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { execa } from "execa";
 import Handlebars from "handlebars";
 
 import { runNextBuild } from "../initialize.mts";
@@ -50,6 +51,26 @@ const TEMPLATES_DIR = path.join(
 const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, "projects");
 
 const APP_DIR = path.join(process.cwd(), "app");
+
+/**
+ * Open project in Finder
+ */
+export async function openInFinderAction(
+  projectPath: string,
+): Promise<{ success: boolean }> {
+  try {
+    // Validate path to prevent directory traversal
+    if (projectPath.includes("..")) {
+      return { success: false };
+    }
+    const fullPath = path.join(APP_DIR, projectPath);
+    await execa("open", [fullPath]);
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to open in Finder:", e);
+    return { success: false };
+  }
+}
 
 /**
  * Load all available project templates.

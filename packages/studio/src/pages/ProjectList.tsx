@@ -1,6 +1,7 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
+import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
 import { ChevronDown, ChevronRight, Folder } from "lucide-react";
@@ -8,11 +9,8 @@ import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies";
-import type {
-  ProjectMeta,
-  SerializedProjectMeta,
-} from "../schemas/project.mts";
 
+import { OpenInFinderButton } from "./OpenInFinderButton";
 import { ProductionLink } from "./ProductionLink";
 
 import styles from "./ProjectList.module.css";
@@ -254,6 +252,7 @@ function ProjectItem({
         </div>
       </a>
       <div className={styles.actions}>
+        <OpenInFinderButton projectPath={project.path} />
         <ProductionLink
           href={`http://localhost:${productionServerPort}/${project.path}`}
         />
