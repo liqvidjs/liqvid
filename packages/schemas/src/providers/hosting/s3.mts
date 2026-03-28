@@ -4,21 +4,26 @@ import { EnvVar, StringWithEnvVars } from "../../shared.mts";
 
 /** Authentication via AWS profile */
 export const S3ProfileAuth = z.object({
-  type: z.literal("profile"),
   profile: z.string(),
+  type: z.literal("profile"),
 });
 export type S3ProfileAuth = z.infer<typeof S3ProfileAuth>;
 
 /** Explicit S3 credentials authentication */
 export const S3ExplicitAuth = z.object({
-  type: z.literal("explicit"),
-
   /**
    * Access key ID. For security, can only be specified via env var.
    *
    * @default {env:AWS_ACCESS_KEY_ID}
    */
   accessKeyId: EnvVar.optional().default(`{env:AWS_ACCESS_KEY_ID}`),
+
+  /**
+   * Domain at which to access content. It is strongly recommended to use
+   * a cache (e.g. AWS CloudFront or CloudFlare R2 Custom Domain) instead
+   * of serving content directly.
+   */
+  domain: z.string(),
 
   /**
    * S3-compatible endpoint URL. May contain env var interpolations.
@@ -39,6 +44,7 @@ export const S3ExplicitAuth = z.object({
    * @default {env:AWS_SECRET_ACCESS_KEY}
    */
   secretAccessKey: EnvVar.optional().default(`{env:AWS_SECRET_ACCESS_KEY}`),
+  type: z.literal("explicit"),
 });
 export type S3ExplicitAuth = z.infer<typeof S3ExplicitAuth>;
 

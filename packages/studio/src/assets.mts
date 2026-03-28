@@ -25,12 +25,15 @@ type StripPrefix<
   S extends string,
 > = T extends `${S}${infer Tail}` ? Tail : never;
 
-export class DirectoryHelper<DS extends string> {
+export class DirectoryHelper<
+  DS extends string,
+  TemplateVars extends string = string,
+> {
   constructor(private dirname = "") {}
 
   dir<D extends Dirs<DS>>(
     dirname: D,
-  ): DirectoryHelper<Exclude<StripPrefix<DS, `${D}/`>, "">> {
+  ): DirectoryHelper<Exclude<StripPrefix<DS, `${D}/`>, "">, TemplateVars> {
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
   }
 
@@ -38,9 +41,14 @@ export class DirectoryHelper<DS extends string> {
     return `${this.dirname}/${filename}`;
   }
 
-  interpolate(vars: Record<string, string>) {
+  interpolate<V extends TemplateVars>(
+    vars: Record<V, string>,
+  ): DirectoryHelper<DS, Exclude<TemplateVars, V>> {
     let dirname = this.dirname;
-    for (const [key, value] of Object.entries(vars)) {
+    for (const [key, value] of Object.entries(vars) as [
+      TemplateVars,
+      string,
+    ][]) {
       dirname = dirname.replace(`{${key}}`, value);
     }
     return new DirectoryHelper<DS>(dirname);

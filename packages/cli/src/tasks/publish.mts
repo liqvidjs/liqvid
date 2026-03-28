@@ -82,7 +82,7 @@ export const publish: CommandModule = {
     const config = await loadConfig(configPath);
 
     // Get glob patterns from config, with sensible defaults
-    const patterns = config.include?.media ?? DEFAULT_MEDIA_PATTERNS;
+    const patterns = config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
 
     // Find media files matching the glob patterns
     const mediaFiles = await fg(patterns, {

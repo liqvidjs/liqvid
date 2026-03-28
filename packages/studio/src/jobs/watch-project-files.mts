@@ -3,7 +3,12 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { Duration } from "@liqvid/duration";
-import type { ProjectMeta } from "@liqvid/schemas";
+import {
+  type AspectRatio,
+  AutoGenProjectMeta,
+  ProjectJson,
+  type ProjectMeta,
+} from "@liqvid/schemas";
 import type { Maybe } from "have-fun";
 import { ZodError } from "zod";
 
