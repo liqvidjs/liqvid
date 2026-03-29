@@ -12,6 +12,8 @@
 #
 **/.liqvid
 
+*.d.json.ts
+
 # hide packages
 #packages/cli
 packages/manim-web
