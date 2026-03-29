@@ -9,8 +9,8 @@ import { subscribeWithSelector } from "zustand/middleware";
 type RecordType<T> = T extends Record<string, infer K> ? K : never;
 type ArrayType<T> = T extends (infer K)[] ? K : never;
 
-/** CodeBooth store state. */
-export interface State {
+/** LiveCode store state. */
+export interface LiveCodeState {
   /**
    * Name of active editor group.
    */
@@ -53,17 +53,17 @@ export interface State {
   shortcuts: Record<string, KeyBinding>;
 
   /** Get the active file. */
-  getActiveFile(): ArrayType<RecordType<State["groups"]>["files"]>;
+  getActiveFile(): ArrayType<RecordType<LiveCodeState["groups"]>["files"]>;
 
   /** Get the active view. */
   getActiveView(): EditorView;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const makeStore = (state: Partial<State> = {}) =>
-  createStore<State>()(
+export const makeStore = (state: Partial<LiveCodeState> = {}) =>
+  createStore<LiveCodeState>()(
     subscribeWithSelector(
-      (_set, get): State => ({
+      (_set, get): LiveCodeState => ({
         // default values
         activeGroup: undefined,
         classNames: ["lqv-codebooth"],
@@ -85,11 +85,22 @@ export const makeStore = (state: Partial<State> = {}) =>
     ),
   );
 
-export type Store = ReturnType<typeof makeStore>;
+export type LiveCodeStore = ReturnType<typeof makeStore>;
 
-export const BoothStore = createContext<Store>(null);
+export const LiveCodeContext = createContext<LiveCodeStore | null>(null);
+LiveCodeContext.displayName = "LiveCode";
 
-/** Get a reference to the Zustand store for this CodeBooth. See {@link State} for store shape. */
-export function useBoothStore(): Store {
-  return useContext(BoothStore);
+/** Get a reference to the Zustand store for this CodeBooth. See {@link LiveCodeState} for store shape. */
+export function useLiveCodeStore(): LiveCodeStore {
+  const store = useContext(LiveCodeContext);
+
+  if (!store) {
+    throw new Error("LiveCode store not available");
+  }
+
+  return store;
+}
+
+export function useLiveCodeStoreOptional(): LiveCodeStore | null {
+  return useContext(LiveCodeContext);
 }

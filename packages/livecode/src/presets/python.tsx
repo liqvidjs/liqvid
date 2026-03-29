@@ -3,7 +3,11 @@ import type { Extension } from "@codemirror/state";
 import { CodeRecording } from "@lqv/codemirror/recording";
 import { useEffect } from "react";
 
-import { Clear, Copy, Reset, Run, Tab, TabList } from "../components/buttons";
+import { Clear } from "../buttons/Clear";
+import { Copy } from "../buttons/Copy";
+import { Reset } from "../buttons/Reset";
+import { Run } from "../buttons/Run";
+import { Tab, TabList } from "../components/buttons";
 import { Console } from "../components/Console";
 import { Editor } from "../components/Editor";
 import { EditorGroup } from "../components/EditorGroup";
@@ -13,7 +17,7 @@ import { Resize } from "../components/Resize";
 import { LiveCode } from "../components/Root";
 import { basicSetup } from "../extensions";
 import { PythonInterpreter } from "../interpreters/skulpt";
-import { useBoothStore } from "../store";
+import { useLiveCodeStore } from "../store";
 
 const interpreter = new PythonInterpreter();
 
@@ -141,7 +145,7 @@ export const PythonReplay: React.FC<{
 
 /** Run Python code. */
 export const PythonRun: React.FC = () => {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
 
   useEffect(() => {
     return store.subscribe(

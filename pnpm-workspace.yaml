@@ -146,6 +146,7 @@ catalogs:
     "@juggle/resize-observer": ">=3.4"
     "@react-three/drei": ">=10"
     "@react-three/fiber": ">=9"
+    "@replit/codemirror-vim": ^6.3
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
     katex: ">=0.16"

@@ -7,15 +7,11 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
-import {
-  Buttons,
-  Clear,
-  Copy,
-  Reset,
-  Run,
-  Tab,
-  TabList,
-} from "../components/buttons";
+import { Clear } from "../buttons/Clear";
+import { Copy } from "../buttons/Copy";
+import { Reset } from "../buttons/Reset";
+import { Run } from "../buttons/Run";
+import { Tab, TabList } from "../components/buttons";
 import { Console } from "../components/Console";
 import { Editor } from "../components/Editor";
 import { EditorGroup } from "../components/EditorGroup";
@@ -25,7 +21,7 @@ import { Record } from "../components/Record";
 import { Replay, ReplayMultiple } from "../components/Replay";
 import { Resize } from "../components/Resize";
 import { basicSetup } from "../extensions";
-import { type State, useBoothStore } from "../store";
+import { type LiveCodeState, useLiveCodeStore } from "../store";
 
 import { LiveCode } from "..";
 
@@ -201,7 +197,7 @@ export const HTMLRecord: React.FC<{
 export function HTMLPreview(
   props: React.IframeHTMLAttributes<HTMLIFrameElement>,
 ) {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
 
   /** <iframe> containing preview document */
   const iframe = useRef<HTMLIFrameElement>();
@@ -380,7 +376,7 @@ export function extensionFromFilename(filename: string): Extension {
  * Get record of filenames to file contents.
  * @param state Booth state.
  */
-function getFileContents(state: State): Record<string, string> {
+function getFileContents(state: LiveCodeState): Record<string, string> {
   const ret: Record<string, string> = {};
   if (!state.groups[state.activeGroup]) return ret;
   const { files } = state.groups[state.activeGroup];
@@ -466,7 +462,7 @@ function key(): number {
  * Component for displaying console logs.
  */
 export const HTMLConsole: React.FC = () => {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const messages = useStore(store, (state) => state.messages);
 
   return (

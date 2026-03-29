@@ -10,7 +10,7 @@ import type { FakeSelectionConfig } from "@lqv/codemirror/fake-selection";
 import { useME } from "@lqv/playback/react";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { type Store, useBoothStore } from "../store";
+import { type LiveCodeStore, useLiveCodeStore } from "../store";
 
 import { Editor } from "./Editor";
 
@@ -40,7 +40,7 @@ export function Replay({
      * @param cmd The command to handle.
      * @param doc The CodeMirror document.
      */
-    handle?: (useStore: Store, cmd: string, doc: Text) => void;
+    handle?: (useStore: LiveCodeStore, cmd: string, doc: Text) => void;
 
     /** Coding data to replay. */
     replay?: CodeData | Promise<CodeData>;
@@ -54,7 +54,7 @@ export function Replay({
      */
     start?: number;
   }): JSX.Element {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const playback = useME();
 
   const __handle = useCallback(
@@ -148,7 +148,11 @@ export function ReplayMultiple({
    * @param cmd The command to handle.
    * @param docs CodeMirror documents.
    */
-  handle?: (store: Store, cmd: string, docs: Record<string, Text>) => void;
+  handle?: (
+    store: LiveCodeStore,
+    cmd: string,
+    docs: Record<string, Text>,
+  ) => void;
 
   /**
    * Coding data to replay.
@@ -162,7 +166,7 @@ export function ReplayMultiple({
   start?: number;
 }): null {
   const playback = useME();
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
 
   /* Handle callback */
   const handle = useCallback(

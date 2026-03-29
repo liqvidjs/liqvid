@@ -6,9 +6,9 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
 import { ids } from "../ids";
-import { type State, useBoothStore } from "../store";
+import { type LiveCodeState, useLiveCodeStore } from "../store";
 
-const selector = (state: State) => [
+const selector = (state: LiveCodeState) => [
   state.activeGroup,
   state.groups[state.activeGroup]?.activeFile,
 ];
@@ -27,7 +27,7 @@ export function FileTabs({
     tab?: string;
   };
 }) {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const [activeGroup, activeFilename] = useStore(store, useShallow(selector));
   const group = store.getState().groups[activeGroup];
   const { recorder } = store.getState();
@@ -75,7 +75,7 @@ export function FileTabs({
   // set class
   useEffect(() => {
     // keyboard shortcuts
-    const selectShortcuts: State["shortcuts"] = {};
+    const selectShortcuts: LiveCodeState["shortcuts"] = {};
 
     for (let i = 1; i <= 9; ++i) {
       selectShortcuts[`Mod-${i}`] = {

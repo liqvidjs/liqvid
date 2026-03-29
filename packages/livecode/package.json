@@ -64,9 +64,11 @@
     "@codemirror/search": "catalog:peer",
     "@codemirror/state": "catalog:peer",
     "@codemirror/view": "catalog:peer",
-    "@lqv/playback": "workspace:^2.0.0-alpha.1",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.2",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@lqv/codemirror": "workspace:^",
+    "@lqv/playback": "workspace:^2.0.0-alpha.1",
+    "@replit/codemirror-vim": "catalog:peer",
     "react": "catalog:peer",
     "skulpt": "catalog:peer"
   },

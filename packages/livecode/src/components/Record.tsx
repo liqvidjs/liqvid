@@ -6,7 +6,7 @@ import { passThrough } from "@lqv/codemirror/extensions";
 import { useEffect, useMemo } from "react";
 
 import { recording } from "../extensions";
-import { type State, useBoothStore } from "../store";
+import { type LiveCodeState, useLiveCodeStore } from "../store";
 
 import { Editor } from "./Editor";
 
@@ -38,7 +38,7 @@ export const Record: React.FC<
     ...attrs
   } = props;
 
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const lqvKeymap = useKeymap();
 
   const newExtensions = useMemo(
@@ -76,9 +76,9 @@ export const Record: React.FC<
 /* NOOOOOOOOOO */
 const modifiedRecorder = Symbol();
 
-type Hack = State["recorder"] & { [modifiedRecorder]: boolean };
+type Hack = LiveCodeState["recorder"] & { [modifiedRecorder]: boolean };
 
-function includeFilenameInRecording(state: State) {
+function includeFilenameInRecording(state: LiveCodeState) {
   // only do this if we are recording in multiple files
   let recordingExtensions = 0;
 

@@ -3,7 +3,7 @@ import { Children, cloneElement, useEffect } from "react";
 import { useStore } from "zustand";
 
 import { ids } from "../ids";
-import { useBoothStore } from "../store";
+import { useLiveCodeStore } from "../store";
 
 /** Holds a group of editors. */
 export function EditorGroup({
@@ -15,7 +15,7 @@ export function EditorGroup({
   /** ID of this group. */
   id: string;
 }) {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const active = useStore(store, (state) => state.activeGroup === id);
 
   useEffect(() => {

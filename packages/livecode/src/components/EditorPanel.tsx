@@ -3,7 +3,7 @@ import { Children, cloneElement } from "react";
 import { useStore } from "zustand";
 
 import { ids } from "../ids";
-import { useBoothStore } from "../store";
+import { useLiveCodeStore } from "../store";
 
 /**
  * Tabpanel containing a single editor.
@@ -28,7 +28,7 @@ export function EditorPanel({
    */
   group?: string;
 }) {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
   const active = useStore(
     store,
     (state) => state.groups[group]?.activeFile === filename,

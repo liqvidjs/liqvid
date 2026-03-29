@@ -2,8 +2,8 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 
-import { recording, shortcuts } from "../extensions";
-import { useBoothStore } from "../store";
+import { recording, shortcuts, vimCompartment } from "../extensions";
+import { useLiveCodeStore } from "../store";
 
 /** Compartment for toggling extensions in CodeMirror. */
 const editorCompartment = new Compartment();
@@ -38,7 +38,7 @@ export function Editor({
    */
   group?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
 
   const ref = useRef<HTMLDivElement>();
   const [view, setView] = useState<EditorView>();
@@ -56,6 +56,9 @@ export function Editor({
         extensions: [
           recording.of([]),
           shortcuts.of([]),
+
+          // vim
+          vimCompartment.of([]),
           ...(editable ? [] : [EditorView.editable.of(false)]),
           ...(extensions ?? []),
         ],

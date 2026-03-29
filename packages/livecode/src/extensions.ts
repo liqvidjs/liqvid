@@ -69,3 +69,4 @@ export const basicSetup: Extension = [
 
 export const recording = new Compartment();
 export const shortcuts = new Compartment();
+export const vimCompartment = new Compartment();

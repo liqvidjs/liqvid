@@ -7,7 +7,12 @@ import { type JSX, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
 import { shortcuts } from "../extensions";
-import { BoothStore, makeStore, type Store, useBoothStore } from "../store";
+import {
+  LiveCodeContext,
+  type LiveCodeStore,
+  makeStore,
+  useLiveCodeStore,
+} from "../store";
 
 /**
  * Container for code editing/recording/replaying.
@@ -18,7 +23,7 @@ export function LiveCode({
   className,
   ...attrs
 }: JSX.IntrinsicElements["div"]) {
-  const store = useRef<Store>(null);
+  const store = useRef<LiveCodeStore>(null);
   if (!store.current) {
     store.current = makeStore();
   }
@@ -31,18 +36,18 @@ export function LiveCode({
       data-affords="click keys"
       {...attrs}
     >
-      <BoothStore.Provider value={store.current}>
+      <LiveCodeContext.Provider value={store.current}>
         <PlaybackContext.Provider value={useME()}>
           <KeyboardShortcuts />
           {children}
         </PlaybackContext.Provider>
-      </BoothStore.Provider>
+      </LiveCodeContext.Provider>
     </div>
   );
 }
 
 export function KeyboardShortcuts(): null {
-  const store = useBoothStore();
+  const store = useLiveCodeStore();
 
   useEffect(() => {
     // this is somewhat wasteful but oh well
