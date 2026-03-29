@@ -16,6 +16,7 @@ tsconfig.tsbuildinfo
 
 # Generated
 bundle.js
+*.json.d.ts
 
 # Operating system
 .DS_Store
