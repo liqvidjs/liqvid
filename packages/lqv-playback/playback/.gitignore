@@ -1,5 +1,0 @@
-# OS and program files
-.DS_Store
-
-# ignore node_modules
-/node_modules
