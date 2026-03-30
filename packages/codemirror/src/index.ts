@@ -199,6 +199,13 @@ export function cmReplayMultiple({
 
           // editor change
           inverses[file][i] = action[0].invert(docs[file]);
+          console.log({
+            action,
+            doc: docs[file],
+            docLength: docs[file].length,
+            file,
+            length: action[0].length,
+          });
           docs[file] = action[0].apply(docs[file]);
         } else if (action[0] === scrollCmd) {
           // @ts-expect-error file selection command will always come first

@@ -77,6 +77,8 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
     const updateListener = EditorView.updateListener.of((update) => {
       if (this.paused || !this.active) return;
 
+      console.log({ update });
+
       // get selection change (if any)
       const transactions = update.transactions
         .map((t) => {
