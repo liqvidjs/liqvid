@@ -94,7 +94,7 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
    * @emits start
    */
   beginRecording(plugins: Record<string, Recorder<unknown, unknown>>): void {
-    if (Object.keys(this.plugins).length === 0) return;
+    if (Object.keys(plugins).length === 0) return;
 
     // initialize
     this.plugins = plugins;

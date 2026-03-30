@@ -40,8 +40,15 @@ export abstract class BaseRecorder<
   beginRecording(timestamp = performance.now()): void {
     this.baseTime = timestamp;
 
+    this.active = true;
+
     // initialize
     this.#setPauseTime.setToZero();
+  }
+
+  endRecording(): void {
+    this.active = false;
+    this.paused = false;
   }
 
   pauseRecording?(timestamp = performance.now()) {
