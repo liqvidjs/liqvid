@@ -10,16 +10,12 @@ export function passThrough(keymap: Keymap, seqs: string[] = []): KeyBinding[] {
   return seqs.map((key) => {
     const can = cm2lv(key);
 
-    // argh
-    const fake =
-      typeof window === "undefined" ? null : new KeyboardEvent("keydown");
-
     return {
       key,
       run: () => {
         const handlers = keymap.getHandlers(can);
         for (const cb of handlers) {
-          cb(fake);
+          cb(fakeKeyboardEvent(can), { seq: key });
         }
         return false;
       },
@@ -27,14 +23,24 @@ export function passThrough(keymap: Keymap, seqs: string[] = []): KeyBinding[] {
   });
 }
 
+function fakeKeyboardEvent(seq: string) {
+  return new KeyboardEvent("keydown", {
+    altKey: seq.includes("Alt"),
+    ctrlKey: seq.includes("Ctrl") || (!isMac && seq.includes("Mod")),
+    metaKey: seq.includes("Meta") || (isMac && seq.includes("Mod")),
+    shiftKey: seq.includes("Shift"),
+  });
+}
+
 /**
  * Convert CodeMirror key sequences to Liqvid format.
  */
 function cm2lv(seq: string): string {
-  const isMac =
-    typeof globalThis.navigator !== "undefined" &&
-    navigator.platform === "MacIntel";
   seq = seq.replace("Mod", isMac ? "Meta" : "Ctrl");
   seq = seq.replace(/-/g, "+");
   return Keymap.normalize(seq);
 }
+
+const isMac =
+  typeof globalThis.navigator !== "undefined" &&
+  navigator.platform === "MacIntel";

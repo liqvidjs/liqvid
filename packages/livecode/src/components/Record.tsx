@@ -4,6 +4,8 @@ import { useKeymap } from "@liqvid/keymap/react";
 import { selectCmd } from "@lqv/codemirror";
 import { passThrough } from "@lqv/codemirror/extensions";
 import { useEffect, useMemo } from "react";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/shallow";
 
 import { recording } from "../extensions";
 import { type LiveCodeState, useLiveCodeStore } from "../store";
@@ -34,12 +36,18 @@ export const Record: React.FC<
     },
     extensions = [],
     group = "default",
-    passKeys = ["Mod-Alt-2", "Mod-Alt-3", "Mod-Alt-4"],
+    passKeys = [],
+    // passKeys = ["Mod-Alt-2", "Mod-Alt-3", "Mod-Alt-4"],
     ...attrs
   } = props;
 
   const store = useLiveCodeStore();
   const lqvKeymap = useKeymap();
+
+  const { groups, recorder } = useStore(
+    store,
+    useShallow(({ groups, recorder }) => ({ groups, recorder })),
+  );
 
   const newExtensions = useMemo(
     () =>
@@ -52,21 +60,21 @@ export const Record: React.FC<
   // attach recording extensions --- this has to be done this way because
   // the `shortcuts` Compartment will abort further handling of the sequence
   useEffect(() => {
-    const state = store.getState();
-    if (!state.recorder) return;
-    const { view } = state.groups[group].files.find(
+    if (!recorder) return;
+
+    const { view } = groups[group].files.find(
       (file) => file.filename === props.filename,
-    );
+    )!;
 
     view.dispatch({
       effects: recording.reconfigure([
         ...(recording.get(view.state) as Extension[]),
-        [state.recorder.extension(captureKeys)],
+        [recorder.extension(captureKeys)],
       ]),
     });
 
-    includeFilenameInRecording(state);
-  }, [captureKeys, group, props.filename, store.getState]);
+    includeFilenameInRecording(store.getState());
+  }, [captureKeys, group, groups, props.filename, recorder, store]);
 
   return (
     <Editor content={props.content} extensions={newExtensions} {...attrs} />
@@ -79,6 +87,8 @@ const modifiedRecorder = Symbol();
 type Hack = LiveCodeState["recorder"] & { [modifiedRecorder]: boolean };
 
 function includeFilenameInRecording(state: LiveCodeState) {
+  if (!state.recorder) return;
+
   // only do this if we are recording in multiple files
   let recordingExtensions = 0;
 
@@ -107,7 +117,7 @@ function includeFilenameInRecording(state: LiveCodeState) {
     // have to call existing beginRecording() FIRST in order to
     // set state.recorder.duration, otherwise we get negative times!
     beginRecording(...args);
-    state.recorder.capture(0, selectCmd + state.getActiveFile().filename);
+    state.recorder?.capture(0, selectCmd + state.getActiveFile().filename);
   };
   (state.recorder as Hack)[modifiedRecorder] = true;
 }

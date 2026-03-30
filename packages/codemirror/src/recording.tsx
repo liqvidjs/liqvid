@@ -49,9 +49,8 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
       class {
         constructor(view: EditorView) {
           view.scrollDOM.addEventListener("scroll", () => {
-            if (!$this.manager || $this.manager.paused || !$this.manager.active)
-              return;
-            const time = $this.manager.getTime();
+            if (!$this.paused || !$this.active) return;
+            const time = $this.getTime();
 
             const fontSize = Number.parseFloat(
               getComputedStyle(view.scrollDOM).getPropertyValue("font-size"),

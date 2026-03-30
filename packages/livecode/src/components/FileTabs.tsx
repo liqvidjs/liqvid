@@ -28,22 +28,25 @@ export function FileTabs({
   const store = useLiveCodeStore();
   const [activeGroup, activeFilename] = useStore(store, useShallow(selector));
   const group = store.getState().groups[activeGroup];
-  const { recorder } = store.getState();
 
   const select = useCallback(
     (filename: string) => {
+      const { activeGroup, recorder } = store.getState();
+
       // record event
       // @ts-expect-error TODO fix this
-      if (recorder?.manager?.active) {
+      if (recorder?.active) {
         recorder.capture(undefined, selectCmd + filename);
       }
+
+      if (!activeGroup) return;
 
       // set state
       store.setState((state) => ({
         groups: {
           ...state.groups,
-          [state.activeGroup]: {
-            ...state.groups[state.activeGroup],
+          [activeGroup]: {
+            ...state.groups[activeGroup],
             activeFile: filename,
           },
         },
@@ -51,7 +54,7 @@ export function FileTabs({
 
       // focus editor
       const state = store.getState();
-      const view = state.groups[state.activeGroup]?.files.find(
+      const view = state.groups[activeGroup]?.files.find(
         (_) => _.filename === filename,
       )?.view;
       if (view) {
@@ -59,7 +62,7 @@ export function FileTabs({
         setTimeout(() => view.focus());
       }
     },
-    [recorder, store.getState, store.setState],
+    [store.getState, store.setState],
   );
 
   const events = useMemo(
@@ -80,6 +83,7 @@ export function FileTabs({
         key: `Mod-${i}`,
         run: () => {
           const state = store.getState();
+          if (!state.activeGroup) return false;
           const group = state.groups[state.activeGroup];
 
           if (group.files.length < i) return false;

@@ -16,7 +16,11 @@ export function ConfigurationComponent({
   useEffect(() => {
     const instance = Array.from(instances)[0];
     instance.provideRecorder(CodeRecording.recorder);
-  }, []);
+
+    return () => {
+      instance.provideRecorder(undefined);
+    };
+  }, [instances]);
 
   return (
     <select
