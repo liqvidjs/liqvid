@@ -3,7 +3,6 @@
 import { keymap } from "@codemirror/view";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
-import { PlaybackContext, useME } from "@lqv/playback/react";
 import classNames from "classnames";
 import { type JSX, useEffect, useRef } from "react";
 import { useStore } from "zustand";
@@ -53,10 +52,8 @@ export function LiveCode({
       {...attrs}
     >
       <LiveCodeContext.Provider value={store.current}>
-        <PlaybackContext.Provider value={useME()}>
-          <KeyboardShortcuts />
-          {children}
-        </PlaybackContext.Provider>
+        <KeyboardShortcuts />
+        {children}
       </LiveCodeContext.Provider>
     </div>
   );

@@ -7,7 +7,7 @@ import {
   selectCmd,
 } from "@lqv/codemirror";
 import type { FakeSelectionConfig } from "@lqv/codemirror/fake-selection";
-import { useME } from "@lqv/playback/react";
+import { useSeekable } from "@lqv/playback/react";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { type LiveCodeStore, useLiveCodeStore } from "../store";
@@ -55,7 +55,7 @@ export function Replay({
     start?: number;
   }) {
   const store = useLiveCodeStore();
-  const playback = useME();
+  const playback = useSeekable();
 
   const __handle = useCallback(
     (cmd: string, doc: Text) => {
@@ -121,7 +121,7 @@ export function Replay({
     ],
   );
 
-  return <Editor extensions={__extensions} readOnly={false} {...props} />;
+  return <Editor extensions={__extensions} readOnly {...props} />;
 }
 
 /**
@@ -165,7 +165,7 @@ export function ReplayMultiple({
    */
   start?: number;
 }): null {
-  const playback = useME();
+  const playback = useSeekable();
   const store = useLiveCodeStore();
 
   /* Handle callback */
@@ -218,6 +218,15 @@ export function ReplayMultiple({
         }),
       );
     } else {
+      console.log({
+        replay,
+        views: Object.fromEntries(
+          Object.entries(views).map(([filename, view]) => [
+            filename,
+            view.state.doc,
+          ]),
+        ),
+      });
       cmReplayMultiple({
         data: replay,
         didScroll,
