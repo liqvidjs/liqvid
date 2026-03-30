@@ -19,8 +19,11 @@ export interface LiqvidStudioRecordingPlugin<
   Datum,
   FinalData = Datum[],
   Config = unknown,
+  Instance = unknown,
 > extends LiqvidStudioPluginBase {
-  configurationComponent?: () => React.ReactNode;
+  configurationComponent?: (props: {
+    instances: Set<Instance>;
+  }) => React.ReactNode;
 
   recordingComponent?: (props: {
     /** Name of the recording */

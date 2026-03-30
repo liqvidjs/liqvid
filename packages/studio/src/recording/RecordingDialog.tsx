@@ -4,10 +4,11 @@ import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
+import classNames from "classnames";
 import { Fragment, useCallback, useEffect, useState } from "react";
 
 import { listRecordings } from "../client.mts";
-import { useProjectContext } from "../LiqvidDevToolsProvider";
+import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
 import { DockableDialog } from "../ui/DockableDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 import { useToggle } from "../utils/react.mts";
@@ -28,7 +29,7 @@ export function RecordingDialog({
   shortcuts,
   onShortcutChange,
 }: RecordingDialogProps) {
-  const { projectPath } = useProjectContext();
+  const { instances, projectPath } = useStudioPrivateApi();
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
 
@@ -45,10 +46,12 @@ export function RecordingDialog({
   }, [projectPath]);
 
   return (
-    <DockableDialog.Dialog>
+    <DockableDialog.Dialog
+      className={classNames("lv-recording-dialog", styles.RecordingDialog)}
+    >
       <DockableDialog.Header>Recording</DockableDialog.Header>
       <DockableDialog.Content>
-        <div id="lv-recording-dialog">
+        <div>
           <Tabs defaultValue="configuration">
             <TabsList>
               <TabsTrigger className="lv-recording-tabs" value="configuration">
@@ -103,7 +106,9 @@ export function RecordingDialog({
                             {plugin.icon({ height: 36, width: 36 })}
                           </th>
                           <td>
-                            <ConfigurationComponent />
+                            <ConfigurationComponent
+                              instances={instances[plugin.package] ?? new Set()}
+                            />
                           </td>
                         </tr>
                       );

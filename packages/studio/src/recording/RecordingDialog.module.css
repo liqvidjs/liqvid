@@ -1,3 +1,7 @@
+.RecordingDialog {
+  font-family: sans-serif !important;
+}
+
 .Recordings {
   --radius: 4px;
 

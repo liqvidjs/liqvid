@@ -21,6 +21,8 @@ export interface PluginContext {
 
   plugins: Record<string, LiqvidStudioPlugin>;
 
+  registerInstance: <T>(pluginName: string, instance: T) => () => void;
+
   /** Set the duration of the current project */
   setDuration: (duration: DurationLike) => void;
 }
@@ -28,6 +30,7 @@ export interface PluginContext {
 const PluginContext = createContext<PluginContext>({
   makeToast() {},
   plugins: {},
+  registerInstance: () => () => {},
   setDuration: () => {},
 });
 PluginContext.displayName = "LiqvidStudioPluginApi";
@@ -55,6 +58,7 @@ export function LiqvidStudioPluginApiProvider({
       get plugins() {
         return plugins;
       },
+      registerInstance: () => () => {},
       setDuration: () => {},
       ...value,
     }),

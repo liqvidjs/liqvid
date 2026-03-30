@@ -9,16 +9,8 @@ export type {
 } from "@liqvid/studio-plugin-api";
 
 export * from "./assets.mts";
-export {
-  LiqvidDevToolsProvider as LiqvidDevToolsProviderProd,
-  useProjectContext,
-} from "./LiqvidDevToolsProvider";
-export {
-  RecordingControl as RecordingControlProd,
-  type RecordingControlProps,
-} from "./recording/RecordingControl";
 
-/* ------------------------- dev-only exports ------------------------- */
+/* ------------------------- ambidextrous components ------------------------- */
 
 /**
  * Liqvid dev tools provider.
@@ -32,6 +24,8 @@ export const LiqvidDevToolsProvider = devProvider(() =>
   ),
 );
 
+export { LiqvidDevToolsProvider as LiqvidDevToolsProviderProd } from "./LiqvidDevToolsProvider";
+
 /**
  * Liqvid recording control.
  *
@@ -43,3 +37,8 @@ export const RecordingControl = devComponent(() =>
     (imports) => imports.RecordingControl,
   ),
 );
+
+export {
+  RecordingControl as RecordingControlProd,
+  type RecordingControlProps,
+} from "./recording/RecordingControl";

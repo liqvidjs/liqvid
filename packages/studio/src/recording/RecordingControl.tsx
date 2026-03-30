@@ -8,7 +8,7 @@ import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef, useState } from "react";
 
 import { saveRecording } from "../client.mts";
-import { useProjectContext } from "../LiqvidDevToolsProvider";
+import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
 import { DockableDialog } from "../ui/DockableDialog";
 
 import { RecordingDialog } from "./RecordingDialog";
@@ -39,7 +39,7 @@ interface FinalizedData {
  */
 export function RecordingControl({ shortcuts }: RecordingControlProps) {
   const { manager, discard, pauseResume, startStop } = useRecordingApi();
-  const { projectPath } = useProjectContext();
+  const { projectPath } = useStudioPrivateApi();
 
   const forceUpdate = useForceUpdate();
 

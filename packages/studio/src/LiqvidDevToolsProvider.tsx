@@ -23,16 +23,19 @@ import { Toaster } from "./ui/Toaster";
 
 import "./palette.css";
 
-export interface ProjectContextShape {
+export interface StudioPrivateContextShape {
+  instances: Record<string, Set<unknown>>;
   projectPath: string;
 }
 
-export const ProjectContext = createContext<ProjectContextShape>({
+export const StudioPrivateContext = createContext<StudioPrivateContextShape>({
+  instances: {},
   projectPath: "",
 });
+StudioPrivateContext.displayName = "LiqvidStudio";
 
-export function useProjectContext() {
-  return useContext(ProjectContext);
+export function useStudioPrivateApi() {
+  return useContext(StudioPrivateContext);
 }
 
 export function LiqvidDevToolsProvider({
@@ -44,13 +47,24 @@ export function LiqvidDevToolsProvider({
   plugins?: LiqvidStudioPlugin[];
   projectPath: string;
 }) {
-  const projectContext = useMemo(() => ({ projectPath }), [projectPath]);
+  const [instances] = useState<Record<string, Set<unknown>>>(() => ({}));
+  const privateContext = useMemo(
+    () => ({ instances, projectPath }),
+    [projectPath, instances],
+  );
 
   const [toasts, setToasts] = useState<ToastPropsWithTime[]>([]);
   const api = useMemo(
     (): Omit<PluginContext, "plugins"> => ({
       makeToast(toast) {
         setToasts((prev) => [...prev, { ...toast, time: Date.now() }]);
+      },
+      registerInstance(pluginName, instance) {
+        instances[pluginName] ??= new Set();
+        instances[pluginName].add(instance);
+        return () => {
+          instances[pluginName].delete(instance);
+        };
       },
       setDuration: (duration: DurationLike) => {
         setProjectMeta({
@@ -63,7 +77,7 @@ export function LiqvidDevToolsProvider({
         });
       },
     }),
-    [projectPath],
+    [instances, projectPath],
   );
 
   const recordingPlugins = useMemo(
@@ -93,7 +107,7 @@ export function LiqvidDevToolsProvider({
   return (
     <LiqvidStudioPluginApiProvider plugins={plugins} value={api}>
       <RecordingProvider plugins={recordingPlugins}>
-        <ProjectContext.Provider value={projectContext}>
+        <StudioPrivateContext.Provider value={privateContext}>
           {plugins?.map((plugin) => {
             if (!plugin.useConfigurePlugin) return null;
             return (
@@ -104,7 +118,7 @@ export function LiqvidDevToolsProvider({
             );
           })}
           {children}
-        </ProjectContext.Provider>
+        </StudioPrivateContext.Provider>
         <Toaster {...{ toasts }} />
       </RecordingProvider>
     </LiqvidStudioPluginApiProvider>
