@@ -4,7 +4,7 @@
  */
 
 import { DirectoryHelper } from "@liqvid/studio";
-import { Animate, splitCode, TargetDescendants, UniversalHelper } from "liqvid";
+import { Animate, TargetDescendants, UniversalHelper } from "liqvid";
 
 import type { ProjectDir } from "../.liqvid/types";
 
@@ -38,8 +38,7 @@ export const $m = script.markers.get.bind(script.markers.get);
 
 /** @package Reference the files in this project with type-safety. Need to interpolate the pathname before using. */
 export const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
-	splitCode(
-		() => "/api/liqvid/static?url={pathname}",
-		() => `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
-	),
+	process.env.NODE_ENV === "development"
+		? "/api/liqvid/static?url={pathname}"
+		: `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
 );

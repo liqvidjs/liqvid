@@ -2,6 +2,7 @@
 
 import "./recording.css";
 
+
 import { MediaRecording } from "@liqvid/media/recording";
 import { PromptsProvider } from "@liqvid/prompts";
 import { MarkerRecording } from "@liqvid/script/recording";
@@ -35,6 +36,7 @@ import {
 	ScriptProvider,
 	SegmentProvider,
 } from "liqvid";
+import {lazy} from "react"
 
 import {
 	persistColorScheme,
@@ -48,11 +50,12 @@ import { KeyboardShortcuts } from "./controls/KeyboardShortcuts";
 import { shortcuts } from "./shortcuts";
 
 /* development-only controls */
-const ShowMarkerName = devComponent(() =>
+const isDevelopment = process.env.NODE_ENV === "development";
+const ShowMarkerName = isDevelopment ? lazy(() =>
 	import("@/components/dev/ShowMarkerName").then(
-		(imports) => imports.ShowMarkerName,
-	),
-);
+		(imports) => ({default: imports.ShowMarkerName,
+	}),
+)) : () => null;
 
 export function LiqvidPlayer<M extends string>({
 	classNames: propClassNames,

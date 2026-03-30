@@ -1,7 +1,9 @@
+const isDevelopment = process.env.NODE_ENV === "development";
+
 export { DockableDialog } from "./ui/DockableDialog";
 export * from "./ui/Tabs";
 
-import { devComponent, devProvider } from "@liqvid/ambidexterity/react";
+import { Fragment, lazy } from "react";
 
 export type {
   LiqvidStudioPlugin,
@@ -18,27 +20,33 @@ export * from "./assets.mts";
  * Only operates in development. If you want this in production,
  * use {@link LiqvidDevToolsProviderProd} instead.
  */
-export const LiqvidDevToolsProvider = devProvider(() =>
-  import("./LiqvidDevToolsProvider").then(
-    (imports) => imports.LiqvidDevToolsProvider,
-  ),
-);
+export const LiqvidDevToolsProvider = isDevelopment
+  ? lazy(() =>
+      import("./LiqvidDevToolsProvider").then((imports) => ({
+        default: imports.LiqvidDevToolsProvider,
+      })),
+    )
+  : Fragment;
 
-export { LiqvidDevToolsProvider as LiqvidDevToolsProviderProd } from "./LiqvidDevToolsProvider";
+/** LiqvidDevToolsProvider without env-switching */
+export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./LiqvidDevToolsProvider";
 
 /**
  * Liqvid recording control.
  *
  * Only renders in development. If you want this in production,
- * use {@link RecordingControlProd} instead.
+ * use {@link RecordingControlUnivalent} instead.
  */
-export const RecordingControl = devComponent(() =>
-  import("./recording/RecordingControl").then(
-    (imports) => imports.RecordingControl,
-  ),
-);
+export const RecordingControl = isDevelopment
+  ? lazy(() =>
+      import("./recording/RecordingControl").then((imports) => ({
+        default: imports.RecordingControl,
+      })),
+    )
+  : () => null;
 
 export {
-  RecordingControl as RecordingControlProd,
+  /** recording control without env-switching */
+  RecordingControl as RecordingControlUnivalent,
   type RecordingControlProps,
 } from "./recording/RecordingControl";

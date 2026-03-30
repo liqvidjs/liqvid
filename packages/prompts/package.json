@@ -38,11 +38,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/ambidexterity": "workspace:^1.0.0-alpha.0",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.0",
