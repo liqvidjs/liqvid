@@ -27,7 +27,6 @@ import classNames from "classnames";
 import {
 	ColorSchemeProvider,
 	Controls,
-	devComponent,
 	type HidingStrategy,
 	HydrateElement,
 	HydrateVariants,
@@ -89,7 +88,7 @@ export function LiqvidPlayer<M extends string>({
 		<ColorSchemeProvider from={persistColorScheme}>
 			<ScriptProvider script={script} shortcuts={shortcuts.script}>
 				<LiqvidDevToolsProvider
-					plugins={[MediaRecording, MarkerRecording, ...(plugins ?? [])]}
+					plugins={isDevelopment ? [MediaRecording, MarkerRecording, ...(plugins ?? [])] : []}
 					projectPath={projectPath}
 				>
 					<SegmentProvider hideWith={hideWith}>

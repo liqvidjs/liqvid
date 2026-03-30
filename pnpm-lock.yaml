@@ -270,17 +270,17 @@ catalogs:
       specifier: '>=9'
       version: 9.5.0
     '@types/react-dom':
-      specifier: '>=18'
-      version: 18.3.7
+      specifier: '>=19'
+      version: 19.2.3
     katex:
       specifier: '>=0.16'
       version: 0.16.39
     react:
-      specifier: '>=18'
-      version: 18.3.1
+      specifier: '>=19'
+      version: 19.2.4
     react-dom:
-      specifier: '>=18'
-      version: 18.3.1
+      specifier: '>=19'
+      version: 19.2.4
     zod:
       specifier: '>=4'
       version: 4.3.6
@@ -292,22 +292,6 @@ importers:
       turbo:
         specifier: ^2.8.17
         version: 2.8.17
-
-  packages/ambidexterity:
-    dependencies:
-      react:
-        specifier: catalog:peer
-        version: 18.3.1
-    devDependencies:
-      '@biomejs/biome':
-        specifier: catalog:dev
-        version: 2.4.8
-      '@types/react':
-        specifier: catalog:dev
-        version: 19.2.14
-      typescript:
-        specifier: catalog:dev
-        version: 5.9.3
 
   packages/animation:
     dependencies:
@@ -423,7 +407,7 @@ importers:
         version: link:../utils
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -463,7 +447,7 @@ importers:
         version: 2.5.1
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -567,7 +551,7 @@ importers:
     dependencies:
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -605,13 +589,13 @@ importers:
         version: link:../utils
       '@radix-ui/react-slot':
         specifier: 'catalog:'
-        version: 1.2.4(@types/react@19.2.14)(react@18.3.1)
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       classnames:
         specifier: 'catalog:'
         version: 2.5.1
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -638,10 +622,10 @@ importers:
         version: link:../ssr
       '@radix-ui/react-slot':
         specifier: 'catalog:'
-        version: 1.2.4(@types/react@19.2.14)(react@18.3.1)
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
       universal-cookie:
         specifier: 'catalog:'
         version: 8.0.1
@@ -663,7 +647,7 @@ importers:
     dependencies:
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -688,7 +672,7 @@ importers:
         version: 0.16.39
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -707,7 +691,7 @@ importers:
     dependencies:
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -730,9 +714,6 @@ importers:
 
   packages/main:
     dependencies:
-      '@liqvid/ambidexterity':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ambidexterity
       '@liqvid/animation':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../animation
@@ -777,13 +758,13 @@ importers:
         version: link:../utils
       '@types/react-dom':
         specifier: catalog:peer
-        version: 18.3.7(@types/react@19.2.14)
+        version: 19.2.3(@types/react@19.2.14)
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
       react-dom:
         specifier: catalog:peer
-        version: 18.3.1(react@18.3.1)
+        version: 19.2.4(react@19.2.4)
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -845,7 +826,7 @@ importers:
         version: link:../utils
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -888,7 +869,7 @@ importers:
         version: 9.6.1
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1051,7 +1032,7 @@ importers:
         version: 3.2.2
       next:
         specifier: 16.2.1
-        version: 16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       npm:
         specifier: ^11.10.0
         version: 11.12.1
@@ -1187,7 +1168,7 @@ importers:
         version: 0.2.2
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@types/react':
         specifier: 'catalog:'
@@ -1236,7 +1217,7 @@ importers:
         version: 2.5.1
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -1262,9 +1243,6 @@ importers:
 
   packages/prompts:
     dependencies:
-      '@liqvid/ambidexterity':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ambidexterity
       '@liqvid/hydration':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../hydration
@@ -1326,10 +1304,10 @@ importers:
         version: 3.4.0
       '@react-three/fiber':
         specifier: catalog:peer
-        version: 9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)(three@0.183.2)
+        version: 9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1346,9 +1324,6 @@ importers:
 
   packages/recording:
     dependencies:
-      '@liqvid/ambidexterity':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ambidexterity
       '@liqvid/duration':
         specifier: workspace:^1.3.0
         version: link:../duration
@@ -1366,7 +1341,7 @@ importers:
         version: link:../utils
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1453,13 +1428,13 @@ importers:
         version: link:../utils
       '@radix-ui/react-slot':
         specifier: 'catalog:'
-        version: 1.2.4(@types/react@19.2.14)(react@18.3.1)
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       classnames:
         specifier: 'catalog:'
         version: 2.5.1
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1490,10 +1465,7 @@ importers:
     dependencies:
       '@base-ui/react':
         specifier: 'catalog:'
-        version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
-      '@liqvid/ambidexterity':
-        specifier: workspace:^1.0.0-alpha.0
-        version: link:../ambidexterity
+        version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@liqvid/cli':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../cli
@@ -1532,7 +1504,7 @@ importers:
         version: link:../utils
       '@radix-ui/react-portal':
         specifier: 'catalog:'
-        version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
+        version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       chalk:
         specifier: 'catalog:'
         version: 5.6.2
@@ -1556,10 +1528,10 @@ importers:
         version: 4.0.8
       lucide-react:
         specifier: 'catalog:'
-        version: 1.0.0-rc.1(react@18.3.1)
+        version: 1.0.0-rc.1(react@19.2.4)
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
       serve:
         specifier: 'catalog:'
         version: 14.2.6
@@ -1596,7 +1568,7 @@ importers:
         version: 30.2.0(@types/node@24.10.1)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3))
       next:
         specifier: 'catalog:'
-        version: 16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
+        version: 16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ts-jest:
         specifier: catalog:dev
         version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.3.0)(jest@30.2.0(@types/node@24.10.1)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3)
@@ -1608,7 +1580,7 @@ importers:
     dependencies:
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1629,11 +1601,11 @@ importers:
   packages/utils:
     dependencies:
       '@liqvid/duration':
-        specifier: workspace:^1.3.0
+        specifier: workspace:^1.3
         version: link:../duration
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1664,7 +1636,7 @@ importers:
         version: link:../utils
       react:
         specifier: catalog:peer
-        version: 18.3.1
+        version: 19.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -4428,11 +4400,6 @@ packages:
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
-  '@types/react-dom@18.3.7':
-    resolution: {integrity: sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==}
-    peerDependencies:
-      '@types/react': ^18.0.0
-
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
@@ -6410,10 +6377,6 @@ packages:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
     engines: {node: '>=10'}
 
-  loose-envify@1.4.0:
-    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
-    hasBin: true
-
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
@@ -7101,11 +7064,6 @@ packages:
     peerDependencies:
       react: '>= 16.3.0'
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
-    peerDependencies:
-      react: ^18.3.1
-
   react-dom@19.2.4:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
@@ -7168,10 +7126,6 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
-
-  react@18.3.1:
-    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
-    engines: {node: '>=0.10.0'}
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
@@ -7318,9 +7272,6 @@ packages:
 
   sax@1.4.3:
     resolution: {integrity: sha512-yqYn1JhPczigF94DMS+shiDMjDowYO6y9+wB/4WgO0Y19jWYk0lQ4tuG5KI7kj4FTp1wxPj5IFfcrz/s1c3jjQ==}
-
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
@@ -8983,27 +8934,27 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-ui/react@1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)':
+  '@base-ui/react@1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.28.6
-      '@base-ui/utils': 0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
-      '@floating-ui/react-dom': 2.1.6(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
+      '@base-ui/utils': 0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@floating-ui/react-dom': 2.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@floating-ui/utils': 0.2.10
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
       tabbable: 6.4.0
-      use-sync-external-store: 1.6.0(react@18.3.1)
+      use-sync-external-store: 1.6.0(react@19.2.4)
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@base-ui/utils@0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)':
+  '@base-ui/utils@0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.28.6
       '@floating-ui/utils': 0.2.10
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
       reselect: 5.1.1
-      use-sync-external-store: 1.6.0(react@18.3.1)
+      use-sync-external-store: 1.6.0(react@19.2.4)
     optionalDependencies:
       '@types/react': 19.2.14
 
@@ -9279,12 +9230,6 @@ snapshots:
     dependencies:
       '@floating-ui/core': 1.7.3
       '@floating-ui/utils': 0.2.10
-
-  '@floating-ui/react-dom@2.1.6(react-dom@19.2.4(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@floating-ui/dom': 1.7.4
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
 
   '@floating-ui/react-dom@2.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -10253,12 +10198,6 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.2.14)(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-    optionalDependencies:
-      '@types/react': 19.2.14
-
   '@radix-ui/react-compose-refs@1.1.2(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
       react: 19.2.4
@@ -10548,16 +10487,6 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@radix-ui/react-portal@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@radix-ui/react-primitive': 2.1.4(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.14)(react@18.3.1)
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
-    optionalDependencies:
-      '@types/react': 19.2.14
-      '@types/react-dom': 19.2.3(@types/react@19.2.14)
-
   '@radix-ui/react-portal@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@radix-ui/react-primitive': 2.1.4(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -10593,15 +10522,6 @@ snapshots:
       '@radix-ui/react-slot': 1.2.3(@types/react@19.2.14)(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-    optionalDependencies:
-      '@types/react': 19.2.14
-      '@types/react-dom': 19.2.3(@types/react@19.2.14)
-
-  '@radix-ui/react-primitive@2.1.4(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@18.3.1)
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
     optionalDependencies:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
@@ -10738,13 +10658,6 @@ snapshots:
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@19.2.4)
       react: 19.2.4
-    optionalDependencies:
-      '@types/react': 19.2.14
-
-  '@radix-ui/react-slot@1.2.4(@types/react@19.2.14)(react@18.3.1)':
-    dependencies:
-      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@18.3.1)
-      react: 18.3.1
     optionalDependencies:
       '@types/react': 19.2.14
 
@@ -10902,12 +10815,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.14)(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-    optionalDependencies:
-      '@types/react': 19.2.14
-
   '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
       react: 19.2.4
@@ -10976,26 +10883,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/three'
-      - immer
-
-  '@react-three/fiber@9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@18.3.1))(react@18.3.1)(three@0.183.2)':
-    dependencies:
-      '@babel/runtime': 7.28.6
-      '@types/webxr': 0.5.24
-      base64-js: 1.5.1
-      buffer: 6.0.3
-      its-fine: 2.0.0(@types/react@19.2.14)(react@18.3.1)
-      react: 18.3.1
-      react-use-measure: 2.1.7(react-dom@19.2.4(react@18.3.1))(react@18.3.1)
-      scheduler: 0.27.0
-      suspend-react: 0.1.3(react@18.3.1)
-      three: 0.183.2
-      use-sync-external-store: 1.6.0(react@18.3.1)
-      zustand: 5.0.9(@types/react@19.2.14)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
-    optionalDependencies:
-      react-dom: 19.2.4(react@18.3.1)
-    transitivePeerDependencies:
-      - '@types/react'
       - immer
 
   '@react-three/fiber@9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)':
@@ -11723,10 +11610,6 @@ snapshots:
       kleur: 3.0.3
 
   '@types/prop-types@15.7.15': {}
-
-  '@types/react-dom@18.3.7(@types/react@19.2.14)':
-    dependencies:
-      '@types/react': 19.2.14
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
@@ -13285,13 +13168,6 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
-  its-fine@2.0.0(@types/react@19.2.14)(react@18.3.1):
-    dependencies:
-      '@types/react-reconciler': 0.28.9(@types/react@19.2.14)
-      react: 18.3.1
-    transitivePeerDependencies:
-      - '@types/react'
-
   its-fine@2.0.0(@types/react@19.2.14)(react@19.2.4):
     dependencies:
       '@types/react-reconciler': 0.28.9(@types/react@19.2.14)
@@ -14035,10 +13911,6 @@ snapshots:
       chalk: 4.1.2
       is-unicode-supported: 0.1.0
 
-  loose-envify@1.4.0:
-    dependencies:
-      js-tokens: 4.0.0
-
   lru-cache@10.4.3: {}
 
   lru-cache@5.1.1:
@@ -14050,10 +13922,6 @@ snapshots:
       yallist: 4.0.0
 
   lru-cache@7.18.3: {}
-
-  lucide-react@1.0.0-rc.1(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   lucide-react@1.0.0-rc.1(react@19.2.4):
     dependencies:
@@ -14201,33 +14069,7 @@ snapshots:
 
   next-tick@1.1.0: {}
 
-  next@16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 16.2.1
-      '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.9
-      caniuse-lite: 1.0.30001780
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 19.2.4(react@18.3.1)
-      styled-jsx: 5.1.6(@babel/core@7.28.5)(babel-plugin-macros@3.1.0)(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.1
-      '@next/swc-darwin-x64': 16.2.1
-      '@next/swc-linux-arm64-gnu': 16.2.1
-      '@next/swc-linux-arm64-musl': 16.2.1
-      '@next/swc-linux-x64-gnu': 16.2.1
-      '@next/swc-linux-x64-musl': 16.2.1
-      '@next/swc-win32-arm64-msvc': 16.2.1
-      '@next/swc-win32-x64-msvc': 16.2.1
-      '@playwright/test': 1.58.2
-      babel-plugin-react-compiler: 1.0.0
-      sharp: 0.34.5
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.1
       '@swc/helpers': 0.5.15
@@ -14236,7 +14078,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.28.5)(react@19.2.4)
+      styled-jsx: 5.1.6(@babel/core@7.28.5)(babel-plugin-macros@3.1.0)(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.1
       '@next/swc-darwin-x64': 16.2.1
@@ -14663,17 +14505,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  react-dom@18.3.1(react@18.3.1):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.3.1
-      scheduler: 0.23.2
-
-  react-dom@19.2.4(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      scheduler: 0.27.0
-
   react-dom@19.2.4(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -14720,21 +14551,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  react-use-measure@2.1.7(react-dom@19.2.4(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-    optionalDependencies:
-      react-dom: 19.2.4(react@18.3.1)
-
   react-use-measure@2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
     optionalDependencies:
       react-dom: 19.2.4(react@19.2.4)
-
-  react@18.3.1:
-    dependencies:
-      loose-envify: 1.4.0
 
   react@19.2.4: {}
 
@@ -14873,10 +14694,6 @@ snapshots:
   sax@1.2.4: {}
 
   sax@1.4.3: {}
-
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
 
   scheduler@0.27.0: {}
 
@@ -15134,20 +14951,13 @@ snapshots:
 
   style-mod@4.1.3: {}
 
-  styled-jsx@5.1.6(@babel/core@7.28.5)(babel-plugin-macros@3.1.0)(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
-    optionalDependencies:
-      '@babel/core': 7.28.5
-      babel-plugin-macros: 3.1.0
-
-  styled-jsx@5.1.6(@babel/core@7.28.5)(react@19.2.4):
+  styled-jsx@5.1.6(@babel/core@7.28.5)(babel-plugin-macros@3.1.0)(react@19.2.4):
     dependencies:
       client-only: 0.0.1
       react: 19.2.4
     optionalDependencies:
       '@babel/core': 7.28.5
+      babel-plugin-macros: 3.1.0
 
   stylus@0.57.0:
     dependencies:
@@ -15174,10 +14984,6 @@ snapshots:
       supports-color: 7.2.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  suspend-react@0.1.3(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   suspend-react@0.1.3(react@19.2.4):
     dependencies:
@@ -15583,10 +15389,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  use-sync-external-store@1.6.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
   use-sync-external-store@1.6.0(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -15858,12 +15660,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
       react: 19.2.4
-
-  zustand@5.0.9(@types/react@19.2.14)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)):
-    optionalDependencies:
-      '@types/react': 19.2.14
-      react: 18.3.1
-      use-sync-external-store: 1.6.0(react@18.3.1)
 
   zustand@5.0.9(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
     optionalDependencies:
