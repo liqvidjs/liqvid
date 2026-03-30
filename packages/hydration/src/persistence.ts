@@ -1,3 +1,5 @@
+"use client";
+
 import { isClient } from "@liqvid/ssr";
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
