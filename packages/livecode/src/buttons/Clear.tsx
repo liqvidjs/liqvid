@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useMemo } from "react";
 
@@ -20,7 +20,7 @@ export function Clear({
     store.setState({ messages: [] });
   }, [store.setState]);
 
-  const events = useMemo(() => onClick(clear), [clear]);
+  const events = useMemo(() => onClickReact(clear), [clear]);
 
   // keyboard shortcut
   useLiveCodeShortcut(

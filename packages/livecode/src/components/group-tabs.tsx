@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import { useMemo } from "react";
 import { useStore } from "zustand";
 
@@ -18,7 +18,7 @@ export function Tab({
 
   const events = useMemo(
     () =>
-      onClick(() => {
+      onClickReact(() => {
         store.setState({ activeGroup: id });
       }),
     [id, store.setState],

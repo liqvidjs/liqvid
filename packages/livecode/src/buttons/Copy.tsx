@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useMemo } from "react";
 
@@ -47,7 +47,7 @@ export function Copy({
     }
   }, [fromGroup, store.getState, toGroup]);
 
-  const events = useMemo(() => onClick(copy), [copy]);
+  const events = useMemo(() => onClickReact(copy), [copy]);
 
   return (
     <button

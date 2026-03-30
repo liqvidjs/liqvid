@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -43,7 +43,7 @@ export function Reset({
     }
   }, [store]);
 
-  const resetEvents = useMemo(() => onClick(reset), [reset]);
+  const resetEvents = useMemo(() => onClickReact(reset), [reset]);
 
   return (
     <button

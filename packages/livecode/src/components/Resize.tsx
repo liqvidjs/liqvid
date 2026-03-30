@@ -1,5 +1,4 @@
-import { clamp } from "@liqvid/utils/misc";
-import { onDrag } from "@liqvid/utils/react";
+import { clamp, onDrag } from "@liqvid/utils";
 import { useMemo, useRef } from "react";
 
 /**
