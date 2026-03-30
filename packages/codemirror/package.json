@@ -48,9 +48,9 @@
     "@codemirror/view": "catalog:peer",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.2",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
-    "liqvid": "workspace:^3.0.0-alpha.0",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
@@ -61,9 +61,6 @@
       "optional": true
     },
     "@types/react": {
-      "optional": true
-    },
-    "liqvid": {
       "optional": true
     },
     "react": {

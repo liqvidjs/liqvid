@@ -1,6 +1,8 @@
 "use client";
 
 import { keymap } from "@codemirror/view";
+import { usePluginApi } from "@liqvid/studio-plugin-api";
+import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
 import { PlaybackContext, useME } from "@lqv/playback/react";
 import classNames from "classnames";
 import { type JSX, useEffect, useRef } from "react";
@@ -17,12 +19,26 @@ import {
 /**
  * Container for code editing/recording/replaying.
  */
-
 export function LiveCode({
   children,
   className,
+  name,
   ...attrs
-}: JSX.IntrinsicElements["div"]) {
+}: JSX.IntrinsicElements["div"] & {
+  /** Name for this LiveCode instance. Used to distinguish multiple instances in the Recording dialog. */
+  name?: string;
+}) {
+  const { registerInstance } = usePluginApi();
+
+  useEffect(() => {
+    return registerInstance<CodeMirrorInstance>("@lqv/codemirror", {
+      name,
+      provideRecorder(recorder) {
+        store.current?.setState((prev) => ({ ...prev, recorder }));
+      },
+    });
+  }, [name, registerInstance]);
+
   const store = useRef<LiveCodeStore>(null);
   if (!store.current) {
     store.current = makeStore();

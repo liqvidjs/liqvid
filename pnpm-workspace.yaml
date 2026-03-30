@@ -1,5 +1,6 @@
 packages:
   - packages/**
+  - "!**/tests/**"
 
 catalog:
   "@base-ui/react": ^1.2.0

@@ -53,7 +53,7 @@ export function Replay({
      * @default 0
      */
     start?: number;
-  }): JSX.Element {
+  }) {
   const store = useLiveCodeStore();
   const playback = useME();
 
@@ -121,7 +121,7 @@ export function Replay({
     ],
   );
 
-  return <Editor editable={false} extensions={__extensions} {...props} />;
+  return <Editor extensions={__extensions} readOnly={false} {...props} />;
 }
 
 /**

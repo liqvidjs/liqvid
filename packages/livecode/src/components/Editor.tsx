@@ -11,7 +11,7 @@ const editorCompartment = new Compartment();
 /** CodeMirror editor. */
 export function Editor({
   content = "",
-  editable = true,
+  readOnly = false,
   extensions,
   filename,
   group: groupId = "default",
@@ -22,9 +22,8 @@ export function Editor({
 
   /**
    * Whether the editor is editable or not.
-   * @default true
    */
-  editable?: boolean;
+  readOnly?: boolean;
 
   /** CodeMirror {@link Extension}s to use in the editor. */
   extensions?: Extension[];
@@ -40,7 +39,7 @@ export function Editor({
 } & React.HTMLAttributes<HTMLDivElement>) {
   const store = useLiveCodeStore();
 
-  const ref = useRef<HTMLDivElement>();
+  const ref = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<EditorView>();
 
   // initialize the view
@@ -59,7 +58,7 @@ export function Editor({
 
           // vim
           vimCompartment.of([]),
-          ...(editable ? [] : [EditorView.editable.of(false)]),
+          ...(readOnly ? [EditorView.editable.of(false)] : []),
           ...(extensions ?? []),
         ],
       }),
@@ -70,7 +69,7 @@ export function Editor({
     // insert into state
     store.setState((prev) => {
       const group = prev.groups[groupId] ?? {
-        activeFile: filename,
+        activeFile: filename!, // set by <EditorPanel>
         files: [],
       };
 
@@ -83,8 +82,8 @@ export function Editor({
             files: [
               ...group.files,
               {
-                editable,
-                filename,
+                editable: !readOnly,
+                filename: filename!, // set by <EditorPanel>
                 view,
               },
             ],
@@ -120,11 +119,11 @@ export function Editor({
   useEffect(() => {
     view?.dispatch({
       effects: editorCompartment.reconfigure([
-        ...(editable ? [] : [EditorView.editable.of(false)]),
+        ...(readOnly ? [EditorView.editable.of(false)] : []),
         ...(extensions ?? []),
       ]),
     });
-  }, [editable, extensions, view]);
+  }, [extensions, readOnly, view]);
 
   return <div ref={ref} {...props} />;
 }

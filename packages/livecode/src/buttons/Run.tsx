@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useMemo } from "react";
 
@@ -31,7 +31,7 @@ export function Run({
   );
 
   // click events
-  const events = useMemo(() => onClick(run), [run]);
+  const events = useMemo(() => onClickReact(run), [run]);
 
   return (
     <button

@@ -40,17 +40,15 @@
   },
   "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codebooth",
   "dependencies": {
-    "@liqvid/keymap": "^1.2",
-    "@liqvid/utils": "^1.10",
-    "classnames": "^2.5.1",
-    "zustand": ">=4"
+    "classnames": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
+    "@biomejs/biome": "catalog:dev",
     "@lqv/codemirror": "workspace:^",
-    "@types/react": "catalog:",
+    "@types/react": "catalog:dev",
     "skulpt": "catalog:dev",
-    "typescript": "catalog:"
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "catalog:peer",
@@ -64,9 +62,12 @@
     "@codemirror/search": "catalog:peer",
     "@codemirror/state": "catalog:peer",
     "@codemirror/view": "catalog:peer",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.2",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
-    "@lqv/codemirror": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.2",
+    "@lqv/codemirror": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^2.0.0-alpha.1",
     "@replit/codemirror-vim": "catalog:peer",
     "react": "catalog:peer",

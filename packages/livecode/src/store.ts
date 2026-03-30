@@ -14,7 +14,7 @@ export interface LiveCodeState {
   /**
    * Name of active editor group.
    */
-  activeGroup: string;
+  activeGroup: string | undefined;
 
   /** Class names to attach to root. */
   classNames: string[];

@@ -1,4 +1,4 @@
-import { onClick } from "@liqvid/utils/react";
+import { onClickReact } from "@liqvid/utils";
 import { selectCmd } from "@lqv/codemirror";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
@@ -7,6 +7,7 @@ import { useShallow } from "zustand/shallow";
 
 import { ids } from "../ids";
 import { type LiveCodeState, useLiveCodeStore } from "../store";
+import { getFileType } from "../utils";
 
 const selector = (state: LiveCodeState) => [
   state.activeGroup,
@@ -17,11 +18,8 @@ const selector = (state: LiveCodeState) => [
  * File selector component.
  */
 export function FileTabs({
-  className,
   classNames: propClassNames,
 }: {
-  /** @deprecated Use `classNames.container` instead. */
-  className?: string;
   classNames?: {
     container?: string;
     tab?: string;
@@ -66,7 +64,7 @@ export function FileTabs({
 
   const events = useMemo(
     () =>
-      onClick<HTMLButtonElement>((e) => {
+      onClickReact<HTMLButtonElement>((e) => {
         select(e.currentTarget.textContent.trim());
       }),
     [select],
@@ -122,10 +120,7 @@ export function FileTabs({
 
   return (
     <div
-      className={classNames(
-        "lqv-file-tabs",
-        propClassNames?.container ?? className,
-      )}
+      className={classNames("lqv-file-tabs", propClassNames?.container)}
       role="tablist"
     >
       {group.files.map(({ filename }) => (
@@ -146,13 +141,4 @@ export function FileTabs({
       ))}
     </div>
   );
-}
-
-/**
- * Get file extension.
- * @param filename Name of file.
- * @returns File extension.
- */
-function getFileType(filename: string): string {
-  return filename.slice(filename.lastIndexOf(".") + 1);
 }

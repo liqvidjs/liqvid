@@ -2,10 +2,27 @@
 
 import type { Command } from "@codemirror/view";
 import { useEffect } from "react";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/shallow";
 
 import { useLiveCodeStore } from "./store";
 
-/* add keyboard shortcuts */
+/** subscribe to the active file */
+export function useActiveFile() {
+  return useStore(
+    useLiveCodeStore(),
+    useShallow((state) => {
+      const { activeGroup, groups } = state;
+      if (!activeGroup) return null;
+
+      // TODO: this is inefficient
+      const group = groups[activeGroup];
+      return group.files.find((f) => f.filename === group.activeFile);
+    }),
+  );
+}
+
+/** add a keyboard shortcut */
 export function useLiveCodeShortcut(
   shortcut: string | undefined,
   action: Command,

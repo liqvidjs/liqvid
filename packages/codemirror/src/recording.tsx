@@ -1,9 +1,10 @@
 import type { Extension } from "@codemirror/state";
 import { EditorView, keymap, ViewPlugin } from "@codemirror/view";
-import { type RecordingPlugin, ReplayDataRecorder } from "@liqvid/recording";
-import type { ReplayData } from "@liqvid/utils";
-import { bind } from "@liqvid/utils";
+import { ReplayDataRecorder } from "@liqvid/recording";
+import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
+import { bind, type ReplayData } from "@liqvid/utils";
 
+import { ConfigurationComponent } from "./configuration";
 import { icon } from "./icon";
 
 import { scrollCmd } from ".";
@@ -18,6 +19,11 @@ export type ScrollAction =
   | [typeof scrollCmd, number];
 
 export type CaptureData = EditorChange | ScrollAction | SpecialKey;
+
+export type CodeMirrorInstance = {
+  name?: string;
+  provideRecorder: (recorder: CodeRecorder | undefined) => void;
+};
 
 // the actual thingy that gets exported
 export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
@@ -112,22 +118,16 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
   }
 }
 
-const KeySaveComponent: React.FC<{ data: ReplayData<CaptureData> }> = (
-  props,
-) => {
-  return <textarea readOnly value={JSON.stringify(props.data)} />;
-};
-
-export const CodeRecording: RecordingPlugin<
+export const CodeRecording = {
+  configurationComponent: ConfigurationComponent,
+  icon,
+  name: "Code",
+  package: "@lqv/codemirror",
+  recorder: new CodeRecorder(),
+  version: "1.0.0",
+} satisfies LiqvidStudioRecordingPlugin<
   [number, CaptureData],
   ReplayData<CaptureData>,
-  CodeRecorder
-> = {
-  enabled: () => true,
-  icon,
-  key: "codemirror",
-  name: "Code",
-  recorder: new CodeRecorder(),
-  saveComponent: KeySaveComponent,
-  title: "Record code",
-};
+  unknown,
+  CodeMirrorInstance
+>;

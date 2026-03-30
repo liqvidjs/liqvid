@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useStore } from "zustand";
 
 import { vimCompartment } from "../extensions";
-import { useLiveCodeShortcut } from "../hooks";
+import { useActiveFile, useLiveCodeShortcut } from "../hooks";
 import { useLiveCodeStore } from "../store";
 
 export const persistVim = {
@@ -41,10 +41,7 @@ export function VimToggle({
   /** Keyboard shortcut to toggle Vim mode. */
   shortcut?: string;
 }) {
-  const getActiveView = useStore(
-    useLiveCodeStore(),
-    (state) => state.getActiveView,
-  );
+  const activeFile = useActiveFile();
 
   // persistence
   const vimPersistenceConfig = useMemo((): BooleanValueConfig | undefined => {
@@ -94,10 +91,10 @@ export function VimToggle({
   );
 
   useEffect(() => {
-    getActiveView().dispatch({
+    activeFile?.view.dispatch({
       effects: vimCompartment.reconfigure(isVimActive ? vim() : []),
     });
-  }, [getActiveView, isVimActive]);
+  }, [activeFile, isVimActive]);
 
   const content = (
     <button
