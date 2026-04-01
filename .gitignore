@@ -7,6 +7,9 @@ coverage
 tsconfig.tsbuildinfo
 *.log
 
+# Turbopack
+.turbo
+
 # Configuration
 .env
 

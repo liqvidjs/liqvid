@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { makeContext } from "@liqvid/utils";
+import { useMemo } from "react";
 
 export type HidingStrategy = "invisible" | "unmount";
 
@@ -8,13 +9,15 @@ export interface SegmentContext {
   hideWith: HidingStrategy;
 }
 
-const SegmentContext = createContext<SegmentContext>({
-  hideWith: "unmount",
+const SegmentContext = makeContext<SegmentContext>({
+  defaultValue: {
+    hideWith: "unmount",
+  },
+  name: "Segment",
+  uniqueKey: "@liqvid/segment",
 });
 
-export function useSegmentContext(): SegmentContext {
-  return useContext(SegmentContext);
-}
+export const useSegmentContext = SegmentContext.use;
 
 /**
  * Set the hiding strategy used by `<Segment>` descendants
