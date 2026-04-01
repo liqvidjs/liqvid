@@ -1,7 +1,7 @@
 import { ChangeSet, type Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { assertType, type ReplayData } from "@liqvid/utils";
-import type { MediaElement } from "@lqv/playback";
+import type { Seekable } from "@lqv/playback";
 
 import { FakeSelection, type Range } from "./fake-selection";
 import type { ScrollAction } from "./recording";
@@ -124,11 +124,10 @@ export function cmReplayMultiple({
   shouldScroll?: (filename: string) => boolean;
 
   /** Playback to sync with. */
-  playback: MediaElement;
+  playback: Seekable;
 
   /**
-   * Time *in seconds* playback should start.
-   * @default 0
+   * Time playback should start, in seconds.
    */
   start?: number;
 
@@ -199,13 +198,6 @@ export function cmReplayMultiple({
 
           // editor change
           inverses[file][i] = action[0].invert(docs[file]);
-          console.log({
-            action,
-            doc: docs[file],
-            docLength: docs[file].length,
-            file,
-            length: action[0].length,
-          });
           docs[file] = action[0].apply(docs[file]);
         } else if (action[0] === scrollCmd) {
           // @ts-expect-error file selection command will always come first
@@ -346,14 +338,14 @@ export function cmReplayMultiple({
 
       if (scrollIntoView) {
         // get position of last change
-        let pos: number;
+        let pos: number | undefined;
         changes[key].iterChangedRanges((_fromA, _toA, _fromB, toB) => {
           pos = toB;
         });
 
         // changes can be empty
         if (pos === undefined) {
-          return;
+          continue;
         }
 
         const { scrollDOM } = view;
