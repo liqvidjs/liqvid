@@ -35,10 +35,18 @@ function fakeKeyboardEvent(seq: string) {
 /**
  * Convert CodeMirror key sequences to Liqvid format.
  */
-function cm2lv(seq: string): string {
+export function cm2lv(seq: string): string {
   seq = seq.replace("Mod", isMac ? "Meta" : "Ctrl");
   seq = seq.replace(/-/g, "+");
   return Keymap.normalize(seq);
+}
+
+/**
+ * Convert Liqvid key sequences to CodeMirror format.
+ */
+export function lv2cm(seq: string): string {
+  seq = seq.replace(/\+/g, "-");
+  return seq;
 }
 
 const isMac =

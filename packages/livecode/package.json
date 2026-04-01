@@ -48,6 +48,7 @@
     "@lqv/codemirror": "workspace:^",
     "@types/react": "catalog:dev",
     "jszip": "catalog:peer",
+    "prettier": "catalog:peer",
     "skulpt": "catalog:dev",
     "typescript": "catalog:dev"
   },
@@ -73,6 +74,7 @@
     "@lqv/playback": "workspace:^2.0.0-alpha.1",
     "@replit/codemirror-vim": "catalog:peer",
     "jszip": "catalog:peer",
+    "prettier": "catalog:peer",
     "react": "catalog:peer",
     "skulpt": "catalog:peer"
   },
@@ -93,6 +95,9 @@
       "optional": true
     },
     "jszip": {
+      "optional": true
+    },
+    "prettier": {
       "optional": true
     },
     "skulpt": {

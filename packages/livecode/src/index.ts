@@ -2,6 +2,7 @@
 
 export { Clear } from "./buttons/Clear";
 export { Copy } from "./buttons/Copy";
+export { Format } from "./buttons/Format";
 export { Reset } from "./buttons/Reset";
 export { Run } from "./buttons/Run";
 export { VimToggle } from "./buttons/VimToggle";
