@@ -43,6 +43,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
     "@types/react": "catalog:peer",
     "react": "catalog:peer"
   },

@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useEffect, useReducer, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { anyHover, onDrag as htmlOnDrag } from "./interaction.ts";
 
@@ -160,4 +167,46 @@ export function usePromise(): [Promise<void>, () => void, () => void] {
   );
 
   return [promise, resolve.current!, reject.current!];
+}
+
+export function makeContext<T>({
+  defaultValue,
+  name,
+  uniqueKey,
+}: {
+  defaultValue: T;
+  name: string;
+  uniqueKey?: string;
+}) {
+  const context = uniqueKey
+    ? createUniqueContext<T>(uniqueKey, defaultValue, name)
+    : createContext<T>(defaultValue);
+  context.displayName = name;
+
+  const useOptional = {
+    // biome-ignore lint/complexity/useArrowFunction: preserve name for console logs
+    [`use${name}Optional`]: function () {
+      return useContext(context);
+    },
+  }[`use${name}Optional`];
+
+  const use = {
+    // biome-ignore lint/complexity/useArrowFunction: preserve name for console logs
+    [`use${name}`]: function () {
+      const value = useOptional();
+      if (!value) {
+        throw new Error(
+          `use$name ?? "Context"must be used within a $name ?? "Context"Provider`,
+        );
+      }
+
+      return value;
+    },
+  }[`use${name}`];
+
+  return {
+    Provider: context.Provider,
+    use,
+    useOptional,
+  };
 }

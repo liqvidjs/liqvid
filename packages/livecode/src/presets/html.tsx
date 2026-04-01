@@ -98,7 +98,7 @@ export const HTMLReplay: React.FC<{
   return (
     <LiveCode>
       <FileTabs />
-      <EditorGroup id="replay">
+      <EditorGroup name="replay">
         {Object.keys(props.files).map((filename) => (
           <EditorPanel filename={filename} key={filename}>
             <Replay
@@ -113,7 +113,7 @@ export const HTMLReplay: React.FC<{
         ))}
         <ReplayMultiple replay={props.replay} start={props.start} />
       </EditorGroup>
-      <EditorGroup id="playground">
+      <EditorGroup name="playground">
         {Object.keys(props.files).map((filename) => (
           <EditorPanel filename={filename} key={filename}>
             <Editor

@@ -1,4 +1,3 @@
-import type { Extension } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import { useKeymap } from "@liqvid/keymap/react";
 import { selectCmd } from "@lqv/codemirror";
@@ -10,33 +9,41 @@ import { useShallow } from "zustand/shallow";
 import { recording } from "../extensions";
 import { type LiveCodeState, useLiveCodeStore } from "../store";
 
+import { useFilenameOptional, useGroup } from "./context";
 import { Editor } from "./Editor";
 
 /** Recording editor. */
-export const Record: React.FC<
-  React.ComponentProps<typeof Editor> & {
-    /**
-     * Special key sequences to include in recording.
-     * @default {"Mod-Enter":"run","Mod-K":"clear","Mod-L":"clear"}
-     */
-    captureKeys?: Record<string, string>;
+export function Record({
+  extensions = [],
+  filename,
+  group: groupId = "default",
+  passKeys = [],
+  ...props
+}: React.ComponentProps<typeof Editor> & {
+  /**
+   * Special key sequences to include in recording.
+   * @default {"Mod-Enter":"run","Mod-K":"clear","Mod-L":"clear"}
+   */
+  captureKeys?: Record<string, string>;
 
-    /**
-     * Key sequences to pass through to {@link Keymap}.
-     * @default ["Mod-Alt-2","Mod-Alt-3","Mod-Alt-4"]
-     */
-    passKeys?: string[];
-  }
-> = (props) => {
+  /**
+   * Key sequences to pass through to {@link Keymap}.
+   * @default ["Mod-Alt-2","Mod-Alt-3","Mod-Alt-4"]
+   */
+  passKeys?: string[];
+}) {
+  const contextGroup = useGroup();
+  groupId ??= contextGroup;
+
+  const contextFilename = useFilenameOptional();
+  filename ??= contextFilename;
+
   const {
     captureKeys = {
       "Mod-Enter": "run",
       "Mod-K": "clear",
       "Mod-L": "clear",
     },
-    extensions = [],
-    group = "default",
-    passKeys = [],
     // passKeys = ["Mod-Alt-2", "Mod-Alt-3", "Mod-Alt-4"],
     ...attrs
   } = props;
@@ -62,24 +69,34 @@ export const Record: React.FC<
   useEffect(() => {
     if (!recorder) return;
 
-    const { view } = groups[group].files.find(
-      (file) => file.filename === props.filename,
+    const { view } = groups[groupId].files.find(
+      (file) => file.filename === filename,
     )!;
 
     view.dispatch({
-      effects: recording.reconfigure([
-        ...(recording.get(view.state) as Extension[]),
-        [recorder.extension(captureKeys)],
-      ]),
+      effects: recording.reconfigure([recorder.extension(captureKeys)]),
     });
 
     includeFilenameInRecording(store.getState());
-  }, [captureKeys, group, groups, props.filename, recorder, store]);
+
+    return () => {
+      view.dispatch({
+        effects: recording.reconfigure([]),
+      });
+    };
+  }, [captureKeys, groups, filename, recorder, store, groupId]);
+
+  console.log({ filename });
 
   return (
-    <Editor content={props.content} extensions={newExtensions} {...attrs} />
+    <Editor
+      extensions={newExtensions}
+      filename={filename}
+      group={groupId}
+      {...attrs}
+    />
   );
-};
+}
 
 /* NOOOOOOOOOO */
 const modifiedRecorder = Symbol();

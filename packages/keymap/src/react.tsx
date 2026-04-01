@@ -1,40 +1,23 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { makeContext } from "@liqvid/utils";
+import { useEffect, useMemo } from "react";
 
 import { Keymap, type ShortcutHandler } from "./index.mjs";
 
-const symbol = Symbol.for("@lqv/keymap");
-
-type GlobalThis = {
-  [symbol]: React.Context<Keymap | null>;
-};
-
-if (!(symbol in globalThis)) {
-  (globalThis as unknown as GlobalThis)[symbol] = createContext<Keymap | null>(
-    null,
-  );
-}
-
-/**
- * {@link React.Context} used to access ambient Keymap
- */
-export const KeymapContext = (globalThis as unknown as GlobalThis)[symbol];
-KeymapContext.displayName = "Keymap";
+const KeymapContext = makeContext<Keymap | undefined>({
+  defaultValue: undefined,
+  name: "Keymap",
+  uniqueKey: "@lqv/keymap",
+});
 
 /** Access the ambient {@link Keymap} */
-export function useKeymap() {
-  const keymap = useKeymapOptional();
-  if (!keymap) throw new Error("no ambient Keymap available");
-  return keymap;
-}
+export const useKeymap = KeymapContext.use;
 
 /**
- * Access the ambient {@link Keymap}, or null if none available.
+ * Access the ambient {@link Keymap}, or undefined if none available.
  */
-export function useKeymapOptional(): Keymap | null {
-  return useContext(KeymapContext);
-}
+export const useKeymapOptional = KeymapContext.useOptional;
 
 /** Register a keyboard shortcut for the duration of the component. */
 export function useKeyboardShortcut(
@@ -83,11 +66,7 @@ function shouldHandleEvent(e: KeyboardEvent): boolean {
   return true;
 }
 
-export function KeymapProvider({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function KeymapProvider({ children }: { children?: React.ReactNode }) {
   const ambientKeymap = useKeymapOptional();
   const keymap = useMemo(() => ambientKeymap ?? new Keymap(), [ambientKeymap]);
 

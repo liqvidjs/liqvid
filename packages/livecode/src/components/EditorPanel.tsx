@@ -1,9 +1,10 @@
 import classNames from "classnames";
-import { Children, cloneElement } from "react";
 import { useStore } from "zustand";
 
 import { ids } from "../ids";
 import { useLiveCodeStore } from "../store";
+
+import { FilenameProvider, useGroup } from "./context";
 
 /**
  * Tabpanel containing a single editor.
@@ -12,7 +13,7 @@ export function EditorPanel({
   children,
   className,
   filename,
-  group = "default",
+  group,
   ...props
 }: {
   className?: string;
@@ -28,6 +29,9 @@ export function EditorPanel({
    */
   group?: string;
 }) {
+  const contextGroup = useGroup() ?? "default";
+  group ??= contextGroup;
+
   const store = useLiveCodeStore();
   const active = useStore(
     store,
@@ -43,12 +47,7 @@ export function EditorPanel({
       role="tabpanel"
       {...props}
     >
-      {Children.map(children, (node) => {
-        if (typeof node === "object" && node !== null && "props" in node) {
-          return cloneElement(node, { filename, group });
-        }
-        return node;
-      })}
+      <FilenameProvider value={filename}>{children}</FilenameProvider>
     </div>
   );
 }

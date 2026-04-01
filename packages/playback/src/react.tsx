@@ -3,15 +3,8 @@
 import { Duration } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { makeContext } from "@liqvid/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Playback } from "./Playback.mts";
 import type {
@@ -19,22 +12,14 @@ import type {
   PlaybackEventsMap,
 } from "./synthetic-playback.mts";
 
-type GlobalThis = {
-  [symbol]: React.Context<Playback | undefined>;
-};
-
-const symbol = Symbol.for("@lqv/playback");
-
-if (!(symbol in globalThis)) {
-  (globalThis as unknown as GlobalThis)[symbol] = createContext<
-    Playback | undefined
-  >(undefined);
-}
-
 /**
  * {@link React.Context} used to access ambient {@link Playback}
  */
-export const PlaybackContext = (globalThis as unknown as GlobalThis)[symbol];
+const PlaybackContext = makeContext<Playback | undefined>({
+  defaultValue: undefined,
+  name: "Playback",
+  uniqueKey: "@lqv/playback",
+});
 
 export function PlaybackProvider({
   children,
@@ -64,18 +49,12 @@ export function PlaybackProvider({
  * Access the ambient {@link Playback}.
  * @throws Error if no playback is available.
  */
-export function usePlayback(): Playback {
-  const playback = usePlaybackOptional();
-  if (!playback) throw new Error("no ambient Playback available");
-  return playback;
-}
+export const usePlayback = PlaybackContext.use;
 
 /**
  * Access the ambient {@link Playback}, or undefined if none available.
  */
-export function usePlaybackOptional(): Playback | undefined {
-  return useContext(PlaybackContext);
-}
+export const usePlaybackOptional = PlaybackContext.useOptional;
 
 /** Callback with current time as a {@link Duration} */
 export function useTime$(

@@ -47,6 +47,7 @@
     "@biomejs/biome": "catalog:dev",
     "@lqv/codemirror": "workspace:^",
     "@types/react": "catalog:dev",
+    "jszip": "catalog:peer",
     "skulpt": "catalog:dev",
     "typescript": "catalog:dev"
   },
@@ -62,14 +63,16 @@
     "@codemirror/search": "catalog:peer",
     "@codemirror/state": "catalog:peer",
     "@codemirror/view": "catalog:peer",
-    "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
+    "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.2",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.2",
     "@lqv/codemirror": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^2.0.0-alpha.1",
     "@replit/codemirror-vim": "catalog:peer",
+    "jszip": "catalog:peer",
     "react": "catalog:peer",
     "skulpt": "catalog:peer"
   },
@@ -87,6 +90,9 @@
       "optional": true
     },
     "@codemirror/lang-sql": {
+      "optional": true
+    },
+    "jszip": {
       "optional": true
     },
     "skulpt": {

@@ -110,7 +110,7 @@ export const PythonReplay: React.FC<{
 
   return (
     <LiveCode>
-      <EditorGroup id="replay">
+      <EditorGroup name="replay">
         <Replay
           content={props.content}
           extensions={[basicSetup, python(), ...extensions]}
@@ -119,7 +119,7 @@ export const PythonReplay: React.FC<{
           start={props.start}
         />
       </EditorGroup>
-      <EditorGroup id="playground">
+      <EditorGroup name="playground">
         <Editor
           content={props.content}
           extensions={[basicSetup, python(), ...extensions]}

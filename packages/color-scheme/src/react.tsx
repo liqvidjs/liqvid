@@ -1,8 +1,8 @@
 "use client";
 
 import { type StringValueConfig, usePersist } from "@liqvid/hydration";
-import { createUniqueContext } from "@liqvid/utils";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { makeContext } from "@liqvid/utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type ColorScheme = "light" | "dark";
 export type ColorSchemeSpecifier = ColorScheme | "system";
@@ -18,16 +18,17 @@ export interface ColorSchemeContext {
   setColorScheme: (update: Updater<ColorScheme>) => void;
 }
 
-const colorSchemeContext = createUniqueContext<ColorSchemeContext>(
-  "@liqvid/color-scheme",
-  {
+const colorSchemeContext = makeContext<ColorSchemeContext>({
+  defaultValue: {
     colorScheme: "light",
     setColorScheme() {},
     toggleColorScheme() {},
   },
-);
-colorSchemeContext.displayName = "ColorScheme";
+  name: "ColorScheme",
+  uniqueKey: "@liqvid/color-scheme",
+});
 
+/** provide color scheme to descendants */
 export function ColorSchemeProvider({
   children,
   from,
@@ -64,6 +65,5 @@ export function ColorSchemeProvider({
   );
 }
 
-export function useColorScheme(): ColorSchemeContext {
-  return useContext(colorSchemeContext);
-}
+/** access the color scheme API */
+export const useColorScheme = colorSchemeContext.use;

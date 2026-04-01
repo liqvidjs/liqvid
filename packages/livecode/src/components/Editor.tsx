@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { recording, shortcuts, vimCompartment } from "../extensions";
 import { useLiveCodeStore } from "../store";
 
+import { useFilenameOptional, useGroup } from "./context";
+
 /** Compartment for toggling extensions in CodeMirror. */
 const editorCompartment = new Compartment();
 
@@ -14,7 +16,7 @@ export function Editor({
   readOnly = false,
   extensions,
   filename,
-  group: groupId = "default",
+  group: groupId,
   ...props
 }: {
   /** Initial content for editor. */
@@ -33,19 +35,42 @@ export function Editor({
 
   /**
    * Group name for editor. You usually specify this on the parent {@link EditorGroup} instead.
-   * @default "default"
    */
   group?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const contextGroup = useGroup();
+  groupId ??= contextGroup;
+
+  const contextFilename = useFilenameOptional();
+  filename ??= contextFilename;
+
+  if (!filename) {
+    throw new Error(
+      "filename must be provided to Editor, either directly or through `<EditorPanel>`.",
+    );
+  }
+
   const store = useLiveCodeStore();
 
   const ref = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<EditorView>();
 
+  // changing content, filename, or groupId is not supported
+  // changing extensions or readOnly is done separately
+  const initialSettings = useRef({
+    content,
+    extensions,
+    filename,
+    groupId,
+    readOnly,
+  });
+
   // initialize the view
-  // biome-ignore lint/correctness/useExhaustiveDependencies: changing `content` is an error
   useEffect(() => {
     if (!ref.current) return;
+
+    const { content, extensions, filename, groupId, readOnly } =
+      initialSettings.current;
 
     // create editor
     const view = new EditorView({
@@ -113,7 +138,7 @@ export function Editor({
         };
       });
     };
-  }, []);
+  }, [store.setState]);
 
   // configure extensions
   useEffect(() => {

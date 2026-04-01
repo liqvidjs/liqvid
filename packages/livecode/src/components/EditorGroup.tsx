@@ -1,62 +1,60 @@
 import classNames from "classnames";
-import { Children, cloneElement, useEffect } from "react";
+import { useEffect } from "react";
 import { useStore } from "zustand";
 
 import { ids } from "../ids";
 import { useLiveCodeStore } from "../store";
 
+import { GroupProvider } from "./context";
+
 /** Holds a group of editors. */
 export function EditorGroup({
   children,
   className,
-  id,
+  name,
   ...attrs
 }: React.HTMLAttributes<HTMLDivElement> & {
-  /** ID of this group. */
-  id: string;
+  /** Name of this group. */
+  name: string;
 }) {
   const store = useLiveCodeStore();
-  const active = useStore(store, (state) => state.activeGroup === id);
+  const active = useStore(store, (state) => state.activeGroup === name);
 
   useEffect(() => {
     const state = store.getState();
     if (!state.activeGroup) {
-      store.setState({ activeGroup: id });
+      store.setState({ activeGroup: name });
     }
 
     return () => {
       store.setState((prev) => {
         const newGroups = Object.fromEntries(
-          Object.entries(prev.groups).filter(([key]) => key !== id),
+          Object.entries(prev.groups).filter(([key]) => key !== name),
         );
         return {
           ...prev,
           activeGroup:
-            prev.activeGroup === id
+            prev.activeGroup === name
               ? Object.keys(newGroups)[0]
               : prev.activeGroup,
           groups: newGroups,
         };
       });
     };
-  }, [id, store]);
+  }, [name, store]);
+
+  console.log({ active, name });
 
   return (
     <div
-      aria-expanded={active}
-      aria-labelledby={ids.groupTab({ group: id })}
+      aria-labelledby={ids.groupTab({ group: name })}
       className={classNames("lqv-editor-group", className)}
       hidden={!active}
-      id={ids.editorGroup({ group: id })}
+      id={ids.editorGroup({ group: name })}
       role="tabpanel"
       {...attrs}
     >
-      {Children.map(children, (node) => {
-        if (typeof node === "object" && node !== null && "props" in node) {
-          return cloneElement(node, { group: id });
-        }
-        return node;
-      })}
+      <GroupProvider value={name}>{children}</GroupProvider>
     </div>
   );
 }

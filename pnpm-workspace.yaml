@@ -3,8 +3,7 @@ packages:
   - "!**/tests/**"
 
 catalog:
-  "@base-ui/react": ^1.2.0
-  "@biomejs/biome": 2.4.9
+  "@base-ui/react": ^1.3.0
   "@builder.io/react-hydration-overlay": ^0.3.0
   "@codemirror/autocomplete": ^6.20.0
   "@codemirror/commands": ^6.10.3
@@ -110,7 +109,7 @@ catalog:
 
 catalogs:
   dev:
-    "@biomejs/biome": 2.4.8
+    "@biomejs/biome": 2.4.10
     "@jest/globals": ^30.3.0
     "@types/cli-progress": ^3.11.6
     "@types/jest": ^30.0.0
@@ -124,9 +123,9 @@ catalogs:
     "@types/yargs": ^17.0.35
     concurrently: ^9.2.1
     csstype: ^3.2.3
-    no-private-imports: ^0.0.1
     jest: ^30.2.0
     next: 16.2.1
+    no-private-imports: ^0.0.1
     skulpt: ^1.2
     ts-jest: ^29.4.6
     typedoc: ^0.28.17
@@ -150,6 +149,7 @@ catalogs:
     "@replit/codemirror-vim": ^6.3
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
+    jszip: ^3.10.1
     katex: ">=0.16"
     mathjax: ">=3"
     next: ">=16"

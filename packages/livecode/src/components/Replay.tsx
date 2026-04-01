@@ -1,5 +1,6 @@
 import type { Extension, Text } from "@codemirror/state";
 import { type EditorView, ViewPlugin } from "@codemirror/view";
+import { Duration, type DurationLike } from "@liqvid/duration";
 import {
   cmReplay,
   cmReplayMultiple,
@@ -12,6 +13,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import { type LiveCodeStore, useLiveCodeStore } from "../store";
 
+import { useGroup } from "./context";
 import { Editor } from "./Editor";
 
 type CodeData = Parameters<typeof cmReplay>[0]["data"];
@@ -27,7 +29,7 @@ export function Replay({
   selectionConfig,
   didScroll,
   shouldScroll,
-  start = 0,
+  start = new Duration(),
   ...props
 }: Pick<
   Parameters<typeof cmReplay>[0],
@@ -52,8 +54,9 @@ export function Replay({
      * Time to start replaying.
      * @default 0
      */
-    start?: number;
+    start?: DurationLike;
   }) {
+  const startSeconds = Duration.from(start).inSeconds();
   const store = useLiveCodeStore();
   const playback = useSeekable();
 
@@ -87,7 +90,7 @@ export function Replay({
                 playback,
                 scrollBehavior,
                 shouldScroll,
-                start,
+                start: startSeconds,
                 view,
               }),
             );
@@ -99,7 +102,7 @@ export function Replay({
               playback,
               scrollBehavior,
               shouldScroll,
-              start,
+              start: startSeconds,
               view,
             });
           }
@@ -117,7 +120,7 @@ export function Replay({
       scrollBehavior,
       selectionConfig,
       shouldScroll,
-      start,
+      startSeconds,
     ],
   );
 
@@ -129,12 +132,12 @@ export function Replay({
  */
 export function ReplayMultiple({
   didScroll,
-  group,
+  group: groupId,
   handle: propsHandle,
   replay,
   scrollBehavior,
   shouldScroll,
-  start = 0,
+  start = new Duration(),
 }: Pick<
   Parameters<typeof cmReplayMultiple>[0],
   "didScroll" | "scrollBehavior" | "shouldScroll"
@@ -163,10 +166,15 @@ export function ReplayMultiple({
    * Time to start replaying.
    * @default 0
    */
-  start?: number;
+  start?: DurationLike;
 }): null {
   const playback = useSeekable();
   const store = useLiveCodeStore();
+
+  const contextGroup = useGroup();
+  groupId ??= contextGroup;
+
+  const startSeconds = Duration.from(start).inSeconds();
 
   /* Handle callback */
   const handle = useCallback(
@@ -176,8 +184,8 @@ export function ReplayMultiple({
         store.setState((state) => ({
           groups: {
             ...state.groups,
-            [group]: {
-              ...state.groups[group],
+            [groupId]: {
+              ...state.groups[groupId],
               activeFile: cmd.slice(selectCmd.length),
             },
           },
@@ -193,61 +201,62 @@ export function ReplayMultiple({
       // userspace handler
       propsHandle?.(store, cmd, docs);
     },
-    [group, propsHandle, store],
+    [groupId, propsHandle, store],
   );
 
   useEffect(() => {
     const state = store.getState();
+    const group = state.groups[groupId];
+    if (!group) return;
 
     const views: Record<string, EditorView> = {};
-    for (const file of state.groups[group].files) {
+    for (const file of group.files) {
       views[file.filename] = file.view;
     }
 
+    let unsubscribe: () => void;
+
     if (replay instanceof Promise) {
-      replay.then((data) =>
-        cmReplayMultiple({
-          data,
-          didScroll,
-          handle,
-          playback,
-          scrollBehavior,
-          shouldScroll,
-          start,
-          views,
-        }),
+      replay.then(
+        (data) =>
+          (unsubscribe = cmReplayMultiple({
+            data,
+            didScroll,
+            handle,
+            playback,
+            scrollBehavior,
+            shouldScroll,
+            start: startSeconds,
+            views,
+          })),
       );
     } else {
-      console.log({
-        replay,
-        views: Object.fromEntries(
-          Object.entries(views).map(([filename, view]) => [
-            filename,
-            view.state.doc,
-          ]),
-        ),
-      });
-      cmReplayMultiple({
+      console.log("subscribing with views", Object.keys(views));
+      unsubscribe = cmReplayMultiple({
         data: replay,
         didScroll,
         handle,
         playback,
         scrollBehavior,
         shouldScroll,
-        start,
+        start: startSeconds,
         views,
       });
     }
+
+    return () => {
+      unsubscribe?.();
+    };
   }, [
     didScroll,
-    group,
+    groupId,
     handle,
     playback,
     replay,
     scrollBehavior,
     shouldScroll,
-    start,
     store,
+    startSeconds,
   ]);
 
   return null;
