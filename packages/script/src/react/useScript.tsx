@@ -2,27 +2,21 @@
 
 import { KeymapProvider, useKeyboardShortcut } from "@liqvid/keymap/react";
 import { PlaybackProvider } from "@liqvid/playback/react";
-import { createContext, useContext } from "react";
+import { makeContext } from "@liqvid/utils";
 
 import type { Script } from "../script.mts";
 
-export const ScriptContext = createContext<Script<string> | null>(null);
+const ScriptContext = makeContext<Script<string> | null>({
+  defaultValue: null,
+  name: "Script",
+  uniqueKey: "@liqvid/script",
+});
 
-export function useScriptOptional<
-  M extends string = string,
->(): Script<M> | null {
-  return useContext(ScriptContext) as Script<M> | null;
-}
+/** Access the ambient {@link Script}, or null if none available. */
+export const useScriptOptional = ScriptContext.useOptional;
 
-export function useScript<M extends string = string>(): Script<M> {
-  const script = useScriptOptional<M>();
-
-  if (!script) {
-    throw new Error("missing script");
-  }
-
-  return script;
-}
+/** Access the ambient {@link Script}. */
+export const useScript = ScriptContext.use;
 
 /** Shortcuts for navigating between markers. */
 export interface ScriptShortcuts {

@@ -1,8 +1,8 @@
 "use client";
 
 import type { EditorView, KeyBinding } from "@codemirror/view";
+import { makeContext } from "@liqvid/utils";
 import type { CodeRecorder } from "@lqv/codemirror/recording";
-import { createContext, useContext } from "react";
 import { createStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -87,20 +87,14 @@ export const makeStore = (state: Partial<LiveCodeState> = {}) =>
 
 export type LiveCodeStore = ReturnType<typeof makeStore>;
 
-export const LiveCodeContext = createContext<LiveCodeStore | null>(null);
-LiveCodeContext.displayName = "LiveCode";
+export const LiveCodeContext = makeContext<LiveCodeStore | null>({
+  defaultValue: null,
+  name: "LiveCode",
+  uniqueKey: "@liqvid/livecode/store",
+});
 
 /** Get a reference to the Zustand store for this CodeBooth. See {@link LiveCodeState} for store shape. */
-export function useLiveCodeStore(): LiveCodeStore {
-  const store = useContext(LiveCodeContext);
+export const useLiveCodeStore = LiveCodeContext.use;
 
-  if (!store) {
-    throw new Error("LiveCode store not available");
-  }
-
-  return store;
-}
-
-export function useLiveCodeStoreOptional(): LiveCodeStore | null {
-  return useContext(LiveCodeContext);
-}
+/** Get a reference to the Zustand store for this CodeBooth, or null if unavailable. See {@link LiveCodeState} for store shape. */
+export const useLiveCodeStoreOptional = LiveCodeContext.useOptional;

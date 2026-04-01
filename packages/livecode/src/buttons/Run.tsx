@@ -35,7 +35,7 @@ export function Run({
 
   return (
     <button
-      className={classNames("lqv-cb-run", className)}
+      className={classNames("lqv-livecode-run", className)}
       type="button"
       {...events}
       {...props}

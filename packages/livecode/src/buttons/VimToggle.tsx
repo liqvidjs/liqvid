@@ -9,11 +9,9 @@ import {
 import { vim } from "@replit/codemirror-vim";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useStore } from "zustand";
 
 import { vimCompartment } from "../extensions";
 import { useActiveFile, useLiveCodeShortcut } from "../hooks";
-import { useLiveCodeStore } from "../store";
 
 export const persistVim = {
   default: false,
