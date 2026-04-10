@@ -1,4 +1,8 @@
-import { useFormatActiveFile, useLiveCodeShortcut } from "@lqv/livecode";
+import {
+  useActiveFile,
+  useFormatActiveFile,
+  useLiveCodeShortcut,
+} from "@lqv/livecode";
 import classNames from "classnames";
 import { useCallback } from "react";
 
@@ -12,11 +16,17 @@ export function Format({
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const formatCurrentFile = useFormatActiveFile();
 
+  const activeFile = useActiveFile();
+
   // keyboard shortcut
   useLiveCodeShortcut(
     shortcut,
     useCallback(() => {
-      formatCurrentFile();
+      try {
+        formatCurrentFile();
+      } catch (e) {
+        console.error(e);
+      }
       return true;
     }, [formatCurrentFile]),
   );
@@ -24,6 +34,7 @@ export function Format({
   return (
     <button
       className={classNames("lqv-livecode-format", className)}
+      disabled={!(activeFile?.editable ?? true)}
       onClick={formatCurrentFile}
       type="button"
       {...props}

@@ -86,8 +86,6 @@ export function Record({
     };
   }, [captureKeys, groups, filename, recorder, store, groupId]);
 
-  console.log({ filename });
-
   return (
     <Editor
       extensions={newExtensions}

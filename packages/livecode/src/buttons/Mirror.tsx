@@ -5,9 +5,7 @@ import { useCallback, useMemo } from "react";
 import { useLiveCodeStore } from "../store";
 
 /** Button for copying the contents of one group to another. */
-
-export function Copy({
-  children = "Copy",
+export function Mirror({
   className,
   from: fromGroup,
   to: toGroup,
@@ -51,11 +49,9 @@ export function Copy({
 
   return (
     <button
-      className={classNames("lqv-cb-copy", className)}
+      className={classNames("lqv-livecode-mirror", className)}
       {...events}
       {...attrs}
-    >
-      {children}
-    </button>
+    />
   );
 }
