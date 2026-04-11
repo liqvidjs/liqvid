@@ -48,6 +48,9 @@ catalogs:
     '@lqv/playback':
       specifier: ^0.2.2
       version: 0.2.2
+    '@phosphor-icons/react':
+      specifier: ^2.1.10
+      version: 2.1.10
     '@radix-ui/react-portal':
       specifier: 1.1.10
       version: 1.1.10
@@ -132,9 +135,6 @@ catalogs:
     lodash.debounce:
       specifier: ^4.0.8
       version: 4.0.8
-    lucide-react:
-      specifier: ^1.0.0-rc.1
-      version: 1.0.0-rc.1
     mathjax:
       specifier: ^3.2.2
       version: 3.2.2
@@ -263,6 +263,33 @@ catalogs:
       specifier: ^5.9
       version: 5.9.3
   peer:
+    '@codemirror/autocomplete':
+      specifier: '>=6'
+      version: 6.20.1
+    '@codemirror/commands':
+      specifier: '>=6'
+      version: 6.10.3
+    '@codemirror/lang-css':
+      specifier: '>=6'
+      version: 6.3.1
+    '@codemirror/lang-html':
+      specifier: '>=6'
+      version: 6.4.11
+    '@codemirror/lang-javascript':
+      specifier: '>=6'
+      version: 6.2.5
+    '@codemirror/lang-python':
+      specifier: '>=6'
+      version: 6.2.1
+    '@codemirror/language':
+      specifier: '>=6'
+      version: 6.12.3
+    '@codemirror/lint':
+      specifier: '>=6'
+      version: 6.9.5
+    '@codemirror/search':
+      specifier: '>=6'
+      version: 6.6.0
     '@codemirror/state':
       specifier: '>=6'
       version: 6.6.0
@@ -275,6 +302,9 @@ catalogs:
     '@react-three/fiber':
       specifier: '>=9'
       version: 9.5.0
+    '@replit/codemirror-vim':
+      specifier: ^6.3
+      version: 6.3.0
     '@types/react-dom':
       specifier: '>=19'
       version: 19.2.3
@@ -1134,6 +1164,9 @@ importers:
       '@lqv/livecode':
         specifier: workspace:^
         version: link:../livecode
+      '@phosphor-icons/react':
+        specifier: 'catalog:'
+        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-portal':
         specifier: 'catalog:'
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1197,9 +1230,6 @@ importers:
       liqvid:
         specifier: workspace:^
         version: link:../main
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.0.0-rc.1(react@19.2.4)
       mathjax:
         specifier: 'catalog:'
         version: 3.2.2
@@ -1645,12 +1675,18 @@ importers:
       '@liqvid/hydration':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../hydration
+      '@liqvid/iframe-api':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../iframe-api
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../keymap
       '@liqvid/playback':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../playback
+      '@liqvid/player':
+        specifier: workspace:^1.0.0-alpha.1
+        version: link:../player
       '@liqvid/recording':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../recording
@@ -1666,6 +1702,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
+      '@phosphor-icons/react':
+        specifier: 'catalog:'
+        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-portal':
         specifier: 'catalog:'
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1690,9 +1729,6 @@ importers:
       lodash.debounce:
         specifier: 'catalog:'
         version: 4.0.8
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.0.0-rc.1(react@19.2.4)
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -3083,6 +3119,13 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@phosphor-icons/react@2.1.10':
+    resolution: {integrity: sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>= 16.8'
+      react-dom: '>= 16.8'
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -6494,11 +6537,6 @@ packages:
   lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
-
-  lucide-react@1.0.0-rc.1:
-    resolution: {integrity: sha512-lJEa0jq6KTjpACE/uNPlSuB/nS9edOTJ6KZ7VSu7VuLq6OFa2jM1W3C83+yfMutAE/K+xwGSBBIZ57PkgSxV/Q==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
@@ -10100,6 +10138,11 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
+  '@phosphor-icons/react@2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -12008,7 +12051,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4):
+  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4):
     dependencies:
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
@@ -13036,7 +13079,7 @@ snapshots:
       '@types/node': 10.14.22
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
-      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4)
+      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4)
       camelcase: 5.3.1
       debug: 4.4.3
       dotenv: 6.2.0
@@ -13050,7 +13093,7 @@ snapshots:
       mime-types: 2.1.35
       object.omit: 3.0.0
       object.pick: 1.3.0
-      retry-axios: 2.6.0(axios@0.26.1)
+      retry-axios: 2.6.0(axios@0.26.1(debug@4.4.3))
       semver: 6.3.1
       tough-cookie: 4.1.4
     transitivePeerDependencies:
@@ -13971,10 +14014,6 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@1.0.0-rc.1(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
   lunr@2.3.9: {}
 
   maath@0.10.8(@types/three@0.183.1)(three@0.183.2):
@@ -14685,7 +14724,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-axios@2.6.0(axios@0.26.1):
+  retry-axios@2.6.0(axios@0.26.1(debug@4.4.3)):
     dependencies:
       axios: 0.26.1(debug@4.4.3)
 

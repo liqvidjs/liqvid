@@ -1,9 +1,12 @@
 import cliProgress from "cli-progress";
 import puppeteer from "puppeteer-core";
 
+/** Namespace for the Liqvid player iframe API */
+export const PLAYER_API_NAMESPACE = "@liqvid/player";
+
 /**
-  Connect to a page running Liqvid.
-*/
+ * Connect to a page running Liqvid.
+ */
 export async function connect({
   browser,
   colorScheme = "light",
@@ -19,18 +22,17 @@ export async function connect({
 }) {
   // init page
   const page = await browser.newPage();
-  page.setViewport({height, width});
+  page.setViewport({ height, width });
   page.on("error", console.error);
   page.on("pageerror", console.error);
 
-  await page.goto(url, {timeout: 0});
+  await page.goto(url, { timeout: 0 });
 
-  await page.waitForSelector(".rp-controls, .lv-controls");
+  await page.waitForSelector(".lv-controls");
 
-  // hide controls
-  await page.evaluate(() => {
-    (document.querySelector(".rp-controls") as HTMLDivElement).style.display =
-      "none";
+  await renderingApi.toggleControls(page, false);
+
+  page.evaluate(() => {
     document.body.style.background = "transparent";
   });
 
@@ -42,16 +44,17 @@ export async function connect({
     },
   ]);
 
-  // set player as global variable
-  // HA HA HA THIS IS HORRIBLE
-  await page.evaluate(async () => {
-    const playerElement = document.querySelector(".lv-player");
-    const symbol = Symbol.for("@liqvid/player/element");
-    window.player = playerElement[symbol];
-  });
-
   return page;
 }
+
+export const renderingApi = {
+  setColorScheme(page: puppeteer.Page, colorScheme: "light" | "dark") {
+    return callPlayerApi(page, "setColorScheme", [colorScheme]);
+  },
+  toggleControls(page: puppeteer.Page, visible?: boolean) {
+    return callPlayerApi(page, "toggleControls", [visible]);
+  },
+};
 
 /**
 Connect to players.
@@ -102,8 +105,8 @@ export async function getPages({
         browser,
         colorScheme,
         height,
-        width,
         url,
+        width,
       });
 
       playerBar.increment();
@@ -114,4 +117,54 @@ export async function getPages({
   playerBar.stop();
 
   return pages;
+} /**
+ * Call a method on the Liqvid player via postMessage API.
+ * This sends a message to the page and waits for the response.
+ */
+export async function callPlayerApi(
+  page: puppeteer.Page,
+  method: string,
+  args: unknown[],
+): Promise<unknown> {
+  return page.evaluate(
+    ({ args, method, namespace }) => {
+      return new Promise((resolve, reject) => {
+        const requestId = Math.random();
+
+        const handleMessage = (event: MessageEvent) => {
+          const data = event.data;
+          if (
+            !data ||
+            typeof data !== "object" ||
+            data.namespace !== namespace ||
+            data.requestId !== requestId
+          ) {
+            return;
+          }
+
+          if (data.type === "return") {
+            window.removeEventListener("message", handleMessage);
+            resolve(data.value);
+          } else if (data.type === "error") {
+            window.removeEventListener("message", handleMessage);
+            reject(new Error(data.error));
+          }
+        };
+
+        window.addEventListener("message", handleMessage);
+
+        window.postMessage(
+          {
+            arguments: args,
+            method,
+            namespace,
+            requestId,
+            type: "call",
+          },
+          "*",
+        );
+      });
+    },
+    { args, method, namespace: PLAYER_API_NAMESPACE },
+  );
 }

@@ -1,7 +1,8 @@
-import {execa} from "execa";
-import {promises as fsp} from "fs";
-import os from "os";
-import path from "path";
+import { promises as fsp } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+import { execa } from "execa";
 
 /**
  * Join multiple audio files into one.
@@ -60,5 +61,5 @@ export async function join({
   await job;
 
   // clean up
-  await fsp.rm(tempDir, {recursive: true});
+  await fsp.rm(tempDir, { recursive: true });
 }

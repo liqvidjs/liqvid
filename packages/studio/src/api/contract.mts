@@ -1,4 +1,5 @@
 import { RecordingMeta } from "@liqvid/schemas";
+import { ScreenshotEntry } from "@liqvid/schemas/screenshot-meta";
 import { z } from "zod";
 
 export type Operation<
@@ -68,5 +69,59 @@ export const staticFileOperation = {
   endpoint: "/static" as const,
   search: z.object({
     url: z.string(),
+  }),
+};
+
+export const listScreenshotsOperation = {
+  endpoint: "/screenshots" as const,
+  response: z.array(ScreenshotEntry),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const captureScreenshotOperation = {
+  body: z.object({
+    /** Color scheme: light, dark, or both */
+    colorScheme: z.enum(["light", "dark", "both"]).optional(),
+    /** Height of screenshot */
+    height: z.number(),
+    /** Time in seconds to capture */
+    time: z.number(),
+    /** Width of screenshot */
+    width: z.number(),
+  }),
+  endpoint: "/screenshots/capture" as const,
+  method: "POST" as const,
+  response: ScreenshotEntry,
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const copyScreenshotOperation = {
+  body: z.object({
+    /** Screenshot folder id */
+    screenshotId: z.string(),
+    /** Source filename for "both" mode (light.png or dark.png) */
+    sourceFilename: z.enum(["light.png", "dark.png"]).optional(),
+    /** Target filename (opengraph-image.png or twitter-image.png) */
+    targetFilename: z.enum(["opengraph-image.png", "twitter-image.png"]),
+  }),
+  endpoint: "/screenshots/copy" as const,
+  method: "POST" as const,
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const checkImageExistsOperation = {
+  endpoint: "/screenshots/check-exists" as const,
+  response: z.object({
+    exists: z.boolean(),
+  }),
+  search: z.object({
+    filename: z.enum(["opengraph-image.png", "twitter-image.png"]),
+    projectPath: z.string(),
   }),
 };

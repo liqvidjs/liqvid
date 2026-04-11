@@ -16,6 +16,7 @@ import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies";
 
 import { OpenInFinderButton } from "./OpenInFinderButton";
 import { ProductionLink } from "./ProductionLink";
+import { ShareButton } from "./ShareButton";
 
 import styles from "./ProjectList.module.css";
 
@@ -303,6 +304,11 @@ function ProjectItem({
         </div>
       </a>
       <div className={styles.actions}>
+        <ShareButton
+          duration={project.duration}
+          productionServerPort={productionServerPort}
+          project={omit(project, ["duration"])}
+        />
         <OpenInFinderButton projectPath={project.path} />
         <ProductionLink
           href={`http://localhost:${productionServerPort}/${project.path}`}

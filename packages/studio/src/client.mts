@@ -4,7 +4,11 @@ import { Err, Ok, type Result } from "have-fun";
 import type { z } from "zod";
 
 import {
+  captureScreenshotOperation,
+  checkImageExistsOperation,
+  copyScreenshotOperation,
   listRecordingsOperation,
+  listScreenshotsOperation,
   type Operation,
   saveRecordingOperation,
   setProjectMetaOperation,
@@ -152,3 +156,11 @@ export async function saveRecording(
     return Err(e as TypeError);
   }
 }
+
+export const listScreenshots = makeFetcher(listScreenshotsOperation);
+
+export const captureScreenshot = makeFetcher(captureScreenshotOperation);
+
+export const copyScreenshot = makeFetcher(copyScreenshotOperation);
+
+export const checkImageExists = makeFetcher(checkImageExistsOperation);

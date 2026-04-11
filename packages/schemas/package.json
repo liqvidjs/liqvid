@@ -19,6 +19,10 @@
       "import": "./dist/esm/recording-meta.mjs",
       "types": "./dist/types/recording-meta.d.mts"
     },
+    "./screenshot-meta": {
+      "import": "./dist/esm/screenshot-meta.mjs",
+      "types": "./dist/types/screenshot-meta.d.mts"
+    },
     "./providers": {
       "import": "./dist/esm/providers/index.mjs",
       "types": "./dist/types/providers/index.d.mts"

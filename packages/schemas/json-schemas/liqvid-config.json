@@ -132,6 +132,9 @@
                       "type": "string",
                       "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
                     },
+                    "domain": {
+                      "type": "string"
+                    },
                     "endpoint": {
                       "type": "string"
                     },
@@ -151,6 +154,7 @@
                   },
                   "required": [
                     "accessKeyId",
+                    "domain",
                     "region",
                     "secretAccessKey",
                     "type"
