@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Select } from "@base-ui/react/select";
-import { Check, ChevronDown, Plus } from "lucide-react";
+import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { IconButton } from "../ui/IconButton";
@@ -84,7 +84,7 @@ export function NewProjectButton() {
       <Dialog.Trigger
         render={<IconButton title="Create a new project" variant="primary" />}
       >
-        <Plus />
+        <PlusIcon />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className={styles.dialogOverlay} />
@@ -139,7 +139,7 @@ export function NewProjectButton() {
                 >
                   <Select.Value placeholder="Select a template" />
                   <Select.Icon className={styles.selectIcon}>
-                    <ChevronDown />
+                    <CaretDownIcon />
                   </Select.Icon>
                 </Select.Trigger>
                 <Select.Portal>
@@ -156,7 +156,7 @@ export function NewProjectButton() {
                             <Select.ItemIndicator
                               className={styles.selectItemIndicator}
                             >
-                              <Check />
+                              <CheckIcon />
                             </Select.ItemIndicator>
                           </Select.Item>
                         ))}

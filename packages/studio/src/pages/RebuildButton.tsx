@@ -1,6 +1,6 @@
 "use client";
 
-import { Package } from "lucide-react";
+import { PackageIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
 import { IconButton } from "../ui/IconButton";
@@ -30,7 +30,7 @@ export function RebuildButton() {
       onClick={handleRebuild}
       title={isBuilding ? "Building..." : "Rebuild projects for production"}
     >
-      <Package />
+      <PackageIcon />
     </IconButton>
   );
 }

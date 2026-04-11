@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderOpen } from "lucide-react";
+import { FolderOpenIcon } from "@phosphor-icons/react";
 
 import { openInFinderAction } from "./root-actions";
 
@@ -18,7 +18,7 @@ export function OpenInFinderButton({ projectPath }: { projectPath: string }) {
       title="Open in Finder"
       type="button"
     >
-      <FolderOpen size={24} />
+      <FolderOpenIcon size={24} />
     </button>
   );
 }

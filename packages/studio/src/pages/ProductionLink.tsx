@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye } from "lucide-react";
+import { EyeIcon } from "@phosphor-icons/react";
 
 import styles from "./root.module.css";
 
@@ -13,7 +13,7 @@ export function ProductionLink({ href }: { href: string }) {
       target="_blank"
       title="Preview"
     >
-      <Eye size={24} />
+      <EyeIcon size={24} />
     </a>
   );
 }

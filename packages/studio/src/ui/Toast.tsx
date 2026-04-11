@@ -1,6 +1,6 @@
 import type { PluginContext } from "@liqvid/studio-plugin-api";
+import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
 import classNames from "classnames";
-import { CheckCircle, Info, XCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import styles from "./Toast.module.css";
@@ -15,9 +15,9 @@ export type ToastPropsWithTime = ToastProps & {
 };
 
 const icons = {
-  info: <XCircle color="red" fill="red" stroke="white" />,
-  negative: <Info color="slateblue" fill="slateblue" stroke="white" />,
-  success: <CheckCircle color="green" fill="green" stroke="white" />,
+  info: <XCircleIcon color="red" fill="red" stroke="white" />,
+  negative: <InfoIcon color="slateblue" fill="slateblue" stroke="white" />,
+  success: <CheckCircleIcon color="green" fill="green" stroke="white" />,
 };
 
 export function Toast({

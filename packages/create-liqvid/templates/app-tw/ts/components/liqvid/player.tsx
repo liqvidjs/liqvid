@@ -12,17 +12,17 @@ import {
 	RecordingControl,
 } from "@liqvid/studio";
 import {
-	Maximize,
-	Minimize,
+	ArrowsIn,
+	ArrowsOut,
 	Moon,
 	Pause,
 	Play,
+	SpeakerHigh,
+	SpeakerLow,
+	SpeakerNone,
+	SpeakerX,
 	Sun,
-	Volume,
-	Volume1,
-	Volume2,
-	VolumeX,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import classNames from "classnames";
 import {
 	ColorSchemeProvider,
@@ -159,9 +159,9 @@ function PlayPause() {
 				return (
 					<button aria-label={label} title={label} {...props}>
 						{paused || seeking ? (
-							<Play className={iconClassName} fill="currentColor" />
+							<Play className={iconClassName} weight="fill" />
 						) : (
-							<Pause className={iconClassName} fill="currentColor" />
+							<Pause className={iconClassName} weight="fill" />
 						)}
 					</button>
 				);
@@ -222,18 +222,18 @@ function MuteButton() {
 										variants={[
 											{
 												children: (
-													<Volume2
+													<SpeakerHigh
 														className={iconClassName}
-														fill="currentColor"
+														weight="fill"
 													/>
 												),
 												gte: 0.5,
 											},
 											{
 												children: (
-													<Volume1
+													<SpeakerLow
 														className={iconClassName}
-														fill="currentColor"
+														weight="fill"
 													/>
 												),
 												gt: 0,
@@ -241,9 +241,9 @@ function MuteButton() {
 											},
 											{
 												children: (
-													<Volume
+													<SpeakerNone
 														className={iconClassName}
-														fill="currentColor"
+														weight="fill"
 													/>
 												),
 												eq: 0,
@@ -258,7 +258,7 @@ function MuteButton() {
 									title={strings.unmute}
 									{...props}
 								>
-									<VolumeX className={iconClassName} fill="currentColor" />
+									<SpeakerX className={iconClassName} weight="fill" />
 								</button>
 							),
 						}}
@@ -291,7 +291,7 @@ function ColorSchemeToggle() {
 										title={strings.dark}
 										{...props}
 									>
-										<Moon className={iconClassName} fill="currentColor" />
+										<Moon className={iconClassName} weight="fill" />
 									</button>
 								),
 								eq: "dark",
@@ -303,7 +303,7 @@ function ColorSchemeToggle() {
 										title={strings.light}
 										{...props}
 									>
-										<Sun className={iconClassName} fill="currentColor" />
+										<Sun className={iconClassName} weight="fill" />
 									</button>
 								),
 								eq: "light",
@@ -327,9 +327,9 @@ function FullScreen() {
 				return (
 					<button aria-label={label} title={label} {...props}>
 						{isFullScreen ? (
-							<Minimize className={iconClassName} strokeWidth={2.5} />
+							<ArrowsIn className={iconClassName} weight="bold" />
 						) : (
-							<Maximize className={iconClassName} strokeWidth={2.5} />
+							<ArrowsOut className={iconClassName} weight="bold" />
 						)}
 					</button>
 				);

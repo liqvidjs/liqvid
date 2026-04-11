@@ -3,7 +3,7 @@
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import classNames from "classnames";
-import type { LucideIcon } from "lucide-react";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import styles from "./RadioTabs.module.css";
@@ -32,8 +32,8 @@ function RadioTabs<T extends string>({
 }
 
 interface RadioTabsItemProps extends React.ComponentProps<typeof Radio.Root> {
-  /** Lucide icon component to display in the tab */
-  icon: LucideIcon;
+  /** Phosphor icon component to display in the tab */
+  icon: PhosphorIcon;
 
   /** Icon size (default: 18) */
   iconSize?: number;
@@ -57,8 +57,8 @@ function RadioTabsItem({
       <IconComponent className={styles.iconRegular} size={iconSize} />
       <IconComponent
         className={styles.iconFill}
-        fill="currentColor"
         size={iconSize}
+        weight="fill"
       />
     </Radio.Root>
   );

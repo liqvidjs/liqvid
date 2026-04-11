@@ -3,8 +3,12 @@
 import { Duration } from "@liqvid/duration";
 import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr";
-import { formatTime, formatTimeDuration } from "@liqvid/utils";
-import { ChevronDown, ChevronRight, Folder } from "lucide-react";
+import { formatTime, formatTimeDuration, omit } from "@liqvid/utils";
+import {
+  CaretDownIcon,
+  CaretRightIcon,
+  FolderIcon,
+} from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -243,11 +247,11 @@ function FolderItem({
         type="button"
       >
         {expanded ? (
-          <ChevronDown className={styles.folderChevron} size={16} />
+          <CaretDownIcon className={styles.folderChevron} size={16} />
         ) : (
-          <ChevronRight className={styles.folderChevron} size={16} />
+          <CaretRightIcon className={styles.folderChevron} size={16} />
         )}
-        <Folder className={styles.folderIcon} fill="" size={18} />
+        <FolderIcon className={styles.folderIcon} fill="" size={18} />
         <span className={styles.folderName}>{folderPath}</span>
         <span className={styles.folderCount}>{totalCount}</span>
       </button>

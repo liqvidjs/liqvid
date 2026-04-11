@@ -4,7 +4,7 @@ For theming, use the CSS variables in `src/palette.css`.
 
 ## Libraries
 
-Use Lucide icons from `lucide-react`. Icons are named in PascalCase without an `Icon` suffix, e.g. `Camera` instead of `CameraIcon`.
+Use Phosphor icons from `@phosphor-icons/react`. Icons are named in PascalCase, and must always end in `Icon`, e.g. `CameraIcon`. Use the `weight` prop for variants: `"thin"`, `"light"`, `"regular"` (default), `"bold"`, `"fill"`, or `"duotone"`.
 
 For formatting times, use the `formatTime`, `formatTimeMs`, and `formatTimeDuration` functions from `@liqvid/utils/time`.
 
