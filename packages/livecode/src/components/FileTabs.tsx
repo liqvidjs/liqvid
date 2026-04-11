@@ -1,4 +1,4 @@
-import { onClickReact } from "@liqvid/utils";
+import { filterRecord, onClickReact } from "@liqvid/utils";
 import { selectCmd } from "@lqv/codemirror";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
@@ -111,10 +111,9 @@ export function FileTabs({
         // set class
         classNames: prev.classNames.filter((_) => _ !== "multifile"),
         // shortcuts
-        shortcuts: Object.fromEntries(
-          Object.entries(prev.shortcuts).filter(
-            ([key]) => !("Mod-1" <= key && key <= "Mod-9"),
-          ),
+        shortcuts: filterRecord(
+          prev.shortcuts,
+          (_, key) => !("Mod-1" <= key && key <= "Mod-9"),
         ),
       }));
     };

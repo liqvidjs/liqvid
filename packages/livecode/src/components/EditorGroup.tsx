@@ -1,3 +1,4 @@
+import { filterRecord } from "@liqvid/utils";
 import classNames from "classnames";
 import { useEffect } from "react";
 import { useStore } from "zustand";
@@ -28,9 +29,7 @@ export function EditorGroup({
 
     return () => {
       store.setState((prev) => {
-        const newGroups = Object.fromEntries(
-          Object.entries(prev.groups).filter(([key]) => key !== name),
-        );
+        const newGroups = filterRecord(prev.groups, (_, key) => key !== name);
         return {
           ...prev,
           activeGroup:
@@ -42,8 +41,6 @@ export function EditorGroup({
       });
     };
   }, [name, store]);
-
-  console.log({ active, name });
 
   return (
     <div

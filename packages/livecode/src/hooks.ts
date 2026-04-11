@@ -3,7 +3,8 @@
 import { EditorSelection, type SelectionRange } from "@codemirror/state";
 import type { Command, EditorView } from "@codemirror/view";
 import { Duration, type DurationLike } from "@liqvid/duration";
-import { cm2lv, lv2cm } from "@lqv/codemirror/extensions";
+import { filterRecord } from "@liqvid/utils";
+import { lv2cm } from "@lqv/codemirror/extensions";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
@@ -161,9 +162,7 @@ export function useLiveCodeShortcut(
 
     return () => {
       setStoreState((prev) => ({
-        shortcuts: Object.fromEntries(
-          Object.entries(prev.shortcuts).filter(([key]) => key !== shortcut),
-        ),
+        shortcuts: filterRecord(prev.shortcuts, (_, key) => key !== shortcut),
       }));
     };
   }, [shortcut, setStoreState, action]);
