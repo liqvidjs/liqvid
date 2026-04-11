@@ -114,7 +114,7 @@ const storeProxyHandler: ProxyHandler<LiveCodeStore> = {
 
         return groups[activeGroup].files.find(
           ({ filename }) => filename === prop,
-        );
+        )?.view;
       }
     }
   },

@@ -34,7 +34,7 @@ export type RecordingData<Data, State> = {
   version: string;
 
   /** Optional initial state for replaying this recording. */
-  initial?: State;
+  initial: State;
 
   /** Recording data to replay. */
   data: Data;

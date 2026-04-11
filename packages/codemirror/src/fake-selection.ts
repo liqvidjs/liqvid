@@ -73,8 +73,8 @@ const fakeSelectionConfig = Facet.define<
 export function fakeSelection(config: FakeSelectionConfig = {}): Extension {
   return [
     fakeSelectionConfig.of(config),
-    fakeCursorLayer,
-    fakeSelectionLayer,
+    fakeCursorLayer(),
+    fakeSelectionLayer(),
     style,
   ];
 }
@@ -95,105 +95,126 @@ function configChanged(update: ViewUpdate) {
   );
 }
 
-const fakeCursorLayer = layer({
-  above: true,
-  class: "lqv-fakeCursorLayer",
-  markers(view) {
-    const { state } = view;
-    const conf = state.facet(fakeSelectionConfig);
-    const cursors: RectangleMarker[] = [];
-    if (!this.range) return [];
+type LayerConfig = Parameters<typeof layer>[0];
 
-    for (const r of [this.range]) {
-      if (r.empty || conf.drawRangeCursor) {
-        const className =
-          conf.cursorStyle === "block"
-            ? "lqv-fakeCursorBlock"
-            : "lqv-fakeCursorColumn";
+type LayerConfigWithRange = LayerConfig & {
+  range: SelectionRange | null;
+};
 
-        const cursor = r.empty
-          ? r
-          : EditorSelection.cursor(r.head, r.head > r.anchor ? -1 : 1);
+const fakeCursorLayer = () =>
+  layer({
+    above: true,
+    class: "lqv-fakeCursorLayer",
+    markers(this: LayerConfigWithRange, view) {
+      const { state } = view;
+      const conf = state.facet(fakeSelectionConfig);
+      const cursors: RectangleMarker[] = [];
+      if (!this.range) return [];
 
-        for (const piece of RectangleMarker.forRange(view, className, cursor))
-          cursors.push(piece);
+      for (const r of [this.range]) {
+        if (r.empty || conf.drawRangeCursor) {
+          const className =
+            conf.cursorStyle === "block"
+              ? "lqv-fakeCursorBlock"
+              : "lqv-fakeCursorColumn";
+
+          const cursor = r.empty
+            ? r
+            : EditorSelection.cursor(r.head, r.head > r.anchor ? -1 : 1);
+
+          try {
+            for (const piece of RectangleMarker.forRange(
+              view,
+              className,
+              cursor,
+            )) {
+              cursors.push(piece);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
       }
-    }
 
-    return cursors;
-  },
-  mount(dom, view) {
-    setBlinkRate(view.state, dom);
-  },
-  update(update, dom) {
-    const effects = update.transactions
-      .map(
-        (tr) =>
-          tr.effects.filter((e) =>
-            e.is(FakeSelection),
-          ) as StateEffect<CMRange>[],
-      )
-      .reduce((a, b) => a.concat(b), []);
+      return cursors;
+    },
+    mount(dom, view) {
+      setBlinkRate(view.state, dom);
+    },
+    update(this: LayerConfigWithRange, update, dom) {
+      const effects = update.transactions
+        .map(
+          (tr) =>
+            tr.effects.filter((e) =>
+              e.is(FakeSelection),
+            ) as StateEffect<CMRange>[],
+        )
+        .reduce((a, b) => a.concat(b), []);
 
-    const confChange = configChanged(update);
-    if (confChange) setBlinkRate(update.state, dom);
+      const confChange = configChanged(update);
+      if (confChange) setBlinkRate(update.state, dom);
 
-    if (effects.length === 0) {
-      return update.docChanged || update.selectionSet || confChange;
-    }
+      if (effects.length === 0) {
+        return update.docChanged || update.selectionSet || confChange;
+      }
 
-    if (effects.length > 0) {
-      dom.style.animationName =
-        dom.style.animationName === "lqv-blink" ? "lqv-blink2" : "lqv-blink";
-      this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
-      return true;
-    }
-  },
-});
+      if (effects.length > 0) {
+        dom.style.animationName =
+          dom.style.animationName === "lqv-blink" ? "lqv-blink2" : "lqv-blink";
+        this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
+        return true;
+      }
+
+      return false;
+    },
+  });
 
 function setBlinkRate(state: EditorState, dom: HTMLElement) {
   dom.style.animationDuration = `${state.facet(fakeSelectionConfig).cursorBlinkRate}ms`;
 }
 
-const fakeSelectionLayer = layer({
-  above: false,
-  class: "lqv-fakeSelectionLayer",
-  markers(view) {
-    if (!this.range) {
-      return [];
-    }
+const fakeSelectionLayer = () =>
+  layer({
+    above: false,
+    class: "lqv-fakeSelectionLayer",
+    markers(this: LayerConfigWithRange, view) {
+      if (!this.range) {
+        return [];
+      }
 
-    return RectangleMarker.forRange(
-      view,
-      "lqv-fakeSelectionBackground",
-      this.range,
-    );
-  },
-  update(update) {
-    const effects = update.transactions
-      .map(
-        (tr) =>
-          tr.effects.filter((e) =>
-            e.is(FakeSelection),
-          ) as StateEffect<CMRange>[],
-      )
-      .reduce((a, b) => a.concat(b), []);
-
-    if (effects.length === 0) {
-      return (
-        update.docChanged ||
-        update.selectionSet ||
-        update.viewportChanged ||
-        configChanged(update)
+      return RectangleMarker.forRange(
+        view,
+        "lqv-fakeSelectionBackground",
+        this.range,
       );
-    }
+    },
+    update(this: LayerConfigWithRange, update) {
+      const effects = update.transactions
+        .map(
+          (tr) =>
+            tr.effects.filter((e) =>
+              e.is(FakeSelection),
+            ) as StateEffect<CMRange>[],
+        )
+        .reduce((a, b) => a.concat(b), []);
 
-    if (effects.length > 0) {
-      this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
-      return true;
-    }
-  },
-});
+      if (effects.length === 0) {
+        return (
+          update.docChanged ||
+          update.selectionSet ||
+          update.viewportChanged ||
+          configChanged(update)
+        );
+      }
+
+      if (effects.length > 0) {
+        this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
+        return true;
+      }
+
+      return false;
+    },
+  });
 
 type StyleSpec = {
   [propOrSelector: string]: string | number | StyleSpec | null;

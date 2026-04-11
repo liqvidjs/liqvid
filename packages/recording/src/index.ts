@@ -12,11 +12,8 @@ export {
   useRecordingApi,
 } from "./RecordingProvider.tsx";
 export type { Recorder } from "./recorder.ts";
-export {
-  compress,
-  ReplayDataRecorder,
-} from "./recorders/replay-data-recorder.mts";
-export type { RecordingPlugin } from "./types.ts";
+export { ReplayDataRecorder } from "./recorders/replay-data-recorder.mts";
+export type { RecordingData, RecordingPlugin } from "./types.ts";
 
 export const RecordingProvider = isDevelopment
   ? lazy(() =>

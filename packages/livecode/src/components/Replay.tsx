@@ -1,7 +1,10 @@
 import type { Extension, Text } from "@codemirror/state";
 import { type EditorView, ViewPlugin } from "@codemirror/view";
 import { Duration, type DurationLike } from "@liqvid/duration";
+import type { RecordingData } from "@liqvid/recording";
+import type { ReplayData } from "@liqvid/utils";
 import {
+  type Action,
   cmReplay,
   cmReplayMultiple,
   fakeSelection,
@@ -17,7 +20,17 @@ import { type LiveCodeStore, useLiveCodeStore } from "../store";
 import { useGroup } from "./context";
 import { Editor } from "./Editor";
 
-type CodeData = Parameters<typeof cmReplay>[0]["data"];
+/** Single-file initial state. */
+type SingleFileInitial = {
+  content?: string;
+  selection?: CMRange;
+};
+
+/** Recording data for single-file replay. */
+type SingleFileRecording = RecordingData<ReplayData<Action>, SingleFileInitial>;
+
+/** Recording data for multi-file replay. */
+type MultiFileRecording = RecordingData<ReplayData<Action>, CMState>;
 
 /**
  * Editor to replay recorded coding.
@@ -25,7 +38,6 @@ type CodeData = Parameters<typeof cmReplay>[0]["data"];
 export function Replay({
   extensions = [],
   handle,
-  initial,
   replay,
   scrollBehavior,
   selectionConfig,
@@ -46,16 +58,8 @@ export function Replay({
      */
     handle?: (useStore: LiveCodeStore, cmd: string, doc: Text) => void;
 
-    /**
-     * Initial content and selection for the editor.
-     */
-    initial?: {
-      content?: string;
-      selection?: CMRange;
-    };
-
-    /** Coding data to replay. */
-    replay?: CodeData | Promise<CodeData>;
+    /** Recording data to replay. */
+    replay?: SingleFileRecording | Promise<SingleFileRecording>;
 
     /** Configuration for replaying the author's cursor and selection. */
     selectionConfig?: FakeSelectionConfig;
@@ -92,12 +96,12 @@ export function Replay({
       ViewPlugin.define((view) => {
         if (replay) {
           if (replay instanceof Promise) {
-            replay.then((data) =>
+            replay.then((recording) =>
               cmReplay({
-                data,
+                data: recording.data,
                 didScroll,
                 handle: __handle,
-                initial,
+                initial: recording.initial,
                 playback,
                 scrollBehavior,
                 shouldScroll,
@@ -107,10 +111,10 @@ export function Replay({
             );
           } else {
             cmReplay({
-              data: replay,
+              data: replay.data,
               didScroll,
               handle: __handle,
-              initial,
+              initial: replay.initial,
               playback,
               scrollBehavior,
               shouldScroll,
@@ -127,7 +131,6 @@ export function Replay({
       __handle,
       didScroll,
       extensions,
-      initial,
       playback,
       replay,
       scrollBehavior,
@@ -147,7 +150,6 @@ export function ReplayMultiple({
   didScroll,
   group: groupId,
   handle: propsHandle,
-  initial,
   replay,
   scrollBehavior,
   shouldScroll,
@@ -172,14 +174,9 @@ export function ReplayMultiple({
   ) => void;
 
   /**
-   * Initial state for each file (content and selection).
+   * Recording data to replay.
    */
-  initial?: CMState;
-
-  /**
-   * Coding data to replay.
-   */
-  replay: CodeData | Promise<CodeData>;
+  replay: MultiFileRecording | Promise<MultiFileRecording>;
 
   /**
    * Time to start replaying.
@@ -237,12 +234,12 @@ export function ReplayMultiple({
 
     if (replay instanceof Promise) {
       replay.then(
-        (data) =>
+        (recording) =>
           (unsubscribe = cmReplayMultiple({
-            data,
+            data: recording.data,
             didScroll,
             handle,
-            initial,
+            initial: recording.initial,
             playback,
             scrollBehavior,
             shouldScroll,
@@ -251,12 +248,11 @@ export function ReplayMultiple({
           })),
       );
     } else {
-      console.log("subscribing with views", Object.keys(views));
       unsubscribe = cmReplayMultiple({
-        data: replay,
+        data: replay.data,
         didScroll,
         handle,
-        initial,
+        initial: replay.initial,
         playback,
         scrollBehavior,
         shouldScroll,
@@ -272,7 +268,6 @@ export function ReplayMultiple({
     didScroll,
     groupId,
     handle,
-    initial,
     playback,
     replay,
     scrollBehavior,

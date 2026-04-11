@@ -33,29 +33,37 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
   $schema = undefined;
   initial: CMState | undefined = undefined;
 
-  private __views: Record<string, EditorView> = {};
+  private __config: CMConfig | undefined;
 
   constructor() {
     super();
     bind(this, ["extension"]);
   }
 
-  configure({ views }: CMConfig) {
-    this.__views = views;
+  configure(config: CMConfig) {
+    this.__config = config;
   }
 
   override beginRecording(timestamp?: number): void {
+    if (!this.__config) {
+      throw new Error("CodeRecorder has not been configured");
+    }
+
     super.beginRecording(timestamp);
 
     // capture initial state
     this.initial = {
-      files: mapRecord(this.__views, ({ state }) => ({
-        content: state.doc.toString(),
-        selection: {
-          anchor: state.selection.ranges[0].anchor,
-          head: state.selection.ranges[0].head,
-        },
-      })),
+      activeFile: this.__config.getActiveFile(),
+      files: mapRecord(this.__config.views, (view) => {
+        const { state } = view;
+        return {
+          content: state.doc.toString(),
+          selection: {
+            anchor: state.selection.ranges[0].anchor,
+            head: state.selection.ranges[0].head,
+          },
+        };
+      }),
     };
   }
 

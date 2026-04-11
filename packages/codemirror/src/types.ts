@@ -6,14 +6,17 @@ export interface CMRange {
 }
 
 export type CMConfig = {
+  getActiveFile(): string;
   views: Record<string, EditorView>;
 };
 
 export type CMState = {
+  /** The initially active file. */
+  activeFile: string;
   files: {
     [filename: string]: {
-      content: string;
-      selection: CMRange;
+      content?: string;
+      selection?: CMRange;
     };
   };
 };

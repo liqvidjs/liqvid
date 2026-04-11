@@ -1,4 +1,4 @@
-import { ChangeSet, EditorSelection, type Text } from "@codemirror/state";
+import { ChangeSet, type Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { assertType, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
@@ -74,25 +74,21 @@ export function cmReplay({
   /** CodeMirror instance to sync with. */
   view: EditorView;
 }): () => void {
-  // Convert single-file initial to CMState format
-  const initialState: CMState | undefined = initial
-    ? {
-        files: {
-          [defaultViewName]: {
-            content: initial.content ?? "",
-            selection: initial.selection ?? { anchor: 0, head: 0 },
-          },
-        },
-      }
-    : undefined;
-
   return cmReplayMultiple({
     data: [[0, selectCmd + defaultViewName], ...data],
     didScroll: (_filename, scrollToOptions) => {
       didScroll?.(scrollToOptions);
     },
     handle: (key, docs) => handle?.(key, docs.default),
-    initial: initialState,
+    initial: {
+      activeFile: defaultViewName,
+      files: {
+        [defaultViewName]: {
+          content: initial?.content ?? "",
+          selection: initial?.selection ?? { anchor: 0, head: 0 },
+        },
+      },
+    },
     playback,
     scrollBehavior,
     shouldScroll,
@@ -130,9 +126,8 @@ export function cmReplayMultiple({
 
   /**
    * Initial state for each file (content and selection).
-   * Applied when replay begins at time 0.
    */
-  initial?: CMState;
+  initial: CMState;
 
   /**
    * Scroll behavior to pass to {@link Element.scrollTo}.
@@ -166,41 +161,29 @@ export function cmReplayMultiple({
   views: Record<string, EditorView>;
 }): () => void {
   /** Current file being replayed into */
-  let file: string;
-
-  // validation
-  if (
-    !(
-      data.length > 0 &&
-      data[0][0] === 0 &&
-      typeof data[0][1] === "string" &&
-      data[0][1].startsWith(selectCmd)
-    )
-  ) {
-    throw new Error("First command must have time 0 and select the file");
-  }
+  let file = initial.activeFile;
 
   // we're going to mess with data, clone it
   data = JSON.parse(JSON.stringify(data));
 
   // Apply initial state to views
-  if (initial) {
-    for (const [filename, fileState] of Object.entries(initial.files)) {
-      const view = views[filename];
-      if (!view) continue;
+  for (const [filename, fileState] of Object.entries(initial.files)) {
+    const view = views[filename];
+    if (!view) continue;
 
-      const { content, selection } = fileState;
+    const { content = "", selection = { anchor: 0, head: 0 } } = fileState;
 
-      // Replace entire document content and set selection
-      view.dispatch({
+    // replace document content and set selection
+    view.dispatch(
+      view.state.update({
         changes: {
           from: 0,
           insert: content,
           to: view.state.doc.length,
         },
-        selection: EditorSelection.single(selection.anchor, selection.head),
-      });
-    }
+        effects: [FakeSelection.of(selection)],
+      }),
+    );
   }
 
   /* unpackage */
@@ -244,14 +227,12 @@ export function cmReplayMultiple({
 
       if (Array.isArray(action)) {
         if (action[0] instanceof ChangeSet) {
-          // @ts-expect-error file selection command will always come first
           assertType<string>(file);
 
           // editor change
           inverses[file][i] = action[0].invert(docs[file]);
           docs[file] = action[0].apply(docs[file]);
         } else if (action[0] === scrollCmd) {
-          // @ts-expect-error file selection command will always come first
           assertType<string>(file);
 
           // scroll
