@@ -2,10 +2,11 @@ import type { Extension } from "@codemirror/state";
 import { EditorView, keymap, ViewPlugin } from "@codemirror/view";
 import { ReplayDataRecorder } from "@liqvid/recording";
 import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
-import { bind, type ReplayData } from "@liqvid/utils";
+import { bind, mapRecord, type ReplayData } from "@liqvid/utils";
 
 import { ConfigurationComponent } from "./configuration";
 import { icon } from "./icon";
+import type { CMConfig, CMState } from "./types";
 
 import { scrollCmd } from ".";
 
@@ -26,10 +27,36 @@ export type CodeMirrorInstance = {
 };
 
 // the actual thingy that gets exported
-export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
+export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
+  package = "@lqv/codemirror";
+  version = "1.0.0";
+  $schema = undefined;
+  initial: CMState | undefined = undefined;
+
+  private __views: Record<string, EditorView> = {};
+
   constructor() {
     super();
     bind(this, ["extension"]);
+  }
+
+  configure({ views }: CMConfig) {
+    this.__views = views;
+  }
+
+  override beginRecording(timestamp?: number): void {
+    super.beginRecording(timestamp);
+
+    // capture initial state
+    this.initial = {
+      files: mapRecord(this.__views, ({ state }) => ({
+        content: state.doc.toString(),
+        selection: {
+          anchor: state.selection.ranges[0].anchor,
+          head: state.selection.ranges[0].head,
+        },
+      })),
+    };
   }
 
   /**
@@ -76,8 +103,6 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData> {
     // record document changes
     const updateListener = EditorView.updateListener.of((update) => {
       if (this.paused || !this.active) return;
-
-      console.log({ update });
 
       // get selection change (if any)
       const transactions = update.transactions

@@ -1,14 +1,24 @@
-import { type ReplayData, truncate } from "@liqvid/utils";
+import { mapRecord, type ReplayData, truncate } from "@liqvid/utils";
 
 import { BaseRecorder } from "../base-recorder";
+import type { RecordingData } from "../types.mts";
 
-export class ReplayDataRecorder<Datum, Config = unknown> extends BaseRecorder<
+export abstract class ReplayDataRecorder<
+  Datum,
+  Initial,
+  Config = unknown,
+> extends BaseRecorder<
   [number, Datum],
-  ReplayData<Datum>,
+  RecordingData<ReplayData<Datum>, Initial>,
   Config
 > {
   private duration: number = 0;
   protected data: [number, Datum][] = [];
+
+  abstract readonly package: string;
+  abstract readonly version: string;
+  abstract readonly $schema?: string;
+  abstract initial?: Initial;
 
   override beginRecording(timestamp = performance.now()): void {
     super.beginRecording(timestamp);
@@ -43,12 +53,7 @@ export function compress<T>(o: T, precision = 2): T {
       if (o === null) {
         return o;
       }
-      return Object.fromEntries(
-        (Object.keys(o) as (keyof typeof o)[]).map((key) => [
-          key,
-          compress(o[key], precision),
-        ]),
-      ) as Record<string, unknown> & T;
+      return mapRecord(o, (value) => compress(value, precision)) as T;
     case "number":
       return truncate(o, precision) as T & number;
     default:

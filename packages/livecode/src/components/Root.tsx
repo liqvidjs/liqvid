@@ -1,10 +1,10 @@
 "use client";
 
-import { keymap } from "@codemirror/view";
+import { type EditorView, keymap } from "@codemirror/view";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
 import classNames from "classnames";
-import { type JSX, useEffect, useRef } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
 import { shortcuts } from "../extensions";
@@ -29,19 +29,23 @@ export function LiveCode({
 }) {
   const { registerInstance } = usePluginApi();
 
+  const [store] = useState(() => makeStore());
+
   useEffect(() => {
     return registerInstance<CodeMirrorInstance>("@lqv/codemirror", {
       name,
       provideRecorder(recorder) {
-        store.current?.setState((prev) => ({ ...prev, recorder }));
+        store.setState((prev) => ({ ...prev, recorder }));
+        recorder?.configure({
+          views: new Proxy(store, storeProxyHandler) as unknown as Record<
+            string,
+            EditorView
+          >,
+        });
       },
     });
-  }, [name, registerInstance]);
+  }, [name, registerInstance, store]);
 
-  const store = useRef<LiveCodeStore>(null);
-  if (!store.current) {
-    store.current = makeStore();
-  }
   const stateClassNames = useStore(store.current, (state) => state.classNames);
 
   /* render */
@@ -95,3 +99,38 @@ export function KeyboardShortcuts(): null {
 
   return null;
 }
+
+const storeProxyHandler: ProxyHandler<LiveCodeStore> = {
+  get(store, prop) {
+    switch (prop) {
+      case "toJSON":
+      case "length":
+        return null;
+      default: {
+        const { activeGroup, groups } = store.getState();
+        if (!activeGroup || !groups[activeGroup]) {
+          return null;
+        }
+
+        return groups[activeGroup].files.find(
+          ({ filename }) => filename === prop,
+        );
+      }
+    }
+  },
+  getOwnPropertyDescriptor() {
+    return {
+      configurable: true,
+      enumerable: true,
+      writable: false,
+    };
+  },
+  ownKeys(target) {
+    const { activeGroup, groups } = target.getState();
+    if (!activeGroup || !groups[activeGroup]) {
+      return [];
+    }
+
+    return groups[activeGroup].files.map(({ filename }) => filename);
+  },
+};

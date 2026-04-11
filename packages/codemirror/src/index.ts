@@ -3,8 +3,9 @@ import type { EditorView } from "@codemirror/view";
 import { assertType, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
-import { FakeSelection, type Range } from "./fake-selection";
+import { FakeSelection } from "./fake-selection";
 import type { ScrollAction } from "./recording";
+import type { CMRange } from "./types";
 
 export { type FakeSelectionConfig, fakeSelection } from "./fake-selection";
 
@@ -227,7 +228,7 @@ export function cmReplayMultiple({
       changes[key] = ChangeSet.empty(views[key].state.doc.length);
     }
 
-    const selections: Record<string, Range> = {};
+    const selections: Record<string, CMRange> = {};
 
     // apply / revert changes
     if (lastTime <= t && index < data.length) {

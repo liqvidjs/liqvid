@@ -22,3 +22,20 @@ export interface RecordingPlugin<
   /** Optional title. */
   title?: string;
 }
+
+export type RecordingData<Data, State> = {
+  /** Optional schema URL for validating this recording. */
+  $schema?: string;
+
+  /** Name of the plugin that created this recording. */
+  package: string;
+
+  /** Version of the plugin that created this recording. */
+  version: string;
+
+  /** Optional initial state for replaying this recording. */
+  initial?: State;
+
+  /** Recording data to replay. */
+  data: Data;
+};

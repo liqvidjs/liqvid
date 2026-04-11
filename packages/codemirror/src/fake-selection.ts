@@ -15,12 +15,9 @@ import {
   type ViewUpdate,
 } from "@codemirror/view";
 
-export interface Range {
-  anchor: number;
-  head: number;
-}
+import type { CMRange } from "./types";
 
-export const FakeSelection = StateEffect.define<Range>();
+export const FakeSelection = StateEffect.define<CMRange>();
 
 /**
  * A "block" cursor is a solid rectangle over a character.
@@ -132,7 +129,9 @@ const fakeCursorLayer = layer({
     const effects = update.transactions
       .map(
         (tr) =>
-          tr.effects.filter((e) => e.is(FakeSelection)) as StateEffect<Range>[],
+          tr.effects.filter((e) =>
+            e.is(FakeSelection),
+          ) as StateEffect<CMRange>[],
       )
       .reduce((a, b) => a.concat(b), []);
 
@@ -174,7 +173,9 @@ const fakeSelectionLayer = layer({
     const effects = update.transactions
       .map(
         (tr) =>
-          tr.effects.filter((e) => e.is(FakeSelection)) as StateEffect<Range>[],
+          tr.effects.filter((e) =>
+            e.is(FakeSelection),
+          ) as StateEffect<CMRange>[],
       )
       .reduce((a, b) => a.concat(b), []);
 
