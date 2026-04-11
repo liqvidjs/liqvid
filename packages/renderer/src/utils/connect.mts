@@ -94,7 +94,7 @@ export async function getPages({
       Boolean,
     ),
     executablePath,
-    headless: false,
+    headless: process.env.HEADLESS !== "false",
     ignoreHTTPSErrors: true,
     product: "chrome",
     timeout: 0,
