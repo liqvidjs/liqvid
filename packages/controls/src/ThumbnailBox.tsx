@@ -1,3 +1,4 @@
+import { useColorScheme } from "@liqvid/color-scheme/react";
 import type { DurationLike } from "@liqvid/duration";
 import { usePlayback } from "@liqvid/playback/react";
 import { formatTime } from "@liqvid/utils";
@@ -34,7 +35,10 @@ export interface ThumbData {
    */
   frequency?: number;
 
-  /** URL pattern for thumbnails. Must include "%s". */
+  /**
+   * URL pattern for thumbnails. Must include "%s" for the index of the image.
+   * Can also include "%c" for the color scheme.
+   */
   path: string;
 
   /** Points of interest in the video to highlight. */
@@ -64,6 +68,7 @@ export function ThumbnailBox({
   width = 160,
 }: ThumbnailBoxProps) {
   const { duration } = usePlayback();
+  const { colorScheme } = useColorScheme();
 
   const count = cols * rows;
 
@@ -74,9 +79,11 @@ export function ThumbnailBox({
 
     for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
       const img = new Image();
-      img.src = path.replace("%s", sheetNum.toString());
+      img.src = path
+        .replace("%s", sheetNum.toString())
+        .replace("%c", colorScheme);
     }
-  }, [count, frequency, path, duration]);
+  }, [count, frequency, path, duration, colorScheme]);
 
   const time = progress * duration;
 
@@ -87,7 +94,9 @@ export function ThumbnailBox({
   const row = Math.floor(markerNumOnSheet / rows);
   const col = markerNumOnSheet % rows;
 
-  const sheetName = path.replace("%s", sheetNum.toString());
+  const sheetName = path
+    .replace("%s", sheetNum.toString())
+    .replace("%c", colorScheme);
 
   return (
     <div
