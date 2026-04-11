@@ -35,7 +35,6 @@ export const render: CommandModule = {
       })
       .option("url", {
         alias: "u",
-        default: "http://localhost:3000/dist/",
         desc: "URL of video to render",
       })
       // General configuration

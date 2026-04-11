@@ -3,7 +3,7 @@ import * as path from "node:path";
 
 import puppeteer from "puppeteer-core";
 
-import type { ImageFormat } from "../types.js";
+import type { ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { callPlayerApi, connect } from "../utils/connect.mts";
 

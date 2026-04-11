@@ -32,7 +32,8 @@
     "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "biome check --fix",
-    "test": "jest"
+    "test": "jest",
+    "watch": "tsc --watch"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",

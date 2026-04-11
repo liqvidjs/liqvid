@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 
-import loadSync from "./load-sync.cjs";
+import loadSync from "./load-sync.cts";
 
 export const DEFAULT_LIST = [
   "liqvid.config.ts",

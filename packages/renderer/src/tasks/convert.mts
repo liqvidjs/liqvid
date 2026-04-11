@@ -1,11 +1,11 @@
-import fs, { promises as fsp } from "fs";
-import path from "path";
+import fs, { promises as fsp } from "node:fs";
+import path from "node:path";
 
 import { formatTime, parseTime } from "@liqvid/utils";
 import cliProgress from "cli-progress";
 import { execa } from "execa";
 
-import { ffmpegExists } from "../utils/binaries.mjs";
+import { ffmpegExists } from "../utils/binaries.mts";
 
 /** Repair and convert audio files */
 export async function convert({ filename }: { filename?: string }) {

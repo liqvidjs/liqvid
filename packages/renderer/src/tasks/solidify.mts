@@ -1,17 +1,17 @@
-import fs, { promises as fsp } from "fs";
-import os from "os";
-import path from "path";
+import fs, { promises as fsp } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 import { formatTime, parseTime } from "@liqvid/utils";
 import cliProgress from "cli-progress";
 
-import type { ImageFormat } from "../types";
-import { ffmpegExists, getEnsureChrome } from "../utils/binaries.mjs";
-import { captureRange } from "../utils/capture.mjs";
-import { validateConcurrency } from "../utils/concurrency.mjs";
-import { getPages } from "../utils/connect.mjs";
-import { Pool } from "../utils/pool.mjs";
-import { stitch } from "../utils/stitch.mjs";
+import type { ImageFormat } from "../types.mts";
+import { ffmpegExists, getEnsureChrome } from "../utils/binaries.mts";
+import { captureRange } from "../utils/capture.mts";
+import { validateConcurrency } from "../utils/concurrency.mts";
+import { getPages } from "../utils/connect.mts";
+import { Pool } from "../utils/pool.mts";
+import { stitch } from "../utils/stitch.mts";
 
 /**
   Render an interactive ("liquid") video as a static ("solid") video.
@@ -27,6 +27,7 @@ export async function solidify({
   sequence,
   url,
   width,
+  start = 0,
   ...o // passthrough parameters
 }: Omit<Parameters<typeof assembleVideo>[0], "framesDir" | "padLen"> & {
   browserExecutable: string;
@@ -63,7 +64,7 @@ export async function solidify({
   }
 
   // validate start/end time
-  if (end <= o.start) {
+  if (end <= start) {
     console.error("End time cannot be before start time");
     process.exit(1);
   }
@@ -97,18 +98,18 @@ export async function solidify({
     return player.playback.duration;
   });
 
-  if (o.start >= totalDuration) {
+  if (start >= totalDuration) {
     console.error("Start cannot be after video endtime");
     process.exit(1);
   }
 
   const realDuration = (() => {
     if (typeof duration === "number") {
-      return Math.min(totalDuration - o.start, duration);
+      return Math.min(totalDuration - start, duration);
     } else if (typeof end === "number") {
-      return Math.min(end - o.start, totalDuration);
+      return Math.min(end - start, totalDuration);
     }
-    return totalDuration - o.start;
+    return totalDuration - start;
   })();
 
   // frames dir
@@ -117,7 +118,7 @@ export async function solidify({
     : await fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.render"));
 
   // calculate how many frames
-  const count = Math.ceil((o.fps * realDuration) / 1000);
+  const count = Math.ceil(o.fps * realDuration);
   const padLen = String(count - 1).length;
 
   /* capture and assemble */
@@ -133,7 +134,7 @@ export async function solidify({
     imageFormat: o.imageFormat,
     pool,
     quality,
-    time: (i) => o.start + (i * 1000) / o.fps,
+    time: (i) => start + i / o.fps,
   });
 
   // close chrome instances

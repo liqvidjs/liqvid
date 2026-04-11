@@ -1,17 +1,17 @@
-import { promises as fsp } from "fs";
-import os from "os";
-import path from "path";
+import { promises as fsp } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 import cliProgress from "cli-progress";
 import jimp from "jimp";
 import type puppeteer from "puppeteer-core";
 
-import type { ImageFormat } from "../types";
-import { getEnsureChrome } from "../utils/binaries.mjs";
-import { captureRange } from "../utils/capture.mjs";
-import { validateConcurrency } from "../utils/concurrency.mjs";
-import { getPages } from "../utils/connect.mjs";
-import { Pool } from "../utils/pool.mjs";
+import type { ImageFormat } from "../types.mts";
+import { getEnsureChrome } from "../utils/binaries.mts";
+import { captureRange } from "../utils/capture.mts";
+import { validateConcurrency } from "../utils/concurrency.mts";
+import { getPages } from "../utils/connect.mts";
+import { Pool } from "../utils/pool.mts";
 
 /**
 Create thumbnail sheets for a Liqvid video.
@@ -38,6 +38,8 @@ export async function thumbs({
   colorScheme: "light" | "dark";
   cols: number;
   concurrency: number;
+
+  /** seconds between thumbnails */
   frequency: number;
   height: number;
   imageFormat: ImageFormat;
@@ -92,7 +94,7 @@ export async function thumbs({
     return player.playback.duration;
   });
 
-  const numThumbs = Math.ceil(duration / frequency / 1000);
+  const numThumbs = Math.ceil(duration / frequency);
 
   // grab thumbs and assemble them
   console.log(`(${step++}/${total}) Capturing thumbs...`);
@@ -175,7 +177,7 @@ async function assembleSheets({
       // get available puppeteer instance
       const page = await pool.acquire();
 
-      const sheet = await new jimp(cols * width, rows * height);
+      const sheet = new jimp(cols * width, rows * height);
 
       // blit thumbs into here
       await Promise.all(
@@ -189,12 +191,8 @@ async function assembleSheets({
           if (imageFormat === "jpeg") {
             thumb.quality(quality);
           }
-          await thumb.resize(width, height);
-          await sheet.blit(
-            thumb,
-            (i % cols) * width,
-            Math.floor(i / rows) * height,
-          );
+          thumb.resize(width, height);
+          sheet.blit(thumb, (i % cols) * width, Math.floor(i / rows) * height);
           sheetsBar.increment();
         }),
       );

@@ -10,11 +10,12 @@ declare global {
     };
   };
   var player: {
-    canPlay: Promise<void>;
+    setColorScheme(scheme: "light" | "dark"): void;
+    toggleControls(visible?: boolean): void;
     playback: {
+      currentTime: number;
       duration: number;
       play(): Promise<void>;
-      seek: (t: number) => void;
     };
   };
 }

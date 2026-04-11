@@ -7,34 +7,31 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.mjs"
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/tasks/index.d.mts"
     },
     "./convert": {
-      "import": "./dist/tasks/convert.mjs"
+      "import": "./dist/esm/tasks/convert.mjs",
+      "types": "./dist/types/tasks/convert.d.mts"
     },
     "./join": {
-      "import": "./dist/tasks/join.mjs"
+      "import": "./dist/esm/tasks/join.mjs",
+      "types": "./dist/types/tasks/join.d.mts"
     },
     "./solidify": {
-      "import": "./dist/tasks/solidify.mjs"
+      "import": "./dist/esm/tasks/solidify.mjs",
+      "types": "./dist/types/tasks/solidify.d.mts"
     },
     "./thumbs": {
-      "import": "./dist/tasks/thumbs.mjs"
+      "import": "./dist/esm/tasks/thumbs.mjs",
+      "types": "./dist/types/tasks/thumbs.d.mts"
     }
   },
-  "typesVersions": {
-    "*": {
-      "index": [
-        "./dist/index.d.mts"
-      ],
-      "*": [
-        "./dist/tasks/*.d.mts"
-      ]
-    }
-  },
-  "sideEffects": false,
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "lint": "biome check --fix",
+    "test": "jest --coverage",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -47,7 +44,7 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/renderer#readme",
   "dependencies": {
-    "@liqvid/utils": "workspace:^",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
     "cli-progress": "catalog:",
     "execa": "catalog:",
     "jimp": "catalog:",
@@ -57,6 +54,9 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
+    "@types/yargs-parser": "catalog:dev",
     "typescript": "catalog:dev"
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

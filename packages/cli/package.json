@@ -11,6 +11,10 @@
     "./build": {
       "import": "./dist/esm/tasks/build.mjs",
       "types": "./dist/types/tasks/build.d.mts"
+    },
+    "./thumbs": {
+      "import": "./dist/esm/tasks/thumbs.mjs",
+      "types": "./dist/types/tasks/thumbs.d.mts"
     }
   },
   "bin": {
@@ -39,9 +43,9 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.800.0",
-    "@aws-sdk/credential-providers": "^3.800.0",
-    "@aws-sdk/lib-storage": "^3.800.0",
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/credential-providers": "catalog:",
+    "@aws-sdk/lib-storage": "catalog:",
     "@liqvid/duration": "workspace:^",
     "@liqvid/renderer": "workspace:^",
     "@liqvid/schemas": "workspace:^",
@@ -60,7 +64,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
-    "@types/pluralize": "^0.0.33",
+    "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
     "typescript": "catalog:dev"
   }

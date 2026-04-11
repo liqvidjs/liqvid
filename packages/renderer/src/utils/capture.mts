@@ -1,9 +1,9 @@
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 
 import cliProgress from "cli-progress";
 import type puppeteer from "puppeteer-core";
 
-import type { ImageFormat } from "../types";
+import type { ImageFormat } from "../types.mts";
 
 import type { Pool } from "./pool.mjs";
 

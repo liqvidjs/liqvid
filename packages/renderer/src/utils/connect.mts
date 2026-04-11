@@ -30,13 +30,23 @@ export async function connect({
 
   await page.waitForSelector(".lv-controls");
 
-  await renderingApi.toggleControls(page, false);
+  page.evaluate((colorScheme) => {
+    const playerElt = document.querySelector(".lv-player");
 
-  page.evaluate(() => {
+    if (!playerElt) {
+      throw new Error("Player element not found");
+    }
+
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    window.player = (playerElt as any)[Symbol.for("@liqvid/player/api")];
+
+    player.setColorScheme(colorScheme);
+    player.toggleControls(false);
+
     document.body.style.background = "transparent";
-  });
+  }, colorScheme);
 
-  // set color scheme
+  // set color scheme for whole page also
   await page.emulateMediaFeatures([
     {
       name: "prefers-color-scheme",
@@ -46,15 +56,6 @@ export async function connect({
 
   return page;
 }
-
-export const renderingApi = {
-  setColorScheme(page: puppeteer.Page, colorScheme: "light" | "dark") {
-    return callPlayerApi(page, "setColorScheme", [colorScheme]);
-  },
-  toggleControls(page: puppeteer.Page, visible?: boolean) {
-    return callPlayerApi(page, "toggleControls", [visible]);
-  },
-};
 
 /**
 Connect to players.
@@ -93,6 +94,7 @@ export async function getPages({
       Boolean,
     ),
     executablePath,
+    headless: false,
     ignoreHTTPSErrors: true,
     product: "chrome",
     timeout: 0,
@@ -117,7 +119,9 @@ export async function getPages({
   playerBar.stop();
 
   return pages;
-} /**
+}
+
+/**
  * Call a method on the Liqvid player via postMessage API.
  * This sends a message to the page and waits for the response.
  */
@@ -132,6 +136,7 @@ export async function callPlayerApi(
         const requestId = Math.random();
 
         const handleMessage = (event: MessageEvent) => {
+          console.log("got message", event.data);
           const data = event.data;
           if (
             !data ||
