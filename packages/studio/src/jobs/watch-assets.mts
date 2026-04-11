@@ -249,28 +249,3 @@ async function listProjectDir(
     ),
   );
 }
-
-/** @deprecated Use listProjectDir instead */
-export async function listDir(dirname: string): Promise<Directory> {
-  const dir = await fsp.readdir(dirname);
-
-  return Object.fromEntries(
-    await Promise.all(
-      dir.reduce(
-        (acc, basename) => {
-          const filename = path.join(dirname, basename);
-          if (basename === ".DS_Store" || basename === "types.ts") return acc;
-
-          const stats = fs.statSync(filename);
-          if (stats.isDirectory()) {
-            acc.push(listDir(filename).then((result) => [basename, result]));
-          } else {
-            acc.push(Promise.resolve([basename, null]));
-          }
-          return acc;
-        },
-        [] as Promise<[string, Directory | null]>[],
-      ),
-    ),
-  );
-}
