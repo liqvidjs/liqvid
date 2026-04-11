@@ -1,14 +1,19 @@
 "use client";
 
 import { isClient } from "@liqvid/ssr";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
-import type { ArgType, LocalValueConfig } from "./types.ts";
+import type { ArgType, BooleanValueConfig, LocalValueConfig } from "./types.ts";
+
+export type PersistentConfig = {
+  /** whether to disable persistence */
+  disabled?: boolean;
+};
 
 export function usePersist<C extends LocalValueConfig>(
   storage: C,
-  { disabled = false } = {},
+  { disabled = false }: PersistentConfig = {},
 ): [get: () => ArgType<C> | null, set: (value: ArgType<C>) => void] {
   type T = ArgType<C>;
   const [cookies] = useState(() => new Cookies(null));
@@ -71,4 +76,61 @@ export function usePersist<C extends LocalValueConfig>(
         ];
     }
   }, [cookies, disabled, storage]);
+}
+
+export function usePersistentState<C extends BooleanValueConfig>(
+  storage: C,
+  opts?: PersistentConfig,
+): [
+  value: ArgType<C>,
+  setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
+  toggle: () => void,
+];
+export function usePersistentState<C extends LocalValueConfig>(
+  storage: C,
+  opts?: PersistentConfig,
+): [
+  value: ArgType<C>,
+  setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
+];
+export function usePersistentState<C extends LocalValueConfig>(
+  storage: C,
+  { disabled = false }: PersistentConfig = {},
+) {
+  const [get, set] = usePersist(storage, { disabled });
+  const [state, setState] = useState<ArgType<C>>(() => {
+    if (disabled) {
+      return storage.default as ArgType<C>;
+    }
+    return get() ?? (storage.default as ArgType<C>);
+  });
+
+  const setPersistedValue = useCallback(
+    (valueOrUpdater: React.SetStateAction<ArgType<C>>) => {
+      if (typeof valueOrUpdater === "function") {
+        setState((prev) => {
+          const newValue = (
+            valueOrUpdater as (prevState: ArgType<C>) => ArgType<C>
+          )(prev);
+          set(newValue);
+          return newValue;
+        });
+      } else {
+        setState(valueOrUpdater);
+        set(valueOrUpdater);
+      }
+    },
+    [set],
+  );
+
+  const toggle = useCallback(
+    () => setPersistedValue((prev) => !prev as ArgType<C>),
+    [setPersistedValue],
+  );
+
+  if (storage.type === "boolean") {
+    return [state, setPersistedValue, toggle];
+  }
+
+  return [state, setPersistedValue];
 }

@@ -3,11 +3,11 @@
 import {
   type BooleanValueConfig,
   type ClientValueSource,
-  usePersist,
+  usePersistentState,
 } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { createUniqueContext } from "@liqvid/utils";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 
 export interface PromptsPersistence {
   /**
@@ -65,29 +65,12 @@ export function PromptsProvider({
     };
   }, [persistence, defaultEnabled]);
 
-  const [getEnabled, setPersistedEnabled] = usePersist(
+  const [enabled, setEnabled, toggleEnabled] = usePersistentState(
     enabledPersistenceConfig!,
     {
       disabled: !enabledPersistenceConfig,
     },
   );
-
-  const [enabled, setEnabled] = useState(() => {
-    if (persistence) {
-      const persisted = getEnabled();
-      return persisted ?? defaultEnabled;
-    }
-    return defaultEnabled;
-  });
-
-  // Persist enabled state when it changes
-  useEffect(() => {
-    if (persistence) {
-      setPersistedEnabled(enabled);
-    }
-  }, [enabled, persistence, setPersistedEnabled]);
-
-  const toggleEnabled = useCallback(() => setEnabled((prev) => !prev), []);
 
   useKeyboardShortcut(shortcut, toggleEnabled);
 
@@ -98,7 +81,7 @@ export function PromptsProvider({
       setEnabled,
       toggleEnabled,
     }),
-    [enabled, persistence, toggleEnabled],
+    [enabled, persistence, toggleEnabled, setEnabled],
   );
 
   return (

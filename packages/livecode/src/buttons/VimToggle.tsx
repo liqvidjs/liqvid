@@ -4,11 +4,11 @@ import {
   type BooleanValueConfig,
   type ClientValueSource,
   HydrateElement,
-  usePersist,
+  usePersistentState,
 } from "@liqvid/hydration";
 import { vim } from "@replit/codemirror-vim";
 import classNames from "classnames";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { vimCompartment } from "../extensions";
 import { useActiveFile, useLiveCodeShortcut } from "../hooks";
@@ -58,26 +58,12 @@ export function VimToggle({
     persistence?.source,
   ]);
 
-  const [getEnabled, setPersistedEnabled] = usePersist(vimPersistenceConfig!, {
-    disabled: !vimPersistenceConfig,
-  });
-
-  const [isVimActive, setVimActive] = useState(() => {
-    if (persistence) {
-      const persisted = getEnabled();
-      return persisted ?? defaultEnabled;
-    }
-    return defaultEnabled;
-  });
-
-  // Persist enabled state when it changes
-  useEffect(() => {
-    if (persistence) {
-      setPersistedEnabled(isVimActive);
-    }
-  }, [isVimActive, persistence, setPersistedEnabled]);
-
-  const toggleVimActive = useCallback(() => setVimActive((prev) => !prev), []);
+  const [isVimActive, _setVimActive, toggleVimActive] = usePersistentState(
+    vimPersistenceConfig!,
+    {
+      disabled: !vimPersistenceConfig,
+    },
+  );
 
   // keyboard shortcut
   useLiveCodeShortcut(

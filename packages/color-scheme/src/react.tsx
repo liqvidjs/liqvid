@@ -1,15 +1,13 @@
 "use client";
 
-import { type StringValueConfig, usePersist } from "@liqvid/hydration";
+import { type StringValueConfig, usePersistentState } from "@liqvid/hydration";
 import { makeContext } from "@liqvid/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 export type ColorScheme = "light" | "dark";
 export type ColorSchemeSpecifier = ColorScheme | "system";
 
 type Updater<T> = T | ((prev: T) => T);
-
-const DEFAULT_COLOR_SCHEME = "light" satisfies ColorScheme;
 
 export interface ColorSchemeContext {
   colorScheme: ColorScheme;
@@ -36,16 +34,13 @@ export function ColorSchemeProvider({
   children?: React.ReactNode;
   from?: StringValueConfig<ColorScheme>;
 }) {
-  const [get, set] = usePersist(from!, { disabled: !from });
-  const [colorScheme, setColorScheme] = useState<ColorScheme>(
-    (from ? get() : undefined) ?? DEFAULT_COLOR_SCHEME,
-  );
-
-  useEffect(() => set(colorScheme), [colorScheme, set]);
+  const [colorScheme, setColorScheme] = usePersistentState(from!, {
+    disabled: !from,
+  });
 
   const toggleColorScheme = useCallback(
     () => setColorScheme((prev) => (prev === "light" ? "dark" : "light")),
-    [],
+    [setColorScheme],
   );
 
   const context = useMemo(
@@ -55,7 +50,7 @@ export function ColorSchemeProvider({
       setColorScheme,
       toggleColorScheme,
     }),
-    [colorScheme, from, toggleColorScheme],
+    [colorScheme, from, toggleColorScheme, setColorScheme],
   );
 
   return (
