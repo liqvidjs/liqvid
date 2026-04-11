@@ -4,11 +4,14 @@
   "description": "Recording functionality for Liqvid",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/esm/utils.js",
+      "types": "./dist/types/utils.d.ts"
     }
   },
-  "typings": "./dist/types/index.d.mts",
   "files": [
     "dist/*"
   ],
@@ -51,5 +54,7 @@
     "react": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }

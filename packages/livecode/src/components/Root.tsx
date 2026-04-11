@@ -4,7 +4,7 @@ import { type EditorView, keymap } from "@codemirror/view";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
 import classNames from "classnames";
-import { type JSX, useEffect, useRef, useState } from "react";
+import { type JSX, useEffect, useState } from "react";
 import { useStore } from "zustand";
 
 import { shortcuts } from "../extensions";
@@ -46,7 +46,7 @@ export function LiveCode({
     });
   }, [name, registerInstance, store]);
 
-  const stateClassNames = useStore(store.current, (state) => state.classNames);
+  const stateClassNames = useStore(store, (state) => state.classNames);
 
   /* render */
   return (
@@ -55,7 +55,7 @@ export function LiveCode({
       data-affords="click keys"
       {...attrs}
     >
-      <LiveCodeContext.Provider value={store.current}>
+      <LiveCodeContext.Provider value={store}>
         <KeyboardShortcuts />
         {children}
       </LiveCodeContext.Provider>

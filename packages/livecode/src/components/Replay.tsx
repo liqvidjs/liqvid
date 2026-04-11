@@ -8,6 +8,7 @@ import {
   selectCmd,
 } from "@lqv/codemirror";
 import type { FakeSelectionConfig } from "@lqv/codemirror/fake-selection";
+import type { CMRange, CMState } from "@lqv/codemirror/types";
 import { useSeekable } from "@lqv/playback/react";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -24,6 +25,7 @@ type CodeData = Parameters<typeof cmReplay>[0]["data"];
 export function Replay({
   extensions = [],
   handle,
+  initial,
   replay,
   scrollBehavior,
   selectionConfig,
@@ -43,6 +45,14 @@ export function Replay({
      * @param doc The CodeMirror document.
      */
     handle?: (useStore: LiveCodeStore, cmd: string, doc: Text) => void;
+
+    /**
+     * Initial content and selection for the editor.
+     */
+    initial?: {
+      content?: string;
+      selection?: CMRange;
+    };
 
     /** Coding data to replay. */
     replay?: CodeData | Promise<CodeData>;
@@ -87,6 +97,7 @@ export function Replay({
                 data,
                 didScroll,
                 handle: __handle,
+                initial,
                 playback,
                 scrollBehavior,
                 shouldScroll,
@@ -99,6 +110,7 @@ export function Replay({
               data: replay,
               didScroll,
               handle: __handle,
+              initial,
               playback,
               scrollBehavior,
               shouldScroll,
@@ -115,6 +127,7 @@ export function Replay({
       __handle,
       didScroll,
       extensions,
+      initial,
       playback,
       replay,
       scrollBehavior,
@@ -134,6 +147,7 @@ export function ReplayMultiple({
   didScroll,
   group: groupId,
   handle: propsHandle,
+  initial,
   replay,
   scrollBehavior,
   shouldScroll,
@@ -156,6 +170,11 @@ export function ReplayMultiple({
     cmd: string,
     docs: Record<string, Text>,
   ) => void;
+
+  /**
+   * Initial state for each file (content and selection).
+   */
+  initial?: CMState;
 
   /**
    * Coding data to replay.
@@ -223,6 +242,7 @@ export function ReplayMultiple({
             data,
             didScroll,
             handle,
+            initial,
             playback,
             scrollBehavior,
             shouldScroll,
@@ -236,6 +256,7 @@ export function ReplayMultiple({
         data: replay,
         didScroll,
         handle,
+        initial,
         playback,
         scrollBehavior,
         shouldScroll,
@@ -251,6 +272,7 @@ export function ReplayMultiple({
     didScroll,
     groupId,
     handle,
+    initial,
     playback,
     replay,
     scrollBehavior,

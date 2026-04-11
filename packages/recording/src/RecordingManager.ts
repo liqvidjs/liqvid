@@ -2,7 +2,7 @@ import { Duration, type DurationSetter } from "@liqvid/duration";
 import { EventEmitter } from "@liqvid/event-emitter";
 import { bind } from "@liqvid/utils";
 
-import type { Recorder } from "./recorder.mts";
+import type { Recorder } from "./recorder";
 
 interface RecordingManagerEventMap {
   cancel: {

@@ -1,13 +1,14 @@
-import { ChangeSet, type Text } from "@codemirror/state";
+import { ChangeSet, EditorSelection, type Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { assertType, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
 import { FakeSelection } from "./fake-selection";
 import type { ScrollAction } from "./recording";
-import type { CMRange } from "./types";
+import type { CMRange, CMState } from "./types";
 
 export { type FakeSelectionConfig, fakeSelection } from "./fake-selection";
+export * from "./types";
 
 /** Possible replay commands. */
 export type Action =
@@ -31,6 +32,7 @@ export const defaultViewName = "default";
 export function cmReplay({
   data,
   handle,
+  initial,
   playback,
   scrollBehavior,
   didScroll,
@@ -39,7 +41,7 @@ export function cmReplay({
   view,
 }: Omit<
   Parameters<typeof cmReplayMultiple>[0],
-  "handle" | "shouldScroll" | "views"
+  "handle" | "initial" | "shouldScroll" | "views"
 > & {
   /**
    * Function for handling special commands.
@@ -47,6 +49,14 @@ export function cmReplay({
    * @param doc CodeMirror document.
    */
   handle?: (cmd: string, doc: Text) => void;
+
+  /**
+   * Initial content and selection for the editor.
+   */
+  initial?: {
+    content?: string;
+    selection?: CMRange;
+  };
 
   /**
    * Callback that gets called when the replay scrolls to a new position.
@@ -64,12 +74,25 @@ export function cmReplay({
   /** CodeMirror instance to sync with. */
   view: EditorView;
 }): () => void {
+  // Convert single-file initial to CMState format
+  const initialState: CMState | undefined = initial
+    ? {
+        files: {
+          [defaultViewName]: {
+            content: initial.content ?? "",
+            selection: initial.selection ?? { anchor: 0, head: 0 },
+          },
+        },
+      }
+    : undefined;
+
   return cmReplayMultiple({
     data: [[0, selectCmd + defaultViewName], ...data],
     didScroll: (_filename, scrollToOptions) => {
       didScroll?.(scrollToOptions);
     },
     handle: (key, docs) => handle?.(key, docs.default),
+    initial: initialState,
     playback,
     scrollBehavior,
     shouldScroll,
@@ -88,6 +111,7 @@ export function cmReplayMultiple({
   data,
   didScroll,
   handle,
+  initial,
   playback,
   scrollBehavior = "auto",
   shouldScroll = () => true,
@@ -103,6 +127,12 @@ export function cmReplayMultiple({
    * @param docs CodeMirror documents.
    */
   handle?: (cmd: string, docs: Record<string, Text>) => void;
+
+  /**
+   * Initial state for each file (content and selection).
+   * Applied when replay begins at time 0.
+   */
+  initial?: CMState;
 
   /**
    * Scroll behavior to pass to {@link Element.scrollTo}.
@@ -152,6 +182,26 @@ export function cmReplayMultiple({
 
   // we're going to mess with data, clone it
   data = JSON.parse(JSON.stringify(data));
+
+  // Apply initial state to views
+  if (initial) {
+    for (const [filename, fileState] of Object.entries(initial.files)) {
+      const view = views[filename];
+      if (!view) continue;
+
+      const { content, selection } = fileState;
+
+      // Replace entire document content and set selection
+      view.dispatch({
+        changes: {
+          from: 0,
+          insert: content,
+          to: view.state.doc.length,
+        },
+        selection: EditorSelection.single(selection.anchor, selection.head),
+      });
+    }
+  }
 
   /* unpackage */
   // decompress times

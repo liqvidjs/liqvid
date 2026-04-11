@@ -1,22 +1,21 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { compress } from "@liqvid/recording/utils";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 
 const RAW_JSON = "raw.json";
 const RAW_DTS = "raw.d.json.ts";
+const DATA_JSON = "recording.json";
+const DATA_DTS = "recording.d.json.ts";
 
-/**
- * Generate TypeScript declaration content for raw.json.
- */
-function generateRawDeclaration(): string {
-  return `import type { ReplayData } from "@liqvid/utils";
-import type { Action } from "@lqv/codemirror";
+/** TypeScript declaration for JSON files */
+const jsonDeclaration = `import type { ReplayData } from "@liqvid/utils";
+import type { Action, CMState } from "@lqv/codemirror";
 
-declare const data: ReplayData<Action>;
+declare const data: RecordingData<Action, CMState>;
 export default data;
 `;
-}
 
 /**
  * Post-process @lqv/codemirror recording data.
@@ -30,6 +29,9 @@ async function postProcessRecording({
   const rawJsonPath = path.join(dirname, RAW_JSON);
   const rawDtsPath = path.join(dirname, RAW_DTS);
 
+  const dataJsonPath = path.join(dirname, DATA_JSON);
+  const dataDtsPath = path.join(dirname, DATA_DTS);
+
   // Check if raw.json exists
   try {
     await fsp.access(rawJsonPath);
@@ -39,8 +41,12 @@ async function postProcessRecording({
   }
 
   // Write raw.d.json.ts
-  const dtsContent = generateRawDeclaration();
-  await fsp.writeFile(rawDtsPath, dtsContent);
+  await fsp.writeFile(rawDtsPath, jsonDeclaration);
+  await fsp.writeFile(dataDtsPath, jsonDeclaration);
+
+  const data = JSON.parse(await fsp.readFile(rawJsonPath, "utf8"));
+
+  await fsp.writeFile(dataJsonPath, JSON.stringify(compress(data, 2)));
 }
 
 const plugin: LiqvidStudioServerPlugin = {
