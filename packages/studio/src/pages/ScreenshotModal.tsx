@@ -2,6 +2,7 @@ import { Duration, type DurationLike } from "@liqvid/duration";
 import { useIframeApi } from "@liqvid/iframe-api/parent/react";
 import { playerApiDeclaration } from "@liqvid/player/iframe-api";
 import type { ProjectMeta } from "@liqvid/schemas/project";
+import type { ColorSchemeOption } from "@liqvid/schemas/screenshot-meta";
 import { formatTime } from "@liqvid/utils";
 import {
   CameraIcon,

@@ -19,6 +19,8 @@ import { Controls } from "./Controls";
 import { PlayerContext, type RenderingTask } from "./hooks";
 import { playerApiDeclaration } from "./iframe-api";
 
+const API_SYMBOL = Symbol.for("@liqvid/player/api");
+
 export function Root({
   aspectRatio: propsAspectRatio = "video",
   className,
@@ -39,6 +41,12 @@ export function Root({
   );
   const contextPlayback = usePlaybackOptional();
   const playback = propsPlayback ?? contextPlayback;
+
+  if (!playback) {
+    throw new Error(
+      "No playback instance provided. Provide a playback prop or wrap the Player in a PlaybackProvider.",
+    );
+  }
 
   const [renderingTasks, setRenderingTasks] = useState<Set<RenderingTask>>(
     () => new Set(),
@@ -72,11 +80,8 @@ export function Root({
 
   const { colorScheme, persistence, setColorScheme } = useColorScheme();
 
-  // Initialize iframe API for postMessage communication
-  useEffect(() => {
-    if (!playback) return;
-
-    return provideIframeApi(playerApiDeclaration, {
+  const api = useMemo(
+    () => ({
       getDuration() {
         return playback.duration;
       },
@@ -93,8 +98,26 @@ export function Root({
           typeof visible === "boolean" ? !visible : undefined,
         );
       },
-    });
-  }, [playback, setColorScheme]);
+    }),
+    [playback, setColorScheme],
+  );
+
+  // Initialize iframe API for postMessage communication
+  // and also symbol API for renderer
+  useEffect(() => {
+    return provideIframeApi(playerApiDeclaration, api);
+  }, [api]);
+
+  useEffect(() => {
+    if (ref.current) {
+      // biome-ignore lint/suspicious/noExplicitAny: symbol
+      (ref.current as any)[API_SYMBOL] = {
+        playback,
+        setColorScheme: api.setColorScheme,
+        toggleControls: api.toggleControls,
+      };
+    }
+  }, [api, playback]);
 
   const inner = (
     <div

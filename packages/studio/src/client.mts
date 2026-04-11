@@ -7,8 +7,10 @@ import {
   captureScreenshotOperation,
   checkImageExistsOperation,
   copyScreenshotOperation,
+  generateThumbsOperation,
   listRecordingsOperation,
   listScreenshotsOperation,
+  listThumbsOperation,
   type Operation,
   saveRecordingOperation,
   setProjectMetaOperation,
@@ -164,3 +166,7 @@ export const captureScreenshot = makeFetcher(captureScreenshotOperation);
 export const copyScreenshot = makeFetcher(copyScreenshotOperation);
 
 export const checkImageExists = makeFetcher(checkImageExistsOperation);
+
+export const generateThumbs = makeFetcher(generateThumbsOperation);
+
+export const listThumbs = makeFetcher(listThumbsOperation);

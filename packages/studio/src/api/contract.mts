@@ -125,3 +125,57 @@ export const checkImageExistsOperation = {
     projectPath: z.string(),
   }),
 };
+
+export const generateThumbsOperation = {
+  body: z.object({
+    /** Color scheme: light, dark, or both */
+    colorScheme: z.enum(["light", "dark", "both"]).optional(),
+
+    /** Number of columns per sheet */
+    cols: z.number().optional(),
+
+    /** Seconds between screenshots */
+    frequency: z.number().optional(),
+
+    /** Height of each thumbnail */
+    height: z.number().optional(),
+
+    /** Image format: jpeg or png */
+    imageFormat: z.enum(["jpeg", "png"]).optional(),
+
+    /** Quality for JPEG images (0-100) */
+    quality: z.number().optional(),
+
+    /** Number of rows per sheet */
+    rows: z.number().optional(),
+
+    /** Width of each thumbnail */
+    width: z.number().optional(),
+  }),
+  endpoint: "/thumbs/generate" as const,
+  method: "POST" as const,
+  response: z.object({
+    /** Thumbnail sheets for dark mode (if colorScheme is "dark" or "both") */
+    dark: z.array(z.string()).optional(),
+    /** Thumbnail sheets for light mode (if colorScheme is "light" or "both") */
+    light: z.array(z.string()).optional(),
+    /** Number of thumbnail sheets generated per color scheme */
+    numSheets: z.number(),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const listThumbsOperation = {
+  endpoint: "/thumbs" as const,
+  response: z.object({
+    /** Thumbnail sheets for dark mode */
+    dark: z.array(z.string()),
+    /** Thumbnail sheets for light mode */
+    light: z.array(z.string()),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};

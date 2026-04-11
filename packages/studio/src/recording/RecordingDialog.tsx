@@ -212,7 +212,6 @@ export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
   const { value: expanded, set: setExpanded } = useToggle();
 
   const { plugins } = usePluginApi();
-  // console.log({ plugins });
 
   return (
     <Collapsible.Root

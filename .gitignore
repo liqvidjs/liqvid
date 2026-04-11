@@ -25,6 +25,9 @@ bundle.js
 .DS_Store
 
 # static files
-*.mp4
+*.jpeg
+*.jpg
 *.png
+
+*.mp4
 *.webm

@@ -237,3 +237,46 @@
   font-size: 0.8125rem;
   padding: 0.125rem 0.375rem;
 }
+
+/* Thumbnails Section */
+.thumbsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.thumbsScheme {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.thumbsSchemeLabel {
+  color: light-dark(#666, #999);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.thumbsGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  padding: 0.25rem;
+}
+
+.thumbSheet {
+  background: light-dark(#f0f0f0, #1a1a1a);
+  border: 1px solid light-dark(#e5e5e5, #404040);
+  border-radius: 6px;
+  cursor: pointer;
+  object-fit: contain;
+  transition: border-color 0.15s;
+  width: 100%;
+
+  &:hover {
+    border-color: light-dark(#2563eb, #3b82f6);
+  }
+}
