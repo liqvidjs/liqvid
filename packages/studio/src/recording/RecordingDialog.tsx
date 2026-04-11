@@ -1,11 +1,19 @@
 import { Collapsible } from "@base-ui/react/collapsible";
+import { usePersist } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
 import classNames from "classnames";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { listRecordings } from "../client.mts";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
@@ -34,6 +42,63 @@ export function RecordingDialog({
   const { plugins } = usePluginApi();
 
   const [recordings, setRecordings] = useState<RecordingMeta[]>([]);
+
+  // Persist enabled plugins to localStorage, partitioned by projectPath
+  const [getPersistedPlugins, setPersistedPlugins] = usePersist(
+    useMemo(
+      () => ({
+        default: "[]",
+        name: `liqvid:enabledPlugins:${projectPath}`,
+        source: "localStorage",
+        type: "string",
+      }),
+      [projectPath],
+    ),
+  );
+
+  // Track whether we've loaded the initial state from localStorage
+  const initializedRef = useRef(false);
+
+  // Load enabled plugins from localStorage on mount
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const stored = getPersistedPlugins();
+    if (!stored) return;
+
+    try {
+      const savedPlugins = JSON.parse(stored) as string[];
+      for (const pluginId of savedPlugins) {
+        // Only enable if the plugin exists
+        if (pluginId in plugins) {
+          togglePlugin(pluginId, true);
+        }
+      }
+    } catch {
+      // Ignore invalid JSON
+    }
+  }, [getPersistedPlugins, plugins, togglePlugin]);
+
+  // Handle toggling a plugin with persistence
+  const handleTogglePlugin = useCallback(
+    (pluginId: string) => {
+      togglePlugin(pluginId);
+
+      // Save to localStorage after toggling
+      // We need to compute the new state since togglePlugin updates state async
+      const currentlyEnabled = enabledPlugins[pluginId];
+      const newEnabledList = Object.keys(plugins).filter((id) => {
+        if (id === pluginId) {
+          return !currentlyEnabled; // toggled
+        }
+        return enabledPlugins[id];
+      });
+
+      setPersistedPlugins(JSON.stringify(newEnabledList));
+    },
+    [enabledPlugins, plugins, setPersistedPlugins, togglePlugin],
+  );
 
   useEffect(() => {
     listRecordings({ search: { url: projectPath } }).then(($res) => {
@@ -80,7 +145,7 @@ export function RecordingDialog({
                         aria-checked={enabledPlugins[plugin.package]}
                         className={styles.recordingToggle}
                         key={plugin.package}
-                        onClick={() => togglePlugin(plugin.package)}
+                        onClick={() => handleTogglePlugin(plugin.package)}
                         role="switch"
                         type="button"
                       >
