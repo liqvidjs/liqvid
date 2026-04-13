@@ -158,6 +158,7 @@ catalogs:
     katex: '>=0.16'
     mathjax: '>=3'
     next: '>=16'
+    nodejs-whisper: ^0.3.0
     prettier: ^3.8.1
     react: '>=19'
     react-dom: '>=19'

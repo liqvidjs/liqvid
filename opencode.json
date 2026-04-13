@@ -31,6 +31,7 @@
       "pnpm lint *": "allow",
       "rm *": "deny",
       "rtk find *": "allow",
+      "rtk git diff *": "allow",
       "rtk grep *": "allow",
       "rtk lint biome": "allow",
       "rtk ls *": "allow",

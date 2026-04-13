@@ -329,6 +329,9 @@ catalogs:
     katex:
       specifier: '>=0.16'
       version: 0.16.39
+    nodejs-whisper:
+      specifier: ^0.3.0
+      version: 0.3.0
     prettier:
       specifier: ^3.8.1
       version: 3.8.1
@@ -1251,6 +1254,9 @@ importers:
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      nodejs-whisper:
+        specifier: ^0.3.0
+        version: 0.3.0
       npm:
         specifier: ^11.10.0
         version: 11.12.1
@@ -1747,6 +1753,9 @@ importers:
       lodash.debounce:
         specifier: 'catalog:'
         version: 4.0.8
+      nodejs-whisper:
+        specifier: catalog:peer
+        version: 0.3.0
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -6759,6 +6768,10 @@ packages:
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
+  nodejs-whisper@0.3.0:
+    resolution: {integrity: sha512-fIj1Aw6mKevfWKW2wuoFEZuYDRAJPM+L9VWdceGgji3sU8+QKoO8pI30L3+kCYVCCssGOXRzU5qQ0eZdRhfMyg==}
+    hasBin: true
+
   normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
 
@@ -7307,6 +7320,10 @@ packages:
     resolution: {integrity: sha512-9nX56alTf5bwXQ3ZDipHJhusu9NTQJ/CVPtb/XHAJCXihZeitfJvIRS4GqQ/mfIoOE3IelHMrpayVrosdHBuLw==}
     engines: {node: '>=8'}
 
+  readline-sync@1.4.10:
+    resolution: {integrity: sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==}
+    engines: {node: '>= 0.8.0'}
+
   rechoir@0.7.1:
     resolution: {integrity: sha512-/njmZ8s1wVeR6pjTZ+0nCnv8SpZNRMT2D1RLOJQESlYFDBvwpTA4KWJpZ+sBJ4+vhjILRcK7JIFdGCdxEAAitg==}
     engines: {node: '>= 0.10'}
@@ -7461,6 +7478,10 @@ packages:
   shell-quote@1.8.3:
     resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
     engines: {node: '>= 0.4'}
+
+  shelljs@0.10.0:
+    resolution: {integrity: sha512-Jex+xw5Mg2qMZL3qnzXIfaxEtBaC4n7xifqaqtrZDdlheR70OGkydrPJWT0V1cA1k3nanC86x9FwAmQl6w3Klw==}
+    engines: {node: '>=18'}
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -14210,6 +14231,11 @@ snapshots:
 
   node-releases@2.0.27: {}
 
+  nodejs-whisper@0.3.0:
+    dependencies:
+      readline-sync: 1.4.10
+      shelljs: 0.10.0
+
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
@@ -14699,6 +14725,8 @@ snapshots:
     dependencies:
       readable-stream: 4.7.0
 
+  readline-sync@1.4.10: {}
+
   rechoir@0.7.1:
     dependencies:
       resolve: 1.22.11
@@ -14899,6 +14927,11 @@ snapshots:
   shebang-regex@3.0.0: {}
 
   shell-quote@1.8.3: {}
+
+  shelljs@0.10.0:
+    dependencies:
+      execa: 5.1.1
+      fast-glob: 3.3.3
 
   signal-exit@3.0.7: {}
 
