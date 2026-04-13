@@ -12,6 +12,10 @@
       "import": "./dist/esm/tasks/build.mjs",
       "types": "./dist/types/tasks/build.d.mts"
     },
+    "./render": {
+      "import": "./dist/esm/tasks/render.mjs",
+      "types": "./dist/types/tasks/render.d.mts"
+    },
     "./thumbs": {
       "import": "./dist/esm/tasks/thumbs.mjs",
       "types": "./dist/types/tasks/thumbs.d.mts"

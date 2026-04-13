@@ -9,11 +9,14 @@ import {
   copyScreenshotOperation,
   generateThumbsOperation,
   listRecordingsOperation,
+  listRendersOperation,
   listScreenshotsOperation,
   listThumbsOperation,
   type Operation,
+  renameRenderOperation,
   saveRecordingOperation,
   setProjectMetaOperation,
+  startRenderOperation,
 } from "./api/contract.mts";
 import { fetchJson } from "./utils/dom.mts";
 
@@ -170,3 +173,9 @@ export const checkImageExists = makeFetcher(checkImageExistsOperation);
 export const generateThumbs = makeFetcher(generateThumbsOperation);
 
 export const listThumbs = makeFetcher(listThumbsOperation);
+
+export const startRender = makeFetcher(startRenderOperation);
+
+export const listRenders = makeFetcher(listRendersOperation);
+
+export const renameRender = makeFetcher(renameRenderOperation);

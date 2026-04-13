@@ -8,6 +8,150 @@ import {
   parseConfig,
 } from "./config.mts";
 
+/**
+ * Image format for frames.
+ */
+export type ImageFormat = "jpeg" | "png";
+
+/**
+ * Options for rendering a video.
+ */
+export interface RenderOptions {
+  /** Additional flags to pass to ffmpeg, applying to the audio file */
+  audioArgs?: string;
+
+  /** Path to audio file */
+  audioFile?: string;
+
+  /** Path to browser executable (optional, will auto-detect) */
+  browserExecutable?: string;
+
+  /** Color scheme: light or dark */
+  colorScheme?: "light" | "dark";
+
+  /** Number of concurrent browser instances */
+  concurrency?: number;
+
+  /** Duration in seconds (conflicts with end) */
+  duration?: number;
+
+  /** End time in seconds (conflicts with duration) */
+  end?: number;
+
+  /** Frames per second */
+  fps?: number;
+
+  /** Video height */
+  height?: number;
+
+  /** Image format for frames */
+  imageFormat?: ImageFormat;
+
+  /** Output filename */
+  output: string;
+
+  /** Pixel format for ffmpeg */
+  pixelFormat?: string;
+
+  /** Quality for JPEG images (0-100) */
+  quality?: number;
+
+  /** Output image sequence instead of video */
+  sequence?: boolean;
+
+  /** Start time in seconds */
+  start?: number;
+
+  /** URL of video to render */
+  url: string;
+
+  /** Additional flags to pass to ffmpeg, applying to the output video */
+  videoArgs?: string;
+
+  /** Video width */
+  width?: number;
+}
+
+/**
+ * Result of video rendering.
+ */
+export interface RenderResult {
+  /** Duration of the rendered video in seconds */
+  duration: number;
+  /** Output file path */
+  output: string;
+}
+
+/**
+ * Render a Liqvid video to a static video file.
+ *
+ * @example
+ * ```ts
+ * import { renderVideo } from "@liqvid/cli/render";
+ *
+ * await renderVideo({
+ *   url: "http://localhost:3000/projects/my-video",
+ *   output: "./renders/video.mp4",
+ * });
+ * ```
+ */
+export async function renderVideo(
+  options: RenderOptions,
+): Promise<RenderResult> {
+  const { solidify } = await import("@liqvid/renderer/solidify");
+
+  // Apply defaults
+  const colorScheme = options.colorScheme ?? "light";
+  const concurrency = options.concurrency ?? 1;
+  const fps = options.fps ?? 30;
+  const height = options.height ?? 800;
+  const width = options.width ?? 1280;
+  const imageFormat = options.imageFormat ?? "jpeg";
+  const quality = options.quality ?? 80;
+  const pixelFormat = options.pixelFormat ?? "yuv420p";
+  const start = options.start ?? 0;
+  const sequence = options.sequence ?? false;
+
+  // Note: solidify's types are stricter than the runtime - it handles undefined
+  // values for optional fields. We use type assertions here.
+  await solidify({
+    audioArgs: options.audioArgs as string,
+    audioFile: options.audioFile as string,
+    browserExecutable: options.browserExecutable ?? "",
+    colorScheme,
+    concurrency,
+    duration: options.duration as number,
+    end: options.end as number,
+    fps,
+    height,
+    imageFormat,
+    output: options.output,
+    pixelFormat,
+    quality,
+    sequence,
+    start,
+    url: options.url,
+    videoArgs: options.videoArgs as string,
+    width,
+  });
+
+  // Calculate actual duration
+  const duration = (() => {
+    if (typeof options.duration === "number") {
+      return options.duration;
+    } else if (typeof options.end === "number") {
+      return options.end - start;
+    }
+    // We don't know the actual duration without querying the video
+    return 0;
+  })();
+
+  return {
+    duration,
+    output: options.output,
+  };
+}
+
 /** Render to static video. */
 export const render: CommandModule = {
   builder: (yargs) =>

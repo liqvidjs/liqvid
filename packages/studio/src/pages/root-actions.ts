@@ -72,6 +72,33 @@ export async function openInFinderAction(
 }
 
 /**
+ * Open a render folder in Finder
+ */
+export async function openRenderInFinderAction(
+  projectPath: string,
+  renderId: string,
+): Promise<{ success: boolean }> {
+  try {
+    // Validate paths to prevent directory traversal
+    if (projectPath.includes("..") || renderId.includes("..")) {
+      return { success: false };
+    }
+    const fullPath = path.join(
+      APP_DIR,
+      projectPath,
+      ".liqvid",
+      "renders",
+      renderId,
+    );
+    await execa("open", [fullPath]);
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to open render in Finder:", e);
+    return { success: false };
+  }
+}
+
+/**
  * Load all available project templates.
  * Templates are sorted with default first, then alphabetically by name.
  */

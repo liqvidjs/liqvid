@@ -179,3 +179,85 @@ export const listThumbsOperation = {
     projectPath: z.string(),
   }),
 };
+
+/**
+ * Metadata for a render.
+ */
+export const RenderMeta = z.object({
+  /** Color scheme used */
+  colorScheme: z.enum(["light", "dark"]),
+  /** Timestamp when render was created */
+  createdAt: z.string(),
+  /** Duration in seconds */
+  duration: z.number().optional(),
+  /** Frames per second */
+  fps: z.number(),
+  /** Video height */
+  height: z.number(),
+  /** Output filename */
+  output: z.string(),
+  /** Render status */
+  status: z.enum(["pending", "rendering", "completed", "failed"]),
+  /** Video width */
+  width: z.number(),
+});
+export type RenderMeta = z.infer<typeof RenderMeta>;
+
+/**
+ * A render entry with its ID and metadata.
+ */
+export const RenderEntry = z.object({
+  /** Unique identifier (datetime folder name) */
+  id: z.string(),
+  /** Render metadata */
+  meta: RenderMeta,
+});
+export type RenderEntry = z.infer<typeof RenderEntry>;
+
+export const startRenderOperation = {
+  body: z.object({
+    /** Color scheme: light or dark */
+    colorScheme: z.enum(["light", "dark"]).optional(),
+    /** Frames per second */
+    fps: z.number().optional(),
+    /** Video height */
+    height: z.number().optional(),
+    /** Video width */
+    width: z.number().optional(),
+  }),
+  endpoint: "/renders/start" as const,
+  method: "POST" as const,
+  response: z.object({
+    /** Render ID (datetime folder name) */
+    id: z.string(),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const listRendersOperation = {
+  endpoint: "/renders" as const,
+  response: z.array(RenderEntry),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const renameRenderOperation = {
+  body: z.object({
+    /** New name for the render */
+    newName: z.string(),
+    /** Current render ID */
+    renderId: z.string(),
+  }),
+  endpoint: "/renders/rename" as const,
+  method: "POST" as const,
+  response: z.object({
+    /** New render ID (folder name) */
+    newId: z.string(),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};

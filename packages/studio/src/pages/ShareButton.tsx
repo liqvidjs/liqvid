@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "../ui/Dialog";
 
+import { RendersSection } from "./RendersSection";
 import { ScreenshotsSection } from "./ScreenshotsSection";
 import { ThumbnailsSection } from "./ThumbnailsSection";
 
@@ -61,6 +62,8 @@ export function ShareButton({
           />
 
           <ThumbnailsSection isOpen={open} projectPath={project.path} />
+
+          <RendersSection isOpen={open} projectPath={project.path} />
 
           <div className={styles.dialogActions}>
             <DialogClose asChild>

@@ -45,6 +45,7 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
   "dependencies": {
     "@base-ui/react": "catalog:",
+    "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "chalk": "catalog:",
     "classnames": "catalog:",
@@ -53,7 +54,6 @@
     "have-fun": "catalog:",
     "http-status-codes": "catalog:",
     "lodash.debounce": "catalog:",
-    "@phosphor-icons/react": "catalog:",
     "serve": "catalog:",
     "universal-cookie": "catalog:",
     "zod": "catalog:"
@@ -86,6 +86,7 @@
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
+    "nodejs-whisper": "catalog:peer",
     "react": "catalog:peer"
   },
   "sideEffects": false,

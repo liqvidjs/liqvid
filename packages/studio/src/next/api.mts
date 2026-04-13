@@ -7,13 +7,17 @@ import { notFound } from "next/navigation";
 import {
   generateThumbsOperation,
   listRecordingsOperation,
+  listRendersOperation,
   listThumbsOperation,
+  renameRenderOperation,
   saveRecordingOperation,
   setProjectMetaOperation,
+  startRenderOperation,
   staticFileOperation,
 } from "../api/contract.mts";
 import { setProjectMeta } from "../api/project-meta.mts";
 import { listRecordings, saveRecording } from "../api/recording.mts";
+import { listRenders, renameRender, startRender } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
@@ -56,6 +60,8 @@ export function getHandler(_dynamicImports: DynamicImports) {
         return getRoot();
       case listRecordingsOperation.endpoint:
         return listRecordings(searchParams);
+      case listRendersOperation.endpoint:
+        return listRenders(searchParams);
       case listThumbsOperation.endpoint:
         return listThumbs(searchParams);
       case staticFileOperation.endpoint:
@@ -97,6 +103,10 @@ export function postHandler(dynamicImports: DynamicImports) {
           await req.formData(),
           dynamicImports,
         );
+      case startRenderOperation.endpoint:
+        return startRender(searchParams, await req.json());
+      case renameRenderOperation.endpoint:
+        return renameRender(searchParams, await req.json());
     }
 
     return Response.json(
