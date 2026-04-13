@@ -1,7 +1,7 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import type { DurationLike } from "@liqvid/duration";
 import { usePlayback } from "@liqvid/playback/react";
-import { formatTime } from "@liqvid/utils";
+import { formatTime, useFirstRender } from "@liqvid/utils";
 import { useEffect } from "react";
 
 export interface ThumbData {
@@ -97,6 +97,10 @@ export function ThumbnailBox({
   const sheetName = path
     .replace("%s", sheetNum.toString())
     .replace("%c", colorScheme);
+
+  // easy way to prevent hydration errors
+  const isFirstRender = useFirstRender();
+  if (isFirstRender) return null;
 
   return (
     <div

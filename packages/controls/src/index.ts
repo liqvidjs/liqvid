@@ -1,4 +1,5 @@
-export { ColorSchemeToggle } from "./ColorSchemeToggle";
+export * from "./Captions";
+export * from "./ColorSchemeToggle";
 export { FullScreen } from "./FullScreen";
 export { Mute, type MuteProps } from "./MuteButton";
 export { PlayPause } from "./PlayPause";

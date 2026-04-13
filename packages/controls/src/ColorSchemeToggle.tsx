@@ -6,11 +6,7 @@ import { useMemo } from "react";
 
 import { convertShortcuts } from "./utils";
 
-export function ColorSchemeToggle({
-  className,
-  render,
-  shortcuts,
-}: {
+type ColorSchemeToggleProps = {
   className?: string;
   render: (
     state: {
@@ -19,7 +15,13 @@ export function ColorSchemeToggle({
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
   shortcuts?: string | string[];
-}) {
+};
+
+export function ColorSchemeToggle({
+  className,
+  render,
+  shortcuts,
+}: ColorSchemeToggleProps) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
 
   useKeyboardShortcut(shortcuts, toggleColorScheme);

@@ -15,6 +15,7 @@ import { convertShortcuts } from "./utils";
 
 const toggleFullScreen = () =>
   isFullScreen() ? exitFullScreen() : requestFullScreen();
+
 const events = onClickReact(toggleFullScreen);
 
 interface FullScreenControlProps {

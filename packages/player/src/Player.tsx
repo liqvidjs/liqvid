@@ -5,7 +5,11 @@ import { HydrateElement } from "@liqvid/hydration";
 import { provideIframeApi } from "@liqvid/iframe-api/child";
 import { KeymapProvider } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
-import { usePlaybackOptional } from "@liqvid/playback/react";
+import {
+  usePlayback,
+  usePlaybackEvent,
+  usePlaybackOptional,
+} from "@liqvid/playback/react";
 import { combineRefs } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -170,13 +174,15 @@ export function Root({
 export function Captions({
   className,
   children,
-  ...props
 }: { children?: React.ReactNode } & React.HTMLAttributes<HTMLElement>) {
-  return (
-    <div className={classNames("lv-captions", className)} {...props}>
-      {children}
-    </div>
+  const playback = usePlayback();
+
+  usePlaybackEvent(
+    "cuechange",
+    useCallback(({ target }) => {}, [playback]),
   );
+
+  return <div className="lv-captions-display" ref={domElement} />;
 }
 
 export const Player = { Canvas, Captions, Controls, Root };
