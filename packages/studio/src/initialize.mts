@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+import { runNextBuild } from "@liqvid/cli/build";
 import type { ProjectMeta } from "@liqvid/schemas";
 import { execa } from "execa";
 
