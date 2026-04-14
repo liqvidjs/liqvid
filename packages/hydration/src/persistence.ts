@@ -75,7 +75,14 @@ export function usePersist<C extends LocalValueConfig>(
           },
         ];
     }
-  }, [cookies, disabled, storage]);
+  }, [
+    cookies,
+    disabled,
+    storage.default,
+    storage.name,
+    storage.source,
+    storage.type,
+  ]);
 }
 
 export function usePersistentState<C extends BooleanValueConfig>(
