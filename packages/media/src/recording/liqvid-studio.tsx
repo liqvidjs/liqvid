@@ -1,4 +1,9 @@
-import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
+import {
+  type LiqvidStudioRecordingPlugin,
+  packageNameToDirName,
+  type RecordingComponentProps,
+  usePluginApi,
+} from "@liqvid/studio-plugin-api";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -205,14 +210,38 @@ function ConfigurationComponent() {
   );
 }
 
-export const MediaRecording = {
-  configurationComponent: ConfigurationComponent,
-  icon,
-  name: "Audio/Video",
-  package: "@liqvid/media",
-  recorder: new LiqvidMediaRecorder(),
-  version: "1.0.0",
-} satisfies LiqvidStudioRecordingPlugin<Blob, Blob>;
+function RecordingComponent({ name }: RecordingComponentProps) {
+  const { makeToast } = usePluginApi();
+  const prefix = `.liqvid/recordings/${name}/${packageNameToDirName(MediaRecording.package)}`;
+  const onClick = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `const projectFiles = useProjectFiles();
+
+<Audio>
+  <source src={projectFiles.file(${JSON.stringify(prefix + "/audio.webm")})} type="audio/webm" />
+  <source src={projectFiles.file(${JSON.stringify(prefix + "/audio.mp4")})} type="audio/mp4" />
+</Audio>
+`,
+      );
+
+      makeToast({
+        title: "Copied code to clipboard",
+        type: "success",
+      });
+    } catch (_error) {}
+  };
+
+  return (
+    <div>
+      {icon({ height: 24, width: 24 })}
+
+      <button className="lv-studio-button" onClick={onClick} type="button">
+        Use
+      </button>
+    </div>
+  );
+}
 
 function mediaDeviceKey(d: MediaDeviceInfo) {
   return `${d.kind}.${d.groupId}.${d.deviceId}`;
@@ -221,3 +250,13 @@ function mediaDeviceKey(d: MediaDeviceInfo) {
 function Spinner() {
   return <span className={styles.spinner} />;
 }
+
+export const MediaRecording = {
+  configurationComponent: ConfigurationComponent,
+  icon,
+  name: "Audio/Video",
+  package: "@liqvid/media",
+  recorder: new LiqvidMediaRecorder(),
+  recordingComponent: RecordingComponent,
+  version: "1.0.0",
+} satisfies LiqvidStudioRecordingPlugin<Blob, Blob>;

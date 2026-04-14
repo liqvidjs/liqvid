@@ -8,13 +8,6 @@
       "types": "./dist/types/index.d.mts"
     }
   },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist/*"
   ],

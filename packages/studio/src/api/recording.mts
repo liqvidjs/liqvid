@@ -4,7 +4,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
-import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import {
+  dirNameToPackageName,
+  type LiqvidStudioServerPlugin,
+  packageNameToDirName,
+} from "@liqvid/studio-plugin-api";
 import { compare } from "@liqvid/utils";
 import { safeGet } from "have-fun";
 import { StatusCodes } from "http-status-codes";
@@ -50,11 +54,17 @@ export async function listRecordings(
         RecordingMetaFile,
         path.join(dir, RECORDING_META_FILE),
       );
-      const children = await fsp.readdir(dir);
+      const children = await fsp.readdir(dir, { withFileTypes: true });
       return recordingMeta.map((file) => ({
         ...file,
-        name,
-        plugins: children.filter((x) => x !== RECORDING_META_FILE),
+        name: dirNameToPackageName(name),
+        plugins: children.reduce((acc, curr) => {
+          if (curr.isDirectory()) {
+            acc.push(dirNameToPackageName(curr.name));
+            return acc;
+          }
+          return acc;
+        }, [] as string[]),
       }));
     }),
   );
@@ -77,13 +87,6 @@ interface SaveRecordingMetadata {
     isBlob: boolean;
     filename?: string;
   }>;
-}
-
-/**
- * Convert package name to directory name (replace / with .)
- */
-function packageToDir(packageName: string): string {
-  return packageName.replace(/\//g, ".");
 }
 
 /**
@@ -157,7 +160,10 @@ export async function saveRecording(
 
   // Write plugin data
   for (const pluginInfo of metadata.plugins) {
-    const pluginDir = path.join(recordingDir, packageToDir(pluginInfo.key));
+    const pluginDir = path.join(
+      recordingDir,
+      packageNameToDirName(pluginInfo.key),
+    );
     await fsp.mkdir(pluginDir, { recursive: true });
 
     const data = formData.get(pluginInfo.key);
@@ -191,7 +197,10 @@ async function runPostProcessing(
   dynamicImports: DynamicImports,
 ): Promise<void> {
   for (const pluginInfo of plugins) {
-    const pluginDir = path.join(recordingDir, packageToDir(pluginInfo.key));
+    const pluginDir = path.join(
+      recordingDir,
+      packageNameToDirName(pluginInfo.key),
+    );
 
     const dynamicImporter =
       dynamicImports[`${pluginInfo.key}/liqvid-studio-server-plugin`];

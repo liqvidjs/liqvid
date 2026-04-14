@@ -1,6 +1,7 @@
 import { BaseRecorder } from "@liqvid/recording";
 import {
   type LiqvidStudioRecordingPlugin,
+  packageNameToDirName,
   usePluginApi,
 } from "@liqvid/studio-plugin-api";
 import { bind, formatTimeMs } from "@liqvid/utils";
@@ -100,7 +101,7 @@ export const MarkerRecording = {
     const onClick = async () => {
       try {
         await navigator.clipboard.writeText(
-          `import ${sanitizeName(name)}Timings from "../.liqvid/recordings/${name}/${packageToDir(MarkerRecording.package)}/timings.json";`,
+          `import ${sanitizeName(name)}Timings from "../.liqvid/recordings/${name}/${packageNameToDirName(MarkerRecording.package)}/timings.json";`,
         );
 
         makeToast({
@@ -138,11 +139,4 @@ export const MarkerRecording = {
 
 function sanitizeName(name: string) {
   return name.replace(/-/g, "");
-}
-
-/**
- * Convert package name to directory name (replace / with .)
- */
-function packageToDir(packageName: string): string {
-  return packageName.replace(/\//g, ".");
 }

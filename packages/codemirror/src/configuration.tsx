@@ -1,14 +1,13 @@
 "use client";
 
+import type { ConfigurationComponentProps } from "@liqvid/studio-plugin-api";
 import { useEffect } from "react";
 
 import { type CodeMirrorInstance, CodeRecording } from "./recording";
 
 export function ConfigurationComponent({
   instances,
-}: {
-  instances: Set<CodeMirrorInstance>;
-}) {
+}: ConfigurationComponentProps<CodeMirrorInstance>) {
   // TODO: disallow code recording in this case
   if (instances.size === 0) return null;
 
