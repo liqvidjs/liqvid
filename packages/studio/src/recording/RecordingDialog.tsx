@@ -1,19 +1,12 @@
 import { Collapsible } from "@base-ui/react/collapsible";
-import { usePersist } from "@liqvid/hydration";
+import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
 import classNames from "classnames";
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import { listRecordings } from "../client.mts";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
@@ -33,6 +26,12 @@ export interface RecordingDialogProps {
   ) => void;
 }
 
+const tabs = {
+  configuration: "configuration",
+  saved: "saved",
+  shortcuts: "shortcuts",
+} as const;
+
 export function RecordingDialog({
   shortcuts,
   onShortcutChange,
@@ -43,18 +42,21 @@ export function RecordingDialog({
 
   const [recordings, setRecordings] = useState<RecordingMeta[]>([]);
 
+  const [activeTab, setActiveTab] = usePersistentState({
+    default: tabs.configuration,
+    enum: Object.values(tabs),
+    name: `liqvid:recordingDialog:activeTab:${projectPath}`,
+    source: "localStorage",
+    type: "string",
+  });
+
   // Persist enabled plugins to localStorage, partitioned by projectPath
-  const [getPersistedPlugins, setPersistedPlugins] = usePersist(
-    useMemo(
-      () => ({
-        default: "[]",
-        name: `liqvid:enabledPlugins:${projectPath}`,
-        source: "localStorage",
-        type: "string",
-      }),
-      [projectPath],
-    ),
-  );
+  const [getPersistedPlugins, setPersistedPlugins] = usePersist({
+    default: "[]",
+    name: `liqvid:enabledPlugins:${projectPath}`,
+    source: "localStorage",
+    type: "string",
+  });
 
   // Track whether we've loaded the initial state from localStorage
   const initializedRef = useRef(false);
@@ -117,19 +119,22 @@ export function RecordingDialog({
       <DockableDialog.Header>Recording</DockableDialog.Header>
       <DockableDialog.Content>
         <div>
-          <Tabs defaultValue="configuration">
+          <Tabs onValueChange={setActiveTab} value={activeTab}>
             <TabsList>
-              <TabsTrigger className="lv-recording-tabs" value="configuration">
+              <TabsTrigger
+                className="lv-recording-tabs"
+                value={tabs.configuration}
+              >
                 Configuration
               </TabsTrigger>
-              <TabsTrigger className="lv-recording-tabs" value="saved">
+              <TabsTrigger className="lv-recording-tabs" value={tabs.saved}>
                 Recordings
               </TabsTrigger>
-              <TabsTrigger className="lv-recording-tabs" value="shortcuts">
+              <TabsTrigger className="lv-recording-tabs" value={tabs.shortcuts}>
                 Shortcuts
               </TabsTrigger>
             </TabsList>
-            <TabsContent asChild value="configuration">
+            <TabsContent asChild value={tabs.configuration}>
               <section>
                 <h3>Plugins</h3>
 
@@ -182,7 +187,7 @@ export function RecordingDialog({
                 </table>
               </section>
             </TabsContent>
-            <TabsContent asChild value="saved">
+            <TabsContent asChild value={tabs.saved}>
               <section>
                 <h3>Saved</h3>
                 <div className={styles.Recordings}>
@@ -192,7 +197,7 @@ export function RecordingDialog({
                 </div>
               </section>
             </TabsContent>
-            <TabsContent asChild value="shortcuts">
+            <TabsContent asChild value={tabs.shortcuts}>
               <section>
                 <h3>Shortcuts</h3>
                 <ShortcutsTable
@@ -242,6 +247,7 @@ export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
       <Collapsible.Panel className={styles.RecordingRowExpand}>
         {r.plugins.map((p) => {
           const plugin = plugins[p];
+
           if (!plugin) return null;
 
           const Component = plugin.recordingComponent;
