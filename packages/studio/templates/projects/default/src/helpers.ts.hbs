@@ -5,6 +5,7 @@
 
 import { DirectoryHelper } from "@liqvid/studio";
 import { Animate, TargetDescendants, UniversalHelper } from "liqvid";
+import { usePathname } from "next/navigation";
 
 import type { ProjectDir } from "../.liqvid/types";
 
@@ -36,9 +37,14 @@ export const $desc = TargetDescendants<M>;
 /** @package Get marker by name */
 export const $m = script.markers.get.bind(script.markers.get);
 
-/** @package Reference the files in this project with type-safety. Need to interpolate the pathname before using. */
-export const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
+const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
 	process.env.NODE_ENV === "development"
 		? "/api/liqvid/static?url={pathname}"
 		: `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
 );
+
+/** @package Reference the files in this project with type-safety. */
+export function useProjectFiles() {
+	const pathname = usePathname();
+	return projectDirTemplated.interpolate({ pathname });
+}
