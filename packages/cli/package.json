@@ -19,6 +19,10 @@
     "./thumbs": {
       "import": "./dist/esm/tasks/thumbs.mjs",
       "types": "./dist/types/tasks/thumbs.d.mts"
+    },
+    "./transcribe": {
+      "import": "./dist/esm/tasks/transcribe.mjs",
+      "types": "./dist/types/tasks/transcribe.d.mts"
     }
   },
   "bin": {
@@ -50,16 +54,17 @@
     "@aws-sdk/client-s3": "catalog:",
     "@aws-sdk/credential-providers": "catalog:",
     "@aws-sdk/lib-storage": "catalog:",
-    "@liqvid/duration": "workspace:^",
-    "@liqvid/renderer": "workspace:^",
+    "@liqvid/duration": "workspace:^1.4.0",
+    "@liqvid/renderer": "workspace:^2.0.0-alpha.1",
     "@liqvid/schemas": "workspace:^",
-    "@liqvid/utils": "workspace:^",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
     "@types/node": "catalog:",
     "chalk": "catalog:",
     "cli-progress": "catalog:",
     "execa": "catalog:",
     "fast-glob": "catalog:",
     "handlebars": "catalog:",
+    "nodejs-whisper": "catalog:peer",
     "pluralize": "catalog:",
     "yargs": "catalog:",
     "yargs-parser": "catalog:",
@@ -70,6 +75,15 @@
     "@types/cli-progress": "catalog:dev",
     "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
+    "nodejs-whisper": "catalog:dev",
     "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "nodejs-whisper": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "nodejs-whisper": {
+      "optional": true
+    }
   }
 }

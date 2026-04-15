@@ -13,6 +13,26 @@ export interface FileUploadStatus {
   reason: "new" | "modified" | "unchanged";
 }
 
+export interface RemoteFileInfo {
+  /** Remote key/path (relative to prefix) */
+  key: string;
+  /** Size in bytes */
+  size: number;
+  /** Last modified date */
+  lastModified: Date;
+}
+
+export interface FileDownloadStatus {
+  /** Remote key/path */
+  key: string;
+  /** Absolute path where the file will be saved locally */
+  localPath: string;
+  /** Whether the file needs to be downloaded */
+  needsDownload: boolean;
+  /** Reason for the download status */
+  reason: "new" | "modified" | "unchanged";
+}
+
 export interface MediaHostingProvider {
   /**
    * Check which files need to be uploaded.
@@ -22,8 +42,32 @@ export interface MediaHostingProvider {
    */
   checkFiles(files: string[], rootDir: string): Promise<FileUploadStatus[]>;
 
+  /**
+   * Check which remote files need to be downloaded.
+   * @param remoteFiles - List of remote file info
+   * @param rootDir - The local root directory where files will be saved
+   * @returns Download status for each file
+   */
+  checkRemoteFiles(
+    remoteFiles: RemoteFileInfo[],
+    rootDir: string,
+  ): Promise<FileDownloadStatus[]>;
+
+  /**
+   * Download media files from the hosting provider.
+   * @param files - Download statuses for files to download
+   * @returns Number of files downloaded
+   */
+  downloadMedia(files: FileDownloadStatus[]): Promise<number>;
+
   /** Get the value of the `NEXT_PUBLIC_LIQVID_MEDIA_BASE` environment variable. */
   getBaseUrl(): string;
+
+  /**
+   * List all remote files under the configured prefix.
+   * @returns List of remote file info
+   */
+  listRemoteFiles(): Promise<RemoteFileInfo[]>;
 
   /**
    * Publish media files to the hosting provider.

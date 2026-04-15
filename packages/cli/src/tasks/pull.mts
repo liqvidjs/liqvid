@@ -2,11 +2,11 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { LiqvidConfig } from "@liqvid/schemas";
-import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
 import { S3Provider } from "../providers/hosting/s3.mts";
+import type { FileDownloadStatus, RemoteFileInfo } from "../providers/types.mts";
 
 const CONFIG_FILE = "liqvid.json";
 
@@ -20,9 +20,6 @@ const DEFAULT_MEDIA_PATTERNS = [
   "**/*.mp4",
   "**/*.png",
   "**/*.webm",
-  // omit social share images handled by Next
-  // "!**/opengraph-image.*",
-  // "!**/twitter-image.*",
   // distinguish Transport Stream files from TypeScript files
   "**/.liqvid/**/*.ts",
   "!**/.liqvid/types.ts",
@@ -30,21 +27,56 @@ const DEFAULT_MEDIA_PATTERNS = [
   "!**/*.d.json.ts",
 ];
 
-/** Publish media files to configured hosting provider. */
-export const publish: CommandModule = {
+/** File extensions that are considered media files for downloading */
+const MEDIA_EXTENSIONS = new Set([
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".m3u8",
+  ".mov",
+  ".mp4",
+  ".png",
+  ".ts",
+  ".webm",
+]);
+
+/**
+ * Check if a remote file is a media file based on its extension.
+ * Note: .ts is for HLS Transport Stream files, not TypeScript.
+ * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
+ */
+function isMediaFile(filePath: string): boolean {
+  const lowerPath = filePath.toLowerCase();
+  const basename = path.basename(lowerPath);
+
+  // Exclude TypeScript files
+  if (
+    lowerPath.endsWith(".d.ts") ||
+    lowerPath.endsWith(".d.json.ts") ||
+    basename === "types.ts"
+  ) {
+    return false;
+  }
+
+  const ext = path.extname(lowerPath);
+  return MEDIA_EXTENSIONS.has(ext);
+}
+
+/** Pull media files from configured hosting provider. */
+export const pull: CommandModule = {
   builder: (yargs) =>
     yargs
       .example([
-        ["liqvid publish"],
-        ["liqvid publish --cwd ./my-project"],
-        ["liqvid publish --base-dir src"],
-        ["liqvid publish --dry-run"],
+        ["liqvid pull"],
+        ["liqvid pull --cwd ./my-project"],
+        ["liqvid pull --base-dir src"],
+        ["liqvid pull --dry-run"],
       ])
       .group(["cwd", "config", "base-dir", "dry-run", "help"], "Options")
       .option("cwd", {
         alias: "C",
         default: process.cwd(),
-        desc: "Working directory containing liqvid.json and media files",
+        desc: "Working directory containing liqvid.json",
         normalize: true,
       })
       .option("config", {
@@ -55,69 +87,70 @@ export const publish: CommandModule = {
       .option("base-dir", {
         alias: "b",
         default: "app",
-        desc: "Base directory containing media files (paths are relative to this)",
+        desc: "Base directory where media files will be saved (paths are relative to this)",
         normalize: true,
       })
       .option("dry-run", {
         alias: "n",
         default: false,
-        desc: "Show what would be uploaded without actually uploading",
+        desc: "Show what would be downloaded without actually downloading",
         type: "boolean",
       })
       .version(false),
-  command: "publish",
-  describe: "Publish media files to configured hosting provider",
+  command: "pull",
+  describe: "Pull media files from configured hosting provider",
   handler: async (argv) => {
     const cwd = argv.cwd as string;
     const baseDir = argv["base-dir"] as string;
     const dryRun = argv["dry-run"] as boolean;
     const configPath = (argv.config as string) ?? path.join(cwd, CONFIG_FILE);
 
-    // The base directory is where we search for media files
+    // The base directory is where we save media files
     // and paths are computed relative to it
-    const searchDir = path.join(cwd, baseDir);
+    const targetDir = path.join(cwd, baseDir);
 
     // Load and parse config
     const config = await loadConfig(configPath);
 
-    // Get glob patterns from config, with sensible defaults
-    const patterns =
-      config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
+    // Create provider based on config
+    const provider = createProvider(config);
 
-    // Find media files matching the glob patterns
-    const mediaFiles = await fg(patterns, {
-      absolute: true,
-      cwd: searchDir,
-      dot: true, // Include files in .liqvid directories
-      onlyFiles: true,
-    });
+    console.log(`Listing remote files from s3://${config.providers.s3?.bucket ?? "bucket"}...`);
+
+    // List all remote files
+    const remoteFiles = await provider.listRemoteFiles();
+
+    // Filter to only media files
+    const mediaFiles = remoteFiles.filter((f) => isMediaFile(f.key));
 
     if (mediaFiles.length === 0) {
-      console.log(`No media files found in ${baseDir}/. Nothing to publish.`);
+      console.log("No media files found on remote. Nothing to pull.");
       process.exit(0);
     }
 
     // Sort for consistent output
-    mediaFiles.sort();
+    mediaFiles.sort((a, b) => a.key.localeCompare(b.key));
 
     console.log(
-      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/`,
+      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} on remote`,
     );
     console.log();
 
-    // Create provider based on config
-    const provider = createProvider(config);
+    // Check which files need to be downloaded
+    const statuses = await provider.checkRemoteFiles(mediaFiles, targetDir);
 
     if (dryRun) {
-      console.log("Dry run mode - checking remote state...\n");
-      await showDryRunInfo(provider, mediaFiles, searchDir, config);
+      console.log("Dry run mode - showing what would be downloaded...\n");
+      await showDryRunInfo(statuses, targetDir, config, mediaFiles);
       process.exit(0);
     }
 
-    // Publish all media files (paths relative to searchDir)
-    await provider.publishMedia(mediaFiles, searchDir);
+    // Download files (this never deletes local content)
+    const downloadCount = await provider.downloadMedia(statuses);
 
-    console.log("\nPublish complete!");
+    if (downloadCount > 0) {
+      console.log("\nPull complete!");
+    }
     process.exit(0);
   },
 };
@@ -198,65 +231,34 @@ function createProvider(config: LiqvidConfig): S3Provider {
   );
 }
 
-/** File extensions that are considered media files for publishing */
-const MEDIA_EXTENSIONS = new Set([
-  ".gif",
-  ".jpeg",
-  ".jpg",
-  ".m3u8",
-  ".mp4",
-  ".png",
-  ".ts",
-  ".webm",
-]);
-
 /**
- * Check if a file is a media file based on its extension.
- * Note: .ts is for HLS Transport Stream files, not TypeScript.
- * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
- */
-function isMediaFile(filePath: string): boolean {
-  const lowerPath = filePath.toLowerCase();
-  const basename = path.basename(lowerPath);
-
-  // Exclude TypeScript files
-  if (
-    lowerPath.endsWith(".d.ts") ||
-    lowerPath.endsWith(".d.json.ts") ||
-    basename === "types.ts"
-  ) {
-    return false;
-  }
-
-  const ext = path.extname(lowerPath);
-  return MEDIA_EXTENSIONS.has(ext);
-}
-
-/**
- * Show what would be uploaded in dry-run mode
+ * Show what would be downloaded in dry-run mode
  */
 async function showDryRunInfo(
-  provider: S3Provider,
-  mediaFiles: string[],
-  rootDir: string,
+  statuses: FileDownloadStatus[],
+  targetDir: string,
   config: LiqvidConfig,
+  remoteFiles: RemoteFileInfo[],
 ): Promise<void> {
   const bucket = config.providers.s3?.bucket ?? "bucket";
 
-  // Check which files need to be uploaded
-  const statuses = await provider.checkFiles(mediaFiles, rootDir);
+  // Build a map for quick lookup of remote file info
+  const remoteFileMap = new Map<string, RemoteFileInfo>();
+  for (const file of remoteFiles) {
+    remoteFileMap.set(file.key, file);
+  }
 
-  const toUpload = statuses.filter((s) => s.needsUpload);
-  const unchanged = statuses.filter((s) => !s.needsUpload);
+  const toDownload = statuses.filter((s) => s.needsDownload);
+  const unchanged = statuses.filter((s) => !s.needsDownload);
 
-  if (toUpload.length > 0) {
-    console.log("Files that would be uploaded:\n");
-    for (const { filePath, key, reason } of toUpload) {
-      const stats = await fsp.stat(filePath);
-      const sizeStr = formatFileSize(stats.size);
+  if (toDownload.length > 0) {
+    console.log("Files that would be downloaded:\n");
+    for (const { key, localPath, reason } of toDownload) {
+      const remoteFile = remoteFileMap.get(key);
+      const sizeStr = remoteFile ? formatFileSize(remoteFile.size) : "unknown";
       const reasonStr = reason === "new" ? "(new)" : "(modified)";
       console.log(
-        `  ${path.relative(rootDir, filePath)} → s3://${bucket}/${key} (${sizeStr}) ${reasonStr}`,
+        `  s3://${bucket}/${config.providers.s3?.prefix ?? ""}/${key} → ${path.relative(targetDir, localPath)} (${sizeStr}) ${reasonStr}`,
       );
     }
     console.log();
@@ -269,7 +271,7 @@ async function showDryRunInfo(
   }
 
   console.log(
-    `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
+    `\nSummary: ${toDownload.length} to download, ${unchanged.length} unchanged`,
   );
 }
 

@@ -32,6 +32,42 @@
       ],
       "additionalProperties": false
     },
+    "captioning": {
+      "type": "object",
+      "properties": {
+        "nodeWhisperOptions": {
+          "type": "object",
+          "properties": {
+            "autoDownloadModelName": {
+              "type": "string"
+            },
+            "modelName": {
+              "type": "string"
+            },
+            "modelRootPath": {
+              "type": "string"
+            },
+            "timestamps_length": {
+              "default": 20,
+              "type": "number"
+            },
+            "withCuda": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "modelName",
+            "withCuda"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "nodeWhisperOptions"
+      ],
+      "additionalProperties": false
+    },
     "providers": {
       "type": "object",
       "properties": {
@@ -269,6 +305,7 @@
   },
   "required": [
     "backend",
+    "captioning",
     "providers"
   ],
   "additionalProperties": false

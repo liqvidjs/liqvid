@@ -2,7 +2,9 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import {
+  GetObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
   type PutObjectCommandInput,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -10,7 +12,12 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { ProviderConfigS3 } from "@liqvid/schemas/providers";
 
-import type { FileUploadStatus, MediaHostingProvider } from "../types.mts";
+import type {
+  FileDownloadStatus,
+  FileUploadStatus,
+  MediaHostingProvider,
+  RemoteFileInfo,
+} from "../types.mts";
 
 /**
  * Resolve an environment variable reference to its actual value.
@@ -182,6 +189,155 @@ export class S3Provider implements MediaHostingProvider {
     }
 
     console.log(`Upload complete.`);
+  }
+
+  async listRemoteFiles(): Promise<RemoteFileInfo[]> {
+    const results: RemoteFileInfo[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const response = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          ContinuationToken: continuationToken,
+          Prefix: this.prefix ? `${this.prefix}/` : undefined,
+        }),
+      );
+
+      if (response.Contents) {
+        for (const obj of response.Contents) {
+          if (obj.Key && obj.Size !== undefined && obj.LastModified) {
+            // Remove prefix from key to get relative path
+            let relativeKey = obj.Key;
+            if (this.prefix && relativeKey.startsWith(`${this.prefix}/`)) {
+              relativeKey = relativeKey.slice(this.prefix.length + 1);
+            }
+
+            results.push({
+              key: relativeKey,
+              lastModified: obj.LastModified,
+              size: obj.Size,
+            });
+          }
+        }
+      }
+
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+
+    return results;
+  }
+
+  async checkRemoteFiles(
+    remoteFiles: RemoteFileInfo[],
+    rootDir: string,
+  ): Promise<FileDownloadStatus[]> {
+    const results: FileDownloadStatus[] = [];
+
+    for (const remoteFile of remoteFiles) {
+      const localPath = path.join(rootDir, remoteFile.key);
+      const status = await this.getDownloadStatus(remoteFile, localPath);
+      results.push(status);
+    }
+
+    return results;
+  }
+
+  async downloadMedia(files: FileDownloadStatus[]): Promise<number> {
+    const toDownload = files.filter((f) => f.needsDownload);
+
+    if (toDownload.length === 0) {
+      console.log("All files are up to date. Nothing to download.");
+      return 0;
+    }
+
+    console.log(
+      `Downloading ${toDownload.length} files (${files.length - toDownload.length} unchanged)...`,
+    );
+
+    for (const { key, localPath } of toDownload) {
+      await this.downloadFile(key, localPath);
+    }
+
+    console.log(`Download complete.`);
+    return toDownload.length;
+  }
+
+  /**
+   * Get the download status for a single file.
+   * Never marks a file for download if the local version is newer.
+   */
+  private async getDownloadStatus(
+    remoteFile: RemoteFileInfo,
+    localPath: string,
+  ): Promise<FileDownloadStatus> {
+    try {
+      // Get local file modification time
+      const localStats = await fsp.stat(localPath);
+      const localLastModified = localStats.mtime;
+
+      // Download only if remote file is newer than local
+      if (remoteFile.lastModified > localLastModified) {
+        return {
+          key: remoteFile.key,
+          localPath,
+          needsDownload: true,
+          reason: "modified",
+        };
+      }
+
+      return {
+        key: remoteFile.key,
+        localPath,
+        needsDownload: false,
+        reason: "unchanged",
+      };
+    } catch (err) {
+      // If the local file doesn't exist, we need to download it
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        return {
+          key: remoteFile.key,
+          localPath,
+          needsDownload: true,
+          reason: "new",
+        };
+      }
+      // For other errors, rethrow
+      throw err;
+    }
+  }
+
+  /**
+   * Download a single file from S3
+   */
+  private async downloadFile(key: string, localPath: string): Promise<void> {
+    const fullKey = this.buildKey(key);
+
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: fullKey,
+      }),
+    );
+
+    if (!response.Body) {
+      throw new Error(`Empty response body for ${fullKey}`);
+    }
+
+    // Ensure the directory exists
+    const dir = path.dirname(localPath);
+    await fsp.mkdir(dir, { recursive: true });
+
+    // Convert the readable stream to a buffer and write to file
+    const chunks: Uint8Array[] = [];
+    const stream = response.Body as AsyncIterable<Uint8Array>;
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
+    await fsp.writeFile(localPath, buffer);
+    console.log(`  Downloaded: ${key}`);
   }
 
   /**

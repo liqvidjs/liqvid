@@ -10,8 +10,10 @@ import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
 import { generateImports } from "./tasks/generate-imports.mts";
 import { publish } from "./tasks/publish.mts";
+import { pull } from "./tasks/pull.mts";
 import { render } from "./tasks/render.mts";
 import { thumbs } from "./tasks/thumbs.mts";
+import { transcribeCommand } from "./tasks/transcribe.mts";
 
 // entry
 export async function main() {
@@ -29,8 +31,10 @@ export async function main() {
     .command(build)
     .command(generateImports)
     .command(publish)
+    .command(pull)
     .command(render)
     .command(thumbs)
+    .command(transcribeCommand)
     .version(version)
     .help()
     .parseAsync();
