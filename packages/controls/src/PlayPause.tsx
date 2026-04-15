@@ -1,6 +1,6 @@
 "use client";
 
-import { useKeymap } from "@liqvid/keymap/react";
+import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
@@ -24,7 +24,6 @@ export function PlayPause({
   ) => React.ReactNode;
   shortcuts?: string[];
 }) {
-  const keymap = useKeymap();
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
@@ -34,25 +33,19 @@ export function PlayPause({
   usePlaybackEvent("seeking", forceUpdate);
   usePlaybackEvent("stop", forceUpdate);
 
-  // keyboard controls
-  const toggle = useCallback(
-    () => playback[playback.paused ? "play" : "pause"](),
-    [playback],
-  );
-
   useEffect(() => {
-    // keyboard shortcut
-    for (const seq of shortcuts ?? []) {
-      keymap.bind(seq, toggle);
-    }
+    setTimeout(() => {
+      console.log("cow");
+    }, 100);
+  });
 
-    return () => {
-      // unbind keyboard controls
-      for (const seq of shortcuts ?? []) {
-        keymap.unbind(seq, toggle);
-      }
-    };
-  }, [keymap, shortcuts, toggle]);
+  // keyboard controls
+  const toggle = useCallback(() => {
+    console.log("click");
+    return playback[playback.paused ? "play" : "pause"]();
+  }, [playback]);
+
+  useKeyboardShortcut(shortcuts, toggle);
 
   // event handler
   const events = useMemo(() => onClickReact(toggle), [toggle]);
@@ -65,6 +58,9 @@ export function PlayPause({
         "lv-controls-playpause lv-controls-button",
         className,
       ),
+      onClick: toggle,
+      onTouchStart: (e) => console.log("touchstart", e),
+      style: { backgroundColor: "red !important", fill: "blue" },
       ...events,
     },
   );

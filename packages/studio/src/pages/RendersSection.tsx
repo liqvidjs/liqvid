@@ -1,6 +1,5 @@
 "use client";
 
-import type { RenderEntry } from "../api/contract.mts";
 import {
   CheckCircleIcon,
   FilmStripIcon,
@@ -15,11 +14,12 @@ import {
 } from "@phosphor-icons/react";
 import { useCallback, useEffect, useState } from "react";
 
+import type { RenderEntry } from "../api/contract.mts";
 import { listRenders, renameRender, startRender } from "../client.mts";
 import {
+  DialogBackdrop,
   DialogClose,
-  DialogContent,
-  DialogOverlay,
+  DialogPopup,
   DialogPortal,
   DialogRoot,
   DialogTitle,
@@ -227,27 +227,25 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
         <div className={shareStyles.sectionHeader}>
           <h3>Renders</h3>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
-            <DialogTrigger asChild>
-              <button
-                className={shareStyles.addButton}
-                disabled={isStarting}
-                type="button"
-              >
-                {isStarting ? (
-                  <>
-                    <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    <FilmStripIcon size={16} /> Render
-                  </>
-                )}
-              </button>
+            <DialogTrigger
+              className={shareStyles.addButton}
+              disabled={isStarting}
+              type="button"
+            >
+              {isStarting ? (
+                <>
+                  <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <FilmStripIcon size={16} /> Render
+                </>
+              )}
             </DialogTrigger>
             <DialogPortal>
-              <DialogOverlay className={styles.dialogOverlay} />
-              <DialogContent className={styles.dialog}>
+              <DialogBackdrop className={styles.dialogOverlay} />
+              <DialogPopup className={styles.dialog}>
                 <DialogTitle className={styles.dialogTitle}>
                   Render Settings
                 </DialogTitle>
@@ -314,10 +312,8 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                 </div>
 
                 <div className={styles.dialogActions}>
-                  <DialogClose asChild>
-                    <button className={styles.cancelButton} type="button">
-                      Cancel
-                    </button>
+                  <DialogClose className={styles.cancelButton}>
+                    Cancel
                   </DialogClose>
                   <button
                     className={styles.submitButton}
@@ -327,7 +323,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                     <FilmStripIcon size={16} /> Start Render
                   </button>
                 </div>
-              </DialogContent>
+              </DialogPopup>
             </DialogPortal>
           </DialogRoot>
         </div>
@@ -403,18 +399,16 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
         open={!!playingRender}
       >
         <DialogPortal>
-          <DialogOverlay className={styles.dialogOverlay} />
-          <DialogContent
+          <DialogBackdrop className={styles.dialogOverlay} />
+          <DialogPopup
             className={`${styles.dialog} ${shareStyles.videoDialog}`}
           >
             <div className={shareStyles.videoHeader}>
               <DialogTitle className={styles.dialogTitle}>
                 {playingRender?.id}
               </DialogTitle>
-              <DialogClose asChild>
-                <button className={shareStyles.closeButton} type="button">
-                  <XIcon size={20} />
-                </button>
+              <DialogClose className={shareStyles.closeButton}>
+                <XIcon size={20} />
               </DialogClose>
             </div>
             {playingRender && (
@@ -427,7 +421,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                 <track kind="captions" />
               </video>
             )}
-          </DialogContent>
+          </DialogPopup>
         </DialogPortal>
       </DialogRoot>
 
@@ -437,8 +431,8 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
         open={!!renamingRender}
       >
         <DialogPortal>
-          <DialogOverlay className={styles.dialogOverlay} />
-          <DialogContent className={styles.dialog}>
+          <DialogBackdrop className={styles.dialogOverlay} />
+          <DialogPopup className={styles.dialog}>
             <DialogTitle className={styles.dialogTitle}>
               Rename Render
             </DialogTitle>
@@ -459,11 +453,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
               />
             </div>
             <div className={styles.dialogActions}>
-              <DialogClose asChild>
-                <button className={styles.cancelButton} type="button">
-                  Cancel
-                </button>
-              </DialogClose>
+              <DialogClose className={styles.cancelButton}>Cancel</DialogClose>
               <button
                 className={styles.submitButton}
                 disabled={isRenaming || !renameValue.trim()}
@@ -480,7 +470,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                 )}
               </button>
             </div>
-          </DialogContent>
+          </DialogPopup>
         </DialogPortal>
       </DialogRoot>
     </>

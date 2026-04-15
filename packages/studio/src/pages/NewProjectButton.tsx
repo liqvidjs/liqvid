@@ -1,11 +1,27 @@
 "use client";
 
-import { Dialog } from "@base-ui/react/dialog";
 import { Select } from "@base-ui/react/select";
 import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 
+import {
+  DialogBackdrop,
+  DialogClose,
+  DialogPopup,
+  DialogPortal,
+  DialogRoot,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/Dialog";
 import { IconButton } from "../ui/IconButton";
+import {
+  SelectIcon,
+  SelectItem,
+  SelectItemIndicator,
+  SelectList,
+  SelectPopup,
+  SelectTrigger,
+} from "../ui/Select";
 
 import {
   createProjectAction,
@@ -79,26 +95,29 @@ export function NewProjectButton() {
     [name, projectPath, templateId, closeDialog],
   );
 
+  const ids = {
+    projectName: useId(),
+    projectPath: useId(),
+  };
+
   return (
-    <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger
+    <DialogRoot onOpenChange={setOpen} open={open}>
+      <DialogTrigger
         render={<IconButton title="Create a new project" variant="primary" />}
       >
         <PlusIcon />
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={styles.dialogOverlay} />
-        <Dialog.Popup className={styles.dialog}>
-          <Dialog.Title className={styles.dialogTitle}>
-            Create New Project
-          </Dialog.Title>
+      </DialogTrigger>
+      <DialogPortal>
+        <DialogBackdrop />
+        <DialogPopup className={styles.dialog}>
+          <DialogTitle>Create New Project</DialogTitle>
           <form className={styles.dialogForm} onSubmit={handleSubmit}>
             <div className={styles.formField}>
-              <label htmlFor="project-name">Project Name</label>
+              <label htmlFor={ids.projectName}>Project Name</label>
               <input
                 autoComplete="off"
                 disabled={isCreating}
-                id="project-name"
+                id={ids.projectName}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My Project"
                 required
@@ -108,11 +127,11 @@ export function NewProjectButton() {
             </div>
 
             <div className={styles.formField}>
-              <label htmlFor="project-path">Project Path</label>
+              <label htmlFor={ids.projectPath}>Project Path</label>
               <input
                 autoComplete="off"
                 disabled={isCreating}
-                id="project-path"
+                id={ids.projectPath}
                 onChange={(e) => setProjectPath(e.target.value)}
                 placeholder="category/project-slug"
                 required
@@ -133,35 +152,26 @@ export function NewProjectButton() {
                 onValueChange={(value) => value && setTemplateId(value)}
                 value={templateId}
               >
-                <Select.Trigger
-                  className={styles.selectTrigger}
-                  id="project-template"
-                >
+                <SelectTrigger id="project-template">
                   <Select.Value placeholder="Select a template" />
-                  <Select.Icon className={styles.selectIcon}>
+                  <SelectIcon>
                     <CaretDownIcon />
-                  </Select.Icon>
-                </Select.Trigger>
+                  </SelectIcon>
+                </SelectTrigger>
                 <Select.Portal>
                   <Select.Positioner sideOffset={4}>
-                    <Select.Popup className={styles.selectContent}>
-                      <Select.List className={styles.selectViewport}>
+                    <SelectPopup>
+                      <SelectList>
                         {templates.map((template) => (
-                          <Select.Item
-                            className={styles.selectItem}
-                            key={template.id}
-                            value={template.id}
-                          >
+                          <SelectItem key={template.id} value={template.id}>
                             <Select.ItemText>{template.name}</Select.ItemText>
-                            <Select.ItemIndicator
-                              className={styles.selectItemIndicator}
-                            >
+                            <SelectItemIndicator>
                               <CheckIcon />
-                            </Select.ItemIndicator>
-                          </Select.Item>
+                            </SelectItemIndicator>
+                          </SelectItem>
                         ))}
-                      </Select.List>
-                    </Select.Popup>
+                      </SelectList>
+                    </SelectPopup>
                   </Select.Positioner>
                 </Select.Portal>
               </Select.Root>
@@ -170,13 +180,13 @@ export function NewProjectButton() {
             {error && <div className={styles.error}>{error}</div>}
 
             <div className={styles.dialogActions}>
-              <Dialog.Close
+              <DialogClose
                 className={styles.cancelButton}
                 disabled={isCreating}
                 render={<button type="button" />}
               >
                 Cancel
-              </Dialog.Close>
+              </DialogClose>
               <button
                 className={styles.submitButton}
                 disabled={
@@ -192,8 +202,8 @@ export function NewProjectButton() {
               </button>
             </div>
           </form>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogPopup>
+      </DialogPortal>
+    </DialogRoot>
   );
 }

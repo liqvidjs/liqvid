@@ -1,4 +1,6 @@
 :root {
+  font-size: 18px;
+
   /* accent */
   --accent-app: light-dark(#fffcfd, #180e11);
   --accent-subtle: light-dark(#fef7f9, #221217);
@@ -260,6 +262,16 @@
       --gray-track: oklch(54% 0.0167 277.7);
     }
   }
+}
+
+/* ------------------------------ sizes ------------------------------ */
+:root {
+  --lvs-text-xs: 0.5rem;
+  --lvs-text-sm: 0.75rem;
+  --lvs-text-lg: 2rem;
+  --lvs-text-xl: 3rem;
+  --lvs-text-2xl: 4rem;
+  --lvs-text-3xl: 5rem;
 }
 
 .lv-studio-button {

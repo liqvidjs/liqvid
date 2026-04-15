@@ -16,9 +16,9 @@ import { useEffect, useState } from "react";
 
 import { captureScreenshot } from "../client.mts";
 import {
+  DialogBackdrop,
   DialogClose,
-  DialogContent,
-  DialogOverlay,
+  DialogPopup,
   DialogPortal,
   DialogTitle,
 } from "../ui/Dialog";
@@ -101,8 +101,8 @@ export function ScreenshotModal({
 
   return (
     <DialogPortal>
-      <DialogOverlay className={styles.dialogOverlay} />
-      <DialogContent
+      <DialogBackdrop className={styles.dialogOverlay} />
+      <DialogPopup
         aria-describedby={undefined}
         className={`${styles.dialog} ${shareStyles.previewDialog}`}
       >
@@ -186,7 +186,7 @@ export function ScreenshotModal({
             )}
           </button>
         </div>
-      </DialogContent>
+      </DialogPopup>
     </DialogPortal>
   );
 }

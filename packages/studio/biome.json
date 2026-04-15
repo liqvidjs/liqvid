@@ -1,3 +1,18 @@
 {
-  "extends": ["../../biome.json"]
+  "extends": ["../../biome.json"],
+  "linter": {
+    "rules": {
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@base-ui/react/dialog": "import the styled versions",
+              "@base-ui/react/select": "import the styled versions"
+            }
+          }
+        }
+      }
+    }
+  }
 }

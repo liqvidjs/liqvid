@@ -4,7 +4,7 @@ import { Duration, type DurationLike } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import classNames from "classnames";
-import { type JSX, useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { isInteractiveElement } from "./utils";
 

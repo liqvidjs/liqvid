@@ -12,9 +12,9 @@ import {
   listScreenshots,
 } from "../client.mts";
 import {
+  DialogBackdrop,
   DialogClose,
-  DialogContent,
-  DialogOverlay,
+  DialogPopup,
   DialogPortal,
   DialogRoot,
   DialogTitle,
@@ -118,10 +118,8 @@ export function ScreenshotsSection({
         <DialogRoot>
           <div className={shareStyles.sectionHeader}>
             <h3>Screenshots</h3>
-            <DialogTrigger asChild>
-              <button className={shareStyles.addButton} type="button">
-                <PlusIcon size={16} /> Add
-              </button>
+            <DialogTrigger className={shareStyles.addButton}>
+              <PlusIcon size={16} /> Add
             </DialogTrigger>
           </div>
           <ScreenshotModal
@@ -214,8 +212,8 @@ export function ScreenshotsSection({
         open={!!confirmDialog}
       >
         <DialogPortal>
-          <DialogOverlay className={styles.dialogOverlay} />
-          <DialogContent className={styles.dialog}>
+          <DialogBackdrop className={styles.dialogOverlay} />
+          <DialogPopup className={styles.dialog}>
             <DialogTitle className={styles.dialogTitle}>
               Confirm Overwrite
             </DialogTitle>
@@ -249,7 +247,7 @@ export function ScreenshotsSection({
                 Replace
               </button>
             </div>
-          </DialogContent>
+          </DialogPopup>
         </DialogPortal>
       </DialogRoot>
     </>

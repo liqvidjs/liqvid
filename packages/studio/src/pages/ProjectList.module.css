@@ -8,7 +8,6 @@
     align-items: center;
     border-radius: 4px;
     border: 1px solid light-dark(#eee, #333);
-    font-size: 1rem;
 
     > :link {
       display: flex;
@@ -40,7 +39,7 @@
 
   /* text */
   color: #fff;
-  font-size: 10px;
+  font-size: var(--lvs-text-xs);
   line-height: 1;
 }
 
@@ -129,7 +128,6 @@
   border: none;
   cursor: pointer;
   display: flex;
-  font-size: 0.875rem;
   font-weight: 500;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
@@ -161,7 +159,6 @@
   background: light-dark(#e5e7eb, #4b5563);
   border-radius: 9999px;
   color: light-dark(#374151, #d1d5db);
-  font-size: 0.75rem;
   font-weight: 500;
   padding: 0.125rem 0.5rem;
 }

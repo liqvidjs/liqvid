@@ -2,12 +2,9 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import classNames from "classnames";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
-  Children,
-  cloneElement,
   createContext,
-  isValidElement,
   useCallback,
   useContext,
   useMemo,
@@ -89,44 +86,16 @@ export function DialogRoot({
   );
 }
 
-interface DialogCloseProps
-  extends Omit<React.ComponentProps<typeof Dialog.Close>, "render"> {
-  asChild?: boolean;
-}
-
 export function DialogClose({
-  asChild,
-  children,
   className,
   ...props
-}: DialogCloseProps) {
-  const combinedClassName = classNames(styles.Close, className);
-
-  if (asChild && isValidElement(children)) {
-    return (
-      <Dialog.Close
-        {...props}
-        render={(renderProps) => {
-          const child = Children.only(children) as ReactElement<{
-            className?: string;
-          }>;
-          return cloneElement(child, {
-            ...renderProps,
-            className: classNames(combinedClassName, child.props.className),
-          });
-        }}
-      />
-    );
-  }
-
+}: React.ComponentProps<typeof Dialog.Close>) {
   return (
-    <Dialog.Close className={combinedClassName} {...props}>
-      {children}
-    </Dialog.Close>
+    <Dialog.Close className={classNames(styles.Close, className)} {...props} />
   );
 }
 
-export function DialogContent({
+export function DialogPopup({
   className,
   ...props
 }: React.ComponentProps<typeof Dialog.Popup>) {
@@ -144,13 +113,13 @@ export function DialogPortal(
   return <Dialog.Portal {...props} />;
 }
 
-export function DialogOverlay({
+export function DialogBackdrop({
   className,
   ...props
 }: React.ComponentProps<typeof Dialog.Backdrop>) {
   return (
     <Dialog.Backdrop
-      className={classNames(styles.Overlay, className)}
+      className={classNames(styles.Backdrop, className)}
       {...props}
     />
   );
@@ -165,39 +134,14 @@ export function DialogTitle({
   );
 }
 
-interface DialogTriggerProps
-  extends Omit<React.ComponentProps<typeof Dialog.Trigger>, "render"> {
-  asChild?: boolean;
-}
-
 export function DialogTrigger({
-  asChild,
-  children,
   className,
   ...props
-}: DialogTriggerProps) {
-  const combinedClassName = classNames(styles.Trigger, className);
-
-  if (asChild && isValidElement(children)) {
-    return (
-      <Dialog.Trigger
-        {...props}
-        render={(renderProps) => {
-          const child = Children.only(children) as ReactElement<{
-            className?: string;
-          }>;
-          return cloneElement(child, {
-            ...renderProps,
-            className: classNames(combinedClassName, child.props.className),
-          });
-        }}
-      />
-    );
-  }
-
+}: React.ComponentProps<typeof Dialog.Trigger>) {
   return (
-    <Dialog.Trigger className={combinedClassName} {...props}>
-      {children}
-    </Dialog.Trigger>
+    <Dialog.Trigger
+      className={classNames(styles.Trigger, className)}
+      {...props}
+    />
   );
 }

@@ -6,9 +6,9 @@ import { ShareFatIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import {
+  DialogBackdrop,
   DialogClose,
-  DialogContent,
-  DialogOverlay,
+  DialogPopup,
   DialogPortal,
   DialogRoot,
   DialogTitle,
@@ -37,18 +37,16 @@ export function ShareButton({
 
   return (
     <DialogRoot onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
-        <button
-          className={styles.rebuildButton}
-          title="Share options"
-          type="button"
-        >
-          <ShareFatIcon size={16} weight="fill" />
-        </button>
+      <DialogTrigger
+        className={styles.rebuildButton}
+        title="Share options"
+        type="button"
+      >
+        <ShareFatIcon size={16} weight="fill" />
       </DialogTrigger>
       <DialogPortal>
-        <DialogOverlay className={styles.dialogOverlay} />
-        <DialogContent
+        <DialogBackdrop className={styles.dialogOverlay} />
+        <DialogPopup
           aria-describedby={undefined}
           className={`${styles.dialog} ${shareStyles.shareDialog}`}
         >
@@ -72,7 +70,7 @@ export function ShareButton({
               </button>
             </DialogClose>
           </div>
-        </DialogContent>
+        </DialogPopup>
       </DialogPortal>
     </DialogRoot>
   );
