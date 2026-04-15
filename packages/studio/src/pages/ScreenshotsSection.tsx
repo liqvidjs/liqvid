@@ -212,11 +212,9 @@ export function ScreenshotsSection({
         open={!!confirmDialog}
       >
         <DialogPortal>
-          <DialogBackdrop className={styles.dialogOverlay} />
-          <DialogPopup className={styles.dialog}>
-            <DialogTitle className={styles.dialogTitle}>
-              Confirm Overwrite
-            </DialogTitle>
+          <DialogBackdrop />
+          <DialogPopup>
+            <DialogTitle>Confirm Overwrite</DialogTitle>
             <p className={shareStyles.confirmMessage}>
               The file{" "}
               <code className={shareStyles.filename}>
@@ -225,11 +223,7 @@ export function ScreenshotsSection({
               already exists. Do you want to replace it?
             </p>
             <div className={styles.dialogActions}>
-              <DialogClose asChild>
-                <button className={styles.cancelButton} type="button">
-                  Cancel
-                </button>
-              </DialogClose>
+              <DialogClose>Cancel</DialogClose>
               <button
                 className={styles.submitButton}
                 onClick={() => {

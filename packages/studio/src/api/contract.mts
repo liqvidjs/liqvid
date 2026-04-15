@@ -261,3 +261,53 @@ export const renameRenderOperation = {
     projectPath: z.string(),
   }),
 };
+
+/**
+ * Transcript entry with word and timing information.
+ * Format: [word, startTimeMs, endTimeMs]
+ */
+export const TranscriptEntry = z.tuple([
+  z.string(),
+  z.number(),
+  z.number(),
+]);
+export type TranscriptEntry = z.infer<typeof TranscriptEntry>;
+
+/**
+ * Captions metadata.
+ */
+export const CaptionsMeta = z.object({
+  /** Path to the captions.vtt file */
+  captionsPath: z.string(),
+  /** Timestamp when captions were generated */
+  createdAt: z.string(),
+  /** Generation status */
+  status: z.enum(["pending", "generating", "completed", "failed"]),
+  /** Path to the transcript.json file */
+  transcriptPath: z.string().optional(),
+});
+export type CaptionsMeta = z.infer<typeof CaptionsMeta>;
+
+export const listCaptionsOperation = {
+  endpoint: "/captions" as const,
+  response: CaptionsMeta.nullable(),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const generateCaptionsOperation = {
+  body: z.object({
+    /** Whisper model to use */
+    modelName: z.string().optional(),
+  }),
+  endpoint: "/captions/generate" as const,
+  method: "POST" as const,
+  response: z.object({
+    /** Status of the generation */
+    status: z.enum(["started", "already_generating"]),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};

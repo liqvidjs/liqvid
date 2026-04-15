@@ -1,5 +1,6 @@
 .main {
   color-scheme: light dark;
+  font-size: var(--lvs-text-base);
   margin: 0 auto;
   padding: 8px;
 }
@@ -18,7 +19,6 @@
 
 @media (width >= 1280px) {
   .main {
-    padding: 80px;
     width: 48rem;
   }
 
@@ -139,26 +139,6 @@
   gap: 0.75rem;
   justify-content: flex-end;
   margin-top: 0.5rem;
-}
-
-.cancelButton {
-  background: light-dark(#f3f4f6, #374151);
-  border: 1px solid light-dark(#d1d5db, #4b5563);
-  border-radius: 4px;
-  color: light-dark(#374151, #f3f4f6);
-  cursor: pointer;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.15s;
-
-  &:hover:not(:disabled) {
-    background: light-dark(#e5e7eb, #4b5563);
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
 }
 
 .submitButton {

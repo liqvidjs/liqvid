@@ -101,16 +101,14 @@ export function ScreenshotModal({
 
   return (
     <DialogPortal>
-      <DialogBackdrop className={styles.dialogOverlay} />
+      <DialogBackdrop />
       <DialogPopup
         aria-describedby={undefined}
-        className={`${styles.dialog} ${shareStyles.previewDialog}`}
+        className={shareStyles.previewDialog}
       >
         <div className={shareStyles.previewHeader}>
-          <DialogTitle className={styles.dialogTitle}>
-            Capture Screenshot
-          </DialogTitle>
-          <DialogClose asChild>
+          <DialogTitle>Capture Screenshot</DialogTitle>
+          <DialogClose>
             <button className={shareStyles.closeButton} type="button">
               <XIcon size={20} />
             </button>
@@ -163,11 +161,7 @@ export function ScreenshotModal({
         </div>
 
         <div className={styles.dialogActions}>
-          <DialogClose asChild>
-            <button className={styles.cancelButton} type="button">
-              Cancel
-            </button>
-          </DialogClose>
+          <DialogClose>Cancel</DialogClose>
           <button
             className={styles.submitButton}
             disabled={isCapturing}

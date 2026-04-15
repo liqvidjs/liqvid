@@ -7,7 +7,9 @@ import {
   captureScreenshotOperation,
   checkImageExistsOperation,
   copyScreenshotOperation,
+  generateCaptionsOperation,
   generateThumbsOperation,
+  listCaptionsOperation,
   listRecordingsOperation,
   listRendersOperation,
   listScreenshotsOperation,
@@ -179,3 +181,7 @@ export const startRender = makeFetcher(startRenderOperation);
 export const listRenders = makeFetcher(listRendersOperation);
 
 export const renameRender = makeFetcher(renameRenderOperation);
+
+export const listCaptions = makeFetcher(listCaptionsOperation);
+
+export const generateCaptions = makeFetcher(generateCaptionsOperation);

@@ -99,6 +99,26 @@ export async function openRenderInFinderAction(
 }
 
 /**
+ * Open captions folder in Finder
+ */
+export async function openCaptionsInFinderAction(
+  projectPath: string,
+): Promise<{ success: boolean }> {
+  try {
+    // Validate path to prevent directory traversal
+    if (projectPath.includes("..")) {
+      return { success: false };
+    }
+    const fullPath = path.join(APP_DIR, projectPath, ".liqvid", "captions");
+    await execa("open", [fullPath]);
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to open captions in Finder:", e);
+    return { success: false };
+  }
+}
+
+/**
  * Load all available project templates.
  * Templates are sorted with default first, then alphabetically by name.
  */

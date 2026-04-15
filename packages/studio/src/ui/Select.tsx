@@ -5,30 +5,6 @@ import classNames from "classnames";
 
 import styles from "./Select.module.css";
 
-export function SelectClose({
-  className,
-  ...props
-}: React.ComponentProps<typeof Select.Close>) {
-  return (
-    <Select.Close className={classNames(styles.Close, className)} {...props} />
-  );
-}
-
-export function SelectPopup({
-  className,
-  ...props
-}: React.ComponentProps<typeof Select.Popup>) {
-  return (
-    <Select.Popup className={classNames(styles.Popup, className)} {...props} />
-  );
-}
-
-export function SelectPortal(
-  props: React.ComponentProps<typeof Select.Portal>,
-) {
-  return <Select.Portal {...props} />;
-}
-
 export function SelectBackdrop({
   className,
   ...props
@@ -40,6 +16,7 @@ export function SelectBackdrop({
     />
   );
 }
+
 export function SelectIcon({
   className,
   ...props
@@ -77,6 +54,21 @@ export function SelectList({
   return (
     <Select.List className={classNames(styles.List, className)} {...props} />
   );
+}
+
+export function SelectPopup({
+  className,
+  ...props
+}: React.ComponentProps<typeof Select.Popup>) {
+  return (
+    <Select.Popup className={classNames(styles.Popup, className)} {...props} />
+  );
+}
+
+export function SelectPortal(
+  props: React.ComponentProps<typeof Select.Portal>,
+) {
+  return <Select.Portal {...props} />;
 }
 
 export function SelectTrigger({

@@ -5,7 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
 import {
+  generateCaptionsOperation,
   generateThumbsOperation,
+  listCaptionsOperation,
   listRecordingsOperation,
   listRendersOperation,
   listThumbsOperation,
@@ -15,6 +17,7 @@ import {
   startRenderOperation,
   staticFileOperation,
 } from "../api/contract.mts";
+import { generateCaptions, listCaptions } from "../api/captions.mts";
 import { setProjectMeta } from "../api/project-meta.mts";
 import { listRecordings, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";
@@ -58,6 +61,8 @@ export function getHandler(_dynamicImports: DynamicImports) {
     switch (route) {
       case "/":
         return getRoot();
+      case listCaptionsOperation.endpoint:
+        return listCaptions(searchParams);
       case listRecordingsOperation.endpoint:
         return listRecordings(searchParams);
       case listRendersOperation.endpoint:
@@ -93,6 +98,8 @@ export function postHandler(dynamicImports: DynamicImports) {
     await initializeServer();
 
     switch (route) {
+      case generateCaptionsOperation.endpoint:
+        return generateCaptions(searchParams, await req.json());
       case generateThumbsOperation.endpoint:
         return generateThumbs(searchParams, await req.json());
       case setProjectMetaOperation.endpoint:
