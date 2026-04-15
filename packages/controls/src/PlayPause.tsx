@@ -2,9 +2,9 @@
 
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { onClickReact, useForceUpdate } from "@liqvid/utils";
+import { useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback } from "react";
 
 import { convertShortcuts } from "./utils";
 
@@ -33,22 +33,12 @@ export function PlayPause({
   usePlaybackEvent("seeking", forceUpdate);
   usePlaybackEvent("stop", forceUpdate);
 
-  useEffect(() => {
-    setTimeout(() => {
-      console.log("cow");
-    }, 100);
-  });
-
   // keyboard controls
   const toggle = useCallback(() => {
-    console.log("click");
     return playback[playback.paused ? "play" : "pause"]();
   }, [playback]);
 
   useKeyboardShortcut(shortcuts, toggle);
-
-  // event handler
-  const events = useMemo(() => onClickReact(toggle), [toggle]);
 
   return render(
     { paused: playback.paused, seeking: playback.seeking },
@@ -59,9 +49,6 @@ export function PlayPause({
         className,
       ),
       onClick: toggle,
-      onTouchStart: (e) => console.log("touchstart", e),
-      style: { backgroundColor: "red !important", fill: "blue" },
-      ...events,
     },
   );
 }

@@ -1,8 +1,10 @@
-import fs, {promises as fsp} from "fs";
-import {IamAuthenticator} from "ibm-watson/auth";
+import fs, { promises as fsp } from "node:fs";
+import path from "node:path";
+
+import { IamAuthenticator } from "ibm-watson/auth";
 import SpeechToTextV1 from "ibm-watson/speech-to-text/v1";
-import path from "path";
-import {toWebVTT} from "./webvtt";
+
+import { toWebVTT } from "./webvtt";
 
 /**
  * Transcript with per-word timings
@@ -48,9 +50,9 @@ export async function transcribe(args: {
     {
       audio: fs.createReadStream(filename),
       contentType: `audio/${extn.slice(1)}`,
+      model: "en-US_BroadbandModel",
 
       objectMode: true,
-      model: "en-US_BroadbandModel",
       profanityFilter: false,
       smartFormatting: true,
       timestamps: true,
@@ -59,7 +61,7 @@ export async function transcribe(args: {
   );
 
   // transcribe
-  const {result: json} = await speechToText.recognize(params);
+  const { result: json } = await speechToText.recognize(params);
   await fsp.writeFile(args.transcript, JSON.stringify(json, null, 2));
 
   // format
