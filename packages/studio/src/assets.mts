@@ -29,7 +29,11 @@ export class DirectoryHelper<
   DS extends string,
   TemplateVars extends string = string,
 > {
-  constructor(private dirname = "") {}
+  private dirname: string;
+
+  constructor(dirname = "") {
+    this.dirname = dirname.replace(/\/$/, "");
+  }
 
   /** get a new DirectoryHelper for a subdirectory */
   dir<D extends Dirs<DS>>(
