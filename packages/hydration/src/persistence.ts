@@ -14,24 +14,30 @@ export type PersistentConfig = {
 export function usePersist<C extends LocalValueConfig>(
   storage: C,
   { disabled = false }: PersistentConfig = {},
-): [get: () => ArgType<C> | null, set: (value: ArgType<C>) => void] {
+): [
+  get: () =>
+    | ArgType<C>
+    | (C["default"] extends undefined ? null : C["default"]),
+  set: (value: ArgType<C>) => void,
+] {
   type T = ArgType<C>;
   const [cookies] = useState(() => new Cookies(null));
 
   return useMemo(() => {
     // quit if disabled
     if (disabled) {
-      return [() => null, (_value) => {}];
+      return [() => (storage.default ?? null) as T, (_value) => {}];
     }
 
     // do nothing on server
     if (!isClient) {
-      return [() => (storage.default as T) ?? null, (_value: T) => {}];
+      return [() => (storage.default ?? null) as T, (_value: T) => {}];
     }
 
     /** parse raw value retrieved from storage */
-    const parse = (value: string | null): ArgType<C> | null => {
-      if (value === null) return (storage.default as T) ?? null;
+    // biome-ignore lint/suspicious/noExplicitAny: types got too complex
+    const parse = (value: string | null): any => {
+      if (value === null) return (storage.default ?? null) as T;
 
       switch (storage.type) {
         case "boolean":

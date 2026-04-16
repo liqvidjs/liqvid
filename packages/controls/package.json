@@ -41,6 +41,7 @@
     "@liqvid/color-scheme": "workspace:^1.0.0-alpha.0",
     "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.2",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/player": "workspace:^1.0.0-alpha.0",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
