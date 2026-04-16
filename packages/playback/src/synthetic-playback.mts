@@ -2,10 +2,15 @@ import { EventEmitter } from "@liqvid/event-emitter";
 import { isClient } from "@liqvid/ssr";
 import { bind, constrain } from "@liqvid/utils";
 
+import {
+  SyntheticTextTrack,
+  SyntheticTextTrackList,
+  type TextTrackKind,
+} from "./text-track.mts";
+
 export type PlaybackEvent =
   | "audiocontextchange"
   | "bufferupdate"
-  | "cuechange"
   | "durationchange"
   | "pause"
   | "play"
@@ -41,12 +46,17 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
   /** Flag indicating whether playback is currently paused. */
   paused = true;
 
+  /**
+   * The list of text tracks associated with this playback.
+   * Behaves like {@link HTMLMediaElement.textTracks}.
+   */
+  readonly textTracks: SyntheticTextTrackList;
+
   /* private fields */
   private __playingFromMs = 0;
   private __startTimeMs = performance.now();
 
   /* private fields exposed by getters */
-  private __captions: DocumentFragment[] = [];
   private __currentTimeMs = 0;
   private __durationMs = 0;
   private __muted = false;
@@ -56,6 +66,9 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
 
   constructor() {
     super();
+
+    // initialize text tracks
+    this.textTracks = new SyntheticTextTrackList();
 
     // bind methods
     bind(this, ["pause", "play"]);
@@ -73,18 +86,6 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
 
   /* magic properties */
 
-  /** Gets or sets the current captions */
-  get captions(): DocumentFragment[] {
-    return this.__captions;
-  }
-
-  /** @emits cuechange */
-  set captions(captions: DocumentFragment[]) {
-    this.__captions = captions;
-
-    this.__emit("cuechange");
-  }
-
   get currentTime() {
     return this.__currentTimeMs / 1000;
   }
@@ -99,6 +100,9 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__emit("seeking");
     this.__emit("timeupdate");
     this.__emit("seeked");
+
+    // Update text tracks after seek
+    this.__updateTextTracks();
 
     if (this.currentTime >= this.duration) {
       this.stop();
@@ -240,10 +244,41 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__emit("stop");
   }
 
+  /**
+   * Add a new text track to the playback.
+   * Behaves like {@link HTMLMediaElement.addTextTrack}.
+   *
+   * @param kind - The kind of text track (subtitles, captions, etc.)
+   * @param label - A human-readable label for the track
+   * @param language - The BCP 47 language tag for the track
+   * @returns The newly created text track
+   */
+  addTextTrack(
+    kind: TextTrackKind,
+    label?: string,
+    language?: string,
+  ): SyntheticTextTrack {
+    const track = new SyntheticTextTrack(kind, label ?? "", language ?? "");
+    this.textTracks.__add(track);
+    return track;
+  }
+
+  /**
+   * Remove a text track from the playback.
+   * Note: This method is not part of the standard HTMLMediaElement API,
+   * but is provided for convenience.
+   *
+   * @param track - The track to remove
+   */
+  removeTextTrack(track: SyntheticTextTrack): void {
+    this.textTracks.__remove(track);
+  }
+
   /* private methods */
 
   /**
    * @emits timeupdate
+   * @emits cuechange
    */
   private __advance(t: number): void {
     // paused
@@ -261,9 +296,34 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
       }
 
       this.__emit("timeupdate");
+
+      // Update active cues on text tracks
+      this.__updateTextTracks();
     }
 
     requestAnimationFrame(this.__advance);
+  }
+
+  /**
+   * Update active cues on all text tracks and emit cuechange if needed.
+   * @emits cuechange
+   */
+  private __updateTextTracks(): void {
+    const currentTime = this.currentTime;
+    let anyChanged = false;
+
+    for (const track of this.textTracks) {
+      if (track.mode !== "disabled") {
+        const changed = track.__updateActiveCues(currentTime);
+        if (changed) {
+          anyChanged = true;
+        }
+      }
+    }
+
+    if (anyChanged) {
+      this.__emit("cuechange");
+    }
   }
 
   /**
