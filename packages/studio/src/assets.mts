@@ -38,8 +38,14 @@ export class DirectoryHelper<
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
   }
 
+  /** fetch a JSON file */
+  async fetch<T>(filename: Files<DS>, version?: string): Promise<T> {
+    const res = await fetch(this.file(filename, version));
+    return await res.json();
+  }
+
   /** get the fully qualified name of a file */
-  file(filename: Files<DS>, _version?: string): string {
+  file(filename: Files<DS>, _version?: string) {
     return `${this.dirname}/${filename}`;
   }
 
