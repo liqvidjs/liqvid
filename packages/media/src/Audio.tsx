@@ -11,7 +11,7 @@ import {
   useRef,
 } from "react";
 
-export interface AudioProps {
+export type AudioProps = {
   children?: React.ReactNode;
 
   /** URL to the audio file. If not provided, will search children for <source> elements. */
@@ -19,7 +19,7 @@ export interface AudioProps {
 
   /** Offset in seconds at which to start the audio file */
   start?: number | DurationLike;
-}
+};
 
 /**
  * Detect if the browser is Safari (which only supports mp4, not webm)
