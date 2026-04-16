@@ -45,7 +45,7 @@ export class MarkerRecorder extends BaseRecorder<
     this.script.addEventListener("markerupdate", this.onMarkerUpdate);
   }
 
-  endRecording() {
+  override endRecording() {
     if (!this.script) {
       throw new Error("must call configure() with script");
     }

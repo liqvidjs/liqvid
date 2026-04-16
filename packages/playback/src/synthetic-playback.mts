@@ -305,24 +305,16 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
   }
 
   /**
-   * Update active cues on all text tracks and emit cuechange if needed.
+   * Update active cues on all text tracks.
    * @emits cuechange
    */
   private __updateTextTracks(): void {
     const currentTime = this.currentTime;
-    let anyChanged = false;
 
     for (const track of this.textTracks) {
       if (track.mode !== "disabled") {
-        const changed = track.__updateActiveCues(currentTime);
-        if (changed) {
-          anyChanged = true;
-        }
+        track.__updateActiveCues(currentTime);
       }
-    }
-
-    if (anyChanged) {
-      this.__emit("cuechange");
     }
   }
 

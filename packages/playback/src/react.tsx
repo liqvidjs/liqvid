@@ -26,12 +26,14 @@ export function PlaybackProvider({
   value,
 }: {
   children?: React.ReactNode;
-  value: Playback;
+  value?: Playback;
 }) {
   const { setDuration } = usePluginApi();
 
   const updateDuration = useCallback(() => {
-    setDuration(value.duration$);
+    if (value) {
+      setDuration(value.duration$);
+    }
   }, [value, setDuration]);
 
   useEffect(() => updateDuration(), [updateDuration]);

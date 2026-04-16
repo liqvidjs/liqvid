@@ -1,4 +1,4 @@
-import { Duration } from "@liqvid/duration";
+import { Duration, type DurationLike } from "@liqvid/duration";
 import { isClient } from "@liqvid/ssr";
 
 import { CorePlayback } from "./synthetic-playback.mts";
@@ -73,8 +73,8 @@ export class Playback extends CorePlayback {
     return this.__$duration;
   }
 
-  set duration$(d: Duration) {
-    this.duration = d.inSeconds();
+  set duration$(d: DurationLike) {
+    this.duration = Duration.from(d).inSeconds();
   }
 
   /**
@@ -231,7 +231,8 @@ export class Playback extends CorePlayback {
 
       for (const anim of this.__animations) {
         const offset =
-          (this.__delays.get(anim.effect!)! - currentTimeMs) / this.playbackRate;
+          (this.__delays.get(anim.effect!)! - currentTimeMs) /
+          this.playbackRate;
         if (this.paused) {
           // anim.startTime = this.timeline.currentTime + offset
           anim.currentTime = -offset;
