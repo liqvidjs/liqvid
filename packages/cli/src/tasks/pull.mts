@@ -13,23 +13,6 @@ import type {
 
 const CONFIG_FILE = "liqvid.json";
 
-/** Default glob patterns for media files (matches schema defaults) */
-const DEFAULT_MEDIA_PATTERNS = [
-  "**/*.gif",
-  "**/*.jpeg",
-  "**/*.jpg",
-  "**/*.m3u8",
-  "**/*.mov",
-  "**/*.mp4",
-  "**/*.png",
-  "**/*.webm",
-  // distinguish Transport Stream files from TypeScript files
-  "**/.liqvid/**/*.ts",
-  "!**/.liqvid/types.ts",
-  "!**/*.d.ts",
-  "!**/*.d.json.ts",
-];
-
 /** File extensions that are considered media files for downloading */
 const MEDIA_EXTENSIONS = new Set([
   ".gif",

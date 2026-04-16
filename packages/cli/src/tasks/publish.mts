@@ -27,9 +27,7 @@ const DEFAULT_MEDIA_PATTERNS = [
   "**/*.mp4",
   "**/*.png",
   "**/*.webm",
-  // omit social share images handled by Next
-  // "!**/opengraph-image.*",
-  // "!**/twitter-image.*",
+  "**/.liqvid/**/*",
   // distinguish Transport Stream files from TypeScript files
   "**/.liqvid/**/*.ts",
   "!**/.liqvid/types.ts",
@@ -88,7 +86,8 @@ export const publish: CommandModule = {
       })
       .version(false),
   command: "publish",
-  describe: "Publish content and/or media files to configured hosting providers",
+  describe:
+    "Publish content and/or media files to configured hosting providers",
   handler: async (argv) => {
     const cwd = argv.cwd as string;
     const baseDir = argv["base-dir"] as string;
@@ -98,8 +97,10 @@ export const publish: CommandModule = {
     const configPath = (argv.config as string) ?? path.join(cwd, CONFIG_FILE);
 
     // If neither --content nor --media is specified, publish both
-    const shouldPublishContent = publishContent || (!publishContent && !publishMedia);
-    const shouldPublishMedia = publishMedia || (!publishContent && !publishMedia);
+    const shouldPublishContent =
+      publishContent || (!publishContent && !publishMedia);
+    const shouldPublishMedia =
+      publishMedia || (!publishContent && !publishMedia);
 
     // The base directory is where we search for media files
     // and paths are computed relative to it
@@ -356,40 +357,6 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
     default:
       throw new Error(`Unsupported content provider: ${contentBackend}`);
   }
-}
-
-/** File extensions that are considered media files for publishing */
-const MEDIA_EXTENSIONS = new Set([
-  ".gif",
-  ".jpeg",
-  ".jpg",
-  ".m3u8",
-  ".mp4",
-  ".png",
-  ".ts",
-  ".webm",
-]);
-
-/**
- * Check if a file is a media file based on its extension.
- * Note: .ts is for HLS Transport Stream files, not TypeScript.
- * TypeScript files (.d.ts, .d.json.ts, types.ts) are explicitly excluded.
- */
-function isMediaFile(filePath: string): boolean {
-  const lowerPath = filePath.toLowerCase();
-  const basename = path.basename(lowerPath);
-
-  // Exclude TypeScript files
-  if (
-    lowerPath.endsWith(".d.ts") ||
-    lowerPath.endsWith(".d.json.ts") ||
-    basename === "types.ts"
-  ) {
-    return false;
-  }
-
-  const ext = path.extname(lowerPath);
-  return MEDIA_EXTENSIONS.has(ext);
 }
 
 /**
