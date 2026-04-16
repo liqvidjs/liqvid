@@ -1,10 +1,26 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import type { WhisperConfig } from "@liqvid/schemas/liqvid-config";
+import { Duration } from "@liqvid/duration";
+import type {
+  WhisperConfig,
+  WhisperModelName,
+} from "@liqvid/schemas/liqvid-config";
 import type { CommandModule } from "yargs";
 
-import { DEFAULT_CONFIG, parseConfig } from "./config.mts";
+import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
+
+/**
+ * Options from `captioning.nodeWhisperOptions` in the config file.
+ * These match the nodejs-whisper option names.
+ */
+interface NodeWhisperOptions {
+  autoDownloadModelName?: string;
+  modelName?: string;
+  modelRootPath?: string;
+  timestamps_length?: number;
+  withCuda?: boolean;
+}
 
 /**
  * Transcript entry with word and timing information.
@@ -70,7 +86,7 @@ function parseVttTimestamp(timestamp: string): number {
     seconds = Number.parseFloat(parts[1]);
   }
 
-  return Math.round((hours * 3600 + minutes * 60 + seconds) * 1000);
+  return Math.round(new Duration({ hours, minutes, seconds }).inMilliseconds());
 }
 
 /**
@@ -197,10 +213,29 @@ export async function transcribe(
   };
 }
 
+/**
+ * Transform nodeWhisperOptions from config file to CLI option names.
+ */
+function transformNodeWhisperOptions(
+  config: NodeWhisperOptions,
+): Record<string, unknown> {
+  return {
+    cuda: config.withCuda,
+    model: config.modelName,
+    "model-path": config.modelRootPath,
+  };
+}
+
 export const transcribeCommand: CommandModule = {
   builder: (yargs) =>
     yargs
-      .config("config", parseConfig("transcribe"))
+      .config(
+        "config",
+        parseConfigWithTransform(
+          ["captioning", "nodeWhisperOptions"],
+          transformNodeWhisperOptions,
+        ),
+      )
       .default("config", DEFAULT_CONFIG)
       .example([
         ["liqvid transcribe -i ./audio.webm -o ./captions"],
@@ -248,7 +283,7 @@ export const transcribeCommand: CommandModule = {
       audioFile: argv.input as string,
       outputDir: argv.output as string,
       whisperConfig: {
-        modelName: argv.model as string,
+        modelName: argv.model as WhisperModelName,
         modelRootPath: argv["model-path"] as string | undefined,
         translateToEnglish: argv.translate as boolean,
         withCuda: argv.cuda as boolean,

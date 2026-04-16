@@ -6,7 +6,10 @@ import { LiqvidConfig } from "@liqvid/schemas";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
+import { CopyProvider } from "../providers/hosting/copy.mts";
+import { LiqvidStudioProvider } from "../providers/hosting/liqvid-studio.mts";
 import { S3Provider } from "../providers/hosting/s3.mts";
+import { SFTPProvider } from "../providers/hosting/sftp.mts";
 import type { MediaHostingProvider } from "../providers/types.mts";
 
 const CONFIG_FILE = "liqvid.json";
@@ -81,22 +84,39 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig | null> {
 }
 
 /**
- * Get the media base URL from the config
+ * Get the media provider from the config
  */
 function getMediaProvider(config: LiqvidConfig): MediaHostingProvider | null {
   switch (config.backend.media) {
+    case "copy": {
+      const copyConfig = config.providers.copy;
+      if (!copyConfig) {
+        return null;
+      }
+      return new CopyProvider(copyConfig);
+    }
+    case "liqvidStudio": {
+      const liqvidStudioConfig = config.providers.liqvidStudio;
+      if (!liqvidStudioConfig) {
+        return null;
+      }
+      return new LiqvidStudioProvider(liqvidStudioConfig);
+    }
     case "s3": {
       const s3Config = config.providers.s3;
       if (!s3Config) {
         return null;
       }
-
       return new S3Provider(s3Config);
     }
+    case "sftp": {
+      const sftpConfig = config.providers.sftp;
+      if (!sftpConfig) {
+        return null;
+      }
+      return new SFTPProvider(sftpConfig);
+    }
   }
-
-  // TODO: Support other backends (sftp, liqvidStudio)
-  return null;
 }
 
 /**

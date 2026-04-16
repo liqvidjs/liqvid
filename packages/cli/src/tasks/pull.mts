@@ -6,7 +6,10 @@ import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
 import { S3Provider } from "../providers/hosting/s3.mts";
-import type { FileDownloadStatus, RemoteFileInfo } from "../providers/types.mts";
+import type {
+  FileDownloadStatus,
+  RemoteFileInfo,
+} from "../providers/types.mts";
 
 const CONFIG_FILE = "liqvid.json";
 
@@ -115,7 +118,9 @@ export const pull: CommandModule = {
     // Create provider based on config
     const provider = createProvider(config);
 
-    console.log(`Listing remote files from s3://${config.providers.s3?.bucket ?? "bucket"}...`);
+    console.log(
+      `Listing remote files from s3://${config.providers.s3?.bucket ?? "bucket"}...`,
+    );
 
     // List all remote files
     const remoteFiles = await provider.listRemoteFiles();
