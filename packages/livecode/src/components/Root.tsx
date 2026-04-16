@@ -37,6 +37,14 @@ export function LiveCode({
       provideRecorder(recorder) {
         store.setState((prev) => ({ ...prev, recorder }));
         recorder?.configure({
+          getActiveFile() {
+            const { activeGroup, groups } = store.getState();
+            if (!activeGroup) {
+              return undefined;
+            }
+
+            return groups[activeGroup]?.activeFile;
+          },
           views: new Proxy(store, storeProxyHandler) as unknown as Record<
             string,
             EditorView
