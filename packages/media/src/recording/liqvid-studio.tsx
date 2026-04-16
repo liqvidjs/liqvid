@@ -212,15 +212,24 @@ function ConfigurationComponent() {
 
 function RecordingComponent({ name }: RecordingComponentProps) {
   const { makeToast } = usePluginApi();
-  const prefix = `.liqvid/recordings/${name}/${packageNameToDirName(MediaRecording.package)}`;
   const onClick = async () => {
     try {
       await navigator.clipboard.writeText(
-        `const projectFiles = useProjectFiles();
+        `const recordings = useRecordings();
 
 <Audio>
-  <source src={projectFiles.file(${JSON.stringify(prefix + "/audio.webm")})} type="audio/webm" />
-  <source src={projectFiles.file(${JSON.stringify(prefix + "/audio.mp4")})} type="audio/mp4" />
+  <source
+    src={recordings
+      .dir(${JSON.stringify(name)})
+      .dir(${JSON.stringify(packageNameToDirName(MediaRecording.package))})
+      .file("audio.webm")}
+    type="audio/webm" />
+  <source
+    src={recordings
+      .dir(${JSON.stringify(name)})
+      .dir(${JSON.stringify(packageNameToDirName(MediaRecording.package))})
+      .file("audio.mp4")}
+    type="audio/mp4" />
 </Audio>
 `,
       );

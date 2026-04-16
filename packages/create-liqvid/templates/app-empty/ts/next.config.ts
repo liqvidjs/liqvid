@@ -41,6 +41,8 @@ const developmentConfig: NextConfig = {
 const productionConfig: NextConfig = {
 	// the typical use-case for Liqvid is exporting a static site
 	output: "export",
+
+  trailingSlash: true,
 };
 
 const nextConfig: NextConfig = {
