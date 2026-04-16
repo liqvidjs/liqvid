@@ -21,6 +21,7 @@ export const ASSETS_DIRNAME = ".liqvid";
 const EXCLUDE_PATTERNS = [
   "project.json",
   /\.(css|js|jsx|ts|tsx)$/,
+  /\.d.json.ts$/,
   /^opengraph-image\./,
   /^twitter-image\./,
 ];
