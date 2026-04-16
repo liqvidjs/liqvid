@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  ProviderConfigCopy,
   ProviderConfigGitHubPages,
   ProviderConfigLiqvidStudio,
   ProviderConfigS3,
@@ -82,23 +83,27 @@ export const LiqvidConfig = z.object({
     /**
      * Provider hosting your content files (html/css/js)
      */
-    content: z.enum(["githubPages", "liqvidStudio", "s3", "sftp"]),
+    content: z.enum(["copy", "githubPages", "liqvidStudio", "s3", "sftp"]),
 
     /**
      * Provider hosting your media files (audio, video, and thumbnails)
      */
-    media: z.enum(["liqvidStudio", "s3", "sftp"]),
+    media: z.enum(["copy", "liqvidStudio", "s3", "sftp"]),
   }),
 
-  /** Whisper transcription configuration */
-  whisper: WhisperConfig.optional(),
+  captioning: z
+    .object({
+      nodeWhisperOptions: WhisperConfig.optional(),
+    })
+    .optional(),
 
   providers: z.object({
     // social
     bluesky: ProviderConfigBlueSky.optional(),
-    facebook: ProviderConfigFacebook.optional(),
 
     // hosting
+    copy: ProviderConfigCopy.optional(),
+    facebook: ProviderConfigFacebook.optional(),
     githubPages: ProviderConfigGitHubPages.optional(),
     instagram: ProviderConfigInstagram.optional(),
     liqvidStudio: ProviderConfigLiqvidStudio.optional(),
@@ -148,5 +153,8 @@ export const LiqvidConfig = z.object({
         .optional(),
     })
     .optional(),
+
+  /** Whisper transcription configuration */
+  whisper: WhisperConfig.optional(),
 });
 export type LiqvidConfig = z.infer<typeof LiqvidConfig>;

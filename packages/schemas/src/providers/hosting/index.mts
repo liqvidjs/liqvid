@@ -1,3 +1,4 @@
+export { CopyDestination, ProviderConfigCopy } from "./copy.mts";
 export { ProviderConfigGitHubPages } from "./github-pages.mts";
 export { ProviderConfigLiqvidStudio } from "./liqvid-studio.mts";
 export {

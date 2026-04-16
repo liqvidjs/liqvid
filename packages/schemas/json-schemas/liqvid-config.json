@@ -11,6 +11,7 @@
         "content": {
           "type": "string",
           "enum": [
+            "copy",
             "githubPages",
             "liqvidStudio",
             "s3",
@@ -20,6 +21,7 @@
         "media": {
           "type": "string",
           "enum": [
+            "copy",
             "liqvidStudio",
             "s3",
             "sftp"
@@ -39,17 +41,48 @@
           "type": "object",
           "properties": {
             "autoDownloadModelName": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "tiny",
+                "tiny.en",
+                "base",
+                "base.en",
+                "small",
+                "small.en",
+                "medium",
+                "medium.en",
+                "large-v1",
+                "large",
+                "large-v3-turbo"
+              ]
             },
             "modelName": {
-              "type": "string"
+              "default": "base.en",
+              "type": "string",
+              "enum": [
+                "tiny",
+                "tiny.en",
+                "base",
+                "base.en",
+                "small",
+                "small.en",
+                "medium",
+                "medium.en",
+                "large-v1",
+                "large",
+                "large-v3-turbo"
+              ]
             },
             "modelRootPath": {
               "type": "string"
             },
-            "timestamps_length": {
+            "timestampsLength": {
               "default": 20,
               "type": "number"
+            },
+            "translateToEnglish": {
+              "default": false,
+              "type": "boolean"
             },
             "withCuda": {
               "default": false,
@@ -57,15 +90,11 @@
             }
           },
           "required": [
-            "modelName",
-            "withCuda"
+            "modelName"
           ],
           "additionalProperties": false
         }
       },
-      "required": [
-        "nodeWhisperOptions"
-      ],
       "additionalProperties": false
     },
     "providers": {
@@ -80,6 +109,42 @@
           },
           "required": [
             "username"
+          ],
+          "additionalProperties": false
+        },
+        "copy": {
+          "type": "object",
+          "properties": {
+            "clean": {
+              "default": false,
+              "type": "boolean"
+            },
+            "destination": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "hosting": {
+                      "type": "string"
+                    },
+                    "media": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "hosting",
+                    "media"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "destination"
           ],
           "additionalProperties": false
         },
@@ -301,11 +366,67 @@
         "delete"
       ],
       "additionalProperties": false
+    },
+    "whisper": {
+      "type": "object",
+      "properties": {
+        "autoDownloadModelName": {
+          "type": "string",
+          "enum": [
+            "tiny",
+            "tiny.en",
+            "base",
+            "base.en",
+            "small",
+            "small.en",
+            "medium",
+            "medium.en",
+            "large-v1",
+            "large",
+            "large-v3-turbo"
+          ]
+        },
+        "modelName": {
+          "default": "base.en",
+          "type": "string",
+          "enum": [
+            "tiny",
+            "tiny.en",
+            "base",
+            "base.en",
+            "small",
+            "small.en",
+            "medium",
+            "medium.en",
+            "large-v1",
+            "large",
+            "large-v3-turbo"
+          ]
+        },
+        "modelRootPath": {
+          "type": "string"
+        },
+        "timestampsLength": {
+          "default": 20,
+          "type": "number"
+        },
+        "translateToEnglish": {
+          "default": false,
+          "type": "boolean"
+        },
+        "withCuda": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "modelName"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
     "backend",
-    "captioning",
     "providers"
   ],
   "additionalProperties": false

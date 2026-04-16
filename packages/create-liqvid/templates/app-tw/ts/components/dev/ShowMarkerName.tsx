@@ -1,7 +1,15 @@
-import { useMarker } from "liqvid";
+import { useMarker, useScriptOptional } from "liqvid";
 
 /** Control to show the name of the current marker. */
 export function ShowMarkerName() {
+	const script = useScriptOptional();
+
+	if (!script) return null;
+
+	return <ShowMarkerNameInner />;
+}
+
+function ShowMarkerNameInner() {
 	const active = useMarker();
 
 	return (
