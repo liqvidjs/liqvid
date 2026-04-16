@@ -366,63 +366,6 @@
         "delete"
       ],
       "additionalProperties": false
-    },
-    "whisper": {
-      "type": "object",
-      "properties": {
-        "autoDownloadModelName": {
-          "type": "string",
-          "enum": [
-            "tiny",
-            "tiny.en",
-            "base",
-            "base.en",
-            "small",
-            "small.en",
-            "medium",
-            "medium.en",
-            "large-v1",
-            "large",
-            "large-v3-turbo"
-          ]
-        },
-        "modelName": {
-          "default": "base.en",
-          "type": "string",
-          "enum": [
-            "tiny",
-            "tiny.en",
-            "base",
-            "base.en",
-            "small",
-            "small.en",
-            "medium",
-            "medium.en",
-            "large-v1",
-            "large",
-            "large-v3-turbo"
-          ]
-        },
-        "modelRootPath": {
-          "type": "string"
-        },
-        "timestampsLength": {
-          "default": 20,
-          "type": "number"
-        },
-        "translateToEnglish": {
-          "default": false,
-          "type": "boolean"
-        },
-        "withCuda": {
-          "default": false,
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "modelName"
-      ],
-      "additionalProperties": false
     }
   },
   "required": [

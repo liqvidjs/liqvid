@@ -153,8 +153,5 @@ export const LiqvidConfig = z.object({
         .optional(),
     })
     .optional(),
-
-  /** Whisper transcription configuration */
-  whisper: WhisperConfig.optional(),
 });
 export type LiqvidConfig = z.infer<typeof LiqvidConfig>;

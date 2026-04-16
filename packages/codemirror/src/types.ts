@@ -6,7 +6,7 @@ export interface CMRange {
 }
 
 export type CMConfig = {
-  getActiveFile(): string;
+  getActiveFile(): string | undefined;
   views: Record<string, EditorView>;
 };
 

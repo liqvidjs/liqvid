@@ -49,11 +49,17 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
       throw new Error("CodeRecorder has not been configured");
     }
 
+    const activeFile = this.__config.getActiveFile();
+
+    if (!activeFile) {
+      throw new Error("no file is active to be recorded");
+    }
+
     super.beginRecording(timestamp);
 
     // capture initial state
     this.initial = {
-      activeFile: this.__config.getActiveFile(),
+      activeFile,
       files: mapRecord(this.__config.views, (view) => {
         const { state } = view;
         return {

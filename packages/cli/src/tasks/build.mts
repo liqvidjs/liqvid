@@ -138,7 +138,6 @@ export async function runNextBuild(options: BuildOptions = {}): Promise<void> {
     if (mediaProvider) {
       const mediaBaseUrl = mediaProvider.getBaseUrl();
       env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
-      console.log(`Setting NEXT_PUBLIC_LIQVID_MEDIA_BASE=${mediaBaseUrl}`);
     }
   }
 
