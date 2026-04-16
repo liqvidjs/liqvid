@@ -2,6 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { transcribe } from "@liqvid/cli/transcribe";
+import type { WhisperModelName } from "@liqvid/schemas/liqvid-config";
 import { StatusCodes } from "http-status-codes";
 
 import type { CaptionsMeta } from "./contract.mts";
@@ -11,10 +12,6 @@ const META_FILE = "meta.json";
 
 /** Track active caption generation jobs */
 const activeJobs = new Set<string>();
-
-interface GenerateCaptionsBody {
-  modelName?: string;
-}
 
 /**
  * Find the first audio.webm file in the .liqvid directory.
@@ -28,11 +25,7 @@ async function findAudioFile(projectDir: string): Promise<string | null> {
     const recordings = await fsp.readdir(recordingsDir);
 
     for (const recording of recordings) {
-      const mediaDir = path.join(
-        recordingsDir,
-        recording,
-        "@liqvid.media",
-      );
+      const mediaDir = path.join(recordingsDir, recording, "@liqvid.media");
       const audioPath = path.join(mediaDir, "audio.webm");
 
       try {
@@ -100,10 +93,7 @@ export async function listCaptions(searchParams: URLSearchParams) {
 /**
  * Generate captions for a project using Whisper.
  */
-export async function generateCaptions(
-  searchParams: URLSearchParams,
-  body: GenerateCaptionsBody,
-) {
+export async function generateCaptions(searchParams: URLSearchParams) {
   const projectPath = searchParams.get("projectPath");
   if (!projectPath) {
     return Response.json(
@@ -151,7 +141,7 @@ export async function generateCaptions(
         const configPath = path.join(projectDir, "liqvid.json");
         const configContent = await fsp.readFile(configPath, "utf8");
         const config = JSON.parse(configContent);
-        whisperConfig = config.whisper ?? {};
+        whisperConfig = config.captioning?.nodeWhisperOptions ?? {};
       } catch {
         // No config file or no whisper config
       }
@@ -160,7 +150,7 @@ export async function generateCaptions(
         audioFile,
         outputDir,
         whisperConfig: {
-          modelName: body.modelName ?? (whisperConfig.modelName as string),
+          modelName: whisperConfig.modelName as WhisperModelName,
           modelRootPath: whisperConfig.modelRootPath as string | undefined,
           translateToEnglish: whisperConfig.translateToEnglish as
             | boolean

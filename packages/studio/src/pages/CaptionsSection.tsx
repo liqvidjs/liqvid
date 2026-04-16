@@ -127,8 +127,7 @@ export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
   };
 
   const isActiveGeneration =
-    captionsMeta?.status === "pending" ||
-    captionsMeta?.status === "generating";
+    captionsMeta?.status === "pending" || captionsMeta?.status === "generating";
 
   return (
     <div className={shareStyles.section}>

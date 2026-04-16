@@ -266,11 +266,7 @@ export const renameRenderOperation = {
  * Transcript entry with word and timing information.
  * Format: [word, startTimeMs, endTimeMs]
  */
-export const TranscriptEntry = z.tuple([
-  z.string(),
-  z.number(),
-  z.number(),
-]);
+export const TranscriptEntry = z.tuple([z.string(), z.number(), z.number()]);
 export type TranscriptEntry = z.infer<typeof TranscriptEntry>;
 
 /**

@@ -39,9 +39,7 @@ function generateRenderId(): string {
 /**
  * Read render metadata from a render directory.
  */
-async function readRenderMeta(
-  renderDir: string,
-): Promise<RenderMeta | null> {
+async function readRenderMeta(renderDir: string): Promise<RenderMeta | null> {
   try {
     const metaPath = path.join(renderDir, RENDER_META_FILE);
     const content = await fsp.readFile(metaPath, "utf-8");
@@ -232,9 +230,7 @@ export async function renameRender(
   }
 
   // Sanitize new name (remove path separators and other invalid characters)
-  const sanitizedName = newName
-    .replace(/[/\\:*?"<>|]/g, "-")
-    .trim();
+  const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
   if (!sanitizedName) {
     return Response.json(

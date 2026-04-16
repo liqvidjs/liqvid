@@ -4,6 +4,7 @@ import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
+import { generateCaptions, listCaptions } from "../api/captions.mts";
 import {
   generateCaptionsOperation,
   generateThumbsOperation,
@@ -17,7 +18,6 @@ import {
   startRenderOperation,
   staticFileOperation,
 } from "../api/contract.mts";
-import { generateCaptions, listCaptions } from "../api/captions.mts";
 import { setProjectMeta } from "../api/project-meta.mts";
 import { listRecordings, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";

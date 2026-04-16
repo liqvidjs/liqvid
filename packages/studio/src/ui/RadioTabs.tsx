@@ -2,8 +2,8 @@
 
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
-import classNames from "classnames";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
+import classNames from "classnames";
 import type { ReactNode } from "react";
 
 import styles from "./RadioTabs.module.css";
