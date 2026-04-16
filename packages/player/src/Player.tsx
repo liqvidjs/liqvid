@@ -5,11 +5,7 @@ import { HydrateElement } from "@liqvid/hydration";
 import { provideIframeApi } from "@liqvid/iframe-api/child";
 import { KeymapProvider } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
-import {
-  usePlayback,
-  usePlaybackEvent,
-  usePlaybackOptional,
-} from "@liqvid/playback/react";
+import { usePlaybackOptional } from "@liqvid/playback/react";
 import { combineRefs } from "@liqvid/utils";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +14,7 @@ import {
   type AspectRatioSpecifier,
   normalizeAspectRatio,
 } from "./aspect-ratio";
+import { Captions, CaptionsDisplay } from "./Captions";
 import { Canvas } from "./Canvas";
 import { Controls } from "./Controls";
 import { PlayerContext, type RenderingTask } from "./hooks";
@@ -169,20 +166,6 @@ export function Root({
       </PlayerContext.Provider>
     </KeymapProvider>
   );
-}
-
-export function Captions({
-  className,
-  children,
-}: { children?: React.ReactNode } & React.HTMLAttributes<HTMLElement>) {
-  const playback = usePlayback();
-
-  usePlaybackEvent(
-    "cuechange",
-    useCallback(({ target }) => {}, [playback]),
-  );
-
-  return <div className="lv-captions-display" ref={domElement} />;
 }
 
 export const Player = { Canvas, Captions, Controls, Root };
