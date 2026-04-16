@@ -9,6 +9,7 @@ import {
   type LiqvidStudioServerPlugin,
   packageNameToDirName,
 } from "@liqvid/studio-plugin-api";
+import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
 import { compare } from "@liqvid/utils";
 import { safeGet } from "have-fun";
 import { StatusCodes } from "http-status-codes";
@@ -89,6 +90,10 @@ interface SaveRecordingMetadata {
   }>;
 }
 
+const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas/recording-meta";
+declare const data: RecordingMeta;
+export default data;`;
+
 /**
  * Save a new recording to disk.
  */
@@ -153,10 +158,14 @@ export async function saveRecording(
       milliseconds: metadata.durationMs,
     },
   };
-  await fsp.writeFile(
-    path.join(recordingDir, RECORDING_META_FILE),
-    JSON.stringify(recordingMeta, null, "\t"),
-  );
+
+  await writeTypedJson({
+    data: recordingMeta,
+    declaration: recordingMetaDeclaration,
+    dirname: recordingDir,
+    filename: RECORDING_META_FILE,
+    pretty: true,
+  });
 
   // Write plugin data
   for (const pluginInfo of metadata.plugins) {

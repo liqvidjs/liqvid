@@ -6,6 +6,10 @@
     ".": {
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
+    },
+    "./server": {
+      "import": "./dist/esm/server.mjs",
+      "types": "./dist/types/server.d.mts"
     }
   },
   "files": [
@@ -33,6 +37,7 @@
     "@biomejs/biome": "catalog:dev",
     "@liqvid/duration": "workspace:",
     "@liqvid/recording": "workspace:",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "typescript": "catalog:dev"
   },
