@@ -1,9 +1,10 @@
 import * as fs from "node:fs";
+import * as http from "node:http";
 import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
 import type { ProjectMeta } from "@liqvid/schemas";
-import { execa } from "execa";
+import handler from "serve-handler";
 
 import { watchAssets } from "./jobs/watch-assets.mts";
 import { watchProjectFiles } from "./jobs/watch-project-files.mts";
@@ -42,6 +43,56 @@ export async function initializeServer() {
   await jobs.watchProjectFiles;
 }
 
+/**
+ * Parse a .env file and return key-value pairs.
+ */
+function parseEnvFile(filePath: string): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      // Skip empty lines and comments
+      if (!trimmed || trimmed.startsWith("#")) {
+        continue;
+      }
+
+      const eqIndex = trimmed.indexOf("=");
+      if (eqIndex === -1) {
+        continue;
+      }
+
+      const key = trimmed.slice(0, eqIndex).trim();
+      let value = trimmed.slice(eqIndex + 1).trim();
+
+      // Remove surrounding quotes if present
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      result[key] = value;
+    }
+  } catch {
+    // File doesn't exist or can't be read, return empty object
+  }
+
+  return result;
+}
+
+/**
+ * Get an environment variable, first checking .env.production, then process.env.
+ */
+function getEnvVar(
+  name: string,
+  envProduction: Record<string, string>,
+): string | undefined {
+  return envProduction[name] ?? process.env[name];
+}
+
 async function startProductionServer(state: LiqvidServerState): Promise<void> {
   const outDir = path.join(process.cwd(), "out");
 
@@ -51,18 +102,25 @@ async function startProductionServer(state: LiqvidServerState): Promise<void> {
     await runNextBuild();
   }
 
+  // Parse .env.production for environment variables
+  const envProductionPath = path.join(process.cwd(), ".env.production");
+  const envProduction = parseEnvFile(envProductionPath);
+
   // Start the production server
   const port =
-    Number(process.env.LIQVID_PRODUCTION_SERVER_PORT) ||
+    Number(getEnvVar("LIQVID_PRODUCTION_SERVER_PORT", envProduction)) ||
     DEFAULT_PRODUCTION_SERVER_PORT;
   state.productionServerPort = port;
 
-  console.log(`Starting production server on port ${port}...`);
-  execa("npx", ["serve", "out", "-p", String(port)], {
-    cwd: process.cwd(),
-    env: { ...process.env, NODE_ENV: "production" },
-    stderr: "inherit",
-    stdout: "inherit",
+  const server = http.createServer((request, response) => {
+    return handler(request, response, {
+      public: outDir,
+      trailingSlash: true,
+    });
+  });
+
+  server.listen(port, () => {
+    console.log(`Production server running on port ${port}...`);
   });
 }
 

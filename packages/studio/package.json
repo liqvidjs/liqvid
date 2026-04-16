@@ -54,7 +54,6 @@
     "have-fun": "catalog:",
     "http-status-codes": "catalog:",
     "lodash.debounce": "catalog:",
-    "serve": "catalog:",
     "universal-cookie": "catalog:",
     "zod": "catalog:"
   },
@@ -65,6 +64,7 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "@types/serve-handler": "catalog:dev",
     "concurrently": "catalog:dev",
     "jest": "catalog:dev",
     "next": "catalog:",
@@ -87,7 +87,8 @@
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "nodejs-whisper": "catalog:peer",
-    "react": "catalog:peer"
+    "react": "catalog:peer",
+    "serve-handler": "^6.1.7"
   },
   "sideEffects": false,
   "type": "module"
