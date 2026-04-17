@@ -241,6 +241,9 @@ catalogs:
     '@types/react-dom':
       specifier: ^19
       version: 19.2.3
+    '@types/serve-handler':
+      specifier: ^6.1.4
+      version: 6.1.4
     '@types/three':
       specifier: '>=0.183'
       version: 0.183.1
@@ -323,6 +326,9 @@ catalogs:
     '@types/react-dom':
       specifier: '>=19'
       version: 19.2.3
+    hls.js:
+      specifier: ^1.6.16
+      version: 1.6.16
     jszip:
       specifier: ^3.10.1
       version: 3.10.1
@@ -530,6 +536,9 @@ importers:
       '@liqvid/duration':
         specifier: workspace:^1.3.0
         version: link:../duration
+      '@liqvid/hydration':
+        specifier: workspace:^1.0.0-alpha.2
+        version: link:../hydration
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../keymap
@@ -1685,6 +1694,283 @@ importers:
         specifier: catalog:dev
         version: 5.9.3
 
+  packages/stem-course:
+    dependencies:
+      '@base-ui/react':
+        specifier: 'catalog:'
+        version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@codemirror/autocomplete':
+        specifier: 'catalog:'
+        version: 6.20.1
+      '@codemirror/lang-css':
+        specifier: 'catalog:'
+        version: 6.3.1
+      '@codemirror/lang-html':
+        specifier: 'catalog:'
+        version: 6.4.11
+      '@codemirror/lang-javascript':
+        specifier: 'catalog:'
+        version: 6.2.5
+      '@codemirror/lang-python':
+        specifier: 'catalog:'
+        version: 6.2.1
+      '@codemirror/language':
+        specifier: 'catalog:'
+        version: 6.12.3
+      '@codemirror/lint':
+        specifier: 'catalog:'
+        version: 6.9.5
+      '@codemirror/state':
+        specifier: 'catalog:'
+        version: 6.6.0
+      '@codemirror/view':
+        specifier: 'catalog:'
+        version: 6.40.0
+      '@dnd-kit/core':
+        specifier: ^6.3.1
+        version: 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@dnd-kit/sortable':
+        specifier: ^10.0.0
+        version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      '@dnd-kit/utilities':
+        specifier: ^3.2.2
+        version: 3.2.2(react@19.2.4)
+      '@fontsource-variable/alegreya':
+        specifier: 'catalog:'
+        version: 5.2.8
+      '@fontsource-variable/inter':
+        specifier: 'catalog:'
+        version: 5.2.8
+      '@juggle/resize-observer':
+        specifier: 'catalog:'
+        version: 3.4.0
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
+      '@liqvid/cli':
+        specifier: workspace:^
+        version: link:../cli
+      '@liqvid/katex':
+        specifier: workspace:^
+        version: link:../katex
+      '@liqvid/mathjax':
+        specifier: workspace:^
+        version: link:../mathjax
+      '@liqvid/media':
+        specifier: workspace:^
+        version: link:../media
+      '@liqvid/prompts':
+        specifier: workspace:^
+        version: link:../prompts
+      '@liqvid/react-three':
+        specifier: workspace:^
+        version: link:../react-three
+      '@liqvid/schemas':
+        specifier: workspace:^
+        version: link:../schemas
+      '@liqvid/script':
+        specifier: workspace:^
+        version: link:../script
+      '@liqvid/studio':
+        specifier: workspace:^
+        version: link:../studio
+      '@liqvid/utils':
+        specifier: workspace:^
+        version: link:../utils
+      '@liqvid/xyjax':
+        specifier: workspace:^
+        version: link:../xyjax
+      '@lqv/codemirror':
+        specifier: workspace:^
+        version: link:../codemirror
+      '@lqv/livecode':
+        specifier: workspace:^
+        version: link:../livecode
+      '@phosphor-icons/react':
+        specifier: 'catalog:'
+        version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-portal':
+        specifier: 'catalog:'
+        version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-slot':
+        specifier: 'catalog:'
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@radix-ui/react-tabs':
+        specifier: 'catalog:'
+        version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@react-three/drei':
+        specifier: 'catalog:'
+        version: 10.7.7(@react-three/fiber@9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2))(@types/react@19.2.14)(@types/three@0.183.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
+      '@react-three/fiber':
+        specifier: 'catalog:'
+        version: 9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
+      '@replit/codemirror-vim':
+        specifier: ^6.3.0
+        version: 6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.40.0)
+      '@tailwindcss/vite':
+        specifier: 'catalog:'
+        version: 4.2.2(vite@7.3.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.32.0)(stylus@0.57.0)(terser@5.44.1)(yaml@2.8.3))
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.95.2(react@19.2.4)
+      chalk:
+        specifier: 'catalog:'
+        version: 5.6.2
+      classnames:
+        specifier: 'catalog:'
+        version: 2.5.1
+      client-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      desmos-react:
+        specifier: 'catalog:'
+        version: 1.2.0(@types/react@19.2.14)(react@19.2.4)(typescript@5.9.3)
+      easings:
+        specifier: 'catalog:'
+        version: 1.1.1
+      hls.js:
+        specifier: catalog:peer
+        version: 1.6.16
+      html-formatter:
+        specifier: ^0.1.9
+        version: 0.1.9
+      html-prettify:
+        specifier: ^1.0.7
+        version: 1.0.7
+      install:
+        specifier: 'catalog:'
+        version: 0.13.0
+      isbot:
+        specifier: ^5.1.35
+        version: 5.1.36
+      jotai:
+        specifier: 'catalog:'
+        version: 2.19.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.2.14)(react@19.2.4)
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
+      katex:
+        specifier: 'catalog:'
+        version: 0.16.39
+      liqvid:
+        specifier: workspace:^
+        version: link:../main
+      mathjax:
+        specifier: 'catalog:'
+        version: 3.2.2
+      next:
+        specifier: 'catalog:'
+        version: 16.2.3(@babel/core@7.28.5)(@playwright/test@1.58.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      nodejs-whisper:
+        specifier: ^0.3.0
+        version: 0.3.0
+      npm:
+        specifier: ^11.10.0
+        version: 11.12.1
+      prettier:
+        specifier: ^3.8.1
+        version: 3.8.1
+      prism-react-renderer:
+        specifier: 'catalog:'
+        version: 2.4.1(react@19.2.4)
+      prismjs:
+        specifier: 'catalog:'
+        version: 1.30.0
+      radix-ui:
+        specifier: 'catalog:'
+        version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      rangetouch:
+        specifier: 'catalog:'
+        version: 2.0.1
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+      react-cookie:
+        specifier: 'catalog:'
+        version: 8.0.1(@types/react@19.2.14)(react@19.2.4)
+      react-dom:
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
+      server-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      skulpt:
+        specifier: 'catalog:'
+        version: 1.2.0
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.5.0
+      three:
+        specifier: 'catalog:'
+        version: 0.183.2
+      three-stdlib:
+        specifier: 'catalog:'
+        version: 2.36.1(three@0.183.2)
+      universal-cookie:
+        specifier: 'catalog:'
+        version: 8.0.1
+      validate-npm-package-name:
+        specifier: 7.0.2
+        version: 7.0.2
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+      zustand:
+        specifier: 'catalog:'
+        version: 5.0.9(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    devDependencies:
+      '@biomejs/biome':
+        specifier: catalog:dev
+        version: 2.4.10
+      '@liqvid/player':
+        specifier: workspace:^
+        version: link:../player
+      '@tailwindcss/postcss':
+        specifier: 'catalog:'
+        version: 4.2.2
+      '@types/katex':
+        specifier: catalog:dev
+        version: 0.16.8
+      '@types/node':
+        specifier: catalog:dev
+        version: 24.10.1
+      '@types/react':
+        specifier: catalog:dev
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: catalog:dev
+        version: 19.2.3(@types/react@19.2.14)
+      '@types/three':
+        specifier: catalog:dev
+        version: 0.183.1
+      autoprefixer:
+        specifier: 'catalog:'
+        version: 10.4.27(postcss@8.5.8)
+      babel-plugin-react-compiler:
+        specifier: ^1.0.0
+        version: 1.0.0
+      no-private-imports:
+        specifier: catalog:dev
+        version: 0.0.1
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.8
+      raw-loader:
+        specifier: ^4.0.2
+        version: 4.0.2(webpack@5.103.0)
+      serve:
+        specifier: 'catalog:'
+        version: 14.2.6
+      stylus:
+        specifier: ^0.57.0
+        version: 0.57.0
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.2.2
+      typescript:
+        specifier: catalog:dev
+        version: 5.9.3
+
   packages/studio:
     dependencies:
       '@base-ui/react':
@@ -1765,9 +2051,9 @@ importers:
       react:
         specifier: catalog:peer
         version: 19.2.4
-      serve:
-        specifier: 'catalog:'
-        version: 14.2.6
+      serve-handler:
+        specifier: ^6.1.7
+        version: 6.1.7
       universal-cookie:
         specifier: 'catalog:'
         version: 8.0.1
@@ -1793,6 +2079,9 @@ importers:
       '@types/react-dom':
         specifier: catalog:dev
         version: 19.2.3(@types/react@19.2.14)
+      '@types/serve-handler':
+        specifier: catalog:dev
+        version: 6.1.4
       concurrently:
         specifier: catalog:dev
         version: 9.2.1
@@ -1824,6 +2113,9 @@ importers:
       '@liqvid/recording':
         specifier: 'workspace:'
         version: link:../recording
+      '@types/node':
+        specifier: catalog:dev
+        version: 24.10.1
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
@@ -2544,32 +2836,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@floating-ui/core@1.7.3':
-    resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
-
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
 
-  '@floating-ui/dom@1.7.4':
-    resolution: {integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==}
-
   '@floating-ui/dom@1.7.6':
     resolution: {integrity: sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ==}
-
-  '@floating-ui/react-dom@2.1.6':
-    resolution: {integrity: sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
 
   '@floating-ui/react-dom@2.1.8':
     resolution: {integrity: sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
-
-  '@floating-ui/utils@0.2.10':
-    resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
@@ -4596,6 +4873,9 @@ packages:
   '@types/retry@0.12.5':
     resolution: {integrity: sha512-3xSjTp3v03X/lSQLkczaN9UIEwJMoMCA1+Nb5HfbJEQWogdeQIyVtTvxPXDQjZ5zws8rFQfVfRdz03ARihPJgw==}
 
+  '@types/serve-handler@6.1.4':
+    resolution: {integrity: sha512-aXy58tNie0NkuSCY291xUxl0X+kGYy986l4kqW6Gi4kEXgr6Tx0fpSH7YwUSa5usPpG3s9DBeIR6hHcDtL2IvQ==}
+
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
 
@@ -5913,8 +6193,8 @@ packages:
       zod:
         optional: true
 
-  hls.js@1.6.15:
-    resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==}
+  hls.js@1.6.16:
+    resolution: {integrity: sha512-VSIRpLfRwlAAdGL4wiTucx2ScRipo0ed1FBatWkyt832jC4CReKstga6yIhYVwGu9LOBjuX9wzmRMeQdBJtzEA==}
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -9345,37 +9625,20 @@ snapshots:
   '@esbuild/win32-x64@0.27.4':
     optional: true
 
-  '@floating-ui/core@1.7.3':
-    dependencies:
-      '@floating-ui/utils': 0.2.10
-
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
-
-  '@floating-ui/dom@1.7.4':
-    dependencies:
-      '@floating-ui/core': 1.7.3
-      '@floating-ui/utils': 0.2.10
 
   '@floating-ui/dom@1.7.6':
     dependencies:
       '@floating-ui/core': 1.7.5
       '@floating-ui/utils': 0.2.11
 
-  '@floating-ui/react-dom@2.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@floating-ui/dom': 1.7.4
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-
   '@floating-ui/react-dom@2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@floating-ui/dom': 1.7.6
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-
-  '@floating-ui/utils@0.2.10': {}
 
   '@floating-ui/utils@0.2.11': {}
 
@@ -10605,7 +10868,7 @@ snapshots:
 
   '@radix-ui/react-popper@1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@floating-ui/react-dom': 2.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-arrow': 1.1.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@19.2.4)
       '@radix-ui/react-context': 1.1.2(@types/react@19.2.14)(react@19.2.4)
@@ -10997,7 +11260,7 @@ snapshots:
       cross-env: 7.0.3
       detect-gpu: 5.0.70
       glsl-noise: 0.0.0
-      hls.js: 1.6.15
+      hls.js: 1.6.16
       maath: 0.10.8(@types/three@0.183.1)(three@0.183.2)
       meshline: 3.3.1(three@0.183.2)
       react: 19.2.4
@@ -11761,6 +12024,10 @@ snapshots:
 
   '@types/retry@0.12.5': {}
 
+  '@types/serve-handler@6.1.4':
+    dependencies:
+      '@types/node': 25.5.0
+
   '@types/stack-utils@2.0.3': {}
 
   '@types/stats.js@0.17.4': {}
@@ -12096,7 +12363,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4):
+  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4):
     dependencies:
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
@@ -13079,7 +13346,7 @@ snapshots:
     optionalDependencies:
       zod: 4.3.6
 
-  hls.js@1.6.15: {}
+  hls.js@1.6.16: {}
 
   hoist-non-react-statics@3.3.2:
     dependencies:
@@ -13124,7 +13391,7 @@ snapshots:
       '@types/node': 10.14.22
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
-      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4)
+      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4)
       camelcase: 5.3.1
       debug: 4.4.3
       dotenv: 6.2.0
@@ -13138,7 +13405,7 @@ snapshots:
       mime-types: 2.1.35
       object.omit: 3.0.0
       object.pick: 1.3.0
-      retry-axios: 2.6.0(axios@0.26.1(debug@4.4.3))
+      retry-axios: 2.6.0(axios@0.26.1)
       semver: 6.3.1
       tough-cookie: 4.1.4
     transitivePeerDependencies:
@@ -14776,7 +15043,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-axios@2.6.0(axios@0.26.1(debug@4.4.3)):
+  retry-axios@2.6.0(axios@0.26.1):
     dependencies:
       axios: 0.26.1(debug@4.4.3)
 
