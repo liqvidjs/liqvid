@@ -59,7 +59,7 @@ export function LiveCode({
   /* render */
   return (
     <div
-      className={classNames(stateClassNames, className)}
+      className={classNames("lqv-livecode", stateClassNames, className)}
       data-affords="click keys"
       {...attrs}
     >
