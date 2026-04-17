@@ -12,9 +12,9 @@
       "types": "./dist/types/interpreters/*.d.ts"
     },
     "./style.css": "./dist/css/style.css",
-    "./*": {
-      "import": "./dist/esm/presets/*.js",
-      "types": "./dist/types/presets/*.d.ts"
+    "./html": {
+      "import": "./dist/esm/presets/html/index.js",
+      "types": "./dist/types/presets/html/index.d.ts"
     }
   },
   "files": [

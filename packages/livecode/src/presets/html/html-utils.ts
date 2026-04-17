@@ -2,7 +2,7 @@ import type { ConsoleMessage } from "../../store";
 
 export type HTMLConsoleMessage = ConsoleMessage<
   unknown[],
-  "debug" | "error" | "info" | "log"
+  "debug" | "error" | "info" | "log" | "warn"
 >;
 
 /** @package */

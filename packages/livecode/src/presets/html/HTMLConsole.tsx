@@ -3,7 +3,7 @@ import { useStore } from "zustand";
 
 import { useLiveCodeStore } from "../../store";
 
-import { isHTMLConsoleMessage } from "./html-utils";
+import { type HTMLConsoleMessage, isHTMLConsoleMessage } from "./html-utils";
 
 type RenderProp<T> = (
   msg: {
@@ -13,7 +13,23 @@ type RenderProp<T> = (
   props?: React.ComponentProps<"pre">,
 ) => React.ReactNode;
 
-export function HTMLConsole(props: {
+type RenderItem = (
+  msg: HTMLConsoleMessage,
+  props: React.ComponentProps<"li">,
+) => React.ReactNode;
+
+/** @package */
+export function HTMLConsole({
+  className,
+  ...props
+}: {
+  debug?: RenderItem;
+  error?: RenderItem;
+  info?: RenderItem;
+  log?: RenderItem;
+  warn?: RenderItem;
+  className?: string;
+
   bigint?: RenderProp<bigint> | string;
   boolean?: RenderProp<boolean> | string;
   function?: RenderProp<(...args: unknown[]) => unknown> | string;
@@ -32,51 +48,64 @@ export function HTMLConsole(props: {
   );
 
   return (
-    <div className="space-between flex gap-2 border-0 border-gray-300 border-b border-solid px-1">
-      <ol>
-        {messages.map((msg, i) => {
-          if (!isHTMLConsoleMessage(msg)) return null;
+    <ol className={className}>
+      {messages.map((msg, i) => {
+        if (!isHTMLConsoleMessage(msg)) return null;
 
-          const { data, timestamp } = msg;
+        const { data, kind, timestamp } = msg;
+
+        const contents = data.map((value, j) => {
+          // biome-ignore lint/suspicious/noExplicitAny: too complex
+          let renderFn: string | RenderProp<any> | undefined;
+
+          const key = timestamp.toISOString() + `#${i}#${j}`;
+
+          console.log({ type: typeof value, value });
+
+          if (value === null) {
+            renderFn = props.null ?? renderDefault;
+          } else {
+            renderFn = props[typeof value] ?? renderDefault;
+          }
+
+          console.log({ props, renderFn, type: typeof value });
+
+          if (typeof renderFn === "string") {
+            return (
+              <Fragment key={key}>
+                {renderDefault(
+                  { data: value, timestamp },
+                  { className: renderFn },
+                )}
+              </Fragment>
+            );
+          }
 
           return (
-            <li key={timestamp.toISOString() + `#${i}`}>
-              {data.map((value, j) => {
-                // biome-ignore lint/suspicious/noExplicitAny: too complex
-                let renderFn: string | RenderProp<any> | undefined;
+            <Fragment key={key}>
+              {renderFn({ data: value, timestamp }, {})}
+            </Fragment>
+          );
+        });
 
-                const key = timestamp.toISOString() + `#${i}#${j}`;
+        const defaultRenderItem: RenderItem = (_, props) => <li {...props} />;
 
-                if (value === null) {
-                  renderFn = props.null;
-                } else {
-                  renderFn = props[typeof value];
-                }
+        const renderItemFn = props[kind] ?? defaultRenderItem;
 
-                if (typeof renderFn === "string") {
-                  return (
-                    <Fragment key={key}>
-                      {renderDefault(
-                        { data: value, timestamp },
-                        { className: renderFn },
-                      )}
-                    </Fragment>
-                  );
-                }
-
-                return (
-                  <Fragment key={key}>
-                    {(renderFn ?? renderDefault)(
-                      { data: value, timestamp },
-                      {},
-                    )}
-                  </Fragment>
-                );
-              })}
+        if (typeof renderItemFn === "string") {
+          return (
+            <li className={renderItemFn} key={i}>
+              {contents}
             </li>
           );
-        })}
-      </ol>
-    </div>
+        }
+
+        return (
+          <Fragment key={i}>
+            {renderItemFn(msg, { children: contents })}
+          </Fragment>
+        );
+      })}
+    </ol>
   );
 }

@@ -11,7 +11,7 @@ export interface ConsoleMessage<T = unknown, K extends string = string> {
   characterNumber?: string;
   data: T;
   filename?: string;
-  kind?: K;
+  kind: K;
   lineNumber?: string;
   timestamp: Date;
 }

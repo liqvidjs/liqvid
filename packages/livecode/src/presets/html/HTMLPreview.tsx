@@ -9,6 +9,7 @@ import { viewContents } from "../../utils";
 
 import { type HTMLConsoleMessage, render } from "./html-utils";
 
+/** @package */
 export function HTMLPreview({
   className,
   ...props
