@@ -29,13 +29,13 @@ const colorSchemeContext = makeContext<ColorSchemeContext>({
 /** provide color scheme to descendants */
 export function ColorSchemeProvider({
   children,
-  from,
+  persistence,
 }: {
   children?: React.ReactNode;
-  from?: StringValueConfig<ColorScheme>;
+  persistence?: StringValueConfig<ColorScheme>;
 }) {
-  const [colorScheme, setColorScheme] = usePersistentState(from!, {
-    disabled: !from,
+  const [colorScheme, setColorScheme] = usePersistentState(persistence!, {
+    disabled: !persistence,
   });
 
   const toggleColorScheme = useCallback(
@@ -46,11 +46,11 @@ export function ColorSchemeProvider({
   const context = useMemo(
     () => ({
       colorScheme,
-      persistence: from,
+      persistence: persistence,
       setColorScheme,
       toggleColorScheme,
     }),
-    [colorScheme, from, toggleColorScheme, setColorScheme],
+    [colorScheme, persistence, toggleColorScheme, setColorScheme],
   );
 
   return (

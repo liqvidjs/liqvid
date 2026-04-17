@@ -85,7 +85,7 @@ export function LiqvidPlayer<M extends string>({
   usePersistVolume(persistVolume, script.playback);
 
 	return (
-		<ColorSchemeProvider from={persistColorScheme}>
+		<ColorSchemeProvider persistence={persistColorScheme}>
 			<ScriptProvider script={script} shortcuts={shortcuts.script}>
 				<LiqvidDevToolsProvider
 					plugins={isDevelopment ? [MediaRecording, MarkerRecording, ...(plugins ?? [])] : []}
