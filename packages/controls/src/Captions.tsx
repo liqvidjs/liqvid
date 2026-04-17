@@ -5,7 +5,7 @@ import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback } from "@liqvid/playback/react";
 import { usePlayer } from "@liqvid/player";
 import classNames from "classnames";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { convertShortcuts } from "./utils";
 
