@@ -69,8 +69,11 @@ export function getHandler(_dynamicImports: DynamicImports) {
         return listRenders(searchParams);
       case listThumbsOperation.endpoint:
         return listThumbs(searchParams);
-      case staticFileOperation.endpoint:
-        return serveStaticFile(searchParams);
+    }
+
+    if (route.startsWith(staticFileOperation.endpoint)) {
+      const url = route.slice(staticFileOperation.endpoint.length);
+      return serveStaticFile(url);
     }
 
     return Response.json(

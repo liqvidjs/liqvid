@@ -47,18 +47,8 @@ function getMimeType(filePath: string): string {
  * Example: /api/liqvid/static?url=/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
  */
 export async function serveStaticFile(
-  searchParams: URLSearchParams,
+  requestedPath: string,
 ): Promise<Response> {
-  const $url = safeGet(searchParams, "url");
-  if ($url.isNone) {
-    return Response.json(
-      { error: "missing url parameter" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
-
-  const requestedPath = $url.unwrap();
-
   // Security: Prevent directory traversal attacks
   const normalizedPath = path.normalize(requestedPath);
   if (normalizedPath.includes("..")) {
