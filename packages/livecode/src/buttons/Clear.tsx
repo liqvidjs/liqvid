@@ -1,9 +1,7 @@
-import { onClickReact } from "@liqvid/utils";
 import classNames from "classnames";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
-import { useLiveCodeShortcut } from "../hooks";
-import { useLiveCodeStore } from "../store";
+import { useClearMessages, useLiveCodeShortcut } from "../hooks";
 
 /** Button for clearing the output/console. */
 export function Clear({
@@ -14,13 +12,7 @@ export function Clear({
   /** Keyboard shortcut to clear the console. */
   shortcut?: string;
 }) {
-  const store = useLiveCodeStore();
-
-  const clear = useCallback(() => {
-    store.setState({ messages: [] });
-  }, [store.setState]);
-
-  const events = useMemo(() => onClickReact(clear), [clear]);
+  const clear = useClearMessages();
 
   // keyboard shortcut
   useLiveCodeShortcut(
@@ -34,8 +26,8 @@ export function Clear({
   return (
     <button
       className={classNames("lqv-cb-clear", className)}
+      onClick={clear}
       type="button"
-      {...events}
       {...attrs}
     />
   );

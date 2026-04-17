@@ -18,7 +18,7 @@ export function Run({
 
   // run callback
   const run = useCallback(() => {
-    setStoreState((prev) => ({ run: prev.run + 1 }));
+    setStoreState((prev) => ({ __run: prev.__run + 1 }));
   }, [setStoreState]);
 
   // keyboard shortcut

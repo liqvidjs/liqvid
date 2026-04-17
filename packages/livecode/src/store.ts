@@ -6,8 +6,26 @@ import type { CodeRecorder } from "@lqv/codemirror/recording";
 import { createStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-type RecordType<T> = T extends Record<string, infer K> ? K : never;
-type ArrayType<T> = T extends (infer K)[] ? K : never;
+/** Console message. */
+export interface ConsoleMessage<T = unknown, K extends string = string> {
+  characterNumber?: string;
+  data: T;
+  filename?: string;
+  kind?: K;
+  lineNumber?: string;
+  timestamp: Date;
+}
+
+type LiveCodeFile = {
+  /** Whether the buffer can be edited by the viewer. */
+  editable: boolean;
+
+  /** File name. */
+  filename: string;
+
+  /** Reference to CodeMirror {@link EditorView} */
+  view: EditorView;
+};
 
 /** LiveCode store state. */
 export interface LiveCodeState {
@@ -27,36 +45,27 @@ export interface LiveCodeState {
       activeFile: string;
 
       /** Files contained in this editor group. */
-      files: {
-        /** Whether the buffer can be edited by the viewer. */
-        editable: boolean;
-
-        /** File name. */
-        filename: string;
-
-        /** Reference to CodeMirror {@link EditorView} */
-        view: EditorView;
-      }[];
+      files: LiveCodeFile[];
     }
   >;
 
   /** Console logs. */
-  messages: React.ReactNode[];
+  messages: ConsoleMessage[];
 
   /** Code recorder. */
   recorder?: CodeRecorder;
 
   /** Used to broadcast run events. */
-  run: number;
+  __run: number;
 
   /** Keyboard shortcuts. */
   shortcuts: Record<string, KeyBinding>;
 
   /** Get the active file. */
-  getActiveFile(): ArrayType<RecordType<LiveCodeState["groups"]>["files"]>;
+  getActiveFile(): LiveCodeFile | undefined;
 
   /** Get the active view. */
-  getActiveView(): EditorView;
+  getActiveView(): EditorView | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -64,21 +73,22 @@ export const makeStore = (state: Partial<LiveCodeState> = {}) =>
   createStore<LiveCodeState>()(
     subscribeWithSelector(
       (_set, get): LiveCodeState => ({
+        __run: 0,
         // default values
         activeGroup: undefined,
         classNames: ["lqv-codebooth"],
         getActiveFile() {
-          const state = get();
-          const group = state.groups[state.activeGroup];
+          const { groups, activeGroup } = get();
+          if (!activeGroup) return undefined;
+          const group = groups[activeGroup];
           return group?.files?.find((_) => _.filename === group.activeFile);
         },
         getActiveView() {
-          return get().getActiveFile().view;
+          return get().getActiveFile()?.view;
         },
         groups: {},
         messages: [],
         recorder: undefined,
-        run: 0,
         shortcuts: {},
         ...state,
       }),
