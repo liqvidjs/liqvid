@@ -265,6 +265,9 @@ catalogs:
     no-private-imports:
       specifier: ^0.0.1
       version: 0.0.1
+    no-restricted-imports:
+      specifier: ^0.0.1
+      version: 0.0.1
     skulpt:
       specifier: ^1.2
       version: 1.2.0
@@ -347,6 +350,9 @@ catalogs:
     react-dom:
       specifier: '>=19'
       version: 19.2.4
+    react-inspector:
+      specifier: ^9.0.0
+      version: 9.0.0
     zod:
       specifier: '>=4'
       version: 4.3.6
@@ -862,9 +868,15 @@ importers:
       '@codemirror/view':
         specifier: catalog:peer
         version: 6.40.0
+      '@liqvid/color-scheme':
+        specifier: workspace:^1.0.0-alpha.2
+        version: link:../color-scheme
       '@liqvid/duration':
         specifier: workspace:^1.3.0
         version: link:../duration
+      '@liqvid/event-emitter':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../event-emitter
       '@liqvid/hydration':
         specifier: workspace:^1.0.0-alpha.2
         version: link:../hydration
@@ -1357,6 +1369,9 @@ importers:
       no-private-imports:
         specifier: catalog:dev
         version: 0.0.1
+      no-restricted-imports:
+        specifier: catalog:dev
+        version: 0.0.1(typescript@5.9.3)
       postcss:
         specifier: ^8.5.6
         version: 8.5.8
@@ -1891,6 +1906,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      react-inspector:
+        specifier: catalog:peer
+        version: 9.0.0(react@19.2.4)
       server-only:
         specifier: 'catalog:'
         version: 0.0.1
@@ -1952,6 +1970,9 @@ importers:
       no-private-imports:
         specifier: catalog:dev
         version: 0.0.1
+      no-restricted-imports:
+        specifier: catalog:dev
+        version: 0.0.1(typescript@5.9.3)
       postcss:
         specifier: ^8.5.6
         version: 8.5.8
@@ -7044,6 +7065,11 @@ packages:
   no-private-imports@0.0.1:
     resolution: {integrity: sha512-l1SIwSfA9CnI/sBGMUP+Ic/LprdCDJ4eCSb9iGOkFCM6ISrEXzochz71dg6UjbcUSUw1COR2/xAwnX78ISvmBg==}
 
+  no-restricted-imports@0.0.1:
+    resolution: {integrity: sha512-tMiYq/EXcNamG+6NVFnZ8vbH1fKXIwWMAkkNJhTVXKb9mxmAe5voIIlPMiwzYfRo9/ZKRYXrnGQHzpO7T9F/rg==}
+    peerDependencies:
+      typescript: ^6.0.3
+
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
@@ -7530,6 +7556,11 @@ packages:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
       react: ^19.2.4
+
+  react-inspector@9.0.0:
+    resolution: {integrity: sha512-w/VJucSeHxlwRa2nfM2k7YhpT1r5EtlDOClSR+L7DyQP91QMdfFEDXDs9bPYN4kzP7umFtom7L0b2GGjph4Kow==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -12363,7 +12394,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4):
+  axios-cookiejar-support@1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4):
     dependencies:
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
@@ -13391,7 +13422,7 @@ snapshots:
       '@types/node': 10.14.22
       '@types/tough-cookie': 4.0.5
       axios: 0.26.1(debug@4.4.3)
-      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1)(tough-cookie@4.1.4)
+      axios-cookiejar-support: 1.0.1(@types/tough-cookie@4.0.5)(axios@0.26.1(debug@4.4.3))(tough-cookie@4.1.4)
       camelcase: 5.3.1
       debug: 4.4.3
       dotenv: 6.2.0
@@ -13405,7 +13436,7 @@ snapshots:
       mime-types: 2.1.35
       object.omit: 3.0.0
       object.pick: 1.3.0
-      retry-axios: 2.6.0(axios@0.26.1)
+      retry-axios: 2.6.0(axios@0.26.1(debug@4.4.3))
       semver: 6.3.1
       tough-cookie: 4.1.4
     transitivePeerDependencies:
@@ -14498,6 +14529,10 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
+  no-restricted-imports@0.0.1(typescript@5.9.3):
+    dependencies:
+      typescript: 5.9.3
+
   node-gyp-build@4.8.4: {}
 
   node-int64@0.4.0: {}
@@ -14916,6 +14951,10 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
+  react-inspector@9.0.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
@@ -15043,7 +15082,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-axios@2.6.0(axios@0.26.1):
+  retry-axios@2.6.0(axios@0.26.1(debug@4.4.3)):
     dependencies:
       axios: 0.26.1(debug@4.4.3)
 
