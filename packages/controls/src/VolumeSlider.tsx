@@ -1,10 +1,12 @@
 "use client";
 
+import { type NumericValueConfig, usePersist } from "@liqvid/hydration";
 import { useKeymap } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import { isClient } from "@liqvid/ssr";
 import { useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export interface AdjustVolumeShortcut {
   /** Keyboard sequence */
@@ -29,6 +31,13 @@ export type VolumeShortcut = AdjustVolumeShortcut | SetVolumeShortcut;
 export interface VolumeSliderProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
+
+  /**
+   * Persistence configuration for the volume level.
+   * If provided, the volume level will be persisted to the specified storage.
+   */
+  persistence?: NumericValueConfig;
+
   render: (
     state: {
       muted: boolean;
@@ -44,6 +53,7 @@ const VOLUME_MAX = 100;
 /** Volume control */
 export function VolumeSlider({
   className,
+  persistence,
   render,
   shortcuts,
 }: VolumeSliderProps) {
@@ -51,7 +61,27 @@ export function VolumeSlider({
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
 
-  usePlaybackEvent("volumechange", forceUpdate);
+  // Persistence hook
+  const [getVolume, setVolume] = usePersist(persistence!, {
+    disabled: !persistence,
+  });
+
+  // restore from persistence
+  useEager(() => {
+    if (!playback) return;
+    playback.volume = getVolume() ?? persistence?.default ?? 1;
+  });
+
+  // Persist changes on volumechange event
+  const handleVolumeChange = useCallback(() => {
+    forceUpdate();
+
+    if (persistence) {
+      setVolume(playback.volume);
+    }
+  }, [forceUpdate, persistence, playback, setVolume]);
+
+  usePlaybackEvent("volumechange", handleVolumeChange);
 
   useEffect(() => {
     // keyboard shortcuts
@@ -85,7 +115,7 @@ export function VolumeSlider({
         keymap.unbind(key, callback);
       }
     };
-  }, [forceUpdate, keymap, playback]);
+  }, [keymap, playback, shortcuts]);
 
   // input
   const onChange = useCallback(
@@ -112,5 +142,16 @@ export function VolumeSlider({
         value: playback.muted ? 0 : playback.volume * VOLUME_MAX,
       },
     );
+  }
+}
+
+function useEager(callback: () => void) {
+  const firstRun = useRef(true);
+  if (firstRun.current) {
+    firstRun.current = false;
+
+    if (isClient) {
+      callback();
+    }
   }
 }

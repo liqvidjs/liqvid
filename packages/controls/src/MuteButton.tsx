@@ -1,15 +1,24 @@
 "use client";
 
+import { type BooleanValueConfig, usePersist } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import { isClient } from "@liqvid/ssr";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import classNames from "classnames";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import { convertShortcuts } from "./utils";
 
 interface MutePropsBase {
   className?: string;
+
+  /**
+   * Persistence configuration for the muted state.
+   * If provided, the muted state will be persisted to the specified storage.
+   */
+  persistence?: BooleanValueConfig;
+
   shortcuts?: string[] | string;
 }
 
@@ -38,16 +47,35 @@ export type MuteProps = MutePropsBase &
   (MutesPropsCustomRender | MutePropsVariants);
 
 /** Mute/unmute button */
-export function Mute({ className, render, shortcuts }: MuteProps) {
+export function Mute({ className, persistence, render, shortcuts }: MuteProps) {
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();
+
+  // Persistence hook
+  const [getMute, setMute] = usePersist(persistence!, {
+    disabled: !persistence,
+  });
+
+  useEager(() => {
+    if (!playback) return;
+    playback.muted = getMute() ?? persistence?.default ?? false;
+  });
+
+  // Persist changes on volumechange event
+  const handleVolumeChange = useCallback(() => {
+    forceUpdate();
+
+    if (persistence) {
+      setMute(playback.muted);
+    }
+  }, [forceUpdate, persistence, playback, setMute]);
+
+  usePlaybackEvent("volumechange", handleVolumeChange);
 
   // keyboard controls
   const toggleMute = useCallback(() => {
     playback.muted = !playback.muted;
   }, [playback]);
-
-  usePlaybackEvent("volumechange", forceUpdate);
 
   useKeyboardShortcut(shortcuts, toggleMute);
 
@@ -65,5 +93,16 @@ export function Mute({ className, render, shortcuts }: MuteProps) {
         ...events,
       },
     );
+  }
+}
+
+function useEager(callback: () => void) {
+  const firstRun = useRef(true);
+  if (firstRun.current) {
+    firstRun.current = false;
+
+    if (isClient) {
+      callback();
+    }
   }
 }

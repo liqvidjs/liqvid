@@ -2,7 +2,6 @@
 
 import "./recording.css";
 
-
 import { MediaRecording } from "@liqvid/media/recording";
 import { PromptsProvider } from "@liqvid/prompts";
 import { MarkerRecording } from "@liqvid/script/recording";
@@ -41,8 +40,6 @@ import {
 	persistColorScheme,
 	persistMute,
 	persistVolume,
-	usePersistMute,
-	usePersistVolume,
 } from "@/lib/persistence";
 
 import { KeyboardShortcuts } from "./controls/KeyboardShortcuts";
@@ -81,8 +78,6 @@ export function LiqvidPlayer<M extends string>({
 
 		script: Script<M>;
 	}) {
-  usePersistMute(persistMute, script.playback);
-  usePersistVolume(persistVolume, script.playback);
 
 	return (
 		<ColorSchemeProvider persistence={persistColorScheme}>
