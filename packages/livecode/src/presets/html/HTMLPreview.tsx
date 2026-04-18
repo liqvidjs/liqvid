@@ -38,7 +38,6 @@ export function HTMLPreview({
   useEventListener(iframe.current, "load", syncColorScheme);
 
   const refresh = useCallback(() => {
-    console.log("refresh");
     const { groups, activeGroup } = store.getState();
     if (!activeGroup) return;
     const files = groups?.[activeGroup]?.files ?? [];

@@ -60,15 +60,11 @@ export function HTMLConsole({
 
           const key = timestamp.toISOString() + `#${i}#${j}`;
 
-          console.log({ type: typeof value, value });
-
           if (value === null) {
             renderFn = props.null ?? renderDefault;
           } else {
             renderFn = props[typeof value] ?? renderDefault;
           }
-
-          console.log({ props, renderFn, type: typeof value });
 
           if (typeof renderFn === "string") {
             return (
