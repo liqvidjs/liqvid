@@ -1,7 +1,7 @@
 import { EventEmitter } from "@liqvid/event-emitter";
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
 
-import { MathJaxReady } from "./loading";
+import { MathJaxReady } from "./loading.ts";
 
 type RenderingStatus = "done" | "rendering";
 
@@ -87,6 +87,8 @@ export function MJX({
 
       hub.beginRendering();
       status.current = "rendering";
+
+      console.log(`rendering`, children);
 
       MathJax.typesetPromise([span]).then(() => {
         hub.doneRendering();

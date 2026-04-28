@@ -61,6 +61,25 @@ function generateDocs(project: ProjectReflection, outDir: string): void {
   }
 }
 
+// Track local type names and their kinds for the current module being processed
+let localTypeKinds: Map<string, ReflectionKind> = new Map();
+
+/**
+ * Get the anchor ID for a type/class/interface name
+ */
+function getAnchorId(name: string, kind: ReflectionKind): string {
+  if (kind === ReflectionKind.Class) {
+    return `class-${name.toLowerCase()}`;
+  }
+  if (kind === ReflectionKind.Interface) {
+    return `interface-${name.toLowerCase()}`;
+  }
+  if (kind === ReflectionKind.Variable) {
+    return `variable-${name.toLowerCase()}`;
+  }
+  return `type-${name.toLowerCase()}`;
+}
+
 /**
  * Generate documentation for a module
  */
@@ -68,6 +87,9 @@ function generateModuleDocs(mod: DeclarationReflection): string {
   let md = `# ${mod.name}\n\n`;
 
   const children = mod.children || [];
+
+  // Build map of local type names to their kinds for linking
+  localTypeKinds = new Map(children.map((c) => [c.name, c.kind]));
 
   // Sort children into categories
   const classes = children.filter((c) => c.kind === ReflectionKind.Class);
@@ -132,9 +154,28 @@ function renderComment(reflection: { comment?: unknown }): string {
 }
 
 /**
- * Render a type to string
+ * Render a type name, optionally as a link if it's a local type
  */
-function renderType(type: unknown): string {
+function renderTypeName(name: string, asLink: boolean): string {
+  if (!name) return "unknown";
+
+  // Check if this is a local type we can link to
+  if (asLink) {
+    const kind = localTypeKinds.get(name);
+    if (kind !== undefined) {
+      return `[${name}](#${getAnchorId(name, kind)})`;
+    }
+  }
+
+  return name;
+}
+
+/**
+ * Render a type to string
+ * @param type - The type to render
+ * @param asLink - Whether to render local types as links (false for code blocks)
+ */
+function renderType(type: unknown, asLink = false): string {
   if (!type) return "unknown";
 
   const t = type as {
@@ -145,6 +186,7 @@ function renderType(type: unknown): string {
     declaration?: DeclarationReflection;
     typeArguments?: unknown[];
     queryType?: { name?: string };
+    target?: DeclarationReflection | number;
   };
 
   if (t.type === "intrinsic") {
@@ -152,22 +194,28 @@ function renderType(type: unknown): string {
   }
 
   if (t.type === "reference") {
+    const typeName = renderTypeName(t.name || "unknown", asLink);
+
     if (t.typeArguments && t.typeArguments.length > 0) {
-      return `${t.name}<${t.typeArguments.map(renderType).join(", ")}>`;
+      return `${typeName}<${t.typeArguments.map((ta) => renderType(ta, asLink)).join(", ")}>`;
     }
-    return t.name || "unknown";
+    return typeName;
   }
 
   if (t.type === "union") {
-    return t.types?.map(renderType).join(" | ") || "unknown";
+    return (
+      t.types?.map((ut) => renderType(ut, asLink)).join(" | ") || "unknown"
+    );
   }
 
   if (t.type === "intersection") {
-    return t.types?.map(renderType).join(" & ") || "unknown";
+    return (
+      t.types?.map((it) => renderType(it, asLink)).join(" & ") || "unknown"
+    );
   }
 
   if (t.type === "tuple") {
-    return `[${t.elements?.map(renderType).join(", ") || ""}]`;
+    return `[${t.elements?.map((el) => renderType(el, asLink)).join(", ") || ""}]`;
   }
 
   if (t.type === "reflection" && t.declaration) {
@@ -178,7 +226,7 @@ function renderType(type: unknown): string {
       const propStr = props
         .map((p) => {
           const opt = p.flags?.isOptional ? "?" : "";
-          return `${p.name}${opt}: ${renderType(p.type)}`;
+          return `${p.name}${opt}: ${renderType(p.type, asLink)}`;
         })
         .join("; ");
       return `{ ${propStr} }`;
@@ -227,7 +275,7 @@ function renderParameters(
   for (const param of filtered) {
     const optional = param.flags?.isOptional ? " (optional)" : "";
     const desc = renderComment(param);
-    md += `- \`${param.name}\`: ${renderType(param.type)}${optional}`;
+    md += `- \`${param.name}\`: ${renderType(param.type, true)}${optional}`;
     if (desc) {
       md += ` - ${desc}`;
     }
@@ -250,12 +298,12 @@ function renderClass(cls: DeclarationReflection): string {
 
   // Extends
   if (cls.extendedTypes && cls.extendedTypes.length > 0) {
-    md += `**Extends:** ${cls.extendedTypes.map(renderType).join(", ")}\n\n`;
+    md += `**Extends:** ${cls.extendedTypes.map((t) => renderType(t, true)).join(", ")}\n\n`;
   }
 
   // Implements
   if (cls.implementedTypes && cls.implementedTypes.length > 0) {
-    md += `**Implements:** ${cls.implementedTypes.map(renderType).join(", ")}\n\n`;
+    md += `**Implements:** ${cls.implementedTypes.map((t) => renderType(t, true)).join(", ")}\n\n`;
   }
 
   // Find constructor
@@ -326,7 +374,11 @@ function renderClass(cls: DeclarationReflection): string {
 /**
  * Render a method
  */
-function renderMethod(method: DeclarationReflection, prefix = "", suffix = ""): string {
+function renderMethod(
+  method: DeclarationReflection,
+  prefix = "",
+  suffix = "",
+): string {
   let md = `### ${prefix}${method.name}${suffix}\n\n`;
 
   if (method.signatures) {
@@ -461,7 +513,7 @@ function renderTypeAlias(alias: DeclarationReflection): string {
     for (const prop of props) {
       const optional = prop.flags?.isOptional ? "?" : "";
       md += `### ${prop.name}${optional}\n\n`;
-      md += `- **Type:** \`${renderType(prop.type)}\`\n`;
+      md += `- **Type:** ${renderType(prop.type, true)}\n`;
 
       const propDesc = renderComment(prop);
       if (propDesc) {

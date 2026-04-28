@@ -3,7 +3,7 @@ declare global {
   const MathJax: any;
 }
 
-export {} from "./context";
+export { MathJaxProvider } from "./context";
 export * from "./fancy";
 export { MathJaxReady } from "./loading";
 export * from "./macros";

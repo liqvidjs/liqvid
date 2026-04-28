@@ -39,7 +39,7 @@ export const $m = script.markers.get.bind(script.markers.get);
 
 const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
 	process.env.NODE_ENV === "development"
-		? "/api/liqvid/static?url={pathname}"
+		? "/api/liqvid/static{pathname}"
 		: `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
 );
 

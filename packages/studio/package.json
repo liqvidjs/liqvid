@@ -4,14 +4,17 @@
   "description": "Production suite for Liqvid videos",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./next/api": {
+      "@liqvid/dev": "./src/next/api.mts",
       "import": "./dist/esm/next/api.mjs",
       "types": "./dist/types/next/api.d.mts"
     },
     "./next/page": {
+      "@liqvid/dev": "./src/next/page.tsx",
       "import": "./dist/esm/next/page.js",
       "types": "./dist/types/next/page.d.ts"
     }

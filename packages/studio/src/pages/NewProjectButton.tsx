@@ -181,7 +181,6 @@ export function NewProjectButton() {
 
             <div className={styles.dialogActions}>
               <DialogClose
-                className={styles.cancelButton}
                 disabled={isCreating}
                 render={<button type="button" />}
               >

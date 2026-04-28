@@ -1,50 +1,46 @@
 .Toast {
-  background-color: var(--gray-app);
-  border-color: var(--gray-sep);
-  border-radius: 8px;
-  box-shadow:
-    0px 1px 2px 0px light-dark(#00000026, #33333326),
-    0px 3px 7px 0px light-dark(#00000040, #33333340);
-  color: light-dark(#000, #fff);
-  font-size: 14px;
-  padding: 8px;
-
-  transition-property: background-color, color;
-  /* transition-timing-function: var(--default-transition-timing-function); */
-  transition-duration: 150ms;
-
   --icon-size: 24px;
   --icon-offset: 8px;
+  position: relative;
 
   /* layout */
   display: grid;
   grid:
     "icon header"
     "icon message" / calc(var(--icon-size) + var(--icon-offset)) auto auto;
-  position: relative;
   width: 300px;
+  padding: 8px;
+  font-size: 14px;
+  color: light-dark(#000, #fff);
+  background-color: var(--gray-app);
+  border-color: var(--gray-sep);
+  border-radius: 8px;
+  box-shadow:
+    0px 1px 2px 0px light-dark(#00000026, #33333326),
+    0px 3px 7px 0px light-dark(#00000040, #33333340);
+  /* transition-timing-function: var(--default-transition-timing-function); */
+  transition-duration: 150ms;
+
+  transition-property: background-color, color;
 
   /* title */
   > header {
-    color: var(--gray-normal);
+    grid-area: header;
     font-family: "Inter", sans-serif;
     font-size: 16px;
     font-weight: 500;
     line-height: var(--icon-size);
-
-    grid-area: header;
+    color: var(--gray-normal);
   }
 }
 
 .message {
-  color: var(--gray-dim);
-
   grid-area: message;
+  color: var(--gray-dim);
 }
 
 .icon {
-  height: var(--icon-size);
-  width: var(--icon-size);
-
   grid-area: icon;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }

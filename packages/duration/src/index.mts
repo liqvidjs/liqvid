@@ -1,3 +1,6 @@
+/**
+ * @description asdf
+ */
 import type { SerializedValue } from "@liqvid/ssr";
 
 const SECONDS = 1000,
@@ -63,22 +66,20 @@ export interface DurationSetter {
 export class Duration {
   protected __valueMs: number;
 
-  constructor(
-    {
-      milliseconds = 0,
-      ms = 0,
-      seconds = 0,
-      s = 0,
-      minutes = 0,
-      m = 0,
-      hours = 0,
-      h = 0,
-      days = 0,
-      d = 0,
-      weeks = 0,
-      w = 0,
-    }: DurationOptions = {},
-  ) {
+  constructor({
+    milliseconds = 0,
+    ms = 0,
+    seconds = 0,
+    s = 0,
+    minutes = 0,
+    m = 0,
+    hours = 0,
+    h = 0,
+    days = 0,
+    d = 0,
+    weeks = 0,
+    w = 0,
+  }: DurationOptions = {}) {
     this.__valueMs =
       (weeks + w) * WEEKS +
       (days + d) * DAYS +

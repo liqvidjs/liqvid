@@ -1,17 +1,17 @@
 .Backdrop {
-  background: rgb(0 0 0 / 0.5);
-  inset: 0;
   position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
 }
 
 .Close {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: light-dark(#374151, #f3f4f6);
+  cursor: pointer;
   background: light-dark(#f3f4f6, #374151);
   border: 1px solid light-dark(#d1d5db, #4b5563);
   border-radius: 4px;
-  color: light-dark(#374151, #f3f4f6);
-  cursor: pointer;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
   transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
@@ -25,22 +25,22 @@
 }
 
 .Content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  padding: 1.5rem;
+  color: light-dark(#1f1f1f, #fff);
   background: light-dark(#fff, #1f1f1f);
   border: 1px solid light-dark(#e5e5e5, #333);
   border-radius: 8px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  color: light-dark(#1f1f1f, #fff);
-  left: 50%;
-  max-width: 28rem;
-  padding: 1.5rem;
-  position: fixed;
-  top: 50%;
   transform: translate(-50%, -50%);
-  width: calc(100% - 2rem);
 }
 
 .Title {
+  margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0;
 }

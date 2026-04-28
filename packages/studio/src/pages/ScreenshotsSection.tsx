@@ -158,7 +158,7 @@ export function ScreenshotsSection({
                   <img
                     alt={`Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`}
                     className={shareStyles.screenshotThumbnail}
-                    src={`/api/liqvid/static?url=${encodeURIComponent(`${projectPath}${variant.path}`)}`}
+                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`}
                   />
                   <div className={shareStyles.screenshotInfo}>
                     <span className={shareStyles.screenshotDate}>

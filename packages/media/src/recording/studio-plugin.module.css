@@ -1,32 +1,32 @@
 .row {
-	background: #0002;
-	display: flex;
-	padding: 2px 0;
-	gap: 4px;
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+  background: #0002;
 
-	input[type="checkbox"] {
-		margin-right: 0.5em;
-	}
+  input[type="checkbox"] {
+    margin-right: 0.5em;
+  }
 
-	select {
-		margin-left: auto;
-		text-align: right;
-	}
+  select {
+    margin-left: auto;
+    text-align: right;
+  }
 }
 
 .spinner {
-	animation: spin 1s linear infinite;
-	border: 2px solid transparent;
-	border-radius: 50%;
-	border-top-color: currentColor;
-	display: inline-block;
-	height: 14px;
-	margin-left: auto;
-	width: 14px;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-	to {
-		transform: rotate(360deg);
-	}
+  to {
+    transform: rotate(360deg);
+  }
 }

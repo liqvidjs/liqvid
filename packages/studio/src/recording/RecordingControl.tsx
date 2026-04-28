@@ -1,9 +1,17 @@
 "use client";
 
+import type {
+  EventEmitter,
+  EventsOn,
+  TypedEventTarget,
+} from "@liqvid/event-emitter";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import type { RecordingPlugin } from "@liqvid/recording";
-import { useRecordingApi } from "@liqvid/recording";
+import {
+  type RecordingManager,
+  type RecordingPlugin,
+  useRecordingApi,
+} from "@liqvid/recording";
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef, useState } from "react";
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { usePlayer } from "@liqvid/player";
 import { combineRefs } from "@liqvid/utils";
 import { useEffect, useRef } from "react";

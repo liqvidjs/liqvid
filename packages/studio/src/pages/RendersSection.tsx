@@ -218,7 +218,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
   };
 
   const getVideoUrl = (render: RenderEntry) => {
-    return `/api/liqvid/static?url=${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
+    return `/api/liqvid/static/${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
   };
 
   return (
@@ -244,11 +244,9 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
               )}
             </DialogTrigger>
             <DialogPortal>
-              <DialogBackdrop className={styles.dialogOverlay} />
-              <DialogPopup className={styles.dialog}>
-                <DialogTitle className={styles.dialogTitle}>
-                  Render Settings
-                </DialogTitle>
+              <DialogBackdrop />
+              <DialogPopup>
+                <DialogTitle>Render Settings</DialogTitle>
 
                 <div className={styles.formField}>
                   <span id="render-color-scheme-label">Color Scheme</span>
@@ -312,9 +310,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                 </div>
 
                 <div className={styles.dialogActions}>
-                  <DialogClose className={styles.cancelButton}>
-                    Cancel
-                  </DialogClose>
+                  <DialogClose>Cancel</DialogClose>
                   <button
                     className={styles.submitButton}
                     onClick={handleStartRender}
@@ -453,7 +449,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
               />
             </div>
             <div className={styles.dialogActions}>
-              <DialogClose className={styles.cancelButton}>Cancel</DialogClose>
+              <DialogClose>Cancel</DialogClose>
               <button
                 className={styles.submitButton}
                 disabled={isRenaming || !renameValue.trim()}

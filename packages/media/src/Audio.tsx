@@ -1,6 +1,7 @@
 "use client";
 
 import { Duration, type DurationLike } from "@liqvid/duration";
+import type { AudioSourceRegistration } from "@liqvid/playback";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import {
   Children,
@@ -110,6 +111,9 @@ export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
   // Track playback state for the audio
   const isPlayingRef = useRef(false);
 
+  // Store the audio source registration for offline rendering
+  const registrationRef = useRef<AudioSourceRegistration | null>(null);
+
   /**
    * Decode the audio data once audioContext is available
    */
@@ -125,11 +129,21 @@ export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
       .decodeAudioData(bufferCopy)
       .then((buffer) => {
         audioBufferRef.current = buffer;
+
+        // Register this audio source for offline rendering
+        if (registrationRef.current) {
+          playback.unregisterAudioSource(registrationRef.current);
+        }
+        registrationRef.current = {
+          buffer,
+          startTime: startInSeconds,
+        };
+        playback.registerAudioSource(registrationRef.current);
       })
       .catch((error) => {
         console.error("Failed to decode audio:", error);
       });
-  }, [playback.audioContext]);
+  }, [playback, startInSeconds]);
 
   /**
    * Stop the current audio source
@@ -284,8 +298,13 @@ export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
   useEffect(() => {
     return () => {
       stopAudio();
+      // Unregister from offline rendering
+      if (registrationRef.current) {
+        playback.unregisterAudioSource(registrationRef.current);
+        registrationRef.current = null;
+      }
     };
-  }, [stopAudio]);
+  }, [playback, stopAudio]);
 
   return <div>{children}</div>;
 }

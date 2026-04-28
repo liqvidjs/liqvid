@@ -54,9 +54,11 @@ export function render({
     doc.querySelectorAll("script[src]"),
   ) as HTMLScriptElement[]) {
     const src = scriptTag.getAttribute("src")!;
-    const script = js[normalizePath(src)];
+    const normalized = normalizePath(src);
+    const script = js[normalized];
     if (!script) continue;
 
+    scriptTag.dataset.filename = normalized;
     scriptTag.removeAttribute("src");
     scriptTag.textContent = script;
   }

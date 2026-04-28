@@ -4,12 +4,12 @@
 }
 
 .TabsTrigger {
-  background-color: light-dark(#0002, #fff2);
-  color: #fff;
-  font-family: "Inter Variable", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
   padding: 1px 8px;
+  font-family: "Inter Variable", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background-color: light-dark(#0002, #fff2);
 
   &[disabled] {
     pointer-events: none;

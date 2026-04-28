@@ -43,8 +43,7 @@ function getMimeType(filePath: string): string {
 
 /**
  * Serve static files from the app directory.
- * The `url` param is the path relative to the app directory.
- * Example: /api/liqvid/static?url=/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
+ * Example: /api/liqvid/static/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
  */
 export async function serveStaticFile(
   requestedPath: string,

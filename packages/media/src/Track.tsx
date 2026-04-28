@@ -4,7 +4,6 @@ import {
   type SyntheticTextTrack,
   SyntheticVTTCue,
   type TextTrackKind,
-  type TextTrackMode,
 } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
 import { useEffect, useRef } from "react";

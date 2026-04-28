@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: Liqvid Studio CLI API
+  version: 1.0.0
+servers:
+  - description: Development server
+    url: https://liqvid.studio/api/v1
+components:
+  responses:
+    400:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [bad_request]
+    401:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [unauthorized]
+    403:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [forbidden]
+      description: Forbidden
+    404:
+      content:
+        application/json:
+          schema:
+            type: string
+      description: not found
+    sessionNotFound:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [sessionNotFound]
+      description: User not found
+    unitNotFound:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [unit_not_found]
+      description: Unit not found
+    userNotFound:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason]
+            properties:
+              reason:
+                type: string
+                enum: [user_not_found]
+      description: User not found
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        -
+paths:
+  /login:
+    post:
+      operationId: getLogin
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: User for account
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reason]
+                properties:
+                  reason:
+                    type: string
+                    enum: [account_not_found]
+      summary: Get account

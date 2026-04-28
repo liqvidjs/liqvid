@@ -7,30 +7,30 @@
 }
 
 .sectionHeader {
-  align-items: center;
   display: flex;
   gap: 0.5rem;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 0.75rem;
 
   h3 {
+    margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    margin: 0;
   }
 }
 
 .addButton {
+  display: flex;
+  gap: 0.25rem;
   align-items: center;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.75rem;
+  color: light-dark(#333, #fff);
+  cursor: pointer;
   background: light-dark(#f0f0f0, #333);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  cursor: pointer;
-  display: flex;
-  font-size: 0.75rem;
-  gap: 0.25rem;
-  padding: 0.375rem 0.625rem;
   transition: background-color 0.15s;
 
   &:hover {
@@ -39,8 +39,8 @@
 }
 
 .loading {
-  align-items: center;
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 2rem;
 }
@@ -59,9 +59,9 @@
 }
 
 .emptyMessage {
-  color: light-dark(#666, #999);
-  font-size: 0.875rem;
   padding: 1rem;
+  font-size: 0.875rem;
+  color: light-dark(#666, #999);
   text-align: center;
 }
 
@@ -69,28 +69,28 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  list-style: none;
-  margin: 0;
   max-height: 300px;
-  overflow-y: auto;
   padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
 }
 
 .screenshotItem {
+  display: flex;
+  gap: 0.75rem;
   align-items: center;
+  padding: 0.5rem;
   background: light-dark(#f9f9f9, #2a2a2a);
   border: 1px solid light-dark(#e5e5e5, #404040);
   border-radius: 6px;
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.5rem;
 }
 
 .screenshotThumbnail {
-  border-radius: 4px;
+  width: 80px;
   height: 48px;
   object-fit: cover;
-  width: 80px;
+  border-radius: 4px;
 }
 
 .screenshotInfo {
@@ -102,13 +102,13 @@
 }
 
 .screenshotDate {
-  color: light-dark(#333, #e0e0e0);
   font-size: 0.75rem;
+  color: light-dark(#333, #e0e0e0);
 }
 
 .screenshotDimensions {
-  color: light-dark(#666, #999);
   font-size: 0.625rem;
+  color: light-dark(#666, #999);
 }
 
 .screenshotActions {
@@ -118,17 +118,17 @@
 }
 
 .copyButton {
+  display: flex;
+  gap: 0.25rem;
   align-items: center;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: light-dark(#0066cc, #66b3ff);
+  cursor: pointer;
   background: light-dark(#e8f4ff, #1e3a5f);
   border: 1px solid light-dark(#b3d4ff, #2a5a8f);
   border-radius: 4px;
-  color: light-dark(#0066cc, #66b3ff);
-  cursor: pointer;
-  display: flex;
-  font-size: 0.625rem;
-  font-weight: 500;
-  gap: 0.25rem;
-  padding: 0.375rem 0.5rem;
   transition: background-color 0.15s;
 
   &:hover {
@@ -138,23 +138,23 @@
 
 /* Preview Dialog */
 .previewDialog {
-  max-width: 64rem;
   width: 90vw;
+  max-width: 64rem;
 }
 
 .previewHeader {
-  align-items: center;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
 
 .closeButton {
-  background: transparent;
-  border: none;
+  padding: 0.25rem;
   color: light-dark(#666, #999);
   cursor: pointer;
-  padding: 0.25rem;
+  background: transparent;
+  border: none;
 
   &:hover {
     color: light-dark(#333, #fff);
@@ -162,80 +162,80 @@
 }
 
 .previewContainer {
+  position: relative;
+  width: 100%;
+  max-height: 60vh;
+  overflow: hidden;
   background: light-dark(#f0f0f0, #1a1a1a);
   border: 1px solid light-dark(#ddd, #444);
   border-radius: 6px;
-  max-height: 60vh;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
 }
 
 .previewIframe {
-  border: none;
-  height: 100%;
-  pointer-events: none;
   position: absolute;
   width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border: none;
 }
 
 .previewControls {
-  align-items: center;
   display: flex;
   gap: 0.75rem;
-  margin-top: 1rem;
+  align-items: center;
   padding: 0 0.25rem;
+  margin-top: 1rem;
 }
 
 .timeDisplay {
-  color: light-dark(#666, #999);
+  min-width: 3rem;
   font-family: monospace;
   font-size: 0.75rem;
-  min-width: 3rem;
+  color: light-dark(#666, #999);
   text-align: center;
   user-select: none;
 }
 
 .seekSlider {
+  flex: 1;
+  height: 6px;
   appearance: none;
   background: light-dark(#ddd, #444);
   border-radius: 4px;
-  flex: 1;
-  height: 6px;
 
   &::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
     appearance: none;
+    cursor: pointer;
     background: light-dark(#2563eb, #3b82f6);
     border: none;
     border-radius: 50%;
-    cursor: pointer;
-    height: 16px;
-    width: 16px;
   }
 
   &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
     background: light-dark(#2563eb, #3b82f6);
     border: none;
     border-radius: 50%;
-    cursor: pointer;
-    height: 16px;
-    width: 16px;
   }
 }
 
 /* Confirmation Dialog */
 .confirmMessage {
-  color: light-dark(#666, #bbb);
+  margin: 1rem 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  margin: 1rem 0;
+  color: light-dark(#666, #bbb);
 }
 
 .filename {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.8125rem;
   background: light-dark(#f0f0f0, #333);
   border-radius: 3px;
-  font-size: 0.8125rem;
-  padding: 0.125rem 0.375rem;
 }
 
 /* Thumbnails Section */
@@ -254,27 +254,27 @@
 }
 
 .thumbsSchemeLabel {
-  color: light-dark(#666, #999);
   font-size: 0.75rem;
   font-weight: 500;
+  color: light-dark(#666, #999);
   text-transform: uppercase;
 }
 
 .thumbsGrid {
   display: grid;
-  gap: 0.75rem;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
   padding: 0.25rem;
 }
 
 .thumbSheet {
+  width: 100%;
+  cursor: pointer;
+  object-fit: contain;
   background: light-dark(#f0f0f0, #1a1a1a);
   border: 1px solid light-dark(#e5e5e5, #404040);
   border-radius: 6px;
-  cursor: pointer;
-  object-fit: contain;
   transition: border-color 0.15s;
-  width: 100%;
 
   &:hover {
     border-color: light-dark(#2563eb, #3b82f6);
@@ -286,22 +286,22 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  list-style: none;
-  margin: 0;
   max-height: 300px;
-  overflow-y: auto;
   padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
 }
 
 .renderItem {
+  display: flex;
+  gap: 0.75rem;
   align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
   background: light-dark(#f9f9f9, #2a2a2a);
   border: 1px solid light-dark(#e5e5e5, #404040);
   border-radius: 6px;
-  display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
-  padding: 0.75rem;
 }
 
 .renderInfo {
@@ -313,23 +313,23 @@
 }
 
 .renderHeader {
-  align-items: center;
   display: flex;
   gap: 0.75rem;
+  align-items: center;
 }
 
 .renderDate {
-  color: light-dark(#333, #e0e0e0);
   font-size: 0.8125rem;
   font-weight: 500;
+  color: light-dark(#333, #e0e0e0);
 }
 
 .renderStatus {
-  align-items: center;
-  color: light-dark(#666, #999);
   display: flex;
-  font-size: 0.75rem;
   gap: 0.25rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: light-dark(#666, #999);
 }
 
 .statusCompleted {
@@ -341,10 +341,10 @@
 }
 
 .renderDetails {
-  color: light-dark(#666, #999);
   display: flex;
-  font-size: 0.6875rem;
   gap: 0.75rem;
+  font-size: 0.6875rem;
+  color: light-dark(#666, #999);
 }
 
 .renderActions {
@@ -354,15 +354,15 @@
 }
 
 .renderActionButton {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  color: light-dark(#333, #fff);
+  cursor: pointer;
   background: light-dark(#f0f0f0, #333);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  padding: 0.375rem;
   transition: background-color 0.15s;
 
   &:hover {
@@ -372,29 +372,29 @@
 
 /* Video Player Dialog */
 .videoDialog {
-  max-width: 80vw;
   width: auto;
+  max-width: 80vw;
 }
 
 .videoHeader {
-  align-items: center;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
 
 .videoPlayer {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
   background: #000;
   border-radius: 6px;
-  display: block;
-  max-height: 70vh;
-  max-width: 100%;
 }
 
 .renderName {
-  color: light-dark(#333, #e0e0e0);
   font-size: 0.8125rem;
   font-weight: 500;
+  color: light-dark(#333, #e0e0e0);
 }
 
 /* Resolution Presets */
@@ -405,13 +405,13 @@
 }
 
 .presetButton {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  color: light-dark(#333, #fff);
+  cursor: pointer;
   background: light-dark(#f0f0f0, #333);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 0.375rem 0.75rem;
   transition:
     background-color 0.15s,
     border-color 0.15s;
@@ -421,50 +421,50 @@
   }
 
   &[data-active="true"] {
+    color: #fff;
     background: light-dark(#2563eb, #3b82f6);
     border-color: light-dark(#2563eb, #3b82f6);
-    color: #fff;
   }
 }
 
 .dimensionInputs {
-  align-items: center;
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .dimensionInput {
+  width: 5rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: light-dark(#333, #fff);
+  text-align: center;
   background: light-dark(#fff, #1a1a1a);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  font-size: 0.875rem;
-  padding: 0.5rem;
-  text-align: center;
-  width: 5rem;
 
   &:focus {
-    border-color: light-dark(#2563eb, #3b82f6);
     outline: none;
+    border-color: light-dark(#2563eb, #3b82f6);
   }
 }
 
 .dimensionSeparator {
-  color: light-dark(#666, #999);
   font-size: 1rem;
+  color: light-dark(#666, #999);
 }
 
 .textInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: light-dark(#333, #fff);
   background: light-dark(#fff, #1a1a1a);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  font-size: 0.875rem;
-  padding: 0.5rem 0.75rem;
-  width: 100%;
 
   &:focus {
-    border-color: light-dark(#2563eb, #3b82f6);
     outline: none;
+    border-color: light-dark(#2563eb, #3b82f6);
   }
 }

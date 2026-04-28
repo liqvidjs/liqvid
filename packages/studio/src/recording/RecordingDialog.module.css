@@ -5,15 +5,15 @@
 .Recordings {
   --radius: 4px;
 
+  margin: 4px 0;
+
   background-color: var(--gray-ui);
   border: 1px solid var(--gray-sep);
   border-radius: var(--radius);
 
-  margin: 4px 0;
-
   * {
-    transition-property: background-color, border-color, color;
     transition-duration: 150ms;
+    transition-property: background-color, border-color, color;
   }
 }
 
@@ -34,11 +34,11 @@
 }
 
 .RecordingRowTrigger {
-  align-items: center;
-  cursor: pointer;
   display: flex;
-  padding: 4px 8px;
+  align-items: center;
   width: 100%;
+  padding: 4px 8px;
+  cursor: pointer;
 
   &:hover {
     background-color: var(--gray-hover);
@@ -57,21 +57,21 @@
   margin-left: auto;
 
   svg {
-    height: 24px;
     width: 24px;
+    height: 24px;
   }
 }
 
 .recordingDuration {
+  width: 4em;
   font-family: monospace;
   font-size: 16px;
   text-align: right;
-  width: 4em;
 }
 
 .RecordingRowExpand {
-  background-color: var(--gray-subtle);
   overflow: hidden;
+  background-color: var(--gray-subtle);
 
   &[data-open] {
     animation: slideDown 150ms ease-out;
@@ -110,11 +110,11 @@
 }
 
 .recordingToggle {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
   background-color: var(--gray-ui);
   border-radius: 4px;
-  cursor: pointer;
-  height: 36px;
-  width: 36px;
 
   transition: unset;
 
@@ -123,20 +123,20 @@
   }
 
   > svg {
-    height: 36px;
     width: 36px;
+    height: 36px;
   }
 }
 
 .configurationTable {
-  border: 1px solid #000;
-  margin: 1em auto;
   width: 100%;
+  margin: 1em auto;
+  border: 1px solid #000;
 
   > tbody > tr > th {
-    text-align: right;
-    padding: 4px;
     width: calc(36px + 8px);
+    padding: 4px;
+    text-align: right;
   }
 
   > tbody > tr > td {
@@ -146,23 +146,23 @@
 }
 
 .shortcutsTable {
-  border: 1px solid var(--gray-sep);
-  border-collapse: collapse;
-  margin: 0.5em 0;
   width: 100%;
+  margin: 0.5em 0;
+  border-collapse: collapse;
+  border: 1px solid var(--gray-sep);
 
   th,
   td {
-    border: 1px solid var(--gray-sep);
     padding: 6px 8px;
     text-align: left;
+    border: 1px solid var(--gray-sep);
   }
 
   thead th {
-    background-color: var(--gray-ui);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
+    background-color: var(--gray-ui);
   }
 
   tbody tr:hover {
@@ -171,19 +171,19 @@
 }
 
 .shortcutInput {
+  width: 100%;
+  padding: 4px 8px;
+  font-family: monospace;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
   background-color: var(--gray-subtle);
   border: 1px solid var(--gray-sep);
   border-radius: 4px;
-  cursor: pointer;
-  font-family: monospace;
-  font-size: 13px;
-  padding: 4px 8px;
-  text-align: center;
-  width: 100%;
 
   &:focus {
-    border-color: var(--blue-focus, #0066cc);
     outline: none;
+    border-color: var(--blue-focus, #0066cc);
   }
 
   &[data-recording] {
@@ -192,7 +192,7 @@
   }
 
   &::placeholder {
-    color: var(--gray-text-muted, #888);
     font-style: italic;
+    color: var(--gray-text-muted, #888);
   }
 }

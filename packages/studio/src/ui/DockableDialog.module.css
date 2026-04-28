@@ -28,32 +28,32 @@
 
 .DockableDialog {
   --border-radius: 4px;
+  position: absolute;
 
   display: flex;
   flex-direction: column;
   width: 500px;
-  position: absolute;
 
   * {
-    transition-property: background-color, color;
     transition-timing-function: var(--default-transition-timing-function);
     transition-duration: 150ms;
+    transition-property: background-color, color;
   }
 }
 
 .DockableDialogHeader {
-  background-color: var(--accent-solid);
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
-  color: #fff;
+  padding: 4px 8px;
   font-size: 14px;
   font-weight: bold;
-  padding: 4px 8px;
+  color: #fff;
   user-select: none;
+  background-color: var(--accent-solid);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .DockableDialogContent {
+  padding: 8px 16px;
+  color: light-dark(#000, #fff);
   background-color: light-dark(#e0e0e0, #333);
   border-radius: 0 0 var(--border-radius) var(--border-radius);
-  color: light-dark(#000, #fff);
-  padding: 8px 16px;
 }

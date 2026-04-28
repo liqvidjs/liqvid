@@ -115,7 +115,7 @@ export function ThumbnailsSection({
                     alt={`Light thumbnail sheet ${sheet}`}
                     className={shareStyles.thumbSheet}
                     key={`light-${sheet}`}
-                    src={`/api/liqvid/static?url=${encodeURIComponent(`${projectPath}/.liqvid/thumbs/light/${sheet}`)}`}
+                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/light/${sheet}`)}`}
                   />
                 ))}
               </div>
@@ -130,7 +130,7 @@ export function ThumbnailsSection({
                     alt={`Dark thumbnail sheet ${sheet}`}
                     className={shareStyles.thumbSheet}
                     key={`dark-${sheet}`}
-                    src={`/api/liqvid/static?url=${encodeURIComponent(`${projectPath}/.liqvid/thumbs/dark/${sheet}`)}`}
+                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/dark/${sheet}`)}`}
                   />
                 ))}
               </div>

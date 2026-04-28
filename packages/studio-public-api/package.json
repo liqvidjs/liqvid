@@ -1,0 +1,51 @@
+{
+  "name": "@liqvid/studio-public-api",
+  "version": "1.0.0-alpha.0",
+  "description": "Zod schemas for Liqvid Studio API",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "types": "./dist/types/index.d.mts"
+    }
+  },
+  "files": [
+    "dist/*",
+    "json-schemas/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    "generate:openapi": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-openapi.mts",
+    "lint": "biome check --fix",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@types/js-yaml": "catalog:dev",
+    "js-yaml": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.4.0",
+    "zod": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "@liqvid/duration": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module"
+}

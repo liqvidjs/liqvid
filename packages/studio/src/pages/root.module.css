@@ -1,14 +1,14 @@
 .main {
-  color-scheme: light dark;
-  font-size: var(--lvs-text-base);
-  margin: 0 auto;
   padding: 8px;
+  margin: 0 auto;
+  font-size: var(--lvs-text-base);
+  color-scheme: light dark;
 }
 
 .headerRow {
-  align-items: center;
   display: flex;
   gap: 1rem;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
@@ -28,12 +28,12 @@
 }
 
 .rebuildButton {
+  padding: 0.5rem 1rem;
+  color: light-dark(#333, #fff);
+  cursor: pointer;
   background: light-dark(#f0f0f0, #333);
   border: 1px solid light-dark(#ccc, #555);
   border-radius: 4px;
-  color: light-dark(#333, #fff);
-  cursor: pointer;
-  padding: 0.5rem 1rem;
   transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
@@ -47,11 +47,11 @@
 }
 
 .productionLink {
+  width: min-content;
   margin-left: auto;
   color: light-dark(#666, #999);
-  text-decoration: none;
   text-align: right;
-  width: min-content;
+  text-decoration: none;
 
   &:hover {
     color: light-dark(#333, #fff);
@@ -59,13 +59,13 @@
 }
 
 .newProjectButton {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
   background: light-dark(#2563eb, #3b82f6);
   border: 1px solid light-dark(#1d4ed8, #2563eb);
   border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
   transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
@@ -95,43 +95,43 @@
   }
 
   input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: inherit;
     background: light-dark(#fff, #2a2a2a);
     border: 1px solid light-dark(#d1d5db, #4b5563);
     border-radius: 4px;
-    color: inherit;
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
 
     &:focus {
-      border-color: light-dark(#2563eb, #3b82f6);
       outline: 2px solid light-dark(#2563eb, #3b82f6);
       outline-offset: 1px;
+      border-color: light-dark(#2563eb, #3b82f6);
     }
 
     &:disabled {
-      background: light-dark(#f3f4f6, #1a1a1a);
       cursor: not-allowed;
+      background: light-dark(#f3f4f6, #1a1a1a);
     }
   }
 }
 
 .fieldHint {
-  color: light-dark(#6b7280, #9ca3af);
   font-size: 0.75rem;
+  color: light-dark(#6b7280, #9ca3af);
 }
 
 .fieldError {
-  color: light-dark(#dc2626, #fca5a5);
   font-size: 0.75rem;
+  color: light-dark(#dc2626, #fca5a5);
 }
 
 .error {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: light-dark(#dc2626, #fca5a5);
   background: light-dark(#fef2f2, #450a0a);
   border: 1px solid light-dark(#fecaca, #7f1d1d);
   border-radius: 4px;
-  color: light-dark(#dc2626, #fca5a5);
-  font-size: 0.875rem;
-  padding: 0.5rem 0.75rem;
 }
 
 .dialogActions {
@@ -142,14 +142,14 @@
 }
 
 .submitButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
   background: light-dark(#2563eb, #3b82f6);
   border: 1px solid light-dark(#1d4ed8, #2563eb);
   border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
   transition: background-color 0.15s;
 
   &:hover:not(:disabled) {

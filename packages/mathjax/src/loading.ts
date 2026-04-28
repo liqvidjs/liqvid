@@ -11,14 +11,13 @@ export const MathJaxReady = waitFor(
     window.MathJax !== null &&
     "_" in window.MathJax,
 ).then(async () => {
+  await MathJax.startup.promise;
+
   const packages = MathJax._.components.package.Package.packages;
   const packageNames = Array.from(packages.keys()).filter((name) => {
     const pkg = packages.get(name)!;
     return pkg.isLoading || pkg.isLoaded;
   });
 
-  await Promise.all([
-    MathJax.loader.ready(...packageNames),
-    MathJax.startup.promise,
-  ]);
+  await MathJax.loader.ready(...packageNames);
 });

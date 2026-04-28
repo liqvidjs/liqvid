@@ -32,6 +32,21 @@ export type PlaybackEventsMap = {
 declare let webkitAudioContext: typeof AudioContext;
 
 /**
+ * Audio source registration for offline rendering.
+ */
+export interface AudioSourceRegistration {
+  /** The decoded audio buffer */
+  buffer: AudioBuffer;
+  /** Start time in seconds (when the audio begins in the timeline) */
+  startTime: number;
+}
+
+/**
+ * Progress callback for offline rendering.
+ */
+export type OfflineRenderProgress = (progress: number) => void;
+
+/**
  * Class pretending to be a media element advancing in time.
  *
  * Imitates {@link HTMLMediaElement} to a certain extent, although it does not implement that interface.
@@ -51,6 +66,12 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
    * Behaves like {@link HTMLMediaElement.textTracks}.
    */
   readonly textTracks: SyntheticTextTrackList;
+
+  /**
+   * Registered audio sources for offline rendering.
+   * Audio components should register their decoded buffers here.
+   */
+  readonly audioSources: Set<AudioSourceRegistration> = new Set();
 
   /* private fields */
   private __playingFromMs = 0;
@@ -274,6 +295,123 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.textTracks.__remove(track);
   }
 
+  /**
+   * Register an audio source for offline rendering.
+   * Audio components should call this after decoding their audio buffers.
+   *
+   * @param registration - The audio source registration
+   */
+  registerAudioSource(registration: AudioSourceRegistration): void {
+    this.audioSources.add(registration);
+  }
+
+  /**
+   * Unregister an audio source from offline rendering.
+   *
+   * @param registration - The audio source registration to remove
+   */
+  unregisterAudioSource(registration: AudioSourceRegistration): void {
+    this.audioSources.delete(registration);
+  }
+
+  /**
+   * Render all registered audio sources to an AudioBuffer using OfflineAudioContext.
+   * This renders as fast as possible (not real-time).
+   *
+   * @param onProgress - Optional callback for progress updates (0-1)
+   * @returns The rendered audio buffer
+   */
+  async renderOffline(onProgress?: OfflineRenderProgress): Promise<AudioBuffer> {
+    if (!isClient) {
+      throw new Error("renderOffline can only be called in the browser");
+    }
+
+    const sampleRate = 44100;
+    const numberOfChannels = 2;
+    const lengthInSamples = Math.ceil(this.duration * sampleRate);
+
+    if (lengthInSamples === 0) {
+      throw new Error("Cannot render audio: duration is 0");
+    }
+
+    // Create offline audio context
+    const offlineContext = new OfflineAudioContext(
+      numberOfChannels,
+      lengthInSamples,
+      sampleRate,
+    );
+
+    // Create a master gain node
+    const masterGain = offlineContext.createGain();
+    masterGain.connect(offlineContext.destination);
+
+    // Schedule all registered audio sources
+    for (const registration of this.audioSources) {
+      const { buffer, startTime } = registration;
+
+      // Skip if the audio starts after the playback ends
+      if (startTime >= this.duration) continue;
+
+      // Create a buffer source for each registered audio
+      const sourceNode = offlineContext.createBufferSource();
+      sourceNode.buffer = buffer;
+      sourceNode.connect(masterGain);
+
+      // Calculate when to start (in samples)
+      const startTimeInContext = Math.max(0, startTime);
+
+      // Calculate offset within the buffer (if startTime is negative)
+      const offsetInBuffer = startTime < 0 ? -startTime : 0;
+
+      // Calculate how long to play
+      const maxDuration = this.duration - startTimeInContext;
+      const bufferDuration = buffer.duration - offsetInBuffer;
+      const playDuration = Math.min(maxDuration, bufferDuration);
+
+      if (playDuration > 0) {
+        sourceNode.start(startTimeInContext, offsetInBuffer, playDuration);
+      }
+    }
+
+    // Render the audio
+    if (onProgress) {
+      // OfflineAudioContext doesn't have native progress events,
+      // so we estimate progress based on time
+      const startRenderTime = performance.now();
+      const estimatedRenderTime = this.duration * 100; // rough estimate: 100ms per second of audio
+
+      const progressInterval = setInterval(() => {
+        const elapsed = performance.now() - startRenderTime;
+        const progress = Math.min(elapsed / estimatedRenderTime, 0.99);
+        onProgress(progress);
+      }, 100);
+
+      try {
+        const renderedBuffer = await offlineContext.startRendering();
+        clearInterval(progressInterval);
+        onProgress(1);
+        return renderedBuffer;
+      } catch (error) {
+        clearInterval(progressInterval);
+        throw error;
+      }
+    }
+
+    return offlineContext.startRendering();
+  }
+
+  /**
+   * Render all registered audio sources and return as a Blob.
+   * This encodes the audio as WAV format.
+   *
+   * @param onProgress - Optional callback for progress updates (0-1)
+   * @returns The rendered audio as a WAV Blob
+   */
+  async renderOfflineAsWav(onProgress?: OfflineRenderProgress): Promise<Blob> {
+    const audioBuffer = await this.renderOffline(onProgress);
+    return audioBufferToWav(audioBuffer);
+  }
+
   /* private methods */
 
   /**
@@ -354,4 +492,76 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
   private __emit(eventName: PlaybackEvent) {
     this.emit(eventName, { target: this, type: eventName });
   }
+}
+
+/**
+ * Convert an AudioBuffer to a WAV Blob.
+ */
+function audioBufferToWav(buffer: AudioBuffer): Blob {
+  const numberOfChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const format = 1; // PCM
+  const bitDepth = 16;
+
+  const bytesPerSample = bitDepth / 8;
+  const blockAlign = numberOfChannels * bytesPerSample;
+
+  // Interleave channels
+  const interleaved = interleaveChannels(buffer);
+  const dataLength = interleaved.length * bytesPerSample;
+  const headerLength = 44;
+  const totalLength = headerLength + dataLength;
+
+  const arrayBuffer = new ArrayBuffer(totalLength);
+  const view = new DataView(arrayBuffer);
+
+  // WAV header
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, totalLength - 8, true);
+  writeString(view, 8, "WAVE");
+  writeString(view, 12, "fmt ");
+  view.setUint32(16, 16, true); // fmt chunk size
+  view.setUint16(20, format, true);
+  view.setUint16(22, numberOfChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true); // byte rate
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitDepth, true);
+  writeString(view, 36, "data");
+  view.setUint32(40, dataLength, true);
+
+  // Write audio data
+  const offset = 44;
+  for (let i = 0; i < interleaved.length; i++) {
+    const sample = Math.max(-1, Math.min(1, interleaved[i]));
+    const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+    view.setInt16(offset + i * 2, intSample, true);
+  }
+
+  return new Blob([arrayBuffer], { type: "audio/wav" });
+}
+
+function writeString(view: DataView, offset: number, str: string): void {
+  for (let i = 0; i < str.length; i++) {
+    view.setUint8(offset + i, str.charCodeAt(i));
+  }
+}
+
+function interleaveChannels(buffer: AudioBuffer): Float32Array {
+  const numberOfChannels = buffer.numberOfChannels;
+  const length = buffer.length;
+  const result = new Float32Array(length * numberOfChannels);
+
+  const channels: Float32Array[] = [];
+  for (let c = 0; c < numberOfChannels; c++) {
+    channels.push(buffer.getChannelData(c));
+  }
+
+  for (let i = 0; i < length; i++) {
+    for (let c = 0; c < numberOfChannels; c++) {
+      result[i * numberOfChannels + c] = channels[c][i];
+    }
+  }
+
+  return result;
 }

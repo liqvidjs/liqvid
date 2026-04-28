@@ -6,41 +6,42 @@
   > li {
     display: flex;
     align-items: center;
-    border-radius: 4px;
     border: 1px solid light-dark(#eee, #333);
+    border-radius: 4px;
 
     > :link {
       display: flex;
       flex: 1;
-      align-items: center;
       gap: 1rem;
+      align-items: center;
       padding: 0.5rem;
     }
   }
 }
 
 .thumbnail {
-  border-radius: 4px;
-  display: flex;
   position: relative;
+  display: flex;
   width: 9rem;
+  border-radius: 4px;
 }
 
 .duration {
   /* position */
-  bottom: 0;
   position: absolute;
   right: 0;
+  /* position */
+  bottom: 0;
+  padding: 4px 4px;
+  font-size: var(--lvs-text-xs);
+  line-height: 1;
+
+  /* text */
+  color: #fff;
 
   /* background/borders/padding */
   background: #0001;
   border-radius: 2px 0 0 0;
-  padding: 4px 4px;
-
-  /* text */
-  color: #fff;
-  font-size: var(--lvs-text-xs);
-  line-height: 1;
 }
 
 .actions {
@@ -55,23 +56,23 @@
 }
 
 .toggleLabel {
-  align-items: center;
-  cursor: pointer;
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+  cursor: pointer;
   user-select: none;
 }
 
 .toggleSwitch {
+  position: relative;
+  width: 2.25rem;
+  height: 1.25rem;
+  padding: 2px;
+  cursor: pointer;
   background: var(--gray-solid);
   border: none;
   border-radius: 9999px;
-  cursor: pointer;
-  height: 1.25rem;
-  padding: 2px;
-  position: relative;
   transition: background-color 0.2s;
-  width: 2.25rem;
 
   &[data-state="checked"] {
     background: var(--accent-solid);
@@ -79,13 +80,13 @@
 }
 
 .toggleThumb {
+  display: block;
+  width: 1rem;
+  height: 1rem;
   background: #fff;
   border-radius: 9999px;
-  display: block;
-  height: 1rem;
   transform: translateX(0);
   transition: transform 0.2s;
-  width: 1rem;
 
   [data-state="checked"] > & {
     transform: translateX(1rem);
@@ -100,9 +101,9 @@
 }
 
 .folder {
+  overflow: hidden;
   border: 1px solid light-dark(#e5e7eb, #374151);
   border-radius: 6px;
-  overflow: hidden;
 
   /* Nested folders */
   .folder {
@@ -122,17 +123,17 @@
 }
 
 .folderHeader {
+  display: flex;
+  gap: 0.5rem;
   align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
   background: light-dark(#f9fafb, #1f2937);
   border: none;
-  cursor: pointer;
-  display: flex;
-  font-weight: 500;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  text-align: left;
   transition: background-color 0.15s;
-  width: 100%;
 
   &:hover {
     background: light-dark(#f3f4f6, #374151);
@@ -140,14 +141,14 @@
 }
 
 .folderChevron {
-  color: light-dark(#6b7280, #9ca3af);
   flex-shrink: 0;
+  color: light-dark(#6b7280, #9ca3af);
 }
 
 .folderIcon {
+  flex-shrink: 0;
   color: var(--accent-solid);
   fill: var(--accent-solid);
-  flex-shrink: 0;
 }
 
 .folderName {
@@ -155,11 +156,11 @@
 }
 
 .folderCount {
+  padding: 0.125rem 0.5rem;
+  font-weight: 500;
+  color: light-dark(#374151, #d1d5db);
   background: light-dark(#e5e7eb, #4b5563);
   border-radius: 9999px;
-  color: light-dark(#374151, #d1d5db);
-  font-weight: 500;
-  padding: 0.125rem 0.5rem;
 }
 
 .folder .projectList {

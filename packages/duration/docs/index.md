@@ -14,7 +14,7 @@ new Duration()
 ### Duration.betweenDates()
 
 ```typescript
-betweenDates(start: Date, end: Date): Duration
+betweenDates(start: Date, end: Date): [Duration](#class-duration)
 ```
 
 
@@ -26,7 +26,7 @@ betweenDates(start: Date, end: Date): Duration
 ### Duration.from()
 
 ```typescript
-from(val: DurationLike | Date): Duration
+from(val: [DurationLike](#type-durationlike) | Date): [Duration](#class-duration)
 ```
 
 Coerce a DurationLike into a Duration
@@ -34,12 +34,12 @@ Coerce a DurationLike into a Duration
 
 **Parameters:**
 
-- `val`: DurationLike | Date
+- `val`: [DurationLike](#type-durationlike) | Date
 
 ### Duration.fromJSON()
 
 ```typescript
-fromJSON(val: SerializedDuration): Duration
+fromJSON(val: [SerializedDuration](#type-serializedduration)): [Duration](#class-duration)
 ```
 
 Hydrate a Duration value
@@ -47,12 +47,12 @@ Hydrate a Duration value
 
 **Parameters:**
 
-- `val`: SerializedDuration
+- `val`: [SerializedDuration](#type-serializedduration)
 
 ### Duration.withSetter()
 
 ```typescript
-withSetter(options?: DurationOptions): [Duration, DurationSetter]
+withSetter(options?: [DurationOptions](#type-durationoptions)): [[Duration](#class-duration), [DurationSetter](#interface-durationsetter)]
 ```
 
 Create a new `Duration` object and receive a callback
@@ -63,12 +63,12 @@ be mutable to consumers.
 
 **Parameters:**
 
-- `options`: DurationOptions (optional)
+- `options`: [DurationOptions](#type-durationoptions) (optional)
 
 ### between()
 
 ```typescript
-between(lower: DurationLike, upper: DurationLike): boolean
+between(lower: [DurationLike](#type-durationlike), upper: [DurationLike](#type-durationlike)): boolean
 ```
 
 whether `lower <= this < upper`
@@ -76,24 +76,24 @@ whether `lower <= this < upper`
 
 **Parameters:**
 
-- `lower`: DurationLike
-- `upper`: DurationLike
+- `lower`: [DurationLike](#type-durationlike)
+- `upper`: [DurationLike](#type-durationlike)
 
 ### dividedBy()
 
 ```typescript
-dividedBy(other: DurationLike): number
+dividedBy(other: [DurationLike](#type-durationlike)): number
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### equals()
 
 ```typescript
-equals(other: DurationLike): boolean
+equals(other: [DurationLike](#type-durationlike)): boolean
 ```
 
 compare two Durations
@@ -101,29 +101,29 @@ compare two Durations
 
 **Parameters:**
 
-- `other`: DurationLike - duration to compare this one to
+- `other`: [DurationLike](#type-durationlike) - duration to compare this one to
 
 ### greaterThan()
 
 ```typescript
-greaterThan(other: DurationLike): boolean
+greaterThan(other: [DurationLike](#type-durationlike)): boolean
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### greaterThanOrEqual()
 
 ```typescript
-greaterThanOrEqual(other: DurationLike): boolean
+greaterThanOrEqual(other: [DurationLike](#type-durationlike)): boolean
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### inDays()
 
@@ -170,35 +170,35 @@ inWeeks(): number
 ### lessThan()
 
 ```typescript
-lessThan(other: DurationLike): boolean
+lessThan(other: [DurationLike](#type-durationlike)): boolean
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### lessThanOrEqual()
 
 ```typescript
-lessThanOrEqual(other: DurationLike): boolean
+lessThanOrEqual(other: [DurationLike](#type-durationlike)): boolean
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### minus()
 
 ```typescript
-minus(other: DurationLike): Duration
+minus(other: [DurationLike](#type-durationlike)): [Duration](#class-duration)
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### plus()
 
@@ -211,18 +211,18 @@ plus(other: Date): Date
 
 - `other`: Date
 ```typescript
-plus(other: DurationLike): Duration
+plus(other: [DurationLike](#type-durationlike)): [Duration](#class-duration)
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### times()
 
 ```typescript
-times(factor: number): Duration
+times(factor: number): [Duration](#class-duration)
 ```
 
 
@@ -233,7 +233,7 @@ times(factor: number): Duration
 ### toJSON()
 
 ```typescript
-toJSON(): SerializedDuration
+toJSON(): [SerializedDuration](#type-serializedduration)
 ```
 
 
@@ -247,9 +247,9 @@ This is mostly for frequently-changing values where we want
 to avoid the cost of allocating lots of new objects; in most situations,
 it should be fine to just use a new Duration.
 
-**Extends:** Duration
+**Extends:** [Duration](#class-duration)
 
-**Implements:** DurationSetter
+**Implements:** [DurationSetter](#interface-durationsetter)
 
 ### constructor
 
@@ -261,13 +261,13 @@ new MutableDuration()
 ### add()
 
 ```typescript
-add(other: DurationLike): void
+add(other: [DurationLike](#type-durationlike)): void
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 ### set()
 
@@ -308,13 +308,13 @@ setToZero(): void
 ### subtract()
 
 ```typescript
-subtract(other: DurationLike): void
+subtract(other: [DurationLike](#type-durationlike)): void
 ```
 
 
 **Parameters:**
 
-- `other`: DurationLike
+- `other`: [DurationLike](#type-durationlike)
 
 
 ---
@@ -324,24 +324,24 @@ subtract(other: DurationLike): void
 ### add()
 
 ```typescript
-add(other: DurationOptions): void
+add(other: [DurationOptions](#type-durationoptions)): void
 ```
 
 
 **Parameters:**
 
-- `other`: DurationOptions
+- `other`: [DurationOptions](#type-durationoptions)
 
 ### set()
 
 ```typescript
-set(options: DurationOptions): void
+set(options: [DurationOptions](#type-durationoptions)): void
 ```
 
 
 **Parameters:**
 
-- `options`: DurationOptions
+- `options`: [DurationOptions](#type-durationoptions)
 
 ### setMilliseconds()
 
@@ -375,13 +375,13 @@ setToZero(): void
 ### subtract()
 
 ```typescript
-subtract(other: DurationOptions): void
+subtract(other: [DurationOptions](#type-durationoptions)): void
 ```
 
 
 **Parameters:**
 
-- `other`: DurationOptions
+- `other`: [DurationOptions](#type-durationoptions)
 
 
 ---
@@ -392,7 +392,7 @@ Convenience type representing either a `Duration`
 or creation options for one
 
 ```typescript
-type DurationLike = Duration | DurationOptions
+type DurationLike = [Duration](#class-duration) | [DurationOptions](#type-durationoptions)
 ```
 
 
@@ -481,7 +481,7 @@ type DurationOptions = {
 ## type SerializedDuration
 
 ```typescript
-type SerializedDuration = DurationOptions & SerializedValue<typeof serializationKey>
+type SerializedDuration = [DurationOptions](#type-durationoptions) & SerializedValue<typeof serializationKey>
 ```
 
 

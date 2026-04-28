@@ -1,0 +1,12 @@
+ApiToken:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  properties:
+    content:
+      type: string
+    name:
+      type: string
+  required:
+    - content
+    - name
+  additionalProperties: false

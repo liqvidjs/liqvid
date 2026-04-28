@@ -1,10 +1,10 @@
 .iconButton {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
   border: none;
   border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
   transition:
     background-color 0.15s,
     opacity 0.15s;
@@ -17,39 +17,39 @@
 
 /* Sizes */
 .sm {
-  height: 1.75rem;
   width: 1.75rem;
+  height: 1.75rem;
 
   > svg {
-    height: 0.875rem;
     width: 0.875rem;
+    height: 0.875rem;
   }
 }
 
 .md {
-  height: 2.25rem;
   width: 2.25rem;
+  height: 2.25rem;
 
   > svg {
-    height: 1.125rem;
     width: 1.125rem;
+    height: 1.125rem;
   }
 }
 
 .lg {
-  height: 2.75rem;
   width: 2.75rem;
+  height: 2.75rem;
 
   > svg {
-    height: 1.375rem;
     width: 1.375rem;
+    height: 1.375rem;
   }
 }
 
 /* Variants */
 .default {
-  background: var(--gray-ui);
   color: var(--gray-normal);
+  background: var(--gray-ui);
 
   &:hover:not(:disabled) {
     background: var(--gray-hover);
@@ -61,8 +61,8 @@
 }
 
 .primary {
-  background: var(--accent-solid);
   color: var(--accent-contrast);
+  background: var(--accent-solid);
 
   &:hover:not(:disabled) {
     background: var(--accent-solid-hover);
