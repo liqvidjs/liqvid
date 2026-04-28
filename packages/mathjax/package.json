@@ -4,10 +4,12 @@
   "description": "MathJax integration for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./plain": {
+"./plain": {
+      "@liqvid/dev": "./src/plain.tsx",
       "import": "./dist/esm/plain.js",
       "types": "./dist/types/plain.d.ts"
     }

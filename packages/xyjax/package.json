@@ -4,6 +4,7 @@
   "description": "XyJax animation helpers for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }

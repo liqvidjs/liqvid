@@ -13,7 +13,11 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "plugins": [{ "name": "next" }, { "name": "no-private-imports" }],
+    "plugins": [
+      { "name": "next" },
+      { "name": "no-private-imports" },
+      { "name": "no-restricted-imports" }
+    ],
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,

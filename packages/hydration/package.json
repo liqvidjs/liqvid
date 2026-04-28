@@ -4,6 +4,7 @@
   "description": "Hydration magic for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     }

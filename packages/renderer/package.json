@@ -7,22 +7,27 @@
   ],
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/tasks/index.d.mts"
     },
     "./convert": {
+      "@liqvid/dev": "./src/tasks/convert.mts",
       "import": "./dist/esm/tasks/convert.mjs",
       "types": "./dist/types/tasks/convert.d.mts"
     },
     "./join": {
+      "@liqvid/dev": "./src/tasks/join.mts",
       "import": "./dist/esm/tasks/join.mjs",
       "types": "./dist/types/tasks/join.d.mts"
     },
     "./solidify": {
+      "@liqvid/dev": "./src/tasks/solidify.mts",
       "import": "./dist/esm/tasks/solidify.mjs",
       "types": "./dist/types/tasks/solidify.d.mts"
     },
     "./thumbs": {
+      "@liqvid/dev": "./src/tasks/thumbs.mts",
       "import": "./dist/esm/tasks/thumbs.mjs",
       "types": "./dist/types/tasks/thumbs.d.mts"
     }

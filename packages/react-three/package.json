@@ -4,6 +4,7 @@
   "description": "@react-three integration for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.tsx",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     }

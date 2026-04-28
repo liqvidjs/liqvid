@@ -4,9 +4,11 @@
   "description": "Playback interface for Liqvid-compatible plugins",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts"
     },
     "./react": {
+      "@liqvid/dev": "./src/react.ts",
       "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }

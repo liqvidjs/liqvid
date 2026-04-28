@@ -5,22 +5,27 @@
   "main": "dist/esm/index.mjs",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./build": {
+      "@liqvid/dev": "./src/tasks/build.mts",
       "import": "./dist/esm/tasks/build.mjs",
       "types": "./dist/types/tasks/build.d.mts"
     },
     "./render": {
+      "@liqvid/dev": "./src/tasks/render.mts",
       "import": "./dist/esm/tasks/render.mjs",
       "types": "./dist/types/tasks/render.d.mts"
     },
     "./thumbs": {
+      "@liqvid/dev": "./src/tasks/thumbs.mts",
       "import": "./dist/esm/tasks/thumbs.mjs",
       "types": "./dist/types/tasks/thumbs.d.mts"
     },
     "./transcribe": {
+      "@liqvid/dev": "./src/tasks/transcribe.mts",
       "import": "./dist/esm/tasks/transcribe.mjs",
       "types": "./dist/types/tasks/transcribe.d.mts"
     }

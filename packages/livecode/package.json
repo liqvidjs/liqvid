@@ -4,15 +4,18 @@
   "description": "GUI for interactive coding tutorials with CodeMirror",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./interpreters/*": {
+      "@liqvid/dev": "./src/interpreters/*.ts",
       "import": "./dist/esm/interpreters/*.js",
       "types": "./dist/types/interpreters/*.d.ts"
     },
     "./style.css": "./dist/css/style.css",
     "./html": {
+      "@liqvid/dev": "./src/presets/html/index.ts",
       "import": "./dist/esm/presets/html/index.js",
       "types": "./dist/types/presets/html/index.d.ts"
     }

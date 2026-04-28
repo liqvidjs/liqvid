@@ -8,6 +8,7 @@
   },
   "exports": {
     "./react": {
+      "@liqvid/dev": "./src/react.tsx",
       "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }

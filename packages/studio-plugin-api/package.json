@@ -4,10 +4,12 @@
   "description": "API for Liqvid Studio plugins",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./server": {
+      "@liqvid/dev": "./src/server.mts",
       "import": "./dist/esm/server.mjs",
       "types": "./dist/types/server.d.mts"
     }

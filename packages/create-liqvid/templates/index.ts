@@ -228,7 +228,10 @@ export const installTemplate = async ({
       react: nextjsReactPeerVersion,
       "react-dom": nextjsReactPeerVersion,
     },
-    devDependencies: {},
+    devDependencies: {
+      "no-private-imports": "^0.0.2",
+      "no-restricted-imports": "^0.0.2",
+    },
     name: appName,
     private: true,
     scripts: {

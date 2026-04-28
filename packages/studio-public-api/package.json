@@ -4,6 +4,7 @@
   "description": "Zod schemas for Liqvid Studio API",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     }

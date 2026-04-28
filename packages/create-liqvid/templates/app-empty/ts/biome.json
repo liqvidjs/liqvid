@@ -26,7 +26,21 @@
       "correctness": {
         "noPrivateImports": "error"
       },
-      "recommended": true
+      "recommended": true,
+
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@liqvid/prompts": {
+                "importNames": ["Cue", "Prompt"],
+                "message": "import the styled versions from @/components/liqvid/prompts"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "vcs": {

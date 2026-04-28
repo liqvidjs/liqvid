@@ -4,10 +4,12 @@
   "description": "Player UI for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./iframe-api": {
+      "@liqvid/dev": "./src/iframe-api.ts",
       "import": "./dist/esm/iframe-api.js",
       "types": "./dist/types/iframe-api.d.ts"
     }

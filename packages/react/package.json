@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "React surface for Liqvid",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/index.js"
+    }
   },
   "typesVersions": {
     "*": {

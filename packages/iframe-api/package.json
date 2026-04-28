@@ -8,17 +8,21 @@
   },
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts"
     },
     "./child": {
+      "@liqvid/dev": "./src/child.ts",
       "import": "./dist/esm/child.js",
       "types": "./dist/types/child.d.ts"
     },
     "./parent": {
+      "@liqvid/dev": "./src/parent.ts",
       "import": "./dist/esm/parent.js",
       "types": "./dist/types/parent.d.ts"
     },
     "./parent/react": {
+      "@liqvid/dev": "./src/react.ts",
       "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }
