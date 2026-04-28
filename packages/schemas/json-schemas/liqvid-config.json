@@ -1,47 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string"
     },
     "backend": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "content": {
-          "type": "string",
-          "enum": [
-            "copy",
-            "githubPages",
-            "liqvidStudio",
-            "s3",
-            "sftp"
-          ]
+          "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
+          "type": "string"
         },
         "media": {
-          "type": "string",
-          "enum": [
-            "copy",
-            "liqvidStudio",
-            "s3",
-            "sftp"
-          ]
+          "enum": ["copy", "liqvidStudio", "s3", "sftp"],
+          "type": "string"
         }
       },
-      "required": [
-        "content",
-        "media"
-      ],
-      "additionalProperties": false
+      "required": ["content", "media"],
+      "type": "object"
     },
     "captioning": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "nodeWhisperOptions": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "autoDownloadModelName": {
-              "type": "string",
               "enum": [
                 "tiny",
                 "tiny.en",
@@ -54,11 +39,11 @@
                 "large-v1",
                 "large",
                 "large-v3-turbo"
-              ]
+              ],
+              "type": "string"
             },
             "modelName": {
               "default": "base.en",
-              "type": "string",
               "enum": [
                 "tiny",
                 "tiny.en",
@@ -71,7 +56,8 @@
                 "large-v1",
                 "large",
                 "large-v3-turbo"
-              ]
+              ],
+              "type": "string"
             },
             "modelRootPath": {
               "type": "string"
@@ -89,31 +75,27 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "modelName"
-          ],
-          "additionalProperties": false
+          "required": ["modelName"],
+          "type": "object"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     },
     "providers": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "bluesky": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         },
         "copy": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "clean": {
               "default": false,
@@ -125,7 +107,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "hosting": {
                       "type": "string"
@@ -134,34 +116,27 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "hosting",
-                    "media"
-                  ],
-                  "additionalProperties": false
+                  "required": ["hosting", "media"],
+                  "type": "object"
                 }
               ]
             }
           },
-          "required": [
-            "destination"
-          ],
-          "additionalProperties": false
+          "required": ["destination"],
+          "type": "object"
         },
         "facebook": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         },
         "githubPages": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "repository": {
               "type": "string"
@@ -173,65 +148,55 @@
               "type": "string"
             }
           },
-          "required": [
-            "repository",
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["repository", "username"],
+          "type": "object"
         },
         "instagram": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         },
         "liqvidStudio": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         },
         "s3": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "auth": {
               "oneOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "profile": {
                       "type": "string"
                     },
                     "type": {
-                      "type": "string",
-                      "const": "profile"
+                      "const": "profile",
+                      "type": "string"
                     }
                   },
-                  "required": [
-                    "profile",
-                    "type"
-                  ],
-                  "additionalProperties": false
+                  "required": ["profile", "type"],
+                  "type": "object"
                 },
                 {
-                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "accessKeyId": {
                       "default": "{env:AWS_ACCESS_KEY_ID}",
-                      "type": "string",
-                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
+                      "type": "string"
                     },
                     "endpoint": {
                       "type": "string"
@@ -242,12 +207,12 @@
                     },
                     "secretAccessKey": {
                       "default": "{env:AWS_SECRET_ACCESS_KEY}",
-                      "type": "string",
-                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$"
+                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
+                      "type": "string"
                     },
                     "type": {
-                      "type": "string",
-                      "const": "explicit"
+                      "const": "explicit",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -256,7 +221,7 @@
                     "secretAccessKey",
                     "type"
                   ],
-                  "additionalProperties": false
+                  "type": "object"
                 }
               ]
             },
@@ -273,15 +238,11 @@
               "type": "string"
             }
           },
-          "required": [
-            "auth",
-            "bucket",
-            "domain"
-          ],
-          "additionalProperties": false
+          "required": ["auth", "bucket", "domain"],
+          "type": "object"
         },
         "sftp": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "host": {
               "type": "string"
@@ -290,48 +251,41 @@
               "type": "string"
             }
           },
-          "required": [
-            "host",
-            "path"
-          ],
-          "additionalProperties": false
+          "required": ["host", "path"],
+          "type": "object"
         },
         "twitter": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         },
         "youtube": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
             }
           },
-          "required": [
-            "username"
-          ],
-          "additionalProperties": false
+          "required": ["username"],
+          "type": "object"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     },
     "publishing": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "delete": {
           "default": false,
           "type": "boolean"
         },
         "include": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "media": {
               "default": [
@@ -350,27 +304,20 @@
                 "!**/*.d.ts",
                 "!**/*.d.json.ts"
               ],
-              "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "type": "array"
             }
           },
-          "required": [
-            "media"
-          ],
-          "additionalProperties": false
+          "required": ["media"],
+          "type": "object"
         }
       },
-      "required": [
-        "delete"
-      ],
-      "additionalProperties": false
+      "required": ["delete"],
+      "type": "object"
     }
   },
-  "required": [
-    "backend",
-    "providers"
-  ],
-  "additionalProperties": false
+  "required": ["backend", "providers"],
+  "type": "object"
 }

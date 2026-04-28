@@ -1,10 +1,10 @@
+import { render } from "@testing-library/react";
 import * as React from "react";
-import {render} from "@testing-library/react";
 
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
-import {IdMap} from "..";
+import { IdMap } from "..";
 
 function Component() {
   return (

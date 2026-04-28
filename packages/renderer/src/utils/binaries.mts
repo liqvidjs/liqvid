@@ -1,6 +1,7 @@
-import {execa} from "execa";
 import fs from "fs";
 import os from "os";
+
+import { execa } from "execa";
 // sillyness
 import Puppeteer from "puppeteer-core";
 
@@ -64,14 +65,14 @@ async function findChromeByPlatform() {
       ].find((location) => fs.existsSync(location));
     default:
       try {
-        const {stdout} = await execa("which", [
+        const { stdout } = await execa("which", [
           "google-chrome",
           "chromium",
           "chromium-browser",
         ]);
         return stdout.split("\n")[0];
       } catch (e) {
-        const {stdout} = e;
+        const { stdout } = e;
         return stdout.split("\n").filter(Boolean)[0];
       }
   }

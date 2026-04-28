@@ -1,7 +1,7 @@
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
-import {Playback, Script} from "..";
+import { Playback, Script } from "..";
 
 describe("Script", () => {
   let script: Script;

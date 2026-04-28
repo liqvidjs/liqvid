@@ -14,8 +14,8 @@ import {
   type AspectRatioSpecifier,
   normalizeAspectRatio,
 } from "./aspect-ratio";
-import { Captions, CaptionsDisplay } from "./Captions";
 import { Canvas } from "./Canvas";
+import { Captions } from "./Captions";
 import { Controls } from "./Controls";
 import { PlayerContext, type RenderingTask } from "./hooks";
 import { playerApiDeclaration } from "./iframe-api";

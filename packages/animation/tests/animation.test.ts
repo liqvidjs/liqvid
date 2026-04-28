@@ -1,4 +1,4 @@
-import { animate, bezier, replay, type ReplayData } from "../src/index";
+import { animate, bezier, type ReplayData, replay } from "../src/index";
 
 describe("animation/animate", () => {
   test("defaults", () => {

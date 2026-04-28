@@ -1,12 +1,18 @@
-import {ElementHandle, expect, JSHandle, test} from "@playwright/test";
-import type {Playback, Player} from "../../src/index";
+import {
+  type ElementHandle,
+  expect,
+  type JSHandle,
+  test,
+} from "@playwright/test";
+
+import type { Playback, Player } from "../../src/index";
 
 test.describe("Media", () => {
   let playback: JSHandle<Playback>;
   let player: JSHandle<Player>;
   let video: ElementHandle<HTMLVideoElement>;
 
-  test.beforeEach(async ({page}) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
     // globals

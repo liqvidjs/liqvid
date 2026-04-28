@@ -1,9 +1,10 @@
 import * as fs from "fs";
-import {getBabelOutputPlugin} from "@rollup/plugin-babel";
+
+import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
-import {nodeResolve} from "@rollup/plugin-node-resolve";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import dts from "rollup-plugin-dts";
-import {terser} from "rollup-plugin-terser";
+import { terser } from "rollup-plugin-terser";
 
 // banner
 const licenseComment = "/*!" + fs.readFileSync("./LICENSE", "utf8") + "*/";
@@ -36,14 +37,13 @@ const babelConfig = () =>
         },
       ],
     ],
-    presets: [["@babel/env", {targets: {ios: "12"}}]],
+    presets: [["@babel/env", { targets: { ios: "12" } }]],
   });
 
 export default [
   {
     external: ["react", "react-dom"],
     input: "dist/esm/index.js",
-    plugins: [nodeResolve({preferBuiltins: false}), commonjs()],
 
     output: [
       // ESM
@@ -62,17 +62,18 @@ export default [
       {
         ...umdConfig,
         file: "./dist/liqvid.min.js",
-        plugins: [babelConfig(), terser({module: false, safari10: true})],
+        plugins: [babelConfig(), terser({ module: false, safari10: true })],
       },
     ],
+    plugins: [nodeResolve({ preferBuiltins: false }), commonjs()],
   },
   // types
   {
     input: "dist/types/index.d.ts",
-    plugins: [dts()],
     output: {
       file: "dist/liqvid.d.ts",
       format: "es",
     },
+    plugins: [dts()],
   },
 ];

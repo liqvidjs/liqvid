@@ -1,17 +1,17 @@
+import { render } from "@testing-library/react";
 import * as React from "react";
-import {render} from "@testing-library/react";
 
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
 import {
-  KeyMap,
+  type KeyMap,
   Playback,
   Player,
-  Script,
+  type Script,
+  useKeymap,
   usePlayback,
   usePlayer,
-  useKeymap,
   useScript,
 } from "..";
 
@@ -26,10 +26,10 @@ function Test<T>(props: {
 }
 
 describe("Hooks", () => {
-  const playback = new Playback({duration: 60000});
+  const playback = new Playback({ duration: 60000 });
 
   test("useKeyMap", () => {
-    const o = {value: null as KeyMap};
+    const o = { value: null as KeyMap };
     let player: Player;
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
@@ -40,7 +40,7 @@ describe("Hooks", () => {
   });
 
   test("usePlayback", () => {
-    const o = {value: null as Playback};
+    const o = { value: null as Playback };
     let player: Player;
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
@@ -51,7 +51,7 @@ describe("Hooks", () => {
   });
 
   test("usePlayer", () => {
-    const o = {value: null as Player};
+    const o = { value: null as Player };
     let player: Player;
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>
@@ -62,7 +62,7 @@ describe("Hooks", () => {
   });
 
   test("useScript", () => {
-    const o = {value: null as Script};
+    const o = { value: null as Script };
     let player: Player;
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>

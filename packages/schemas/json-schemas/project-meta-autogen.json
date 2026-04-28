@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
     "duration": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "d": {
           "type": "number"
@@ -42,11 +42,9 @@
           "type": "number"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     }
   },
-  "required": [
-    "duration"
-  ],
-  "additionalProperties": false
+  "required": ["duration"],
+  "type": "object"
 }

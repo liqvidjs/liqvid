@@ -1,16 +1,17 @@
+import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
-import {fireEvent, render} from "@testing-library/react";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
-import {Playback, Player} from "../..";
-import {act} from "react-dom/test-utils";
+import { act } from "react-dom/test-utils";
+
+import { Playback, Player } from "../..";
 
 describe("Play/pause button", () => {
   let button: HTMLButtonElement;
 
-  const playback = new Playback({duration: 60000});
+  const playback = new Playback({ duration: 60000 });
 
   beforeEach(() => {
     render(<Player playback={playback}></Player>);
@@ -41,16 +42,16 @@ describe("Play/pause button", () => {
   });
 
   test("Keyboard shortcuts work", () => {
-    fireEvent.keyDown(document.body, {key: "K", code: "KeyK"});
+    fireEvent.keyDown(document.body, { code: "KeyK", key: "K" });
     expect(playback.paused).toBe(false);
 
-    fireEvent.keyDown(document.body, {key: "K", code: "KeyK"});
+    fireEvent.keyDown(document.body, { code: "KeyK", key: "K" });
     expect(playback.paused).toBe(true);
 
-    fireEvent.keyDown(document.body, {key: " ", code: "Space"});
+    fireEvent.keyDown(document.body, { code: "Space", key: " " });
     expect(playback.paused).toBe(false);
 
-    fireEvent.keyDown(document.body, {key: " ", code: "Space"});
+    fireEvent.keyDown(document.body, { code: "Space", key: " " });
     expect(playback.paused).toBe(true);
   });
 });

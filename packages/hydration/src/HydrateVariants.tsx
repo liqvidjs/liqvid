@@ -68,7 +68,6 @@ export function HydrateVariants(props: VariantConfig) {
           return <>{selected.children}</>;
         } else {
           return props.variants.map((variant, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: this is safe
             <Slot.Root id={`${id}-${i}`} key={i}>
               {variant.children}
             </Slot.Root>

@@ -1,33 +1,27 @@
 const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 const env = process.env.NODE_ENV || "development";
-require("dotenv").config({path: "../../.env"});
+require("dotenv").config({ path: "../../.env" });
 const webpack = require("webpack");
 
 module.exports = {
+  // necessary due to bug in old versions of mobile Safari
+  devtool: false,
   entry: `./src/index.tsx`,
-  output: {
-    filename: "bundle.js",
-    path: path.join(__dirname, "static"),
-  },
 
   mode: env,
 
   module: {
     rules: [
       {
-        test: /\.[jt]sx?$/,
         loader: "ts-loader",
+        test: /\.[jt]sx?$/,
       },
     ],
   },
 
-  plugins: [new webpack.EnvironmentPlugin(["PLAYWRIGHT_TEST_VIDEO"])],
-
-  // necessary due to bug in old versions of mobile Safari
-  devtool: false,
-
   optimization: {
+    emitOnErrors: true,
     minimizer: [
       new TerserPlugin({
         parallel: true,
@@ -36,13 +30,18 @@ module.exports = {
         },
       }),
     ],
-    emitOnErrors: true,
+  },
+  output: {
+    filename: "bundle.js",
+    path: path.join(__dirname, "static"),
   },
 
+  plugins: [new webpack.EnvironmentPlugin(["PLAYWRIGHT_TEST_VIDEO"])],
+
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
     alias: {
       "@env": path.join(__dirname, "src", "@" + env),
     },
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
   },
 };

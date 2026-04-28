@@ -1,17 +1,18 @@
+import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
-import {fireEvent, render} from "@testing-library/react";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
-import {Playback, Player} from "../..";
-import {act} from "react-dom/test-utils";
+import { act } from "react-dom/test-utils";
+
+import { Playback, Player } from "../..";
 
 describe("Volume button", () => {
   let button: HTMLButtonElement;
   let slider: HTMLInputElement;
 
-  const playback = new Playback({duration: 60000});
+  const playback = new Playback({ duration: 60000 });
 
   beforeEach(() => {
     render(<Player playback={playback}></Player>);
@@ -31,29 +32,29 @@ describe("Volume button", () => {
   });
 
   test("Setting volume works", () => {
-    fireEvent.change(slider, {target: {value: 70}});
+    fireEvent.change(slider, { target: { value: 70 } });
     expect(playback.volume).toBe(0.7);
   });
 
   test("Setting volume updates button icon", () => {
     expect(button).toMatchSnapshot();
 
-    fireEvent.change(slider, {target: {value: 40}});
+    fireEvent.change(slider, { target: { value: 40 } });
     expect(button).toMatchSnapshot();
 
-    fireEvent.change(slider, {target: {value: 0}});
+    fireEvent.change(slider, { target: { value: 0 } });
     expect(button).toMatchSnapshot();
   });
 
   test("Keyboard shortcuts work", () => {
-    fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
-    fireEvent.keyDown(document.body, {key: "ArrowDown", code: "ArrowDown"});
+    fireEvent.keyDown(document.body, { code: "ArrowDown", key: "ArrowDown" });
+    fireEvent.keyDown(document.body, { code: "ArrowDown", key: "ArrowDown" });
     expect(playback.volume).toBeCloseTo(0.9, 5);
 
-    fireEvent.keyDown(document.body, {key: "ArrowUp", code: "ArrowUp"});
+    fireEvent.keyDown(document.body, { code: "ArrowUp", key: "ArrowUp" });
     expect(playback.volume).toBeCloseTo(0.95, 5);
 
-    fireEvent.keyDown(document.body, {key: "M", code: "KeyM"});
+    fireEvent.keyDown(document.body, { code: "KeyM", key: "M" });
     expect(playback.muted).toBe(true);
   });
 });

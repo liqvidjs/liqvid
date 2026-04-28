@@ -1,25 +1,25 @@
 /* console */
 .lqv-console {
-  color: #000;
   grid-area: console;
   overflow-y: auto;
+  color: #000;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 .lqv-console > header {
+  display: block;
+  width: 100%;
+  padding: 0.2em 0.4em;
+  font-family: sans-serif;
   color: #fff;
   background-color: #333;
-  font-family: sans-serif;
-  padding: 0.2em 0.4em;
-  width: 100%;
-  display: block;
 }
 .lqv-console > output > pre {
-  border-bottom: 1px solid #eee;
   display: block;
-  padding: 0.1em 0.4em;
   width: 100%;
+  padding: 0.1em 0.4em;
   color: #000;
+  border-bottom: 1px solid #eee;
 }
 .lqv-console > output > pre.error {
   color: #f00;
@@ -53,18 +53,18 @@
 }
 /* html preview */
 .lqv-preview {
-  background: #fff;
   grid-area: console;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  background: #fff;
   border-left: 1px solid #ddd;
 }
 /* html console */
 .lqv-preview + .lqv-console {
-  left: var(--split);
-  height: var(--v-split);
-  grid-area: none;
-  width: calc(100% - var(--split));
   position: absolute;
   bottom: 0;
+  left: var(--split);
+  grid-area: none;
+  width: calc(100% - var(--split));
+  height: var(--v-split);
 }

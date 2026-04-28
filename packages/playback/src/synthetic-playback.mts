@@ -321,7 +321,9 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
    * @param onProgress - Optional callback for progress updates (0-1)
    * @returns The rendered audio buffer
    */
-  async renderOffline(onProgress?: OfflineRenderProgress): Promise<AudioBuffer> {
+  async renderOffline(
+    onProgress?: OfflineRenderProgress,
+  ): Promise<AudioBuffer> {
     if (!isClient) {
       throw new Error("renderOffline can only be called in the browser");
     }

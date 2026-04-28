@@ -1,12 +1,12 @@
-import {jsx} from "react/jsx-runtime";
-import {Utils, usePlayer} from "liqvid";
+import { Utils, usePlayer } from "liqvid";
 import {
   forwardRef,
-  useRef,
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
 } from "react";
+import { jsx } from "react/jsx-runtime";
 
 const implementation = function MJX(props, ref) {
   const {
@@ -34,8 +34,8 @@ const implementation = function MJX(props, ref) {
   const [open, close] = display ? ["\\[", "\\]"] : ["\\(", "\\)"];
   return jsx("span", {
     ...attrs,
-    ref: spanRef,
     children: open + children + close,
+    ref: spanRef,
   });
 };
 const MJX$1 = forwardRef(implementation);
@@ -51,9 +51,9 @@ function usePromise(deps = []) {
   return [promise, resolveRef.current];
 }
 
-const {combineRefs} = Utils.react;
+const { combineRefs } = Utils.react;
 const MJX = forwardRef(function MJX(props, ref) {
-  const {reparse = false, ...attrs} = props;
+  const { reparse = false, ...attrs } = props;
   const plain = useRef();
   const combined = combineRefs(plain, ref);
   const player = usePlayer();
@@ -64,7 +64,7 @@ const MJX = forwardRef(function MJX(props, ref) {
       );
     }
   }, []);
-  return jsx(MJX$1, {ref: combined, ...attrs});
+  return jsx(MJX$1, { ref: combined, ...attrs });
 });
 
-export {MJX};
+export { MJX };

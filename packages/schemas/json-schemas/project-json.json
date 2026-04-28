@@ -1,19 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
     "aspectRatio": {
-      "default": {
-        "height": 9,
-        "width": 16
-      },
       "anyOf": [
         {
-          "type": "string",
-          "pattern": "^-?\\d+(?:\\.\\d+)?:-?\\d+(?:\\.\\d+)?$"
+          "pattern": "^-?\\d+(?:\\.\\d+)?:-?\\d+(?:\\.\\d+)?$",
+          "type": "string"
         },
         {
-          "type": "array",
           "prefixItems": [
             {
               "type": "number"
@@ -21,10 +16,11 @@
             {
               "type": "number"
             }
-          ]
+          ],
+          "type": "array"
         },
         {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "height": {
               "type": "number"
@@ -33,21 +29,19 @@
               "type": "number"
             }
           },
-          "required": [
-            "height",
-            "width"
-          ],
-          "additionalProperties": false
+          "required": ["height", "width"],
+          "type": "object"
         }
-      ]
+      ],
+      "default": {
+        "height": 9,
+        "width": 16
+      }
     },
     "name": {
       "type": "string"
     }
   },
-  "required": [
-    "aspectRatio",
-    "name"
-  ],
-  "additionalProperties": false
+  "required": ["aspectRatio", "name"],
+  "type": "object"
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
     "height": {
       "type": "number"
@@ -9,9 +9,6 @@
       "type": "number"
     }
   },
-  "required": [
-    "height",
-    "width"
-  ],
-  "additionalProperties": false
+  "required": ["height", "width"],
+  "type": "object"
 }

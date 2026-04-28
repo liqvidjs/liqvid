@@ -7,21 +7,21 @@
   display: contents;
 }
 .lqv-codebooth button {
-  border: 0 none transparent;
-  border-radius: 0;
+  flex: 1;
+  height: var(--button-height);
+  font-size: 1.5rem;
   color: #fff;
   cursor: pointer;
-  flex: 1;
-  font-size: 1.5rem;
-  height: var(--button-height);
+  border: 0 none transparent;
+  border-radius: 0;
 }
 /* reset */
 .lqv-cb-reset {
   background-color: #1a69b5;
 }
 .lqv-cb-reset:active {
-  background-color: #16599a;
   outline: none;
+  background-color: #16599a;
 }
 /* run */
 /* clear */
