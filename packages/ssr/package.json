@@ -8,6 +8,7 @@
   },
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     }
@@ -30,10 +31,10 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
-  "sideEffects": false,
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "typescript": "catalog:dev"
   },
+  "sideEffects": false,
   "type": "module"
 }

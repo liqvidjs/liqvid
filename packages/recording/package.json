@@ -4,10 +4,12 @@
   "description": "Recording functionality for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./utils": {
+      "@liqvid/dev": "./src/utils.ts",
       "import": "./dist/esm/utils.js",
       "types": "./dist/types/utils.d.ts"
     }

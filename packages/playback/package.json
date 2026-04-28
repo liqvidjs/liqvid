@@ -4,19 +4,14 @@
   "description": "Playback class for Liqvid",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./react": {
+      "@liqvid/dev": "./src/react.tsx",
       "import": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*"
-      ]
     }
   },
   "files": [
@@ -45,10 +40,10 @@
     "@lqv/playback": "catalog:"
   },
   "devDependencies": {
-    "@types/react": "catalog:",
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
     "babel-jest": "catalog:",
-    "tsd": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.3.0",
