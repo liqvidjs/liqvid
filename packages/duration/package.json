@@ -1,13 +1,15 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Class for unitless time intervals",
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./zod": {
+      "@liqvid/dev": "./src/zod.mts",
       "import": "./dist/esm/zod.mjs",
       "types": "./dist/types/zod.d.mts"
     }
@@ -20,6 +22,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:typedoc": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"
   },
@@ -35,6 +39,8 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

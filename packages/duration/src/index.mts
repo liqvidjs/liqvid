@@ -15,6 +15,7 @@ const serializationKey = "@liqvid/duration";
 export type DurationLike = Duration | DurationOptions;
 
 /**
+ * Object for creating or specifying Durations.
  * These are additive, e.g. passing `{seconds: 20, minutes: 5}` is
  * equivalent to passing `{seconds: 320}`.
  */
@@ -62,20 +63,22 @@ export interface DurationSetter {
 export class Duration {
   protected __valueMs: number;
 
-  constructor({
-    milliseconds = 0,
-    ms = 0,
-    seconds = 0,
-    s = 0,
-    minutes = 0,
-    m = 0,
-    hours = 0,
-    h = 0,
-    days = 0,
-    d = 0,
-    weeks = 0,
-    w = 0,
-  }: DurationOptions = {}) {
+  constructor(
+    {
+      milliseconds = 0,
+      ms = 0,
+      seconds = 0,
+      s = 0,
+      minutes = 0,
+      m = 0,
+      hours = 0,
+      h = 0,
+      days = 0,
+      d = 0,
+      weeks = 0,
+      w = 0,
+    }: DurationOptions = {},
+  ) {
     this.__valueMs =
       (weeks + w) * WEEKS +
       (days + d) * DAYS +
@@ -85,10 +88,16 @@ export class Duration {
       (milliseconds + ms);
   }
 
+  static betweenDates(start: Date, end: Date): Duration {
+    return new Duration({ milliseconds: end.getTime() - start.getTime() });
+  }
+
   /**
    * Coerce a DurationLike into a Duration
    */
-  static from(val: DurationLike): Duration {
+  static from(val: DurationLike | Date): Duration {
+    if (val instanceof Date)
+      return new Duration({ milliseconds: val.getTime() });
     if (val instanceof Duration) return val;
     return new Duration(val);
   }
@@ -184,12 +193,16 @@ export class Duration {
   }
 
   /* ------------------------- comparison ------------------------- */
-  /** lower <= this < upper */
+  /** whether `lower <= this < upper` */
   between(lower: DurationLike, upper: DurationLike): boolean {
     return this.greaterThanOrEqual(lower) && this.lessThan(upper);
   }
 
-  equals(other: DurationLike): boolean {
+  /** compare two Durations */
+  equals(
+    /** duration to compare this one to */
+    other: DurationLike,
+  ): boolean {
     other = Duration.from(other);
     return this.__valueMs === other.__valueMs;
   }
@@ -225,7 +238,13 @@ export class Duration {
     });
   }
 
-  plus(other: DurationLike): Duration {
+  plus(other: Date): Date;
+  plus(other: DurationLike): Duration;
+  plus(other: DurationLike | Date): Duration | Date {
+    if (other instanceof Date) {
+      return new Date(other.getTime() + this.__valueMs);
+    }
+
     other = Duration.from(other);
     return new Duration({
       milliseconds: this.__valueMs + other.__valueMs,
