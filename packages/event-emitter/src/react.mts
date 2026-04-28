@@ -2,70 +2,48 @@
 
 import { useEffect, useRef } from "react";
 
-import type { EventEmitter } from "./index.mts";
-import type { EventsOn } from "./types.mts";
-
-/** Subscribe to events on the Window. */
-export function useEventListener<E extends keyof WindowEventMap>(
-  /** Target */
-  target: Window | null | undefined,
-
-  /** Event to subscribe to */
-  eventName: E,
-
-  /** Event callback to register */
-  callback: (event: WindowEventMap[E]) => unknown,
-): void;
-
-/** Subscribe to events on HTML elements */
-export function useEventListener<
-  T extends HTMLElement,
-  E extends keyof HTMLElementEventMap,
->(
-  target: T | null | undefined,
-  eventName: E,
-  callback: (event: HTMLElementEventMap[E]) => void,
-): void;
-
-/** Subscribe to events on SVG elements */
-export function useEventListener<
-  T extends SVGElement,
-  E extends keyof SVGElementEventMap,
->(
-  target: T | null | undefined,
-  eventName: E,
-  callback: (event: SVGElementEventMap[E]) => void,
-): void;
-
-/** Subscribe to events on {@link EventEmitter}s */
-export function useEventListener<
-  Target extends EventEmitter<unknown>,
-  E extends keyof EventsOn<Target>,
->(
-  /** Target */
-  target: Target | null | undefined,
-
-  /** Event to subscribe to */
-  eventName: E,
-
-  /** Event callback to register */
-  callback: (event: EventsOn<Target>[E]) => unknown,
-): void;
+import type { EventsOn, TypedEventTarget } from "./types.mts";
 
 /** Subscribe to events */
 export function useEventListener<
-  Target extends Window | EventEmitter<unknown>,
-  E extends keyof EventsOn<Target>,
+  T extends
+    | HTMLElement
+    | MediaQueryList
+    | SVGElement
+    | TypedEventTarget<unknown>
+    | Window,
+  KH extends keyof HTMLElementEventMap,
+  KM extends keyof MediaQueryListEventMap,
+  KS extends keyof SVGElementEventMap,
+  KT extends keyof EventsOn<T>,
   KW extends keyof WindowEventMap,
 >(
   /** Target */
-  target: Target | null,
+  target: T | null | undefined,
 
   /** Event to subscribe to */
-  eventName: E | KW,
+  eventName: T extends TypedEventTarget<unknown>
+    ? KT
+    : T extends HTMLElement
+      ? KH
+      : T extends SVGElement
+        ? KS
+        : T extends MediaQueryList
+          ? KM
+          : KW,
 
   /** Event callback to register */
-  callback: (event: WindowEventMap[KW] | EventsOn<Target>[E]) => unknown,
+  callback: (
+    event: T extends TypedEventTarget<unknown>
+      ? EventsOn<T>[KT]
+      : T extends HTMLElement
+        ? HTMLElementEventMap[KH]
+        : T extends SVGElement
+          ? SVGElementEventMap[KS]
+          : T extends MediaQueryList
+            ? MediaQueryListEventMap[KM]
+            : WindowEventMap[KW],
+  ) => unknown,
 ) {
   const savedCallback = useRef(callback);
 

@@ -8,10 +8,12 @@
   },
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.mts",
       "import": "./dist/esm/index.mjs",
       "types": "./dist/types/index.d.mts"
     },
     "./react": {
+      "@liqvid/dev": "./src/react.mts",
       "import": "./dist/esm/react.mjs",
       "types": "./dist/types/react.d.mts"
     }

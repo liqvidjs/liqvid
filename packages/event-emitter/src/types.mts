@@ -1,6 +1,6 @@
-import type { EventEmitter } from "./index.mts";
-
 export interface TypedEventTarget<Events> {
+  readonly __events: Events;
+
   addEventListener<K extends string & keyof Events>(
     eventName: K,
     callback: (event: Events[K]) => void,
@@ -12,4 +12,4 @@ export interface TypedEventTarget<Events> {
   ): void;
 }
 
-export type EventsOn<T> = T extends EventEmitter<infer E> ? E : never;
+export type EventsOn<T> = T extends TypedEventTarget<infer E> ? E : never;
