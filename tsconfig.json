@@ -1,24 +1,25 @@
 {
-	"compilerOptions": {
-		"alwaysStrict": true,
-		"composite": true,
-		"declaration": true,
-		"esModuleInterop": true,
-		"incremental": true,
-		"isolatedModules": true,
-		"jsx": "react-jsx",
-		"lib": ["es2022", "dom", "dom.iterable"],
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"noImplicitAny": true,
-		"noImplicitOverride": true,
-		"noUncheckedIndexedAccess": false,
-		"pretty": true,
-		"removeComments": false,
-		"rewriteRelativeImportExtensions": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"target": "es2022",
-		"verbatimModuleSyntax": true
-	}
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "composite": true,
+    "customConditions": ["@liqvid/dev"],
+    "declaration": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": false,
+    "pretty": true,
+    "removeComments": false,
+    "rewriteRelativeImportExtensions": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "verbatimModuleSyntax": true
+  }
 }

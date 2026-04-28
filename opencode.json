@@ -26,6 +26,8 @@
       "pnpm exec biome *": "allow",
       "pnpm exec tsc --noEmit *": "allow",
       "pnpm filter *": "allow",
+      "pnpm format *": "allow",
+      "pnpm generate:openapi *": "allow",
       "pnpm info *": "allow",
       "pnpm install *": "allow",
       "pnpm lint *": "allow",
