@@ -138,6 +138,12 @@ const config: Config = {
           sidebarId: "apiSidebar",
           type: "docSidebar",
         },
+        {
+          label: "Plugins",
+          position: "left",
+          sidebarId: "pluginsSidebar",
+          type: "docSidebar",
+        },
         { label: "Blog", position: "left", to: "/blog" },
         {
           href: "https://github.com/liqvidjs",
