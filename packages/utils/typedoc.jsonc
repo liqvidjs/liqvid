@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/collections.ts",
+    "./src/interaction.ts",
+    "./src/math.ts",
+    "./src/misc.ts",
+    "./src/react.tsx",
+    "./src/replay-data.ts",
+    "./src/svg.ts",
+    "./src/time.ts",
+    "./src/types.ts"
+  ],
+  "out": "./docs",
+  "plugin": ["../docs/typedoc-plugin.mts"]
+}

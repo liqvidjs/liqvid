@@ -51,8 +51,6 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
     "build": "tsc --build",
-    "docs:gen": "typedoc",
-    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "test": "jest --coverage",
     "watch": "tsc --watch"

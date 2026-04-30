@@ -43,8 +43,6 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
-    "docs:gen": "typedoc",
-    "docs:watch": "typedoc --watch",
     "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
     "lint": "biome check --fix",
     "watch": "tsc --watch"

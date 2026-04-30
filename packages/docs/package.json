@@ -2,9 +2,14 @@
   "name": "@liqvid/docs",
   "version": "0.0.0",
   "private": true,
+  "portless": {
+    "name": "docs",
+    "script": "start"
+  },
   "scripts": {
+    "dev": "portless",
     "docusaurus": "docusaurus",
-    "start": "docusaurus start --port 5137",
+    "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -47,7 +52,10 @@
     "@docusaurus/types": "3.10.0",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "portless": "catalog:dev",
     "raw-loader": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "browserslist": {

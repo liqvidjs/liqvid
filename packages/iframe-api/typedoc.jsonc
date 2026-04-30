@@ -1,0 +1,11 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/index.ts",
+    "./src/child.ts",
+    "./src/parent.ts",
+    "./src/react.ts"
+  ],
+  "out": "./docs",
+  "plugin": ["../docs/typedoc-plugin.mts"]
+}
