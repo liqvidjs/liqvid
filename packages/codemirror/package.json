@@ -42,6 +42,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "pnpm biome check --fix",
     "watch": "tsc --watch"
   },
@@ -49,6 +51,8 @@
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

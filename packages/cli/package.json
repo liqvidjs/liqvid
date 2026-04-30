@@ -51,6 +51,8 @@
   "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
     "build": "tsc --build",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -81,6 +83,8 @@
     "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
     "nodejs-whisper": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

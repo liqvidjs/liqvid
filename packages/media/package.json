@@ -38,6 +38,8 @@
     "build:js": "pnpm build:js:esm",
     "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"
   },
@@ -47,6 +49,8 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

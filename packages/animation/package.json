@@ -17,6 +17,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -39,6 +41,8 @@
     "@types/jest": "catalog:dev",
     "jest": "catalog:dev",
     "ts-jest": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

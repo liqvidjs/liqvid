@@ -4,6 +4,9 @@
     "build": {
       "dependsOn": ["^build"]
     },
+    "docs:gen": {
+      "dependsOn": ["^docs:gen"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

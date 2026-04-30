@@ -2,16 +2,19 @@
   "name": "@liqvid/duration",
   "version": "1.5.0",
   "description": "Class for unitless time intervals",
+  "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
     },
     "./zod": {
-      "@liqvid/dev": "./src/zod.mts",
-      "import": "./dist/esm/zod.mjs",
-      "types": "./dist/types/zod.d.mts"
+      "@liqvid/dev": "./src/zod.ts",
+      "import": "./dist/esm/zod.js",
+      "require": "./dist/cjs/zod.js",
+      "types": "./dist/types/zod.d.ts"
     }
   },
   "files": [
@@ -20,9 +23,11 @@
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "docs:typedoc": "typedoc",
+    "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"

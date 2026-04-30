@@ -29,6 +29,8 @@
     "build:hbs": "cp -R templates dist",
     "build:js": "tsc",
     "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
@@ -72,6 +74,8 @@
     "jest": "catalog:dev",
     "next": "catalog:",
     "ts-jest": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

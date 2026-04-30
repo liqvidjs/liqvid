@@ -33,6 +33,8 @@
     "build:css": "cp -R css dist",
     "build:js": "tsc",
     "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"
   },
@@ -53,6 +55,8 @@
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",
     "skulpt": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

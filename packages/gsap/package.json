@@ -7,6 +7,8 @@
   "typings": "./dist/index.d.ts",
   "files": ["dist/*"],
   "scripts": {
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,6 +27,8 @@
   },
   "sideEffects": false,
   "devDependencies": {
-    "gsap": "^3.9.1"
+    "gsap": "^3.9.1",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev"
   }
 }

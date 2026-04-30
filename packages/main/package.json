@@ -23,6 +23,8 @@
     "build:js": "pnpm build:js:bundle;  pnpm build:js:esm",
     "build:js:bundle": "tsc && rollup -c && rm -rf dist/esm",
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",

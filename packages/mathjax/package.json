@@ -27,6 +27,8 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"
   },
@@ -44,9 +46,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
-    "@types/react": "catalog:dev",
     "@liqvid/player": "workspace:^",
+    "@types/react": "catalog:dev",
     "mathjax": "^3.2.0",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {

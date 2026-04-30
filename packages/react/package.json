@@ -15,6 +15,8 @@
   },
   "files": ["dist/*"],
   "scripts": {
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -33,7 +35,9 @@
   },
   "devDependencies": {
     "events": "^3.3.0",
-    "strict-event-emitter-types": "^2.0.0"
+    "strict-event-emitter-types": "^2.0.0",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev"
   },
   "peerDependencies": {
     "liqvid": "workspace:^",

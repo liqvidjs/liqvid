@@ -21,6 +21,8 @@
   ],
   "scripts": {
     "build": "tsc",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "watch": "tsc --watch"
   },
@@ -41,6 +43,8 @@
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
