@@ -199,6 +199,9 @@ catalogs:
     js-yaml:
       specifier: ^4.1.1
       version: 4.1.1
+    portless:
+      specifier: ^0.12.0
+      version: 0.12.0
     raw-loader:
       specifier: ^4.0.2
       version: 4.0.2
@@ -336,6 +339,12 @@ importers:
       ts-jest:
         specifier: catalog:dev
         version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.3.0)(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -345,6 +354,12 @@ importers:
       ibm-watson:
         specifier: ^6.2.1
         version: 6.2.2
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/cli:
     dependencies:
@@ -415,6 +430,12 @@ importers:
       '@types/yargs':
         specifier: catalog:dev
         version: 17.0.35
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -455,6 +476,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -477,6 +504,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -520,6 +553,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -580,6 +619,12 @@ importers:
       tar:
         specifier: 7.5.11
         version: 7.5.11
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -595,6 +640,13 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^
         version: link:../utils
+    devDependencies:
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/docs:
     dependencies:
@@ -689,9 +741,18 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      portless:
+        specifier: catalog:dev
+        version: 0.12.0
       raw-loader:
         specifier: catalog:dev
         version: 4.0.2(webpack@5.103.0(@swc/core@1.15.30(@swc/helpers@0.5.15)))
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -730,6 +791,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -743,6 +810,12 @@ importers:
       gsap:
         specifier: ^3.9.1
         version: 3.14.2
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/helpers:
     dependencies:
@@ -780,11 +853,24 @@ importers:
       csstype:
         specifier: catalog:dev
         version: 3.2.3
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
 
-  packages/host: {}
+  packages/host:
+    devDependencies:
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/hydration:
     dependencies:
@@ -810,6 +896,12 @@ importers:
       '@types/react-dom':
         specifier: catalog:dev
         version: 19.2.3(@types/react@19.2.14)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -829,6 +921,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -854,6 +952,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -882,6 +986,12 @@ importers:
       ts-jest:
         specifier: catalog:dev
         version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.3.0)(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -979,6 +1089,12 @@ importers:
       skulpt:
         specifier: catalog:dev
         version: 1.2.0
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -991,6 +1107,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1123,6 +1245,12 @@ importers:
       mathjax:
         specifier: ^3.2.0
         version: 3.2.2
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1166,6 +1294,12 @@ importers:
       '@types/react-dom':
         specifier: catalog:dev
         version: 19.2.3(@types/react@19.2.14)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1203,6 +1337,12 @@ importers:
       babel-jest:
         specifier: 'catalog:'
         version: 30.2.0(@babel/core@7.28.5)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1255,6 +1395,12 @@ importers:
       '@types/react-dom':
         specifier: catalog:dev
         version: 19.2.3(@types/react@19.2.14)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1264,6 +1410,13 @@ importers:
       pepjs:
         specifier: ^0.5.3
         version: 0.5.3
+    devDependencies:
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/prompts:
     dependencies:
@@ -1292,6 +1445,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1320,6 +1479,12 @@ importers:
       strict-event-emitter-types:
         specifier: ^2.0.0
         version: 2.0.0
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
 
   packages/react-three:
     dependencies:
@@ -1342,6 +1507,12 @@ importers:
       '@types/three':
         specifier: catalog:dev
         version: 0.183.1
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1379,6 +1550,12 @@ importers:
       '@types/react-dom':
         specifier: catalog:dev
         version: 19.2.3(@types/react@19.2.14)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1413,6 +1590,12 @@ importers:
       '@types/yargs-parser':
         specifier: catalog:dev
         version: 21.0.3
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1429,6 +1612,12 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.4.13
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1475,6 +1664,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1484,6 +1679,12 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.4.13
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1611,6 +1812,12 @@ importers:
       ts-jest:
         specifier: catalog:dev
         version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.3.0)(jest@30.2.0(@types/node@24.10.1)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1636,6 +1843,12 @@ importers:
       '@types/react':
         specifier: catalog:dev
         version: 19.2.14
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1658,6 +1871,12 @@ importers:
       js-yaml:
         specifier: catalog:dev
         version: 4.1.1
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1686,6 +1905,12 @@ importers:
       ts-jest:
         specifier: catalog:dev
         version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.3.0)(jest@30.2.0(@types/node@25.5.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -1714,6 +1939,12 @@ importers:
       liqvid:
         specifier: workspace:^
         version: link:../main
+      typedoc:
+        specifier: catalog:dev
+        version: 0.28.17(typescript@5.9.3)
+      typedoc-plugin-markdown:
+        specifier: catalog:dev
+        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -5641,7 +5872,7 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
+    deprecated: Security vulnerability fixed in 5.2.1, please upgrade
 
   batch@0.6.1:
     resolution: {integrity: sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==}
@@ -8609,6 +8840,12 @@ packages:
   pngjs@3.4.0:
     resolution: {integrity: sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==}
     engines: {node: '>=4.0.0'}
+
+  portless@0.12.0:
+    resolution: {integrity: sha512-zE8EYJ5xIEtKEBu1wnD+FavOE90/GNxRixF4Mu2hxMvDuVx1ftUbA6VbjbxI9sP9LUt0L26l6OiENGo4EFtLfw==}
+    engines: {node: '>=20'}
+    os: [darwin, linux, win32]
+    hasBin: true
 
   postcss-attribute-case-insensitive@7.0.1:
     resolution: {integrity: sha512-Uai+SupNSqzlschRyNx3kbCTWgY/2hcwtHEI/ej2LJWc9JJ77qKgGptd8DHwY1mXtZ7Aoh4z4yxfwMBue9eNgw==}
@@ -20055,6 +20292,8 @@ snapshots:
   pluralize@8.0.0: {}
 
   pngjs@3.4.0: {}
+
+  portless@0.12.0: {}
 
   postcss-attribute-case-insensitive@7.0.1(postcss@8.5.8):
     dependencies:
