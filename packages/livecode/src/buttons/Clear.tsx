@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback } from "react";
 
 import { useClearMessages, useLiveCodeShortcut } from "../hooks";
@@ -25,7 +25,7 @@ export function Clear({
 
   return (
     <button
-      className={classNames("lqv-cb-clear", className)}
+      className={clsx("lqv-cb-clear", className)}
       onClick={clear}
       type="button"
       {...attrs}

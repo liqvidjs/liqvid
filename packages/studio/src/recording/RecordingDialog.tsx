@@ -5,7 +5,7 @@ import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import { listRecordings } from "../client.mts";
@@ -114,7 +114,7 @@ export function RecordingDialog({
 
   return (
     <DockableDialog.Dialog
-      className={classNames("lv-recording-dialog", styles.RecordingDialog)}
+      className={clsx("lv-recording-dialog", styles.RecordingDialog)}
     >
       <DockableDialog.Header>Recording</DockableDialog.Header>
       <DockableDialog.Content>

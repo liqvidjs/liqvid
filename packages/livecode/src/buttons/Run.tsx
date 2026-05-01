@@ -1,5 +1,5 @@
 import { onClickReact } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 
 import { useLiveCodeShortcut } from "../hooks";
@@ -35,7 +35,7 @@ export function Run({
 
   return (
     <button
-      className={classNames("lqv-livecode-run", className)}
+      className={clsx("lqv-livecode-run", className)}
       type="button"
       {...events}
       {...props}

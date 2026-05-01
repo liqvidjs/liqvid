@@ -2,7 +2,7 @@
 
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useEffect } from "react";
 
 import {
@@ -49,10 +49,7 @@ export function FullScreen({
     { isFullScreen: isFullScreen() ?? false },
     {
       "aria-keyshortcuts": convertShortcuts(shortcuts),
-      className: classNames(
-        "lv-controls-fullscreen lv-controls-button",
-        className,
-      ),
+      className: clsx("lv-controls-fullscreen lv-controls-button", className),
       ...events,
     },
   );

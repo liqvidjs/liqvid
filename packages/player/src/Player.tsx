@@ -7,7 +7,7 @@ import { KeymapProvider } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
 import { usePlaybackOptional } from "@liqvid/playback/react";
 import { combineRefs } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -122,7 +122,7 @@ export function Root({
 
   const inner = (
     <div
-      className={classNames("lv-player", className)}
+      className={clsx("lv-player", className)}
       data-color-scheme={colorScheme}
       ref={combineRefs(ref, forwardedRef)}
       style={{

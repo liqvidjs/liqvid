@@ -1,6 +1,6 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useEventListener } from "@liqvid/event-emitter/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useAddMessage, useClearMessages, useOnRun } from "../../hooks";
@@ -106,7 +106,7 @@ export function HTMLPreview({
   return (
     <iframe
       allow="fullscreen"
-      className={classNames("lqv-livecode-html-preview", className)}
+      className={clsx("lqv-livecode-html-preview", className)}
       ref={iframe}
       {...props}
     />

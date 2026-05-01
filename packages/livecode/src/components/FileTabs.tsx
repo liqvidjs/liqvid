@@ -1,6 +1,6 @@
 import { filterRecord, onClickReact } from "@liqvid/utils";
 import { selectCmd } from "@lqv/codemirror";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
@@ -122,15 +122,12 @@ export function FileTabs({
   if (!group) return null;
 
   return (
-    <div
-      className={classNames("lqv-file-tabs", propClassNames?.container)}
-      role="tablist"
-    >
+    <div className={clsx("lqv-file-tabs", propclsx?.container)} role="tablist">
       {group.files.map(({ filename }) => (
         <button
           aria-controls={ids.editorPanel({ filename, group: activeGroup })}
           aria-selected={activeFilename === filename}
-          className={classNames(
+          className={clsx(
             `lqv-filetype-${getFileType(filename)}`,
             propClassNames?.tab,
           )}

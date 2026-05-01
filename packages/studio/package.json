@@ -53,7 +53,7 @@
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "chalk": "catalog:",
-    "classnames": "catalog:",
+    "clsx": "catalog:",
     "execa": "catalog:",
     "handlebars": "catalog:",
     "have-fun": "catalog:",

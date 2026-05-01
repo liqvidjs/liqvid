@@ -1,5 +1,5 @@
 import { onClickReact } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useLiveCodeStore } from "../store";
@@ -47,7 +47,7 @@ export function Reset({
 
   return (
     <button
-      className={classNames("lqv-cb-reset", className)}
+      className={clsx("lqv-cb-reset", className)}
       {...resetEvents}
       {...attrs}
     />

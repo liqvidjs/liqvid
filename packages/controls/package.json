@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/controls#readme",
   "dependencies": {
-    "classnames": "catalog:"
+    "clsx": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",

@@ -3,7 +3,7 @@
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { useForceUpdate } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback } from "react";
 
 import { convertShortcuts } from "./utils";
@@ -44,10 +44,7 @@ export function PlayPause({
     { paused: playback.paused, seeking: playback.seeking },
     {
       "aria-keyshortcuts": convertShortcuts(shortcuts),
-      className: classNames(
-        "lv-controls-playpause lv-controls-button",
-        className,
-      ),
+      className: clsx("lv-controls-playpause lv-controls-button", className),
       onClick: toggle,
     },
   );

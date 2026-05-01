@@ -1,6 +1,6 @@
 import type { PluginContext } from "@liqvid/studio-plugin-api";
 import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useEffect, useRef } from "react";
 
 import styles from "./Toast.module.css";
@@ -54,7 +54,7 @@ export function Toast({
 
   return (
     <aside
-      className={classNames(styles.Toast, className)}
+      className={clsx(styles.Toast, className)}
       onClick={(e) => e.stopPropagation()}
       ref={elt}
     >

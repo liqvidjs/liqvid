@@ -3,7 +3,7 @@ import {
   useFormatActiveFile,
   useLiveCodeShortcut,
 } from "@lqv/livecode";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback } from "react";
 
 export function Format({
@@ -33,7 +33,7 @@ export function Format({
 
   return (
     <button
-      className={classNames("lqv-livecode-format", className)}
+      className={clsx("lqv-livecode-format", className)}
       disabled={!(activeFile?.editable ?? true)}
       onClick={formatCurrentFile}
       type="button"

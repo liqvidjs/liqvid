@@ -3,7 +3,7 @@
 import { useEventListener } from "@liqvid/event-emitter/react";
 import type { SyntheticTextTrack } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 
 export interface CaptionsDisplayProps {
@@ -93,9 +93,7 @@ export function CaptionsDisplay({ className }: CaptionsDisplayProps) {
   }
 
   return (
-    <pre className={classNames("lv-captions-display", className)}>
-      {captions}
-    </pre>
+    <pre className={clsx("lv-captions-display", className)}>{captions}</pre>
   );
 }
 

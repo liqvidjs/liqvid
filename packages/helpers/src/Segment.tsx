@@ -4,7 +4,7 @@ import type { Script } from "@liqvid/script";
 import { useMarker, useScript } from "@liqvid/script/react";
 import { useFirstRender } from "@liqvid/utils";
 import * as Slot from "@radix-ui/react-slot";
-import classNames from "classnames";
+import clsx from "clsx";
 import {
   type JSX,
   useCallback,
@@ -103,7 +103,7 @@ export function Segment<M extends string>({
           <Component
             {...props}
             aria-hidden
-            className={classNames(
+            className={clsx(
               invisibleClassName,
               (props as { className?: string }).className,
             )}

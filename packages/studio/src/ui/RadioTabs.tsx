@@ -3,7 +3,7 @@
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import type { ReactNode } from "react";
 
 import styles from "./RadioTabs.module.css";
@@ -23,7 +23,7 @@ function RadioTabs<T extends string>({
 }: RadioTabsProps<T>) {
   return (
     <RadioGroup
-      className={classNames(styles.RadioTabs, className)}
+      className={clsx(styles.RadioTabs, className)}
       onValueChange={onValueChange as (value: string) => void}
       value={value}
       {...props}
@@ -49,7 +49,7 @@ function RadioTabsItem({
 }: RadioTabsItemProps) {
   return (
     <Radio.Root
-      className={classNames(styles.RadioTabsItem, className)}
+      className={clsx(styles.RadioTabsItem, className)}
       title={title}
       value={value}
       {...props}

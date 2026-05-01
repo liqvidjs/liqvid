@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/player#readme",
   "dependencies": {
-    "classnames": "catalog:",
+    "clsx": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -4,7 +4,7 @@ import { type BooleanValueConfig, usePersistentState } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback } from "@liqvid/playback/react";
 import { usePlayer } from "@liqvid/player";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback } from "react";
 
 import { convertShortcuts } from "./utils";
@@ -69,7 +69,7 @@ export function CaptionsToggle({
     { enabled },
     {
       "aria-keyshortcuts": convertShortcuts(shortcuts),
-      className: classNames(
+      className: clsx(
         "lv-controls-captions-toggle lv-controls-button",
         className,
       ),

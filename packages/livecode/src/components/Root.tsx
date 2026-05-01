@@ -3,7 +3,7 @@
 import { type EditorView, keymap } from "@codemirror/view";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
-import classNames from "classnames";
+import clsx from "clsx";
 import { type JSX, useEffect, useState } from "react";
 import { useStore } from "zustand";
 
@@ -59,7 +59,7 @@ export function LiveCode({
   /* render */
   return (
     <div
-      className={classNames("lqv-livecode", stateClassNames, className)}
+      className={clsx("lqv-livecode", stateClassNames, className)}
       data-affords="click keys"
       {...attrs}
     >

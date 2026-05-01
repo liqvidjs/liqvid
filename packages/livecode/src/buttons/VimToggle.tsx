@@ -7,7 +7,7 @@ import {
   usePersistentState,
 } from "@liqvid/hydration";
 import { vim } from "@replit/codemirror-vim";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { vimCompartment } from "../extensions";
@@ -83,7 +83,7 @@ export function VimToggle({
   const content = (
     <button
       aria-checked={isVimActive}
-      className={classNames("lqv-livecode-vim", className)}
+      className={clsx("lqv-livecode-vim", className)}
       onClick={toggleVimActive}
       role="switch"
       {...props}

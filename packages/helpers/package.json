@@ -34,7 +34,7 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/helpers#readme",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
-    "classnames": "catalog:"
+    "clsx": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",

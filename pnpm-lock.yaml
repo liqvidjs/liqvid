@@ -93,12 +93,12 @@ catalogs:
     chalk:
       specifier: 5.6.2
       version: 5.6.2
-    classnames:
-      specifier: ^2.5.1
-      version: 2.5.1
     cli-progress:
       specifier: ^3.12.0
       version: 3.12.0
+    clsx:
+      specifier: ^2.1.1
+      version: 2.1.1
     execa:
       specifier: ^9.6.1
       version: 9.6.1
@@ -540,9 +540,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -619,12 +619,6 @@ importers:
       tar:
         specifier: 7.5.11
         version: 7.5.11
-      typedoc:
-        specifier: catalog:dev
-        version: 0.28.17(typescript@5.9.3)
-      typedoc-plugin-markdown:
-        specifier: catalog:dev
-        version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: catalog:dev
         version: 5.9.3
@@ -834,9 +828,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: 'catalog:'
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -936,6 +930,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^
         version: link:../utils
+      '@radix-ui/react-slot':
+        specifier: 'catalog:'
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       katex:
         specifier: catalog:peer
         version: 0.16.39
@@ -1061,9 +1058,9 @@ importers:
       '@replit/codemirror-vim':
         specifier: catalog:peer
         version: 6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.40.0)
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -1376,9 +1373,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -1432,9 +1429,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -1645,9 +1642,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: 'catalog:'
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       react:
         specifier: catalog:peer
         version: 19.2.4
@@ -1745,9 +1742,9 @@ importers:
       chalk:
         specifier: 'catalog:'
         version: 5.6.2
-      classnames:
+      clsx:
         specifier: 'catalog:'
-        version: 2.5.1
+        version: 2.1.1
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -6092,9 +6089,6 @@ packages:
 
   cjs-module-lexer@2.1.1:
     resolution: {integrity: sha512-+CmxIZ/L2vNcEfvNtLdU0ZQ6mbq3FZnwAP2PPTiKP+1QOoKwlKlPgb8UKV0Dds7QVaMnHm+FwSft2VB0s/SLjQ==}
-
-  classnames@2.5.1:
-    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
 
   clean-css@5.3.3:
     resolution: {integrity: sha512-D5J+kHaVb/wKSFcyyV75uCn8fiY4sV38XJoe4CUyGQ+mOU/fMVYUdH1hJC+CJQ5uY3EnW27SbJYS4X8BiLrAFg==}
@@ -16786,8 +16780,6 @@ snapshots:
   ci-info@4.4.0: {}
 
   cjs-module-lexer@2.1.1: {}
-
-  classnames@2.5.1: {}
 
   clean-css@5.3.3:
     dependencies:

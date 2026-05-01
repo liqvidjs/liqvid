@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { useStore } from "zustand";
 
 import { ids } from "../ids";
@@ -41,7 +41,7 @@ export function EditorPanel({
   return (
     <div
       aria-labelledby={ids.fileTab({ filename, group })}
-      className={classNames("lqv-editor-panel", className)}
+      className={clsx("lqv-editor-panel", className)}
       hidden={!active}
       id={ids.editorPanel({ filename, group })}
       role="tabpanel"

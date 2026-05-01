@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codebooth",
   "dependencies": {
-    "classnames": "catalog:",
+    "clsx": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {

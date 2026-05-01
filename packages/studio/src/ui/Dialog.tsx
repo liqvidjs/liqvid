@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import classNames from "classnames";
+import clsx from "clsx";
 import type { ReactNode } from "react";
 import {
   createContext,
@@ -90,9 +90,7 @@ export function DialogClose({
   className,
   ...props
 }: React.ComponentProps<typeof Dialog.Close>) {
-  return (
-    <Dialog.Close className={classNames(styles.Close, className)} {...props} />
-  );
+  return <Dialog.Close className={clsx(styles.Close, className)} {...props} />;
 }
 
 export function DialogPopup({
@@ -100,10 +98,7 @@ export function DialogPopup({
   ...props
 }: React.ComponentProps<typeof Dialog.Popup>) {
   return (
-    <Dialog.Popup
-      className={classNames(styles.Content, className)}
-      {...props}
-    />
+    <Dialog.Popup className={clsx(styles.Content, className)} {...props} />
   );
 }
 
@@ -118,10 +113,7 @@ export function DialogBackdrop({
   ...props
 }: React.ComponentProps<typeof Dialog.Backdrop>) {
   return (
-    <Dialog.Backdrop
-      className={classNames(styles.Backdrop, className)}
-      {...props}
-    />
+    <Dialog.Backdrop className={clsx(styles.Backdrop, className)} {...props} />
   );
 }
 
@@ -129,9 +121,7 @@ export function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof Dialog.Title>) {
-  return (
-    <Dialog.Title className={classNames(styles.Title, className)} {...props} />
-  );
+  return <Dialog.Title className={clsx(styles.Title, className)} {...props} />;
 }
 
 export function DialogTrigger({
@@ -139,9 +129,6 @@ export function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof Dialog.Trigger>) {
   return (
-    <Dialog.Trigger
-      className={classNames(styles.Trigger, className)}
-      {...props}
-    />
+    <Dialog.Trigger className={clsx(styles.Trigger, className)} {...props} />
   );
 }

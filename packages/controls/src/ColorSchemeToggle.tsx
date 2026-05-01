@@ -1,7 +1,7 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useMemo } from "react";
 
 import { convertShortcuts } from "./utils";
@@ -35,10 +35,7 @@ export function ColorSchemeToggle({
     { colorScheme },
     {
       "aria-keyshortcuts": convertShortcuts(shortcuts),
-      className: classNames(
-        "lv-controls-color-scheme lv-controls-button",
-        className,
-      ),
+      className: clsx("lv-controls-color-scheme lv-controls-button", className),
       ...events,
     },
   );

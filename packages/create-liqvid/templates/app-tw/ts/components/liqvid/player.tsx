@@ -22,7 +22,7 @@ import {
 	SpeakerX,
 	Sun,
 } from "@phosphor-icons/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import {
 	ColorSchemeProvider,
 	Controls,
@@ -104,7 +104,7 @@ export function LiqvidPlayer<M extends string>({
 									<Buttons />
 								</Player.Controls>
 								<Player.Canvas
-									className={classNames(
+									className={clsx(
 										"bg-[#eee] text-black",
 										"dark:bg-[#202020] dark:text-white",
 										"transition-colors duration-150",

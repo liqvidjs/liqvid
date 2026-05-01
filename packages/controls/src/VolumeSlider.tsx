@@ -5,7 +5,7 @@ import { useKeymap } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { isClient } from "@liqvid/ssr";
 import { useForceUpdate } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
 
 export interface AdjustVolumeShortcut {
@@ -134,7 +134,7 @@ export function VolumeSlider({
       },
       {
         // "aria-keyshortcuts": convertShortcuts(shortcuts),
-        className: classNames("lv-controls-volume-slider", className),
+        className: clsx("lv-controls-volume-slider", className),
         max: VOLUME_MAX,
         min: 0,
         onChange,

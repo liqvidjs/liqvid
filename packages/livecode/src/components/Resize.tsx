@@ -1,5 +1,5 @@
 import { clamp, onDragReact } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { type JSX, useMemo, useRef } from "react";
 
 /**
@@ -96,7 +96,7 @@ export function Resize({
 
   return (
     <div
-      className={classNames(`lqv-livecode-resize`, className)}
+      className={clsx(`lqv-livecode-resize`, className)}
       data-dir={dir}
       ref={ref}
       style={style}

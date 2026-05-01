@@ -1,6 +1,6 @@
 import type { Script } from "@liqvid/script";
 import { useMarker, useScript } from "@liqvid/script/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
 export type CueState = "active" | "future" | "past";
@@ -8,7 +8,7 @@ export type CueState = "active" | "future" | "past";
 /** Lines to be read at a particular marker */
 export function Cue<M extends string>({
   classes,
-  merge = classNames,
+  merge = clsx,
   ...props
 }: {
   classes?: {

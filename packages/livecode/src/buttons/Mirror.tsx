@@ -1,5 +1,5 @@
 import { onClickReact } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 
 import { useLiveCodeStore } from "../store";
@@ -49,7 +49,7 @@ export function Mirror({
 
   return (
     <button
-      className={classNames("lqv-livecode-mirror", className)}
+      className={clsx("lqv-livecode-mirror", className)}
       {...events}
       {...attrs}
     />

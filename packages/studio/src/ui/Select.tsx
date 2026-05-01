@@ -1,7 +1,7 @@
 "use client";
 
 import { Select } from "@base-ui/react/select";
-import classNames from "classnames";
+import clsx from "clsx";
 
 import styles from "./Select.module.css";
 
@@ -10,10 +10,7 @@ export function SelectBackdrop({
   ...props
 }: React.ComponentProps<typeof Select.Backdrop>) {
   return (
-    <Select.Backdrop
-      className={classNames(styles.Backdrop, className)}
-      {...props}
-    />
+    <Select.Backdrop className={clsx(styles.Backdrop, className)} {...props} />
   );
 }
 
@@ -21,18 +18,14 @@ export function SelectIcon({
   className,
   ...props
 }: React.ComponentProps<typeof Select.Icon>) {
-  return (
-    <Select.Icon className={classNames(styles.Icon, className)} {...props} />
-  );
+  return <Select.Icon className={clsx(styles.Icon, className)} {...props} />;
 }
 
 export function SelectItem({
   className,
   ...props
 }: React.ComponentProps<typeof Select.Item>) {
-  return (
-    <Select.Item className={classNames(styles.Item, className)} {...props} />
-  );
+  return <Select.Item className={clsx(styles.Item, className)} {...props} />;
 }
 
 export function SelectItemIndicator({
@@ -41,7 +34,7 @@ export function SelectItemIndicator({
 }: React.ComponentProps<typeof Select.ItemIndicator>) {
   return (
     <Select.ItemIndicator
-      className={classNames(styles.ItemIndicator, className)}
+      className={clsx(styles.ItemIndicator, className)}
       {...props}
     />
   );
@@ -51,18 +44,14 @@ export function SelectList({
   className,
   ...props
 }: React.ComponentProps<typeof Select.List>) {
-  return (
-    <Select.List className={classNames(styles.List, className)} {...props} />
-  );
+  return <Select.List className={clsx(styles.List, className)} {...props} />;
 }
 
 export function SelectPopup({
   className,
   ...props
 }: React.ComponentProps<typeof Select.Popup>) {
-  return (
-    <Select.Popup className={classNames(styles.Popup, className)} {...props} />
-  );
+  return <Select.Popup className={clsx(styles.Popup, className)} {...props} />;
 }
 
 export function SelectPortal(
@@ -76,9 +65,6 @@ export function SelectTrigger({
   ...props
 }: React.ComponentProps<typeof Select.Trigger>) {
   return (
-    <Select.Trigger
-      className={classNames(styles.Trigger, className)}
-      {...props}
-    />
+    <Select.Trigger className={clsx(styles.Trigger, className)} {...props} />
   );
 }

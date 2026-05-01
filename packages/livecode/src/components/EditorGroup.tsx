@@ -1,5 +1,5 @@
 import { filterRecord } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useEffect } from "react";
 import { useStore } from "zustand";
 
@@ -45,7 +45,7 @@ export function EditorGroup({
   return (
     <div
       aria-labelledby={ids.groupTab({ group: name })}
-      className={classNames("lqv-editor-group", className)}
+      className={clsx("lqv-editor-group", className)}
       hidden={!active}
       id={ids.editorGroup({ group: name })}
       role="tabpanel"

@@ -4,7 +4,7 @@ import { useColorScheme } from "@liqvid/color-scheme/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, onDragReact } from "@liqvid/utils";
 import { Portal } from "@radix-ui/react-portal";
-import classNames from "classnames";
+import clsx from "clsx";
 import {
   Children,
   cloneElement,
@@ -39,7 +39,7 @@ function Slot({
     child as React.ReactElement<React.HTMLAttributes<HTMLElement>>,
     {
       ...props,
-      className: classNames(className, childProps.className),
+      className: clsx(className, childProps.className),
     },
   );
 }
@@ -130,7 +130,7 @@ function Content({
 
   return (
     <Component
-      className={classNames(styles.DockableDialogContent, className)}
+      className={clsx(styles.DockableDialogContent, className)}
       {...props}
     />
   );
@@ -204,7 +204,7 @@ function Header({
 
   return (
     <Component
-      className={classNames(styles.DockableDialogHeader, className)}
+      className={clsx(styles.DockableDialogHeader, className)}
       ref={ref}
       {...events}
       {...props}
@@ -219,7 +219,7 @@ function Dialog({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <Portal>
       <aside
-        className={classNames(styles.DockableDialog, "shadow-lg", className)}
+        className={clsx(styles.DockableDialog, "shadow-lg", className)}
         hidden={!open}
         style={{
           colorScheme,

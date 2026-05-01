@@ -1,5 +1,5 @@
 import { usePlayback } from "@liqvid/playback/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback } from "react";
 
 import { ignoreCanvasClickSymbol } from "./symbols";
@@ -65,7 +65,7 @@ export function Canvas({
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: we are imitating standard video behavior here
     <div
-      className={classNames("lv-canvas", className)}
+      className={clsx("lv-canvas", className)}
       onMouseUp={canvasClickHandler}
       {...props}
     >

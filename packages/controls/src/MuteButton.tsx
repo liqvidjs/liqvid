@@ -5,7 +5,7 @@ import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { isClient } from "@liqvid/ssr";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useMemo, useRef } from "react";
 
 import { convertShortcuts } from "./utils";
@@ -89,7 +89,7 @@ export function Mute({ className, persistence, render, shortcuts }: MuteProps) {
       },
       {
         "aria-keyshortcuts": convertShortcuts(shortcuts),
-        className: classNames("lv-controls-mute lv-controls-button", className),
+        className: clsx("lv-controls-mute lv-controls-button", className),
         ...events,
       },
     );

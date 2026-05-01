@@ -3,7 +3,7 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useCallback, useRef, useState } from "react";
 
 import { isInteractiveElement } from "./utils";
@@ -76,7 +76,7 @@ export function Controls({
 
   return (
     <div
-      className={classNames(
+      className={clsx(
         "lv-controls",
         visible || "lv-controls-hidden",
         className,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
-import classNames from "classnames";
+import clsx from "clsx";
 import type { ReactElement } from "react";
 import { Children, cloneElement, isValidElement } from "react";
 
@@ -13,7 +13,7 @@ function Tabs({
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
-      className={classNames("flex flex-col gap-2", className)}
+      className={clsx("flex flex-col gap-2", className)}
       data-slot="tabs"
       {...props}
     />
@@ -26,7 +26,7 @@ function TabsList({
 }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
-      className={classNames(
+      className={clsx(
         styles.TabsList,
         "inline-flex w-fit items-center justify-center rounded-lg bg-muted p-[3px]",
         className,
@@ -43,7 +43,7 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
-      className={classNames(
+      className={clsx(
         styles.TabsTrigger,
         "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap border border-transparent font-medium text-sm transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
         className,
@@ -65,7 +65,7 @@ function TabsContent({
   className,
   ...props
 }: TabsContentProps) {
-  const combinedClassName = classNames("flex-1 outline-none", className);
+  const combinedClassName = clsx("flex-1 outline-none", className);
 
   if (asChild && isValidElement(children)) {
     return (
@@ -77,7 +77,7 @@ function TabsContent({
           }>;
           return cloneElement(child, {
             ...renderProps,
-            className: classNames(combinedClassName, child.props.className),
+            className: clsx(combinedClassName, child.props.className),
           });
         }}
       />
