@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 
-import { parseMacros } from "./macros";
+import { parseMacros } from "./macros.ts";
 
 const KaTeXContext = createContext<katex.KatexOptions>({});
 

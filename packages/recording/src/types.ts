@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 
-import type { Recorder } from "./recorder";
+import type { Recorder } from "./recorder.ts";
 
 export interface RecordingPlugin<
   T = unknown,

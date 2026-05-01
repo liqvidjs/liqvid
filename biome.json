@@ -92,6 +92,7 @@
       "correctness": {
         "noPrivateImports": "error",
         "useExhaustiveDependencies": "error",
+        "useImportExtensions": "error",
         "useUniqueElementIds": "off"
       },
       "nursery": {

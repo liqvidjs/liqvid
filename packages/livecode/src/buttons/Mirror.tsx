@@ -2,7 +2,7 @@ import { onClickReact } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 
-import { useLiveCodeStore } from "../store";
+import { useLiveCodeStore } from "../store.ts";
 
 /** Button for copying the contents of one group to another. */
 export function Mirror({

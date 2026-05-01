@@ -4,7 +4,7 @@ import { usePlayer } from "@liqvid/player";
 import { combineRefs } from "@liqvid/utils";
 import { useEffect, useRef } from "react";
 
-import { type Handle, MJX as MJXPlain } from "./plain";
+import { type Handle, MJX as MJXPlain } from "./plain.tsx";
 
 /** Component for MathJax code */
 export function MJX({ ref, ...props }: React.ComponentProps<typeof MJXPlain>) {

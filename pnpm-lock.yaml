@@ -1053,7 +1053,7 @@ importers:
         specifier: workspace:^2.0.0-alpha.2
         version: link:../utils
       '@lqv/playback':
-        specifier: workspace:^2.0.0-alpha.1
+        specifier: workspace:^1.0.0-alpha.0
         version: link:../lqv-playback
       '@replit/codemirror-vim':
         specifier: catalog:peer

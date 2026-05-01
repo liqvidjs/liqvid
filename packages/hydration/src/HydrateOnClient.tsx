@@ -1,7 +1,7 @@
 import { isClient } from "@liqvid/ssr";
 
 import { golf } from "./golf.ts";
-import { SneakyScript } from "./SneakyScript";
+import { SneakyScript } from "./SneakyScript.tsx";
 import type { ArgType, LocalValueConfig } from "./types.ts";
 
 export function HydrateOnClient<

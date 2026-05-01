@@ -8,8 +8,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
-import { useLiveCodeStore } from "./store";
-import { viewContents } from "./utils";
+import { useLiveCodeStore } from "./store.ts";
+import { viewContents } from "./utils.ts";
 
 export * from "./hooks/downloading.ts";
 export * from "./hooks/messages.ts";

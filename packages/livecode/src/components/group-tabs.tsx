@@ -2,8 +2,8 @@ import { onClickReact } from "@liqvid/utils";
 import { useMemo } from "react";
 import { useStore } from "zustand";
 
-import { ids } from "../ids";
-import { useLiveCodeStore } from "../store";
+import { ids } from "../ids.ts";
+import { useLiveCodeStore } from "../store.ts";
 
 /** Group selection tab. */
 export function Tab({

@@ -1,12 +1,12 @@
 import { serialize } from "@liqvid/ssr";
 import { cookies } from "next/headers";
 
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies";
+import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
 import { getServerState, initializeServer } from "../initialize.mts";
 
-import { NewProjectButton } from "./NewProjectButton";
-import { ProjectList } from "./ProjectList";
-import { RebuildButton } from "./RebuildButton";
+import { NewProjectButton } from "./NewProjectButton.tsx";
+import { ProjectList } from "./ProjectList.tsx";
+import { RebuildButton } from "./RebuildButton.tsx";
 
 import "../palette.css";
 

@@ -15,10 +15,10 @@ import type { CMRange, CMState } from "@lqv/codemirror/types";
 import { useSeekable } from "@lqv/playback/react";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { type LiveCodeStore, useLiveCodeStore } from "../store";
+import { type LiveCodeStore, useLiveCodeStore } from "../store.ts";
 
-import { useGroup } from "./context";
-import { Editor } from "./Editor";
+import { useGroup } from "./context.tsx";
+import { Editor } from "./Editor.tsx";
 
 /** Single-file initial state. */
 type SingleFileInitial = {

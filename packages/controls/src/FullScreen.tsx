@@ -10,8 +10,8 @@ import {
   isFullScreen,
   onFullScreenChange,
   requestFullScreen,
-} from "./fake-fullscreen";
-import { convertShortcuts } from "./utils";
+} from "./fake-fullscreen.ts";
+import { convertShortcuts } from "./utils.ts";
 
 const toggleFullScreen = () =>
   isFullScreen() ? exitFullScreen() : requestFullScreen();

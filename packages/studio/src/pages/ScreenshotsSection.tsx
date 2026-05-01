@@ -19,9 +19,9 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog";
+} from "../ui/Dialog.tsx";
 
-import { ScreenshotModal } from "./ScreenshotModal";
+import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
 import styles from "./root.module.css";
 import shareStyles from "./share.module.css";

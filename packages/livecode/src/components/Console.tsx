@@ -1,7 +1,8 @@
 "use client";
 
-import { useLiveCodeStore } from "@lqv/livecode";
 import { useStore } from "zustand";
+
+import { useLiveCodeStore } from "../store.ts";
 
 /** Component for displaying console logs. */
 export function Console({ className }: { className?: string }) {

@@ -7,13 +7,13 @@ import clsx from "clsx";
 import { type JSX, useEffect, useState } from "react";
 import { useStore } from "zustand";
 
-import { shortcuts } from "../extensions";
+import { shortcuts } from "../extensions.ts";
 import {
   LiveCodeContext,
   type LiveCodeStore,
   makeStore,
   useLiveCodeStore,
-} from "../store";
+} from "../store.ts";
 
 /**
  * Container for code editing/recording/replaying.

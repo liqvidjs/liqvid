@@ -2,8 +2,8 @@ import { onClickReact } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 
-import { useLiveCodeShortcut } from "../hooks";
-import { useLiveCodeStore } from "../store";
+import { useLiveCodeShortcut } from "../hooks.ts";
+import { useLiveCodeStore } from "../store.ts";
 
 /** Button for running the code. */
 export function Run({

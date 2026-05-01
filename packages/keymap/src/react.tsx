@@ -3,7 +3,7 @@
 import { makeContext } from "@liqvid/utils";
 import { useEffect, useMemo } from "react";
 
-import { Keymap, type ShortcutHandler } from "./index.mjs";
+import { Keymap, type ShortcutHandler } from "./index.mts";
 
 const KeymapContext = makeContext<Keymap | undefined>({
   defaultValue: undefined,

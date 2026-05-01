@@ -6,8 +6,8 @@ import {
 import { onDragReact } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Cue } from "./Cue";
-import { usePromptsApi } from "./PromptsProvider";
+import type { Cue } from "./Cue.tsx";
+import { usePromptsApi } from "./PromptsProvider.tsx";
 
 const NS = "lv-prompt";
 

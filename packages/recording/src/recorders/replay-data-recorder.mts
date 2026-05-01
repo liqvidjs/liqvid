@@ -1,7 +1,7 @@
 import type { ReplayData } from "@liqvid/utils";
 
-import { BaseRecorder } from "../base-recorder";
-import type { RecordingData } from "../types";
+import { BaseRecorder } from "../base-recorder.ts";
+import type { RecordingData } from "../types.ts";
 
 export abstract class ReplayDataRecorder<
   Datum,

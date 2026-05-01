@@ -5,7 +5,7 @@ import { omit } from "@liqvid/utils";
 import * as Slot from "@radix-ui/react-slot";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { useInvisibleClassName } from "./Segment";
+import { useInvisibleClassName } from "./Segment.tsx";
 
 interface AnimationConfig {
   duration: number;

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useCallback } from "react";
 
-import { useClearMessages, useLiveCodeShortcut } from "../hooks";
+import { useClearMessages, useLiveCodeShortcut } from "../hooks.ts";
 
 /** Button for clearing the output/console. */
 export function Clear({

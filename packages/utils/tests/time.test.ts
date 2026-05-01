@@ -3,7 +3,7 @@ import {
   formatTimeDuration,
   formatTimeMs,
   parseTime,
-} from "../src/time";
+} from "../src/time.ts";
 
 /* time constants */
 const SECONDS = 1000;

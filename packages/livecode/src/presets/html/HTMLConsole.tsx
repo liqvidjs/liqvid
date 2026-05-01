@@ -1,9 +1,9 @@
 import { Fragment } from "react";
 import { useStore } from "zustand";
 
-import { useLiveCodeStore } from "../../store";
+import { useLiveCodeStore } from "../../store.ts";
 
-import { type HTMLConsoleMessage, isHTMLConsoleMessage } from "./html-utils";
+import { type HTMLConsoleMessage, isHTMLConsoleMessage } from "./html-utils.ts";
 
 type RenderProp<T> = (
   msg: {

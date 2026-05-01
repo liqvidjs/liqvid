@@ -6,6 +6,7 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./liqvid-studio-server-plugin": {
@@ -16,6 +17,7 @@
     "./*": {
       "@liqvid/dev": "./src/*.ts",
       "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js",
       "types": "./dist/types/*.d.ts"
     }
   },
@@ -40,7 +42,9 @@
   "scripts": {
     "build": "pnpm build:clean; pnpm lint; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution nodenext --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",

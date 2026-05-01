@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
-import { useLiveCodeStore } from "../store";
-import { download, getFileType, viewContents } from "../utils";
+import { useLiveCodeStore } from "../store.ts";
+import { download, getFileType, viewContents } from "../utils.ts";
 
 /** download all the files in the active group as a .zip */
 export function useDownloadAll(

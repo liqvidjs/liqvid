@@ -6,11 +6,11 @@ import { useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
-import { recording } from "../extensions";
-import { type LiveCodeState, useLiveCodeStore } from "../store";
+import { recording } from "../extensions.ts";
+import { type LiveCodeState, useLiveCodeStore } from "../store.ts";
 
-import { useFilenameOptional, useGroup } from "./context";
-import { Editor } from "./Editor";
+import { useFilenameOptional, useGroup } from "./context.tsx";
+import { Editor } from "./Editor.tsx";
 
 /** Recording editor. */
 export function Record({

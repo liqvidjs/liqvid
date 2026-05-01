@@ -6,7 +6,7 @@ import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { anyHover, between, clamp, onDrag } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { type ThumbData, ThumbnailBox } from "./ThumbnailBox";
+import { type ThumbData, ThumbnailBox } from "./ThumbnailBox.tsx";
 
 export type { ThumbData };
 

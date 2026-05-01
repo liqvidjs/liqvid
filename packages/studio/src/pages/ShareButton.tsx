@@ -13,12 +13,12 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog";
+} from "../ui/Dialog.tsx";
 
-import { CaptionsSection } from "./CaptionsSection";
-import { RendersSection } from "./RendersSection";
-import { ScreenshotsSection } from "./ScreenshotsSection";
-import { ThumbnailsSection } from "./ThumbnailsSection";
+import { CaptionsSection } from "./CaptionsSection.tsx";
+import { RendersSection } from "./RendersSection.tsx";
+import { ScreenshotsSection } from "./ScreenshotsSection.tsx";
+import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
 import styles from "./root.module.css";
 import shareStyles from "./share.module.css";

@@ -1,6 +1,6 @@
-export * from "./Captions";
-export * from "./Controls";
-export { PlayerContext, type RenderingTask, usePlayer } from "./hooks";
-export * from "./iframe-api";
-export * from "./Player";
-export * from "./symbols";
+export * from "./Captions.tsx";
+export * from "./Controls.tsx";
+export { PlayerContext, type RenderingTask, usePlayer } from "./hooks.ts";
+export * from "./iframe-api.ts";
+export * from "./Player.tsx";
+export * from "./symbols.ts";

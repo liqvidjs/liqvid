@@ -15,7 +15,7 @@ import {
   type ViewUpdate,
 } from "@codemirror/view";
 
-import type { CMRange } from "./types";
+import type { CMRange } from "./types.ts";
 
 export const FakeSelection = StateEffect.define<CMRange>();
 

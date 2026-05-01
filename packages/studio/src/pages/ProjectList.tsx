@@ -12,11 +12,11 @@ import {
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies";
+import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
 
-import { OpenInFinderButton } from "./OpenInFinderButton";
-import { ProductionLink } from "./ProductionLink";
-import { ShareButton } from "./ShareButton";
+import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
+import { ProductionLink } from "./ProductionLink.tsx";
+import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
 

@@ -3,10 +3,10 @@ import clsx from "clsx";
 import { useEffect } from "react";
 import { useStore } from "zustand";
 
-import { ids } from "../ids";
-import { useLiveCodeStore } from "../store";
+import { ids } from "../ids.ts";
+import { useLiveCodeStore } from "../store.ts";
 
-import { GroupProvider } from "./context";
+import { GroupProvider } from "./context.tsx";
 
 /** Holds a group of editors. */
 export function EditorGroup({

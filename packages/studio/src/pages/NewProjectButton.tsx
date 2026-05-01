@@ -12,8 +12,8 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog";
-import { IconButton } from "../ui/IconButton";
+} from "../ui/Dialog.tsx";
+import { IconButton } from "../ui/IconButton.tsx";
 import {
   SelectIcon,
   SelectItem,
@@ -21,13 +21,13 @@ import {
   SelectList,
   SelectPopup,
   SelectTrigger,
-} from "../ui/Select";
+} from "../ui/Select.tsx";
 
 import {
   createProjectAction,
   loadTemplatesAction,
   type TemplateInfo,
-} from "./root-actions";
+} from "./root-actions.ts";
 
 import styles from "./root.module.css";
 

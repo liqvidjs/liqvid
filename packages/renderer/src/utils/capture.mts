@@ -5,7 +5,7 @@ import type puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
 
-import type { Pool } from "./pool.mjs";
+import type { Pool } from "./pool.mts";
 
 export async function capture({
   page,

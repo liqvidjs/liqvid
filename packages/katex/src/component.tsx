@@ -1,13 +1,15 @@
 "use client";
 
 import { combineRefs, useFirstRender } from "@liqvid/utils";
+import { Slot } from "@radix-ui/react-slot";
 import katex from "katex";
+import renderMathInElement from "katex/contrib/auto-render";
 import { useEffect, useRef } from "react";
 
-import { useKaTeXContext } from "./context";
+import { useKaTeXContext } from "./context.tsx";
 
 /** Component for KaTeX code */
-export const KTX = function KTX({
+export function KTX({
   children,
   ref: propRef,
 
@@ -112,4 +114,88 @@ export const KTX = function KTX({
   }
 
   return <span ref={combineRefs(ref, propRef)} {...props} />;
-};
+}
+
+/** Component for KaTeX code */
+export function RenderMathInElement({
+  children,
+
+  // katex options
+  colorIsTextColor,
+  delimiters,
+  displayMode,
+  errorColor,
+  fleqn,
+  globalGroup,
+  leqno,
+  macros,
+  maxExpand,
+  maxSize,
+  minRuleThickness,
+  output,
+  strict,
+  throwOnError,
+  trust,
+  errorCallback,
+  ignoredClasses,
+  ignoredTags,
+}: renderMathInElement.RenderMathInElementOptions & {
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+
+  const defaults = useKaTeXContext();
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    children;
+
+    renderMathInElement(ref.current, {
+      colorIsTextColor: colorIsTextColor ?? defaults.colorIsTextColor,
+      delimiters,
+      displayMode: displayMode ?? defaults.displayMode,
+
+      errorCallback,
+      errorColor: errorColor ?? defaults.errorColor,
+      fleqn: fleqn ?? defaults.fleqn,
+      globalGroup: globalGroup ?? defaults.globalGroup,
+      ignoredClasses,
+      ignoredTags,
+      leqno: leqno ?? defaults.leqno,
+      macros: macros ?? defaults.macros,
+      maxExpand: maxExpand ?? defaults.maxExpand,
+      maxSize: maxSize ?? defaults.maxSize,
+      minRuleThickness: minRuleThickness ?? defaults.minRuleThickness,
+      output: output ?? defaults.output,
+      strict: strict ?? defaults.strict,
+      throwOnError: throwOnError ?? defaults.throwOnError,
+      trust: trust ?? defaults.trust,
+    });
+  }, [
+    defaults,
+
+    // katex options
+    children,
+    colorIsTextColor,
+    delimiters,
+    displayMode,
+    errorCallback,
+    errorColor,
+    fleqn,
+    globalGroup,
+    ignoredClasses,
+    ignoredTags,
+    leqno,
+    macros,
+    maxExpand,
+    maxSize,
+    minRuleThickness,
+    output,
+    strict,
+    throwOnError,
+    trust,
+  ]);
+
+  return <Slot ref={ref}>{children}</Slot>;
+}

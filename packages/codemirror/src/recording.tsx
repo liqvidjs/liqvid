@@ -4,11 +4,10 @@ import { ReplayDataRecorder } from "@liqvid/recording";
 import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
 import { bind, mapRecord, type ReplayData } from "@liqvid/utils";
 
-import { ConfigurationComponent } from "./configuration";
-import { icon } from "./icon";
-import type { CMConfig, CMState } from "./types";
-
-import { scrollCmd } from ".";
+import { ConfigurationComponent } from "./configuration.tsx";
+import { icon } from "./icon.tsx";
+import { scrollCmd } from "./index.ts";
+import type { CMConfig, CMState } from "./types.ts";
 
 export type EditorChange = [
   [number, ...(EditorChange | number | string)[]],

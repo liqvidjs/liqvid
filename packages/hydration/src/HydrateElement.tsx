@@ -2,7 +2,7 @@ import { isClient } from "@liqvid/ssr";
 import { Root as Slot } from "@radix-ui/react-slot";
 import { useId } from "react";
 
-import { HydrateOnClient } from "./HydrateOnClient";
+import { HydrateOnClient } from "./HydrateOnClient.tsx";
 import type { ArgType, LocalValueConfig } from "./types.ts";
 
 export function HydrateElement<

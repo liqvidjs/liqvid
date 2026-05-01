@@ -2,7 +2,7 @@ import { onClickReact } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { useLiveCodeStore } from "../store";
+import { useLiveCodeStore } from "../store.ts";
 
 /** Button for resetting editor contents to initial state. */
 export function Reset({

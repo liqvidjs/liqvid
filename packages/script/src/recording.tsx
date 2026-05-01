@@ -7,7 +7,7 @@ import {
 import { bind, formatTimeMs } from "@liqvid/utils";
 import { useEffect } from "react";
 
-import { useScript } from "./react/useScript";
+import { useScript } from "./react/useScript.tsx";
 import type { MarkerUpdateEvent, Script } from "./script.mts";
 import type { MarkerFormatted, SerializedMarker } from "./types.mts";
 

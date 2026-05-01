@@ -4,7 +4,7 @@ import { onClickReact } from "@liqvid/utils";
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import { convertShortcuts } from "./utils";
+import { convertShortcuts } from "./utils.ts";
 
 type ColorSchemeToggleProps = {
   className?: string;

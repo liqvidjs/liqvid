@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 
-import * as Liqvid from "../../../src/index";
-import { Playback, Player, Video } from "../../../src/index";
+import * as Liqvid from "../../../src/index.ts";
+import { Playback, Player, Video } from "../../../src/index.ts";
 
 // simplifies testing for now
 window.Liqvid = Liqvid;

@@ -13,12 +13,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type AspectRatioSpecifier,
   normalizeAspectRatio,
-} from "./aspect-ratio";
-import { Canvas } from "./Canvas";
-import { Captions } from "./Captions";
-import { Controls } from "./Controls";
-import { PlayerContext, type RenderingTask } from "./hooks";
-import { playerApiDeclaration } from "./iframe-api";
+} from "./aspect-ratio.ts";
+import { Canvas } from "./Canvas.tsx";
+import { Captions } from "./Captions.tsx";
+import { Controls } from "./Controls.tsx";
+import { PlayerContext, type RenderingTask } from "./hooks.ts";
+import { playerApiDeclaration } from "./iframe-api.ts";
 
 const API_SYMBOL = Symbol.for("@liqvid/player/api");
 

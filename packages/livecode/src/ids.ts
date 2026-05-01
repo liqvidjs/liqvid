@@ -1,4 +1,4 @@
-import { sanitize } from "./utils";
+import { sanitize } from "./utils.ts";
 
 export const ids = {
   editorGroup: ({ group }: { group: string }) => `lqv-group-${group}`,

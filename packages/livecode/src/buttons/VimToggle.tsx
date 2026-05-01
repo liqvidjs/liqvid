@@ -10,8 +10,8 @@ import { vim } from "@replit/codemirror-vim";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { vimCompartment } from "../extensions";
-import { useActiveFile, useLiveCodeShortcut } from "../hooks";
+import { vimCompartment } from "../extensions.ts";
+import { useActiveFile, useLiveCodeShortcut } from "../hooks.ts";
 
 export const persistVim = {
   default: false,

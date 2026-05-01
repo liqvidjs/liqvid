@@ -6,6 +6,7 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
     },
     "./interpreters/*": {
@@ -17,6 +18,7 @@
     "./html": {
       "@liqvid/dev": "./src/presets/html/index.ts",
       "import": "./dist/esm/presets/html/index.js",
+      "require": "./dist/cjs/presets/html/index.js",
       "types": "./dist/types/presets/html/index.d.ts"
     }
   },
@@ -31,7 +33,9 @@
     "build": "pnpm build:clean; pnpm build:css; pnpm lint; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -fr dist && mkdir dist",
     "build:css": "cp -R css dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution nodenext --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -80,7 +84,7 @@
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.2",
     "@lqv/codemirror": "workspace:^1.0.0-alpha.0",
-    "@lqv/playback": "workspace:^2.0.0-alpha.1",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
     "@replit/codemirror-vim": "catalog:peer",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",

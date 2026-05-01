@@ -5,9 +5,9 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
-import { ids } from "../ids";
-import { type LiveCodeState, useLiveCodeStore } from "../store";
-import { getFileType } from "../utils";
+import { ids } from "../ids.ts";
+import { type LiveCodeState, useLiveCodeStore } from "../store.ts";
+import { getFileType } from "../utils.ts";
 
 const selector = (state: LiveCodeState) => [
   state.activeGroup,

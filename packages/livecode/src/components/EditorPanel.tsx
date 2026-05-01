@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import { useStore } from "zustand";
 
-import { ids } from "../ids";
-import { useLiveCodeStore } from "../store";
+import { ids } from "../ids.ts";
+import { useLiveCodeStore } from "../store.ts";
 
-import { FilenameProvider, useGroup } from "./context";
+import { FilenameProvider, useGroup } from "./context.tsx";
 
 /**
  * Tabpanel containing a single editor.

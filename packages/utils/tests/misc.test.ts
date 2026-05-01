@@ -7,7 +7,7 @@ import {
   range,
   wait,
   waitFor,
-} from "../src/misc";
+} from "../src/misc.ts";
 
 jest.useFakeTimers();
 jest.spyOn(globalThis, "setTimeout");

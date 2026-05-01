@@ -9,12 +9,12 @@ import clsx from "clsx";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import { listRecordings } from "../client.mts";
-import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
-import { DockableDialog } from "../ui/DockableDialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
+import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
+import { DockableDialog } from "../ui/DockableDialog.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 import { useToggle } from "../utils/react.mts";
 
-import type { RecordingControlProps } from "./RecordingControl";
+import type { RecordingControlProps } from "./RecordingControl.tsx";
 
 import styles from "./RecordingDialog.module.css";
 

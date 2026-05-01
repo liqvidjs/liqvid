@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { Homepage } from "../pages/root";
+import { Homepage } from "../pages/root.tsx";
 
 export default async function Pages({
   params: asyncParams,

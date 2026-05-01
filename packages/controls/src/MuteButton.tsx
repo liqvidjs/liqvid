@@ -8,7 +8,7 @@ import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useMemo, useRef } from "react";
 
-import { convertShortcuts } from "./utils";
+import { convertShortcuts } from "./utils.ts";
 
 interface MutePropsBase {
   className?: string;

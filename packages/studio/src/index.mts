@@ -1,7 +1,7 @@
 const isDevelopment = process.env.NODE_ENV === "development";
 
-export { DockableDialog } from "./ui/DockableDialog";
-export * from "./ui/Tabs";
+export { DockableDialog } from "./ui/DockableDialog.tsx";
+export * from "./ui/Tabs.tsx";
 
 import { Fragment, lazy } from "react";
 
@@ -22,14 +22,14 @@ export * from "./assets.mts";
  */
 export const LiqvidDevToolsProvider = isDevelopment
   ? lazy(() =>
-      import("./LiqvidDevToolsProvider").then((imports) => ({
+      import("./LiqvidDevToolsProvider.tsx").then((imports) => ({
         default: imports.LiqvidDevToolsProvider,
       })),
     )
   : Fragment;
 
 /** LiqvidDevToolsProvider without env-switching */
-export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./LiqvidDevToolsProvider";
+export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./LiqvidDevToolsProvider.tsx";
 
 /**
  * Liqvid recording control.
@@ -39,7 +39,7 @@ export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./Liq
  */
 export const RecordingControl = isDevelopment
   ? lazy(() =>
-      import("./recording/RecordingControl").then((imports) => ({
+      import("./recording/RecordingControl.tsx").then((imports) => ({
         default: imports.RecordingControl,
       })),
     )
@@ -49,4 +49,4 @@ export {
   /** recording control without env-switching */
   RecordingControl as RecordingControlUnivalent,
   type RecordingControlProps,
-} from "./recording/RecordingControl";
+} from "./recording/RecordingControl.tsx";

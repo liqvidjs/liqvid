@@ -6,7 +6,7 @@ import { useForceUpdate } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback } from "react";
 
-import { convertShortcuts } from "./utils";
+import { convertShortcuts } from "./utils.ts";
 
 /** Control for playing/pausing */
 export function PlayPause({

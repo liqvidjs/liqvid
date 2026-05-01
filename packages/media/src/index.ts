@@ -1,3 +1,3 @@
-export { Audio, type AudioProps } from "./Audio";
-export { Track, type TrackProps } from "./Track";
-export { Video } from "./Video";
+export { Audio, type AudioProps } from "./Audio.tsx";
+export { Track, type TrackProps } from "./Track.tsx";
+export { Video } from "./Video.tsx";

@@ -16,10 +16,10 @@ import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef, useState } from "react";
 
 import { saveRecording } from "../client.mts";
-import { useStudioPrivateApi } from "../LiqvidDevToolsProvider";
-import { DockableDialog } from "../ui/DockableDialog";
+import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
+import { DockableDialog } from "../ui/DockableDialog.tsx";
 
-import { RecordingDialog } from "./RecordingDialog";
+import { RecordingDialog } from "./RecordingDialog.tsx";
 
 export interface RecordingControlProps {
   shortcuts?: {

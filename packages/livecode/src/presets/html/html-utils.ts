@@ -1,4 +1,4 @@
-import type { ConsoleMessage } from "../../store";
+import type { ConsoleMessage } from "../../store.ts";
 
 export type HTMLConsoleMessage = ConsoleMessage<
   unknown[],

@@ -4,7 +4,7 @@ import { Duration } from "@liqvid/duration";
 import { combineRefs } from "@liqvid/utils";
 import { type JSX, useRef } from "react";
 
-import { type MediaProps, useSyncMedia } from "./useSyncMedia";
+import { type MediaProps, useSyncMedia } from "./useSyncMedia.ts";
 
 type VideoProps = JSX.IntrinsicElements["video"] & MediaProps;
 

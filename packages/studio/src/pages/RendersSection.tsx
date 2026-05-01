@@ -24,10 +24,10 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog";
-import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs";
+} from "../ui/Dialog.tsx";
+import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs.tsx";
 
-import { openRenderInFinderAction } from "./root-actions";
+import { openRenderInFinderAction } from "./root-actions.ts";
 
 import styles from "./root.module.css";
 import shareStyles from "./share.module.css";

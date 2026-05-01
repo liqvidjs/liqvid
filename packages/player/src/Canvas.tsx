@@ -2,8 +2,8 @@ import { usePlayback } from "@liqvid/playback/react";
 import clsx from "clsx";
 import { useCallback } from "react";
 
-import { ignoreCanvasClickSymbol } from "./symbols";
-import { isInteractiveElement } from "./utils";
+import { ignoreCanvasClickSymbol } from "./symbols.ts";
+import { isInteractiveElement } from "./utils.ts";
 
 /**
  * Player canvas where all the content goes.

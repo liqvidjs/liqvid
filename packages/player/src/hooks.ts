@@ -3,7 +3,7 @@
 import { createUniqueContext } from "@liqvid/utils";
 import { useContext } from "react";
 
-import type { AspectRatio } from "./aspect-ratio";
+import type { AspectRatio } from "./aspect-ratio.ts";
 
 export type RenderingTask = {
   /** whether this is currently onscreen */

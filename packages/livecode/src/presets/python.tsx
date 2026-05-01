@@ -3,21 +3,21 @@ import type { Extension } from "@codemirror/state";
 import { CodeRecording } from "@lqv/codemirror/recording";
 import { useEffect } from "react";
 
-import { Clear } from "../buttons/Clear";
-import { Copy } from "../buttons/Copy";
-import { Reset } from "../buttons/Reset";
-import { Run } from "../buttons/Run";
-import { Console } from "../components/Console";
-import { Editor } from "../components/Editor";
-import { EditorGroup } from "../components/EditorGroup";
-import { Tab, TabList } from "../components/group-tabs";
-import { Record } from "../components/Record";
-import { Replay } from "../components/Replay";
-import { Resize } from "../components/Resize";
-import { LiveCode } from "../components/Root";
-import { basicSetup } from "../extensions";
-import { PythonInterpreter } from "../interpreters/skulpt";
-import { useLiveCodeStore } from "../store";
+import { Clear } from "../buttons/Clear.tsx";
+// import { Copy } from "../buttons/Copy";
+import { Reset } from "../buttons/Reset.tsx";
+import { Run } from "../buttons/Run.tsx";
+import { Console } from "../components/Console.tsx";
+import { Editor } from "../components/Editor.tsx";
+import { EditorGroup } from "../components/EditorGroup.tsx";
+import { Tab, TabList } from "../components/group-tabs.tsx";
+import { Record } from "../components/Record.tsx";
+import { Replay } from "../components/Replay.tsx";
+import { Resize } from "../components/Resize.tsx";
+import { LiveCode } from "../components/Root.tsx";
+import { basicSetup } from "../extensions.ts";
+import { PythonInterpreter } from "../interpreters/skulpt.ts";
+import { useLiveCodeStore } from "../store.ts";
 
 const interpreter = new PythonInterpreter();
 

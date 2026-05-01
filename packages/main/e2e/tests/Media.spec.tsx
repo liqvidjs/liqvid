@@ -5,7 +5,7 @@ import {
   test,
 } from "@playwright/test";
 
-import type { Playback, Player } from "../../src/index";
+import type { Playback, Player } from "../../src/index.ts";
 
 test.describe("Media", () => {
   let playback: JSHandle<Playback>;

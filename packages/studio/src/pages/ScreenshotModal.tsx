@@ -21,8 +21,8 @@ import {
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "../ui/Dialog";
-import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs";
+} from "../ui/Dialog.tsx";
+import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs.tsx";
 
 import styles from "./root.module.css";
 import shareStyles from "./share.module.css";

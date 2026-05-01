@@ -3,8 +3,8 @@ declare global {
   const MathJax: any;
 }
 
-export { MathJaxProvider } from "./context";
-export * from "./fancy";
-export { MathJaxReady } from "./loading";
-export * from "./macros";
-export type { Handle } from "./plain";
+export { MathJaxProvider } from "./context.tsx";
+export * from "./fancy.tsx";
+export { MathJaxReady } from "./loading.ts";
+export * from "./macros.ts";
+export type { Handle } from "./plain.tsx";

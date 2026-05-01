@@ -1,5 +1,5 @@
-import { Position, type PositionProps } from "./Position";
-import { Segment, type SegmentProps } from "./Segment";
+import { Position, type PositionProps } from "./Position.tsx";
+import { Segment, type SegmentProps } from "./Segment.tsx";
 
 export function UniversalHelper<M extends string>({
   children,

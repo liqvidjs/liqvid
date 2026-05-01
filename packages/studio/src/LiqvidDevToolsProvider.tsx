@@ -18,8 +18,8 @@ import {
 } from "react";
 
 import { setProjectMeta } from "./client.mts";
-import type { ToastPropsWithTime } from "./ui/Toast";
-import { Toaster } from "./ui/Toaster";
+import type { ToastPropsWithTime } from "./ui/Toast.tsx";
+import { Toaster } from "./ui/Toaster.tsx";
 
 import "./palette.css";
 

@@ -2,7 +2,7 @@
 
 import { FolderOpenIcon } from "@phosphor-icons/react";
 
-import { openInFinderAction } from "./root-actions";
+import { openInFinderAction } from "./root-actions.ts";
 
 import styles from "./root.module.css";
 

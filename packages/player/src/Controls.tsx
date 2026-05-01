@@ -6,7 +6,7 @@ import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import clsx from "clsx";
 import { useCallback, useRef, useState } from "react";
 
-import { isInteractiveElement } from "./utils";
+import { isInteractiveElement } from "./utils.ts";
 
 /** Container for the player controls */
 export function Controls({

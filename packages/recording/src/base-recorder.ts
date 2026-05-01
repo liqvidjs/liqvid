@@ -1,6 +1,6 @@
 import { Duration, type DurationSetter } from "@liqvid/duration";
 
-import type { Recorder } from "./recorder";
+import type { Recorder } from "./recorder.ts";
 
 export abstract class BaseRecorder<
   Datum = unknown,

@@ -2,10 +2,10 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 
-import { recording, shortcuts, vimCompartment } from "../extensions";
-import { useLiveCodeStore } from "../store";
+import { recording, shortcuts, vimCompartment } from "../extensions.ts";
+import { useLiveCodeStore } from "../store.ts";
 
-import { useFilenameOptional, useGroup } from "./context";
+import { useFilenameOptional, useGroup } from "./context.tsx";
 
 /** Compartment for toggling extensions in CodeMirror. */
 const editorCompartment = new Compartment();

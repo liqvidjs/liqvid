@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { type ConsoleMessage, useLiveCodeStore } from "../store";
+import { type ConsoleMessage, useLiveCodeStore } from "../store.ts";
 
 export function useAddMessage() {
   const store = useLiveCodeStore();

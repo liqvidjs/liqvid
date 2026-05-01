@@ -3,11 +3,11 @@ import { useEventListener } from "@liqvid/event-emitter/react";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useAddMessage, useClearMessages, useOnRun } from "../../hooks";
-import { useLiveCodeStore } from "../../store";
-import { viewContents } from "../../utils";
+import { useAddMessage, useClearMessages, useOnRun } from "../../hooks.ts";
+import { useLiveCodeStore } from "../../store.ts";
+import { viewContents } from "../../utils.ts";
 
-import { type HTMLConsoleMessage, render } from "./html-utils";
+import { type HTMLConsoleMessage, render } from "./html-utils.ts";
 
 /** @package */
 export function HTMLPreview({

@@ -47,6 +47,7 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
   "license": "MIT",
   "dependencies": {
+    "@radix-ui/react-slot": "catalog:",
     "@liqvid/utils": "workspace:^"
   },
   "devDependencies": {

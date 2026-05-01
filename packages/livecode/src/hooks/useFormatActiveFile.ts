@@ -2,8 +2,8 @@ import type { EditorSelection, SelectionRange } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { useCallback } from "react";
 
-import { useLiveCodeStore } from "../store";
-import { getFileType, viewContents } from "../utils";
+import { useLiveCodeStore } from "../store.ts";
+import { getFileType, viewContents } from "../utils.ts";
 
 /**
  * Format the active file using Prettier.

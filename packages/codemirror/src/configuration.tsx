@@ -3,7 +3,7 @@
 import type { ConfigurationComponentProps } from "@liqvid/studio-plugin-api";
 import { useEffect } from "react";
 
-import { type CodeMirrorInstance, CodeRecording } from "./recording";
+import { type CodeMirrorInstance, CodeRecording } from "./recording.tsx";
 
 export function ConfigurationComponent({
   instances,

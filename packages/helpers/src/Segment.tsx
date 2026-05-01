@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 
-import { type HidingStrategy, useSegmentContext } from "./SegmentProvider";
+import { type HidingStrategy, useSegmentContext } from "./SegmentProvider.tsx";
 
 interface SegmentPropsCommon {
   /**

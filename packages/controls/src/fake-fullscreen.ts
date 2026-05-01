@@ -4,7 +4,7 @@ import {
   onFullScreenChange as $onFullScreenChange,
   requestFullScreen as $requestFullScreen,
   fullscreenEnabled,
-} from "./polyfills";
+} from "./polyfills.ts";
 
 let __isFullScreen = false;
 const __callbacks: (() => void)[] = [];

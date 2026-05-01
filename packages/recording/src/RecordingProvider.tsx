@@ -1,9 +1,9 @@
 import { createUniqueContext } from "@liqvid/utils";
 import { useContext, useMemo, useReducer, useState } from "react";
 
-import { RecordingManager } from "./RecordingManager";
-import type { Recorder } from "./recorder";
-import type { RecordingPlugin } from "./types";
+import { RecordingManager } from "./RecordingManager.ts";
+import type { Recorder } from "./recorder.ts";
+import type { RecordingPlugin } from "./types.ts";
 
 export interface RecordingContext {
   manager: RecordingManager;

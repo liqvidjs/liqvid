@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { CaptionsMeta } from "../api/contract.mts";
 import { generateCaptions, listCaptions } from "../client.mts";
 
-import { openCaptionsInFinderAction } from "./root-actions";
+import { openCaptionsInFinderAction } from "./root-actions.ts";
 
 import shareStyles from "./share.module.css";
 

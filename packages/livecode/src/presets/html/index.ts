@@ -1,2 +1,2 @@
-export * from "./HTMLConsole";
-export * from "./HTMLPreview";
+export * from "./HTMLConsole.tsx";
+export * from "./HTMLPreview.tsx";

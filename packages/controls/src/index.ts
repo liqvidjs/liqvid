@@ -1,18 +1,18 @@
-export * from "./Captions";
-export * from "./ColorSchemeToggle";
-export { FullScreen } from "./FullScreen";
-export { Mute, type MuteProps } from "./MuteButton";
-export { PlayPause } from "./PlayPause";
+export * from "./Captions.tsx";
+export * from "./ColorSchemeToggle.tsx";
+export { FullScreen } from "./FullScreen.tsx";
+export { Mute, type MuteProps } from "./MuteButton.tsx";
+export { PlayPause } from "./PlayPause.tsx";
 export {
   type PercentageSeekShortcut,
   type RelativeSeekShortcut,
   ScrubberBar,
   type ScrubberBarProps,
-} from "./ScrubberBar";
-export type { ThumbData, VideoHighlight } from "./ThumbnailBox";
-export { TimeDisplay } from "./TimeDisplay";
+} from "./ScrubberBar.tsx";
+export type { ThumbData, VideoHighlight } from "./ThumbnailBox.tsx";
+export { TimeDisplay } from "./TimeDisplay.tsx";
 export {
   type VolumeShortcut,
   VolumeSlider,
   type VolumeSliderProps,
-} from "./VolumeSlider";
+} from "./VolumeSlider.tsx";

@@ -3,9 +3,9 @@
 import { PackageIcon } from "@phosphor-icons/react";
 import { useCallback, useState } from "react";
 
-import { IconButton } from "../ui/IconButton";
+import { IconButton } from "../ui/IconButton.tsx";
 
-import { rebuildAction } from "./root-actions";
+import { rebuildAction } from "./root-actions.ts";
 
 export function RebuildButton() {
   const [isBuilding, setIsBuilding] = useState(false);

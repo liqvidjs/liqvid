@@ -3,7 +3,7 @@ import * as Slot from "@radix-ui/react-slot";
 import { useId } from "react";
 
 import { golf } from "./golf.ts";
-import { HydrateOnClient } from "./HydrateOnClient";
+import { HydrateOnClient } from "./HydrateOnClient.tsx";
 import type {
   BooleanValueConfig,
   ComparisonVariant,

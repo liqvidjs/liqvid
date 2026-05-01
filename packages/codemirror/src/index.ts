@@ -3,12 +3,12 @@ import type { EditorView } from "@codemirror/view";
 import { assertType, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
-import { FakeSelection } from "./fake-selection";
-import type { ScrollAction } from "./recording";
-import type { CMRange, CMState } from "./types";
+import { FakeSelection } from "./fake-selection.ts";
+import type { ScrollAction } from "./recording.tsx";
+import type { CMRange, CMState } from "./types.ts";
 
-export { type FakeSelectionConfig, fakeSelection } from "./fake-selection";
-export * from "./types";
+export { type FakeSelectionConfig, fakeSelection } from "./fake-selection.ts";
+export * from "./types.ts";
 
 /** Possible replay commands. */
 export type Action =

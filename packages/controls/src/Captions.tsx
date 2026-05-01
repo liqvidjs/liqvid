@@ -7,7 +7,7 @@ import { usePlayer } from "@liqvid/player";
 import clsx from "clsx";
 import { useCallback } from "react";
 
-import { convertShortcuts } from "./utils";
+import { convertShortcuts } from "./utils.ts";
 
 export type CaptionsToggleProps = {
   className?: string;
