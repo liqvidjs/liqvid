@@ -30,11 +30,14 @@ const colorSchemeContext = makeContext<ColorSchemeContext>({
 export function ColorSchemeProvider({
   children,
   persistence,
+  value,
 }: {
   children?: React.ReactNode;
   persistence?: StringValueConfig<ColorScheme>;
+  value?: ColorScheme;
 }) {
   const [colorScheme, setColorScheme] = usePersistentState(persistence!, {
+    default: value ?? "light",
     disabled: !persistence,
   });
 
@@ -45,12 +48,12 @@ export function ColorSchemeProvider({
 
   const context = useMemo(
     () => ({
-      colorScheme,
+      colorScheme: value ?? colorScheme,
       persistence: persistence,
       setColorScheme,
       toggleColorScheme,
     }),
-    [colorScheme, persistence, toggleColorScheme, setColorScheme],
+    [colorScheme, persistence, toggleColorScheme, setColorScheme, value],
   );
 
   return (

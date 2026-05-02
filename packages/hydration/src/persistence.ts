@@ -6,38 +6,51 @@ import Cookies from "universal-cookie";
 
 import type { ArgType, BooleanValueConfig, LocalValueConfig } from "./types.ts";
 
-export type PersistentConfig = {
+export type PersistentConfig<T> = {
+  /** initial value to use when persistence is disabled */
+  default?: T;
+
   /** whether to disable persistence */
   disabled?: boolean;
 };
 
 export function usePersist<C extends LocalValueConfig>(
   storage: C,
-  { disabled = false }: PersistentConfig = {},
-): [
-  get: () =>
-    | ArgType<C>
-    | (C["default"] extends undefined ? null : C["default"]),
-  set: (value: ArgType<C>) => void,
-] {
+  opts?: PersistentConfig<ArgType<C>>,
+): [get: () => ArgType<C>, set: (value: ArgType<C>) => void];
+
+export function usePersist<C extends LocalValueConfig>(
+  storage: C | undefined,
+  opts: Required<PersistentConfig<ArgType<C>>>,
+): [get: () => ArgType<C>, set: (value: ArgType<C>) => void];
+
+export function usePersist<C extends LocalValueConfig>(
+  storage: C | undefined,
+  {
+    default: fallbackDefault,
+    disabled = false,
+  }: PersistentConfig<ArgType<C>> = {},
+): [get: () => ArgType<C>, set: (value: ArgType<C>) => void] {
   type T = ArgType<C>;
   const [cookies] = useState(() => new Cookies(null));
 
+  const hasStorage = storage !== undefined;
+
   return useMemo(() => {
     // quit if disabled
-    if (disabled) {
-      return [() => (storage.default ?? null) as T, (_value) => {}];
+    if (disabled || !hasStorage) {
+      return [() => storage?.default ?? fallbackDefault, (_value) => {}];
     }
 
     // do nothing on server
     if (!isClient) {
-      return [() => (storage.default ?? null) as T, (_value: T) => {}];
+      return [() => storage?.default ?? fallbackDefault, (_value: T) => {}];
     }
 
     /** parse raw value retrieved from storage */
     // biome-ignore lint/suspicious/noExplicitAny: types got too complex
     const parse = (value: string | null): any => {
-      if (value === null) return (storage.default ?? null) as T;
+      if (value === null) return (storage?.default ?? fallbackDefault) as T;
 
       switch (storage.type) {
         case "boolean":
@@ -48,6 +61,9 @@ export function usePersist<C extends LocalValueConfig>(
           return value as T;
       }
     };
+
+    if (storage) {
+    }
 
     // different storage sources
     switch (storage.source) {
@@ -84,38 +100,42 @@ export function usePersist<C extends LocalValueConfig>(
   }, [
     cookies,
     disabled,
-    storage.default,
-    storage.name,
-    storage.source,
-    storage.type,
+    storage?.default,
+    storage?.name,
+    storage?.source,
+    storage?.type,
+    fallbackDefault,
+    hasStorage,
+    storage,
   ]);
 }
 
 export function usePersistentState<C extends BooleanValueConfig>(
   storage: C,
-  opts?: PersistentConfig,
+  opts?: PersistentConfig<ArgType<C>>,
 ): [
   value: ArgType<C>,
   setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
   toggle: () => void,
 ];
 export function usePersistentState<C extends LocalValueConfig>(
-  storage: C,
-  opts?: PersistentConfig,
+  storage: C | undefined,
+  opts: Required<PersistentConfig<ArgType<C>>>,
 ): [
   value: ArgType<C>,
   setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
 ];
 export function usePersistentState<C extends LocalValueConfig>(
-  storage: C,
-  { disabled = false }: PersistentConfig = {},
+  storage: C | undefined,
+  opts: PersistentConfig<ArgType<C>> = {},
 ) {
-  const [get, set] = usePersist(storage, { disabled });
+  // biome-ignore lint/suspicious/noExplicitAny: complex types
+  const [get, set] = usePersist(storage, opts as any);
   const [state, setState] = useState<ArgType<C>>(() => {
-    if (disabled) {
-      return storage.default as ArgType<C>;
+    if (opts.disabled) {
+      return (storage?.default ?? opts.default) as ArgType<C>;
     }
-    return get() ?? (storage.default as ArgType<C>);
+    return (get() ?? storage?.default ?? opts.default) as ArgType<C>;
   });
 
   const setPersistedValue = useCallback(
@@ -141,7 +161,7 @@ export function usePersistentState<C extends LocalValueConfig>(
     [setPersistedValue],
   );
 
-  if (storage.type === "boolean") {
+  if (storage?.type === "boolean") {
     return [state, setPersistedValue, toggle];
   }
 

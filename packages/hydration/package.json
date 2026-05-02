@@ -6,6 +6,7 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
     }
   },
@@ -15,7 +16,9 @@
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
