@@ -1,14 +1,14 @@
 import type { ConsoleMessage } from "../../store.ts";
 
-export type HTMLConsoleMessage = ConsoleMessage<
+export type WebConsoleMessage = ConsoleMessage<
   unknown[],
   "debug" | "error" | "info" | "log" | "warn"
 >;
 
 /** @package */
-export function isHTMLConsoleMessage(
+export function isWebConsoleMessage(
   msg: ConsoleMessage<unknown, string>,
-): msg is HTMLConsoleMessage {
+): msg is WebConsoleMessage {
   return (
     typeof msg.data === "object" &&
     msg.data !== null &&

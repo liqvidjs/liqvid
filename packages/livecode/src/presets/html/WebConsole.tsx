@@ -3,7 +3,7 @@ import { useStore } from "zustand";
 
 import { useLiveCodeStore } from "../../store.ts";
 
-import { type HTMLConsoleMessage, isHTMLConsoleMessage } from "./html-utils.ts";
+import { isWebConsoleMessage, type WebConsoleMessage } from "./html-utils.ts";
 
 type RenderProp<T> = (
   msg: {
@@ -14,12 +14,14 @@ type RenderProp<T> = (
 ) => React.ReactNode;
 
 type RenderItem = (
-  msg: HTMLConsoleMessage,
+  msg: WebConsoleMessage,
   props: React.ComponentProps<"li">,
 ) => React.ReactNode;
 
-/** @package */
-export function HTMLConsole({
+/**
+ * Rich JavaScript/TypeScript console resembling what is found in web browsers.
+ */
+export function WebConsole({
   className,
   ...props
 }: {
@@ -50,10 +52,11 @@ export function HTMLConsole({
   return (
     <ol className={className}>
       {messages.map((msg, i) => {
-        if (!isHTMLConsoleMessage(msg)) return null;
+        if (!isWebConsoleMessage(msg)) return null;
 
         const { data, kind, timestamp } = msg;
 
+        /* ------------------------------ render the individual parts of the value ------------------------------ */
         const contents = data.map((value, j) => {
           // biome-ignore lint/suspicious/noExplicitAny: too complex
           let renderFn: string | RenderProp<any> | undefined;

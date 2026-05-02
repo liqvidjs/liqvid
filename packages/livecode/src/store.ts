@@ -27,6 +27,13 @@ type LiveCodeFile = {
   view: EditorView;
 };
 
+type LiveCodeGroup = {
+  /** Name of active file. */
+  activeFile: string;
+  /** Files contained in this editor group. */
+  files: LiveCodeFile[];
+};
+
 /** LiveCode store state. */
 export interface LiveCodeState {
   /**
@@ -38,16 +45,7 @@ export interface LiveCodeState {
   classNames: string[];
 
   /** Group of files/editors. */
-  groups: Record<
-    string,
-    {
-      /** Name of active file. */
-      activeFile: string;
-
-      /** Files contained in this editor group. */
-      files: LiveCodeFile[];
-    }
-  >;
+  groups: Record<string, LiveCodeGroup>;
 
   /** Console logs. */
   messages: ConsoleMessage[];
@@ -64,6 +62,9 @@ export interface LiveCodeState {
   /** Get the active file. */
   getActiveFile(): LiveCodeFile | undefined;
 
+  /** Get the active group. */
+  getActiveGroup(): LiveCodeGroup | undefined;
+
   /** Get the active view. */
   getActiveView(): EditorView | undefined;
 }
@@ -78,10 +79,13 @@ export const makeStore = (state: Partial<LiveCodeState> = {}) =>
         activeGroup: undefined,
         classNames: ["lqv-codebooth"],
         getActiveFile() {
+          const group = get().getActiveGroup();
+          return group?.files?.find((_) => _.filename === group.activeFile);
+        },
+        getActiveGroup() {
           const { groups, activeGroup } = get();
           if (!activeGroup) return undefined;
-          const group = groups[activeGroup];
-          return group?.files?.find((_) => _.filename === group.activeFile);
+          return groups[activeGroup];
         },
         getActiveView() {
           return get().getActiveFile()?.view;

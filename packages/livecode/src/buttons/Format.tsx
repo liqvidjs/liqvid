@@ -6,6 +6,9 @@ import {
 import clsx from "clsx";
 import { useCallback } from "react";
 
+/**
+ * Button to format the currently active file.
+ */
 export function Format({
   className,
   shortcut,

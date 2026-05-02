@@ -122,7 +122,10 @@ export function FileTabs({
   if (!group) return null;
 
   return (
-    <div className={clsx("lqv-file-tabs", propclsx?.container)} role="tablist">
+    <div
+      className={clsx("lqv-file-tabs", propClassNames?.container)}
+      role="tablist"
+    >
       {group.files.map(({ filename }) => (
         <button
           aria-controls={ids.editorPanel({ filename, group: activeGroup })}

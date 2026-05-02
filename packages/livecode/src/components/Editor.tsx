@@ -42,7 +42,7 @@ export function Editor({
   groupId ??= contextGroup;
 
   const contextFilename = useFilenameOptional();
-  filename ??= contextFilename;
+  filename ??= contextFilename ?? undefined;
 
   if (!filename) {
     throw new Error(

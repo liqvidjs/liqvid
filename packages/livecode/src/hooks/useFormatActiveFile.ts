@@ -1,4 +1,4 @@
-import type { EditorSelection, SelectionRange } from "@codemirror/state";
+import { EditorSelection, type SelectionRange } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { useCallback } from "react";
 
@@ -13,7 +13,12 @@ export function useFormatActiveFile() {
   const store = useLiveCodeStore();
 
   return useCallback(async () => {
-    const { filename, view } = store.getState().getActiveFile();
+    // extract state
+    const active = store.getState().getActiveFile();
+    if (!active) return;
+    const { filename, view } = active;
+
+    // get file type
     const extn = getFileType(filename);
 
     // Dynamically import prettier and plugins
@@ -41,13 +46,26 @@ export function useFormatActiveFile() {
           });
         break;
       }
-      case "js": {
+      case "js":
+      case "jsx": {
         const babelPlugin = await import("prettier/plugins/babel");
         const estreePlugin = await import("prettier/plugins/estree");
         formatter = (code) =>
           prettier.format(code, {
             filepath: filename,
             plugins: [estreePlugin.default, babelPlugin.default],
+          });
+        break;
+      }
+
+      case "ts":
+      case "tsx": {
+        const estreePlugin = await import("prettier/plugins/estree");
+        const typescriptPlugin = await import("prettier/plugins/typescript");
+        formatter = (code) =>
+          prettier.format(code, {
+            filepath: filename,
+            plugins: [estreePlugin.default, typescriptPlugin.default],
           });
         break;
       }
@@ -91,7 +109,10 @@ async function formatView(view: EditorView, formatter: Formatter) {
 /** Characters that get inserted by Prettier */
 const aestheticChars = /[\s(),;]/g;
 
-/** Preserve selection when formatting with Prettier */
+/**
+ * Preserve selection when formatting with Prettier
+ * TODO: there is an actual API for doing this
+ */
 function preserveSelection(
   selection: SelectionRange,
   unformatted: string,

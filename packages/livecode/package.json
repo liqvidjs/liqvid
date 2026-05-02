@@ -34,7 +34,7 @@
     "build:clean": "rm -fr dist && mkdir dist",
     "build:css": "cp -R css dist",
     "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution nodenext --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
     "build:js:esm": "tsc",
     "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",

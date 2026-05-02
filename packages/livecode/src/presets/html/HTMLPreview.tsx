@@ -1,3 +1,5 @@
+"use client";
+
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import clsx from "clsx";
@@ -9,7 +11,11 @@ import { viewContents } from "../../utils.ts";
 
 import { type HTMLConsoleMessage, render } from "./html-utils.ts";
 
-/** @package */
+/**
+ * Render a preview of HTML code in an iframe.
+ *
+ * CSS-only changes do not cause the preview to reload.
+ */
 export function HTMLPreview({
   className,
   ...props
@@ -35,7 +41,9 @@ export function HTMLPreview({
     syncColorScheme(colorScheme);
   }, [colorScheme, syncColorScheme]);
 
-  useEventListener(iframe.current, "load", syncColorScheme);
+  useEventListener(iframe.current, "load", () => {
+    syncColorScheme(colorScheme);
+  });
 
   const refresh = useCallback(() => {
     const { groups, activeGroup } = store.getState();
@@ -108,6 +116,7 @@ export function HTMLPreview({
       allow="fullscreen"
       className={clsx("lqv-livecode-html-preview", className)}
       ref={iframe}
+      sandbox="allow-scripts"
       {...props}
     />
   );
