@@ -31,25 +31,42 @@ export function compare<T extends string | number | Date>(a: T, b: T) {
 
 /**
  * Given a template string with string placeholders, creates a function
- * accepting those placeholders as named arguments.
+ * accepting those placeholders as named arguments. Strings beginning with
+ * "slot" become placeholders, while any other interpolations are treated
+ * as usual.
  *
  * @example
  * ```ts
- * const template = namedSlotsTemplate`Hello, ${"name"}!`;`
+ * const template = namedSlotsTemplate`Hello, ${"slot:name"}!`;`
  *
  * template({ name: "World" }); // "Hello, World!"
  * ```
  */
+
 export function namedSlotsTemplate<Args extends string[]>(
   strings: TemplateStringsArray,
   ...keys: Args
 ) {
-  return (values: Record<Args[number], unknown>): string => {
+  const slotPrefix = "slot:";
+
+  return (
+    values: Record<
+      Extract<Args[number], `slot:${string}`> extends `slot:${infer S}`
+        ? S
+        : never,
+      unknown
+    >,
+  ): string => {
     let result = strings[0];
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i] as Args[number];
-      result += values[key];
+      if (key.startsWith(slotPrefix)) {
+        const slotKey = key.slice(slotPrefix.length);
+        result += values[slotKey as keyof typeof values] as unknown as string;
+      } else {
+        result += key;
+      }
       result += strings[i + 1];
     }
 
