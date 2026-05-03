@@ -1,6 +1,6 @@
-import type { TypedEventTarget } from "./types.mts";
+import type { TypedEventTarget } from "./types.ts";
 
-export type { EventsOn, TypedEventTarget } from "./types.mts";
+export type { EventsOn, TypedEventTarget } from "./types.ts";
 
 export class EventEmitter<Events> implements TypedEventTarget<Events> {
   // @ts-expect-error this is type-only

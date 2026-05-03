@@ -8,14 +8,16 @@
   },
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
     },
     "./react": {
-      "@liqvid/dev": "./src/react.mts",
-      "import": "./dist/esm/react.mjs",
-      "types": "./dist/types/react.d.mts"
+      "@liqvid/dev": "./src/react.ts",
+      "import": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js",
+      "types": "./dist/types/react.d.ts"
     }
   },
   "typesVersions": {
@@ -31,7 +33,9 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",

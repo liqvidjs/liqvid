@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import type { EventsOn, TypedEventTarget } from "./types.mts";
+import type { EventsOn, TypedEventTarget } from "./types.ts";
 
 /** Subscribe to events */
 export function useEventListener<
