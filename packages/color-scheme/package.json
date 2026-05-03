@@ -7,9 +7,16 @@
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
   "exports": {
+    "./docusaurus": {
+      "@liqvid/dev": "./src/docusaurus.tsx",
+      "import": "./dist/esm/docusaurus.js",
+      "require": "./dist/esm/docusaurus.js",
+      "types": "./dist/types/docusaurus.d.ts"
+    },
     "./react": {
       "@liqvid/dev": "./src/react.tsx",
       "import": "./dist/esm/react.js",
+      "require": "./dist/esm/react.js",
       "types": "./dist/types/react.d.ts"
     }
   },
@@ -19,7 +26,9 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -35,6 +44,8 @@
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@docusaurus/theme-common": "catalog:dev",
+    "@docusaurus/types": "catalog:dev",
     "@types/react": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
