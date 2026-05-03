@@ -16,7 +16,7 @@ export interface ConsoleMessage<T = unknown, K extends string = string> {
   timestamp: Date;
 }
 
-type LiveCodeFile = {
+export type LiveCodeFile = {
   /** Whether the buffer can be edited by the viewer. */
   editable: boolean;
 

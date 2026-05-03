@@ -25,12 +25,14 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import {
   drawSelection,
   dropCursor,
+  type EditorView,
   highlightActiveLine,
   highlightActiveLineGutter,
   highlightSpecialChars,
   keymap,
   lineNumbers,
   rectangularSelection,
+  ViewPlugin,
 } from "@codemirror/view";
 
 export const basicSetup: Extension = [
@@ -67,6 +69,17 @@ export const basicSetup: Extension = [
   ]),
 ];
 
+export const lightDarkCompartment = new Compartment();
 export const recording = new Compartment();
 export const shortcuts = new Compartment();
 export const vimCompartment = new Compartment();
+
+/** get a plugin to read the view */
+export const getReadViewPlugin = (callback: (view: EditorView) => void) =>
+  ViewPlugin.fromClass(
+    class {
+      constructor(readonly view: EditorView) {
+        callback(view);
+      }
+    },
+  );

@@ -2,8 +2,7 @@ import { onClickReact } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 
-import { useLiveCodeShortcut } from "../hooks.ts";
-import { useLiveCodeStore } from "../store.ts";
+import { useLiveCodeShortcut, useRun } from "../hooks.ts";
 
 /** Button for running the code. */
 export function Run({
@@ -14,12 +13,8 @@ export function Run({
   /** Keyboard shortcut to run the code. */
   shortcut?: string;
 }) {
-  const { setState: setStoreState } = useLiveCodeStore();
-
   // run callback
-  const run = useCallback(() => {
-    setStoreState((prev) => ({ __run: prev.__run + 1 }));
-  }, [setStoreState]);
+  const run = useRun();
 
   // keyboard shortcut
   useLiveCodeShortcut(
