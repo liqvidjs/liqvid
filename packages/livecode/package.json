@@ -15,11 +15,11 @@
       "types": "./dist/types/interpreters/*.d.ts"
     },
     "./style.css": "./dist/css/style.css",
-    "./html": {
-      "@liqvid/dev": "./src/presets/html/index.ts",
-      "import": "./dist/esm/presets/html/index.js",
-      "require": "./dist/cjs/presets/html/index.js",
-      "types": "./dist/types/presets/html/index.d.ts"
+    "./web": {
+      "@liqvid/dev": "./src/presets/web/index.ts",
+      "import": "./dist/esm/presets/web/index.js",
+      "require": "./dist/cjs/presets/web/index.js",
+      "types": "./dist/types/presets/web/index.d.ts"
     }
   },
   "files": [

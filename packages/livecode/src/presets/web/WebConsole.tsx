@@ -25,12 +25,13 @@ export function WebConsole({
   className,
   ...props
 }: {
+  className?: string;
+
   debug?: RenderItem;
   error?: RenderItem;
   info?: RenderItem;
   log?: RenderItem;
   warn?: RenderItem;
-  className?: string;
 
   bigint?: RenderProp<bigint> | string;
   boolean?: RenderProp<boolean> | string;

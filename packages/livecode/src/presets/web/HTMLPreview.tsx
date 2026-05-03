@@ -9,7 +9,7 @@ import { useAddMessage, useClearMessages, useOnRun } from "../../hooks.ts";
 import { useLiveCodeStore } from "../../store.ts";
 import { viewContents } from "../../utils.ts";
 
-import { type HTMLConsoleMessage, render } from "./html-utils.ts";
+import { render, type WebConsoleMessage } from "./html-utils.ts";
 
 /**
  * Render a preview of HTML code in an iframe.
@@ -100,7 +100,7 @@ export function HTMLPreview({
       case "console.info":
       case "console.warn":
       case "console.log":
-        addMessage<HTMLConsoleMessage>({
+        addMessage<WebConsoleMessage>({
           data: msg.data.content,
           kind: msg.data.type.slice("console.".length),
           timestamp: new Date(),
