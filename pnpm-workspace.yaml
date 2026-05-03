@@ -67,9 +67,9 @@ catalog:
   autoprefixer: ^10.4.21
   babel-jest: ^30.2.0
   chalk: 5.6.2
-  clsx: ^2.1.1
   cli-progress: ^3.12.0
   client-only: ^0.0.1
+  clsx: ^2.1.1
   codemirror-lang-glsl: ^0.5.0
   csstype: ^3.2.3
   desmos-react: ^1.2.0
@@ -122,6 +122,7 @@ catalogs:
   dev:
     "@biomejs/biome": 2.4.13
     "@jest/globals": ^30.3.0
+    "@types/babel__standalone": ^7.1.9
     "@types/cli-progress": ^3.11.6
     "@types/jest": ^30.0.0
     "@types/js-yaml": ^4.0.9
@@ -137,6 +138,7 @@ catalogs:
     "@types/yargs-parser": ^21.0.3
     concurrently: ^9.2.1
     csstype: ^3.2.3
+    effect: beta
     jest: ^30.2.0
     js-yaml: ^4.1.1
     next: 16.2.3
@@ -152,6 +154,7 @@ catalogs:
     typedoc-plugin-markdown: ^4.11.0
     typescript: ^5.9
   peer:
+    "@babel/standalone": ">=7"
     "@codemirror/autocomplete": ">=6"
     "@codemirror/commands": ">=6"
     "@codemirror/lang-css": ">=6"
@@ -169,6 +172,7 @@ catalogs:
     "@replit/codemirror-vim": ^6.3
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
+    "effect": "beta"
     hls.js: ^1.6.16
     jszip: ^3.10.1
     katex: ">=0.16"

@@ -10,6 +10,12 @@
       "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
     },
+    "./effect": {
+      "@liqvid/dev": "./src/effect.ts",
+      "import": "./dist/esm/effect.js",
+      "require": "./dist/cjs/effect.js",
+      "types": "./dist/types/effect.d.ts"
+    },
     "./zod": {
       "@liqvid/dev": "./src/zod.ts",
       "import": "./dist/esm/zod.js",
@@ -50,9 +56,13 @@
   },
   "peerDependencies": {
     "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
+    "effect": "catalog:peer",
     "zod": "catalog:peer"
   },
   "peerDependenciesMeta": {
+    "effect": {
+      "optional": true
+    },
     "zod": {
       "optional": true
     }
