@@ -1,7 +1,6 @@
 import { python } from "@codemirror/lang-python";
 import type { Extension } from "@codemirror/state";
 import { CodeRecording } from "@lqv/codemirror/recording";
-import { useEffect } from "react";
 
 import { Clear } from "../buttons/Clear.tsx";
 // import { Copy } from "../buttons/Copy";
@@ -16,7 +15,9 @@ import { Replay } from "../components/Replay.tsx";
 import { Resize } from "../components/Resize.tsx";
 import { LiveCode } from "../components/Root.tsx";
 import { basicSetup } from "../extensions.ts";
+import { useOnRun } from "../hooks.ts";
 import { PythonInterpreter } from "../interpreters/skulpt.ts";
+import { selectActiveView } from "../selectors.ts";
 import { useLiveCodeStore } from "../store.ts";
 
 const interpreter = new PythonInterpreter();
@@ -147,31 +148,29 @@ export const PythonReplay: React.FC<{
 export const PythonRun: React.FC = () => {
   const store = useLiveCodeStore();
 
-  useEffect(() => {
-    return store.subscribe(
-      (state) => state.run,
-      () => {
-        const state = store.getState();
-        const view = state.getActiveView();
-        const code = view.state.doc.toString();
-        let output: React.ReactNode[] = [];
-        try {
-          output = interpreter
-            .runSync(code)
-            .map((log) => <pre key={Math.random()}>{log}</pre>);
-        } catch (e) {
-          const msg = `Error (line ${e.traceback[0].lineno}): ${e.args.v[0].v}`;
-          output = [
-            <pre className="error" key={`${msg}-${Math.random()}`}>
-              {msg}
-            </pre>,
-          ];
-        }
-        store.setState((prev) => ({
-          messages: [...prev.messages, ...output],
-        }));
-      },
-    );
-  }, [store]);
+  useOnRun(() => {
+    const state = store.getState();
+    const view = selectActiveView(state);
+    if (!view) return;
+
+    const code = view.state.doc.toString();
+    let output: React.ReactNode[] = [];
+    try {
+      output = interpreter
+        .runSync(code)
+        .map((log) => <pre key={Math.random()}>{log}</pre>);
+    } catch (e) {
+      const msg = `Error (line ${e.traceback[0].lineno}): ${e.args.v[0].v}`;
+      output = [
+        <pre className="error" key={`${msg}-${Math.random()}`}>
+          {msg}
+        </pre>,
+      ];
+    }
+    store.setState((prev) => ({
+      messages: [...prev.messages, ...output],
+    }));
+  });
+
   return null;
 };

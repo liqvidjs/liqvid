@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { selectActiveFile } from "../selectors.ts";
 import { useLiveCodeStore } from "../store.ts";
 import { download, getFileType, viewContents } from "../utils.ts";
 
@@ -39,7 +40,7 @@ export function useDownloadAll(
 export function useDownloadCurrent() {
   const store = useLiveCodeStore();
   return useCallback(() => {
-    const { filename, view } = store.getState().getActiveFile();
+    const { filename, view } = selectActiveFile(store.getState());
 
     download({
       content: viewContents(view),

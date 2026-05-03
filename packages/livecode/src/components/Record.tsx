@@ -7,6 +7,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
 import { recording } from "../extensions.ts";
+import { selectActiveFile } from "../selectors.ts";
 import { type LiveCodeState, useLiveCodeStore } from "../store.ts";
 
 import { useFilenameOptional, useGroup } from "./context.tsx";
@@ -132,7 +133,7 @@ function includeFilenameInRecording(state: LiveCodeState) {
     // have to call existing beginRecording() FIRST in order to
     // set state.recorder.duration, otherwise we get negative times!
     beginRecording(...args);
-    state.recorder?.capture(0, selectCmd + state.getActiveFile().filename);
+    state.recorder?.capture(0, selectCmd + selectActiveFile(state).filename);
   };
   (state.recorder as Hack)[modifiedRecorder] = true;
 }

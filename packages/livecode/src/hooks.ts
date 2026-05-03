@@ -11,6 +11,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
 import { getReadViewPlugin, lightDarkCompartment } from "./extensions.ts";
+import { selectActiveFile } from "./selectors.ts";
 import { useLiveCodeStore } from "./store.ts";
 import { viewContents } from "./utils.ts";
 
@@ -48,7 +49,7 @@ export function useCopyActiveFile({
   }
 
   const copyActiveFile = useCallback(async () => {
-    const view = store.getState().getActiveFile()?.view;
+    const view = selectActiveFile(store.getState())?.view;
     if (!view) return;
 
     // copy text
@@ -131,19 +132,31 @@ export function useLiveCodeShortcut(
 export function useOnRun(
   /** callback to be called when the run event is triggered */
   callback: () => void,
+
+  {
+    initial = false,
+  }: {
+    /**
+     * whether to call the callback immediately on mount
+     * @default false
+     * */
+    initial?: boolean;
+  } = {},
 ) {
   const store = useLiveCodeStore();
 
-  useEffect(
-    () =>
-      store.subscribe(
-        (state) => state.__run,
-        () => {
-          callback();
-        },
-      ),
-    [store, callback],
-  );
+  useEffect(() => {
+    if (initial) {
+      callback();
+    }
+
+    return store.subscribe(
+      (state) => state.__run,
+      () => {
+        callback();
+      },
+    );
+  }, [store, callback, initial]);
 }
 
 /** get a callback to run the code */

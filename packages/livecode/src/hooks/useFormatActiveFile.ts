@@ -2,6 +2,7 @@ import { EditorSelection, type SelectionRange } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { useCallback } from "react";
 
+import { selectActiveFile } from "../selectors.ts";
 import { useLiveCodeStore } from "../store.ts";
 import { getFileType, viewContents } from "../utils.ts";
 
@@ -14,7 +15,7 @@ export function useFormatActiveFile() {
 
   return useCallback(async () => {
     // extract state
-    const active = store.getState().getActiveFile();
+    const active = selectActiveFile(store.getState());
     if (!active) return;
     const { filename, view } = active;
 

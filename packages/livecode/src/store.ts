@@ -58,38 +58,17 @@ export interface LiveCodeState {
 
   /** Keyboard shortcuts. */
   shortcuts: Record<string, KeyBinding>;
-
-  /** Get the active file. */
-  getActiveFile(): LiveCodeFile | undefined;
-
-  /** Get the active group. */
-  getActiveGroup(): LiveCodeGroup | undefined;
-
-  /** Get the active view. */
-  getActiveView(): EditorView | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const makeStore = (state: Partial<LiveCodeState> = {}) =>
   createStore<LiveCodeState>()(
     subscribeWithSelector(
-      (_set, get): LiveCodeState => ({
+      (_set): LiveCodeState => ({
         __run: 0,
         // default values
         activeGroup: undefined,
         classNames: ["lqv-codebooth"],
-        getActiveFile() {
-          const group = get().getActiveGroup();
-          return group?.files?.find((_) => _.filename === group.activeFile);
-        },
-        getActiveGroup() {
-          const { groups, activeGroup } = get();
-          if (!activeGroup) return undefined;
-          return groups[activeGroup];
-        },
-        getActiveView() {
-          return get().getActiveFile()?.view;
-        },
         groups: {},
         messages: [],
         recorder: undefined,

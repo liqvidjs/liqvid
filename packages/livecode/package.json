@@ -55,6 +55,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@lqv/codemirror": "workspace:^",
+    "@types/babel__standalone": "catalog:dev",
     "@types/react": "catalog:dev",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",
@@ -64,6 +65,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@babel/standalone": "catalog:peer",
     "@codemirror/autocomplete": "catalog:peer",
     "@codemirror/commands": "catalog:peer",
     "@codemirror/lang-css": "catalog:peer",
@@ -92,6 +94,9 @@
     "skulpt": "catalog:peer"
   },
   "peerDependenciesMeta": {
+    "@babel/standalone": {
+      "optional": true
+    },
     "@codemirror/lang-css": {
       "optional": true
     },

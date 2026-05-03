@@ -18,6 +18,7 @@ export { Resize } from "./components/Resize.tsx";
 export * from "./components/Root.tsx";
 export * from "./extensions.ts";
 export * from "./hooks.ts";
+export * from "./selectors.ts";
 export {
   type LiveCodeState,
   type LiveCodeStore,
