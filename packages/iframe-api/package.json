@@ -57,14 +57,21 @@
   },
   "peerDependencies": {
     "@types/react": "catalog:peer",
+    "effect": "catalog:peer",
     "react": "catalog:peer",
-    "zod": "catalog:"
+    "zod": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
     },
+    "effect": {
+      "optional": true
+    },
     "react": {
+      "optional": true
+    },
+    "zod": {
       "optional": true
     }
   },

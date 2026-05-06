@@ -8,7 +8,7 @@
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
     },
-"./plain": {
+    "./plain": {
       "@liqvid/dev": "./src/plain.tsx",
       "import": "./dist/esm/plain.js",
       "types": "./dist/types/plain.d.ts"
@@ -47,6 +47,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@liqvid/player": "workspace:^",
+    "@types/node": "catalog:",
     "@types/react": "catalog:dev",
     "mathjax": "^3.2.0",
     "typedoc": "catalog:dev",

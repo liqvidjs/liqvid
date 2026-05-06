@@ -5,7 +5,7 @@ import type {
   IFrameAPIDeclaration,
   ReceivedMessage,
   ReturnMessage,
-} from "./index";
+} from "./index.ts";
 
 const DEFAULT_RETRY_INTERVAL = 100;
 

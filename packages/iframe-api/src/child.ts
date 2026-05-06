@@ -5,7 +5,7 @@ import type {
   IFrameAPIImplementation,
   ReceivedMessage,
   ReturnMessage,
-} from "./index";
+} from "./index.ts";
 
 /**
  * Options for provideIframeApi in the child.

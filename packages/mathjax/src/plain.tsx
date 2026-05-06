@@ -88,8 +88,6 @@ export function MJX({
       hub.beginRendering();
       status.current = "rendering";
 
-      console.log(`rendering`, children);
-
       MathJax.typesetPromise([span]).then(() => {
         hub.doneRendering();
         status.current = "done";

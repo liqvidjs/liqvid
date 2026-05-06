@@ -9,7 +9,8 @@ export const MathJaxReady = waitFor(
     "MathJax" in window &&
     typeof window.MathJax === "object" &&
     window.MathJax !== null &&
-    "_" in window.MathJax,
+    "_" in window.MathJax &&
+    window.MathJax._ !== undefined,
 ).then(async () => {
   await MathJax.startup.promise;
 

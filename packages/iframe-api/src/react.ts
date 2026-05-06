@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import type { IFrameAPIClient, IFrameAPIDeclaration } from "./index";
-import { type GetIframeApiOptions, getIframeApi } from "./parent";
+import type { IFrameAPIClient, IFrameAPIDeclaration } from "./index.ts";
+import { type GetIframeApiOptions, getIframeApi } from "./parent.ts";
 
 export function useIframeApi<D extends IFrameAPIDeclaration>(
   decl: D,
