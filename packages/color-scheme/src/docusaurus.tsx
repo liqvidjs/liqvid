@@ -5,9 +5,12 @@ import type { LocalValueConfig } from "@liqvid/hydration";
 import { usePersist } from "@liqvid/hydration";
 import type { ReactNode } from "react";
 
-import { ColorSchemeProvider } from "./react";
+import { ColorSchemeProvider } from "./react.tsx";
 
-export const persistColorScheme = {
+/**
+ * load Docusaurus color scheme preference from localStorage
+ */
+export const docusaurusPersistColorScheme = {
   default: "light" as const,
   enum: ["light", "dark"] as const,
   name: `theme${SiteStorage.namespace}`,
@@ -23,7 +26,7 @@ export const persistColorScheme = {
  * can solve the hydration issues using the `@liqvid/hydration` package. However, you can also
  * opt out of this fix by setting `cautiousHydration: true`.
  */
-export function SyncDocusaurusColorSchemeProviderWithLiqvid({
+export function SyncDocusaurusColorSchemeWithLiqvid({
   cautiousHydration = false,
   children,
 }: {
@@ -36,7 +39,7 @@ export function SyncDocusaurusColorSchemeProviderWithLiqvid({
   // note that get() and colorMode are equal except for possibly the first render
   // even if we didn't have cautiousHydration, we would need to call useColorMode()
   // to subscribe to updates
-  const [get] = usePersist(persistColorScheme);
+  const [get] = usePersist(docusaurusPersistColorScheme);
 
   const { colorMode } = useColorMode();
 

@@ -10,13 +10,13 @@
     "./docusaurus": {
       "@liqvid/dev": "./src/docusaurus.tsx",
       "import": "./dist/esm/docusaurus.js",
-      "require": "./dist/esm/docusaurus.js",
+      "require": "./dist/cjs/docusaurus.js",
       "types": "./dist/types/docusaurus.d.ts"
     },
     "./react": {
       "@liqvid/dev": "./src/react.tsx",
       "import": "./dist/esm/react.js",
-      "require": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js",
       "types": "./dist/types/react.d.ts"
     }
   },

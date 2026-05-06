@@ -2,7 +2,7 @@
 
 import { type StringValueConfig, usePersistentState } from "@liqvid/hydration";
 import { makeContext } from "@liqvid/utils";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type ColorScheme = "light" | "dark";
 export type ColorSchemeSpecifier = ColorScheme | "system";
@@ -65,3 +65,31 @@ export function ColorSchemeProvider({
 
 /** access the color scheme API */
 export const useColorScheme = colorSchemeContext.use;
+
+/**
+ * Adds a `<meta name="color-scheme">` tag to `<head>` and keeps it in sync.
+ * This is useful if you need transparent iframes in dark mode (https://github.com/w3c/csswg-drafts/issues/4772).
+ */
+export function ColorSchemeMetaTag() {
+  const { colorScheme } = useColorScheme();
+  const initialColorScheme = useRef(colorScheme);
+  const meta = useRef<HTMLMetaElement>(null);
+
+  useEffect(() => {
+    meta.current = document.createElement("meta");
+    meta.current.setAttribute("name", "color-scheme");
+    meta.current.setAttribute("content", initialColorScheme.current);
+
+    document.head.appendChild(meta.current);
+
+    return () => {
+      meta.current?.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    meta.current?.setAttribute("content", colorScheme);
+  }, [colorScheme]);
+
+  return null;
+}

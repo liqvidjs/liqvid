@@ -10,7 +10,11 @@ export function SneakyScript({ children }: { children: Joinable }) {
   if (isClient) return null;
 
   return (
-    <script>{`(()=>{${combine(children)};document.currentScript.remove()})()`}</script>
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `(()=>{${combine(children)};document.currentScript.remove()})()`,
+      }}
+    />
   );
 }
 
