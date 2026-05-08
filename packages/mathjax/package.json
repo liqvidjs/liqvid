@@ -67,5 +67,7 @@
     "mathjax": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false,
+  "type": "module"
 }
