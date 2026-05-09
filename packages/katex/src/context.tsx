@@ -3,20 +3,27 @@
 import { createContext, useContext, useMemo } from "react";
 
 import { parseMacros } from "./macros.ts";
+import type { BetterRenderMathInElementOptions } from "./types.ts";
 
-const KaTeXContext = createContext<katex.KatexOptions>({});
+const KaTeXContext = createContext<BetterRenderMathInElementOptions>({});
 
 export function useKaTeXContext() {
   return useContext(KaTeXContext);
 }
 
 export function KaTeXProvider({
+  overwriteMacros = false,
+
   children,
   colorIsTextColor,
+  delimiters,
   displayMode,
+  errorCallback,
   errorColor,
   fleqn,
   globalGroup,
+  ignoredClasses,
+  ignoredTags,
   leqno,
   macros,
   maxExpand,
@@ -29,19 +36,31 @@ export function KaTeXProvider({
 }: {
   children?: React.ReactNode;
   macros?: string | Record<string, string>;
-} & katex.KatexOptions) {
-  const context = useMemo<katex.KatexOptions>(() => {
+  /**
+   * By default, the `macros` prop will merge with existing macros defined in the context.
+   * If this is set to true, it will instead overwrite all macros.
+   */
+  overwriteMacros?: boolean;
+} & BetterRenderMathInElementOptions) {
+  const existing = useKaTeXContext();
+
+  const context = useMemo<BetterRenderMathInElementOptions>(() => {
     if (typeof macros === "string") {
       macros = parseMacros(macros);
     }
+
     return {
       colorIsTextColor,
+      delimiters,
       displayMode,
+      errorCallback,
       errorColor,
       fleqn,
       globalGroup,
+      ignoredClasses,
+      ignoredTags,
       leqno,
-      macros,
+      macros: overwriteMacros ? macros : { ...existing?.macros, ...macros },
       maxExpand,
       maxSize,
       minRuleThickness,
@@ -52,10 +71,16 @@ export function KaTeXProvider({
     };
   }, [
     colorIsTextColor,
+    delimiters,
     displayMode,
+    errorCallback,
     errorColor,
+    existing?.macros,
+    overwriteMacros,
     fleqn,
     globalGroup,
+    ignoredClasses,
+    ignoredTags,
     leqno,
     macros,
     maxExpand,

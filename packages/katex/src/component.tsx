@@ -7,10 +7,12 @@ import renderMathInElement from "katex/contrib/auto-render";
 import { useEffect, useRef } from "react";
 
 import { useKaTeXContext } from "./context.tsx";
+import type { BetterKaTeXOptions } from "./types.ts";
 
 /** Component for KaTeX code */
 export function KTX({
   children,
+  overwriteMacros = false,
   ref: propRef,
 
   // katex options
@@ -29,9 +31,15 @@ export function KTX({
   throwOnError,
   trust,
   ...props
-}: katex.KatexOptions &
+}: BetterKaTeXOptions &
   React.JSX.IntrinsicElements["span"] & {
     children: string;
+
+    /**
+     * By default, the `macros` prop will merge with existing macros defined in the context.
+     * If this is set to true, it will instead overwrite all macros.
+     */
+    overwriteMacros?: boolean;
   }) {
   const ref = useRef(null);
 
@@ -52,7 +60,9 @@ export function KTX({
       fleqn: fleqn ?? defaults.fleqn,
       globalGroup: globalGroup ?? defaults.globalGroup,
       leqno: leqno ?? defaults.leqno,
-      macros: macros ?? defaults.macros,
+      macros: overwriteMacros
+        ? (macros ?? defaults.macros)
+        : { ...defaults.macros, ...macros },
       maxExpand: maxExpand ?? defaults.maxExpand,
       maxSize: maxSize ?? defaults.maxSize,
       minRuleThickness: minRuleThickness ?? defaults.minRuleThickness,
@@ -81,6 +91,7 @@ export function KTX({
     strict,
     throwOnError,
     trust,
+    overwriteMacros,
   ]);
 
   // ensure that it is server-rendered
@@ -103,13 +114,9 @@ export function KTX({
     });
 
     return (
-      <span
-        dangerouslySetInnerHTML={{
-          __html: tex,
-        }}
-        ref={combineRefs(ref, propRef)}
-        {...props}
-      />
+      <span ref={combineRefs(ref, propRef)} {...props}>
+        {tex}
+      </span>
     );
   }
 
