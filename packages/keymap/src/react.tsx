@@ -8,7 +8,7 @@ import { Keymap, type ShortcutHandler } from "./index.mts";
 const KeymapContext = makeContext<Keymap | undefined>({
   defaultValue: undefined,
   name: "Keymap",
-  uniqueKey: "@lqv/keymap",
+  uniqueKey: "@liqvid/keymap",
 });
 
 /** Access the ambient {@link Keymap} */
