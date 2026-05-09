@@ -94,7 +94,7 @@ export class Duration {
   }
 
   /**
-   * Coerce a DurationLike into a Duration
+   * Coerce a DurationLike or Date into a Duration
    */
   static from(val: DurationLike | Date): Duration {
     if (val instanceof Date)
@@ -162,6 +162,9 @@ export class Duration {
       },
     ];
   }
+
+  /** referentially stable empty duration */
+  static zero = new Duration();
 
   /* ------------------------- serialization ------------------------- */
   toJSON(): SerializedDuration {
