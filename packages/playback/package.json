@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/playback",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "Playback class for Liqvid",
   "exports": {
     ".": {
@@ -30,7 +30,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
+    "url": "git+https://github.com/liqvidjs/liqvid",
+    "directory": "packages/playback"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "babel-jest": "catalog:",
     "typedoc": "catalog:dev",

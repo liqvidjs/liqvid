@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef } from "react";
 
-import type { Seekable } from ".";
+import type { Seekable } from "./index.ts";
 
 type GlobalThis = {
   [symbol]: React.Context<Seekable | null>;

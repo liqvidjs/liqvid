@@ -47,7 +47,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@liqvid/player": "workspace:^",
-    "@types/node": "catalog:",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "mathjax": "^3.2.0",
     "typedoc": "catalog:dev",

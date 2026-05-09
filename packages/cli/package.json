@@ -63,7 +63,7 @@
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",
     "@liqvid/schemas": "workspace:^",
     "@liqvid/utils": "workspace:^2.0.0-alpha.3",
-    "@types/node": "catalog:",
+    "@types/node": "catalog:dev",
     "chalk": "catalog:",
     "cli-progress": "catalog:",
     "execa": "catalog:",

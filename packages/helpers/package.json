@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/helpers",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Convenience components for Liqvid",
   "exports": {
     ".": {
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
     "csstype": "catalog:dev",

@@ -1,10 +1,11 @@
 {
   "name": "@liqvid/ssr",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.1",
   "description": "Server-side rendering helpers for Liqvid",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/ssr"
   },
   "types": "dist/types/index.d.ts",
   "exports": {

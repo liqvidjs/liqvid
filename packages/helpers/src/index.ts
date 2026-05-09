@@ -1,9 +1,9 @@
-export { Animate } from "./Animate.tsx";
-export { Segment, type SegmentProps } from "./Segment.tsx";
+export * from "./Animate.tsx";
+export * from "./Segment.tsx";
 export {
   type HidingStrategy,
   type SegmentContext,
   SegmentProvider,
 } from "./SegmentProvider.tsx";
-export { type TargetConfig, TargetDescendants } from "./TargetDescendants.tsx";
-export { UniversalHelper } from "./UniversalHelper.tsx";
+export * from "./TargetDescendants.tsx";
+export * from "./UniversalHelper.tsx";

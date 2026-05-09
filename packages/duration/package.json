@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.5.0",
+  "version": "1.4.0",
   "description": "Class for unitless time intervals",
   "types": "dist/types/index.d.ts",
   "exports": {
@@ -13,13 +13,11 @@
     "./effect": {
       "@liqvid/dev": "./src/effect.ts",
       "import": "./dist/esm/effect.js",
-      "require": "./dist/cjs/effect.js",
       "types": "./dist/types/effect.d.ts"
     },
     "./zod": {
       "@liqvid/dev": "./src/zod.ts",
       "import": "./dist/esm/zod.js",
-      "require": "./dist/cjs/zod.js",
       "types": "./dist/types/zod.d.ts"
     }
   },
@@ -30,7 +28,7 @@
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
     "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:cjs": "tsc --project tsconfig.cjs.json",
     "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",

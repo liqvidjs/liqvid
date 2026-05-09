@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/katex",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "KaTeX integration for Liqvid",
   "files": [
     "dist/*"
@@ -48,11 +48,12 @@
   "license": "MIT",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
-    "@liqvid/utils": "workspace:^"
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@liqvid/player": "workspace:^",
+    "@types/katex": "catalog:dev",
     "@types/react": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

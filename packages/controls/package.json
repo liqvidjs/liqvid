@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/controls",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Controls for Liqvid",
   "exports": {
     ".": {
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

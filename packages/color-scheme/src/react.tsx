@@ -2,7 +2,7 @@
 
 import { type StringValueConfig, usePersistentState } from "@liqvid/hydration";
 import { makeContext } from "@liqvid/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 export type ColorScheme = "light" | "dark";
 export type ColorSchemeSpecifier = ColorScheme | "system";

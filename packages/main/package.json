@@ -1,6 +1,6 @@
 {
   "name": "liqvid",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "description": "Framework for interactive videos in React",
   "files": [
     "dist/*"
@@ -47,6 +47,8 @@
     "@types/jest": "catalog:dev",
     "@types/react": "catalog:dev",
     "jest": "catalog:dev",
+    "nib": "catalog:dev",
+    "stylus": "catalog:dev",
     "ts-jest": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

@@ -9,6 +9,7 @@
       "types": "./dist/types/index.d.ts"
     }
   },
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist/*"
   ],
@@ -25,7 +26,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
+    "url": "git+https://github.com/liqvidjs/liqvid",
+    "directory": "packages/animation"
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
@@ -34,7 +36,7 @@
   },
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/animation#readme",
   "dependencies": {
-    "bezier-easing": "^2.1.0"
+    "bezier-easing": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
