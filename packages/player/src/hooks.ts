@@ -1,6 +1,6 @@
 "use client";
 
-import { createUniqueContext } from "@liqvid/utils";
+import { type CleanUpFn, createUniqueContext } from "@liqvid/utils";
 import { useContext } from "react";
 
 import type { AspectRatio } from "./aspect-ratio.ts";
@@ -14,7 +14,7 @@ export type PlayerContext = {
   aspectRatio: AspectRatio;
   domElement: HTMLElement | null;
   renderingTasks: Set<RenderingTask>;
-  registerRenderingTask(task: RenderingTask): () => void;
+  registerRenderingTask(task: RenderingTask): CleanUpFn;
 };
 
 export const PlayerContext = createUniqueContext<PlayerContext>(

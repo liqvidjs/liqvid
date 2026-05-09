@@ -1,4 +1,4 @@
-import { assertType } from "./types.ts";
+import { assertType, type CleanUpFn } from "./types.ts";
 
 /* https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener#matching_event_listeners_for_removal */
 declare global {
@@ -194,7 +194,7 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
 export function onClick<T extends HTMLElement | SVGElement>(
   node: T,
   callback: (e: (MouseEvent | TouchEvent) & { currentTarget: T }) => void,
-): () => void {
+): CleanUpFn {
   if (anyHover) {
     // @ts-expect-error TODO: sort this out
     node.addEventListener("click", callback);

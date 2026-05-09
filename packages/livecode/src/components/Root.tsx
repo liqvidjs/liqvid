@@ -2,6 +2,7 @@
 
 import { type EditorView, keymap } from "@codemirror/view";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
+import type { CleanUpFn } from "@liqvid/utils";
 import type { CodeMirrorInstance } from "@lqv/codemirror/recording";
 import clsx from "clsx";
 import { type JSX, useEffect, useState } from "react";
@@ -90,7 +91,7 @@ export function KeyboardShortcuts(): null {
       }
     }
 
-    const unsubs: (() => void)[] = [];
+    const unsubs: CleanUpFn[] = [];
 
     // update with new shortcuts
     unsubs.push(store.subscribe((state) => state.shortcuts, reconfigure));

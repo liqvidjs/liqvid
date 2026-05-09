@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlayer } from "@liqvid/player";
-import { combineRefs } from "@liqvid/utils";
+import { type CleanUpFn, combineRefs } from "@liqvid/utils";
 import { useEffect, useRef } from "react";
 
 import { type Handle, MJX as MJXPlain } from "./plain.tsx";
@@ -20,7 +20,7 @@ export function MJX({ ref, ...props }: React.ComponentProps<typeof MJXPlain>) {
     if (!plain?.domElement) return;
 
     const task = { visible: isVisible(plain.domElement) };
-    let unsubscribe: null | (() => void) = registerRenderingTask(task);
+    let unsubscribe: null | CleanUpFn = registerRenderingTask(task);
 
     const onStart = () => {
       unsubscribe?.();

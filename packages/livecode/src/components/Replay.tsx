@@ -2,7 +2,7 @@ import type { Extension, Text } from "@codemirror/state";
 import { type EditorView, ViewPlugin } from "@codemirror/view";
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { RecordingData } from "@liqvid/recording";
-import type { ReplayData } from "@liqvid/utils";
+import type { CleanUpFn, ReplayData } from "@liqvid/utils";
 import {
   type Action,
   cmReplay,
@@ -230,7 +230,7 @@ export function ReplayMultiple({
       views[file.filename] = file.view;
     }
 
-    let unsubscribe: () => void;
+    let unsubscribe: CleanUpFn;
 
     if (replay instanceof Promise) {
       replay.then(

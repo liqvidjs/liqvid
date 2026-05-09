@@ -1,6 +1,6 @@
 import { ChangeSet, type Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
-import { assertType, type ReplayData } from "@liqvid/utils";
+import { assertType, type CleanUpFn, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
 import { FakeSelection } from "./fake-selection.ts";
@@ -73,7 +73,7 @@ export function cmReplay({
 
   /** CodeMirror instance to sync with. */
   view: EditorView;
-}): () => void {
+}): CleanUpFn {
   return cmReplayMultiple({
     data: [[0, selectCmd + defaultViewName], ...data],
     didScroll: (_filename, scrollToOptions) => {
@@ -159,7 +159,7 @@ export function cmReplayMultiple({
 
   /** CodeMirror instances to sync with. */
   views: Record<string, EditorView>;
-}): () => void {
+}): CleanUpFn {
   /** Current file being replayed into */
   let file = initial.activeFile;
 
