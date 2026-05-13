@@ -1,0 +1,84 @@
+{
+  "name": "@lqv/cursor",
+  "version": "0.2.1",
+  "description": "Cursor recording and replaying for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/cursor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/plugins.git",
+    "directory": "packages/cursor"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js"
+    },
+    "./recording": {
+      "types": "./dist/types/recording.d.ts",
+      "import": "./dist/esm/recording.js",
+      "require": "./dist/cjs/recording.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "pnpm build:cjs; pnpm build:esm; node ../../build.mjs",
+    "build:cjs": "tsc --outDir dist/cjs --module commonjs",
+    "build:esm": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh"
+  },
+  "dependencies": {
+    "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/recording": "workspace:^1.0.0-alpha.1",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "@types/react": "catalog:peer",
+    "liqvid": "^2.1.15",
+    "react": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "liqvid": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "keywords": [
+    "liqvid"
+  ]
+}
