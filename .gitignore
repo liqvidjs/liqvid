@@ -1,4 +1,5 @@
 packages/**/LICENSE
+packages/epiplexis
 
 # Node
 node_modules
