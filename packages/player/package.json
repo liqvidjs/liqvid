@@ -2,30 +2,31 @@
   "name": "@liqvid/player",
   "version": "1.0.0-alpha.2",
   "description": "Player UI for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./iframe-api": {
-      "@liqvid/dev": "./src/iframe-api.ts",
-      "import": "./dist/esm/iframe-api.js",
-      "types": "./dist/types/iframe-api.d.ts"
-    }
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/player#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git",
     "directory": "packages/player"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./iframe-api": {
+      "types": "./dist/types/iframe-api.d.ts",
+      "@liqvid/dev": "./src/iframe-api.ts",
+      "import": "./dist/esm/iframe-api.js"
+    }
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:postclean",
@@ -35,9 +36,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/player#readme",
   "dependencies": {
     "clsx": "catalog:",
     "zod": "catalog:"

@@ -2,32 +2,38 @@
   "name": "@lqv/livecode",
   "version": "1.0.0-alpha.0",
   "description": "GUI for interactive coding tutorials with CodeMirror",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./interpreters/*": {
-      "@liqvid/dev": "./src/interpreters/*.ts",
-      "import": "./dist/esm/interpreters/*.js",
-      "types": "./dist/types/interpreters/*.d.ts"
-    },
-    "./style.css": "./dist/css/style.css",
-    "./web": {
-      "@liqvid/dev": "./src/presets/web/index.ts",
-      "import": "./dist/esm/presets/web/index.js",
-      "require": "./dist/cjs/presets/web/index.js",
-      "types": "./dist/types/presets/web/index.d.ts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codebooth",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
   },
   "files": [
     "dist/*"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/plugins.git"
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./interpreters/*": {
+      "types": "./dist/types/interpreters/*.d.ts",
+      "@liqvid/dev": "./src/interpreters/*.ts",
+      "import": "./dist/esm/interpreters/*.js"
+    },
+    "./style.css": "./dist/css/style.css",
+    "./web": {
+      "types": "./dist/types/presets/web/index.d.ts",
+      "@liqvid/dev": "./src/presets/web/index.ts",
+      "import": "./dist/esm/presets/web/index.js",
+      "require": "./dist/cjs/presets/web/index.js"
+    }
   },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:css; pnpm lint; pnpm build:js; pnpm build:postclean",
@@ -40,14 +46,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/plugins/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/codebooth",
   "dependencies": {
     "clsx": "catalog:",
     "zustand": "catalog:"

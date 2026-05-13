@@ -2,34 +2,35 @@
   "name": "@liqvid/media",
   "version": "1.0.0-alpha.2",
   "description": "Audio/video functionality for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./recording": {
-      "@liqvid/dev": "./src/recording.mts",
-      "import": "./dist/esm/recording.mjs",
-      "types": "./dist/types/recording.d.mts"
-    },
-    "./liqvid-studio-server-plugin": {
-      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
-      "import": "./dist/esm/liqvid-studio-server-plugin.mjs",
-      "types": "./dist/types/liqvid-studio-server-plugin.d.mts"
-    }
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/media#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./recording": {
+      "types": "./dist/types/recording.d.mts",
+      "@liqvid/dev": "./src/recording.mts",
+      "import": "./dist/esm/recording.mjs"
+    },
+    "./liqvid-studio-server-plugin": {
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
+      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
+    }
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
@@ -41,9 +42,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/media#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",

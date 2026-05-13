@@ -8,14 +8,14 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "import": "./dist/esm/index.mjs"
     },
     "./react": {
+      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.tsx",
-      "import": "./dist/esm/react.js",
-      "types": "./dist/types/react.d.ts"
+      "import": "./dist/esm/react.js"
     }
   },
   "files": [
@@ -29,6 +29,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "test": "jest",
     "watch": "tsc --watch"
   },

@@ -2,18 +2,27 @@
   "name": "@liqvid/hydration",
   "version": "1.0.0-alpha.3",
   "description": "Hydration magic for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "types": "dist/types/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -24,18 +33,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "universal-cookie": "catalog:"
@@ -53,5 +53,6 @@
     "react": "catalog:peer"
   },
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "types": "dist/types/index.d.ts"
 }

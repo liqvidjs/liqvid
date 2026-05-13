@@ -2,38 +2,9 @@
   "name": "@liqvid/xyjax",
   "version": "0.0.2",
   "description": "XyJax animation helpers for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*"
-      ]
-    }
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": [
-    "liqvid",
-    "mathjax",
-    "xyjax"
-  ],
-  "scripts": {
-    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc; node ../../build.mjs; rollup -c",
-    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
-    "docs:gen": "typedoc",
-    "docs:watch": "typedoc --watch",
-    "lint": "eslint --ext ts,tsx --fix src"
-  },
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/xyjax",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
@@ -41,8 +12,26 @@
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/xyjax",
-  "license": "MIT",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc; node ../../build.mjs; rollup -c",
+    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh"
+  },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
   },
@@ -59,5 +48,17 @@
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/mathjax": "workspace:^1.0.0-alpha.0",
     "react": "catalog:peer"
+  },
+  "keywords": [
+    "liqvid",
+    "mathjax",
+    "xyjax"
+  ],
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
   }
 }

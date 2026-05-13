@@ -2,29 +2,30 @@
   "name": "@liqvid/recording",
   "version": "1.0.0-alpha.1",
   "description": "Recording functionality for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./utils": {
-      "@liqvid/dev": "./src/utils.ts",
-      "import": "./dist/esm/utils.js",
-      "types": "./dist/types/utils.d.ts"
-    }
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./utils": {
+      "types": "./dist/types/utils.d.ts",
+      "@liqvid/dev": "./src/utils.ts",
+      "import": "./dist/esm/utils.js"
+    }
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
@@ -36,9 +37,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",

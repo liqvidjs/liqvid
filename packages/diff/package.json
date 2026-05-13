@@ -4,18 +4,22 @@
   "description": "Object-diffing utility",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/cjs/index.cjs"
     }
   },
   "typesVersions": {
     "*": {
-      "*": ["./dist/types/*.d.ts"]
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
     }
   },
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -24,6 +28,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
+    "lint:package": "../../format-package-json.sh",
     "test": "eslint src --ext ts,tsx && jest --coverage"
   },
   "repository": {

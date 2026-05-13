@@ -52,6 +52,7 @@ export const build: CommandModule = {
 export interface BuildOptions {
   /** Path to liqvid.json config file */
   configPath?: string;
+
   /** Working directory */
   cwd?: string;
 }

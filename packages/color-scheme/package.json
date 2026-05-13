@@ -2,27 +2,33 @@
   "name": "@liqvid/color-scheme",
   "version": "1.0.0-alpha.2",
   "description": "Color scheme helpers for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "exports": {
-    "./docusaurus": {
-      "@liqvid/dev": "./src/docusaurus.tsx",
-      "import": "./dist/esm/docusaurus.js",
-      "require": "./dist/cjs/docusaurus.js",
-      "types": "./dist/types/docusaurus.d.ts"
-    },
-    "./react": {
-      "@liqvid/dev": "./src/react.tsx",
-      "import": "./dist/esm/react.js",
-      "require": "./dist/cjs/react.js",
-      "types": "./dist/types/react.d.ts"
-    }
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    "./docusaurus": {
+      "types": "./dist/types/docusaurus.d.ts",
+      "@liqvid/dev": "./src/docusaurus.tsx",
+      "import": "./dist/esm/docusaurus.js",
+      "require": "./dist/cjs/docusaurus.js"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "@liqvid/dev": "./src/react.tsx",
+      "import": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -33,18 +39,12 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "test": "jest",
     "watch": "tsc --watch"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
-    "@docusaurus/theme-common": "catalog:dev",
     "@docusaurus/types": "catalog:dev",
     "@types/react": "catalog:dev",
     "typedoc": "catalog:dev",
@@ -52,12 +52,16 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@docusaurus/theme-common": "catalog:dev",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "@types/react": "catalog:peer",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
+    "@docusaurus/theme-common": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },

@@ -4,14 +4,14 @@
   "description": "MathJax integration for Liqvid",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/index.js"
     },
     "./plain": {
+      "types": "./dist/types/plain.d.ts",
       "@liqvid/dev": "./src/plain.tsx",
-      "import": "./dist/esm/plain.js",
-      "types": "./dist/types/plain.d.ts"
+      "import": "./dist/esm/plain.js"
     }
   },
   "files": [
@@ -30,6 +30,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
   "repository": {

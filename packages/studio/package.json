@@ -2,26 +2,37 @@
   "name": "@liqvid/studio",
   "version": "1.0.0-alpha.6",
   "description": "Production suite for Liqvid videos",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
-    },
-    "./next/api": {
-      "@liqvid/dev": "./src/next/api.mts",
-      "import": "./dist/esm/next/api.mjs",
-      "types": "./dist/types/next/api.d.mts"
-    },
-    "./next/page": {
-      "@liqvid/dev": "./src/next/page.tsx",
-      "import": "./dist/esm/next/page.js",
-      "types": "./dist/types/next/page.d.ts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/studio"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./next/api": {
+      "types": "./dist/types/next/api.d.mts",
+      "@liqvid/dev": "./src/next/api.mts",
+      "import": "./dist/esm/next/api.mjs"
+    },
+    "./next/page": {
+      "types": "./dist/types/next/page.d.ts",
+      "@liqvid/dev": "./src/next/page.tsx",
+      "import": "./dist/esm/next/page.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean ; pnpm build:js ; pnpm build:hbs ; pnpm build:css ; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -32,22 +43,13 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
     "watch:css": "watch -n1 pnpm build:css",
     "watch:hbs": "watch -n1 pnpm build:hbs",
     "watch:tsc": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
   "dependencies": {
     "@base-ui/react": "catalog:",
     "@phosphor-icons/react": "catalog:",

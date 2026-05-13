@@ -2,28 +2,37 @@
   "name": "@liqvid/duration",
   "version": "1.4.0",
   "description": "Class for unitless time intervals",
-  "types": "dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./effect": {
-      "@liqvid/dev": "./src/effect.ts",
-      "import": "./dist/esm/effect.js",
-      "types": "./dist/types/effect.d.ts"
-    },
-    "./zod": {
-      "@liqvid/dev": "./src/zod.ts",
-      "import": "./dist/esm/zod.js",
-      "types": "./dist/types/zod.d.ts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./effect": {
+      "types": "./dist/types/effect.d.ts",
+      "@liqvid/dev": "./src/effect.ts",
+      "import": "./dist/esm/effect.js"
+    },
+    "./zod": {
+      "types": "./dist/types/zod.d.ts",
+      "@liqvid/dev": "./src/zod.ts",
+      "import": "./dist/esm/zod.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -34,18 +43,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "typedoc": "catalog:dev",
@@ -66,5 +66,6 @@
     }
   },
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "types": "dist/types/index.d.ts"
 }

@@ -2,21 +2,32 @@
   "name": "@liqvid/studio-plugin-api",
   "version": "1.0.0-alpha.0",
   "description": "API for Liqvid Studio plugins",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
-    },
-    "./server": {
-      "@liqvid/dev": "./src/server.mts",
-      "import": "./dist/esm/server.mjs",
-      "types": "./dist/types/server.d.mts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio-plugin-api#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/studio-plugin-api"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./server": {
+      "types": "./dist/types/server.d.mts",
+      "@liqvid/dev": "./src/server.mts",
+      "import": "./dist/esm/server.mjs"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -25,18 +36,9 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio-plugin-api#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@liqvid/duration": "workspace:",

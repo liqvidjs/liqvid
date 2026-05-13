@@ -2,14 +2,24 @@
   "name": "liqvid",
   "version": "3.0.0-alpha.5",
   "description": "Framework for interactive videos in React",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/main#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "files": [
     "dist/*"
   ],
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/index.js"
     },
     "./dist/liqvid.css": "./dist/liqvid.css",
     "./dist/liqvid.min.css": "./dist/liqvid.min.css",
@@ -24,6 +34,7 @@
     "build:js:bundle": "tsc && rollup -c && rm -rf dist/esm",
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
     "test": "pnpm test:jest && pnpm test:build-e2e && pnpm test:playwright",
@@ -32,16 +43,6 @@
     "test:playwright": "npx playwright test",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/main#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/jest": "catalog:dev",

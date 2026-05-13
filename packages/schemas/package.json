@@ -2,42 +2,52 @@
   "name": "@liqvid/schemas",
   "version": "1.0.0-alpha.0",
   "description": "Zod schemas and JSON Schema files for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
-    },
-    "./liqvid-config": {
-      "@liqvid/dev": "./src/liqvid-config.mts",
-      "import": "./dist/esm/liqvid-config.mjs",
-      "types": "./dist/types/liqvid-config.d.mts"
-    },
-    "./project": {
-      "@liqvid/dev": "./src/project.mts",
-      "import": "./dist/esm/project.mjs",
-      "types": "./dist/types/project.d.mts"
-    },
-    "./recording-meta": {
-      "@liqvid/dev": "./src/recording-meta.mts",
-      "import": "./dist/esm/recording-meta.mjs",
-      "types": "./dist/types/recording-meta.d.mts"
-    },
-    "./screenshot-meta": {
-      "@liqvid/dev": "./src/screenshot-meta.mts",
-      "import": "./dist/esm/screenshot-meta.mjs",
-      "types": "./dist/types/screenshot-meta.d.mts"
-    },
-    "./providers": {
-      "@liqvid/dev": "./src/providers/index.mts",
-      "import": "./dist/esm/providers/index.mjs",
-      "types": "./dist/types/providers/index.d.mts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*",
     "json-schemas/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./liqvid-config": {
+      "types": "./dist/types/liqvid-config.d.mts",
+      "@liqvid/dev": "./src/liqvid-config.mts",
+      "import": "./dist/esm/liqvid-config.mjs"
+    },
+    "./project": {
+      "types": "./dist/types/project.d.mts",
+      "@liqvid/dev": "./src/project.mts",
+      "import": "./dist/esm/project.mjs"
+    },
+    "./recording-meta": {
+      "types": "./dist/types/recording-meta.d.mts",
+      "@liqvid/dev": "./src/recording-meta.mts",
+      "import": "./dist/esm/recording-meta.mjs"
+    },
+    "./screenshot-meta": {
+      "types": "./dist/types/screenshot-meta.d.mts",
+      "@liqvid/dev": "./src/screenshot-meta.mts",
+      "import": "./dist/esm/screenshot-meta.mjs"
+    },
+    "./providers": {
+      "types": "./dist/types/providers/index.d.mts",
+      "@liqvid/dev": "./src/providers/index.mts",
+      "import": "./dist/esm/providers/index.mjs"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -45,18 +55,9 @@
     "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
     "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
   "dependencies": {
     "zod": "catalog:"
   },

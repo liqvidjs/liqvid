@@ -2,21 +2,32 @@
   "name": "@liqvid/playback",
   "version": "2.0.0-alpha.2",
   "description": "Playback class for Liqvid",
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
-    },
-    "./react": {
-      "@liqvid/dev": "./src/react.tsx",
-      "import": "./dist/esm/react.js",
-      "types": "./dist/types/react.d.ts"
-    }
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/playback#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid",
+    "directory": "packages/playback"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "@liqvid/dev": "./src/react.tsx",
+      "import": "./dist/esm/react.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -25,20 +36,10 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "pnpm biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "test": "jest",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid",
-    "directory": "packages/playback"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/playback#readme",
   "dependencies": {
     "@lqv/playback": "catalog:"
   },

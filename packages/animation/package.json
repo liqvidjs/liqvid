@@ -4,9 +4,9 @@
   "description": "Animation utilities for Liqvid",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/index.js"
     }
   },
   "types": "./dist/types/index.d.ts",
@@ -21,6 +21,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
     "test": "jest --coverage",
     "watch": "tsc --watch"
   },
