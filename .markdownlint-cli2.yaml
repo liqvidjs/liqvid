@@ -1,0 +1,15 @@
+config:
+  line-length: false
+  no-inline-html:
+    allowed_elements:
+      - table
+      - tbody
+      - td
+      - text
+      - tfoot
+      - th
+      - thead
+      - tr
+    table_allowed_elements:
+      - br
+  default: true
