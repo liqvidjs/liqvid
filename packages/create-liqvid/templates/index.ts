@@ -237,6 +237,8 @@ export const installTemplate = async ({
     scripts: {
       build: `next build${bundlerFlags}`,
       dev: `next dev${bundlerFlags}`,
+      "liqvid:build": "liqvid build",
+      "liqvid:publish": "liqvid publish",
       postinstall: "npx @liqvid/cli generate-imports",
       start: "next start",
       ...(eslint && { lint: "eslint" }),
