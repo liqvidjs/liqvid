@@ -1,13 +1,14 @@
 {
   "name": "@liqvid/color-scheme",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Color scheme helpers for Liqvid",
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/color-scheme#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/color-scheme"
   },
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
