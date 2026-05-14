@@ -2,7 +2,13 @@ import { isClient } from "@liqvid/ssr";
 
 import { golf } from "./golf.ts";
 import { SneakyScript } from "./SneakyScript.tsx";
-import type { ArgType, LocalValueConfig } from "./types.ts";
+import type {
+  ArgType,
+  CustomSourceConfig,
+  LocalValueConfig,
+  SearchThenMessagesConfig,
+  SimpleSourceConfig,
+} from "./types.ts";
 
 export function HydrateOnClient<
   const Config extends readonly LocalValueConfig[],
@@ -47,18 +53,29 @@ export function HydrateOnClient<
 
       switch (lvc.source ?? "localStorage") {
         case "cookie":
+          assertType<SimpleSourceConfig>(lvc);
           hasCookies = true;
           value = `${golf.cookies}[${JSON.stringify(lvc.name)}]`;
           break;
+        case "custom":
+          assertType<CustomSourceConfig<unknown>>(lvc);
+          value = `(${lvc.options.get})()`;
+          break;
         case "localStorage":
+          assertType<SimpleSourceConfig>(lvc);
           hasLocalStorage = true;
           value = `${golf.localStorage}.getItem(${JSON.stringify(lvc.name)})`;
           break;
         case "sessionStorage":
+          assertType<SimpleSourceConfig>(lvc);
           hasSessionStorage = true;
           value = `${golf.sessionStorage}.getItem(${JSON.stringify(lvc.name)})`;
           break;
         case "search":
+        case "search-then-messages":
+          assertType<SimpleSourceConfig | SearchThenMessagesConfig<unknown>>(
+            lvc,
+          );
           hasSearchParams = true;
           value = `${golf.url}.get(${JSON.stringify(lvc.name)})`;
           break;
@@ -67,11 +84,21 @@ export function HydrateOnClient<
       switch (lvc.type ?? "string") {
         case "boolean": {
           const defaultValue = lvc.default ?? "null";
-          return `${value}?${value}=="true":${defaultValue}`;
+          if (lvc.source === "custom") {
+            return `(_$=${value},typeof _$=="boolean"?_$:_$?_$=="true":${defaultValue})`;
+          }
+          return `(_$=${value},_$?_$=="true":${defaultValue})`;
         }
         case "number": {
           if (typeof lvc.default !== "undefined") {
+            if (lvc.source === "custom") {
+              return `(_$=${value},typeof _$=="number"?_$:[parseFloat(_$),${lvc.default}].find(Number.isFinite))`;
+            }
             return `[parseFloat(${value}),${lvc.default}].find(Number.isFinite)`;
+          }
+
+          if (lvc.source === "custom") {
+            return `(_$=${value},typeof _$=="number"?_$:parseFloat(_$))`;
           }
           return `parseFloat(${value})`;
         }
@@ -108,3 +135,10 @@ const cookieScript = `${golf.cookies}=Object.fromEntries(${golf.document}.cookie
 const localStorageScript = `${golf.localStorage}=localStorage`;
 const sessionStorageScript = `${golf.sessionStorage}=sessionStorage`;
 const searchScript = `${golf.url}=new URLSearchParams(location.search)`;
+
+/**
+ * Assert the type of a variable.
+ *
+ * TODO: ideally should not have to do this but I couldn't make the type magic work
+ */
+function assertType<K>(a: unknown): asserts a is K {}

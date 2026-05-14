@@ -1,13 +1,14 @@
 {
   "name": "@liqvid/hydration",
-  "version": "1.0.0-alpha.3",
-  "description": "Hydration magic for Liqvid",
+  "version": "1.0.0-alpha.4",
+  "description": "Use client-only values in React without encountering hydration errors. Especially useful for statically generated sites.",
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/hydration"
   },
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"

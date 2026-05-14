@@ -1,10 +1,16 @@
 "use client";
 
 import { isClient } from "@liqvid/ssr";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
-import type { ArgType, BooleanValueConfig, LocalValueConfig } from "./types.ts";
+import type {
+  ArgType,
+  BooleanValueConfig,
+  LocalValueConfig,
+  SearchThenMessagesConfig,
+  SimpleSourceConfig,
+} from "./types.ts";
 
 export type PersistentConfig<T> = {
   /** initial value to use when persistence is disabled */
@@ -74,6 +80,12 @@ export function usePersist<C extends LocalValueConfig>(
             cookies.set(storage.name, String(value));
           },
         ];
+      case "custom":
+        return [
+          storage.options.get as () => T,
+          (storage.options.set as ((value: T) => void) | undefined) ??
+            ((_value: T) => {}),
+        ];
       case "localStorage":
         return [
           () => parse(localStorage.getItem(storage.name)),
@@ -82,6 +94,7 @@ export function usePersist<C extends LocalValueConfig>(
           },
         ];
       case "search":
+      case "search-then-messages":
         return [
           () =>
             parse(
@@ -101,7 +114,7 @@ export function usePersist<C extends LocalValueConfig>(
     cookies,
     disabled,
     storage?.default,
-    storage?.name,
+    (storage as SimpleSourceConfig | undefined)?.name,
     storage?.source,
     storage?.type,
     fallbackDefault,
@@ -164,6 +177,26 @@ export function usePersistentState<C extends LocalValueConfig>(
   if (storage?.type === "boolean") {
     return [state, setPersistedValue, toggle];
   }
+
+  useEffect(() => {
+    if (storage?.source !== "search-then-messages") return;
+
+    const receiveMsg = (m: MessageEvent) => {
+      const value = storage.options.incoming(m);
+      if (!value) return;
+
+      setState(value.new as ArgType<C>);
+    };
+
+    window.addEventListener("message", receiveMsg);
+
+    return () => {
+      window.removeEventListener("message", receiveMsg);
+    };
+  }, [
+    storage?.source,
+    (storage as SearchThenMessagesConfig<ArgType<C>> | undefined)?.options,
+  ]);
 
   return [state, setPersistedValue];
 }

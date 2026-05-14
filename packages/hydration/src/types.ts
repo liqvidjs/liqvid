@@ -28,36 +28,62 @@ export interface VariantsMap {
 
 export type ClientValueSource =
   | "cookie"
+  | "custom"
   | "localStorage"
   | "search"
+  | "search-then-messages"
   | "sessionStorage";
 
 /* configuration */
-interface BaseValueConfig {
+export type SimpleSourceConfig = {
   name: string;
 
   /**
    * @default localStorage
    */
-  source: ClientValueSource;
-}
+  source: Exclude<ClientValueSource, "custom" | "search-then-messages">;
+};
 
-export interface BooleanValueConfig extends BaseValueConfig {
+export type CustomSourceConfig<T> = {
+  name: "";
+  source: "custom";
+  options: {
+    get: () => T;
+    /* biome-ignore lint/suspicious/noExplicitAny: using T here makes the type
+     * bivariant which breaks usePersistentState and I haven't figured out how
+     * to fix that */
+    set?: (_value: any) => void;
+  };
+};
+
+export type SearchThenMessagesConfig<T> = {
+  name: string;
+  source: "search-then-messages";
+  options: {
+    incoming: (m: MessageEvent) => { new: T } | undefined;
+  };
+};
+
+export type SourceConfig<T> =
+  | SimpleSourceConfig
+  | CustomSourceConfig<T>
+  | SearchThenMessagesConfig<T>;
+
+export type BooleanValueConfig = SourceConfig<boolean> & {
   default?: boolean;
   type: "boolean";
-}
+};
 
-export interface NumericValueConfig extends BaseValueConfig {
+export type NumericValueConfig = SourceConfig<number> & {
   default?: number;
   type: "number";
-}
+};
 
-export interface StringValueConfig<T extends string = string>
-  extends BaseValueConfig {
+export type StringValueConfig<T extends string = string> = SourceConfig<T> & {
   default?: T;
   enum?: readonly T[];
   type?: "string";
-}
+};
 
 export type LocalValueConfig =
   | BooleanValueConfig

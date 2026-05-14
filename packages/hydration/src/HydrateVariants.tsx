@@ -14,23 +14,23 @@ import type {
 } from "./types.ts";
 import { comparisonCondition, matches, stringCondition } from "./utils.ts";
 
-interface BooleanVariantConfig extends BooleanValueConfig {
+type BooleanVariantConfig = BooleanValueConfig & {
   variants: {
     false: React.ReactElement;
     true: React.ReactElement;
   };
   value: boolean;
-}
+};
 
-export interface NumericVariantConfig extends NumericValueConfig {
+export type NumericVariantConfig = NumericValueConfig & {
   variants: ComparisonVariant<number>[];
   value: number;
-}
+};
 
-export interface StringVariantConfig extends StringValueConfig {
+export type StringVariantConfig = StringValueConfig & {
   variants: StringVariant[];
   value: string;
-}
+};
 
 type VariantConfig =
   | BooleanVariantConfig
