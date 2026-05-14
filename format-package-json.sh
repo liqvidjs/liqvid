@@ -2,7 +2,10 @@ FILTER=$(
   cat <<JQ
 # types must come first
 .exports |= with_entries(
-    .value |= ({types, "@liqvid/dev", import, require} + . | with_entries(select(.value != null)))
+    .value |=
+      if type == "object" then
+        ({types, "@liqvid/dev", import, require} + . | with_entries(select(.value != null)))
+      else . end
 )
 |
 # for development, we need "src/*" in the files array, but this should not be published to npm
