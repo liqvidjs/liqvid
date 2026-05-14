@@ -11,7 +11,7 @@ export { Editor } from "./components/Editor.tsx";
 export { EditorGroup } from "./components/EditorGroup.tsx";
 export { EditorPanel } from "./components/EditorPanel.tsx";
 export { FileTabs } from "./components/FileTabs.tsx";
-export * from "./components/group-tabs.ts";
+export * from "./components/group-tabs.tsx";
 export { Record } from "./components/Record.tsx";
 export { Replay, ReplayMultiple } from "./components/Replay.tsx";
 export { Resize } from "./components/Resize.tsx";

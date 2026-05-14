@@ -2,7 +2,7 @@ export * from "./collections.ts";
 export * from "./interaction.ts";
 export * from "./math.ts";
 export * from "./misc.ts";
-export * from "./react.ts";
+export * from "./react.tsx";
 export * from "./replay-data.ts";
 export * from "./svg.ts";
 export * from "./time.ts";
