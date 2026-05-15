@@ -83,12 +83,15 @@ export async function generateThumbs(
     );
   }
 
-  const { productionServerPort } = getServerState();
+  const { basePath, productionServerPort } = getServerState();
   const projectDir = path.join(process.cwd(), "app", projectPath);
   const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
   // Build the URL for the video
-  const url = `http://localhost:${productionServerPort}/${projectPath}`;
+  const previewPath = basePath
+    ? `${basePath}/${projectPath}`
+    : `/${projectPath}`;
+  const url = `http://localhost:${productionServerPort}${previewPath}`;
 
   const colorScheme = body.colorScheme ?? "both";
 

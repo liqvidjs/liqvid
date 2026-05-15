@@ -75,7 +75,7 @@ export async function startRender(
     );
   }
 
-  const { productionServerPort } = getServerState();
+  const { basePath, productionServerPort } = getServerState();
   const projectDir = path.join(process.cwd(), "app", projectPath);
   const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
 
@@ -87,7 +87,10 @@ export async function startRender(
   await fsp.mkdir(renderDir, { recursive: true });
 
   // Build the URL for the video
-  const url = `http://localhost:${productionServerPort}/${projectPath}`;
+  const previewPath = basePath
+    ? `${basePath}/${projectPath}`
+    : `/${projectPath}`;
+  const url = `http://localhost:${productionServerPort}${previewPath}`;
 
   // Apply defaults
   const colorScheme = body.colorScheme ?? "light";

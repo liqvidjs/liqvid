@@ -74,6 +74,8 @@ export async function thumbs({
     fsp.mkdir(path.dirname(output), { recursive: true }),
   ]);
 
+  console.log(`Connecting to ${url} with ${concurrency} browser instances...`);
+
   // pool of puppeteer instances
   console.log(`(${step++}/${total}) Connecting to players...`);
   const pages = await getPages({

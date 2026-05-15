@@ -2,7 +2,7 @@
 
 import { EyeIcon } from "@phosphor-icons/react";
 
-import styles from "./root.module.css";
+import styles from "../root.module.css";
 
 export function ProductionLink({ href }: { href: string }) {
   return (

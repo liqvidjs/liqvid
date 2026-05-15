@@ -2,9 +2,9 @@
 
 import { FolderOpenIcon } from "@phosphor-icons/react";
 
-import { openInFinderAction } from "./root-actions.ts";
+import { openInFinderAction } from "../root-actions.ts";
 
-import styles from "./root.module.css";
+import styles from "../root.module.css";
 
 export function OpenInFinderButton({ projectPath }: { projectPath: string }) {
   async function handleClick() {

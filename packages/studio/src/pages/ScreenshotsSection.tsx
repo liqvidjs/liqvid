@@ -27,6 +27,7 @@ import styles from "./root.module.css";
 import shareStyles from "./share.module.css";
 
 interface ScreenshotsSectionProps {
+  basePath: string;
   duration: Duration;
   project: Omit<ProjectMeta, "duration">;
   productionServerPort: number;
@@ -35,6 +36,7 @@ interface ScreenshotsSectionProps {
 }
 
 export function ScreenshotsSection({
+  basePath,
   duration,
   isOpen,
   productionServerPort,
@@ -123,6 +125,7 @@ export function ScreenshotsSection({
             </DialogTrigger>
           </div>
           <ScreenshotModal
+            basePath={basePath}
             duration={duration}
             onCaptured={loadScreenshots}
             productionServerPort={productionServerPort}

@@ -14,13 +14,15 @@ import Cookies from "universal-cookie";
 
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
 
-import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
-import { ProductionLink } from "./ProductionLink.tsx";
+import { EmbedButton } from "./homepage/EmbedButton.tsx";
+import { OpenInFinderButton } from "./homepage/OpenInFinderButton.tsx";
+import { ProductionLink } from "./homepage/ProductionLink.tsx";
 import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
 
 type ProjectListProps = {
+  basePath: string;
   initialCollapsedFolders: string[];
   initialFolderView: boolean;
   productionServerPort: number;
@@ -108,6 +110,7 @@ const cookieOptions = {
 };
 
 export function ProjectList({
+  basePath,
   initialCollapsedFolders,
   initialFolderView,
   productionServerPort,
@@ -188,6 +191,7 @@ export function ProjectList({
                 <ul className={styles.projectList} key="__root__">
                   {folder.projects.map(([key, project]) => (
                     <ProjectItem
+                      basePath={basePath}
                       key={key}
                       productionServerPort={productionServerPort}
                       project={project}
@@ -196,6 +200,7 @@ export function ProjectList({
                 </ul>
               ) : (
                 <FolderItem
+                  basePath={basePath}
                   collapsedFolders={collapsedFolders}
                   folder={folder}
                   folderPath={folderName}
@@ -210,6 +215,7 @@ export function ProjectList({
         <ul className={styles.projectList}>
           {sortedProjects.map(([key, project]) => (
             <ProjectItem
+              basePath={basePath}
               key={key}
               productionServerPort={productionServerPort}
               project={project}
@@ -222,12 +228,14 @@ export function ProjectList({
 }
 
 function FolderItem({
+  basePath,
   collapsedFolders,
   folder,
   folderPath,
   onToggle,
   productionServerPort,
 }: {
+  basePath: string;
   collapsedFolders: Set<string>;
   folder: FolderNode;
   folderPath: string;
@@ -261,6 +269,7 @@ function FolderItem({
           {/* Render subfolders first */}
           {sortedSubfolders.map(([subfolderName, subfolder]) => (
             <FolderItem
+              basePath={basePath}
               collapsedFolders={collapsedFolders}
               folder={subfolder}
               folderPath={`${folderPath}/${subfolderName}`}
@@ -274,6 +283,7 @@ function FolderItem({
             <ul className={styles.projectList}>
               {folder.projects.map(([key, project]) => (
                 <ProjectItem
+                  basePath={basePath}
                   key={key}
                   productionServerPort={productionServerPort}
                   project={project}
@@ -288,12 +298,19 @@ function FolderItem({
 }
 
 function ProjectItem({
+  basePath,
   productionServerPort,
   project,
 }: {
+  basePath: string;
   productionServerPort: number;
   project: ProjectMeta;
 }) {
+  // Build the preview URL with basePath if configured
+  const previewPath = basePath
+    ? `${basePath}/${project.path}`
+    : `/${project.path}`;
+
   return (
     <li>
       <a href={project.path}>
@@ -305,13 +322,19 @@ function ProjectItem({
       </a>
       <div className={styles.actions}>
         <ShareButton
+          basePath={basePath}
           duration={project.duration}
           productionServerPort={productionServerPort}
           project={omit(project, ["duration"])}
         />
+        <EmbedButton
+          basePath={basePath}
+          productionServerPort={productionServerPort}
+          project={project}
+        />
         <OpenInFinderButton projectPath={project.path} />
         <ProductionLink
-          href={`http://localhost:${productionServerPort}/${project.path}`}
+          href={`http://localhost:${productionServerPort}${previewPath}`}
         />
       </div>
     </li>

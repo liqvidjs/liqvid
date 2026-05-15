@@ -24,12 +24,14 @@ import styles from "./root.module.css";
 import shareStyles from "./share.module.css";
 
 interface ShareButtonProps {
+  basePath: string;
   duration: Duration;
   project: Omit<ProjectMeta, "duration">;
   productionServerPort: number;
 }
 
 export function ShareButton({
+  basePath,
   duration,
   project,
   productionServerPort,
@@ -54,6 +56,7 @@ export function ShareButton({
           <DialogTitle className={styles.dialogTitle}>Share</DialogTitle>
 
           <ScreenshotsSection
+            basePath={basePath}
             duration={duration}
             isOpen={open}
             productionServerPort={productionServerPort}

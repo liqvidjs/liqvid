@@ -1,7 +1,7 @@
 "use client";
 
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import { generateThumbs, listThumbs } from "../client.mts";
 
@@ -29,7 +29,7 @@ export function ThumbnailsSection({
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const loadThumbs = useCallback(async () => {
+  const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
     try {
       const result = await listThumbs({ search: { projectPath } });
@@ -42,15 +42,15 @@ export function ThumbnailsSection({
     } finally {
       setIsLoading(false);
     }
-  }, [projectPath]);
+  });
 
   useEffect(() => {
     if (isOpen) {
       loadThumbs();
     }
-  }, [isOpen, loadThumbs]);
+  }, [isOpen]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useEffectEvent(async () => {
     setIsGenerating(true);
     try {
       const result = await generateThumbs({
@@ -68,7 +68,7 @@ export function ThumbnailsSection({
     } finally {
       setIsGenerating(false);
     }
-  };
+  });
 
   const hasNoThumbs =
     thumbSheets.light.length === 0 && thumbSheets.dark.length === 0;

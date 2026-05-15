@@ -5,6 +5,8 @@ import { transcribe } from "@liqvid/cli/transcribe";
 import type { WhisperModelName } from "@liqvid/schemas/liqvid-config";
 import { StatusCodes } from "http-status-codes";
 
+import { CONFIG_FILE } from "../conventions.mts";
+
 import type { CaptionsMeta } from "./contract.mts";
 
 const CAPTIONS_DIR = ".liqvid/captions";
@@ -138,7 +140,7 @@ export async function generateCaptions(searchParams: URLSearchParams) {
       // Load whisper config from liqvid.json if it exists
       let whisperConfig: Record<string, unknown> = {};
       try {
-        const configPath = path.join(projectDir, "liqvid.json");
+        const configPath = path.join(projectDir, CONFIG_FILE);
         const configContent = await fsp.readFile(configPath, "utf8");
         const config = JSON.parse(configContent);
         whisperConfig = config.captioning?.nodeWhisperOptions ?? {};

@@ -91,6 +91,11 @@ export const LiqvidConfig = z.object({
     media: z.enum(["copy", "liqvidStudio", "s3", "sftp"]),
   }),
 
+  /**
+   * Base path that content is hosted under. Should match the basePath in your framework configuration.
+   */
+  basePath: z.string().optional(),
+
   captioning: z
     .object({
       nodeWhisperOptions: WhisperConfig.optional(),

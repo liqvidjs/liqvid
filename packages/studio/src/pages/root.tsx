@@ -14,7 +14,7 @@ import styles from "./root.module.css";
 
 export async function Homepage() {
   await initializeServer();
-  const { productionServerPort, projects } = getServerState();
+  const { basePath, productionServerPort, projects } = getServerState();
 
   const cookieStore = await cookies();
   const folderViewCookie = cookieStore.get(FOLDER_VIEW_COOKIE);
@@ -33,6 +33,7 @@ export async function Homepage() {
         <RebuildButton />
       </div>
       <ProjectList
+        basePath={basePath}
         initialCollapsedFolders={initialCollapsedFolders}
         initialFolderView={initialFolderView}
         productionServerPort={productionServerPort}

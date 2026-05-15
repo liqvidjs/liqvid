@@ -28,6 +28,7 @@ import styles from "./root.module.css";
 import shareStyles from "./share.module.css";
 
 interface ScreenshotModalProps {
+  basePath: string;
   duration: DurationLike;
   project: Omit<ProjectMeta, "duration">;
   productionServerPort: number;
@@ -35,6 +36,7 @@ interface ScreenshotModalProps {
 }
 
 export function ScreenshotModal({
+  basePath,
   duration,
   productionServerPort,
   onCaptured,
@@ -47,7 +49,10 @@ export function ScreenshotModal({
 
   const { aspectRatio, path: projectPath } = project;
 
-  const previewUrl = `http://localhost:${productionServerPort}/${projectPath}`;
+  const previewPath = basePath
+    ? `${basePath}/${projectPath}`
+    : `/${projectPath}`;
+  const previewUrl = `http://localhost:${productionServerPort}${previewPath}`;
 
   const { api, ref: iframeRef } = useIframeApi(playerApiDeclaration);
 
