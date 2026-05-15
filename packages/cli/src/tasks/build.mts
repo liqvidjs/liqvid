@@ -12,7 +12,8 @@ import { S3Provider } from "../providers/hosting/s3.mts";
 import { SFTPProvider } from "../providers/hosting/sftp.mts";
 import type { MediaHostingProvider } from "../providers/types.mts";
 
-const CONFIG_FILE = "liqvid.json";
+import { CONFIG_FILE } from "./conventions.mts";
+
 const ERROR_LOG_PATH = path.join(process.cwd(), "logs/build-errors.log");
 
 function getErrorLogStream(): fs.WriteStream {

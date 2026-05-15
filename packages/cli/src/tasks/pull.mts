@@ -11,7 +11,7 @@ import type {
   RemoteFileInfo,
 } from "../providers/types.mts";
 
-const CONFIG_FILE = "liqvid.json";
+import { CONFIG_FILE } from "./conventions.mts";
 
 /** File extensions that are considered media files for downloading */
 const MEDIA_EXTENSIONS = new Set([

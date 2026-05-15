@@ -15,7 +15,7 @@ import type {
   MediaHostingProvider,
 } from "../providers/types.mts";
 
-const CONFIG_FILE = "liqvid.json";
+import { CONFIG_FILE } from "./conventions.mts";
 
 /** Default glob patterns for media files (matches schema defaults) */
 const DEFAULT_MEDIA_PATTERNS = [
@@ -28,6 +28,7 @@ const DEFAULT_MEDIA_PATTERNS = [
   "**/*.png",
   "**/*.webm",
   "**/.liqvid/**/*",
+  "!**/.DS_Store",
   // distinguish Transport Stream files from TypeScript files
   "**/.liqvid/**/*.ts",
   "!**/.liqvid/types.ts",

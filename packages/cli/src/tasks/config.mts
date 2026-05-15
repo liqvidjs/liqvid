@@ -1,9 +1,10 @@
 import os from "node:os";
 import path from "node:path";
 
+import { CONFIG_FILE } from "./conventions.mts";
 import loadSync from "./load-sync.cts";
 
-export const DEFAULT_LIST = ["liqvid.json"];
+export const DEFAULT_LIST = [CONFIG_FILE];
 export const DEFAULT_CONFIG = DEFAULT_LIST[0];
 
 export function parseConfig(...keys: string[]) {
