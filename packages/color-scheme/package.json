@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/color-scheme",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Color scheme helpers for Liqvid",
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
@@ -54,8 +54,9 @@
   },
   "peerDependencies": {
     "@docusaurus/theme-common": "catalog:dev",
-    "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.0",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.4",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
     "@types/react": "catalog:peer",
     "react": "catalog:peer"
   },

@@ -3,15 +3,16 @@ import { useColorMode } from "@docusaurus/theme-common";
 import SiteStorage from "@generated/site-storage";
 import type { LocalValueConfig } from "@liqvid/hydration";
 import { usePersist } from "@liqvid/hydration";
+import { isClient } from "@liqvid/ssr";
 import type { ReactNode } from "react";
 
-import { ColorSchemeProvider } from "./react.tsx";
+import { type ColorScheme, ColorSchemeProvider } from "./react.tsx";
 
 /**
  * load Docusaurus color scheme preference from localStorage
  */
 export const docusaurusPersistColorScheme = {
-  default: "light" as const,
+  default: "system" as const,
   enum: ["light", "dark"] as const,
   name: `theme${SiteStorage.namespace}`,
   source: "localStorage",
@@ -39,12 +40,24 @@ export function SyncDocusaurusColorSchemeWithLiqvid({
   // note that get() and colorMode are equal except for possibly the first render
   // even if we didn't have cautiousHydration, we would need to call useColorMode()
   // to subscribe to updates
-  const [get] = usePersist(docusaurusPersistColorScheme);
+  const [getSpecifier] = usePersist(docusaurusPersistColorScheme);
+
+  const getEffective = (): ColorScheme => {
+    const specifier = getSpecifier();
+    if (specifier !== "system") {
+      return specifier;
+    }
+    return isClient
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : "light";
+  };
 
   const { colorMode } = useColorMode();
 
   return (
-    <ColorSchemeProvider value={cautiousHydration ? colorMode : get()}>
+    <ColorSchemeProvider value={cautiousHydration ? colorMode : getEffective()}>
       {children}
     </ColorSchemeProvider>
   );
