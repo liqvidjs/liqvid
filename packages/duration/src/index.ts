@@ -1,6 +1,3 @@
-/**
- * @description asdf
- */
 import type { SerializedValue } from "@liqvid/ssr";
 
 const SECONDS = 1000,
