@@ -3,6 +3,7 @@ import { type EditorView, ViewPlugin } from "@codemirror/view";
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { RecordingData } from "@liqvid/recording";
 import type { CleanUpFn, ReplayData } from "@liqvid/utils";
+import type { CMRange, CMState } from "@lqv/codemirror";
 import {
   type Action,
   cmReplay,
@@ -11,10 +12,10 @@ import {
   selectCmd,
 } from "@lqv/codemirror";
 import type { FakeSelectionConfig } from "@lqv/codemirror/fake-selection";
-import type { CMRange, CMState } from "@lqv/codemirror/types";
 import { useSeekable } from "@lqv/playback/react";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { useClearMessages, useRun } from "../hooks.ts";
 import { type LiveCodeStore, useLiveCodeStore } from "../store.ts";
 
 import { useGroup } from "./context.tsx";
@@ -74,20 +75,28 @@ export function Replay({
   const store = useLiveCodeStore();
   const playback = useSeekable();
 
+  const run = useRun();
+  const clear = useClearMessages();
+
   const __handle = useCallback(
     (cmd: string, doc: Text) => {
       if (cmd === "run") {
         // run command
-        store.setState((state) => ({ run: state.run + 1 }));
+        run();
       } else if (cmd === "clear") {
         // clear console
-        store.setState(() => ({ messages: [] }));
+        clear();
       }
 
       // userspace handler
       handle?.(store, cmd, doc);
     },
-    [handle, store],
+    [
+      handle,
+      store,
+      run, // clear console
+      clear,
+    ],
   );
 
   const __extensions: Extension[] = useMemo(
@@ -192,6 +201,9 @@ export function ReplayMultiple({
 
   const startSeconds = Duration.from(start).inSeconds();
 
+  const run = useRun();
+  const clear = useClearMessages();
+
   /* Handle callback */
   const handle = useCallback(
     (cmd: string, docs: Record<string, Text>) => {
@@ -208,16 +220,22 @@ export function ReplayMultiple({
         }));
       } else if (cmd === "run") {
         // run command
-        store.setState((state) => ({ run: state.run + 1 }));
+        run();
       } else if (cmd === "clear") {
         // clear console
-        store.setState(() => ({ messages: [] }));
+        clear();
       }
 
       // userspace handler
       propsHandle?.(store, cmd, docs);
     },
-    [groupId, propsHandle, store],
+    [
+      groupId,
+      propsHandle,
+      store,
+      clear, // run command
+      run,
+    ],
   );
 
   useEffect(() => {

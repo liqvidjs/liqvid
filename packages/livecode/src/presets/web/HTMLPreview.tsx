@@ -103,7 +103,6 @@ export function HTMLPreview({
         addMessage<WebConsoleMessage>({
           data: msg.data.content,
           kind: msg.data.type.slice("console.".length),
-          timestamp: new Date(),
         });
         break;
       case "console.clear":

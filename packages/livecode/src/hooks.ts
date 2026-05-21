@@ -6,7 +6,14 @@ import { useColorScheme } from "@liqvid/color-scheme/react";
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { filterRecord } from "@liqvid/utils";
 import { lv2cm } from "@lqv/codemirror/extensions";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
@@ -107,6 +114,8 @@ export function useLiveCodeShortcut(
 ) {
   const { setState: setStoreState } = useLiveCodeStore();
 
+  const action$ = useEffectEvent(action);
+
   useEffect(() => {
     if (!shortcut) return;
 
@@ -115,7 +124,7 @@ export function useLiveCodeShortcut(
         ...prev.shortcuts,
         [shortcut]: {
           key: lv2cm(shortcut),
-          run: action,
+          run: action$,
         },
       },
     }));
@@ -125,7 +134,7 @@ export function useLiveCodeShortcut(
         shortcuts: filterRecord(prev.shortcuts, (_, key) => key !== shortcut),
       }));
     };
-  }, [shortcut, setStoreState, action]);
+  }, [shortcut, setStoreState]);
 }
 
 /** subscribe to the run event */
@@ -145,18 +154,20 @@ export function useOnRun(
 ) {
   const store = useLiveCodeStore();
 
+  const callback$ = useEffectEvent(callback);
+
   useEffect(() => {
     if (initial) {
-      callback();
+      callback$();
     }
 
     return store.subscribe(
       (state) => state.__run,
       () => {
-        callback();
+        callback$();
       },
     );
-  }, [store, callback, initial]);
+  }, [store, initial]);
 }
 
 /** get a callback to run the code */

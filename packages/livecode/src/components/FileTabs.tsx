@@ -1,4 +1,4 @@
-import { filterRecord, onClickReact } from "@liqvid/utils";
+import { assertType, filterRecord, onClickReact } from "@liqvid/utils";
 import { selectCmd } from "@lqv/codemirror";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo } from "react";
@@ -6,12 +6,13 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
 import { ids } from "../ids.ts";
+import { selectActiveGroup } from "../selectors.ts";
 import { type LiveCodeState, useLiveCodeStore } from "../store.ts";
 import { getFileType } from "../utils.ts";
 
 const selector = (state: LiveCodeState) => [
   state.activeGroup,
-  state.groups[state.activeGroup]?.activeFile,
+  selectActiveGroup(state)?.activeFile,
 ];
 
 /**
@@ -27,7 +28,7 @@ export function FileTabs({
 }) {
   const store = useLiveCodeStore();
   const [activeGroup, activeFilename] = useStore(store, useShallow(selector));
-  const group = store.getState().groups[activeGroup];
+  const group = activeGroup ? store.getState().groups[activeGroup] : null;
 
   const select = useCallback(
     (filename: string) => {
@@ -120,6 +121,7 @@ export function FileTabs({
   }, [select, store.getState, store.setState]);
 
   if (!group) return null;
+  assertType<string>(activeGroup);
 
   return (
     <div

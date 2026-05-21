@@ -1,14 +1,14 @@
 import { makeContext } from "@liqvid/utils";
 
 export const { use: useGroup, Provider: GroupProvider } = makeContext<
-  null | string
+  string | undefined
 >({
   defaultValue: "default",
   name: "Group",
 });
 
 export const { useOptional: useFilenameOptional, Provider: FilenameProvider } =
-  makeContext<null | string>({
-    defaultValue: null,
+  makeContext<string | undefined>({
+    defaultValue: undefined,
     name: "Filename",
   });

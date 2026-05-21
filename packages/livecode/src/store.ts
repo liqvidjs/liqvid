@@ -8,11 +8,11 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 /** Console message. */
 export interface ConsoleMessage<T = unknown, K extends string = string> {
-  characterNumber?: string;
+  characterNumber?: number;
   data: T;
   filename?: string;
   kind: K;
-  lineNumber?: string;
+  lineNumber?: number;
   timestamp: Date;
 }
 

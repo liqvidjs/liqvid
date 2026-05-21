@@ -1,12 +1,11 @@
 // buttons
 
 export { Clear } from "./buttons/Clear.tsx";
-// export { Copy } from "./buttons/Copy";
 export { Format } from "./buttons/Format.tsx";
+export { Mirror } from "./buttons/Mirror.tsx";
 export { Reset } from "./buttons/Reset.tsx";
 export { Run } from "./buttons/Run.tsx";
 export { VimToggle } from "./buttons/VimToggle.tsx";
-export { Console } from "./components/Console.tsx";
 export { Editor } from "./components/Editor.tsx";
 export { EditorGroup } from "./components/EditorGroup.tsx";
 export { EditorPanel } from "./components/EditorPanel.tsx";
@@ -20,6 +19,7 @@ export * from "./extensions.ts";
 export * from "./hooks.ts";
 export * from "./selectors.ts";
 export {
+  type ConsoleMessage,
   type LiveCodeState,
   type LiveCodeStore,
   useLiveCodeStore,

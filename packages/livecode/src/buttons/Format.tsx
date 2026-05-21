@@ -1,10 +1,11 @@
+import clsx from "clsx";
+import { useCallback } from "react";
+
 import {
   useActiveFile,
   useFormatActiveFile,
   useLiveCodeShortcut,
-} from "@lqv/livecode";
-import clsx from "clsx";
-import { useCallback } from "react";
+} from "../hooks.ts";
 
 /**
  * Button to format the currently active file.

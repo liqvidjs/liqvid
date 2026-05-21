@@ -32,7 +32,8 @@ export function Mirror({
 
     for (const file of from.files) {
       const source = file.view;
-      const target = to.files.find((_) => _.filename === file.filename).view;
+      const target = to.files.find((_) => _.filename === file.filename)?.view;
+      if (!target) return;
       target.dispatch(
         target.state.update({
           changes: {

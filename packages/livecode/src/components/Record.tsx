@@ -133,7 +133,10 @@ function includeFilenameInRecording(state: LiveCodeState) {
     // have to call existing beginRecording() FIRST in order to
     // set state.recorder.duration, otherwise we get negative times!
     beginRecording(...args);
-    state.recorder?.capture(0, selectCmd + selectActiveFile(state).filename);
+
+    const activeFile = selectActiveFile(state);
+    if (!activeFile) return;
+    state.recorder?.capture(0, selectCmd + activeFile.filename);
   };
   (state.recorder as Hack)[modifiedRecorder] = true;
 }

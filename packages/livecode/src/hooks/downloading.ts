@@ -40,7 +40,12 @@ export function useDownloadAll(
 export function useDownloadCurrent() {
   const store = useLiveCodeStore();
   return useCallback(() => {
-    const { filename, view } = selectActiveFile(store.getState());
+    const $file = selectActiveFile(store.getState());
+    if (!$file) {
+      return;
+    }
+
+    const { filename, view } = $file;
 
     download({
       content: viewContents(view),
