@@ -1,0 +1,51 @@
+{
+  "name": "@liqvid/fp",
+  "version": "1.0.0-alpha.0",
+  "description": "A functional programming library",
+  "module": "./dist/index.mjs",
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
+    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js:esm": "tsc",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
+    "test": "jest",
+    "watch": "tsc --watch"
+  },
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./zod": {
+      "@liqvid/dev": "./src/integrations/zod.mts",
+      "import": "./dist/integrations/zod.mjs",
+      "types": "./dist/integrations/zod.d.mts"
+    }
+  },
+  "files": [
+    "./dist/*"
+  ],
+  "type": "module",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
+    "zod": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  }
+}
