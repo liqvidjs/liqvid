@@ -1,5 +1,7 @@
 import type { ConsoleMessage } from "../../store.ts";
 
+import { magicScripts } from "./magicScripts.ts";
+
 export type WebConsoleMessage = ConsoleMessage<
   unknown[],
   "debug" | "error" | "info" | "log" | "warn"
@@ -105,55 +107,6 @@ export function render({
   return serializeDocument(doc);
 }
 
-/** Iframe client code for development magic */
-const magicScripts = `
-(${() => {
-  window.addEventListener("message", ({ data }) => {
-    if (data.type === "update-css") {
-      const styleTag = document.querySelector(
-        "style[data-filename='" + data.filename + "']",
-      );
-      if (styleTag) {
-        styleTag.textContent = data.content;
-      }
-    }
-  });
-
-  /* intercept console.log */
-  {
-    function formatArgs(args: unknown): unknown {
-      if (Array.isArray(args)) {
-        return args.filter((item) => !(item instanceof Node)).map(formatArgs);
-      }
-      return args;
-    }
-    const log = console.log;
-    console.log = (...args) => {
-      try {
-        window.parent.postMessage(
-          {
-            content: formatArgs(args),
-            type: "console.log",
-          },
-          "*",
-        );
-      } catch (_e) {}
-      log(...args);
-    };
-
-    const clear = console.clear;
-    console.clear = () => {
-      window.parent.postMessage(
-        {
-          type: "console.clear",
-        },
-        "*",
-      );
-      clear();
-    };
-  }
-}})()`;
-
 /** Serialize a Document back to HTML string, including doctype. */
 export function serializeDocument(doc: Document) {
   return Array.from(doc.childNodes)
@@ -181,7 +134,7 @@ function isDocumentTypeNode(node: Node): node is DocumentType {
   return node.nodeType === node.DOCUMENT_TYPE_NODE;
 }
 
-function isElement(node: Node): node is Element {
+export function isElement(node: Node): node is Element {
   return node.nodeType === node.ELEMENT_NODE;
 }
 

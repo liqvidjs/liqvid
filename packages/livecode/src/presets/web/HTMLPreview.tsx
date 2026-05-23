@@ -101,8 +101,11 @@ export function HTMLPreview({
       case "console.warn":
       case "console.log":
         addMessage<WebConsoleMessage>({
+          characterNumber: msg.data.characterNumber,
           data: msg.data.content,
+          filename: msg.data.filename,
           kind: msg.data.type.slice("console.".length),
+          lineNumber: msg.data.lineNumber,
         });
         break;
       case "console.clear":
