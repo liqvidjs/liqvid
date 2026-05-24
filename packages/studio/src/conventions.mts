@@ -1,3 +1,5 @@
+export const CONFIG_FILE = "liqvid.json";
+
 export const PROJECT_FILE = "project.json";
 
 export const PROJECT_META_FILE = "project-meta.json";
