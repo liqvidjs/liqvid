@@ -10,6 +10,7 @@ import { useLiveCodeStore } from "../../store.ts";
 import { viewContents } from "../../utils.ts";
 
 import { render, type WebConsoleMessage } from "./html-utils.ts";
+import type { WebConsoleMessageUp } from "./magicScripts.ts";
 
 /**
  * Render a preview of HTML code in an iframe.
@@ -94,6 +95,8 @@ export function HTMLPreview({
 
   useEventListener(globalThis?.window, "message", (msg: MessageEvent) => {
     if (!msg.data?.type) return;
+    if (!isWebConsoleMessageUp(msg.data)) return;
+
     switch (msg.data.type) {
       case "console.debug":
       case "console.error":
@@ -104,7 +107,9 @@ export function HTMLPreview({
           characterNumber: msg.data.characterNumber,
           data: msg.data.content,
           filename: msg.data.filename,
-          kind: msg.data.type.slice("console.".length),
+          kind: msg.data.type.slice(
+            "console.".length,
+          ) as WebConsoleMessage["kind"],
           lineNumber: msg.data.lineNumber,
         });
         break;
@@ -121,5 +126,14 @@ export function HTMLPreview({
       sandbox="allow-scripts"
       {...props}
     />
+  );
+}
+
+function isWebConsoleMessageUp(msg: unknown): msg is WebConsoleMessageUp {
+  return (
+    typeof msg === "object" &&
+    msg !== null &&
+    typeof (msg as WebConsoleMessageUp).type === "string" &&
+    (msg as WebConsoleMessageUp).type.startsWith("console.")
   );
 }

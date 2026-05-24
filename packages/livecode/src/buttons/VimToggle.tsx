@@ -33,7 +33,7 @@ export function VimToggle({
   persistence?: {
     default?: boolean;
     name: string;
-    source?: ClientValueSource;
+    source?: Exclude<ClientValueSource, "custom" | "search-then-messages">;
   };
 
   /** Keyboard shortcut to toggle Vim mode. */

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="skulpt.d.ts" />
 
 import Sk from "skulpt";
@@ -17,7 +16,7 @@ export class PythonInterpreter {
     return Sk.builtinFiles.files[filename];
   }
 
-  run(code: string): Promise<string[]> {
+  async run(code: string): Promise<string[]> {
     const output: string[] = [];
     Sk.configure({
       output: (txt) => {
@@ -28,9 +27,10 @@ export class PythonInterpreter {
       read: this.read,
     });
 
-    return Sk.misceval
-      .asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
-      .then(() => output);
+    await Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true),
+    );
+    return output;
   }
 
   runSync(code: string): string[] {

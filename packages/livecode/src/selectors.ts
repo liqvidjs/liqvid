@@ -1,19 +1,25 @@
-import type { LiveCodeState } from "./store.ts";
+import type { EditorView } from "@codemirror/view";
 
-/** Get the active file. */
-export function selectActiveFile(state: LiveCodeState) {
+import type { LiveCodeFile, LiveCodeGroup, LiveCodeState } from "./store.ts";
+
+/** Select the active file. */
+export function selectActiveFile(
+  state: LiveCodeState,
+): LiveCodeFile | undefined {
   const group = selectActiveGroup(state);
   return group?.files?.find((_) => _.filename === group.activeFile);
 }
 
-/** Get the active group. */
-export function selectActiveGroup(state: LiveCodeState) {
+/** Select the active group. */
+export function selectActiveGroup(
+  state: LiveCodeState,
+): LiveCodeGroup | undefined {
   const { groups, activeGroup } = state;
   if (!activeGroup) return undefined;
   return groups[activeGroup];
 }
 
-/** Get the active view. */
-export function selectActiveView(state: LiveCodeState) {
+/** Select the active view. */
+export function selectActiveView(state: LiveCodeState): EditorView | undefined {
   return selectActiveFile(state)?.view;
 }

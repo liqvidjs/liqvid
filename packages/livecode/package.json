@@ -84,7 +84,7 @@
     "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
-    "@liqvid/hydration": "workspace:^1.0.0-alpha.2",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.4",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",

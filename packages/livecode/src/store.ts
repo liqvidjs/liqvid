@@ -27,9 +27,10 @@ export type LiveCodeFile = {
   view: EditorView;
 };
 
-type LiveCodeGroup = {
+export type LiveCodeGroup = {
   /** Name of active file. */
   activeFile: string;
+
   /** Files contained in this editor group. */
   files: LiveCodeFile[];
 };

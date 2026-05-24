@@ -9,6 +9,23 @@ export interface ScriptOffset {
   end: TextPosition;
 }
 
+export type WebConsoleMessageUp =
+  | {
+      characterNumber?: number;
+      content: unknown[];
+      filename?: string;
+      lineNumber?: number;
+      type:
+        | "console.debug"
+        | "console.error"
+        | "console.info"
+        | "console.log"
+        | "console.warn";
+    }
+  | {
+      type: "console.clear";
+    };
+
 /** Iframe client code for development magic */
 export const magicScripts = `
 (${() => {
@@ -25,6 +42,7 @@ export const magicScripts = `
 
   /* intercept console.log */
   {
+    function formatArgs(args: unknown[]): unknown[];
     function formatArgs(args: unknown): unknown {
       if (Array.isArray(args)) {
         return args.filter((item) => !(item instanceof Node)).map(formatArgs);
@@ -52,12 +70,10 @@ export const magicScripts = `
           return true;
         });
 
-        const message: any = {
+        const message: WebConsoleMessageUp = {
           content: formatArgs(args),
           type: "console.log",
         };
-
-        log({ absoluteLineNumber, characterNumber, currentScript, offsets });
 
         if (currentScript) {
           message.filename = currentScript.node.dataset.filename;
