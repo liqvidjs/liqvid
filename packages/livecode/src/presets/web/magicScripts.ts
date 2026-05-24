@@ -51,13 +51,22 @@ export const magicScripts = `
     }
     const log = console.log;
     console.log = (...args) => {
-      try {
-        const traceback = getTraceback(2);
-        const [absoluteLineNumber, characterNumber] = traceback
-          .match(/:(\d+):(\d+)\)?$/)!
-          .slice(1)
-          .map(Number);
+      const message: WebConsoleMessageUp = {
+        content: formatArgs(args),
+        type: "console.log",
+      };
+
+      // fancy line-number magic
+      const traceback = getTraceback(2);
+      const $_ = traceback
+        ?.match(/:(\d+):(\d+)\)?$/)
+        ?.slice(1)
+        .map(Number);
+      if ($_ && $_.length === 2) {
+        const [absoluteLineNumber, characterNumber] = $_ as [number, number];
         const offsets = getScriptNodeOffsets(document.documentElement);
+
+        // find script
         const currentScript = offsets.find(({ start, end }) => {
           if (start.line > absoluteLineNumber) return false;
           if (start.line === absoluteLineNumber && start.col > characterNumber)
@@ -70,11 +79,7 @@ export const magicScripts = `
           return true;
         });
 
-        const message: WebConsoleMessageUp = {
-          content: formatArgs(args),
-          type: "console.log",
-        };
-
+        // set filename and offsets
         if (currentScript) {
           message.filename = currentScript.node.dataset.filename;
           message.lineNumber = absoluteLineNumber - currentScript.start.line;
@@ -82,7 +87,10 @@ export const magicScripts = `
           // TODO: this can be wrong on first line
           message.characterNumber = characterNumber;
         }
+      }
 
+      // post message
+      try {
         window.parent.postMessage(message, "*");
       } catch (e) {
         console.error(e);
@@ -191,10 +199,10 @@ export const magicScripts = `
     return scriptNodes;
   }
 
-  function update(str: string, row: number, col: number) {
+  function update(str: string, row: number, col: number): [number, number] {
     const lines = str.split("\n");
     if (lines.length === 1) {
-      return [row, col + lines[0].length];
+      return [row, col + lines[0]!.length];
     }
     return [row + lines.length - 1, lines.at(-1)!.length];
   }

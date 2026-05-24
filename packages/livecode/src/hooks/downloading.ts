@@ -24,7 +24,7 @@ export function useDownloadAll(
       return;
     }
 
-    for (const { filename, view } of groups[activeGroup].files) {
+    for (const { filename, view } of groups[activeGroup]?.files ?? []) {
       zip.file(filename, viewContents(view));
     }
 

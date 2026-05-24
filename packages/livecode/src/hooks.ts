@@ -1,7 +1,7 @@
 "use client";
 
 import type { Extension } from "@codemirror/state";
-import type { Command, EditorView } from "@codemirror/view";
+import type { Command, EditorView, KeyBinding } from "@codemirror/view";
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { filterRecord } from "@liqvid/utils";
@@ -36,7 +36,7 @@ export function useActiveFile() {
 
       // TODO: this is inefficient
       const group = groups[activeGroup];
-      return group.files.find((f) => f.filename === group.activeFile);
+      return group?.files?.find((f) => f.filename === group.activeFile);
     }),
   );
 }
@@ -110,11 +110,19 @@ export function useLiveCodeShortcut(
   shortcut: string | undefined,
 
   /** command to run when the shortcut is triggered */
-  action: Command,
+  action: Command | KeyBinding,
 ) {
   const { setState: setStoreState } = useLiveCodeStore();
 
-  const action$ = useEffectEvent(action);
+  const action$ = useEffectEvent((view: EditorView) => {
+    if (typeof action === "function") {
+      return action(view);
+    }
+
+    return action.run?.(view) ?? false;
+  });
+
+  const isFunction = typeof action === "function";
 
   useEffect(() => {
     if (!shortcut) return;
@@ -122,10 +130,23 @@ export function useLiveCodeShortcut(
     setStoreState((prev) => ({
       shortcuts: {
         ...prev.shortcuts,
-        [shortcut]: {
-          key: lv2cm(shortcut),
-          run: action$,
-        },
+        [shortcut]: isFunction
+          ? {
+              key: lv2cm(shortcut),
+              run: action$,
+            }
+          : {
+              any: action.any,
+              key: action.key,
+              linux: action.linux,
+              mac: action.mac,
+              preventDefault: action.preventDefault,
+              run: action$,
+              scope: action.scope,
+              shift: action.shift,
+              stopPropagation: action.stopPropagation,
+              win: action.win,
+            },
       },
     }));
 
@@ -134,7 +155,20 @@ export function useLiveCodeShortcut(
         shortcuts: filterRecord(prev.shortcuts, (_, key) => key !== shortcut),
       }));
     };
-  }, [shortcut, setStoreState]);
+  }, [
+    (action as KeyBinding).any,
+    (action as KeyBinding).key,
+    (action as KeyBinding).linux,
+    (action as KeyBinding).mac,
+    (action as KeyBinding).preventDefault,
+    (action as KeyBinding).scope,
+    (action as KeyBinding).shift,
+    (action as KeyBinding).stopPropagation,
+    (action as KeyBinding).win,
+    isFunction,
+    setStoreState,
+    shortcut,
+  ]);
 }
 
 /** subscribe to the run event */

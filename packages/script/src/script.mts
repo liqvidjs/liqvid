@@ -29,6 +29,9 @@ export class Script<M extends string = string> extends EventEmitter<
   markers: Marker<M>[] & {
     /** Get a marker by name. */
     get(name: M): Marker<M>;
+
+    /** Check whether a marker exists. */
+    has(name: string): name is M;
   };
 
   /** The underlying {@link Playback} instance. */
@@ -66,6 +69,10 @@ export class Script<M extends string = string> extends EventEmitter<
     this.markers.get = this.__map.get.bind(this.__map) as (
       name: M,
     ) => Marker<M>;
+
+    this.markers.has = this.__map.has.bind(this.__map) as (
+      name: string,
+    ) => boolean;
 
     for (let index = 0; index < markers.length; ++index) {
       const [name, stringDuration] = markers[index];

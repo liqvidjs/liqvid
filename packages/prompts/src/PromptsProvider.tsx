@@ -19,7 +19,7 @@ export interface PromptsPersistence {
    * Storage source (localStorage, sessionStorage, etc.)
    * @default "localStorage"
    */
-  source?: ClientValueSource;
+  source?: Exclude<ClientValueSource, "custom" | "search-then-messages">;
 }
 
 export interface PromptsContext {

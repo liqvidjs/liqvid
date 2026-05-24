@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { useLiveCodeShortcut, useRun } from "../hooks.ts";
 
 /** Button for running the code. */
-export function Run({
+export function RunButton({
   className,
   shortcut,
   ...props

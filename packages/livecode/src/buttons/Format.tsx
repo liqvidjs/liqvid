@@ -7,10 +7,8 @@ import {
   useLiveCodeShortcut,
 } from "../hooks.ts";
 
-/**
- * Button to format the currently active file.
- */
-export function Format({
+/** Button to format the currently active file. */
+export function FormatButton({
   className,
   shortcut,
   ...props

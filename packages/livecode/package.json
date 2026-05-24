@@ -19,19 +19,19 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "@liqvid/dev": "./src/index.ts",
+      "default": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./interpreters/*": {
       "types": "./dist/types/interpreters/*.d.ts",
-      "@liqvid/dev": "./src/interpreters/*.ts",
+      "default": "./src/interpreters/*.ts",
       "import": "./dist/esm/interpreters/*.js"
     },
     "./style.css": "./dist/css/style.css",
     "./web": {
       "types": "./dist/types/presets/web/index.d.ts",
-      "@liqvid/dev": "./src/presets/web/index.ts",
+      "default": "./src/presets/web/index.ts",
       "import": "./dist/esm/presets/web/index.js",
       "require": "./dist/cjs/presets/web/index.js"
     }

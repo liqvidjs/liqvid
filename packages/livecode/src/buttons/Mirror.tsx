@@ -4,19 +4,21 @@ import { useCallback, useMemo } from "react";
 
 import { useLiveCodeStore } from "../store.ts";
 
+type MirrorProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Source editor group. */
+  from: string;
+
+  /** Target editor group. */
+  to: string;
+};
+
 /** Button for copying the contents of one group to another. */
 export function Mirror({
   className,
   from: fromGroup,
   to: toGroup,
   ...attrs
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  /** Source editor group. */
-  from: string;
-
-  /** Target editor group. */
-  to: string;
-}) {
+}: MirrorProps) {
   const store = useLiveCodeStore();
 
   const copy = useCallback(() => {

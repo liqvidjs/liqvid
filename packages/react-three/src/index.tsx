@@ -1,11 +1,9 @@
 import { ResizeObserver } from "@juggle/resize-observer";
 import { Canvas as ThreeCanvas } from "@react-three/fiber";
 
-import { Fixes } from "./fixes";
+import { Fixes } from "./fixes.tsx";
 
-/** Default affordances: click and arrow keys */
-export const defaultAffords =
-  "click keys(ArrowUp,ArrowDown,ArrowLeft,ArrowRight)";
+export { defaultAffords } from "./affordances.ts";
 
 /**
  * Liqvid-aware Canvas component @react-three/fiber

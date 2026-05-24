@@ -1,10 +1,10 @@
 // buttons
 
 export { Clear } from "./buttons/Clear.tsx";
-export { Format } from "./buttons/Format.tsx";
+export { FormatButton, FormatButton as Format } from "./buttons/Format.tsx";
 export { Mirror } from "./buttons/Mirror.tsx";
 export { Reset } from "./buttons/Reset.tsx";
-export { Run } from "./buttons/Run.tsx";
+export { RunButton, RunButton as Run } from "./buttons/Run.tsx";
 export { VimToggle } from "./buttons/VimToggle.tsx";
 export { Editor } from "./components/Editor.tsx";
 export { EditorGroup } from "./components/EditorGroup.tsx";

@@ -66,13 +66,14 @@ export function VimToggle({
   );
 
   // keyboard shortcut
-  useLiveCodeShortcut(
-    shortcut,
-    useCallback(() => {
+  useLiveCodeShortcut(shortcut, {
+    key: shortcut,
+    preventDefault: true,
+    run: () => {
       toggleVimActive();
       return true;
-    }, [toggleVimActive]),
-  );
+    },
+  });
 
   useEffect(() => {
     activeFile?.view.dispatch({

@@ -42,7 +42,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/hydration": "workspace:^1.0.0-alpha.0",
+    "@liqvid/hydration": "workspace:^1.0.0-alpha.4",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"

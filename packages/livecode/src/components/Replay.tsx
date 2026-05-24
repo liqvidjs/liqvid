@@ -251,20 +251,19 @@ export function ReplayMultiple({
     let unsubscribe: CleanUpFn;
 
     if (replay instanceof Promise) {
-      replay.then(
-        (recording) =>
-          (unsubscribe = cmReplayMultiple({
-            data: recording.data,
-            didScroll,
-            handle,
-            initial: recording.initial,
-            playback,
-            scrollBehavior,
-            shouldScroll,
-            start: startSeconds,
-            views,
-          })),
-      );
+      replay.then((recording) => {
+        unsubscribe = cmReplayMultiple({
+          data: recording.data,
+          didScroll,
+          handle,
+          initial: recording.initial,
+          playback,
+          scrollBehavior,
+          shouldScroll,
+          start: startSeconds,
+          views,
+        });
+      });
     } else {
       unsubscribe = cmReplayMultiple({
         data: replay.data,

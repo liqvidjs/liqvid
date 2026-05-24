@@ -3,7 +3,7 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 
-import { defaultAffords } from ".";
+import { defaultAffords } from "./affordances.ts";
 
 export function Fixes({ dataAffords }: { dataAffords?: string }): null {
   const { gl } = useThree();

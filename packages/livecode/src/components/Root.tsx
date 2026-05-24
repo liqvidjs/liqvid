@@ -80,8 +80,8 @@ export function KeyboardShortcuts(): null {
     function reconfigure(): void {
       const state = store.getState();
 
-      for (const groupName in state.groups) {
-        for (const { view } of state.groups[groupName].files) {
+      for (const group of Object.values(state.groups)) {
+        for (const { view } of group.files) {
           view.dispatch({
             effects: shortcuts.reconfigure([
               keymap.of(Object.values(state.shortcuts)),

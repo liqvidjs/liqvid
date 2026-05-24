@@ -6,7 +6,7 @@ import {
 } from "@liqvid/studio-plugin-api";
 import { useCallback, useEffect, useState } from "react";
 
-import { CameraPreview } from "./CameraPreview";
+import { CameraPreview } from "./CameraPreview.tsx";
 import {
   LiqvidMediaRecorder,
   type MediaRecorderConfig,
@@ -218,17 +218,16 @@ function RecordingComponent({ name }: RecordingComponentProps) {
     try {
       await navigator.clipboard.writeText(
         `const recordings = useRecordings();
+const latest = recordings.dir(${JSON.stringify(name)});
 
 <Audio>
   <source
-    src={recordings
-      .dir(${JSON.stringify(name)})
+    src={latest
       .dir(${JSON.stringify(packageNameToDirName(MediaRecording.package))})
       .file("audio.webm")}
     type="audio/webm" />
   <source
-    src={recordings
-      .dir(${JSON.stringify(name)})
+    src={latest
       .dir(${JSON.stringify(packageNameToDirName(MediaRecording.package))})
       .file("audio.mp4")}
     type="audio/mp4" />

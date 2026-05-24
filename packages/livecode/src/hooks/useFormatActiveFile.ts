@@ -132,7 +132,7 @@ function offset(pos: number, ugly: string, pretty: string): number {
   const normalized = ugly.slice(0, pos).replace(/[\s(),]/g, "");
 
   for (let i = 0; i < normalized.length && newPos < pretty.length; ++newPos) {
-    if (pretty[newPos].match(aestheticChars)) {
+    if (pretty[newPos]!.match(aestheticChars)) {
       continue;
     }
 
