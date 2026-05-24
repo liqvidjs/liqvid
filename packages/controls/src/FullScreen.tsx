@@ -13,13 +13,10 @@ import {
 } from "./fake-fullscreen.ts";
 import { convertShortcuts } from "./utils.ts";
 
-const toggleFullScreen = () =>
-  isFullScreen() ? exitFullScreen() : requestFullScreen();
-
-const events = onClickReact(toggleFullScreen);
-
-interface FullScreenControlProps {
+type FullScreenControlProps = FullscreenOptions & {
   className?: string;
+  // not in lib.dom.d.ts yet
+  keyboardLock?: "browser" | "none";
   render: (
     state: {
       isFullScreen: boolean;
@@ -27,15 +24,22 @@ interface FullScreenControlProps {
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
   shortcuts?: string | string[];
-}
+};
 
 /** Fullscreen control */
 export function FullScreen({
   className,
   render,
   shortcuts,
+  ...options
 }: FullScreenControlProps) {
   const forceUpdate = useForceUpdate();
+
+  const toggleFullScreen = () => {
+    return isFullScreen() ? exitFullScreen() : requestFullScreen(options);
+  };
+
+  const events = onClickReact(toggleFullScreen);
 
   useKeyboardShortcut(shortcuts, toggleFullScreen);
 
