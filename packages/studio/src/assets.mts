@@ -25,6 +25,8 @@ type StripPrefix<
   S extends string,
 > = T extends `${S}${infer Tail}` ? Tail : never;
 
+const globalFetchCache = new Map<string, unknown>();
+
 export class DirectoryHelper<
   DS extends string,
   TemplateVars extends string = string,
@@ -43,12 +45,43 @@ export class DirectoryHelper<
   }
 
   /** fetch a JSON file */
-  async fetch<T>(filename: Files<DS>, version?: string): Promise<T> {
-    const res = await fetch(this.file(filename, version));
-    return await res.json();
+  async fetch<T>(
+    filename: Files<DS>,
+    options?: {
+      /** @default json */
+      type: "blob" | "json" | "raw" | "text";
+
+      /** optional version string */
+      v?: string;
+    },
+  ): Promise<T> {
+    const url = this.file(filename, options?.v);
+
+    if (!globalFetchCache.has(url)) {
+      globalFetchCache.set(
+        url,
+        fetch(url).then((res) => {
+          switch (options?.type) {
+            case "blob":
+              return res.arrayBuffer;
+            case "raw":
+              return res;
+            case "text":
+              return res.text();
+            default:
+              return res.json();
+          }
+        }),
+      );
+    }
+
+    return globalFetchCache.get(url) as Promise<T>;
   }
 
-  /** get the fully qualified name of a file */
+  /**
+   * get the fully qualified name of a file
+   * TODO: support versioning
+   */
   file(filename: Files<DS>, _version?: string) {
     return `${this.dirname}/${filename}`;
   }
