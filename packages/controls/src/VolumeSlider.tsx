@@ -73,15 +73,13 @@ export function VolumeSlider({
   });
 
   // Persist changes on volumechange event
-  const handleVolumeChange = useCallback(() => {
+  usePlaybackEvent("volumechange", () => {
     forceUpdate();
 
     if (persistence) {
       setVolume(playback.volume);
     }
-  }, [forceUpdate, persistence, playback, setVolume]);
-
-  usePlaybackEvent("volumechange", handleVolumeChange);
+  });
 
   useEffect(() => {
     // keyboard shortcuts

@@ -46,30 +46,21 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   const scrubberBar = useRef<HTMLDivElement>(null);
 
   /* Event handlers */
-  usePlaybackEvent(
-    "seek",
-    useCallback(() => {
-      if (playback.seeking) return;
-      const progress = playback.currentTime / playback.duration;
-      setProgress({ scrubber: progress, thumb: progress });
-    }, [playback]),
-  );
+  usePlaybackEvent("seek", () => {
+    if (playback.seeking) return;
+    const progress = playback.currentTime / playback.duration;
+    setProgress({ scrubber: progress, thumb: progress });
+  });
 
-  usePlaybackEvent(
-    "seeked",
-    useCallback(() => {
-      const progress = playback.currentTime / playback.duration;
-      setProgress((prev) => ({ scrubber: progress, thumb: prev.thumb }));
-    }, [playback]),
-  );
+  usePlaybackEvent("seeked", () => {
+    const progress = playback.currentTime / playback.duration;
+    setProgress((prev) => ({ scrubber: progress, thumb: prev.thumb }));
+  });
 
-  usePlaybackEvent(
-    "timeupdate",
-    useCallback(() => {
-      const progress = playback.currentTime / playback.duration;
-      setProgress((prev) => ({ scrubber: progress, thumb: prev.thumb }));
-    }, [playback]),
-  );
+  usePlaybackEvent("timeupdate", () => {
+    const progress = playback.currentTime / playback.duration;
+    setProgress((prev) => ({ scrubber: progress, thumb: prev.thumb }));
+  });
 
   useRelativeShortcuts(shortcuts?.relative);
   usePercentageShortcuts(shortcuts?.percentage);

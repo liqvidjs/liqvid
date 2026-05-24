@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 import type { EventsOn, TypedEventTarget } from "./types.ts";
 
@@ -45,17 +45,15 @@ export function useEventListener<
             : WindowEventMap[KW],
   ) => unknown,
 ) {
-  const savedCallback = useRef(callback);
-
   // allow consumers to omit useCallback without messing up the other useEffect
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
+  const callback$ = useEffectEvent(callback);
 
   useEffect(() => {
     if (!target?.addEventListener) return;
 
-    const listener: typeof callback = (e) => savedCallback.current(e);
+    const listener: typeof callback = (e) => {
+      callback$(e);
+    };
 
     // biome-ignore lint/suspicious/noExplicitAny: complicated
     (target as any).addEventListener(eventName, listener);
