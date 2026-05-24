@@ -6,6 +6,7 @@ import {
 } from "@liqvid/studio-plugin-api";
 import { useCallback, useEffect, useState } from "react";
 
+import { CameraPreview } from "./CameraPreview";
 import {
   LiqvidMediaRecorder,
   type MediaRecorderConfig,
@@ -205,6 +206,7 @@ function ConfigurationComponent() {
             ))}
           </select>
         )}
+        {videoEnabled && <CameraPreview />}
       </div>
     </div>
   );

@@ -138,39 +138,30 @@ export function useSyncMedia<T extends HTMLMediaElement>(
 
   // /* ------------------------- simple event listeners ------------------------- */
   // ratechange
-  usePlaybackEvent(
-    "ratechange",
-    useCallback(() => {
-      const domElement = ref.current;
-      if (!domElement) return;
+  usePlaybackEvent("ratechange", () => {
+    const domElement = ref.current;
+    if (!domElement) return;
 
-      domElement.playbackRate = playback.playbackRate;
-    }, [ref, playback]),
-  );
+    domElement.playbackRate = playback.playbackRate;
+  });
 
   // seek
-  usePlaybackEvent(
-    "seek",
-    useCallback(
-      ({ target: playback }) => {
-        const domElement = ref.current;
-        if (!domElement) return;
+  usePlaybackEvent("seek", ({ target: playback }) => {
+    const domElement = ref.current;
+    if (!domElement) return;
 
-        const t = playback.currentTime;
+    const t = playback.currentTime;
 
-        domElement.currentTime = (t - start) / 1000;
+    domElement.currentTime = (t - start) / 1000;
 
-        if (between(start, t, end)) {
-          if (domElement.paused && !playback.paused && !playback.seeking) {
-            play().catch(playback.pause);
-          }
-        } else {
-          if (!domElement.paused) pause();
-        }
-      },
-      [end, pause, play, ref, start],
-    ),
-  );
+    if (between(start, t, end)) {
+      if (domElement.paused && !playback.paused && !playback.seeking) {
+        play().catch(playback.pause);
+      }
+    } else {
+      if (!domElement.paused) pause();
+    }
+  });
 
   usePlaybackEvent("seeking", pause);
   usePlaybackEvent("timeupdate", onTimeUpdate);

@@ -18,17 +18,17 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "@liqvid/dev": "./src/index.ts",
+      "default": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
     "./recording": {
       "types": "./dist/types/recording.d.mts",
-      "@liqvid/dev": "./src/recording.mts",
+      "default": "./src/recording.mts",
       "import": "./dist/esm/recording.mjs"
     },
     "./liqvid-studio-server-plugin": {
       "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
-      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "default": "./src/liqvid-studio-server-plugin.mts",
       "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
     }
   },
@@ -45,6 +45,9 @@
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
+  "dependencies": {
+    "clsx": "catalog:"
+  },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -57,14 +60,19 @@
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
+    "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "execa": "catalog:",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
+    "@liqvid/studio": {
+      "optional": true
+    },
     "execa": {
       "optional": true
     },
