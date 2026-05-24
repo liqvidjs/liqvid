@@ -1,6 +1,6 @@
 "use client";
 
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -49,7 +49,7 @@ export function usePersist<C extends LocalValueConfig>(
     }
 
     // do nothing on server
-    if (!isClient) {
+    if (!IS_CLIENT) {
       return [() => storage?.default ?? fallbackDefault, (_value: T) => {}];
     }
 

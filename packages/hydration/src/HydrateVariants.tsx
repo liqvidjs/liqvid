@@ -1,4 +1,4 @@
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 import * as Slot from "@radix-ui/react-slot";
 import { useId } from "react";
 
@@ -46,7 +46,7 @@ export function HydrateVariants(props: VariantConfig) {
   const variantNodes = (() => {
     switch (props.type) {
       case "boolean": {
-        if (isClient) {
+        if (IS_CLIENT) {
           return props.variants[`${props.value}`];
         }
         return [false, true].map((variant) => (
@@ -57,7 +57,7 @@ export function HydrateVariants(props: VariantConfig) {
       }
       case "number":
       case "string":
-        if (isClient) {
+        if (IS_CLIENT) {
           const selected = props.variants.find((variant) =>
             matches(props.value, variant),
           );

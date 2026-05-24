@@ -1,5 +1,5 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 
 import { CorePlayback } from "./synthetic-playback.mts";
 
@@ -55,7 +55,7 @@ export class Playback extends CorePlayback {
       });
     }
 
-    if (isClient) {
+    if (IS_CLIENT) {
       this.__createTimeline();
     }
   }

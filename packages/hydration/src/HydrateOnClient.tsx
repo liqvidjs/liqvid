@@ -1,4 +1,4 @@
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 
 import { golf } from "./golf.ts";
 import { SneakyScript } from "./SneakyScript.tsx";
@@ -40,7 +40,7 @@ export function HydrateOnClient<
         }
       ) => unknown);
 }) {
-  if (isClient) return <>{children}</>;
+  if (IS_CLIENT) return <>{children}</>;
 
   let hasCookies = false;
   let hasLocalStorage = false;

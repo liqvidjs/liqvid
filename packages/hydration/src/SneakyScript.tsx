@@ -1,4 +1,4 @@
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 
 type Joinable = false | string | Joinable[];
 
@@ -7,7 +7,7 @@ type Joinable = false | string | Joinable[];
  * On the client, does nothing
  */
 export function SneakyScript({ children }: { children: Joinable }) {
-  if (isClient) return null;
+  if (IS_CLIENT) return null;
 
   return (
     <script

@@ -3,7 +3,7 @@ import { useColorMode } from "@docusaurus/theme-common";
 import SiteStorage from "@generated/site-storage";
 import type { LocalValueConfig } from "@liqvid/hydration";
 import { usePersist } from "@liqvid/hydration";
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 import type { ReactNode } from "react";
 
 import { type ColorScheme, ColorSchemeProvider } from "./react.tsx";
@@ -47,7 +47,7 @@ export function SyncDocusaurusColorSchemeWithLiqvid({
     if (specifier !== "system") {
       return specifier;
     }
-    return isClient
+    return IS_CLIENT
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light"

@@ -1,5 +1,5 @@
 import { EventEmitter } from "@liqvid/event-emitter";
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 import { bind, constrain } from "@liqvid/utils";
 
 import {
@@ -96,7 +96,7 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__advance = this.__advance.bind(this);
 
     // browser-only
-    if (isClient) {
+    if (IS_CLIENT) {
       // audio
       this.__initAudio();
 
@@ -324,7 +324,7 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
   async renderOffline(
     onProgress?: OfflineRenderProgress,
   ): Promise<AudioBuffer> {
-    if (!isClient) {
+    if (!IS_CLIENT) {
       throw new Error("renderOffline can only be called in the browser");
     }
 

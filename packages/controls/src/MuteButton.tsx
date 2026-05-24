@@ -3,7 +3,7 @@
 import { type BooleanValueConfig, usePersist } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useMemo, useRef } from "react";
@@ -101,7 +101,7 @@ function useEager(callback: () => void) {
   if (firstRun.current) {
     firstRun.current = false;
 
-    if (isClient) {
+    if (IS_CLIENT) {
       callback();
     }
   }

@@ -1,8 +1,8 @@
-import { isClient } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
 
 const id = <T>(_: T) => _;
 
-export const fullscreenEnabled: boolean = isClient
+export const fullscreenEnabled: boolean = IS_CLIENT
   ? (
       [
         "fullscreenEnabled",
@@ -17,21 +17,22 @@ export const fullscreenEnabled: boolean = isClient
       .find((_) => _ !== undefined)
   : false;
 
-export const requestFullScreen: () => Promise<void> = isClient
-  ? [
-      "requestFullscreen",
-      "webkitRequestFullscreen",
-      "mozRequestFullScreen",
-      "msRequestFullscreen",
-    ]
-      // biome-ignore lint/suspicious/noExplicitAny: vendor-specific
-      .map((_) => (document as any).body[_])
-      .concat(() => {})
-      .find(id)
-      .bind(document.body)
-  : async () => {};
+export const requestFullScreen: (options?: FullscreenOptions) => Promise<void> =
+  IS_CLIENT
+    ? [
+        "requestFullscreen",
+        "webkitRequestFullscreen",
+        "mozRequestFullScreen",
+        "msRequestFullscreen",
+      ]
+        // biome-ignore lint/suspicious/noExplicitAny: vendor-specific
+        .map((_) => (document as any).body[_])
+        .concat(() => {})
+        .find(id)
+        .bind(document.body)
+    : async () => {};
 
-export const exitFullScreen: () => Promise<void> = isClient
+export const exitFullScreen: () => Promise<void> = IS_CLIENT
   ? (
       [
         "exitFullscreen",
