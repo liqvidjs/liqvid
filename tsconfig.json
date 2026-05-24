@@ -13,7 +13,7 @@
     "moduleResolution": "bundler",
     "noImplicitAny": true,
     "noImplicitOverride": true,
-    "noUncheckedIndexedAccess": false,
+    "noUncheckedIndexedAccess": true,
     "pretty": true,
     "removeComments": false,
     "rewriteRelativeImportExtensions": true,

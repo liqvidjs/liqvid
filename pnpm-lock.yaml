@@ -18,57 +18,6 @@ catalogs:
     '@base-ui/react':
       specifier: ^1.3.0
       version: 1.4.1
-    '@codemirror/autocomplete':
-      specifier: 6.20.2
-      version: 6.20.2
-    '@codemirror/collab':
-      specifier: 6.1.1
-      version: 6.1.1
-    '@codemirror/commands':
-      specifier: 6.10.3
-      version: 6.10.3
-    '@codemirror/lang-css':
-      specifier: 6.3.1
-      version: 6.3.1
-    '@codemirror/lang-html':
-      specifier: 6.4.11
-      version: 6.4.11
-    '@codemirror/lang-javascript':
-      specifier: 6.2.5
-      version: 6.2.5
-    '@codemirror/lang-json':
-      specifier: 6.0.2
-      version: 6.0.2
-    '@codemirror/lang-markdown':
-      specifier: 6.5.0
-      version: 6.5.0
-    '@codemirror/lang-python':
-      specifier: 6.2.1
-      version: 6.2.1
-    '@codemirror/lang-sql':
-      specifier: 6.10.0
-      version: 6.10.0
-    '@codemirror/lang-xml':
-      specifier: 6.1.0
-      version: 6.1.0
-    '@codemirror/language':
-      specifier: 6.12.3
-      version: 6.12.3
-    '@codemirror/language-data':
-      specifier: 6.5.2
-      version: 6.5.2
-    '@codemirror/lint':
-      specifier: 6.9.6
-      version: 6.9.6
-    '@codemirror/search':
-      specifier: 6.7.0
-      version: 6.7.0
-    '@codemirror/state':
-      specifier: 6.6.0
-      version: 6.6.0
-    '@codemirror/view':
-      specifier: 6.43.0
-      version: 6.43.0
     '@juggle/resize-observer':
       specifier: ^3.4.0
       version: 3.4.0
@@ -172,6 +121,57 @@ catalogs:
     '@biomejs/biome':
       specifier: 2.4.15
       version: 2.4.15
+    '@codemirror/autocomplete':
+      specifier: 6.20.2
+      version: 6.20.2
+    '@codemirror/collab':
+      specifier: 6.1.1
+      version: 6.1.1
+    '@codemirror/commands':
+      specifier: 6.10.3
+      version: 6.10.3
+    '@codemirror/lang-css':
+      specifier: 6.3.1
+      version: 6.3.1
+    '@codemirror/lang-html':
+      specifier: 6.4.11
+      version: 6.4.11
+    '@codemirror/lang-javascript':
+      specifier: 6.2.5
+      version: 6.2.5
+    '@codemirror/lang-json':
+      specifier: 6.0.2
+      version: 6.0.2
+    '@codemirror/lang-markdown':
+      specifier: 6.5.0
+      version: 6.5.0
+    '@codemirror/lang-python':
+      specifier: 6.2.1
+      version: 6.2.1
+    '@codemirror/lang-sql':
+      specifier: 6.10.0
+      version: 6.10.0
+    '@codemirror/lang-xml':
+      specifier: 6.1.0
+      version: 6.1.0
+    '@codemirror/language':
+      specifier: 6.12.3
+      version: 6.12.3
+    '@codemirror/language-data':
+      specifier: 6.5.2
+      version: 6.5.2
+    '@codemirror/lint':
+      specifier: 6.9.6
+      version: 6.9.6
+    '@codemirror/search':
+      specifier: 6.7.0
+      version: 6.7.0
+    '@codemirror/state':
+      specifier: 6.6.0
+      version: 6.6.0
+    '@codemirror/view':
+      specifier: 6.43.0
+      version: 6.43.0
     '@jest/globals':
       specifier: ^30.3.0
       version: 30.3.0
@@ -257,39 +257,6 @@ catalogs:
     '@babel/standalone':
       specifier: '>=7'
       version: 7.29.3
-    '@codemirror/autocomplete':
-      specifier: '>=6'
-      version: 6.20.1
-    '@codemirror/commands':
-      specifier: '>=6'
-      version: 6.10.3
-    '@codemirror/lang-css':
-      specifier: '>=6'
-      version: 6.3.1
-    '@codemirror/lang-html':
-      specifier: '>=6'
-      version: 6.4.11
-    '@codemirror/lang-javascript':
-      specifier: '>=6'
-      version: 6.2.5
-    '@codemirror/lang-python':
-      specifier: '>=6'
-      version: 6.2.1
-    '@codemirror/language':
-      specifier: '>=6'
-      version: 6.12.3
-    '@codemirror/lint':
-      specifier: '>=6'
-      version: 6.9.5
-    '@codemirror/search':
-      specifier: '>=6'
-      version: 6.6.0
-    '@codemirror/state':
-      specifier: '>=6'
-      version: 6.6.0
-    '@codemirror/view':
-      specifier: '>=6'
-      version: 6.42.1
     '@juggle/resize-observer':
       specifier: '>=3.4'
       version: 3.4.0
@@ -338,25 +305,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@codemirror/collab':
-        specifier: 'catalog:'
-        version: 6.1.1
-      '@codemirror/lang-json':
-        specifier: 'catalog:'
-        version: 6.0.2
-      '@codemirror/lang-markdown':
-        specifier: 'catalog:'
-        version: 6.5.0
-      '@codemirror/lang-sql':
-        specifier: 'catalog:'
-        version: 6.10.0
-      '@codemirror/lang-xml':
-        specifier: 'catalog:'
-        version: 6.1.0
-      '@codemirror/language-data':
-        specifier: 'catalog:'
-        version: 6.5.2
     devDependencies:
       turbo:
         specifier: ^2.8.17
@@ -489,12 +437,6 @@ importers:
 
   packages/codemirror:
     dependencies:
-      '@codemirror/state':
-        specifier: catalog:peer
-        version: 6.6.0
-      '@codemirror/view':
-        specifier: catalog:peer
-        version: 6.42.1
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.1
         version: link:../keymap
@@ -517,6 +459,12 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.4.15
+      '@codemirror/state':
+        specifier: catalog:dev
+        version: 6.6.0
+      '@codemirror/view':
+        specifier: catalog:dev
+        version: 6.43.0
       '@types/node':
         specifier: catalog:dev
         version: 25.5.0
@@ -738,55 +686,55 @@ importers:
   packages/docs:
     dependencies:
       '@codemirror/autocomplete':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.20.2
       '@codemirror/collab':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.1.1
       '@codemirror/commands':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.10.3
       '@codemirror/lang-css':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.3.1
       '@codemirror/lang-html':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.4.11
       '@codemirror/lang-javascript':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.5
       '@codemirror/lang-json':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.0.2
       '@codemirror/lang-markdown':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.5.0
       '@codemirror/lang-python':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.1
       '@codemirror/lang-sql':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.10.0
       '@codemirror/lang-xml':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.1.0
       '@codemirror/language':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.12.3
       '@codemirror/language-data':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.5.2
       '@codemirror/lint':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.9.6
       '@codemirror/search':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.7.0
       '@codemirror/state':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.6.0
       '@codemirror/view':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.43.0
       '@docusaurus/core':
         specifier: 3.10.1
@@ -1134,37 +1082,37 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@codemirror/autocomplete':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.20.2
       '@codemirror/commands':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.10.3
       '@codemirror/lang-css':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.3.1
       '@codemirror/lang-html':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.4.11
       '@codemirror/lang-javascript':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.5
       '@codemirror/lang-python':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.1
       '@codemirror/language':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.12.3
       '@codemirror/lint':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.9.6
       '@codemirror/search':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.7.0
       '@codemirror/state':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.6.0
       '@codemirror/view':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.43.0
       '@fontsource-variable/alegreya':
         specifier: ^5.2.8
@@ -1459,37 +1407,37 @@ importers:
         specifier: 'catalog:'
         version: 1.4.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@codemirror/autocomplete':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.20.2
       '@codemirror/commands':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.10.3
       '@codemirror/lang-css':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.3.1
       '@codemirror/lang-html':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.4.11
       '@codemirror/lang-javascript':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.5
       '@codemirror/lang-python':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.2.1
       '@codemirror/language':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.12.3
       '@codemirror/lint':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.9.6
       '@codemirror/search':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.7.0
       '@codemirror/state':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.6.0
       '@codemirror/view':
-        specifier: 'catalog:'
+        specifier: catalog:dev
         version: 6.43.0
       '@fontsource-variable/alegreya':
         specifier: ^5.2.8
@@ -2013,39 +1961,6 @@ importers:
       '@babel/standalone':
         specifier: catalog:peer
         version: 7.29.3
-      '@codemirror/autocomplete':
-        specifier: catalog:peer
-        version: 6.20.1
-      '@codemirror/commands':
-        specifier: catalog:peer
-        version: 6.10.3
-      '@codemirror/lang-css':
-        specifier: catalog:peer
-        version: 6.3.1
-      '@codemirror/lang-html':
-        specifier: catalog:peer
-        version: 6.4.11
-      '@codemirror/lang-javascript':
-        specifier: catalog:peer
-        version: 6.2.5
-      '@codemirror/lang-python':
-        specifier: catalog:peer
-        version: 6.2.1
-      '@codemirror/language':
-        specifier: catalog:peer
-        version: 6.12.3
-      '@codemirror/lint':
-        specifier: catalog:peer
-        version: 6.9.5
-      '@codemirror/search':
-        specifier: catalog:peer
-        version: 6.6.0
-      '@codemirror/state':
-        specifier: catalog:peer
-        version: 6.6.0
-      '@codemirror/view':
-        specifier: catalog:peer
-        version: 6.42.1
       '@liqvid/color-scheme':
         specifier: workspace:^1.0.0-alpha.2
         version: link:../color-scheme
@@ -2078,7 +1993,7 @@ importers:
         version: link:../lqv-playback
       '@replit/codemirror-vim':
         specifier: catalog:peer
-        version: 6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.42.1)
+        version: 6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.7.0)(@codemirror/state@6.6.0)(@codemirror/view@6.43.0)
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -2095,6 +2010,39 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.4.15
+      '@codemirror/autocomplete':
+        specifier: catalog:dev
+        version: 6.20.2
+      '@codemirror/commands':
+        specifier: catalog:dev
+        version: 6.10.3
+      '@codemirror/lang-css':
+        specifier: catalog:dev
+        version: 6.3.1
+      '@codemirror/lang-html':
+        specifier: catalog:dev
+        version: 6.4.11
+      '@codemirror/lang-javascript':
+        specifier: catalog:dev
+        version: 6.2.5
+      '@codemirror/lang-python':
+        specifier: catalog:dev
+        version: 6.2.1
+      '@codemirror/language':
+        specifier: catalog:dev
+        version: 6.12.3
+      '@codemirror/lint':
+        specifier: catalog:dev
+        version: 6.9.6
+      '@codemirror/search':
+        specifier: catalog:dev
+        version: 6.7.0
+      '@codemirror/state':
+        specifier: catalog:dev
+        version: 6.6.0
+      '@codemirror/view':
+        specifier: catalog:dev
+        version: 6.43.0
       '@lqv/codemirror':
         specifier: workspace:^
         version: link:../codemirror
@@ -16439,11 +16387,11 @@ snapshots:
 
   '@codemirror/lang-markdown@6.5.0':
     dependencies:
-      '@codemirror/autocomplete': 6.20.1
+      '@codemirror/autocomplete': 6.20.2
       '@codemirror/lang-html': 6.4.11
       '@codemirror/language': 6.12.3
       '@codemirror/state': 6.6.0
-      '@codemirror/view': 6.42.1
+      '@codemirror/view': 6.43.0
       '@lezer/common': 1.5.1
       '@lezer/markdown': 1.6.3
 
@@ -16478,7 +16426,7 @@ snapshots:
 
   '@codemirror/lang-sql@6.10.0':
     dependencies:
-      '@codemirror/autocomplete': 6.20.1
+      '@codemirror/autocomplete': 6.20.2
       '@codemirror/language': 6.12.3
       '@codemirror/state': 6.6.0
       '@lezer/common': 1.5.1
@@ -16503,10 +16451,10 @@ snapshots:
 
   '@codemirror/lang-xml@6.1.0':
     dependencies:
-      '@codemirror/autocomplete': 6.20.1
+      '@codemirror/autocomplete': 6.20.2
       '@codemirror/language': 6.12.3
       '@codemirror/state': 6.6.0
-      '@codemirror/view': 6.42.1
+      '@codemirror/view': 6.43.0
       '@lezer/common': 1.5.1
       '@lezer/xml': 1.0.6
 
@@ -22423,14 +22371,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - immer
-
-  '@replit/codemirror-vim@6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.42.1)':
-    dependencies:
-      '@codemirror/commands': 6.10.3
-      '@codemirror/language': 6.12.3
-      '@codemirror/search': 6.6.0
-      '@codemirror/state': 6.6.0
-      '@codemirror/view': 6.42.1
 
   '@replit/codemirror-vim@6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.3)(@codemirror/search@6.7.0)(@codemirror/state@6.6.0)(@codemirror/view@6.43.0)':
     dependencies:
