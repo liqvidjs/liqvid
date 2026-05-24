@@ -3,6 +3,7 @@ import * as fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { type Result, safeGet } from "@liqvid/fp";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,
@@ -11,7 +12,6 @@ import {
 } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
 import { compare } from "@liqvid/utils";
-import { safeGet } from "have-fun";
 import { StatusCodes } from "http-status-codes";
 
 import { RECORDING_META_FILE } from "../conventions.mts";

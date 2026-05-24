@@ -1,5 +1,5 @@
-import type { Result } from "have-fun";
-import { fromZod } from "have-fun/zod";
+import type { Result } from "@liqvid/fp";
+import { fromZod } from "@liqvid/fp/zod";
 import type { z } from "zod";
 
 export async function fetchJson<T extends z.ZodType>(

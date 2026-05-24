@@ -32,7 +32,7 @@ This is a monorepo for the Liqvid animation framework - a library for creating i
 - `studio-plugin-api` → `@liqvid/studio-plugin-api`
 - `utils` → `@liqvid/utils`
 
-**External/plugin packages** (will be split out later): `cursor`, `have-fun`
+**External/plugin packages** (will be split out later): `cursor`
 
 **Legacy** (ignore): `captioning`, `server`, `cli`, `dev-watcher`, `dev-watcher-rs`
 

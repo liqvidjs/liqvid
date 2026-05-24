@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/complexity/noBannedTypes: intersection types */
 /** biome-ignore-all lint/suspicious/noExplicitAny: heavy type magic here */
-import { Err, Ok, type Result } from "have-fun";
+import { Err, Ok, type Result } from "@liqvid/fp";
 import type { z } from "zod";
 
 import {

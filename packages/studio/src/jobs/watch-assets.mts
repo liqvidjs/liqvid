@@ -3,9 +3,9 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import type { Maybe } from "@liqvid/fp";
 import { execa } from "execa";
 import Handlebars from "handlebars";
-import type { Maybe } from "have-fun";
 
 import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
 import type { Directory } from "../types/assets.mts";

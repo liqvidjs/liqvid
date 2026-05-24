@@ -2,7 +2,6 @@ import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import { safeGet } from "have-fun";
 import { StatusCodes } from "http-status-codes";
 
 /**

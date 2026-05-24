@@ -3,7 +3,7 @@ import * as fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { safeGet } from "have-fun";
+import { safeGet } from "@liqvid/fp";
 import { StatusCodes } from "http-status-codes";
 
 import { PROJECT_META_FILE } from "../conventions.mts";

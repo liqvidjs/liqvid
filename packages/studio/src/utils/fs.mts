@@ -3,8 +3,8 @@ import * as fsp from "node:fs/promises";
 import { readdir } from "node:fs/promises";
 import * as path from "node:path";
 
-import { Err, Maybe, type Result, safeJsonParse } from "have-fun";
-import { fromZod } from "have-fun/zod";
+import { Err, Maybe, type Result, safeJsonParse } from "@liqvid/fp";
+import { fromZod } from "@liqvid/fp/zod";
 import type { z } from "zod";
 
 import type { Awaitable } from "../types.mts";
