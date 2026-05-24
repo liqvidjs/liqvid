@@ -32,7 +32,7 @@ export class DirectoryHelper<DS extends string> {
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
   }
 
-  file(filename: Files<DS>, version?: string): string {
+  file(filename: Files<DS>, _version?: string): string {
     return `${this.dirname}/${filename}`;
   }
 }

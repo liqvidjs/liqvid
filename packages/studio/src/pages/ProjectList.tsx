@@ -69,7 +69,7 @@ function buildFolderTree(
 
       let currentLevel = root;
       for (let i = 0; i < folderParts.length; i++) {
-        const folderName = folderParts[i];
+        const folderName = folderParts[i]!;
         if (!currentLevel.has(folderName)) {
           currentLevel.set(folderName, {
             name: folderName,

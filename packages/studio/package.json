@@ -31,6 +31,11 @@
       "types": "./dist/types/next/page.d.ts",
       "@liqvid/dev": "./src/next/page.tsx",
       "import": "./dist/esm/next/page.js"
+    },
+    "./ui": {
+      "types": "./dist/types/ui/index.d.ts",
+      "default": "./src/ui/index.ts",
+      "import": "./dist/esm/ui/index.js"
     }
   },
   "scripts": {
@@ -44,6 +49,7 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:package": "../../format-package-json.sh",
+    "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
     "watch:css": "watch -n1 pnpm build:css",
