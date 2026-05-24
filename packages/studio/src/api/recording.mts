@@ -47,27 +47,40 @@ export async function listRecordings(
     return Response.json([]);
   }
 
-  const recordingNames = await fsp.readdir(recordingsDir);
+  const recordingDirs = await fsp.readdir(recordingsDir, {
+    withFileTypes: true,
+  });
   const $recordings = await Promise.all(
-    recordingNames.map(async (name) => {
-      const dir = path.join(recordingsDir, name);
-      const recordingMeta = await loadJson(
-        RecordingMetaFile,
-        path.join(dir, RECORDING_META_FILE),
-      );
-      const children = await fsp.readdir(dir, { withFileTypes: true });
-      return recordingMeta.map((file) => ({
-        ...file,
-        name: dirNameToPackageName(name),
-        plugins: children.reduce((acc, curr) => {
-          if (curr.isDirectory()) {
-            acc.push(dirNameToPackageName(curr.name));
-            return acc;
-          }
-          return acc;
-        }, [] as string[]),
-      }));
-    }),
+    (recordingDirs as fs.Dirent<string>[]).reduce(
+      (acc, entry) => {
+        if (entry.isDirectory()) return acc;
+
+        const { name } = entry;
+
+        const dir = path.join(recordingsDir, name);
+        acc.push(
+          loadJson(RecordingMetaFile, path.join(dir, RECORDING_META_FILE)).then(
+            async ($recordingMeta) => {
+              const children = await fsp.readdir(dir, { withFileTypes: true });
+              return $recordingMeta.map((file) => ({
+                ...file,
+                name: dirNameToPackageName(name),
+                plugins: children.reduce((acc, curr) => {
+                  if (curr.isDirectory()) {
+                    acc.push(dirNameToPackageName(curr.name));
+                    return acc;
+                  }
+                  return acc;
+                }, [] as string[]),
+              }));
+            },
+          ),
+        );
+
+        return acc;
+      },
+      [] as Promise<Result<RecordingMeta, unknown>>[],
+    ),
   );
 
   const recordings = $recordings.reduce((acc, $curr) => {
