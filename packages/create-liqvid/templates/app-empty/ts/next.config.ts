@@ -50,9 +50,16 @@ const nextConfig: NextConfig = {
 	basePath: process.env.NEXT_PUBLIC_BASE_PATH,
 
 	turbopack: {
-		// enable importing .tex files
+		// enable importing these as plaintext
 		rules: {
-			"*.tex": {
+			"*.{css,js}": {
+				as: "*.js",
+				condition: {
+					query: /[?&]raw(?=&|$)/,
+				},
+				loaders: ["raw-loader"],
+			},
+			"*.{html,tex}": {
 				as: "*.js",
 				loaders: ["raw-loader"],
 			},
