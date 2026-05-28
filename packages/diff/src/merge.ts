@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: very complicated types here */
 import { assertDefined, assertType } from "@liqvid/utils";
 
-import { applyArrayDiff, applyDiff } from "./apply";
+import { applyArrayDiff, applyDiff } from "./apply.ts";
 import {
   arrayDiff,
   arrayItemDiff,
@@ -11,15 +11,15 @@ import {
   deletionDiff,
   objectDiff,
   objectItemDiff,
-} from "./builders";
-import type { ArrayDiff, ItemDiff, ObjectDiff } from "./types";
+} from "./builders.ts";
+import type { ArrayDiff, ItemDiff, ObjectDiff } from "./types.ts";
 import {
   consume,
   getOffset,
   matchItemDiff,
   matchRunes,
   objectKeys,
-} from "./utils";
+} from "./utils.ts";
 
 /** Merge two array diffs. */
 export function mergeArrayDiffs<T>(

@@ -1,15 +1,16 @@
-import {assertType} from "@liqvid/utils/types";
-import {applyDiff} from "./apply";
-import {diffObjects} from "./compute";
-import {runes} from "./runes";
+import { assertType } from "@liqvid/utils";
+
+import { applyDiff } from "./apply.ts";
+import { diffObjects } from "./compute.ts";
+import { runes } from "./runes.ts";
 import type {
   ArrayDiff,
   ItemDiff,
   ObjectDiff,
   Rune,
-  RuneName,
   RunedKey,
-} from "./types";
+  RuneName,
+} from "./types.ts";
 
 /** Typed {@link Object.keys} */
 export function objectKeys<T extends object>(obj: T): (keyof T)[] {

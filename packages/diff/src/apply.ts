@@ -1,5 +1,6 @@
-import type {ArrayDiff, ObjectDiff} from "./types";
-import {matchItemDiff, matchRunes, objectKeys} from "./utils";
+/** biome-ignore-all lint/suspicious/noExplicitAny: deep type magic */
+import type { ArrayDiff, ObjectDiff } from "./types.ts";
+import { matchItemDiff, matchRunes, objectKeys } from "./utils.ts";
 
 /**
  * Apply a diff to an object.
@@ -7,19 +8,11 @@ import {matchItemDiff, matchRunes, objectKeys} from "./utils";
  * @param b - The diff to apply.
  * @returns A new object with the diff applied.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyDiff<T>(a: T, b: ObjectDiff<T>): T {
   const copy = structuredClone(a);
 
   for (const rkey of objectKeys(b)) {
     matchRunes(b, rkey, {
-      create(key, item) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        copy[key] = item as any;
-      },
-      delete(key) {
-        delete copy[key];
-      },
       array(key, item) {
         const target = copy[key];
 
@@ -27,8 +20,16 @@ export function applyDiff<T>(a: T, b: ObjectDiff<T>): T {
           throw new TypeError("Expected array");
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         copy[key] = applyArrayDiff(target, item) as any;
+      },
+      change(key, item) {
+        copy[key] = item as any;
+      },
+      create(key, item) {
+        copy[key] = item as any;
+      },
+      delete(key) {
+        delete copy[key];
       },
       object(key, item) {
         const target = copy[key];
@@ -38,10 +39,6 @@ export function applyDiff<T>(a: T, b: ObjectDiff<T>): T {
         }
 
         copy[key] = applyDiff(target, item);
-      },
-      change(key, item) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        copy[key] = item as any;
       },
     });
   }
@@ -61,9 +58,6 @@ export function applyArrayDiff<T>(arr: T[], diff: ArrayDiff<T>): T[] {
 
   for (const diff of itemDiffs) {
     matchItemDiff(diff, {
-      set(offset, item) {
-        copy[copy.length - offset] = item as T;
-      },
       array(offset, item) {
         copy[copy.length - offset] = applyArrayDiff(
           copy[copy.length - offset] as unknown[],
@@ -75,6 +69,9 @@ export function applyArrayDiff<T>(arr: T[], diff: ArrayDiff<T>): T[] {
           copy[copy.length - offset],
           item,
         ) as T;
+      },
+      set(offset, item) {
+        copy[copy.length - offset] = item as T;
       },
     });
   }

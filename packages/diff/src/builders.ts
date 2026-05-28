@@ -1,4 +1,4 @@
-import {deletePlaceholder, runes} from "./runes";
+import { deletePlaceholder, runes } from "./runes.ts";
 import type {
   ArrayDiff,
   ArrayItemDiff,
@@ -6,7 +6,7 @@ import type {
   DeletePlaceholder,
   ObjectDiff,
   RunedKey,
-} from "./types";
+} from "./types.ts";
 
 /**
  * Make a diff to create a value.
@@ -14,7 +14,10 @@ import type {
  * @param value Value to create.
  */
 export function creationDiff<K extends string, V>(key: string, value: V) {
-  return {[`${runes.create}${key}`]: value} as Record<RunedKey<"create", K>, V>;
+  return { [`${runes.create}${key}`]: value } as Record<
+    RunedKey<"create", K>,
+    V
+  >;
 }
 
 /**
@@ -23,7 +26,7 @@ export function creationDiff<K extends string, V>(key: string, value: V) {
  * @returns Diff to delete the value.
  */
 export function deletionDiff<K extends string>(key: K) {
-  return {[`${runes.delete}${key}`]: deletePlaceholder} as Record<
+  return { [`${runes.delete}${key}`]: deletePlaceholder } as Record<
     RunedKey<"delete", K>,
     DeletePlaceholder
   >;
@@ -38,7 +41,7 @@ export function arrayDiff<K extends string, T, D extends ArrayDiff<T>>(
   key: K,
   diff: D,
 ) {
-  return {[`${runes.array}${key}`]: diff} as Record<RunedKey<"array", K>, D>;
+  return { [`${runes.array}${key}`]: diff } as Record<RunedKey<"array", K>, D>;
 }
 
 /**
@@ -50,7 +53,10 @@ export function objectDiff<K extends string, T, D extends ObjectDiff<T>>(
   key: K,
   diff: D,
 ) {
-  return {[`${runes.object}${key}`]: diff} as Record<RunedKey<"object", K>, D>;
+  return { [`${runes.object}${key}`]: diff } as Record<
+    RunedKey<"object", K>,
+    D
+  >;
 }
 
 /**
@@ -59,7 +65,10 @@ export function objectDiff<K extends string, T, D extends ObjectDiff<T>>(
  * @value Value to set.
  */
 export function changeDiff<K extends string, V>(key: string, value: V) {
-  return {[`${runes.change}${key}`]: value} as Record<RunedKey<"change", K>, V>;
+  return { [`${runes.change}${key}`]: value } as Record<
+    RunedKey<"change", K>,
+    V
+  >;
 }
 
 // item diffs

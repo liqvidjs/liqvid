@@ -1,4 +1,4 @@
-export {applyArrayDiff, applyDiff} from "./apply";
+export { applyArrayDiff, applyDiff } from "./apply.ts";
 export {
   arrayDiff,
   arrayItemDiff,
@@ -8,9 +8,9 @@ export {
   deletionDiff,
   objectDiff,
   objectItemDiff,
-} from "./builders";
-export {diffArrays, diffObjects as diffObjects} from "./compute";
-export {mergeArrayDiffs, mergeDiffs} from "./merge";
+} from "./builders.ts";
+export { diffArrays, diffObjects } from "./compute.ts";
+export { mergeArrayDiffs, mergeDiffs } from "./merge.ts";
 export type {
   ArrayDiff,
   ArrayItemDiff,
@@ -20,7 +20,7 @@ export type {
   ObjectDiff,
   ObjectItemDiff,
   Rune,
-  RuneName,
   RunedKey,
-} from "./types";
-export {cmp, invertDiff, matchItemDiff, matchRunes} from "./utils";
+  RuneName,
+} from "./types.ts";
+export { cmp, invertDiff, matchItemDiff, matchRunes } from "./utils.ts";

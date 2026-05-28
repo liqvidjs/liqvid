@@ -1,4 +1,4 @@
-import type {deletePlaceholder, runes} from "./runes";
+import type { deletePlaceholder, runes } from "./runes.ts";
 
 // runes
 export type RuneName = keyof typeof runes;

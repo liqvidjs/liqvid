@@ -1,4 +1,6 @@
-import {assertType} from "@liqvid/utils/types";
+/** biome-ignore-all lint/suspicious/noExplicitAny: deep type magic */
+import { assertType } from "@liqvid/utils";
+
 import {
   arrayDiff,
   arrayItemDiff,
@@ -7,9 +9,9 @@ import {
   deletionDiff,
   objectDiff,
   objectItemDiff,
-} from "./builders";
-import type {ArrayDiff, ObjectDiff} from "./types";
-import {cmp} from "./utils";
+} from "./builders.ts";
+import type { ArrayDiff, ObjectDiff } from "./types.ts";
+import { cmp } from "./utils.ts";
 
 /** Compute the diff between two arrays. */
 export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
@@ -32,7 +34,7 @@ export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
         typeof itemA === "string" ||
         itemA === null ||
         itemB === null ||
-        Array.isArray(itemA) != Array.isArray(itemB)
+        Array.isArray(itemA) !== Array.isArray(itemB)
       ) {
         itemDiffs.push([offset, itemB]);
         continue;
@@ -40,7 +42,6 @@ export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
 
       if (Array.isArray(itemA)) {
         assertType<unknown[]>(itemB);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         itemDiffs.push(arrayItemDiff<any>(offset, diffArrays(itemA, itemB)));
       } else {
         assertType<Record<string, unknown>>(itemA);
