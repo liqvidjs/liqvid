@@ -473,6 +473,15 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
         this.audioNode = this.audioContext.createGain();
         this.audioNode.connect(this.audioContext.destination);
 
+        if (this.__muted) {
+          this.audioNode.gain.value = 0;
+        } else {
+          this.audioNode.gain.setValueAtTime(
+            this.volume,
+            this.audioContext.currentTime,
+          );
+        }
+
         window.removeEventListener("click", requestAudioContext);
         window.removeEventListener("load", requestAudioContext);
         window.removeEventListener("mousemove", requestAudioContext);
@@ -535,7 +544,7 @@ function audioBufferToWav(buffer: AudioBuffer): Blob {
   // Write audio data
   const offset = 44;
   for (let i = 0; i < interleaved.length; i++) {
-    const sample = Math.max(-1, Math.min(1, interleaved[i]));
+    const sample = Math.max(-1, Math.min(1, interleaved[i]!));
     const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
     view.setInt16(offset + i * 2, intSample, true);
   }
@@ -561,7 +570,7 @@ function interleaveChannels(buffer: AudioBuffer): Float32Array {
 
   for (let i = 0; i < length; i++) {
     for (let c = 0; c < numberOfChannels; c++) {
-      result[i * numberOfChannels + c] = channels[c][i];
+      result[i * numberOfChannels + c] = channels[c]![i]!;
     }
   }
 
