@@ -11,7 +11,7 @@ const __callbacks: (() => void)[] = [];
 
 export const requestFullScreen = fullscreenEnabled
   ? $requestFullScreen
-  : (): void => {
+  : (_options?: FullscreenOptions): void => {
       window.parent.postMessage(
         { type: "fake-fullscreen", value: true },
         window.parent.origin,
