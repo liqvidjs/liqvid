@@ -80,16 +80,18 @@ export class Playback extends CorePlayback {
   /**
    * Create an {@link Animation} (factory) synced to this playback
    * @param keyframes A [keyframes object](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats) or `null`
-   * @param options Either an integer representing the animation's duration (in milliseconds), or {@link KeyframeEffectOptions}
+   * @param options Either an integer representing the animation's duration, or {@link KeyframeEffectOptions}
    * @returns A callback to attach the animation to a target
    */
   newAnimation<T extends Element>(
     keyframes: Keyframe[] | PropertyIndexedKeyframes,
-    options?: number | KeyframeEffectOptions,
-  ): (target: T) => Animation | undefined {
+    options?:
+      | DurationLike
+      | (KeyframeEffectOptions & { duration: DurationLike }),
+  ): (target: T | null) => Animation | undefined {
     let anim: Animation | undefined;
 
-    return (target: T) => {
+    return (target: T | null) => {
       if (target === null) {
         anim?.cancel();
         anim = undefined;
@@ -112,16 +114,38 @@ export class Playback extends CorePlayback {
   private __adoptAnimation(
     target: Element,
     keyframes: Keyframe[] | PropertyIndexedKeyframes,
-    options?: number | KeyframeEffectOptions,
+    options?:
+      | DurationLike
+      | (KeyframeEffectOptions & {
+          delay?: DurationLike;
+          duration: DurationLike;
+        }),
   ): Animation | undefined {
+    let transformedOptions: number | undefined | KeyframeEffectOptions;
+
+    if (options) {
+      if ("duration" in options) {
+        transformedOptions = {
+          ...options,
+          delay: options.delay
+            ? Duration.from(options.delay).inMilliseconds()
+            : 0,
+          duration: Duration.from(options.duration).inMilliseconds(),
+        };
+      } else {
+        transformedOptions = Duration.from(options).inMilliseconds();
+      }
+    }
+
     // create animation
     const anim = new Animation(
-      new KeyframeEffect(target, keyframes, options),
+      new KeyframeEffect(target, keyframes, transformedOptions),
       this.timeline,
     );
 
     const shouldFill =
       typeof options === "object" &&
+      "duration" in options &&
       (options.fill === "forwards" || options.fill === "both");
 
     if (shouldFill && supportsCommitStyles) {

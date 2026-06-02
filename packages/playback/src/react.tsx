@@ -2,6 +2,11 @@
 
 import { Duration } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
+import {
+  type BooleanValueConfig,
+  type NumericValueConfig,
+  usePersist,
+} from "@liqvid/hydration";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { makeContext } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +16,7 @@ import type {
   PlaybackEvent,
   PlaybackEventsMap,
 } from "./synthetic-playback.mts";
+import { useEager } from "./useEager.ts";
 
 /**
  * {@link React.Context} used to access ambient {@link Playback}
@@ -23,11 +29,40 @@ const PlaybackContext = makeContext<Playback | undefined>({
 
 export function PlaybackProvider({
   children,
+  restore,
   value,
 }: {
   children?: React.ReactNode;
+  restore?: {
+    muted?: BooleanValueConfig;
+    volume?: NumericValueConfig;
+  };
   value?: Playback;
 }) {
+  /* ------------------------------ eager restoration of values ------------------------------ */
+  const [getMuted] = usePersist(restore?.muted, {
+    default: false,
+    disabled: restore?.muted === undefined,
+  });
+
+  const [getVolume] = usePersist(restore?.volume, {
+    default: 1,
+    disabled: restore?.volume === undefined,
+  });
+
+  useEager(() => {
+    if (!value) return;
+
+    if (restore?.muted) {
+      value.muted = getMuted();
+    }
+
+    if (restore?.volume) {
+      value.volume = getVolume();
+    }
+  }, value);
+
+  /* ------------------------------ update duration ------------------------------ */
   const { setDuration } = usePluginApi();
 
   const updateDuration = useCallback(() => {
@@ -38,8 +73,9 @@ export function PlaybackProvider({
 
   useEffect(() => updateDuration(), [updateDuration]);
 
-  usePlaybackEvent("durationchange", updateDuration);
+  useEventListener(value, "durationchange", updateDuration);
 
+  /* ------------------------------ render ------------------------------ */
   return (
     <PlaybackContext.Provider value={value}>
       {children}

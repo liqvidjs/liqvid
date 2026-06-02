@@ -3,10 +3,9 @@
 import { type BooleanValueConfig, usePersist } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { IS_CLIENT } from "@liqvid/ssr";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import clsx from "clsx";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 
 import { convertShortcuts } from "./utils.ts";
 
@@ -52,13 +51,8 @@ export function Mute({ className, persistence, render, shortcuts }: MuteProps) {
   const forceUpdate = useForceUpdate();
 
   // Persistence hook
-  const [getMute, setMute] = usePersist(persistence!, {
+  const [, setMute] = usePersist(persistence!, {
     disabled: !persistence,
-  });
-
-  useEager(() => {
-    if (!playback) return;
-    playback.muted = getMute() ?? persistence?.default ?? false;
   });
 
   // Persist changes on volumechange event
@@ -93,16 +87,5 @@ export function Mute({ className, persistence, render, shortcuts }: MuteProps) {
         ...events,
       },
     );
-  }
-}
-
-function useEager(callback: () => void) {
-  const firstRun = useRef(true);
-  if (firstRun.current) {
-    firstRun.current = false;
-
-    if (IS_CLIENT) {
-      callback();
-    }
   }
 }
