@@ -24,16 +24,16 @@ import { RecordingDialog } from "./RecordingDialog.tsx";
 export interface RecordingControlProps {
   shortcuts?: {
     /** Shortcut to toggle the Recording panel */
-    toggle?: string;
+    toggle?: string | string[];
 
     /** Shortcut to discard recording */
-    discard?: string;
+    discard?: string | string[];
 
     /** Shortcut to pause recording */
-    pause?: string;
+    pause?: string | string[];
 
     /** Shortcut to start/stop recording */
-    startStop?: string;
+    startStop?: string | string[];
   };
 }
 
