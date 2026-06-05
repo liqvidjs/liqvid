@@ -30,6 +30,13 @@ export function useDraggable<T extends HTMLElement | SVGElement>(
 
           if (!e.target) return;
 
+          // Don't start drag if clicking on a resize handle
+          const eventTarget = e.target as HTMLElement;
+          if (eventTarget.dataset?.resizeHandle) {
+            active.current = false;
+            return;
+          }
+
           active.current = target.contains(e.target as Node);
 
           const rect = target.getBoundingClientRect();

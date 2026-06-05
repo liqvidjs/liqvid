@@ -6,3 +6,4 @@ export * from "./RadioTabs.tsx";
 export * from "./Select.tsx";
 export * from "./Tabs.tsx";
 export * from "./useDraggable.ts";
+export * from "./useResizable.ts";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useColorScheme } from "@liqvid/color-scheme/react";
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, onDragReact } from "@liqvid/utils";
 import { Portal } from "@radix-ui/react-portal";
@@ -72,7 +73,7 @@ function Root({
 }: {
   children?: React.ReactNode;
   name?: string;
-  shortcut?: string;
+  shortcut?: ShortcutsSpecifier;
 }) {
   const { value: open, set: setOpen, toggle } = useToggle();
 
