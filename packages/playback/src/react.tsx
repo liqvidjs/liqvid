@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Playback } from "./Playback.mts";
 import type {
+  CorePlayback,
   PlaybackEvent,
   PlaybackEventsMap,
 } from "./synthetic-playback.mts";
@@ -189,12 +190,15 @@ export function useTime<T>(
 }
 
 /** Subscribe to playback events. */
-export function usePlaybackEvent<E extends PlaybackEvent>(
+export function usePlaybackEvent<
+  E extends PlaybackEvent,
+  P extends CorePlayback = Playback,
+>(
   /** Event to subscribe to */
   eventName: E,
 
   /** Event callback to register */
-  callback: (event: PlaybackEventsMap[E]) => unknown,
+  callback: (event: PlaybackEventsMap<P>[E]) => unknown,
 ) {
   useEventListener(usePlaybackOptional(), eventName, callback);
 }

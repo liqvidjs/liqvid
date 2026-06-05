@@ -1,6 +1,5 @@
 "use client";
 
-import { Duration } from "@liqvid/duration";
 import { combineRefs } from "@liqvid/utils";
 import { type JSX, useRef } from "react";
 
@@ -14,7 +13,7 @@ type VideoProps = JSX.IntrinsicElements["video"] & MediaProps;
 export function Video({ ref: propsRef, start, ...props }: VideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
 
-  useSyncMedia(ref, Duration.from(start ?? { seconds: 0 }).inSeconds());
+  useSyncMedia(ref, start);
 
   return (
     <video

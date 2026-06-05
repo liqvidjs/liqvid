@@ -15,16 +15,15 @@ export type PlaybackEvent =
   | "pause"
   | "play"
   | "ratechange"
-  | "seek"
   | "seeked"
   | "seeking"
   | "stop"
   | "timeupdate"
   | "volumechange";
 
-export type PlaybackEventsMap = {
+export type PlaybackEventsMap<P extends CorePlayback> = {
   [key in PlaybackEvent]: {
-    target: CorePlayback;
+    target: P;
     type: key;
   };
 };

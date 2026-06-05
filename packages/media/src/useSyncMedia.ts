@@ -1,6 +1,6 @@
-import type { DurationLike } from "@liqvid/duration";
+import { Duration, type DurationLike } from "@liqvid/duration";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { between } from "@liqvid/utils";
+import { between, useStable } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface MediaProps {
@@ -11,15 +11,18 @@ export interface MediaProps {
 
 export function useSyncMedia<T extends HTMLMediaElement>(
   ref: React.RefObject<T | null>,
-  start: number,
+  start: DurationLike = {},
 ) {
+  const start$ = useStable(start, (a, b) => a.equals(b), Duration.from);
   const playback = usePlayback();
 
-  const [end, setEnd] = useState(start + (ref.current?.duration ?? 0));
+  const [end, setEnd] = useState(() =>
+    start$.plus({ seconds: ref.current?.duration ?? 0 }),
+  );
 
   useEffect(() => {
     const update = () => {
-      setEnd(start + (ref.current?.duration ?? 0));
+      setEnd(start$.plus({ seconds: ref.current?.duration ?? 0 }));
     };
 
     update();
@@ -29,7 +32,7 @@ export function useSyncMedia<T extends HTMLMediaElement>(
     return () => {
       ref.current?.removeEventListener("durationchange", update);
     };
-  }, [ref, start]);
+  }, [ref, start$]);
 
   // canplay/canplaythrough events
   // if (props.obstructCanPlay) {
@@ -112,16 +115,18 @@ export function useSyncMedia<T extends HTMLMediaElement>(
     const domElement = ref.current;
     if (!domElement) return;
 
-    const t = playback.currentTime;
+    const t = playback.currentTime$;
 
-    if (between(start, t, end)) {
+    if (t.between(start, end)) {
       if (!domElement.paused) return;
 
-      domElement.currentTime = (t - start) / 1000;
-      play().catch(playback.pause);
+      domElement.currentTime = t.minus(start).inSeconds();
+      if (!playback.paused) {
+        play().catch(playback.pause);
+      }
     } else {
       if (!domElement.paused) pause();
-      domElement.currentTime = (t - start) / 1000;
+      domElement.currentTime = t.minus(start).inSeconds();
     }
   }, [end, pause, play, playback, ref, start]);
 
@@ -146,15 +151,15 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   });
 
   // seek
-  usePlaybackEvent("seek", ({ target: playback }) => {
+  usePlaybackEvent("seeked", ({ target: playback }) => {
     const domElement = ref.current;
     if (!domElement) return;
 
-    const t = playback.currentTime;
+    const t = playback.currentTime$;
 
-    domElement.currentTime = (t - start) / 1000;
+    domElement.currentTime = t.minus(start).inSeconds();
 
-    if (between(start, t, end)) {
+    if (t.between(start, end)) {
       if (domElement.paused && !playback.paused && !playback.seeking) {
         play().catch(playback.pause);
       }
