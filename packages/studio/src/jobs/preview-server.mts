@@ -111,7 +111,7 @@ function interpolateEnvVars(str: string, envFiles: EnvFiles): string {
 
     if (parts.length === 1) {
       // {env:VAR_NAME} - use process.env
-      const varName = parts[0];
+      const varName = parts[0]!;
       const value = process.env[varName];
       if (value === undefined) {
         throw new Error(`Environment variable ${varName} is not set`);
@@ -119,7 +119,7 @@ function interpolateEnvVars(str: string, envFiles: EnvFiles): string {
       return value;
     } else if (parts.length === 2) {
       // {env:environment:VAR_NAME}
-      const [environment, varName] = parts;
+      const [environment, varName] = parts as [string, string];
 
       if (environment === "production") {
         const value = envFiles.production[varName] ?? process.env[varName];

@@ -70,9 +70,12 @@ export function Record({
   useEffect(() => {
     if (!recorder) return;
 
-    const { view } = groups[groupId].files.find(
+    const file = groups[groupId]?.files.find(
       (file) => file.filename === filename,
-    )!;
+    );
+    if (!file) return;
+
+    const { view } = file;
 
     view.dispatch({
       effects: recording.reconfigure([recorder.extension(captureKeys)]),

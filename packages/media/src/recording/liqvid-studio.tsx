@@ -96,8 +96,9 @@ function ConfigurationComponent() {
           const grouped = await refreshDevices();
 
           // Auto-select first device if available
-          if (grouped.audioinput.length > 0) {
-            setSelectedAudioDevice(grouped.audioinput[0].deviceId);
+          const first = grouped.audioinput[0];
+          if (first) {
+            setSelectedAudioDevice(first.deviceId);
           }
 
           setAudioEnabled(true);
@@ -133,8 +134,9 @@ function ConfigurationComponent() {
           const grouped = await refreshDevices();
 
           // Auto-select first device if available
-          if (grouped.videoinput.length > 0) {
-            setSelectedVideoDevice(grouped.videoinput[0].deviceId);
+          const first = grouped.videoinput[0];
+          if (first) {
+            setSelectedVideoDevice(first.deviceId);
           }
 
           setVideoEnabled(true);

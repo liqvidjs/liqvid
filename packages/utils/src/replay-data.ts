@@ -8,14 +8,16 @@ export type ReplayData<K> = [number, K][];
  * @param args [ReplayData, delay] objects to join
  * @returns Concatenated replay data
  */
-export function concat<T>(...args: [ReplayData<T>, number][]) {
-  const [head, ...tail] = args;
+export function concat<T>(
+  head: [ReplayData<T>, number],
+  ...tail: [ReplayData<T>, number][]
+) {
   const ret: ReplayData<T> = [...head[0]];
   let ptr = head[1] + length(head[0]);
 
   for (const [data, start] of tail) {
     const copy = data.slice();
-    copy[0][0] += start - ptr;
+    copy[0]![0] += start - ptr;
     ret.push(...copy);
     ptr += length(copy);
   }

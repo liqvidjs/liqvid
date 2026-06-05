@@ -6,6 +6,7 @@ import {
   type TextTrackKind,
 } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
+import { assertType } from "@liqvid/utils";
 import { useEffect, useRef } from "react";
 
 export interface TrackProps {
@@ -39,17 +40,23 @@ function parseVTTTimestamp(timestamp: string): number {
   const parts = timestamp.trim().split(":");
 
   if (parts.length === 3) {
+    assertType<[string, string, string]>(parts);
+
     // HH:MM:SS.mmm
     const hours = Number.parseFloat(parts[0]);
     const minutes = Number.parseFloat(parts[1]);
     const seconds = Number.parseFloat(parts[2]);
     return hours * 3600 + minutes * 60 + seconds;
   } else if (parts.length === 2) {
+    assertType<[string, string, string]>(parts);
+
     // MM:SS.mmm
     const minutes = Number.parseFloat(parts[0]);
     const seconds = Number.parseFloat(parts[1]);
     return minutes * 60 + seconds;
   } else {
+    assertType<[string]>(parts);
+
     // SS.mmm
     return Number.parseFloat(parts[0]);
   }
@@ -77,7 +84,7 @@ function parseVTT(content: string): Array<{
   let i = 0;
 
   // Skip the WEBVTT header
-  while (i < lines.length && !lines[i].startsWith("WEBVTT")) {
+  while (i < lines.length && !lines[i]!.startsWith("WEBVTT")) {
     i++;
   }
   if (i < lines.length) {
@@ -85,14 +92,14 @@ function parseVTT(content: string): Array<{
   }
 
   // Skip any header metadata (lines before the first blank line after WEBVTT)
-  while (i < lines.length && lines[i].trim() !== "") {
+  while (i < lines.length && lines[i]!.trim() !== "") {
     i++;
   }
 
   // Process cue blocks
   while (i < lines.length) {
     // Skip blank lines
-    while (i < lines.length && lines[i].trim() === "") {
+    while (i < lines.length && lines[i]!.trim() === "") {
       i++;
     }
 
@@ -102,7 +109,7 @@ function parseVTT(content: string): Array<{
     let timingLine = "";
 
     // Check if this line is a cue identifier or timing line
-    const currentLine = lines[i];
+    const currentLine = lines[i]!;
     if (currentLine.includes("-->")) {
       // This is a timing line (no cue ID)
       timingLine = currentLine;
@@ -115,7 +122,7 @@ function parseVTT(content: string): Array<{
       ) {
         // Skip NOTE/STYLE/REGION blocks
         i++;
-        while (i < lines.length && lines[i].trim() !== "") {
+        while (i < lines.length && lines[i]!.trim() !== "") {
           i++;
         }
         continue;
@@ -126,11 +133,13 @@ function parseVTT(content: string): Array<{
       i++;
 
       if (i >= lines.length) break;
-      timingLine = lines[i];
+      timingLine = lines[i]!;
     }
 
     // Parse the timing line
-    const timingMatch = timingLine.match(/(.+?)\s*-->\s*(.+?)(?:\s|$)/);
+    const timingMatch = timingLine.match(/(.+?)\s*-->\s*(.+?)(?:\s|$)/) as
+      | [string, string, string]
+      | null;
     if (!timingMatch) {
       i++;
       continue;
@@ -138,15 +147,15 @@ function parseVTT(content: string): Array<{
 
     const startTime = parseVTTTimestamp(timingMatch[1]);
     // Extract end time (may have settings after it)
-    const endPart = timingMatch[2].split(/\s/)[0];
+    const endPart = timingMatch[2].split(/\s/)[0]!;
     const endTime = parseVTTTimestamp(endPart);
 
     i++;
 
     // Collect cue text (may span multiple lines)
     const textLines: string[] = [];
-    while (i < lines.length && lines[i].trim() !== "") {
-      textLines.push(lines[i]);
+    while (i < lines.length && lines[i]!.trim() !== "") {
+      textLines.push(lines[i]!);
       i++;
     }
 

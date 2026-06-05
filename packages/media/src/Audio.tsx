@@ -25,38 +25,30 @@ export type AudioProps = {
 /**
  * Detect if the browser is Safari (which only supports mp4, not webm)
  */
-function isSafari(): boolean {
-  if (typeof navigator === "undefined") return false;
+const isSafari = (() => {
+  if (!navigator) return false;
   const ua = navigator.userAgent;
   return (
     ua.includes("Safari") && !ua.includes("Chrome") && !ua.includes("Chromium")
   );
-}
+})();
 
 /**
  * Get supported audio MIME types based on browser
  * Firefox and Chrome support webm, Safari only supports mp4
  */
-function getSupportedTypes(): Set<string> {
-  if (isSafari()) {
-    return new Set(["audio/mp4", "audio/mpeg", "audio/aac"]);
-  }
-  // Firefox and Chrome
-  return new Set([
-    "audio/webm",
-    "audio/mp4",
-    "audio/mpeg",
-    "audio/ogg",
-    "audio/aac",
-  ]);
-}
+const supportedTypes = new Set([
+  "audio/aac",
+  "audio/mp4",
+  "audio/mpeg",
+  // Safari doesn't support webm or ogg
+  ...(isSafari ? [] : ["audio/ogg", "audio/webm"]),
+]);
 
 /**
  * Find the first supported source from children <source> elements
  */
 function findSupportedSource(children: React.ReactNode): string | undefined {
-  const supportedTypes = getSupportedTypes();
-
   const sources: Array<{ src: string; type?: string }> = [];
 
   Children.forEach(children, (child) => {
@@ -76,11 +68,7 @@ function findSupportedSource(children: React.ReactNode): string | undefined {
   }
 
   // If no type specified, return first source
-  if (sources.length > 0) {
-    return sources[0].src;
-  }
-
-  return undefined;
+  return sources[0]?.src;
 }
 
 /**

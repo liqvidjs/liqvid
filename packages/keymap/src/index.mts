@@ -1,4 +1,8 @@
+import { compare } from "@liqvid/utils";
+
 import { mixedCaseVals } from "./mixedCaseVals.mts";
+
+export type ShortcutsSpecifier = string | string[];
 
 /**
  * If this returns `true`, further event handling will be stopped.
@@ -81,7 +85,7 @@ export class Keymap {
           return mixedCase[lower];
         }
 
-        return str[0].toUpperCase() + lower.slice(1);
+        return str[0]!.toUpperCase() + lower.slice(1);
       })
       .sort((a, b) => {
         if (modifierOrder.includes(a)) {
@@ -93,7 +97,7 @@ export class Keymap {
         } else if (modifierOrder.includes(b)) {
           return 1;
         } else {
-          return cmp(a, b);
+          return compare(a, b);
         }
       })
       .join("+");
@@ -104,7 +108,7 @@ export class Keymap {
    * @param seq Shortcut sequence
    * @param cb Callback function
    */
-  bind(seq: string | string[], cb: ShortcutHandler) {
+  bind(seq: ShortcutsSpecifier, cb: ShortcutHandler) {
     if (Array.isArray(seq)) {
       for (const atomic of seq) {
         this.bind(atomic, cb);
@@ -115,7 +119,7 @@ export class Keymap {
     if (!Object.hasOwn(this.__bindings, seq)) {
       this.__bindings[seq] = [];
     }
-    this.__bindings[seq].push(cb);
+    this.__bindings[seq]!.push(cb);
   }
 
   /**
@@ -134,12 +138,13 @@ export class Keymap {
     if (!Object.hasOwn(this.__bindings, seq)) {
       return;
     }
-    const index = this.__bindings[seq].indexOf(cb);
+    const bindings = this.__bindings[seq]!;
+    const index = bindings.indexOf(cb);
     if (index < 0) {
       return;
     }
-    this.__bindings[seq].splice(index, 1);
-    if (this.__bindings[seq].length === 0) {
+    bindings.splice(index, 1);
+    if (bindings.length === 0) {
       delete this.__bindings[seq];
     }
   }
@@ -152,7 +157,7 @@ export class Keymap {
   /** Get the list of handlers for a given shortcut sequence. */
   getHandlers(seq: string) {
     if (!Object.hasOwn(this.__bindings, seq)) return [];
-    return this.__bindings[seq].slice();
+    return this.__bindings[seq]!.slice();
   }
 
   /** Dispatches all handlers matching the given event. */
@@ -169,13 +174,4 @@ export class Keymap {
       }
     }
   }
-}
-
-/**
- * Returns -1 if a < b, 0 if a === b, and 1 if a > b.
- */
-function cmp<T>(a: T, b: T) {
-  if (a < b) return -1;
-  else if (a === b) return 0;
-  return 1;
 }

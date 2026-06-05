@@ -79,7 +79,7 @@ export function cmReplay({
     didScroll: (_filename, scrollToOptions) => {
       didScroll?.(scrollToOptions);
     },
-    handle: (key, docs) => handle?.(key, docs.default),
+    handle: (key, docs) => handle?.(key, docs.default!),
     initial: {
       activeFile: defaultViewName,
       files: {
@@ -190,7 +190,9 @@ export function cmReplayMultiple({
   // decompress times
   const times = data.map((_) => _[0]);
 
-  for (let i = 1; i < times.length; ++i) times[i] += times[i - 1];
+  for (let i = 1; i < times.length; ++i) {
+    times[i]! += times[i - 1]!;
+  }
 
   // deserialize changesets
   for (const [, action] of data) {
@@ -219,25 +221,25 @@ export function cmReplayMultiple({
   {
     const docs: Record<keyof typeof views, Text> = {};
     for (const key in views) {
-      docs[key] = views[key].state.doc;
+      docs[key] = views[key]!.state.doc;
     }
 
     for (let i = 0; i < data.length; ++i) {
-      const action = data[i][1];
+      const action = data[i]![1];
 
       if (Array.isArray(action)) {
         if (action[0] instanceof ChangeSet) {
           assertType<string>(file);
 
           // editor change
-          inverses[file][i] = action[0].invert(docs[file]);
-          docs[file] = action[0].apply(docs[file]);
+          inverses[file]![i] = action[0].invert(docs[file]!);
+          docs[file] = action[0].apply(docs[file]!);
         } else if (action[0] === scrollCmd) {
           assertType<string>(file);
 
           // scroll
           hasScroll[file] = true;
-          inverses[file][i] = lastScroll[file];
+          inverses[file]![i]! = lastScroll[file]!;
           lastScroll[file] = [action[1], action[2] ?? 0];
         }
       } else if (action.startsWith(selectCmd)) {
@@ -256,7 +258,7 @@ export function cmReplayMultiple({
 
     const changes: Record<string, ChangeSet> = {};
     for (const key in views) {
-      changes[key] = ChangeSet.empty(views[key].state.doc.length);
+      changes[key] = ChangeSet.empty(views[key]!.state.doc.length);
     }
 
     const selections: Record<string, CMRange> = {};
@@ -265,8 +267,8 @@ export function cmReplayMultiple({
     if (lastTime <= t && index < data.length) {
       // forward
       let i = index;
-      for (; i < data.length && times[i] <= progress; ++i) {
-        const action = data[i][1];
+      for (; i < data.length && times[i]! <= progress; ++i) {
+        const action = data[i]![1];
 
         if (typeof action === "string") {
           if (action.startsWith(selectCmd)) {
@@ -275,7 +277,7 @@ export function cmReplayMultiple({
           // handle action
           const docs: Record<string, Text> = {};
           for (const key in views) {
-            docs[key] = changes[key].apply(views[key].state.doc);
+            docs[key] = changes[key]!.apply(views[key]!.state.doc);
           }
           handle?.(action, docs);
         } else {
@@ -283,20 +285,20 @@ export function cmReplayMultiple({
             if (shouldScroll(file)) {
               // scroll
               const [, y, x = 0] = action;
-              const fontSize = getFontSize(views[file]);
+              const fontSize = getFontSize(views[file]!);
               if (!Number.isNaN(fontSize)) {
                 const scrollToOptions = {
                   behavior: scrollBehavior,
                   left: x * fontSize,
                   top: y * fontSize,
                 };
-                views[file].scrollDOM.scrollTo(scrollToOptions);
+                views[file]!.scrollDOM.scrollTo(scrollToOptions);
                 didScroll?.(file, scrollToOptions);
               }
             }
           } else {
             // editor change
-            changes[file] = changes[file].compose(action[0]);
+            changes[file] = changes[file]!.compose(action[0]);
 
             // handle selection
             if (action[1]) {
@@ -310,35 +312,35 @@ export function cmReplayMultiple({
     } else if (t < lastTime && 0 < index) {
       // revert
       let i = index - 1;
-      for (; 0 <= i && progress < times[i]; --i) {
-        if (inverses[file][i]) {
-          const inverse = inverses[file][i];
+      for (; 0 <= i && progress < times[i]!; --i) {
+        if (inverses[file]![i]) {
+          const inverse = inverses[file]![i];
           // editor change
           if (inverse instanceof ChangeSet) {
-            changes[file] = changes[file].compose(
-              inverses[file][i] as ChangeSet,
+            changes[file] = changes[file]!.compose(
+              inverses[file]![i] as ChangeSet,
             );
           }
           // scroll
-          else if (inverses[file][i].length === 2) {
+          else if (inverses[file]![i]!.length === 2) {
             if (shouldScroll(file)) {
-              const [y, x] = inverses[file][i] as [number, number];
-              const fontSize = getFontSize(views[file]);
+              const [y, x] = inverses[file]![i] as [number, number];
+              const fontSize = getFontSize(views[file]!);
               if (!Number.isNaN(fontSize)) {
                 const scrollToOptions = {
                   behavior: scrollBehavior,
                   left: x * fontSize,
                   top: y * fontSize,
                 };
-                views[file].scrollDOM.scrollTo(scrollToOptions);
+                views[file]!.scrollDOM.scrollTo(scrollToOptions);
                 didScroll?.(file, scrollToOptions);
               }
             }
           }
-        } else if (data[i][1] === selectCmd + file) {
+        } else if (data[i]![1] === selectCmd + file) {
           // find file to replay into
           for (let j = i - 1; 0 <= j; --j) {
-            const action = data[j][1];
+            const action = data[j]![1];
             if (typeof action === "string" && action.startsWith(selectCmd)) {
               file = action.slice(selectCmd.length);
 
@@ -352,11 +354,10 @@ export function cmReplayMultiple({
       index = i + 1;
     }
 
-    for (const key in views) {
+    for (const [key, view] of Object.entries(views)) {
       const effects = selections[key]
         ? [FakeSelection.of(selections[key])]
         : undefined;
-      const view = views[key];
 
       view.dispatch(
         view.state.update({
@@ -371,7 +372,7 @@ export function cmReplayMultiple({
       if (scrollIntoView) {
         // get position of last change
         let pos: number | undefined;
-        changes[key].iterChangedRanges((_fromA, _toA, _fromB, toB) => {
+        changes[key]!.iterChangedRanges((_fromA, _toA, _fromB, toB) => {
           pos = toB;
         });
 

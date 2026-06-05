@@ -76,7 +76,7 @@ export function onClickReact<T extends HTMLElement | SVGElement>(
     const onTouchStart: React.TouchEventHandler<T> = (e) => {
       if (typeof touchId === "number") return;
       target = e.currentTarget as T;
-      touchId = e.changedTouches[0].identifier;
+      touchId = e.changedTouches[0]?.identifier;
     };
 
     // touchend handler
@@ -188,7 +188,7 @@ export function makeContext<T>({
     [`use${name}Optional`]: function () {
       return useContext(context);
     },
-  }[`use${name}Optional`];
+  }[`use${name}Optional`]!;
 
   const use = {
     // biome-ignore lint/complexity/useArrowFunction: preserve name for console logs
@@ -202,11 +202,43 @@ export function makeContext<T>({
 
       return value;
     },
-  }[`use${name}`];
+  }[`use${name}`]!;
 
   return {
     Provider: context.Provider,
     use,
     useOptional,
   };
+}
+
+/**
+ * Use a referentially stable value with custom equality function.
+ */
+export function useStable<T>(val: T, equals: (a: T, b: T) => boolean): T;
+
+/**
+ * Use a referentially stable value with custom equality function
+ * and initializer function.
+ */
+export function useStable<Pre, Post>(
+  val: Pre,
+  equals: (a: Post, b: Pre) => boolean,
+  init: (a: Pre) => Post,
+): Post;
+export function useStable<Pre, Post>(
+  val: Pre,
+  equals: (a: Post, b: Pre) => boolean,
+  init?: (a: Pre) => Post,
+): Post {
+  const prev = useRef<Post>(null);
+
+  if (!prev.current) {
+    prev.current = init ? init(val) : (val as unknown as Post);
+  }
+
+  if (!equals(prev.current, val)) {
+    prev.current = init ? init(val) : (val as unknown as Post);
+  }
+
+  return prev.current;
 }
