@@ -21,6 +21,7 @@ export const ASSETS_DIRNAME = ".liqvid";
 const EXCLUDE_PATTERNS = [
   "project.json",
   /\.(css|js|jsx|ts|tsx)$/,
+  /hls\/.*data\d+\.ts$/,
   /\.d.json.ts$/,
   /^opengraph-image\./,
   /^twitter-image\./,
@@ -48,7 +49,7 @@ function shouldExclude(relativePath: string, basename: string): boolean {
   for (const pattern of EXCLUDE_PATTERNS) {
     if (typeof pattern === "string") {
       if (relativePath === pattern || basename === pattern) return true;
-    } else if (pattern.test(basename)) {
+    } else if (pattern.test(relativePath)) {
       return true;
     }
   }
@@ -186,7 +187,6 @@ export async function runTemplate({
   /** Path to the template file */
   template: string;
 }) {
-  console.debug(`compiling ${template} -> ${out}`);
   const templateHbs = await fsp.readFile(
     path.join(TEMPLATES_DIR, template),
     "utf8",

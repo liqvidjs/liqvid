@@ -53,7 +53,7 @@ export async function listRecordings(
   const $recordings = await Promise.all(
     (recordingDirs as fs.Dirent<string>[]).reduce(
       (acc, entry) => {
-        if (entry.isDirectory()) return acc;
+        if (!entry.isDirectory()) return acc;
 
         const { name } = entry;
 
