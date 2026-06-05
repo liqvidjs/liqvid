@@ -4,21 +4,27 @@ import { Duration, type DurationLike } from "@liqvid/duration";
 import { useKeymap } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { anyHover, between, clamp, onDrag } from "@liqvid/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { type ThumbData, ThumbnailBox } from "./ThumbnailBox.tsx";
 
 export type { ThumbData };
 
+/** Shortcut to seek forward/backward by a fixed amount of time. */
 export interface RelativeSeekShortcut {
   delta: DurationLike;
+
+  /** key to trigger the shortcut */
   key: string;
 }
 
+/** Shortcut to seek to a percentage of the Playback duration. */
 export interface PercentageSeekShortcut {
+  /** key to trigger the shortcut */
   key: string;
 
   /**
+   * e.g. 0.1 will seek to 10% of the way through the Playback
    * @min 0
    * @max 1
    */
@@ -26,13 +32,20 @@ export interface PercentageSeekShortcut {
 }
 
 export interface ScrubberBarProps {
+  /** seeking shortcuts */
   shortcuts?: {
+    /** configure shortcuts for seeking forward/backward by a fixed amount of time */
     relative?: RelativeSeekShortcut[];
+
+    /** configure shortcuts for seeking to a percentage of the Playback duration */
     percentage?: PercentageSeekShortcut[];
   };
+
+  /** Thumbnail preview data */
   thumbs?: ThumbData;
 }
 
+/** Display a scrubber interface for playback, optionally including thumbnail previews and highlights. */
 export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   const playback = usePlayback();
 
@@ -46,7 +59,7 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   const scrubberBar = useRef<HTMLDivElement>(null);
 
   /* Event handlers */
-  usePlaybackEvent("seek", () => {
+  usePlaybackEvent("seeked", () => {
     if (playback.seeking) return;
     const progress = playback.currentTime / playback.duration;
     setProgress({ scrubber: progress, thumb: progress });
