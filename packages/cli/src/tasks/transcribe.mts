@@ -8,6 +8,7 @@ import type {
 } from "@liqvid/schemas/liqvid-config";
 import type { CommandModule } from "yargs";
 
+import { expandTilde } from "../utils/paths.mts";
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
 
 /**
@@ -166,7 +167,9 @@ export async function transcribe(
   await nodewhisper(absoluteAudioFile, {
     autoDownloadModelName: whisperConfig.autoDownloadModelName ?? modelName,
     modelName,
-    modelRootPath: whisperConfig.modelRootPath,
+    modelRootPath: whisperConfig.modelRootPath
+      ? expandTilde(whisperConfig.modelRootPath)
+      : undefined,
     removeWavFileAfterTranscription: true,
     whisperOptions: {
       outputInJson: true,

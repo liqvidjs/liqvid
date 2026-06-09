@@ -10,6 +10,7 @@ import type {
   MediaHostingProvider,
   RemoteFileInfo,
 } from "../types.mts";
+import { expandTilde } from "../../utils/paths.mts";
 
 /**
  * Copy provider that copies output to another location on disk.
@@ -27,10 +28,8 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
    */
   #getDestination(mode: "hosting" | "media"): string {
     const { destination } = this.#config;
-    if (typeof destination === "string") {
-      return destination;
-    }
-    return destination[mode];
+    const dest = typeof destination === "string" ? destination : destination[mode];
+    return expandTilde(dest);
   }
 
   /**
