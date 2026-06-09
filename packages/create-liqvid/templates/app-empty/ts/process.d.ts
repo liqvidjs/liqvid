@@ -11,6 +11,11 @@ declare namespace NodeJS {
 		// NOTE: Only variables prefixed with `NEXT_PUBLIC` will be exposed to the
 		// frontend. This behavior is a part of Next.js.
 		// https://nextjs.org/docs/app/guides/environment-variables#bundling-environment-variables-for-the-browser
+    //
+    /**
+     * Base path for the application, if deployed to a subdirectory.
+     */
+    NEXT_PUBLIC_BASE_PATH: string;
 
 		/**
 		 * Base from which media content is served in production.
