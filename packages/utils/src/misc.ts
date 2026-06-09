@@ -57,7 +57,7 @@ export function namedSlotsTemplate<Args extends string[]>(
       unknown
     >,
   ): string => {
-    let result = strings[0];
+    let result = strings[0]!;
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i] as Args[number];
@@ -67,7 +67,7 @@ export function namedSlotsTemplate<Args extends string[]>(
       } else {
         result += key;
       }
-      result += strings[i + 1];
+      result += strings[i + 1]!;
     }
 
     return result;

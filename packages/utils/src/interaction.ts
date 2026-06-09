@@ -110,12 +110,12 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
     } else {
       /* touch events */
       e.preventDefault();
-      const touches = e.changedTouches;
+      const touch = e.changedTouches[0]!;
 
-      const touchId = touches[0].identifier;
+      const touchId = touch.identifier;
 
-      let lastX = touches[0].clientX,
-        lastY = touches[0].clientY;
+      let lastX = touch.clientX,
+        lastY = touch.clientY;
 
       // up
       const upHandler = (e: MouseEvent | TouchEvent) => {
@@ -177,7 +177,7 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
 
       return down(
         e,
-        { x: touches[0].clientX, y: touches[0].clientY },
+        { x: touch.clientX, y: touch.clientY },
         upHandler,
         moveHandler,
       );
@@ -209,7 +209,7 @@ export function onClick<T extends HTMLElement | SVGElement>(
   // touchstart handler
   const touchStart = (e: TouchEvent): void => {
     if (typeof touchId === "number") return;
-    touchId = e.changedTouches[0].identifier;
+    touchId = e.changedTouches[0]?.identifier;
   };
 
   // touchend handler

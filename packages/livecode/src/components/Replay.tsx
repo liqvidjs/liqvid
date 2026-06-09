@@ -213,7 +213,7 @@ export function ReplayMultiple({
           groups: {
             ...state.groups,
             [groupId]: {
-              ...state.groups[groupId],
+              ...state.groups[groupId]!,
               activeFile: cmd.slice(selectCmd.length),
             },
           },

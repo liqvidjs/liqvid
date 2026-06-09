@@ -3,7 +3,11 @@
 import { makeContext } from "@liqvid/utils";
 import { useEffect, useMemo } from "react";
 
-import { Keymap, type ShortcutHandler } from "./index.mts";
+import {
+  Keymap,
+  type ShortcutHandler,
+  type ShortcutsSpecifier,
+} from "./index.mts";
 
 const KeymapContext = makeContext<Keymap | undefined>({
   defaultValue: undefined,
@@ -25,7 +29,7 @@ export function useKeyboardShortcut(
    * Keyboard sequence(s) to bind to.
    * If `undefined` or `null` are passed, nothing happens.
    */
-  seqOrSeqs: string | string[] | undefined | null,
+  seqOrSeqs: ShortcutsSpecifier | undefined | null,
 
   /** Callback to handle the shortcut */
   callback: ShortcutHandler,
