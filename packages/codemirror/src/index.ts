@@ -1,11 +1,11 @@
-import { ChangeSet, type Text } from "@codemirror/state";
+import { ChangeSet, SelectionRange, type Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
-import { assertType, type CleanUpFn, type ReplayData } from "@liqvid/utils";
+import type { CleanUpFn, ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
 import { FakeSelection } from "./fake-selection.ts";
 import type { ScrollAction } from "./recording.tsx";
-import type { CMRange, CMState } from "./types.ts";
+import type { CMRange, CMRangeArray, CMState } from "./types.ts";
 
 export { type FakeSelectionConfig, fakeSelection } from "./fake-selection.ts";
 export * from "./types.ts";
@@ -14,7 +14,7 @@ export * from "./types.ts";
 export type Action =
   | ScrollAction
   | string
-  | [changes: ChangeSet, selection?: [number, number]];
+  | [changes: ChangeSet, selection?: CMRangeArray];
 
 /** Reserved command for specifying file. */
 export const selectCmd = "file:";
@@ -166,12 +166,16 @@ export function cmReplayMultiple({
   // we're going to mess with data, clone it
   data = JSON.parse(JSON.stringify(data));
 
+  /** Map of filenames to editor selection state */
+  const selections: Record<string, SelectionRange> = {};
+
   // Apply initial state to views
   for (const [filename, fileState] of Object.entries(initial.files)) {
     const view = views[filename];
     if (!view) continue;
 
     const { content = "", selection = { anchor: 0, head: 0 } } = fileState;
+    selections[filename] = SelectionRange.fromJSON(selection);
 
     // replace document content and set selection
     view.dispatch(
@@ -228,19 +232,15 @@ export function cmReplayMultiple({
       const action = data[i]![1];
 
       if (Array.isArray(action)) {
-        if (action[0] instanceof ChangeSet) {
-          assertType<string>(file);
-
-          // editor change
-          inverses[file]![i] = action[0].invert(docs[file]!);
-          docs[file] = action[0].apply(docs[file]!);
-        } else if (action[0] === scrollCmd) {
-          assertType<string>(file);
-
+        if (action[0] === scrollCmd) {
           // scroll
           hasScroll[file] = true;
           inverses[file]![i]! = lastScroll[file]!;
           lastScroll[file] = [action[1], action[2] ?? 0];
+        } else if (action[0] instanceof ChangeSet) {
+          // editor change
+          inverses[file]![i] = action[0].invert(docs[file]!);
+          docs[file] = action[0].apply(docs[file]!);
         }
       } else if (action.startsWith(selectCmd)) {
         file = action.slice(selectCmd.length);
@@ -260,8 +260,6 @@ export function cmReplayMultiple({
     for (const key in views) {
       changes[key] = ChangeSet.empty(views[key]!.state.doc.length);
     }
-
-    const selections: Record<string, CMRange> = {};
 
     // apply / revert changes
     if (lastTime <= t && index < data.length) {
@@ -303,7 +301,7 @@ export function cmReplayMultiple({
             // handle selection
             if (action[1]) {
               const [anchor, head] = action[1];
-              selections[file] = { anchor, head };
+              selections[file] = SelectionRange.fromJSON({ anchor, head });
             }
           }
         }
@@ -312,19 +310,19 @@ export function cmReplayMultiple({
     } else if (t < lastTime && 0 < index) {
       // revert
       let i = index - 1;
-      for (; 0 <= i && progress < times[i]!; --i) {
-        if (inverses[file]![i]) {
-          const inverse = inverses[file]![i];
+
+      for (; 0 <= i && progress <= times[i]!; --i) {
+        const inverse = inverses[file]![i];
+        if (progress < times[i]! && inverse) {
           // editor change
           if (inverse instanceof ChangeSet) {
-            changes[file] = changes[file]!.compose(
-              inverses[file]![i] as ChangeSet,
-            );
+            changes[file] = changes[file]!.compose(inverse);
+            selections[file] = selections[file]!.map(inverse);
           }
           // scroll
-          else if (inverses[file]![i]!.length === 2) {
+          else if (inverse.length === 2) {
             if (shouldScroll(file)) {
-              const [y, x] = inverses[file]![i] as [number, number];
+              const [y, x] = inverse;
               const fontSize = getFontSize(views[file]!);
               if (!Number.isNaN(fontSize)) {
                 const scrollToOptions = {

@@ -154,18 +154,17 @@ const fakeCursorLayer = () =>
       const confChange = configChanged(update);
       if (confChange) setBlinkRate(update.state, dom);
 
-      if (effects.length === 0) {
+      const last = effects.at(-1);
+
+      if (!last) {
         return update.docChanged || update.selectionSet || confChange;
       }
 
-      if (effects.length > 0) {
-        dom.style.animationName =
-          dom.style.animationName === "lqv-blink" ? "lqv-blink2" : "lqv-blink";
-        this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
-        return true;
-      }
+      dom.style.animationName =
+        dom.style.animationName === "lqv-blink" ? "lqv-blink2" : "lqv-blink";
+      this.range = SelectionRange.fromJSON(last.value);
 
-      return false;
+      return true;
     },
   });
 
@@ -198,7 +197,9 @@ const fakeSelectionLayer = () =>
         )
         .reduce((a, b) => a.concat(b), []);
 
-      if (effects.length === 0) {
+      const last = effects.at(-1);
+
+      if (!last) {
         return (
           update.docChanged ||
           update.selectionSet ||
@@ -207,12 +208,9 @@ const fakeSelectionLayer = () =>
         );
       }
 
-      if (effects.length > 0) {
-        this.range = SelectionRange.fromJSON(effects[effects.length - 1].value);
-        return true;
-      }
+      this.range = SelectionRange.fromJSON(last.value);
 
-      return false;
+      return true;
     },
   });
 

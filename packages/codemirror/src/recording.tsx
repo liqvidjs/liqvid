@@ -14,9 +14,7 @@ export type EditorChange = [
   [number, number],
 ];
 export type SpecialKey = string;
-export type ScrollAction =
-  | [typeof scrollCmd, number, number]
-  | [typeof scrollCmd, number];
+export type ScrollAction = [typeof scrollCmd, y: number, x?: number];
 
 export type CaptureData = EditorChange | ScrollAction | SpecialKey;
 
@@ -61,11 +59,13 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
       activeFile,
       files: mapRecord(this.__config.views, (view) => {
         const { state } = view;
+        const range = state.selection.ranges[0]!;
+
         return {
           content: state.doc.toString(),
           selection: {
-            anchor: state.selection.ranges[0].anchor,
-            head: state.selection.ranges[0].head,
+            anchor: range.anchor,
+            head: range.head,
           },
         };
       }),
@@ -121,8 +121,8 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
       const transactions = update.transactions
         .map((t) => {
           if (!t.selection) return null;
-          const range = t.selection.ranges[0];
-          return [range.anchor, range.head] as [number, number];
+          const range = t.selection.ranges[0]!;
+          return [range.anchor, range.head];
         })
         .filter(Boolean)
         .slice(-1);
@@ -145,7 +145,7 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
           if (this.active && !this.paused) {
             this.capture(
               this.getTime(),
-              (specialKeys as Record<string, string>)[key],
+              (specialKeys as Record<string, string>)[key]!,
             );
           }
           return false;

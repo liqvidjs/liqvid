@@ -5,6 +5,8 @@ export interface CMRange {
   head: number;
 }
 
+export type CMRangeArray = [anchor: number, head: number];
+
 export type CMConfig = {
   getActiveFile(): string | undefined;
   views: Record<string, EditorView>;
