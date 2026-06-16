@@ -71,7 +71,7 @@ export function Replay({
      */
     start?: DurationLike;
   }) {
-  const startSeconds = Duration.from(start).inSeconds();
+  const startSeconds = Duration.inSeconds(start);
   const store = useLiveCodeStore();
   const playback = useSeekable();
 
@@ -199,7 +199,7 @@ export function ReplayMultiple({
   const contextGroup = useGroup();
   groupId ??= contextGroup;
 
-  const startSeconds = Duration.from(start).inSeconds();
+  const startSeconds = Duration.inSeconds(start);
 
   const run = useRun();
   const clear = useClearMessages();

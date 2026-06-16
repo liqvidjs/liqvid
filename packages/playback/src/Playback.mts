@@ -74,7 +74,7 @@ export class Playback extends CorePlayback {
   }
 
   set duration$(d: DurationLike) {
-    this.duration = Duration.from(d).inSeconds();
+    this.duration = Duration.inSeconds(d);
   }
 
   /**
@@ -127,13 +127,11 @@ export class Playback extends CorePlayback {
       if ("duration" in options) {
         transformedOptions = {
           ...options,
-          delay: options.delay
-            ? Duration.from(options.delay).inMilliseconds()
-            : 0,
-          duration: Duration.from(options.duration).inMilliseconds(),
+          delay: Duration.inMilliseconds(options.delay),
+          duration: Duration.inMilliseconds(options.duration),
         };
       } else {
-        transformedOptions = Duration.from(options).inMilliseconds();
+        transformedOptions = Duration.inMilliseconds(options);
       }
     }
 

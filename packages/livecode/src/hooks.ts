@@ -52,7 +52,7 @@ export function useCopyActiveFile({
   const copyTimeout = useRef<number | undefined>(undefined);
 
   if (typeof timeout !== "number") {
-    timeout = Duration.from(timeout).inMilliseconds();
+    timeout = Duration.inMilliseconds(timeout);
   }
 
   const copyActiveFile = useCallback(async () => {

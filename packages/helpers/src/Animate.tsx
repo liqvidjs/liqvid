@@ -41,11 +41,10 @@ export function Animate<M extends string>({
   }
 
   if (typeof at === "object") {
-    at = Duration.from(at).inMilliseconds();
+    at = Duration.inMilliseconds(at);
   }
 
-  delay =
-    typeof delay === "number" ? delay : Duration.from(delay).inMilliseconds();
+  delay = typeof delay === "number" ? delay : Duration.inMilliseconds(delay);
 
   const isFirstRender = useFirstRender();
 
@@ -61,7 +60,7 @@ export function Animate<M extends string>({
           duration:
             typeof duration === "number"
               ? duration
-              : Duration.from(duration).inMilliseconds(),
+              : Duration.inMilliseconds(duration),
           easing,
           fill,
           // biome-ignore lint/suspicious/noExplicitAny: Radix types don't accept SVG

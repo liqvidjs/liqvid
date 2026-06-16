@@ -209,9 +209,9 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   // TODO: optimize this
   const activeHighlight = thumbs?.highlights?.find((h) =>
     between(
-      Duration.from(h.time).inSeconds() / playback.duration,
+      Duration.inSeconds(h.time) / playback.duration,
       progress.thumb,
-      Duration.from(h.time).inSeconds() / playback.duration + 0.01,
+      Duration.inSeconds(h.time) / playback.duration + 0.01,
     ),
   );
 

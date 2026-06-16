@@ -46,7 +46,7 @@ export function Controls({
 
       timer.current = window.setTimeout(
         () => setVisible(false),
-        Duration.from(hideAfter).inMilliseconds(),
+        Duration.inMilliseconds(hideAfter),
       );
 
       setVisible(true);

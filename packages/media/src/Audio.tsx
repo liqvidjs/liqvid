@@ -85,7 +85,7 @@ export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
   }, [srcProp, children]);
 
   const startInSeconds =
-    typeof start === "number" ? start : Duration.from(start).inSeconds();
+    typeof start === "number" ? start : Duration.inSeconds(start);
 
   // Store the fetched array buffer (before decoding)
   const arrayBufferRef = useRef<ArrayBuffer | null>(null);

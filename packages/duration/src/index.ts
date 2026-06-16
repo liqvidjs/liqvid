@@ -64,7 +64,7 @@ export class Duration {
   protected __valueMs: number;
 
   constructor(opts: DurationOptions = {}) {
-    this.__valueMs = valueMs(opts);
+    this.__valueMs = Duration.inMilliseconds(opts);
   }
 
   static betweenDates(start: Date, end: Date): Duration {
@@ -88,6 +88,40 @@ export class Duration {
     return Duration.from(val);
   }
 
+  /** convert a DurationLike to milliseconds without creating unnecessary Duration objects */
+  static inMilliseconds(val: DurationLike = {}): number {
+    if (val instanceof Duration) return val.inMilliseconds();
+
+    const {
+      milliseconds = 0,
+      ms = 0,
+      seconds = 0,
+      s = 0,
+      minutes = 0,
+      m = 0,
+      hours = 0,
+      h = 0,
+      days = 0,
+      d = 0,
+      weeks = 0,
+      w = 0,
+    } = val;
+
+    return (
+      (weeks + w) * WEEKS +
+      (days + d) * DAYS +
+      (hours + h) * HOURS +
+      (minutes + m) * MINUTES +
+      (seconds + s) * SECONDS +
+      (milliseconds + ms)
+    );
+  }
+
+  /** convert a DurationLike to seconds without creating unnecessary Duration objects */
+  static inSeconds(val: DurationLike): number {
+    return Duration.inMilliseconds(val) / 1000;
+  }
+
   /**
    * Create a new {@link Duration} object and receive a callback
    * to imperatively set its value. You can use this instead of
@@ -101,10 +135,10 @@ export class Duration {
       dur,
       {
         add(other: DurationOptions) {
-          dur.__valueMs += valueMs(other);
+          dur.__valueMs += Duration.inMilliseconds(other);
         },
         set(other: DurationOptions) {
-          dur.__valueMs = valueMs(other);
+          dur.__valueMs = Duration.inMilliseconds(other);
         },
         setMilliseconds(ms: number) {
           dur.__valueMs = ms;
@@ -116,7 +150,7 @@ export class Duration {
           dur.__valueMs = 0;
         },
         subtract(other: DurationOptions) {
-          dur.__valueMs -= valueMs(other);
+          dur.__valueMs -= Duration.inMilliseconds(other);
         },
       },
     ];
@@ -166,7 +200,7 @@ export class Duration {
     /** duration to compare this one to */
     other: DurationLike,
   ): boolean {
-    return this.__valueMs === valueMs(other);
+    return this.__valueMs === Duration.inMilliseconds(other);
   }
 
   greaterThan(other: DurationLike): boolean {
@@ -178,21 +212,21 @@ export class Duration {
   }
 
   lessThan(other: DurationLike): boolean {
-    return this.__valueMs < valueMs(other);
+    return this.__valueMs < Duration.inMilliseconds(other);
   }
 
   lessThanOrEqual(other: DurationLike): boolean {
-    return this.__valueMs <= valueMs(other);
+    return this.__valueMs <= Duration.inMilliseconds(other);
   }
 
   /* ------------------------- arithmetic ------------------------- */
   dividedBy(other: DurationLike): number {
-    return this.__valueMs / valueMs(other);
+    return this.__valueMs / Duration.inMilliseconds(other);
   }
 
   minus(other: DurationLike): Duration {
     return new Duration({
-      milliseconds: this.__valueMs - valueMs(other),
+      milliseconds: this.__valueMs - Duration.inMilliseconds(other),
     });
   }
 
@@ -204,7 +238,7 @@ export class Duration {
     }
 
     return new Duration({
-      milliseconds: this.__valueMs + valueMs(other),
+      milliseconds: this.__valueMs + Duration.inMilliseconds(other),
     });
   }
 
@@ -222,15 +256,15 @@ export class Duration {
 export class MutableDuration extends Duration implements DurationSetter {
   /* ------------------------------ setter methods ------------------------------ */
   add(other: DurationLike) {
-    this.__valueMs = this.__valueMs + valueMs(other);
+    this.__valueMs = this.__valueMs + Duration.inMilliseconds(other);
   }
 
   subtract(other: DurationLike) {
-    this.__valueMs = this.__valueMs - valueMs(other);
+    this.__valueMs = this.__valueMs - Duration.inMilliseconds(other);
   }
 
   set(opts: DurationOptions = {}) {
-    this.__valueMs = valueMs(opts);
+    this.__valueMs = Duration.inMilliseconds(opts);
   }
 
   setMilliseconds(ms: number) {
@@ -244,33 +278,4 @@ export class MutableDuration extends Duration implements DurationSetter {
   setToZero() {
     this.__valueMs = 0;
   }
-}
-
-/** avoid creating a new Duration object just to convert some options into milliseconds */
-function valueMs(val: DurationLike = {}): number {
-  if (val instanceof Duration) return val.inMilliseconds();
-
-  const {
-    milliseconds = 0,
-    ms = 0,
-    seconds = 0,
-    s = 0,
-    minutes = 0,
-    m = 0,
-    hours = 0,
-    h = 0,
-    days = 0,
-    d = 0,
-    weeks = 0,
-    w = 0,
-  } = val;
-
-  return (
-    (weeks + w) * WEEKS +
-    (days + d) * DAYS +
-    (hours + h) * HOURS +
-    (minutes + m) * MINUTES +
-    (seconds + s) * SECONDS +
-    (milliseconds + ms)
-  );
 }
