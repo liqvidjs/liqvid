@@ -54,8 +54,10 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@liqvid/player": "workspace:^",
+    "@types/jest": "catalog:dev",
     "@types/katex": "catalog:dev",
     "@types/react": "catalog:dev",
+    "jest": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
