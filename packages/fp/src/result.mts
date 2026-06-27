@@ -1,3 +1,7 @@
+import type { SerializedValue } from "@liqvid/ssr";
+
+import { type Maybe, None, Some } from "./maybe.mts";
+
 type PromiseValue<A> = A extends Promise<infer T> ? T : A;
 
 type ResultMethods<Val, Err> = {
@@ -11,17 +15,23 @@ type ResultMethods<Val, Err> = {
     Err: (error: Err) => Err2;
   }): Val2 | Err2;
 
+  ok(): Maybe<Val>;
+
   unwrapOr<A>(altValue: A): A | Val;
   unwrapOrElse<A>(altGetter: (err: Err) => A): A | Val;
   unwrapOrThrow(): Val;
 
+  /** @deprecated */
   json(): SerializedResult<Val, Err>;
+  toJSON(): SerializedResult<Val, Err>;
 };
 
 type ResultResultMethods<T, F> =
   T extends ResultMethods<infer V, infer E>
     ? { flatten: () => Result<V, E | F> }
     : unknown;
+
+const serializationKey = "@liqvid/fp/result";
 
 export type Result<T, E> = ResultMethods<T, E> &
   ResultResultMethods<T, E> &
@@ -100,6 +110,13 @@ class internalResult<Val, Err> {
     }
   }
 
+  ok(): Maybe<Val> {
+    if (this.isOk) {
+      return Some(this.value as Val);
+    }
+    return None;
+  }
+
   unwrap() {
     if (this.isOk) {
       return this.value as Val;
@@ -136,10 +153,14 @@ class internalResult<Val, Err> {
   }
 
   json(): SerializedResult<Val, Err> {
+    return this.toJSON();
+  }
+
+  toJSON(): SerializedResult<Val, Err> {
     if (this.isOk) {
-      return { "#ok": this.value as Val };
+      return { __deser: serializationKey, "#ok": this.value as Val };
     }
-    return { "#err": this.error as Err };
+    return { __deser: serializationKey, "#err": this.error as Err };
   }
 }
 
@@ -153,21 +174,20 @@ function isResult<T, E>(obj: unknown): obj is Result<T, E> {
   );
 }
 
-// biome-ignore lint/suspicious/noExplicitAny:
+// biome-ignore lint/suspicious/noExplicitAny: variance
 export function Ok<T>(value: T): Result<T, any> {
   const obj = new internalResult(true, value, undefined);
   Object.freeze(obj);
   return obj as unknown as Result<T, never>;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny:
+// biome-ignore lint/suspicious/noExplicitAny: variance
 export function Err<E>(error: E): Result<any, E> {
   const obj = new internalResult(false, undefined, error);
   Object.freeze(obj);
   return obj as unknown as Result<never, E>;
 }
 
-// biome-ignore lint/style/noNamespace:
 export namespace Result {
   /** Convert an array of Results to a single Result */
   export function all<T, E>(results: Result<T, E>[]): Result<T[], E[]> {
@@ -241,6 +261,14 @@ export namespace Result {
       return Err(error as E);
     }
   }
+
+  export type OkType<R extends Result<any, any>> =
+    R extends Result<infer T, any> ? T : never;
+
+  export type ErrType<R extends Result<any, any>> =
+    R extends Result<any, infer E> ? E : never;
 }
 
-export type SerializedResult<T, E> = { "#err": E } | { "#ok": T };
+export type SerializedResult<T, E> =
+  | ({ "#err": E } & SerializedValue<typeof serializationKey>)
+  | ({ "#ok": T } & SerializedValue<typeof serializationKey>);

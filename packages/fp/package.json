@@ -1,8 +1,24 @@
 {
   "name": "@liqvid/fp",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "A functional programming library",
-  "module": "./dist/index.mjs",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "files": [
+    "./dist/*"
+  ],
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./zod": {
+      "@liqvid/dev": "./src/integrations/zod.mts",
+      "types": "./dist/types/integrations/zod.d.mts",
+      "import": "./dist/esm/integrations/zod.mjs"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -17,24 +33,6 @@
     "test": "jest",
     "watch": "tsc --watch"
   },
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
-    },
-    "./zod": {
-      "@liqvid/dev": "./src/integrations/zod.mts",
-      "import": "./dist/integrations/zod.mjs",
-      "types": "./dist/integrations/zod.d.mts"
-    }
-  },
-  "files": [
-    "./dist/*"
-  ],
-  "type": "module",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "typescript": "catalog:dev"
@@ -47,5 +45,7 @@
     "zod": {
       "optional": true
     }
-  }
+  },
+  "type": "module",
+  "module": "./dist/index.mjs"
 }
