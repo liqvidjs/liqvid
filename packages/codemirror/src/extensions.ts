@@ -6,19 +6,24 @@ import { Keymap } from "@liqvid/keymap";
  * @param keymap {@link Keymap} to handle key sequences.
  * @param seqs Key sequences to handle.
  */
-export function passThrough(keymap: Keymap, seqs: string[] = []): KeyBinding[] {
-  return seqs.map((key) => {
-    const can = cm2lv(key);
+export function passThrough(
+  keymap: Keymap,
+  seqs: string[] = [],
+  options?: KeyBinding,
+): KeyBinding[] {
+  return seqs.map((seq) => {
+    const key = lv2cm(seq);
 
     return {
-      key,
+      key: key.toLowerCase(),
       run: () => {
-        const handlers = keymap.getHandlers(can);
+        const handlers = keymap.getHandlers(seq);
         for (const cb of handlers) {
-          cb(fakeKeyboardEvent(can), { seq: key });
+          cb(fakeKeyboardEvent(seq), { seq });
         }
         return false;
       },
+      ...options,
     } as KeyBinding;
   });
 }
@@ -46,6 +51,11 @@ export function cm2lv(seq: string): string {
  */
 export function lv2cm(seq: string): string {
   seq = seq.replace(/\+/g, "-");
+
+  if (!seq.includes("Shift")) {
+    seq = seq.replace(/\b[A-Z]\b/g, (x) => x.toLowerCase());
+  }
+
   return seq;
 }
 
