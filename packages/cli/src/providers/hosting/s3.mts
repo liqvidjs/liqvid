@@ -12,6 +12,7 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { ProviderConfigS3 } from "@liqvid/schemas/providers";
 
+import { parallelMap } from "../../utils/parallel.mts";
 import type {
   FileDownloadStatus,
   FileUploadStatus,
@@ -28,7 +29,7 @@ function resolveEnvVar(envVar: string): string {
   if (!match) {
     throw new Error(`Invalid environment variable reference: ${envVar}`);
   }
-  const varName = match[1];
+  const varName = match[1]!;
   const value = process.env[varName];
   if (value === undefined) {
     throw new Error(`Environment variable ${varName} is not set`);
@@ -146,16 +147,19 @@ export class S3Provider implements MediaHostingProvider {
     files: string[],
     rootDir: string,
   ): Promise<FileUploadStatus[]> {
-    const results: FileUploadStatus[] = [];
-
-    for (const filePath of files) {
-      const relativeFromRoot = path.relative(rootDir, filePath);
-      const key = this.buildKey(relativeFromRoot);
-      const status = await this.getUploadStatus(filePath, key);
-      results.push(status);
-    }
-
-    return results;
+    return parallelMap(
+      files,
+      async (filePath) => {
+        const relativeFromRoot = path.relative(rootDir, filePath);
+        const key = this.buildKey(relativeFromRoot);
+        return this.getUploadStatus(filePath, key);
+      },
+      {
+        concurrency: 50,
+        progress: true,
+        progressLabel: "Checking files",
+      },
+    );
   }
 
   getBaseUrl(): string {
@@ -232,15 +236,18 @@ export class S3Provider implements MediaHostingProvider {
     remoteFiles: RemoteFileInfo[],
     rootDir: string,
   ): Promise<FileDownloadStatus[]> {
-    const results: FileDownloadStatus[] = [];
-
-    for (const remoteFile of remoteFiles) {
-      const localPath = path.join(rootDir, remoteFile.key);
-      const status = await this.getDownloadStatus(remoteFile, localPath);
-      results.push(status);
-    }
-
-    return results;
+    return parallelMap(
+      remoteFiles,
+      async (remoteFile) => {
+        const localPath = path.join(rootDir, remoteFile.key);
+        return this.getDownloadStatus(remoteFile, localPath);
+      },
+      {
+        concurrency: 50,
+        progress: true,
+        progressLabel: "Checking remote files",
+      },
+    );
   }
 
   async downloadMedia(files: FileDownloadStatus[]): Promise<number> {

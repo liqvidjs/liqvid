@@ -2,6 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { LiqvidConfig } from "@liqvid/schemas";
+import type { LiqvidConfigOut } from "@liqvid/schemas/liqvid-config";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
@@ -146,7 +147,7 @@ export const pull: CommandModule = {
 /**
  * Load and validate the liqvid.json config file
  */
-async function loadConfig(configPath: string): Promise<LiqvidConfig> {
+async function loadConfig(configPath: string): Promise<LiqvidConfigOut> {
   let rawConfig: unknown;
 
   try {
@@ -201,7 +202,7 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig> {
 /**
  * Create the appropriate provider based on config
  */
-function createProvider(config: LiqvidConfig): S3Provider {
+function createProvider(config: LiqvidConfigOut): S3Provider {
   const mediaBackend = config.backend.media;
 
   if (mediaBackend === "s3") {
@@ -225,7 +226,7 @@ function createProvider(config: LiqvidConfig): S3Provider {
 async function showDryRunInfo(
   statuses: FileDownloadStatus[],
   targetDir: string,
-  config: LiqvidConfig,
+  config: LiqvidConfigOut,
   remoteFiles: RemoteFileInfo[],
 ): Promise<void> {
   const bucket = config.providers.s3?.bucket ?? "bucket";

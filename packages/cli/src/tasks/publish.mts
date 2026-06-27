@@ -2,6 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { LiqvidConfig } from "@liqvid/schemas";
+import type { LiqvidConfigOut } from "@liqvid/schemas/liqvid-config";
 import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
@@ -15,26 +16,7 @@ import type {
   MediaHostingProvider,
 } from "../providers/types.mts";
 
-import { CONFIG_FILE } from "./conventions.mts";
-
-/** Default glob patterns for media files (matches schema defaults) */
-const DEFAULT_MEDIA_PATTERNS = [
-  "**/*.gif",
-  "**/*.jpeg",
-  "**/*.jpg",
-  "**/*.m3u8",
-  "**/*.mov",
-  "**/*.mp4",
-  "**/*.png",
-  "**/*.webm",
-  "**/.liqvid/**/*",
-  "!**/.DS_Store",
-  // distinguish Transport Stream files from TypeScript files
-  "**/.liqvid/**/*.ts",
-  "!**/.liqvid/types.ts",
-  "!**/*.d.ts",
-  "!**/*.d.json.ts",
-];
+import { CONFIG_FILE, DEFAULT_MEDIA_PATTERNS } from "./conventions.mts";
 
 /** Publish content and/or media files to configured hosting providers. */
 export const publish: CommandModule = {
@@ -129,7 +111,7 @@ export const publish: CommandModule = {
  * Publish content files (html/css/js) to the hosting provider.
  */
 async function publishContentFiles(
-  config: LiqvidConfig,
+  config: LiqvidConfigOut,
   cwd: string,
   dryRun: boolean,
 ): Promise<void> {
@@ -163,7 +145,7 @@ async function publishContentFiles(
  * Publish media files to the media hosting provider.
  */
 async function publishMediaFiles(
-  config: LiqvidConfig,
+  config: LiqvidConfigOut,
   searchDir: string,
   baseDir: string,
   dryRun: boolean,
@@ -209,7 +191,7 @@ async function publishMediaFiles(
 /**
  * Load and validate the liqvid.json config file
  */
-async function loadConfig(configPath: string): Promise<LiqvidConfig> {
+async function loadConfig(configPath: string): Promise<LiqvidConfigOut> {
   let rawConfig: unknown;
 
   try {
@@ -264,7 +246,7 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig> {
 /**
  * Create the appropriate media provider based on config
  */
-function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
+function createMediaProvider(config: LiqvidConfigOut): MediaHostingProvider {
   const mediaBackend = config.backend.media;
 
   switch (mediaBackend) {
@@ -312,7 +294,7 @@ function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
 /**
  * Create the appropriate hosting provider based on config
  */
-function createHostingProvider(config: LiqvidConfig): HostingProvider {
+function createHostingProvider(config: LiqvidConfigOut): HostingProvider {
   const contentBackend = config.backend.content;
 
   switch (contentBackend) {
@@ -337,15 +319,6 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
       }
       return new LiqvidStudioProvider(liqvidStudioConfig);
     }
-    case "s3": {
-      const s3Config = config.providers.s3;
-      if (!s3Config) {
-        throw new Error(
-          "S3 is configured as content backend but no S3 provider configuration found",
-        );
-      }
-      return new S3Provider(s3Config);
-    }
     case "sftp": {
       const sftpConfig = config.providers.sftp;
       if (!sftpConfig) {
@@ -367,7 +340,7 @@ async function showDryRunInfo(
   provider: MediaHostingProvider,
   mediaFiles: string[],
   rootDir: string,
-  _config: LiqvidConfig,
+  _config: LiqvidConfigOut,
 ): Promise<void> {
   // Check which files need to be uploaded
   const statuses = await provider.checkFiles(mediaFiles, rootDir);

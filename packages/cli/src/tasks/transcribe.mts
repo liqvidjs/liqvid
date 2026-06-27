@@ -5,10 +5,12 @@ import { Duration } from "@liqvid/duration";
 import type {
   WhisperConfig,
   WhisperModelName,
-} from "@liqvid/schemas/liqvid-config";
+} from "@liqvid/schemas/jobs/captioning";
+import { assertType } from "@liqvid/utils";
 import type { CommandModule } from "yargs";
 
 import { expandTilde } from "../utils/paths.mts";
+
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
 
 /**
@@ -79,10 +81,12 @@ function parseVttTimestamp(timestamp: string): number {
   let seconds = 0;
 
   if (parts.length === 3) {
+    assertType<[string, string, string]>(parts);
     hours = Number.parseInt(parts[0], 10);
     minutes = Number.parseInt(parts[1], 10);
     seconds = Number.parseFloat(parts[2]);
   } else if (parts.length === 2) {
+    assertType<[string, string]>(parts);
     minutes = Number.parseInt(parts[0], 10);
     seconds = Number.parseFloat(parts[1]);
   }

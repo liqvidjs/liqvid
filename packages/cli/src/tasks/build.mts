@@ -1,8 +1,9 @@
-import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { Err, Ok, type Result } from "@liqvid/fp";
 import { LiqvidConfig } from "@liqvid/schemas";
+import type { LiqvidConfigOut } from "@liqvid/schemas/liqvid-config";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
@@ -13,16 +14,6 @@ import { SFTPProvider } from "../providers/hosting/sftp.mts";
 import type { MediaHostingProvider } from "../providers/types.mts";
 
 import { CONFIG_FILE } from "./conventions.mts";
-
-const ERROR_LOG_PATH = path.join(process.cwd(), "logs/build-errors.log");
-
-function getErrorLogStream(): fs.WriteStream {
-  const logsDir = path.dirname(ERROR_LOG_PATH);
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
-  }
-  return fs.createWriteStream(ERROR_LOG_PATH, { flags: "a" });
-}
 
 /**
  * Build project
@@ -61,7 +52,7 @@ export interface BuildOptions {
 /**
  * Load and validate the liqvid.json config file
  */
-async function loadConfig(configPath: string): Promise<LiqvidConfig | null> {
+async function loadConfig(configPath: string): Promise<LiqvidConfigOut | null> {
   try {
     const content = await fsp.readFile(configPath, "utf-8");
     const rawConfig = JSON.parse(content);
@@ -88,7 +79,9 @@ async function loadConfig(configPath: string): Promise<LiqvidConfig | null> {
 /**
  * Get the media provider from the config
  */
-function getMediaProvider(config: LiqvidConfig): MediaHostingProvider | null {
+function getMediaProvider(
+  config: LiqvidConfigOut,
+): MediaHostingProvider | null {
   switch (config.backend.media) {
     case "copy": {
       const copyConfig = config.providers.copy;
@@ -121,10 +114,18 @@ function getMediaProvider(config: LiqvidConfig): MediaHostingProvider | null {
   }
 }
 
+/** Error returned when build fails */
+export type BuildError = {
+  /** Error messages from the build process */
+  messages: string[];
+};
+
 /**
  * Run Next.js build
  */
-export async function runNextBuild(options: BuildOptions = {}): Promise<void> {
+export async function runNextBuild(
+  options: BuildOptions = {},
+): Promise<Result<null, BuildError>> {
   const cwd = options.cwd ?? process.cwd();
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
 
@@ -144,15 +145,75 @@ export async function runNextBuild(options: BuildOptions = {}): Promise<void> {
   }
 
   console.log("Running 'next build'...");
-  const errorLogStream = getErrorLogStream();
 
-  const buildProcess = execa("npx", ["next", "build"], {
-    cwd,
-    env,
-    stderr: "pipe",
-    stdout: "inherit",
-  });
-  buildProcess.stderr?.pipe(errorLogStream, { end: false });
-  await buildProcess;
-  console.log("'next build' completed.");
+  try {
+    const buildProcess = execa("npx", ["next", "build"], {
+      cwd,
+      env,
+      reject: false,
+      stderr: "pipe",
+      stdout: "inherit",
+    });
+
+    const result = await buildProcess;
+
+    if (result.exitCode !== 0) {
+      const stderrOutput = result.stderr || "";
+      const messages = parseNextBuildErrors(stderrOutput);
+      return Err({ messages });
+    }
+
+    console.log("'next build' completed.");
+    return Ok(null);
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return Err({ messages: [errorMessage] });
+  }
+}
+
+/**
+ * Parse error messages from Next.js build stderr output
+ */
+function parseNextBuildErrors(stderr: string): string[] {
+  if (!stderr.trim()) {
+    return ["Build failed with unknown error"];
+  }
+
+  // Split by common error patterns and filter empty lines
+  const lines = stderr
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  // Look for TypeScript/build errors that typically start with file paths or "Error:"
+  const errorMessages: string[] = [];
+  let currentError = "";
+
+  for (const line of lines) {
+    // Lines starting with file paths (e.g., "./src/file.ts:10:5") or "Error:" are error starts
+    if (
+      /^\.?\/?[a-zA-Z]/.test(line) ||
+      line.startsWith("Error:") ||
+      line.startsWith("error")
+    ) {
+      if (currentError) {
+        errorMessages.push(currentError);
+      }
+      currentError = line;
+    } else if (currentError) {
+      // Continuation of the current error
+      currentError += " " + line;
+    }
+  }
+
+  if (currentError) {
+    errorMessages.push(currentError);
+  }
+
+  // If we couldn't parse specific errors, return the whole stderr
+  if (errorMessages.length === 0) {
+    return [stderr.trim()];
+  }
+
+  return errorMessages;
 }

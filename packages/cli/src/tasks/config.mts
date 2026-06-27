@@ -5,7 +5,7 @@ import { CONFIG_FILE } from "./conventions.mts";
 import loadSync from "./load-sync.cts";
 
 export const DEFAULT_LIST = [CONFIG_FILE];
-export const DEFAULT_CONFIG = DEFAULT_LIST[0];
+export const DEFAULT_CONFIG = DEFAULT_LIST[0]!;
 
 export function parseConfig(...keys: string[]) {
   return (configPath: string): object => {

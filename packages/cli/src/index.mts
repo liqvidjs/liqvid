@@ -8,6 +8,7 @@ import { hideBin } from "yargs/helpers";
 
 import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
+import { compress } from "./tasks/compress.mts";
 import { generateImports } from "./tasks/generate-imports.mts";
 import { publish } from "./tasks/publish.mts";
 import { pull } from "./tasks/pull.mts";
@@ -29,6 +30,7 @@ export async function main() {
     .usage("$0 <cmd> [args]")
     .demandCommand(1, "Must specify a command")
     .command(build)
+    .command(compress)
     .command(generateImports)
     .command(publish)
     .command(pull)

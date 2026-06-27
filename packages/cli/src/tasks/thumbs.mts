@@ -1,63 +1,20 @@
+import {
+  ThumbnailOptions,
+  type ThumbnailOptionsIn,
+} from "@liqvid/schemas/jobs/thumbnails";
 import type { CommandModule } from "yargs";
 
 import {
   BROWSER_EXECUTABLE,
   CONCURRENCY,
   DEFAULT_CONFIG,
-  parseConfig,
+  parseConfigWithTransform,
 } from "./config.mts";
 
 /**
  * Image format for thumbnails.
  */
 export type ImageFormat = "jpeg" | "png";
-
-/**
- * Options for generating thumbnail sheets.
- */
-export interface ThumbsOptions {
-  /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable?: string;
-
-  /** Height of screenshot before resizing */
-  browserHeight?: number;
-
-  /** Width of screenshot before resizing */
-  browserWidth?: number;
-
-  /** Color scheme: light or dark */
-  colorScheme?: "light" | "dark";
-
-  /** Number of columns per sheet */
-  cols?: number;
-
-  /** Number of concurrent browser instances */
-  concurrency?: number;
-
-  /** Seconds between screenshots */
-  frequency?: number;
-
-  /** Height of each thumbnail */
-  height?: number;
-
-  /** Image format: jpeg or png */
-  imageFormat?: ImageFormat;
-
-  /** Pattern for output filenames (must include %s for sheet number) */
-  output: string;
-
-  /** Quality for JPEG images (0-100) */
-  quality?: number;
-
-  /** Number of rows per sheet */
-  rows?: number;
-
-  /** URL of video to generate thumbs for */
-  url: string;
-
-  /** Width of each thumbnail */
-  width?: number;
-}
 
 /**
  * Result of thumbnail generation.
@@ -83,23 +40,38 @@ export interface ThumbsResult {
  * ```
  */
 export async function generateThumbs(
-  options: ThumbsOptions,
+  options: ThumbnailOptionsIn & {
+    /**
+     * Pattern for output filenames
+     * Interpolation patterns:
+     * - `%s` sheet number (required)
+     */
+    output: string;
+
+    /** URL of video to generate thumbs for */
+    url: string;
+  },
 ): Promise<ThumbsResult> {
   const path = await import("node:path");
   const fsp = await import("node:fs/promises");
 
   const { thumbs: renderThumbs } = await import("@liqvid/renderer/thumbs");
 
+  const schema = ThumbnailOptions.def.shape;
+
   // Apply defaults
-  const cols = options.cols ?? 5;
-  const rows = options.rows ?? 5;
-  const frequency = options.frequency ?? 4;
-  const width = options.width ?? 160;
-  const height = options.height ?? 100;
-  const imageFormat = options.imageFormat ?? "jpeg";
-  const colorScheme = options.colorScheme ?? "light";
-  const quality = options.quality ?? 80;
-  const concurrency = options.concurrency ?? 1;
+  const cols = options.cols ?? schema.cols.def.defaultValue;
+  const rows = options.rows ?? schema.rows.def.defaultValue;
+  const frequency = options.frequency ?? schema.frequency.def.defaultValue;
+  const width = options.width ?? schema.width.def.defaultValue;
+  const height = options.height ?? schema.height.def.defaultValue;
+  const imageFormat =
+    options.imageFormat ?? schema.imageFormat.def.defaultValue;
+  const colorScheme =
+    options.colorScheme ?? schema.colorScheme.def.defaultValue;
+  const quality = options.quality ?? schema.quality.def.defaultValue;
+  const concurrency =
+    options.concurrency ?? schema.concurrency.def.defaultValue;
 
   await renderThumbs({
     browserExecutable: options.browserExecutable ?? "",
@@ -142,15 +114,48 @@ export async function generateThumbs(
   }
 }
 
+/**
+ * Transform thumbnail config from liqvid.json to CLI option names.
+ */
+function transformThumbnailConfig(
+  config: Partial<ThumbnailOptionsIn> & {
+    output: string;
+    url: string;
+  },
+): Record<string, unknown> {
+  return {
+    "browser-executable": config.browserExecutable,
+    "browser-height": config.browserHeight,
+    "browser-width": config.browserWidth,
+    "color-scheme": config.colorScheme,
+    cols: config.cols,
+    concurrency: config.concurrency,
+    frequency: config.frequency,
+    height: config.height,
+    "image-format": config.imageFormat,
+    output: config.output,
+    quality: config.quality,
+    rows: config.rows,
+    url: config.url,
+    width: config.width,
+  };
+}
+
 export const thumbs: CommandModule = {
   builder: (yargs) =>
     yargs
-      .config("config", parseConfig("thumbs"))
+      .config(
+        "config",
+        parseConfigWithTransform(
+          ["media", "thumbnails", "defaults"],
+          transformThumbnailConfig,
+        ),
+      )
       .default("config", DEFAULT_CONFIG)
       .example([
         ["liqvid thumbs"],
         [
-          "liqvid thumbs -u http://localhost:8080/dist/ -o ./dist/thumbs/%s.jpeg",
+          "liqvid thumbs -u http://localhost:4000/video -o ./.liqvid/thumbs/%s.jpeg",
         ],
       ])
       // Selection
@@ -163,7 +168,6 @@ export const thumbs: CommandModule = {
       })
       .option("url", {
         alias: "u",
-        default: "http://localhost:3000/dist/",
         desc: "URL of video to generate thumbs for",
       })
       // General
