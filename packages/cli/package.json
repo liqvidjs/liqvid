@@ -29,6 +29,11 @@
       "types": "./dist/types/tasks/thumbs.d.mts",
       "import": "./dist/esm/tasks/thumbs.mjs"
     },
+    "./screenshot": {
+      "@liqvid/dev": "./src/tasks/screenshot.mts",
+      "types": "./dist/types/tasks/screenshot.d.mts",
+      "import": "./dist/esm/tasks/screenshot.mjs"
+    },
     "./transcribe": {
       "@liqvid/dev": "./src/tasks/transcribe.mts",
       "types": "./dist/types/tasks/transcribe.d.mts",
