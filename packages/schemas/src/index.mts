@@ -1,4 +1,8 @@
-export { LiqvidConfig } from "./liqvid-config.mts";
+export {
+  LiqvidConfig,
+  type LiqvidConfigIn,
+  type LiqvidConfigOut,
+} from "./liqvid-config.mts";
 export {
   AspectRatio,
   AspectRatioSpecifier,

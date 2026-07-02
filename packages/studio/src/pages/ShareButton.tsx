@@ -2,7 +2,13 @@
 
 import type { Duration } from "@liqvid/duration";
 import type { ProjectMeta } from "@liqvid/schemas/project";
-import { ShareFatIcon } from "@phosphor-icons/react";
+import {
+  CameraIcon,
+  ClosedCaptioningIcon,
+  FilmStripIcon,
+  ImagesIcon,
+  ShareFatIcon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 import {
@@ -14,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/Dialog.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 
 import { CaptionsSection } from "./CaptionsSection.tsx";
 import { RendersSection } from "./RendersSection.tsx";
@@ -52,22 +59,52 @@ export function ShareButton({
         <DialogPopup
           aria-describedby={undefined}
           className={`${styles.dialog} ${shareStyles.shareDialog}`}
+          size="large"
         >
           <DialogTitle className={styles.dialogTitle}>Share</DialogTitle>
 
-          <ScreenshotsSection
-            basePath={basePath}
-            duration={duration}
-            isOpen={open}
-            productionServerPort={productionServerPort}
-            project={project}
-          />
+          <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
+            <TabsList style={{ fontSize: "18px" }}>
+              <TabsTrigger value="screenshots">
+                <CameraIcon size={14} /> Screenshots
+              </TabsTrigger>
+              <TabsTrigger value="thumbnails">
+                <ImagesIcon size={14} /> Thumbnails
+              </TabsTrigger>
+              <TabsTrigger value="renders">
+                <FilmStripIcon size={14} /> Renders
+              </TabsTrigger>
+              <TabsTrigger value="captions">
+                <ClosedCaptioningIcon size={14} /> Captions
+              </TabsTrigger>
+            </TabsList>
 
-          <ThumbnailsSection isOpen={open} projectPath={project.path} />
+            <TabsContent value="screenshots">
+              <ScreenshotsSection
+                basePath={basePath}
+                duration={duration}
+                isOpen={open}
+                productionServerPort={productionServerPort}
+                project={project}
+              />
+            </TabsContent>
 
-          <RendersSection isOpen={open} projectPath={project.path} />
+            <TabsContent value="thumbnails">
+              <ThumbnailsSection
+                duration={duration}
+                isOpen={open}
+                projectPath={project.path}
+              />
+            </TabsContent>
 
-          <CaptionsSection isOpen={open} projectPath={project.path} />
+            <TabsContent value="renders">
+              <RendersSection isOpen={open} projectPath={project.path} />
+            </TabsContent>
+
+            <TabsContent value="captions">
+              <CaptionsSection isOpen={open} projectPath={project.path} />
+            </TabsContent>
+          </Tabs>
 
           <div className={styles.dialogActions}>
             <DialogClose>Close</DialogClose>

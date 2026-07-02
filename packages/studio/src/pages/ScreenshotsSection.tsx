@@ -118,8 +118,7 @@ export function ScreenshotsSection({
     <>
       <div className={shareStyles.section}>
         <DialogRoot>
-          <div className={shareStyles.sectionHeader}>
-            <h3>Screenshots</h3>
+          <div className={shareStyles.sectionActions}>
             <DialogTrigger className={shareStyles.addButton}>
               <PlusIcon size={16} /> Add
             </DialogTrigger>

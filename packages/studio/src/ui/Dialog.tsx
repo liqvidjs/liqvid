@@ -95,10 +95,16 @@ export function DialogClose({
 
 export function DialogPopup({
   className,
+  size = "medium",
   ...props
-}: React.ComponentProps<typeof Dialog.Popup>) {
+}: React.ComponentProps<typeof Dialog.Popup> & {
+  size?: "small" | "medium" | "large";
+}) {
   return (
-    <Dialog.Popup className={clsx(styles.Content, className)} {...props} />
+    <Dialog.Popup
+      className={clsx(styles.Content, styles[size], className)}
+      {...props}
+    />
   );
 }
 

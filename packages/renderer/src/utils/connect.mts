@@ -44,12 +44,11 @@ export async function connect({
         throw new Error("Player element not found");
       }
 
-      playerElt.dataset.liqvidRenderMode = renderMode;
-
       // biome-ignore lint/suspicious/noExplicitAny: symbol
       window.player = (playerElt as any)[Symbol.for("@liqvid/player/api")];
 
       player.setColorScheme(colorScheme);
+      player.setRenderMode(renderMode);
       player.toggleControls(false);
 
       document.body.style.background = "transparent";
@@ -151,7 +150,6 @@ export async function callPlayerApi(
         const requestId = Math.random();
 
         const handleMessage = (event: MessageEvent) => {
-          console.log("got message", event.data);
           const data = event.data;
           if (
             !data ||

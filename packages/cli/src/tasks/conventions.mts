@@ -11,6 +11,7 @@ export const DEFAULT_MEDIA_PATTERNS = [
   "**/*.png",
   "**/*.webm",
   "**/.liqvid/**/*",
+  "!**/.liqvid/preview",
   "!**/.liqvid/**/@lqv@codemirror/raw.json",
   "!**/.liqvid/**/@liqvid@media/video.webm",
   "!**/.DS_Store",

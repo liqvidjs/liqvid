@@ -4,12 +4,16 @@
 }
 
 .TabsTrigger {
+  display: inline-flex;
+  gap: 0.2em;
+  align-items: center;
   padding: 1px 8px;
+
   font-family: "Inter Variable", sans-serif;
-  font-size: 14px;
   font-weight: 500;
+
   color: #fff;
-  background-color: light-dark(#0002, #fff2);
+  background-color: light-dark(#0003, #fff2);
 
   &[disabled] {
     pointer-events: none;
@@ -27,5 +31,4 @@
   &:last-child {
     border-radius: 0 4px 4px 0;
   }
-  /*  data-[state=active]:bg-background data-[state=active]:shadow-sm dark:text-muted-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground */
 }

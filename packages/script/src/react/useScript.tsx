@@ -62,6 +62,7 @@ export function ScriptProvider<M extends string>({
 
 function ScriptShortcutsHandler({ shortcuts }: { shortcuts: ScriptShortcuts }) {
   const script = useScript();
+
   useKeyboardShortcut(shortcuts.back, script.back);
   useKeyboardShortcut(shortcuts.forward, script.forward);
 

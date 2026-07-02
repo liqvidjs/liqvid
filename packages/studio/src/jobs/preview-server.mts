@@ -7,6 +7,7 @@ import handler from "serve-handler";
 
 import { CONFIG_FILE } from "../conventions.mts";
 import type { LiqvidServerState } from "../initialize.mts";
+import { interpolateEnvVars } from "../utils/misc.mts";
 
 export const DEFAULT_PRODUCTION_SERVER_PORT = 4000;
 
@@ -41,6 +42,16 @@ export async function startProductionServer(
 
   const server = http.createServer((request, response) => {
     return handler(request, response, {
+      headers: [
+        {
+          headers: [
+            { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+            { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+            { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          ],
+          source: "**",
+        },
+      ],
       public: previewDir,
       trailingSlash: true,
     });
@@ -51,7 +62,7 @@ export async function startProductionServer(
   });
 }
 
-interface EnvFiles {
+export interface EnvFiles {
   development: Record<string, string>;
   production: Record<string, string>;
 }
@@ -95,59 +106,6 @@ function loadLiqvidConfig(
     // Config file doesn't exist or can't be parsed
     return null;
   }
-}
-
-/**
- * Interpolate environment variable placeholders in a string.
- * Supports:
- *   - {env:VAR_NAME} - reads from process.env
- *   - {env:production:VAR_NAME} - reads from .env.production
- *   - {env:development:VAR_NAME} - reads from .env.development
- */
-function interpolateEnvVars(str: string, envFiles: EnvFiles): string {
-  // Match {env:VAR_NAME} or {env:environment:VAR_NAME}
-  return str.replace(/\{env:([^}]+)\}/g, (_match, content: string) => {
-    const parts = content.split(":");
-
-    if (parts.length === 1) {
-      // {env:VAR_NAME} - use process.env
-      const varName = parts[0]!;
-      const value = process.env[varName];
-      if (value === undefined) {
-        throw new Error(`Environment variable ${varName} is not set`);
-      }
-      return value;
-    } else if (parts.length === 2) {
-      // {env:environment:VAR_NAME}
-      const [environment, varName] = parts as [string, string];
-
-      if (environment === "production") {
-        const value = envFiles.production[varName] ?? process.env[varName];
-        if (value === undefined) {
-          throw new Error(
-            `Environment variable ${varName} is not set in .env.production or process.env`,
-          );
-        }
-        return value;
-      } else if (environment === "development") {
-        const value = envFiles.development[varName] ?? process.env[varName];
-        if (value === undefined) {
-          throw new Error(
-            `Environment variable ${varName} is not set in .env.development or process.env`,
-          );
-        }
-        return value;
-      } else {
-        throw new Error(
-          `Invalid environment "${environment}" in placeholder. Use "production" or "development".`,
-        );
-      }
-    } else {
-      throw new Error(
-        `Invalid environment variable placeholder: {env:${content}}`,
-      );
-    }
-  });
 }
 
 /**

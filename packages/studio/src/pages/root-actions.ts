@@ -5,17 +5,13 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { runNextBuild } from "@liqvid/cli/build";
+import { serialize } from "@liqvid/ssr";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
-export async function rebuildAction(): Promise<{ success: boolean }> {
-  try {
-    await runNextBuild();
-    return { success: true };
-  } catch (e) {
-    console.error("Failed to run next build:", e);
-    return { success: false };
-  }
+export async function rebuildAction() {
+  const result = await runNextBuild();
+  return serialize(result);
 }
 
 export interface TemplateInfo {

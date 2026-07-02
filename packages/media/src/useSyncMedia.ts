@@ -1,6 +1,6 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { between, useStable } from "@liqvid/utils";
+import { useStable } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface MediaProps {

@@ -244,7 +244,7 @@ export class Playback extends CorePlayback {
 
       // Recreate committed animations when rewound past their start
       for (let i = this.__committed.length - 1; i >= 0; i--) {
-        const { delay, keyframes, options, target } = this.__committed[i];
+        const { delay, keyframes, options, target } = this.__committed[i]!;
         if (currentTimeMs <= delay) {
           this.__committed.splice(i, 1);
           this.__adoptAnimation(target, keyframes, options);

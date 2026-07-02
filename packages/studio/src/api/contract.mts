@@ -1,4 +1,5 @@
 import { RecordingMeta } from "@liqvid/schemas";
+import { ThumbnailsJob } from "@liqvid/schemas/jobs/thumbnails";
 import { ScreenshotEntry } from "@liqvid/schemas/screenshot-meta";
 import { z } from "zod";
 
@@ -169,12 +170,18 @@ export const generateThumbsOperation = {
 
 export const listThumbsOperation = {
   endpoint: "/thumbs" as const,
-  response: z.object({
-    /** Thumbnail sheets for dark mode */
-    dark: z.array(z.string()),
-    /** Thumbnail sheets for light mode */
-    light: z.array(z.string()),
-  }),
+  response: z
+    .object({
+      /** Thumbnail sheets for dark mode */
+      dark: z.array(z.string()),
+
+      /** Thumbnail job configuration (null if no thumbs exist) */
+      job: ThumbnailsJob.nullable(),
+
+      /** Thumbnail sheets for light mode */
+      light: z.array(z.string()),
+    })
+    .nullable(),
   search: z.object({
     projectPath: z.string(),
   }),

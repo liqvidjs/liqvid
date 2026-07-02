@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
   "properties": {
     "created": {
       "format": "date-time",
@@ -8,7 +7,6 @@
       "type": "string"
     },
     "duration": {
-      "additionalProperties": false,
       "properties": {
         "milliseconds": {
           "type": "number"

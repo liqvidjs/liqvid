@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 
 import { formatTimeMs } from "@liqvid/utils";
 import { execa } from "execa";
@@ -16,7 +16,7 @@ export function stitch({
   pattern,
   output,
   pixelFormat,
-  start,
+  start = 0,
   videoArgs,
 }: {
   audioArgs: string;
@@ -78,7 +78,6 @@ export function stitch({
   return execa("ffmpeg", args.filter(Boolean));
 }
 
-// fuck
 function splitArgs(combined: string) {
   if (!combined) return [];
 
@@ -91,5 +90,5 @@ function splitArgs(combined: string) {
     if (key === "_") return opts;
     if (typeof parsed[key] === "boolean") return opts.concat([`-${key}`]);
     return opts.concat([`-${key}`, parsed[key]]);
-  }, []);
+  }, [] as string[]);
 }

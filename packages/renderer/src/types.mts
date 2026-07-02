@@ -1,4 +1,8 @@
+export type ColorScheme = "light" | "dark";
+
 export type ImageFormat = "jpeg" | "png";
+
+export type RenderMode = "screenshot" | "thumbs" | "video";
 
 // hilarious!!
 declare global {
@@ -10,7 +14,8 @@ declare global {
     };
   };
   var player: {
-    setColorScheme(scheme: "light" | "dark"): void;
+    setColorScheme(scheme: ColorScheme): void;
+    setRenderMode(renderMode: RenderMode): void;
     toggleControls(visible?: boolean): void;
     playback: {
       currentTime: number;
@@ -18,10 +23,7 @@ declare global {
       play(): Promise<void>;
     };
   };
-}
 
-// declare module "puppeteer-core" {
-//   export interface Page {
-//     screenshot(): Promise<Buffer>;
-//   }
-// }
+  /** for debugging */
+  var __pause: boolean | undefined;
+}

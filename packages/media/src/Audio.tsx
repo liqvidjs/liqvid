@@ -3,6 +3,7 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { AudioSourceRegistration } from "@liqvid/playback";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import { isSafari } from "@liqvid/utils";
 import {
   Children,
   isValidElement,
@@ -21,17 +22,6 @@ export type AudioProps = {
   /** Offset in seconds at which to start the audio file */
   start?: number | DurationLike;
 };
-
-/**
- * Detect if the browser is Safari (which only supports mp4, not webm)
- */
-const isSafari = (() => {
-  if (!navigator) return false;
-  const ua = navigator.userAgent;
-  return (
-    ua.includes("Safari") && !ua.includes("Chrome") && !ua.includes("Chromium")
-  );
-})();
 
 /**
  * Get supported audio MIME types based on browser

@@ -17,7 +17,6 @@
       "type": "array"
     },
     {
-      "additionalProperties": false,
       "properties": {
         "height": {
           "type": "number"

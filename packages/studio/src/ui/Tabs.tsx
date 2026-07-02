@@ -26,11 +26,7 @@ function TabsList({
 }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
-      className={clsx(
-        styles.TabsList,
-        "inline-flex w-fit items-center justify-center rounded-lg bg-muted p-[3px]",
-        className,
-      )}
+      className={clsx(styles.TabsList, className)}
       data-slot="tabs-list"
       {...props}
     />
@@ -43,11 +39,7 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
-      className={clsx(
-        styles.TabsTrigger,
-        "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap border border-transparent font-medium text-sm transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-        className,
-      )}
+      className={clsx(styles.TabsTrigger, className)}
       data-slot="tabs-trigger"
       {...props}
     />

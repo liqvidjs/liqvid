@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
   "properties": {
     "aspectRatio": {
       "anyOf": [
@@ -20,7 +19,6 @@
           "type": "array"
         },
         {
-          "additionalProperties": false,
           "properties": {
             "height": {
               "type": "number"
@@ -42,6 +40,6 @@
       "type": "string"
     }
   },
-  "required": ["aspectRatio", "name"],
+  "required": ["name"],
   "type": "object"
 }

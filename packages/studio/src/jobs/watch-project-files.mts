@@ -71,9 +71,15 @@ export async function watchProjectFiles(projects: Projects) {
         });
         break;
       }
+      default: {
+        // Handle opengraph-image and twitter-image changes
+        if (isOpenGraphImage(basename)) {
+          handleOpenGraphImage({ dirname, projects });
+        } else if (isTwitterImage(basename)) {
+          handleTwitterImage({ dirname, projects });
+        }
+      }
     }
-
-    // values
   });
 }
 
@@ -209,30 +215,84 @@ async function handleProjectMeta({
   project.duration = new Duration(projectMeta.duration);
 }
 
+const OPENGRAPH_IMAGE_FILENAMES = [
+  "opengraph-image.gif",
+  "opengraph-image.jpeg",
+  "opengraph-image.jpg",
+  "opengraph-image.png",
+];
+
+const TWITTER_IMAGE_FILENAMES = [
+  "twitter-image.gif",
+  "twitter-image.jpeg",
+  "twitter-image.jpg",
+  "twitter-image.png",
+];
+
+/**
+ * Whether a filename is an Open Graph image.
+ */
+function isOpenGraphImage(basename: string) {
+  return OPENGRAPH_IMAGE_FILENAMES.includes(basename);
+}
+
+/**
+ * Whether a filename is a Twitter image.
+ */
+function isTwitterImage(basename: string) {
+  return TWITTER_IMAGE_FILENAMES.includes(basename);
+}
+
 /**
  * Whether a project has an Open Graph image defined.
  */
 function hasOpenGraphImage(dirname: string) {
-  const filenames = [
-    "opengraph-image.gif",
-    "opengraph-image.jpeg",
-    "opengraph-image.jpg",
-    "opengraph-image.png",
-  ];
-  return filenames.some((f) => fs.existsSync(path.join(dirname, f)));
+  return OPENGRAPH_IMAGE_FILENAMES.some((f) =>
+    fs.existsSync(path.join(dirname, f)),
+  );
 }
 
 /**
  * Whether a project has a Twitter image defined.
  */
 function hasTwitterImage(dirname: string) {
-  const filenames = [
-    "twitter-image.gif",
-    "twitter-image.jpeg",
-    "twitter-image.jpg",
-    "twitter-image.png",
-  ];
-  return filenames.some((f) => fs.existsSync(path.join(dirname, f)));
+  return TWITTER_IMAGE_FILENAMES.some((f) =>
+    fs.existsSync(path.join(dirname, f)),
+  );
+}
+
+/**
+ * Handle opengraph-image file creation or deletion.
+ */
+function handleOpenGraphImage({
+  dirname,
+  projects,
+}: {
+  dirname: string;
+  projects: Projects;
+}) {
+  const projectPath = path.relative(TARGET_DIR, dirname);
+  const project = projects[projectPath];
+  if (!project) return;
+
+  project.openGraph = hasOpenGraphImage(dirname);
+}
+
+/**
+ * Handle twitter-image file creation or deletion.
+ */
+function handleTwitterImage({
+  dirname,
+  projects,
+}: {
+  dirname: string;
+  projects: Projects;
+}) {
+  const projectPath = path.relative(TARGET_DIR, dirname);
+  const project = projects[projectPath];
+  if (!project) return;
+
+  project.twitter = hasTwitterImage(dirname);
 }
 
 function parseAspectRatio(value: unknown): AspectRatio {

@@ -14,7 +14,7 @@ import {
 } from "./conventions.mts";
 
 /** Options for the compress command */
-export interface CompressOptions {
+export type CompressOptions = {
   /** Directory to scan for PNG files (if not specified, uses media patterns) */
   input?: string;
 
@@ -32,10 +32,10 @@ export interface CompressOptions {
 
   /** Whether to run in dry-run mode (report only, no compression) */
   dryRun?: boolean;
-}
+};
 
 /** Result for a single file compression */
-export interface FileCompressionResult {
+export type FileCompressionResult = {
   /** Path to the file */
   filePath: string;
 
@@ -47,10 +47,10 @@ export interface FileCompressionResult {
 
   /** Percentage saved (0-100) */
   percentageSaved: number;
-}
+};
 
 /** Overall compression report */
-export interface CompressionReport {
+export type CompressionReport = {
   /** Results for each file */
   files: FileCompressionResult[];
 
@@ -65,13 +65,13 @@ export interface CompressionReport {
 
   /** Number of files processed */
   fileCount: number;
-}
+};
 
 /** Error returned when compression fails */
-export interface CompressError {
+export type CompressError = {
   /** Error messages */
   messages: string[];
-}
+};
 
 /**
  * Find all PNG files in a directory recursively
@@ -234,7 +234,7 @@ export async function runCompress(
   } = options;
 
   let pngFiles: string[];
-  let displayPath: string;
+  // let displayPath: string;
 
   if (input) {
     // User specified a directory - scan it recursively
@@ -247,7 +247,7 @@ export async function runCompress(
       return Err({ messages: [`Input is not a directory: ${input}`] });
     }
 
-    displayPath = input;
+    // displayPath = input;
     console.log(chalk.blue(`Scanning for PNG files in ${input}...`));
     pngFiles = await findPngFilesInDir(input);
   } else {
@@ -263,9 +263,11 @@ export async function runCompress(
       });
     }
 
-    displayPath = `${baseDir}/`;
+    // displayPath = `${baseDir}/`;
     console.log(
-      chalk.blue(`Scanning for PNG files in ${baseDir}/ using media patterns...`),
+      chalk.blue(
+        `Scanning for PNG files in ${baseDir}/ using media patterns...`,
+      ),
     );
     pngFiles = await findPngFilesWithPatterns(searchDir);
   }

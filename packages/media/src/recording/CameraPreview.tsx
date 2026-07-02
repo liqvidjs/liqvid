@@ -1,18 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: don't have good types yet */
 "use client";
 
-import { Maybe, None } from "@liqvid/fp";
 import { useRecordingApi } from "@liqvid/recording";
 import { Portal, useDraggable, useResizable } from "@liqvid/studio/ui";
 import clsx from "clsx";
-import {
-  type JSX,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 
 import type { LiqvidMediaRecorder } from "./LiqvidMediaRecorder.mts";
 
@@ -37,28 +29,43 @@ export function CameraPreview({
     minWidth: 100,
   });
 
-  const $video = useWaitFor(
-    useCallback(() => Maybe.nullish(videoRef.current), []),
-  );
-  const $stream = useWaitFor(() => {
-    const plugin = plugins["@liqvid/media"] as any;
-    const mediaRecorder = plugin.recorder as LiqvidMediaRecorder;
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
-    return Maybe.nullish(mediaRecorder?.stream);
-  });
-
+  // Subscribe to stream changes from the media recorder
   useEffect(() => {
-    if ($video.isNone) return;
-    const video = $video.unwrap();
+    const plugin = plugins["@liqvid/media"] as any;
+    const mediaRecorder = plugin?.recorder as LiqvidMediaRecorder | undefined;
 
-    if ($stream.isNone) return;
-    const stream = $stream.unwrap();
+    if (!mediaRecorder) return;
 
-    console.log(stream);
+    // Set initial stream
+    setStream(mediaRecorder.stream);
+
+    // Listen for stream changes
+    const handleStreamChange = (newStream: MediaStream | null) => {
+      setStream(newStream);
+    };
+
+    mediaRecorder.addEventListener("streamchange", handleStreamChange);
+
+    return () => {
+      mediaRecorder.removeEventListener("streamchange", handleStreamChange);
+    };
+  }, [plugins]);
+
+  // Update video element when stream changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
     video.srcObject = stream;
-    video.play();
-  }, [$stream, $video]);
+
+    if (stream) {
+      video.play().catch((e) => {
+        console.warn(e);
+      });
+    }
+  }, [stream]);
 
   return (
     <Portal>
@@ -66,8 +73,8 @@ export function CameraPreview({
         className="fixed z-wizard"
         ref={containerRef}
         style={{
-          bottom: "5%",
-          right: "5%",
+          left: "80%",
+          top: `calc(100% - ${initialHeight}px)`,
         }}
         {...dragEvents}
       >
@@ -95,43 +102,4 @@ export function CameraPreview({
       </div>
     </Portal>
   );
-}
-
-function useWaitFor<T>(
-  callback: () => Maybe<T>,
-
-  opts = {
-    interval: 100,
-    limit: 100,
-  },
-) {
-  const [counter, setCounter] = useState(0);
-  const callback$ = useEffectEvent(callback);
-
-  const [$value, setValue] = useState<Maybe<T>>(None);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
-    const result = callback$();
-    if (result.isSome) {
-      setValue(result);
-    } else {
-      if (counter < opts.limit) {
-        timeout = setTimeout(
-          () => setCounter((prev) => prev + 1),
-          opts.interval,
-        );
-      }
-    }
-
-    // cancel the timeout
-    return () => {
-      if (timeout !== undefined) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [counter, opts.interval, opts.limit]);
-
-  return $value;
 }

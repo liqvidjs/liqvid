@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { toJSONSchema, type ZodType } from "zod";
 
+import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 // Import schemas
 import { LiqvidConfig } from "../src/liqvid-config.mts";
 import {
@@ -39,6 +40,9 @@ const schemas: SchemaEntry[] = [
   // recording-meta
   { name: "recording-meta-file", schema: RecordingMetaFile },
   { name: "recording-meta", schema: RecordingMeta },
+
+  // thumbnails-job
+  { name: "thumbnails-job", schema: ThumbnailsJob },
 ];
 
 async function main() {
@@ -48,12 +52,14 @@ async function main() {
   console.log(`Generating JSON schemas in ${OUTPUT_DIR}...\n`);
 
   for (const { name, schema } of schemas) {
-    const jsonSchema = toJSONSchema(schema);
     const filename = `${name}.json`;
+
+    console.log(`  ${filename}...`);
+
     const filepath = path.join(OUTPUT_DIR, filename);
+    const jsonSchema = toJSONSchema(schema, { io: "input" });
 
     await fsp.writeFile(filepath, JSON.stringify(jsonSchema, null, 2) + "\n");
-    console.log(`  ${filename}`);
   }
 
   console.log(`\nGenerated ${schemas.length} schema(s).`);

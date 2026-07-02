@@ -1,7 +1,7 @@
 "use client";
 
 import { makeContext } from "@liqvid/utils";
-import { useEffect, useMemo } from "react";
+import { useEffect, useEffectEvent, useMemo } from "react";
 
 import {
   Keymap,
@@ -36,16 +36,21 @@ export function useKeyboardShortcut(
 ) {
   const keymap = useKeymap();
 
+  const listener = useEffectEvent<ShortcutHandler>((...args) => {
+    callback(...args);
+  });
+
   useEffect(() => {
     if (!seqOrSeqs) {
       return;
     }
 
-    keymap.bind(seqOrSeqs, callback);
+    keymap.bind(seqOrSeqs, listener);
+
     return () => {
-      keymap.unbind(seqOrSeqs, callback);
+      keymap.unbind(seqOrSeqs, listener);
     };
-  }, [callback, keymap, seqOrSeqs]);
+  }, [keymap, seqOrSeqs]);
 }
 
 /**

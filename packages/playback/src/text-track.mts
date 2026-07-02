@@ -124,7 +124,7 @@ export class SyntheticTextTrackCueList {
     }
     // Set new indices
     for (let i = 0; i < this.__cues.length; i++) {
-      (this as Record<number, SyntheticVTTCue>)[i] = this.__cues[i];
+      (this as Record<number, SyntheticVTTCue>)[i] = this.__cues[i]!;
     }
   }
 
@@ -304,7 +304,7 @@ export class SyntheticTextTrackList extends EventEmitter<TextTrackListEventMap> 
     }
     // Set new indices
     for (let i = 0; i < this.__tracks.length; i++) {
-      (this as Record<number, SyntheticTextTrack>)[i] = this.__tracks[i];
+      (this as Record<number, SyntheticTextTrack>)[i] = this.__tracks[i]!;
     }
   }
 

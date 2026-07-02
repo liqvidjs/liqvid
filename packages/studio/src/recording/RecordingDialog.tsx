@@ -4,7 +4,7 @@ import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { formatTime, formatTimeDuration } from "@liqvid/utils";
+import { formatTime, formatTimeDuration, isMac } from "@liqvid/utils";
 import clsx from "clsx";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
@@ -228,8 +228,8 @@ export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
         <span className={styles.recordingName}>{r.name}</span>
         <span className={styles.pluginIcons}>
           {r.plugins.map((p) =>
-            p in plugins ? (
-              <Fragment key={p}>{plugins[p].icon()}</Fragment>
+            Object.hasOwn(plugins, p) ? (
+              <Fragment key={p}>{plugins[p]!.icon()}</Fragment>
             ) : null,
           )}
         </span>
@@ -358,7 +358,7 @@ function ShortcutRow({
 
 /** Format key sequences with special characters on Mac */
 function fmtSeq(str: string) {
-  if (!isMac()) return str;
+  if (!isMac) return str;
   if (str === undefined) return str;
   return str
     .split("+")
@@ -370,11 +370,4 @@ function fmtSeq(str: string) {
       return k;
     })
     .join("");
-}
-
-function isMac() {
-  return (
-    typeof globalThis.navigator !== "undefined" &&
-    navigator.platform === "MacIntel"
-  );
 }

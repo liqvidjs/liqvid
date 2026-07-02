@@ -1,3 +1,4 @@
+import { EventEmitter } from "@liqvid/event-emitter";
 import type { Recorder } from "@liqvid/recording";
 
 export interface MediaRecorderConfig {
@@ -5,13 +6,27 @@ export interface MediaRecorderConfig {
   videoDeviceId?: string;
 }
 
+interface LiqvidMediaRecorderEvents {
+  streamchange: MediaStream | null;
+}
+
 export class LiqvidMediaRecorder
+  extends EventEmitter<LiqvidMediaRecorderEvents>
   implements Recorder<Blob, Blob, MediaRecorderConfig>
 {
   private mediaRecorder: MediaRecorder | null = null;
 
-  stream: MediaStream | null = null;
+  private __stream: MediaStream | null = null;
   private config: MediaRecorderConfig = {};
+
+  get stream(): MediaStream | null {
+    return this.__stream;
+  }
+
+  private set stream(value: MediaStream | null) {
+    this.__stream = value;
+    this.emit("streamchange", value);
+  }
 
   private chunks: Blob[] = [];
 

@@ -142,18 +142,21 @@
 }
 
 .submitButton {
+  display: flex;
+  gap: 0.2em;
+  align-items: center;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: #fff;
   cursor: pointer;
-  background: light-dark(#2563eb, #3b82f6);
-  border: 1px solid light-dark(#1d4ed8, #2563eb);
+  background: var(--accent-solid);
+  /* border: 1px solid var(--accent-ui); */
   border-radius: 4px;
   transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
-    background: light-dark(#1d4ed8, #2563eb);
+    background: var(--accent-solid-hover);
   }
 
   &:disabled {

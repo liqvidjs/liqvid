@@ -1,12 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string"
     },
     "backend": {
-      "additionalProperties": false,
       "properties": {
         "content": {
           "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
@@ -20,72 +18,134 @@
       "required": ["content", "media"],
       "type": "object"
     },
-    "captioning": {
-      "additionalProperties": false,
+    "basePath": {
+      "type": "string"
+    },
+    "media": {
       "properties": {
-        "nodeWhisperOptions": {
-          "additionalProperties": false,
+        "captioning": {
           "properties": {
-            "autoDownloadModelName": {
-              "enum": [
-                "tiny",
-                "tiny.en",
-                "base",
-                "base.en",
-                "small",
-                "small.en",
-                "medium",
-                "medium.en",
-                "large-v1",
-                "large",
-                "large-v3-turbo"
-              ],
-              "type": "string"
-            },
-            "modelName": {
-              "default": "base.en",
-              "enum": [
-                "tiny",
-                "tiny.en",
-                "base",
-                "base.en",
-                "small",
-                "small.en",
-                "medium",
-                "medium.en",
-                "large-v1",
-                "large",
-                "large-v3-turbo"
-              ],
-              "type": "string"
-            },
-            "modelRootPath": {
-              "type": "string"
-            },
-            "timestampsLength": {
-              "default": 20,
-              "type": "number"
-            },
-            "translateToEnglish": {
-              "default": false,
-              "type": "boolean"
-            },
-            "withCuda": {
-              "default": false,
-              "type": "boolean"
+            "nodeWhisperOptions": {
+              "properties": {
+                "autoDownloadModelName": {
+                  "enum": [
+                    "tiny",
+                    "tiny.en",
+                    "base",
+                    "base.en",
+                    "small",
+                    "small.en",
+                    "medium",
+                    "medium.en",
+                    "large-v1",
+                    "large",
+                    "large-v3-turbo"
+                  ],
+                  "type": "string"
+                },
+                "modelName": {
+                  "default": "base.en",
+                  "enum": [
+                    "tiny",
+                    "tiny.en",
+                    "base",
+                    "base.en",
+                    "small",
+                    "small.en",
+                    "medium",
+                    "medium.en",
+                    "large-v1",
+                    "large",
+                    "large-v3-turbo"
+                  ],
+                  "type": "string"
+                },
+                "modelRootPath": {
+                  "type": "string"
+                },
+                "timestampsLength": {
+                  "default": 20,
+                  "type": "number"
+                },
+                "translateToEnglish": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "withCuda": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
             }
           },
-          "required": ["modelName"],
+          "type": "object"
+        },
+        "thumbnails": {
+          "properties": {
+            "defaults": {
+              "properties": {
+                "browserExecutable": {
+                  "type": "string"
+                },
+                "browserHeight": {
+                  "type": "number"
+                },
+                "browserWidth": {
+                  "type": "number"
+                },
+                "colorScheme": {
+                  "default": "light",
+                  "enum": ["light", "dark"],
+                  "type": "string"
+                },
+                "cols": {
+                  "default": 5,
+                  "type": "number"
+                },
+                "concurrency": {
+                  "default": 1,
+                  "type": "number"
+                },
+                "frequency": {
+                  "default": 4,
+                  "type": "number"
+                },
+                "height": {
+                  "default": 90,
+                  "type": "number"
+                },
+                "imageFormat": {
+                  "default": "png",
+                  "enum": ["jpeg", "png"],
+                  "type": "string"
+                },
+                "quality": {
+                  "default": 80,
+                  "type": "number"
+                },
+                "rows": {
+                  "default": 5,
+                  "type": "number"
+                },
+                "width": {
+                  "default": 160,
+                  "type": "number"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": ["defaults"],
           "type": "object"
         }
       },
+      "required": ["thumbnails"],
       "type": "object"
     },
     "providers": {
-      "additionalProperties": false,
       "properties": {
         "bluesky": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -95,7 +155,6 @@
           "type": "object"
         },
         "copy": {
-          "additionalProperties": false,
           "properties": {
             "clean": {
               "default": false,
@@ -107,7 +166,6 @@
                   "type": "string"
                 },
                 {
-                  "additionalProperties": false,
                   "properties": {
                     "hosting": {
                       "type": "string"
@@ -126,7 +184,6 @@
           "type": "object"
         },
         "facebook": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -136,7 +193,6 @@
           "type": "object"
         },
         "githubPages": {
-          "additionalProperties": false,
           "properties": {
             "repository": {
               "type": "string"
@@ -152,7 +208,6 @@
           "type": "object"
         },
         "instagram": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -162,7 +217,6 @@
           "type": "object"
         },
         "liqvidStudio": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -172,12 +226,10 @@
           "type": "object"
         },
         "s3": {
-          "additionalProperties": false,
           "properties": {
             "auth": {
               "oneOf": [
                 {
-                  "additionalProperties": false,
                   "properties": {
                     "profile": {
                       "type": "string"
@@ -191,7 +243,6 @@
                   "type": "object"
                 },
                 {
-                  "additionalProperties": false,
                   "properties": {
                     "accessKeyId": {
                       "default": "{env:AWS_ACCESS_KEY_ID}",
@@ -215,12 +266,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "accessKeyId",
-                    "region",
-                    "secretAccessKey",
-                    "type"
-                  ],
+                  "required": ["type"],
                   "type": "object"
                 }
               ]
@@ -242,7 +288,6 @@
           "type": "object"
         },
         "sftp": {
-          "additionalProperties": false,
           "properties": {
             "host": {
               "type": "string"
@@ -255,7 +300,6 @@
           "type": "object"
         },
         "twitter": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -265,7 +309,6 @@
           "type": "object"
         },
         "youtube": {
-          "additionalProperties": false,
           "properties": {
             "username": {
               "type": "string"
@@ -278,14 +321,12 @@
       "type": "object"
     },
     "publishing": {
-      "additionalProperties": false,
       "properties": {
         "delete": {
           "default": false,
           "type": "boolean"
         },
         "include": {
-          "additionalProperties": false,
           "properties": {
             "media": {
               "default": [
@@ -310,11 +351,9 @@
               "type": "array"
             }
           },
-          "required": ["media"],
           "type": "object"
         }
       },
-      "required": ["delete"],
       "type": "object"
     }
   },

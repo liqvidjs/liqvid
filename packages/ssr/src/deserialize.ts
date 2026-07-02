@@ -20,15 +20,17 @@ export function deserialize<
       if (obj === null) {
         return obj as any;
       }
+
       if (Array.isArray(obj)) {
         return obj.map((value) =>
           deserialize(value as In, deserializers),
         ) as any;
       }
-      if ("__hydrator" in obj && typeof obj.__hydrator === "string") {
-        const hydrationKey = obj.__hydrator as DeserKeys<In>;
+
+      if ("__deser" in obj && typeof obj.__deser === "string") {
+        const hydrationKey = obj.__deser as DeserKeys<In>;
         if (!Object.hasOwn(deserializers, hydrationKey)) {
-          throw new Error(`missing hydrator: ${obj.__hydrator}`);
+          throw new Error(`missing deserializer: ${obj.__deser}`);
         }
         return deserializers[hydrationKey](obj) as any;
       }

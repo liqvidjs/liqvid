@@ -6,6 +6,7 @@ import {
   HydrateElement,
   usePersistentState,
 } from "@liqvid/hydration";
+import { lv2cm } from "@lqv/codemirror/extensions";
 import { vim } from "@replit/codemirror-vim";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo } from "react";
@@ -67,7 +68,7 @@ export function VimToggle({
 
   // keyboard shortcut
   useLiveCodeShortcut(shortcut, {
-    key: shortcut,
+    key: shortcut ? lv2cm(shortcut) : undefined,
     preventDefault: true,
     run: () => {
       toggleVimActive();

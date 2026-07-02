@@ -224,8 +224,7 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
   return (
     <>
       <div className={shareStyles.section}>
-        <div className={shareStyles.sectionHeader}>
-          <h3>Renders</h3>
+        <div className={shareStyles.sectionActions}>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
             <DialogTrigger
               className={shareStyles.addButton}

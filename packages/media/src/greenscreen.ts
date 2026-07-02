@@ -1,4 +1,5 @@
 import { useEventListener } from "@liqvid/event-emitter/react";
+import { isChrome } from "@liqvid/utils";
 import { useEffect, useEffectEvent, useRef } from "react";
 
 export type HexColor = `#${string}`;
@@ -16,7 +17,8 @@ export function useGreenScreen({
   canvasRef,
   color = "#00FF00",
   enabled = false,
-  tolerance = 50,
+  // Chrome does weird things to colors
+  tolerance = isChrome ? 60 : 50,
   video,
 }: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -44,7 +46,10 @@ export function useGreenScreen({
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
 
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const ctx = canvas.getContext("2d", {
+      colorSpace: "srgb",
+      willReadFrequently: true,
+    });
     if (!ctx) return;
 
     // Match canvas size to video
@@ -68,12 +73,10 @@ export function useGreenScreen({
       const g = data[i + 1]!;
       const b = data[i + 2]!;
 
+      const dist = supDistance({ b, g, r }, keyColor);
+
       // Check if pixel is close to the key color
-      if (
-        Math.abs(r - keyColor.r) <= tolerance &&
-        Math.abs(g - keyColor.g) <= tolerance &&
-        Math.abs(b - keyColor.b) <= tolerance
-      ) {
+      if (dist <= tolerance) {
         // Make pixel transparent
         data[i + 3] = 0;
       }
@@ -118,8 +121,18 @@ export function useGreenScreen({
   useEventListener(video, "seeked", renderFrame);
 }
 
+function supDistance(color1: RGB, color2: RGB) {
+  return Math.max(
+    Math.abs(color1.r - color2.r) / 2,
+    Math.abs(color1.g - color2.g),
+    Math.abs(color1.b - color2.b) / 2,
+  );
+}
+
+type RGB = { r: number; g: number; b: number };
+
 /** Parse a hex color string to RGB values */
-function parseHexColor(hex: string): { r: number; g: number; b: number } {
+function parseHexColor(hex: string): RGB {
   const normalized = hex.replace("#", "");
   const r = parseInt(normalized.slice(0, 2), 16);
   const g = parseInt(normalized.slice(2, 4), 16);

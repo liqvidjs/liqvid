@@ -1,41 +1,45 @@
 "use client";
 
+import type { Duration } from "@liqvid/duration";
+import type { ThumbnailsJob } from "@liqvid/schemas/jobs/thumbnails";
+import { formatTime } from "@liqvid/utils";
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
 import { generateThumbs, listThumbs } from "../client.mts";
 
 import shareStyles from "./share.module.css";
 
 interface ThumbnailsSectionProps {
+  duration: Duration;
   projectPath: string;
+
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
 
-interface ThumbSheets {
+interface ThumbsData {
   dark: string[];
   light: string[];
+  job: ThumbnailsJob | null;
 }
 
 export function ThumbnailsSection({
+  duration,
   isOpen,
   projectPath,
 }: ThumbnailsSectionProps) {
-  const [thumbSheets, setThumbSheets] = useState<ThumbSheets>({
-    dark: [],
-    light: [],
-  });
+  const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [sliderValue, setSliderValue] = useState(0);
 
   const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
     try {
       const result = await listThumbs({ search: { projectPath } });
       if (result.isOk) {
-        const { dark, light } = result.unwrap();
-        setThumbSheets({ dark, light });
+        setThumbsData(result.unwrap());
       }
     } catch (e) {
       console.error("Failed to load thumbnails:", e);
@@ -70,13 +74,50 @@ export function ThumbnailsSection({
     }
   });
 
-  const hasNoThumbs =
-    thumbSheets.light.length === 0 && thumbSheets.dark.length === 0;
+  const hasNoThumbs = thumbsData === null;
+  const job = thumbsData?.job;
+
+  // Calculate thumbnail display info based on ThumbnailBox strategy
+  const thumbInfo = useMemo(() => {
+    if (!job) return null;
+
+    const cols = job.cols;
+    const rows = job.rows ?? 5;
+    const frequency = job.frequency;
+    const width = job.width ?? 160;
+    const height = job.height ?? 90;
+    const count = cols * rows;
+    const imageFormat = job.imageFormat;
+
+    // Convert slider value (0-100) to time
+    const time = (sliderValue / 100) * duration.inSeconds();
+
+    const markerNum = Math.floor(time / frequency);
+    const sheetNum = Math.floor(markerNum / count);
+    const markerNumOnSheet = markerNum % count;
+
+    const row = Math.floor(markerNumOnSheet / cols);
+    const col = markerNumOnSheet % cols;
+
+    return {
+      col,
+      height,
+      imageFormat,
+      row,
+      sheetNum,
+      time,
+      width,
+    };
+  }, [job, sliderValue, duration]);
+
+  const getSheetUrl = (colorScheme: "light" | "dark") => {
+    if (!thumbInfo) return "";
+    return `/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/${colorScheme}/${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`)}`;
+  };
 
   return (
     <div className={shareStyles.section}>
-      <div className={shareStyles.sectionHeader}>
-        <h3>Thumbnails</h3>
+      <div className={shareStyles.sectionActions}>
         <button
           className={shareStyles.addButton}
           disabled={isGenerating}
@@ -104,40 +145,78 @@ export function ThumbnailsSection({
         <p className={shareStyles.emptyMessage}>
           No thumbnails yet. Click "Generate" to create thumbnail sheets.
         </p>
-      ) : (
-        <div className={shareStyles.thumbsContainer}>
-          {thumbSheets.light.length > 0 && (
-            <div className={shareStyles.thumbsScheme}>
-              <span className={shareStyles.thumbsSchemeLabel}>Light</span>
-              <div className={shareStyles.thumbsGrid}>
-                {thumbSheets.light.map((sheet) => (
+      ) : thumbInfo ? (
+        <div className={shareStyles.thumbsPreview}>
+          <div className={shareStyles.thumbsPreviewRow}>
+            {/* Light thumbnail */}
+            {thumbsData.light.length > 0 && (
+              <div className={shareStyles.thumbsPreviewItem}>
+                <span className={shareStyles.thumbsSchemeLabel}>Light</span>
+                <div
+                  className={shareStyles.thumbsPreviewBox}
+                  style={{
+                    height: thumbInfo.height,
+                    width: thumbInfo.width,
+                  }}
+                >
                   <img
-                    alt={`Light thumbnail sheet ${sheet}`}
-                    className={shareStyles.thumbSheet}
-                    key={`light-${sheet}`}
-                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/light/${sheet}`)}`}
+                    alt="Light thumbnail"
+                    src={getSheetUrl("light")}
+                    style={{
+                      left: -thumbInfo.col * thumbInfo.width,
+                      maxWidth: "unset",
+                      top: -thumbInfo.row * thumbInfo.height,
+                    }}
                   />
-                ))}
+                </div>
               </div>
-            </div>
-          )}
-          {thumbSheets.dark.length > 0 && (
-            <div className={shareStyles.thumbsScheme}>
-              <span className={shareStyles.thumbsSchemeLabel}>Dark</span>
-              <div className={shareStyles.thumbsGrid}>
-                {thumbSheets.dark.map((sheet) => (
+            )}
+
+            {/* Dark thumbnail */}
+            {thumbsData.dark.length > 0 && (
+              <div className={shareStyles.thumbsPreviewItem}>
+                <span className={shareStyles.thumbsSchemeLabel}>Dark</span>
+                <div
+                  className={shareStyles.thumbsPreviewBox}
+                  style={{
+                    height: thumbInfo.height,
+                    width: thumbInfo.width,
+                  }}
+                >
                   <img
-                    alt={`Dark thumbnail sheet ${sheet}`}
-                    className={shareStyles.thumbSheet}
-                    key={`dark-${sheet}`}
-                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/dark/${sheet}`)}`}
+                    alt="Dark thumbnail"
+                    src={getSheetUrl("dark")}
+                    style={{
+                      left: -thumbInfo.col * thumbInfo.width,
+                      maxWidth: "unset",
+                      top: -thumbInfo.row * thumbInfo.height,
+                    }}
                   />
-                ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Slider controls */}
+          <div className={shareStyles.thumbsSliderControls}>
+            <span className={shareStyles.timeDisplay}>
+              {formatTime(thumbInfo.time * 1000)}
+            </span>
+            <input
+              className={shareStyles.seekSlider}
+              max={100}
+              min={0}
+              onChange={(e) => setSliderValue(Number(e.target.value))}
+              step={0.1}
+              type="range"
+              value={sliderValue}
+            />
+            <span className={shareStyles.timeDisplay}>
+              {formatTime(duration.inMilliseconds())}
+            </span>
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

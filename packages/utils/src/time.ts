@@ -66,7 +66,7 @@ export function parseTime$(str: string): Duration {
  */
 export function formatTimeDuration(time: number | DurationLike): string {
   if (typeof time === "object") {
-    return formatTimeDuration(Duration.from(time).inMilliseconds());
+    return formatTimeDuration(Duration.inMilliseconds(time));
   }
   const parts = ["P"];
   const timeParts: string[] = [];
@@ -106,7 +106,7 @@ export function formatTimeDuration(time: number | DurationLike): string {
  */
 export function formatTime(time: number | DurationLike): string {
   if (typeof time === "object") {
-    return formatTime(Duration.from(time).inMilliseconds());
+    return formatTime(Duration.inMilliseconds(time));
   }
   if (time < 0) {
     return MINUS_SIGN + formatTime(-time);
@@ -143,7 +143,7 @@ export function formatTime(time: number | DurationLike): string {
  */
 export function formatTimeMs(time: number | DurationLike): string {
   if (typeof time === "object") {
-    return formatTimeMs(Duration.from(time).inMilliseconds());
+    return formatTimeMs(Duration.inMilliseconds(time));
   }
   if (time < 0) {
     return MINUS_SIGN + formatTimeMs(-time);

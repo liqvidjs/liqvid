@@ -114,7 +114,7 @@ export function wait(
   return new Promise((resolve) => {
     setTimeout(
       resolve,
-      typeof time === "number" ? time : Duration.from(time).inMilliseconds(),
+      typeof time === "number" ? time : Duration.inMilliseconds(time),
     );
   });
 }
@@ -133,7 +133,7 @@ export function waitFor(
           checkCondition,
           typeof interval === "number"
             ? interval
-            : Duration.from(interval).inMilliseconds(),
+            : Duration.inMilliseconds(interval),
         );
       }
     };

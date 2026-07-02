@@ -2,11 +2,16 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
+import {
+  ThumbnailOptions,
+  type ThumbnailsJob,
+} from "@liqvid/schemas/jobs/thumbnails";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
 
 const THUMBS_BASE_DIR = ".liqvid/thumbs";
+const THUMBS_JOB_FILE = "thumbnails-job.json";
 
 interface GenerateThumbsBody {
   colorScheme?: "light" | "dark" | "both";
@@ -46,23 +51,27 @@ async function generateForScheme(
   colorScheme: "light" | "dark",
   body: GenerateThumbsBody,
 ): Promise<string[]> {
-  const imageFormat = body.imageFormat ?? "jpeg";
+  const { config } = getServerState();
+
+  const defaults = ThumbnailOptions.parse(
+    config
+      .map((config) => config.media?.thumbnails?.defaults ?? {})
+      .unwrapOr({}),
+  );
+
+  const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
   const outputPattern = path.join(outputDir, `%s.${imageFormat}`);
 
   // Ensure output directory exists
   await fsp.mkdir(outputDir, { recursive: true });
 
   await generateThumbsApi({
+    ...defaults,
+    ...body,
     colorScheme,
-    cols: body.cols,
-    frequency: body.frequency,
-    height: body.height,
     imageFormat,
     output: outputPattern,
-    quality: body.quality,
-    rows: body.rows,
     url,
-    width: body.width,
   });
 
   return readThumbSheets(outputDir);
@@ -88,14 +97,37 @@ export async function generateThumbs(
   const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
   // Build the URL for the video
-  const previewPath = basePath
-    ? `${basePath}/${projectPath}`
-    : `/${projectPath}`;
+  const previewPath = `${basePath || ""}/${projectPath}/`;
   const url = `http://localhost:${productionServerPort}${previewPath}`;
 
   const colorScheme = body.colorScheme ?? "both";
 
   try {
+    // Ensure thumbs base directory exists
+    await fsp.mkdir(thumbsBaseDir, { recursive: true });
+
+    // Resolve options with defaults
+    const { config } = getServerState();
+    const defaults = ThumbnailOptions.parse(
+      config.map((c) => c.media?.thumbnails?.defaults ?? {}).unwrapOr({}),
+    );
+    const resolvedOptions: ThumbnailsJob = {
+      colorScheme,
+      cols: body.cols ?? defaults.cols,
+      frequency: body.frequency ?? defaults.frequency,
+      height: body.height ?? defaults.height,
+      imageFormat: body.imageFormat ?? defaults.imageFormat,
+      rows: body.rows ?? defaults.rows,
+      width: body.width ?? defaults.width,
+    };
+    if (resolvedOptions.imageFormat === "jpeg") {
+      resolvedOptions.quality = body.quality ?? defaults.quality;
+    }
+
+    // Save job options to file
+    const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
+    await fsp.writeFile(jobFilePath, JSON.stringify(resolvedOptions, null, 2));
+
     let lightSheets: string[] = [];
     let darkSheets: string[] = [];
 
@@ -126,6 +158,21 @@ export async function generateThumbs(
 }
 
 /**
+ * Read the thumbnail job configuration from a project.
+ */
+async function readThumbsJob(
+  thumbsBaseDir: string,
+): Promise<ThumbnailsJob | null> {
+  try {
+    const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
+    const content = await fsp.readFile(jobFilePath, "utf-8");
+    return JSON.parse(content) as ThumbnailsJob;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * List existing thumbnail sheets for a project.
  */
 export async function listThumbs(searchParams: URLSearchParams) {
@@ -144,13 +191,20 @@ export async function listThumbs(searchParams: URLSearchParams) {
     THUMBS_BASE_DIR,
   );
 
-  const [lightSheets, darkSheets] = await Promise.all([
+  const [lightSheets, darkSheets, job] = await Promise.all([
     readThumbSheets(path.join(thumbsBaseDir, "light")),
     readThumbSheets(path.join(thumbsBaseDir, "dark")),
+    readThumbsJob(thumbsBaseDir),
   ]);
+
+  // If no thumbs exist, return null
+  if (lightSheets.length === 0 && darkSheets.length === 0) {
+    return Response.json(null);
+  }
 
   return Response.json({
     dark: darkSheets,
+    job,
     light: lightSheets,
   });
 }

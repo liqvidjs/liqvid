@@ -63,13 +63,13 @@ export function LiqvidDevToolsProvider({
         instances[pluginName] ??= new Set();
         instances[pluginName].add(instance);
         return () => {
-          instances[pluginName].delete(instance);
+          instances[pluginName]?.delete(instance);
         };
       },
       setDuration: (duration: DurationLike) => {
         setProjectMeta({
           body: {
-            durationMs: Duration.from(duration).inMilliseconds(),
+            durationMs: Duration.inMilliseconds(duration),
           },
           search: {
             url: projectPath,

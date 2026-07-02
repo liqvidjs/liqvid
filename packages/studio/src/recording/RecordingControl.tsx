@@ -1,17 +1,8 @@
 "use client";
 
-import type {
-  EventEmitter,
-  EventsOn,
-  TypedEventTarget,
-} from "@liqvid/event-emitter";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import {
-  type RecordingManager,
-  type RecordingPlugin,
-  useRecordingApi,
-} from "@liqvid/recording";
+import { type RecordingPlugin, useRecordingApi } from "@liqvid/recording";
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef, useState } from "react";
 
@@ -24,16 +15,16 @@ import { RecordingDialog } from "./RecordingDialog.tsx";
 export interface RecordingControlProps {
   shortcuts?: {
     /** Shortcut to toggle the Recording panel */
-    toggle?: string | string[];
+    toggle?: string;
 
     /** Shortcut to discard recording */
-    discard?: string | string[];
+    discard?: string;
 
     /** Shortcut to pause recording */
-    pause?: string | string[];
+    pause?: string;
 
     /** Shortcut to start/stop recording */
-    startStop?: string | string[];
+    startStop?: string;
   };
 }
 

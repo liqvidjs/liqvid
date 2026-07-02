@@ -131,8 +131,7 @@ export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
 
   return (
     <div className={shareStyles.section}>
-      <div className={shareStyles.sectionHeader}>
-        <h3>Captions</h3>
+      <div className={shareStyles.sectionActions}>
         <button
           className={shareStyles.addButton}
           disabled={isGenerating || isActiveGeneration}

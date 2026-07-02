@@ -6,11 +6,14 @@ import { notFound } from "next/navigation";
 
 import { generateCaptions, listCaptions } from "../api/captions.mts";
 import {
+  captureScreenshotOperation,
+  copyScreenshotOperation,
   generateCaptionsOperation,
   generateThumbsOperation,
   listCaptionsOperation,
   listRecordingsOperation,
   listRendersOperation,
+  listScreenshotsOperation,
   listThumbsOperation,
   renameRenderOperation,
   saveRecordingOperation,
@@ -22,6 +25,11 @@ import { setProjectMeta } from "../api/project-meta.mts";
 import { listRecordings, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
+import {
+  handleCaptureScreenshot,
+  handleCopyScreenshot,
+  handleListScreenshots,
+} from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
@@ -52,7 +60,7 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     const route = "/" + routeParams.join("/");
 
-    const { search } = url.parse(req.url, true);
+    const { search } = new URL(req.url);
 
     const searchParams = new URLSearchParams(search ?? "");
 
@@ -61,12 +69,19 @@ export function getHandler(_dynamicImports: DynamicImports) {
     switch (route) {
       case "/":
         return getRoot();
+
       case listCaptionsOperation.endpoint:
         return listCaptions(searchParams);
+
       case listRecordingsOperation.endpoint:
         return listRecordings(searchParams);
+
       case listRendersOperation.endpoint:
         return listRenders(searchParams);
+
+      case listScreenshotsOperation.endpoint:
+        return handleListScreenshots(req);
+
       case listThumbsOperation.endpoint:
         return listThumbs(searchParams);
     }
@@ -101,20 +116,31 @@ export function postHandler(dynamicImports: DynamicImports) {
     await initializeServer();
 
     switch (route) {
+      case captureScreenshotOperation.endpoint:
+        return handleCaptureScreenshot(req);
+
+      case copyScreenshotOperation.endpoint:
+        return handleCopyScreenshot(req);
+
       case generateCaptionsOperation.endpoint:
-        return generateCaptions(searchParams, await req.json());
+        return generateCaptions(searchParams /*await req.json()*/);
+
       case generateThumbsOperation.endpoint:
         return generateThumbs(searchParams, await req.json());
+
       case setProjectMetaOperation.endpoint:
         return setProjectMeta(searchParams, await req.json());
+
       case saveRecordingOperation.endpoint:
         return saveRecording(
           searchParams,
           await req.formData(),
           dynamicImports,
         );
+
       case startRenderOperation.endpoint:
         return startRender(searchParams, await req.json());
+
       case renameRenderOperation.endpoint:
         return renameRender(searchParams, await req.json());
     }

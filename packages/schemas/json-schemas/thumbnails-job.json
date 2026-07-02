@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "colorScheme": {
+      "enum": ["light", "dark", "both"],
+      "type": "string"
+    },
+    "cols": {
+      "type": "number"
+    },
+    "frequency": {
+      "type": "number"
+    },
+    "height": {
+      "default": 90,
+      "type": "number"
+    },
+    "imageFormat": {
+      "enum": ["jpeg", "png"],
+      "type": "string"
+    },
+    "quality": {
+      "type": "number"
+    },
+    "rows": {
+      "default": 5,
+      "type": "number"
+    },
+    "width": {
+      "default": 160,
+      "type": "number"
+    }
+  },
+  "required": ["colorScheme", "cols", "frequency", "imageFormat"],
+  "type": "object"
+}

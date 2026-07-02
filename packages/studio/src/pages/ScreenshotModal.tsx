@@ -42,22 +42,25 @@ export function ScreenshotModal({
   onCaptured,
   project,
 }: ScreenshotModalProps) {
-  duration = Duration.from(duration);
   const [previewTime, setPreviewTime] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorSchemeOption>("light");
 
   const { aspectRatio, path: projectPath } = project;
 
+  // NEED the trailing slash because that's how they are exported
+  // TODO: this depends on the user not changing this option from the default next.config.js that we provide
   const previewPath = basePath
-    ? `${basePath}/${projectPath}`
-    : `/${projectPath}`;
+    ? `${basePath}/${projectPath}/`
+    : `/${projectPath}/`;
+
   const previewUrl = `http://localhost:${productionServerPort}${previewPath}`;
 
   const { api, ref: iframeRef } = useIframeApi(playerApiDeclaration);
 
   // Hide controls
   useEffect(() => {
+    api?.setRenderMode("screenshot").catch(console.error);
     api?.toggleControls(false);
   }, [api]);
 
@@ -113,10 +116,8 @@ export function ScreenshotModal({
       >
         <div className={shareStyles.previewHeader}>
           <DialogTitle>Capture Screenshot</DialogTitle>
-          <DialogClose>
-            <button className={shareStyles.closeButton} type="button">
-              <XIcon size={20} />
-            </button>
+          <DialogClose className={shareStyles.closeButton}>
+            <XIcon size={20} />
           </DialogClose>
         </div>
 
@@ -140,7 +141,7 @@ export function ScreenshotModal({
           </span>
           <input
             className={shareStyles.seekSlider}
-            max={duration.inSeconds() || 60}
+            max={Duration.inSeconds(duration) || 60}
             min={0}
             onChange={(e) => setPreviewTime(e.target.valueAsNumber)}
             step={0.1}

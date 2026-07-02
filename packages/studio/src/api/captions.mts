@@ -143,7 +143,7 @@ export async function generateCaptions(searchParams: URLSearchParams) {
         const configPath = path.join(projectDir, CONFIG_FILE);
         const configContent = await fsp.readFile(configPath, "utf8");
         const config = JSON.parse(configContent);
-        whisperConfig = config.captioning?.nodeWhisperOptions ?? {};
+        whisperConfig = config.media?.captioning?.nodeWhisperOptions ?? {};
       } catch {
         // No config file or no whisper config
       }

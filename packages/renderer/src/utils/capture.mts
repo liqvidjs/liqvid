@@ -1,5 +1,6 @@
 import { promises as fsp } from "node:fs";
 
+import { wait } from "@liqvid/utils";
 import cliProgress from "cli-progress";
 import type puppeteer from "puppeteer-core";
 
@@ -34,14 +35,6 @@ export async function capture({
   const base64Data = data.replace(/^data:image\/png;base64,/, "");
 
   return fsp.writeFile(path, base64Data, "base64");
-
-  return page.screenshot({
-    omitBackground: type === "png",
-    path,
-    // puppeteer will throw error if quality is passed for png
-    quality: type === "jpeg" ? quality : undefined,
-    type,
-  });
 }
 
 /**
@@ -89,6 +82,10 @@ export async function captureRange({
         type: imageFormat,
       });
       captureBar.increment();
+
+      if (await page.evaluate(() => window.__pause === true)) {
+        await wait({ minutes: 1 });
+      }
 
       // release puppeteer instance
       pool.release(page);

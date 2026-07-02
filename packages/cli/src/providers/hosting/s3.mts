@@ -20,6 +20,8 @@ import type {
   RemoteFileInfo,
 } from "../types.mts";
 
+const MAX_CONCURRENCY = 50;
+
 /**
  * Resolve an environment variable reference to its actual value.
  * Matches exact env var references like `{env:VAR_NAME}`.
@@ -154,11 +156,7 @@ export class S3Provider implements MediaHostingProvider {
         const key = this.buildKey(relativeFromRoot);
         return this.getUploadStatus(filePath, key);
       },
-      {
-        concurrency: 50,
-        progress: true,
-        progressLabel: "Checking files",
-      },
+      MAX_CONCURRENCY,
     );
   }
 
@@ -242,11 +240,7 @@ export class S3Provider implements MediaHostingProvider {
         const localPath = path.join(rootDir, remoteFile.key);
         return this.getDownloadStatus(remoteFile, localPath);
       },
-      {
-        concurrency: 50,
-        progress: true,
-        progressLabel: "Checking remote files",
-      },
+      MAX_CONCURRENCY,
     );
   }
 
