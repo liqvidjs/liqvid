@@ -72,6 +72,7 @@ export async function screenshot(
     const page = await connect({
       browser,
       height,
+      renderMode: "screenshot",
       url,
       width,
     });

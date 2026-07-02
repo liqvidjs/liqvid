@@ -83,6 +83,7 @@ export async function thumbs({
     concurrency,
     executablePath,
     height: browserHeight,
+    renderMode: "thumbs",
     url,
     width: browserWidth,
   });
@@ -92,11 +93,11 @@ export async function thumbs({
   }
 
   // calculate how many thumbs
-  const duration = await pages[0].evaluate(() => {
+  const durationSeconds = await pages[0]!.evaluate(() => {
     return player.playback.duration;
   });
 
-  const numThumbs = Math.ceil(duration / frequency);
+  const numThumbs = Math.ceil(durationSeconds / frequency);
 
   // grab thumbs and assemble them
   console.log(`(${step++}/${total}) Capturing thumbs...`);
@@ -109,7 +110,7 @@ export async function thumbs({
   });
 
   // close chrome instances
-  pages[0].browser().close();
+  pages[0]!.browser().close();
 
   console.log(`(${step++}/${total}) Assembling sheets...`);
   await assembleSheets({

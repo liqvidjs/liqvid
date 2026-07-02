@@ -1,0 +1,28 @@
+/* color scheme */
+@custom-variant dark (
+  &:where([data-color-scheme="dark"], [data-color-scheme="dark"] *)
+);
+
+/* render modes */
+@custom-variant lv-static (
+  &:where(
+    [data-render-mode]:not([data-render-mode="web"]),
+    [data-render-mode]:not([data-render-mode="web"]) *
+  )
+);
+
+@custom-variant lv-render-screenshot (
+  &:where([data-render-mode="screenshot"], [data-render-mode="screenshot"] *)
+);
+
+@custom-variant lv-render-thumbs (
+  &:where([data-render-mode="thumbs"], [data-render-mode="thumbs"] *)
+);
+
+@custom-variant lv-render-video (
+  &:where([data-render-mode="video"], [data-render-mode="video"] *)
+);
+
+@custom-variant lv-render-web (
+  &:where([data-render-mode="web"], [data-render-mode="web"] *)
+);

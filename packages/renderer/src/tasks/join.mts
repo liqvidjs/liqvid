@@ -6,6 +6,7 @@ import { execa } from "execa";
 
 /**
  * Join multiple audio files into one.
+ * @deprecated
  */
 export async function join({
   filenames,
@@ -27,7 +28,7 @@ export async function join({
       console.error("Must provide at least one input file");
       process.exit();
     }
-    output = filenames.pop();
+    output = filenames.pop()!;
   }
 
   // create join list

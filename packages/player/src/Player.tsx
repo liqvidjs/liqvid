@@ -19,6 +19,7 @@ import { Captions } from "./Captions.tsx";
 import { Controls } from "./Controls.tsx";
 import { PlayerContext, type RenderingTask } from "./hooks.ts";
 import { playerApiDeclaration } from "./iframe-api.ts";
+import type { RenderMode } from "./render-mode.ts";
 
 const API_SYMBOL = Symbol.for("@liqvid/player/api");
 
@@ -28,6 +29,7 @@ export function Root({
   children,
   playback: propsPlayback,
   ref: forwardedRef = null,
+  renderMode: initialRenderMode = "web",
   style,
   ...props
 }: {
@@ -35,6 +37,7 @@ export function Root({
   children?: React.ReactNode;
   playback?: Playback;
   ref?: React.Ref<HTMLDivElement>;
+  renderMode?: RenderMode;
 } & React.HTMLAttributes<HTMLElement>) {
   const aspectRatio = useMemo(
     () => normalizeAspectRatio(propsAspectRatio),
@@ -42,6 +45,8 @@ export function Root({
   );
   const contextPlayback = usePlaybackOptional();
   const playback = propsPlayback ?? contextPlayback;
+
+  const [renderMode, setRenderMode] = useState(initialRenderMode);
 
   if (!playback) {
     throw new Error(
@@ -75,8 +80,9 @@ export function Root({
       },
       registerRenderingTask,
       renderingTasks,
+      renderMode,
     }),
-    [aspectRatio, renderingTasks, registerRenderingTask],
+    [aspectRatio, renderingTasks, registerRenderingTask, renderMode],
   );
 
   const { colorScheme, persistence, setColorScheme } = useColorScheme();
@@ -91,6 +97,9 @@ export function Root({
       },
       setColorScheme(colorScheme: ColorScheme) {
         setColorScheme(colorScheme);
+      },
+      setRenderMode(renderMode: RenderMode) {
+        setRenderMode(renderMode);
       },
       toggleControls(visible?: boolean) {
         const controls = ref.current?.querySelector(".lv-controls");
@@ -115,6 +124,7 @@ export function Root({
       (ref.current as any)[API_SYMBOL] = {
         playback,
         setColorScheme: api.setColorScheme,
+        setRenderMode: api.setRenderMode,
         toggleControls: api.toggleControls,
       };
     }
@@ -124,6 +134,7 @@ export function Root({
     <div
       className={clsx("lv-player", className)}
       data-color-scheme={colorScheme}
+      data-render-mode={renderMode}
       ref={combineRefs(ref, forwardedRef)}
       style={{
         ...style,

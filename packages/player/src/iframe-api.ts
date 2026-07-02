@@ -3,6 +3,8 @@
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
 import { z } from "zod";
 
+import { RenderMode } from "./render-mode";
+
 /**
  * API declaration for Liqvid player iframe communication.
  */
@@ -23,6 +25,12 @@ export const playerApiDeclaration = {
     /** Set the color scheme */
     setColorScheme: {
       arguments: z.tuple([z.enum(["light", "dark"])]),
+      return: z.void(),
+    },
+
+    /** Set the render mode */
+    setRenderMode: {
+      arguments: z.tuple([RenderMode]),
       return: z.void(),
     },
 

@@ -1,6 +1,8 @@
 import cliProgress from "cli-progress";
 import puppeteer from "puppeteer-core";
 
+import type { ColorScheme, RenderMode } from "../types.mts";
+
 /** Namespace for the Liqvid player iframe API */
 export const PLAYER_API_NAMESPACE = "@liqvid/player";
 
@@ -12,13 +14,15 @@ export async function connect({
   colorScheme = "light",
   height,
   url,
+  renderMode,
   width,
 }: {
   browser: puppeteer.Browser;
-  colorScheme?: "light" | "dark";
+  colorScheme?: ColorScheme;
   height: number;
   url: string;
   width: number;
+  renderMode: RenderMode;
 }) {
   // init page
   const page = await browser.newPage();
@@ -30,21 +34,29 @@ export async function connect({
 
   await page.waitForSelector(".lv-controls");
 
-  page.evaluate((colorScheme) => {
-    const playerElt = document.querySelector(".lv-player");
+  page.evaluate(
+    (colorScheme, renderMode) => {
+      const playerElt = document.querySelector(
+        ".lv-player",
+      ) as HTMLElement | null;
 
-    if (!playerElt) {
-      throw new Error("Player element not found");
-    }
+      if (!playerElt) {
+        throw new Error("Player element not found");
+      }
 
-    // biome-ignore lint/suspicious/noExplicitAny: symbol
-    window.player = (playerElt as any)[Symbol.for("@liqvid/player/api")];
+      playerElt.dataset.liqvidRenderMode = renderMode;
 
-    player.setColorScheme(colorScheme);
-    player.toggleControls(false);
+      // biome-ignore lint/suspicious/noExplicitAny: symbol
+      window.player = (playerElt as any)[Symbol.for("@liqvid/player/api")];
 
-    document.body.style.background = "transparent";
-  }, colorScheme);
+      player.setColorScheme(colorScheme);
+      player.toggleControls(false);
+
+      document.body.style.background = "transparent";
+    },
+    colorScheme,
+    renderMode,
+  );
 
   // set color scheme for whole page also
   await page.emulateMediaFeatures([
@@ -65,6 +77,7 @@ export async function getPages({
   concurrency,
   executablePath,
   height,
+  renderMode,
   url,
   width,
 }: {
@@ -72,6 +85,7 @@ export async function getPages({
   concurrency: number;
   executablePath: string;
   height: number;
+  renderMode: RenderMode;
   url: string;
   width: number;
 }) {
@@ -90,13 +104,13 @@ export async function getPages({
 
   // get local browser
   const browser = await puppeteer.launch({
+    acceptInsecureCerts: true,
     args: [process.platform === "linux" ? "--single-process" : null].filter(
       Boolean,
-    ),
+    ) as string[],
+    browser: "chrome",
     executablePath,
     headless: process.env.HEADLESS !== "false",
-    ignoreHTTPSErrors: true,
-    product: "chrome",
     timeout: 0,
   });
 
@@ -107,6 +121,7 @@ export async function getPages({
         browser,
         colorScheme,
         height,
+        renderMode,
         url,
         width,
       });

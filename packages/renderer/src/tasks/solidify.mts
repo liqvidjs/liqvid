@@ -85,6 +85,7 @@ export async function solidify({
     concurrency,
     executablePath,
     height,
+    renderMode: "video",
     url,
     width,
   });
@@ -94,7 +95,7 @@ export async function solidify({
   const pool = new Pool(pages);
 
   // get duration
-  const totalDuration = await pages[0].evaluate(() => {
+  const totalDuration = await pages[0]!.evaluate(() => {
     return player.playback.duration;
   });
 
@@ -201,7 +202,7 @@ async function assembleVideo({
   job.stderr.on("data", (msg: Buffer) => {
     const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
     if ($_) {
-      stitchingBar.update(parseTime($_[1]));
+      stitchingBar.update(parseTime($_[1]!));
     }
   });
 
