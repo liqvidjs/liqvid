@@ -4,7 +4,7 @@ FILTER=$(
 .exports |= with_entries(
     .value |=
       if type == "object" then
-        ({types, "@liqvid/dev", import, require} + . | with_entries(select(.value != null)))
+        ({"@liqvid/dev", types, import, require} + . | with_entries(select(.value != null)))
       else . end
 )
 |

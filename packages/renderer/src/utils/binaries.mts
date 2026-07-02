@@ -1,18 +1,26 @@
-import fs from "fs";
-import os from "os";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
-import { execa } from "execa";
-// sillyness
-import Puppeteer from "puppeteer-core";
+import {
+  Browser,
+  BrowserTag,
+  detectBrowserPlatform,
+  getInstalledBrowsers,
+  install,
+  resolveBuildId,
+} from "@puppeteer/browsers";
+import { ExecaError, execa } from "execa";
 
-const puppeteer = Puppeteer as unknown as Puppeteer.PuppeteerNode;
+/** Default cache directory for browser downloads */
+const CACHE_DIR = path.join(os.homedir(), ".cache", "puppeteer");
 
 export async function ffmpegExists() {
   const locate = os.platform() === "win32" ? "where" : "which";
   try {
     await execa(locate, ["ffmpeg"]);
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -34,19 +42,38 @@ export async function getEnsureChrome(userChrome: string) {
   const systemChrome = await findChromeByPlatform();
   if (systemChrome) return systemChrome;
 
-  // puppeteer preinstalled
-  const preinstalledChrome = puppeteer.executablePath();
-  if (fs.existsSync(preinstalledChrome)) return preinstalledChrome;
+  // check for already installed browser in cache
+  const platform = detectBrowserPlatform();
+  if (!platform) {
+    throw new Error("Unable to detect browser platform");
+  }
 
-  // puppeteer install
+  const installedBrowsers = await getInstalledBrowsers({ cacheDir: CACHE_DIR });
+  const installedChrome = installedBrowsers.find(
+    (b) => b.browser === Browser.CHROME,
+  );
+  if (installedChrome) {
+    return installedChrome.executablePath;
+  }
+
+  // download and install Chrome
   console.log(
     "No Chrome installation found. Downloading one from the internet...",
   );
-  const browserFetcher = puppeteer.createBrowserFetcher({});
-  const revisionInfo = await browserFetcher.download(
-    puppeteer._preferredRevision,
+
+  const buildId = await resolveBuildId(
+    Browser.CHROME,
+    platform,
+    BrowserTag.STABLE,
   );
-  return revisionInfo.executablePath;
+  const installedBrowser = await install({
+    browser: Browser.CHROME,
+    buildId,
+    cacheDir: CACHE_DIR,
+    downloadProgressCallback: "default",
+  });
+
+  return installedBrowser.executablePath;
 }
 
 /**
@@ -72,8 +99,11 @@ async function findChromeByPlatform() {
         ]);
         return stdout.split("\n")[0];
       } catch (e) {
-        const { stdout } = e;
-        return stdout.split("\n").filter(Boolean)[0];
+        if (e instanceof ExecaError) {
+          const { stdout } = e;
+          return (stdout as unknown as string).split("\n").filter(Boolean)[0];
+        }
+        throw e;
       }
   }
 }

@@ -5,25 +5,34 @@ import puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
-import { callPlayerApi, connect } from "../utils/connect.mts";
+import { capture } from "../utils/capture.mts";
+import { connect } from "../utils/connect.mts";
 
 export interface ScreenshotOptions {
   /** Path to Chrome/ium executable */
   browserExecutable?: string;
+
   /** Color scheme */
   colorScheme?: "light" | "dark";
+
   /** Screenshot height */
   height: number;
+
   /** Image format */
   imageFormat?: ImageFormat;
+
   /** Output path for the screenshot */
   output: string;
+
   /** Image quality (for JPEG) */
   quality?: number;
+
   /** Time in seconds to capture */
   time: number;
+
   /** URL of the Liqvid player */
   url: string;
+
   /** Screenshot width */
   width: number;
 }
@@ -71,32 +80,26 @@ export async function screenshot(
     // Connect to the page
     const page = await connect({
       browser,
+      colorScheme,
       height,
       renderMode: "screenshot",
       url,
       width,
     });
 
-    await Promise.all([
-      // Set color scheme
-      callPlayerApi(page, "setColorScheme", [colorScheme]),
-
-      // Seek to the specified time
-      callPlayerApi(page, "seekTo", [time]),
-    ]);
-
-    // Wait a moment for rendering to settle
-    // TODO: this will slow things down
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Create CDP session for capture utility
+    // biome-ignore lint/suspicious/noExplicitAny: puppeteer internal API
+    (page as any).client = await page.target().createCDPSession();
 
     // Ensure output directory exists
     await fsp.mkdir(path.dirname(output), { recursive: true });
 
-    // Capture screenshot
-    await page.screenshot({
-      omitBackground: imageFormat === "png",
+    // Capture screenshot using the shared capture utility
+    await capture({
+      page,
       path: output,
-      quality: imageFormat === "jpeg" ? quality : undefined,
+      quality,
+      time,
       type: imageFormat,
     });
 

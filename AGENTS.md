@@ -51,10 +51,10 @@ pnpm build:js       # Compile TypeScript (ESM + CJS)
 ### Linting
 
 ```bash
-rtk lint biome           # Run Biome with auto-fix (uses biome.json config)
+pnpm lint --reporter=concise          # Run Biome with auto-fix (uses biome.json config)
 ```
 
-**Important:** Always use `pnpm lint` instead of calling `pnpm biome` directly. The `pnpm lint` script ensures the correct `biome.json` configuration is applied, including proper file exclusions (e.g., `dist/` directories).
+**Important:** Always use `pnpm lint:agent` instead of calling `pnpm biome` directly. The `pnpm lint` script ensures the correct `biome.json` configuration is applied, including proper file exclusions (e.g., `dist/` directories).
 
 ### Testing
 
@@ -145,10 +145,10 @@ import type { ThumbData } from "./controls/ScrubberBar";
 - Strict mode enabled - no implicit any
 - Use explicit return types for public API functions
 - Non-null assertions (`!`) are allowed when the value is guaranteed
-- Prefer interfaces for object shapes, types for unions/aliases
+- Prefer types over interfaces for object shapes
 
 ```typescript
-interface AnimateOptions {
+type AnimateOptions = {
   startValue?: number;
   endValue?: number;
   startTime: number;
