@@ -18,6 +18,7 @@ declare global {
     setRenderMode(renderMode: RenderMode): void;
     toggleControls(visible?: boolean): void;
     playback: {
+      audioSources: Set<{ buffer: AudioBuffer; startTime: number }>;
       currentTime: number;
       duration: number;
       play(): Promise<void>;
