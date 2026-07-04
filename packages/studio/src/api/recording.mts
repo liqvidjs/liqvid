@@ -26,80 +26,90 @@ import {
   SaveRecordingMetadataFromJson,
 } from "./types.mts";
 
-export async function listRecordings(
-  searchParams: URLSearchParams,
-): Promise<Response> {
-  const $url = safeGet(searchParams, "url");
-  if ($url.isNone) {
-    return Response.json(
-      { error: "invalid" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
+export function listRecordings(searchParams: URLSearchParams) {
+  return Effect.gen(function* () {
+    const $url = safeGet(searchParams, "url");
+    if ($url.isNone) {
+      return yield* new HttpError({
+        message: "invalid",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  let projectDir = fileURLToPath($url.unwrap());
-  if (projectDir.endsWith("page.tsx")) {
-    projectDir = path.dirname(projectDir);
-  }
+    let projectDir = fileURLToPath($url.unwrap());
+    if (projectDir.endsWith("page.tsx")) {
+      projectDir = path.dirname(projectDir);
+    }
 
-  const assetsDir = path.join(projectDir, ".liqvid");
+    const assetsDir = path.join(projectDir, ".liqvid");
 
-  // error if assets dir doesn't exist
-  if (!fs.existsSync(assetsDir)) {
-    return Response.json(null, { status: StatusCodes.INTERNAL_SERVER_ERROR });
-  }
+    // error if assets dir doesn't exist
+    if (!fs.existsSync(assetsDir)) {
+      return yield* new HttpError({
+        message: "assets dir does not exist",
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      });
+    }
 
-  const recordingsDir = path.join(assetsDir, "recordings");
+    const recordingsDir = path.join(assetsDir, "recordings");
 
-  if (!fs.existsSync(recordingsDir)) {
-    return Response.json([]);
-  }
+    if (!fs.existsSync(recordingsDir)) {
+      return [];
+    }
 
-  const recordingDirs = await fsp.readdir(recordingsDir, {
-    withFileTypes: true,
-  });
-  const $recordings = await Promise.all(
-    (recordingDirs as fs.Dirent<string>[]).reduce(
-      (acc, entry) => {
-        if (!entry.isDirectory()) return acc;
+    const recordings = yield* Effect.promise(async () => {
+      const recordingDirs = await fsp.readdir(recordingsDir, {
+        withFileTypes: true,
+      });
+      const $recordings = await Promise.all(
+        (recordingDirs as fs.Dirent<string>[]).reduce(
+          (acc, entry) => {
+            if (!entry.isDirectory()) return acc;
 
-        const { name } = entry;
+            const { name } = entry;
 
-        const dir = path.join(recordingsDir, name);
-        acc.push(
-          loadJson(RecordingMetaFile, path.join(dir, RECORDING_META_FILE)).then(
-            async ($recordingMeta) => {
-              const children = await fsp.readdir(dir, { withFileTypes: true });
-              return $recordingMeta.map((file) => ({
-                ...file,
-                name: dirNameToPackageName(name),
-                plugins: children.reduce((acc, curr) => {
-                  if (curr.isDirectory()) {
-                    acc.push(dirNameToPackageName(curr.name));
+            const dir = path.join(recordingsDir, name);
+            acc.push(
+              loadJson(
+                RecordingMetaFile,
+                path.join(dir, RECORDING_META_FILE),
+              ).then(async ($recordingMeta) => {
+                const children = await fsp.readdir(dir, {
+                  withFileTypes: true,
+                });
+                return $recordingMeta.map((file) => ({
+                  ...file,
+                  name: dirNameToPackageName(name),
+                  plugins: children.reduce((acc, curr) => {
+                    if (curr.isDirectory()) {
+                      acc.push(dirNameToPackageName(curr.name));
+                      return acc;
+                    }
                     return acc;
-                  }
-                  return acc;
-                }, [] as string[]),
-              }));
-            },
-          ),
-        );
+                  }, [] as string[]),
+                }));
+              }),
+            );
 
+            return acc;
+          },
+          [] as Promise<Result<RecordingMeta, unknown>>[],
+        ),
+      );
+
+      const recordings = $recordings.reduce((acc, $curr) => {
+        if ($curr.isErr) return acc;
+        acc.push($curr.unwrap());
         return acc;
-      },
-      [] as Promise<Result<RecordingMeta, unknown>>[],
-    ),
-  );
+      }, [] as RecordingMeta[]);
 
-  const recordings = $recordings.reduce((acc, $curr) => {
-    if ($curr.isErr) return acc;
-    acc.push($curr.unwrap());
-    return acc;
-  }, [] as RecordingMeta[]);
+      recordings.sort((a, b) => compare(a.created, b.created));
 
-  recordings.sort((a, b) => compare(a.created, b.created));
+      return recordings;
+    });
 
-  return Response.json(recordings);
+    return recordings;
+  });
 }
 
 const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas/recording-meta";

@@ -1,5 +1,9 @@
-import { getServerState } from "../initialize.mts";
+import { Effect } from "effect";
 
-export async function getRoot() {
-  return Response.json({ serverState: getServerState() });
+import { getServerState } from "../initialize.mts";
+import { loadLiqvidConfig } from "../jobs/watch-config.mts";
+
+export function getRoot() {
+  return loadLiqvidConfig();
+  return Effect.sync(() => ({ serverState: getServerState() }));
 }

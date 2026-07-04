@@ -10,7 +10,7 @@ import { toJSONSchema, type ZodType } from "zod";
 
 import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 // Import schemas
-import { LiqvidConfig } from "../src/liqvid-config.mts";
+import { LiqvidConfig } from "../src/liqvid-config-zod.mts";
 import {
   AspectRatio,
   AspectRatioSpecifier,

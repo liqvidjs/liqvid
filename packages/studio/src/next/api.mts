@@ -1,6 +1,7 @@
 import * as url from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
+import { EnvFiles } from "@liqvid/schemas/effect";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
 import { Effect, Exit, type FileSystem } from "effect";
@@ -36,6 +37,7 @@ import {
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
+import { loadEnvFiles } from "../jobs/preview-server.mts";
 import { FileDecodeError, HttpError } from "../utils/errors.mts";
 
 interface RequestContext {
@@ -71,22 +73,29 @@ export function getHandler(_dynamicImports: DynamicImports) {
     await initializeServer();
 
     let program:
-      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | Effect.Effect<
+          unknown,
+          HttpError | unknown,
+          EnvFiles | FileSystem.FileSystem
+        >
       | undefined;
 
     switch (route) {
       case "/":
-        return getRoot();
+        program = getRoot();
+        break;
 
       case listCaptionsOperation.endpoint:
         program = listCaptions(searchParams);
         break;
 
       case listRecordingsOperation.endpoint:
-        return listRecordings(searchParams);
+        program = listRecordings(searchParams);
+        break;
 
       case listRendersOperation.endpoint:
-        return listRenders(searchParams);
+        program = listRenders(searchParams);
+        break;
 
       case listScreenshotsOperation.endpoint:
         program = handleListScreenshots(req);
@@ -98,13 +107,13 @@ export function getHandler(_dynamicImports: DynamicImports) {
       }
     }
 
-    if (program) {
-      return runEffect(program);
+    if (!program && route.startsWith(staticFileOperation.endpoint)) {
+      const url = route.slice(staticFileOperation.endpoint.length);
+      program = serveStaticFile(url);
     }
 
-    if (route.startsWith(staticFileOperation.endpoint)) {
-      const url = route.slice(staticFileOperation.endpoint.length);
-      return serveStaticFile(url);
+    if (program) {
+      return runEffect(program);
     }
 
     return Response.json(
@@ -148,7 +157,8 @@ export function postHandler(dynamicImports: DynamicImports) {
         break;
 
       case generateCaptionsOperation.endpoint:
-        return generateCaptions(searchParams);
+        program = generateCaptions(searchParams);
+        break;
 
       case generateThumbsOperation.endpoint: {
         program = generateThumbs(searchParams, await req.json());
@@ -168,10 +178,12 @@ export function postHandler(dynamicImports: DynamicImports) {
         break;
 
       case startRenderOperation.endpoint:
-        return startRender(searchParams, await req.json());
+        program = startRender(searchParams, await req.json());
+        break;
 
       case renameRenderOperation.endpoint:
-        return renameRender(searchParams, await req.json());
+        program = renameRender(searchParams, await req.json());
+        break;
     }
 
     if (program) {
@@ -215,10 +227,13 @@ export function patchHandler(_dynamicImports: DynamicImports) {
 }
 
 async function runEffect<A, E>(
-  program: Effect.Effect<A, E, FileSystem.FileSystem>,
+  program: Effect.Effect<A, E, FileSystem.FileSystem | EnvFiles>,
 ) {
   const result = await Effect.runPromiseExit(
-    program.pipe(Effect.provide(NodeFileSystem.layer)),
+    program.pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+    ),
   );
 
   return Exit.match(result, {
@@ -226,6 +241,7 @@ async function runEffect<A, E>(
       for (const reason of cause.reasons) {
         // all other errors are 500
         if (reason._tag !== "Fail") {
+          console.error(reason);
           break;
         }
 
@@ -239,10 +255,10 @@ async function runEffect<A, E>(
           );
         } else if (error instanceof FileDecodeError) {
           console.error(
-            chalk.red(
-              `FileDecodeError in ${error.filename}: ${error.cause.message}`,
-            ),
+            chalk.red(`FileDecodeError in ${error.filename}: ${error.cause}`),
           );
+        } else {
+          console.error(error);
         }
 
         break;
@@ -255,7 +271,6 @@ async function runEffect<A, E>(
       );
     },
     onSuccess: (v) => {
-      console.log("Effect succeeded with value:", v, v instanceof Response);
       if (v instanceof Response) {
         return v;
       }

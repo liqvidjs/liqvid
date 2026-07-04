@@ -3,6 +3,7 @@ import * as http from "node:http";
 import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
+import type { EnvFiles } from "@liqvid/schemas/effect";
 import handler from "serve-handler";
 
 import { CONFIG_FILE } from "../conventions.mts";
@@ -62,17 +63,13 @@ export async function startProductionServer(
   });
 }
 
-export interface EnvFiles {
-  development: Record<string, string>;
-  production: Record<string, string>;
-}
-
 /**
  * Load all environment files (.env, .env.development, .env.production).
  */
-function loadEnvFiles(rootDir: string): EnvFiles {
+export function loadEnvFiles(rootDir: string): EnvFiles {
   return {
     development: parseEnvFile(path.join(rootDir, ".env.development")),
+    local: parseEnvFile(path.join(rootDir, ".env.local")),
     production: parseEnvFile(path.join(rootDir, ".env.production")),
   };
 }

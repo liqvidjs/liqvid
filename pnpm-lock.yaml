@@ -408,6 +408,9 @@ importers:
       cli-progress:
         specifier: 'catalog:'
         version: 3.12.0
+      effect:
+        specifier: 'catalog:'
+        version: 4.0.0-beta.93
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -439,6 +442,9 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.5.0
+      '@effect/language-service':
+        specifier: catalog:dev
+        version: 0.86.2
       '@types/cli-progress':
         specifier: catalog:dev
         version: 3.11.6
@@ -2657,6 +2663,9 @@ importers:
       '@liqvid/duration':
         specifier: workspace:^1.4.0
         version: link:../duration
+      effect:
+        specifier: catalog:peer
+        version: 4.0.0-beta.93
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -2664,6 +2673,9 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.5.0
+      '@types/node':
+        specifier: catalog:dev
+        version: 25.9.1
       typedoc:
         specifier: catalog:dev
         version: 0.28.19(typescript@5.9.3)

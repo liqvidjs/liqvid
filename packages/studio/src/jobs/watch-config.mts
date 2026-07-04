@@ -1,76 +1,80 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { Err, Ok, type Result, Some } from "@liqvid/fp";
-import { LiqvidConfig, type LiqvidConfigOut } from "@liqvid/schemas";
-import type z from "zod";
+import { NodeFileSystem } from "@effect/platform-node";
+import { LiqvidConfigFromJson } from "@liqvid/schemas/effect";
+import { Console, Effect } from "effect";
 
+import { EnvFiles } from "../../../schemas/src/env-vars.mts";
 import { CONFIG_FILE } from "../conventions.mts";
 import type { LiqvidServerState } from "../initialize.mts";
+import { loadJsonEffect } from "../utils/effect.mts";
+
+import { loadEnvFiles } from "./preview-server.mts";
 
 /**
  * Load and parse liqvid.json.
  */
-export function loadLiqvidConfig(): Result<
-  LiqvidConfigOut,
-  Error | z.ZodError
-> {
+export function loadLiqvidConfig() {
   const configPath = path.join(process.cwd(), CONFIG_FILE);
+  return loadJsonEffect(LiqvidConfigFromJson, configPath);
+}
 
-  try {
-    const content = fs.readFileSync(configPath, "utf-8");
-    const rawConfig = JSON.parse(content);
-    const result = LiqvidConfig.safeParse(rawConfig);
-
-    if (result.success) {
-      return Ok(result.data);
-    }
-
-    return Err(result.error);
-  } catch (e) {
-    return Err(e as Error);
-  }
+/**
+ * Reload the config into `state.config`, logging the reason.
+ */
+function reloadConfig(state: LiqvidServerState, message: string) {
+  return Effect.gen(function* () {
+    yield* Console.log(message);
+    state.config = yield* loadLiqvidConfig().pipe(Effect.option);
+  });
 }
 
 /**
  * Watch liqvid.config.json for changes and reload when modified.
  */
-export async function watchLiqvidConfig(
-  state: LiqvidServerState,
-): Promise<void> {
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
+export function watchLiqvidConfig(state: LiqvidServerState) {
+  return Effect.sync(() => {
+    const configPath = path.join(process.cwd(), CONFIG_FILE);
 
-  try {
-    fs.watch(configPath, (eventType) => {
-      if (eventType === "change") {
-        console.log(`${CONFIG_FILE} changed, reloading...`);
-        const $config = loadLiqvidConfig();
-        if ($config.isOk) {
-          state.config = Some($config.unwrap());
+    /** Watch the config file itself for changes. */
+    const watchConfigFile = () => {
+      fs.watch(configPath, (eventType) => {
+        console.log({ configPath, eventType });
+        if (eventType === "change") {
+          Effect.runPromise(
+            reloadConfig(state, `${CONFIG_FILE} changed, reloading...`).pipe(
+              Effect.provide(NodeFileSystem.layer),
+              Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+            ),
+          );
         }
-      }
-    });
-  } catch {
-    // Config file doesn't exist, watch the directory for it to be created
-    const dir = process.cwd();
+      });
+    };
 
-    fs.watch(dir, (_eventType, filename) => {
-      if (filename === CONFIG_FILE) {
-        console.log(`${CONFIG_FILE} detected, loading...`);
-        state.config = loadLiqvidConfig();
+    try {
+      watchConfigFile();
+    } catch {
+      // Config file doesn't exist, watch the directory for it to be created
+      const dir = process.cwd();
 
-        // Now watch the file itself for changes
-        try {
-          fs.watch(configPath, (eventType) => {
-            if (eventType === "change") {
-              console.log(`${CONFIG_FILE} changed, reloading...`);
-              state.config = loadLiqvidConfig();
-            }
-          });
-        } catch {
-          // File may have been deleted again
+      fs.watch(dir, (_eventType, filename) => {
+        if (filename === CONFIG_FILE) {
+          Effect.runPromise(
+            reloadConfig(state, `${CONFIG_FILE} detected, loading...`).pipe(
+              Effect.provide(NodeFileSystem.layer),
+              Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+            ),
+          );
+
+          // Now watch the file itself for changes
+          try {
+            watchConfigFile();
+          } catch {
+            // File may have been deleted again
+          }
         }
-      }
-    });
-  }
+      });
+    }
+  });
 }

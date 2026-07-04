@@ -10,7 +10,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
-import type { ProviderConfigS3 } from "@liqvid/schemas/providers";
+import type { ProviderConfigS3 } from "@liqvid/schemas/effect";
+import { Redacted } from "effect";
 
 import { parallelMap } from "../../utils/parallel.mts";
 import type {
@@ -21,37 +22,6 @@ import type {
 } from "../types.mts";
 
 const MAX_CONCURRENCY = 50;
-
-/**
- * Resolve an environment variable reference to its actual value.
- * Matches exact env var references like `{env:VAR_NAME}`.
- */
-function resolveEnvVar(envVar: string): string {
-  const match = envVar.match(/^\{env:(.+)\}$/);
-  if (!match) {
-    throw new Error(`Invalid environment variable reference: ${envVar}`);
-  }
-  const varName = match[1]!;
-  const value = process.env[varName];
-  if (value === undefined) {
-    throw new Error(`Environment variable ${varName} is not set`);
-  }
-  return value;
-}
-
-/**
- * Interpolate all environment variable references in a string.
- * Replaces all `{env:VAR_NAME}` patterns with their values.
- */
-function interpolateEnvVars(str: string): string {
-  return str.replace(/\{env:([^}]+)\}/g, (_match, varName) => {
-    const value = process.env[varName];
-    if (value === undefined) {
-      throw new Error(`Environment variable ${varName} is not set`);
-    }
-    return value;
-  });
-}
 
 /** Content type mapping for common media files */
 const CONTENT_TYPES: Record<string, string> = {
@@ -122,17 +92,12 @@ export class S3Provider implements MediaHostingProvider {
 
       case "explicit": {
         // Explicit credentials (accessKeyId/secretAccessKey)
-        // This is the path used for S3-compatible providers like Cloudflare R2
-        const accessKeyId = resolveEnvVar(auth.accessKeyId);
-        const secretAccessKey = resolveEnvVar(auth.secretAccessKey);
 
-        // Handle endpoint with env var interpolation (e.g., for Cloudflare R2)
-        const endpoint = auth.endpoint
-          ? interpolateEnvVars(auth.endpoint)
-          : undefined;
+        // un-redact values
+        const accessKeyId = Redacted.value(auth.accessKeyId);
+        const secretAccessKey = Redacted.value(auth.secretAccessKey);
+        const endpoint = Redacted.value(auth.endpoint);
 
-        // When using a custom endpoint (like R2), region must be "auto"
-        // See: https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/
         return new S3Client({
           credentials: {
             accessKeyId,

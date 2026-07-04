@@ -1,5 +1,7 @@
-import { type Maybe, None } from "@liqvid/fp";
-import type { LiqvidConfigOut, ProjectMeta } from "@liqvid/schemas";
+import { NodeFileSystem } from "@effect/platform-node";
+import type { ProjectMeta } from "@liqvid/schemas";
+import type { LiqvidConfig } from "@liqvid/schemas/effect";
+import { Effect, Option } from "effect";
 
 import {
   DEFAULT_PRODUCTION_SERVER_PORT,
@@ -20,9 +22,8 @@ export interface LiqvidServerState {
   /**
    * The full parsed liqvid.config.json
    */
-  config: Maybe<LiqvidConfigOut>;
+  config: Option.Option<LiqvidConfig>;
   jobs: {
-    // TODO: use Async.Idle here
     productionServer: null | Promise<void>;
     watchAssets: null | Promise<void>;
     watchConfig: null | Promise<void>;
@@ -41,13 +42,18 @@ export async function initializeServer() {
   const { jobs, projects } = state;
 
   // Load config initially
-  if (state.config.isNone) {
-    state.config = loadLiqvidConfig().ok();
+  if (Option.isNone(state.config)) {
+    const config = await Effect.runPromise(
+      loadLiqvidConfig().pipe(Effect.provide(NodeFileSystem.layer)),
+    );
+    state.config = config;
   }
 
   jobs.watchAssets ??= watchAssets();
 
-  jobs.watchConfig ??= watchLiqvidConfig(state);
+  jobs.watchConfig ??= Effect.runPromise(
+    watchLiqvidConfig(state).pipe(Effect.provide(NodeFileSystem.layer)),
+  );
 
   jobs.watchProjectFiles ??= jobs.watchAssets.then(() =>
     watchProjectFiles(projects),
@@ -62,7 +68,7 @@ export function getServerState(): LiqvidServerState {
   if (!(symbol in globalThis)) {
     (globalThis as unknown as GlobalThis)[symbol] = {
       basePath: "",
-      config: None,
+      config: Option.none(),
       jobs: {
         productionServer: null,
         watchAssets: null,

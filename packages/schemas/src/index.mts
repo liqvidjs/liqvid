@@ -2,7 +2,7 @@ export {
   LiqvidConfig,
   type LiqvidConfigIn,
   type LiqvidConfigOut,
-} from "./liqvid-config.mts";
+} from "./liqvid-config-zod.mts";
 export {
   AspectRatio,
   AspectRatioSpecifier,

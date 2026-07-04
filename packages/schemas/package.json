@@ -63,15 +63,24 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/duration": "workspace:^1.4.0"
+    "@liqvid/duration": "workspace:^1.4.0",
+    "effect": "catalog:peer",
+    "zod": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@liqvid/duration": {
+      "optional": true
+    },
+    "effect": {
+      "optional": true
+    },
+    "zod": {
       "optional": true
     }
   },

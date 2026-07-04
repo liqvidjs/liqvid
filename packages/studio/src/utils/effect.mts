@@ -23,7 +23,9 @@ export function loadJsonEffect<
 
     const file = yield* fs.readFileString(filename, "utf8");
 
-    return yield* Schema.decodeEffect(parser)(file).pipe(
+    return yield* Schema.decodeEffect(parser, { onExcessProperty: "ignore" })(
+      file,
+    ).pipe(
       Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
     );
   });

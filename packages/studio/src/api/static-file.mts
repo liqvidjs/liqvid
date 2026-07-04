@@ -1,8 +1,9 @@
-import * as fs from "node:fs";
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { Effect, FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
+
+import { HttpError } from "../utils/errors.mts";
 
 /**
  * MIME type mappings for common file extensions
@@ -44,56 +45,58 @@ function getMimeType(filePath: string): string {
  * Serve static files from the app directory.
  * Example: /api/liqvid/static/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
  */
-export async function serveStaticFile(
-  requestedPath: string,
-): Promise<Response> {
-  // Security: Prevent directory traversal attacks
-  const normalizedPath = path.normalize(requestedPath);
-  if (normalizedPath.includes("..")) {
-    return Response.json(
-      { error: "invalid path" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
+export function serveStaticFile(requestedPath: string) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // Resolve relative to the app directory
-  const appDir = path.join(process.cwd(), "app");
-  const absolutePath = path.join(appDir, normalizedPath);
+    // Security: Prevent directory traversal attacks
+    const normalizedPath = path.normalize(requestedPath);
+    if (normalizedPath.includes("..")) {
+      return yield* new HttpError({
+        message: "invalid path",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  // Security: Ensure the resolved path is within the app directory
-  if (!absolutePath.startsWith(appDir + path.sep)) {
-    return Response.json(
-      { error: "invalid path" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
+    // Resolve relative to the app directory
+    const appDir = path.join(process.cwd(), "app");
+    const absolutePath = path.join(appDir, normalizedPath);
 
-  // Check if file exists
-  if (!fs.existsSync(absolutePath)) {
-    return Response.json(
-      { error: "file not found" },
-      { status: StatusCodes.NOT_FOUND },
-    );
-  }
+    // Security: Ensure the resolved path is within the app directory
+    if (!absolutePath.startsWith(appDir + path.sep)) {
+      return yield* new HttpError({
+        message: "invalid path",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  // Check if it's a file (not a directory)
-  const stat = await fsp.stat(absolutePath);
-  if (!stat.isFile()) {
-    return Response.json(
-      { error: "not a file" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
+    // Check if file exists
+    if (!(yield* fs.exists(absolutePath))) {
+      return yield* new HttpError({
+        message: "file not found",
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
 
-  // Read and serve the file
-  const content = await fsp.readFile(absolutePath);
-  const mimeType = getMimeType(absolutePath);
+    // Check if it's a file (not a directory)
+    const stat = yield* fs.stat(absolutePath);
+    if (stat.type !== "File") {
+      return yield* new HttpError({
+        message: "not a file",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  return new Response(content, {
-    headers: {
-      "Content-Length": String(content.length),
-      "Content-Type": mimeType,
-    },
-    status: StatusCodes.OK,
+    // Read and serve the file
+    const content = yield* fs.readFile(absolutePath);
+    const mimeType = getMimeType(absolutePath);
+
+    return new Response(content as BodyInit, {
+      headers: {
+        "Content-Length": String(content.length),
+        "Content-Type": mimeType,
+      },
+      status: StatusCodes.OK,
+    });
   });
 }

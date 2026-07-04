@@ -78,6 +78,7 @@
     "@types/node": "catalog:dev",
     "chalk": "catalog:",
     "cli-progress": "catalog:",
+    "effect": "catalog:",
     "execa": "catalog:",
     "fast-glob": "catalog:",
     "handlebars": "catalog:",
@@ -90,6 +91,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@effect/language-service": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
     "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
