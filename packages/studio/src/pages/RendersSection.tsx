@@ -1,9 +1,12 @@
 "use client";
 
+import type { AspectRatio } from "@liqvid/schemas";
 import {
   CheckCircleIcon,
   FilmStripIcon,
   FolderOpenIcon,
+  LockSimpleIcon,
+  LockSimpleOpenIcon,
   MoonIcon,
   PencilSimpleIcon,
   PlayIcon,
@@ -33,7 +36,11 @@ import styles from "./root.module.css";
 import shareStyles from "./share.module.css";
 
 interface RendersSectionProps {
+  /** Project aspect ratio (defaults to 16:9) */
+  aspectRatio?: AspectRatio;
+
   projectPath: string;
+
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
@@ -46,20 +53,31 @@ interface RenderConfig {
   width: number;
 }
 
-const DEFAULT_CONFIG: RenderConfig = {
-  colorScheme: "light",
-  height: 800,
-  width: 1280,
-};
+const DEFAULT_ASPECT_RATIO: AspectRatio = { height: 9, width: 16 };
 
-const RESOLUTION_PRESETS = [
-  { height: 720, label: "720p", width: 1280 },
-  { height: 800, label: "800p", width: 1280 },
-  { height: 1080, label: "1080p", width: 1920 },
-  { height: 1440, label: "1440p", width: 2560 },
-];
+const WIDTH_PRESETS = [640, 1280, 1920, 2560];
 
-export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
+/**
+ * Compute height from width per the aspect ratio,
+ * rounded to the nearest even number (required by most video encoders).
+ */
+function heightFromWidth(width: number, aspectRatio: AspectRatio): number {
+  return Math.round((width * aspectRatio.height) / aspectRatio.width / 2) * 2;
+}
+
+/**
+ * Compute width from height per the aspect ratio,
+ * rounded to the nearest even number (required by most video encoders).
+ */
+function widthFromHeight(height: number, aspectRatio: AspectRatio): number {
+  return Math.round((height * aspectRatio.width) / aspectRatio.height / 2) * 2;
+}
+
+export function RendersSection({
+  aspectRatio = DEFAULT_ASPECT_RATIO,
+  isOpen,
+  projectPath,
+}: RendersSectionProps) {
   const [renders, setRenders] = useState<RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -72,7 +90,12 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
 
   // Render config state
   const [configOpen, setConfigOpen] = useState(false);
-  const [config, setConfig] = useState<RenderConfig>(DEFAULT_CONFIG);
+  const [lockAspectRatio, setLockAspectRatio] = useState(true);
+  const [config, setConfig] = useState<RenderConfig>(() => ({
+    colorScheme: "light",
+    height: heightFromWidth(1280, aspectRatio),
+    width: 1280,
+  }));
 
   const loadRenders = useCallback(async () => {
     setIsLoading(true);
@@ -168,12 +191,42 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
     }
   };
 
-  const handleResolutionPreset = (preset: (typeof RESOLUTION_PRESETS)[0]) => {
+  const handleWidthPreset = (width: number) => {
     setConfig((c) => ({
       ...c,
-      height: preset.height,
-      width: preset.width,
+      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+      width,
     }));
+  };
+
+  const handleWidthChange = (width: number) => {
+    setConfig((c) => ({
+      ...c,
+      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+      width,
+    }));
+  };
+
+  const handleHeightChange = (height: number) => {
+    setConfig((c) => ({
+      ...c,
+      height,
+      width: lockAspectRatio ? widthFromHeight(height, aspectRatio) : c.width,
+    }));
+  };
+
+  const handleToggleLock = () => {
+    setLockAspectRatio((locked) => {
+      const next = !locked;
+      // When re-locking, snap the height to match the aspect ratio
+      if (next) {
+        setConfig((c) => ({
+          ...c,
+          height: heightFromWidth(c.width, aspectRatio),
+        }));
+      }
+      return next;
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -264,18 +317,15 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                 <div className={styles.formField}>
                   <span>Resolution</span>
                   <div className={shareStyles.resolutionPresets}>
-                    {RESOLUTION_PRESETS.map((preset) => (
+                    {WIDTH_PRESETS.map((width) => (
                       <button
                         className={shareStyles.presetButton}
-                        data-active={
-                          config.width === preset.width &&
-                          config.height === preset.height
-                        }
-                        key={preset.label}
-                        onClick={() => handleResolutionPreset(preset)}
+                        data-active={config.width === width}
+                        key={width}
+                        onClick={() => handleWidthPreset(width)}
                         type="button"
                       >
-                        {preset.label}
+                        {width}
                       </button>
                     ))}
                   </div>
@@ -284,10 +334,9 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                       className={shareStyles.dimensionInput}
                       min={1}
                       onChange={(e) =>
-                        setConfig((c) => ({
-                          ...c,
-                          width: Number(e.target.value) || c.width,
-                        }))
+                        handleWidthChange(
+                          Number(e.target.value) || config.width,
+                        )
                       }
                       type="number"
                       value={config.width}
@@ -297,14 +346,31 @@ export function RendersSection({ isOpen, projectPath }: RendersSectionProps) {
                       className={shareStyles.dimensionInput}
                       min={1}
                       onChange={(e) =>
-                        setConfig((c) => ({
-                          ...c,
-                          height: Number(e.target.value) || c.height,
-                        }))
+                        handleHeightChange(
+                          Number(e.target.value) || config.height,
+                        )
                       }
                       type="number"
                       value={config.height}
                     />
+                    <button
+                      aria-pressed={lockAspectRatio}
+                      className={shareStyles.lockButton}
+                      data-active={lockAspectRatio}
+                      onClick={handleToggleLock}
+                      title={
+                        lockAspectRatio
+                          ? `Unlock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
+                          : `Lock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
+                      }
+                      type="button"
+                    >
+                      {lockAspectRatio ? (
+                        <LockSimpleIcon size={16} weight="fill" />
+                      ) : (
+                        <LockSimpleOpenIcon size={16} />
+                      )}
+                    </button>
                   </div>
                 </div>
 

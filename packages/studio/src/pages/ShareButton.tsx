@@ -98,7 +98,11 @@ export function ShareButton({
             </TabsContent>
 
             <TabsContent value="renders">
-              <RendersSection isOpen={open} projectPath={project.path} />
+              <RendersSection
+                aspectRatio={project.aspectRatio}
+                isOpen={open}
+                projectPath={project.path}
+              />
             </TabsContent>
 
             <TabsContent value="captions">

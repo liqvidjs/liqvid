@@ -1,48 +1,23 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { renderAudio } from "@liqvid/cli/render-audio";
 import { transcribe } from "@liqvid/cli/transcribe";
-import type { WhisperModelName } from "@liqvid/schemas/liqvid-config";
+import { LiqvidConfig } from "@liqvid/schemas";
 import { StatusCodes } from "http-status-codes";
 
 import { CONFIG_FILE } from "../conventions.mts";
+import { getServerState } from "../initialize.mts";
+import { loadJson } from "../utils/fs.mts";
 
 import type { CaptionsMeta } from "./contract.mts";
 
 const CAPTIONS_DIR = ".liqvid/captions";
 const META_FILE = "meta.json";
+const AUDIO_FILE = "audio.wav";
 
 /** Track active caption generation jobs */
 const activeJobs = new Set<string>();
-
-/**
- * Find the first audio.webm file in the .liqvid directory.
- */
-async function findAudioFile(projectDir: string): Promise<string | null> {
-  const liqvidDir = path.join(projectDir, ".liqvid");
-
-  try {
-    // Search for audio.webm in recordings subdirectories
-    const recordingsDir = path.join(liqvidDir, "recordings");
-    const recordings = await fsp.readdir(recordingsDir);
-
-    for (const recording of recordings) {
-      const mediaDir = path.join(recordingsDir, recording, "@liqvid.media");
-      const audioPath = path.join(mediaDir, "audio.webm");
-
-      try {
-        await fsp.access(audioPath);
-        return audioPath;
-      } catch {
-        // File doesn't exist, continue searching
-      }
-    }
-  } catch {
-    // Recordings directory doesn't exist
-  }
-
-  return null;
-}
 
 /**
  * Read captions metadata from the project.
@@ -96,6 +71,12 @@ export async function listCaptions(searchParams: URLSearchParams) {
  * Generate captions for a project using Whisper.
  */
 export async function generateCaptions(searchParams: URLSearchParams) {
+  const { basePath, config: $config, productionServerPort } = getServerState();
+  if ($config.isNone) {
+    throw new Error("config not loaded");
+  }
+  const config = $config.unwrap();
+
   const projectPath = searchParams.get("projectPath");
   if (!projectPath) {
     return Response.json(
@@ -111,19 +92,15 @@ export async function generateCaptions(searchParams: URLSearchParams) {
     return Response.json({ status: "already_generating" });
   }
 
-  // Find audio file
-  const audioFile = await findAudioFile(projectDir);
-  if (!audioFile) {
-    return Response.json(
-      { error: "No audio file found in .liqvid directory" },
-      { status: StatusCodes.NOT_FOUND },
-    );
-  }
-
   // Mark as generating
   activeJobs.add(projectPath);
 
   const outputDir = path.join(projectDir, CAPTIONS_DIR);
+  const audioFile = path.join(outputDir, AUDIO_FILE);
+
+  // Build the URL for the video
+  const previewPath = `${basePath || ""}/${projectPath}/`;
+  const url = `http://localhost:${productionServerPort}${previewPath}`;
 
   // Write initial metadata
   const initialMeta: CaptionsMeta = {
@@ -137,28 +114,18 @@ export async function generateCaptions(searchParams: URLSearchParams) {
   // Start transcription in background
   (async () => {
     try {
-      // Load whisper config from liqvid.json if it exists
-      let whisperConfig: Record<string, unknown> = {};
-      try {
-        const configPath = path.join(projectDir, CONFIG_FILE);
-        const configContent = await fsp.readFile(configPath, "utf8");
-        const config = JSON.parse(configContent);
-        whisperConfig = config.media?.captioning?.nodeWhisperOptions ?? {};
-      } catch {
-        // No config file or no whisper config
-      }
+      // Create the audio file by rendering the video's audio track
+      const audioStart = performance.now();
+      await renderAudio({ output: audioFile, url });
+      const audioElapsed = performance.now() - audioStart;
+      console.log(
+        `Created audio file for ${projectPath} in ${(audioElapsed / 1000).toFixed(2)}s`,
+      );
 
       await transcribe({
         audioFile,
         outputDir,
-        whisperConfig: {
-          modelName: whisperConfig.modelName as WhisperModelName,
-          modelRootPath: whisperConfig.modelRootPath as string | undefined,
-          translateToEnglish: whisperConfig.translateToEnglish as
-            | boolean
-            | undefined,
-          withCuda: whisperConfig.withCuda as boolean | undefined,
-        },
+        whisperConfig: config.media?.captioning?.nodeWhisperOptions,
       });
 
       // Update metadata to completed

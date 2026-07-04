@@ -27,20 +27,14 @@
 }
 
 .duration {
-  /* position */
   position: absolute;
   right: 0;
-  /* position */
   bottom: 0;
   padding: 4px 4px;
   font-size: var(--lvs-text-xs);
   line-height: 1;
-
-  /* text */
   color: #fff;
-
-  /* background/borders/padding */
-  background: #0001;
+  background: #0007;
   border-radius: 2px 0 0 0;
 }
 
