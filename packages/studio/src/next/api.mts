@@ -2,7 +2,7 @@ import * as url from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
-import { Effect, Exit } from "effect";
+import { Effect, Exit, type FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
@@ -69,6 +69,10 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     await initializeServer();
 
+    let program:
+      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | undefined;
+
     switch (route) {
       case "/":
         return getRoot();
@@ -83,47 +87,17 @@ export function getHandler(_dynamicImports: DynamicImports) {
         return listRenders(searchParams);
 
       case listScreenshotsOperation.endpoint:
-        return handleListScreenshots(req);
+        program = handleListScreenshots(req);
+        break;
 
       case listThumbsOperation.endpoint: {
-        const result = await Effect.runPromiseExit(
-          listThumbs(searchParams).pipe(Effect.provide(NodeFileSystem.layer)),
-        );
-
-        return Exit.match(result, {
-          onFailure: (cause) => {
-            for (const reason of cause.reasons) {
-              switch (reason._tag) {
-                case "Fail": {
-                  const { error } = reason;
-
-                  // HTTP errors, expected
-                  if (error instanceof HttpError) {
-                    return Response.json(
-                      { error: error.message },
-                      { status: error.status },
-                    );
-                  }
-
-                  // filesystem error, 500
-                  return Response.json(
-                    { error: "Internal Server Error" },
-                    { status: StatusCodes.INTERNAL_SERVER_ERROR },
-                  );
-                }
-
-                default:
-                  // other errors are 500
-                  return Response.json(
-                    { error: "Internal Server Error" },
-                    { status: StatusCodes.INTERNAL_SERVER_ERROR },
-                  );
-              }
-            }
-          },
-          onSuccess: (v) => Response.json(v),
-        });
+        program = listThumbs(searchParams);
+        break;
       }
+    }
+
+    if (program) {
+      return runEffect(program);
     }
 
     if (route.startsWith(staticFileOperation.endpoint)) {
@@ -158,55 +132,30 @@ export function postHandler(dynamicImports: DynamicImports) {
 
     await initializeServer();
 
+    let program:
+      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | undefined;
+
     switch (route) {
       case captureScreenshotOperation.endpoint:
-        return handleCaptureScreenshot(req);
+        program = handleCaptureScreenshot(req);
+        break;
 
       case copyScreenshotOperation.endpoint:
-        return handleCopyScreenshot(req);
+        program = handleCopyScreenshot(req);
+        break;
 
       case generateCaptionsOperation.endpoint:
-        return generateCaptions(searchParams /*await req.json()*/);
+        return generateCaptions(searchParams);
 
       case generateThumbsOperation.endpoint: {
-        const program = generateThumbs(searchParams, await req.json());
-        const result = await Effect.runPromiseExit(
-          program.pipe(Effect.provide(NodeFileSystem.layer)),
-        );
-
-        return Exit.match(result, {
-          onFailure: (cause) => {
-            for (const reason of cause.reasons) {
-              // all other errors are 500
-              if (reason._tag !== "Fail") {
-                break;
-              }
-
-              const { error } = reason;
-
-              // HTTP errors, expected
-              if (!(error instanceof HttpError)) {
-                break;
-              }
-
-              return Response.json(
-                { error: error.message },
-                { status: error.status },
-              );
-            }
-
-            // other error, 500
-            return Response.json(
-              { error: "Internal Server Error" },
-              { status: StatusCodes.INTERNAL_SERVER_ERROR },
-            );
-          },
-          onSuccess: (v) => Response.json(v),
-        });
+        program = generateThumbs(searchParams, await req.json());
+        break;
       }
 
       case setProjectMetaOperation.endpoint:
-        return setProjectMeta(searchParams, await req.json());
+        program = setProjectMeta(searchParams, await req.json());
+        break;
 
       case saveRecordingOperation.endpoint:
         return saveRecording(
@@ -220,6 +169,10 @@ export function postHandler(dynamicImports: DynamicImports) {
 
       case renameRenderOperation.endpoint:
         return renameRender(searchParams, await req.json());
+    }
+
+    if (program) {
+      return runEffect(program);
     }
 
     return Response.json(
@@ -256,4 +209,48 @@ export function patchHandler(_dynamicImports: DynamicImports) {
   return async function PATCH(_req: Request, _ctx: RequestContext) {
     notFound();
   };
+}
+
+async function runEffect<A, E>(
+  program: Effect.Effect<A, E, FileSystem.FileSystem>,
+) {
+  const result = await Effect.runPromiseExit(
+    program.pipe(Effect.provide(NodeFileSystem.layer)),
+  );
+
+  return Exit.match(result, {
+    onFailure: (cause) => {
+      for (const reason of cause.reasons) {
+        // all other errors are 500
+        if (reason._tag !== "Fail") {
+          break;
+        }
+
+        const { error } = reason;
+
+        // HTTP errors, expected
+        if (!(error instanceof HttpError)) {
+          break;
+        }
+
+        return Response.json(
+          { error: error.message },
+          { status: error.status },
+        );
+      }
+
+      // other error, 500
+      return Response.json(
+        { error: "Internal Server Error" },
+        { status: StatusCodes.INTERNAL_SERVER_ERROR },
+      );
+    },
+    onSuccess: (v) => {
+      if (v instanceof Response) {
+        return v;
+      }
+
+      return Response.json(v);
+    },
+  });
 }

@@ -7,8 +7,11 @@ import type {
   ScreenshotEntry,
   ScreenshotMeta,
 } from "@liqvid/schemas/screenshot-meta";
+import { Effect } from "effect";
+import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
+import { HttpError } from "../utils/errors.mts";
 
 /**
  * Get the project directory from a project path.
@@ -36,9 +39,7 @@ function generateFolderName(): string {
 /**
  * List all screenshots for a project
  */
-export async function listScreenshots(
-  projectPath: string,
-): Promise<ScreenshotEntry[]> {
+export async function listScreenshots(projectPath: string) {
   const screenshotsDir = getScreenshotsDir(projectPath);
 
   try {
@@ -232,82 +233,76 @@ export async function checkImageExists(
 /**
  * API route handlers
  */
-export async function handleListScreenshots(
-  request: Request,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const projectPath = url.searchParams.get("projectPath");
+export function handleListScreenshots(request: Request) {
+  return Effect.gen(function* () {
+    const url = new URL(request.url);
+    const projectPath = url.searchParams.get("projectPath");
 
-  if (!projectPath) {
-    return Response.json({ error: "projectPath is required" }, { status: 400 });
-  }
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  const screenshots = await listScreenshots(projectPath);
-  return Response.json(screenshots);
+    return yield* Effect.promise(() => listScreenshots(projectPath));
+  });
 }
 
-export async function handleCaptureScreenshot(
-  request: Request,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const projectPath = url.searchParams.get("projectPath");
+export function handleCaptureScreenshot(request: Request) {
+  return Effect.gen(function* () {
+    const url = new URL(request.url);
+    const projectPath = url.searchParams.get("projectPath");
 
-  if (!projectPath) {
-    return Response.json({ error: "projectPath is required" }, { status: 400 });
-  }
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  try {
-    const body = (await request.json()) as {
-      colorScheme?: ColorSchemeOption;
-      height: number;
-      time: number;
-      width: number;
-    };
+    return yield* Effect.tryPromise(async () => {
+      const body = (await request.json()) as {
+        colorScheme?: ColorSchemeOption;
+        height: number;
+        time: number;
+        width: number;
+      };
 
-    console.log({ body });
-
-    const screenshotResult = await captureScreenshot(projectPath, body);
-    return Response.json(screenshotResult);
-  } catch (e) {
-    console.error("Failed to capture screenshot:", e);
-    return Response.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 },
-    );
-  }
+      return await captureScreenshot(projectPath, body);
+    });
+  });
 }
 
-export async function handleCopyScreenshot(
-  request: Request,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const projectPath = url.searchParams.get("projectPath");
+export function handleCopyScreenshot(request: Request) {
+  return Effect.gen(function* () {
+    const url = new URL(request.url);
+    const projectPath = url.searchParams.get("projectPath");
 
-  if (!projectPath) {
-    return Response.json({ error: "projectPath is required" }, { status: 400 });
-  }
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  try {
-    const body = (await request.json()) as {
-      screenshotId: string;
-      sourceFilename?: "light.png" | "dark.png";
-      targetFilename: "opengraph-image.png" | "twitter-image.png";
-    };
+    return yield* Effect.tryPromise(async () => {
+      const body = (await request.json()) as {
+        screenshotId: string;
+        sourceFilename?: "light.png" | "dark.png";
+        targetFilename: "opengraph-image.png" | "twitter-image.png";
+      };
 
-    await copyScreenshotToRoot(
-      projectPath,
-      body.screenshotId,
-      body.targetFilename,
-      body.sourceFilename,
-    );
-    return Response.json({ success: true });
-  } catch (e) {
-    console.error("Failed to copy screenshot:", e);
-    return Response.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 },
-    );
-  }
+      await copyScreenshotToRoot(
+        projectPath,
+        body.screenshotId,
+        body.targetFilename,
+        body.sourceFilename,
+      );
+
+      return { success: true };
+    });
+  });
 }
 
 export async function handleCheckImageExists(
