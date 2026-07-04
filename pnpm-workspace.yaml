@@ -28,7 +28,7 @@ catalog:
   "@dnd-kit/core": ^6.3.1
   "@dnd-kit/sortable": ^10.0.0
   "@dnd-kit/utilities": ^3.2.2
-  "@effect/platform-node": ^0.107.0
+  "@effect/platform-node": 4.0.0-beta.93
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
@@ -78,7 +78,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-beta.90
+  effect: 4.0.0-beta.93
   execa: ^9.6.1
   fast-glob: 3.3.3
   handlebars: ^4.7.8

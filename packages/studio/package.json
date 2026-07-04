@@ -58,10 +58,12 @@
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
+    "@effect/platform-node": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "chalk": "catalog:",
     "clsx": "catalog:",
+    "effect": "catalog:",
     "execa": "catalog:",
     "handlebars": "catalog:",
     "http-status-codes": "catalog:",
@@ -71,6 +73,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@effect/language-service": "catalog:dev",
     "@jest/globals": "catalog:dev",
     "@types/jest": "catalog:dev",
     "@types/node": "catalog:dev",

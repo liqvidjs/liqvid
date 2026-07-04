@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/@effect/language-service/schema.json",
   "compilerOptions": {
     "alwaysStrict": true,
     "composite": true,

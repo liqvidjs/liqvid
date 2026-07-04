@@ -1,6 +1,8 @@
 import * as url from "node:url";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import { Effect, Exit } from "effect";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
@@ -33,6 +35,7 @@ import {
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
+import { HttpError } from "../utils/errors.mts";
 
 interface RequestContext {
   params: Promise<{
@@ -82,8 +85,45 @@ export function getHandler(_dynamicImports: DynamicImports) {
       case listScreenshotsOperation.endpoint:
         return handleListScreenshots(req);
 
-      case listThumbsOperation.endpoint:
-        return listThumbs(searchParams);
+      case listThumbsOperation.endpoint: {
+        const result = await Effect.runPromiseExit(
+          listThumbs(searchParams).pipe(Effect.provide(NodeFileSystem.layer)),
+        );
+
+        return Exit.match(result, {
+          onFailure: (cause) => {
+            for (const reason of cause.reasons) {
+              switch (reason._tag) {
+                case "Fail": {
+                  const { error } = reason;
+
+                  // HTTP errors, expected
+                  if (error instanceof HttpError) {
+                    return Response.json(
+                      { error: error.message },
+                      { status: error.status },
+                    );
+                  }
+
+                  // filesystem error, 500
+                  return Response.json(
+                    { error: "Internal Server Error" },
+                    { status: StatusCodes.INTERNAL_SERVER_ERROR },
+                  );
+                }
+
+                default:
+                  // other errors are 500
+                  return Response.json(
+                    { error: "Internal Server Error" },
+                    { status: StatusCodes.INTERNAL_SERVER_ERROR },
+                  );
+              }
+            }
+          },
+          onSuccess: (v) => Response.json(v),
+        });
+      }
     }
 
     if (route.startsWith(staticFileOperation.endpoint)) {
@@ -102,7 +142,10 @@ export function getHandler(_dynamicImports: DynamicImports) {
  * Liqvid server POST handler
  */
 export function postHandler(dynamicImports: DynamicImports) {
-  return async function POST(req: Request, { params }: RequestContext) {
+  return async function POST(
+    req: Request,
+    { params }: RequestContext,
+  ): Promise<Response> {
     const paramsObject = await params;
     const keys = Object.keys(paramsObject);
     const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
@@ -125,8 +168,42 @@ export function postHandler(dynamicImports: DynamicImports) {
       case generateCaptionsOperation.endpoint:
         return generateCaptions(searchParams /*await req.json()*/);
 
-      case generateThumbsOperation.endpoint:
-        return generateThumbs(searchParams, await req.json());
+      case generateThumbsOperation.endpoint: {
+        const program = generateThumbs(searchParams, await req.json());
+        const result = await Effect.runPromiseExit(
+          program.pipe(Effect.provide(NodeFileSystem.layer)),
+        );
+
+        return Exit.match(result, {
+          onFailure: (cause) => {
+            for (const reason of cause.reasons) {
+              // all other errors are 500
+              if (reason._tag !== "Fail") {
+                break;
+              }
+
+              const { error } = reason;
+
+              // HTTP errors, expected
+              if (!(error instanceof HttpError)) {
+                break;
+              }
+
+              return Response.json(
+                { error: error.message },
+                { status: error.status },
+              );
+            }
+
+            // other error, 500
+            return Response.json(
+              { error: "Internal Server Error" },
+              { status: StatusCodes.INTERNAL_SERVER_ERROR },
+            );
+          },
+          onSuccess: (v) => Response.json(v),
+        });
+      }
 
       case setProjectMetaOperation.endpoint:
         return setProjectMeta(searchParams, await req.json());
