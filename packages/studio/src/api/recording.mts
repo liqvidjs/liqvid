@@ -12,11 +12,19 @@ import {
 } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
 import { compare } from "@liqvid/utils";
+import { Effect, FileSystem, Option, Schema } from "effect";
 import { StatusCodes } from "http-status-codes";
 
 import { RECORDING_META_FILE } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
+import { safeGetOption } from "../utils/effect.mts";
+import { HttpError } from "../utils/errors.mts";
 import { loadJson } from "../utils/fs.mts";
+
+import {
+  type SaveRecordingMetadata,
+  SaveRecordingMetadataFromJson,
+} from "./types.mts";
 
 export async function listRecordings(
   searchParams: URLSearchParams,
@@ -94,15 +102,6 @@ export async function listRecordings(
   return Response.json(recordings);
 }
 
-interface SaveRecordingMetadata {
-  durationMs: number;
-  plugins: Array<{
-    key: string;
-    isBlob: boolean;
-    filename?: string;
-  }>;
-}
-
 const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas/recording-meta";
 declare const data: RecordingMeta;
 export default data;`;
@@ -110,104 +109,113 @@ export default data;`;
 /**
  * Save a new recording to disk.
  */
-export async function saveRecording(
+export function saveRecording(
   searchParams: URLSearchParams,
   formData: FormData,
   dynamicImports: DynamicImports,
-): Promise<Response> {
-  const $url = safeGet(searchParams, "url");
-  if ($url.isNone) {
-    return Response.json(
-      { error: "invalid" },
-      { status: StatusCodes.BAD_REQUEST },
+) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    const url = yield* safeGetOption(searchParams, "url").pipe(
+      Option.match({
+        onNone: () =>
+          Effect.fail(
+            new HttpError({
+              message: "missing url parameter",
+              status: StatusCodes.BAD_REQUEST,
+            }),
+          ),
+        onSome: (url) => Effect.succeed(url),
+      }),
     );
-  }
 
-  // Parse metadata
-  const metadataStr = formData.get("metadata");
-  if (typeof metadataStr !== "string") {
-    return Response.json(
-      { error: "missing metadata" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
-
-  let metadata: SaveRecordingMetadata;
-  try {
-    metadata = JSON.parse(metadataStr);
-  } catch {
-    return Response.json(
-      { error: "invalid metadata" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
-
-  let projectDir = fileURLToPath($url.unwrap());
-  if (projectDir.endsWith("page.tsx")) {
-    projectDir = path.dirname(projectDir);
-  }
-
-  const assetsDir = path.join(projectDir, ".liqvid");
-
-  // Create assets dir if it doesn't exist
-  if (!fs.existsSync(assetsDir)) {
-    await fsp.mkdir(assetsDir, { recursive: true });
-  }
-
-  const recordingsDir = path.join(assetsDir, "recordings");
-  if (!fs.existsSync(recordingsDir)) {
-    await fsp.mkdir(recordingsDir, { recursive: true });
-  }
-
-  // Create recording directory with ISO datetime name
-  const recordingName = new Date().toISOString().replace(/[:.]/g, "-");
-  const recordingDir = path.join(recordingsDir, recordingName);
-  await fsp.mkdir(recordingDir, { recursive: true });
-
-  // Write recording-meta.json
-  const recordingMeta: RecordingMetaFile = {
-    created: new Date().toISOString(),
-    duration: {
-      milliseconds: metadata.durationMs,
-    },
-  };
-
-  await writeTypedJson({
-    data: recordingMeta,
-    declaration: recordingMetaDeclaration,
-    dirname: recordingDir,
-    filename: RECORDING_META_FILE,
-    pretty: true,
-  });
-
-  // Write plugin data
-  for (const pluginInfo of metadata.plugins) {
-    const pluginDir = path.join(
-      recordingDir,
-      packageNameToDirName(pluginInfo.key),
-    );
-    await fsp.mkdir(pluginDir, { recursive: true });
-
-    const data = formData.get(pluginInfo.key);
-    if (data === null) continue;
-
-    if (pluginInfo.isBlob) {
-      // Write blob data with specified filename
-      // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
-      const filename = pluginInfo.filename ?? "data.bin";
-      const blobData = data as Blob;
-      const buffer = Buffer.from(await blobData.arrayBuffer());
-      await fsp.writeFile(path.join(pluginDir, filename), buffer);
-    } else if (typeof data === "string") {
-      // Write JSON data as raw.json
-      await fsp.writeFile(path.join(pluginDir, "raw.json"), data);
+    // Parse metadata
+    const metadataStr = formData.get("metadata");
+    if (typeof metadataStr !== "string") {
+      return yield* new HttpError({
+        message: "missing metadata",
+        status: StatusCodes.BAD_REQUEST,
+      });
     }
-  }
 
-  // Run post-processing plugins
-  await runPostProcessing(recordingDir, metadata.plugins, dynamicImports);
+    const metadata = yield* Schema.decodeEffect(SaveRecordingMetadataFromJson)(
+      metadataStr,
+    );
 
-  return new Response(null, { status: StatusCodes.CREATED });
+    let projectDir = fileURLToPath(url);
+    if (projectDir.endsWith("page.tsx")) {
+      projectDir = path.dirname(projectDir);
+    }
+
+    const assetsDir = path.join(projectDir, ".liqvid");
+
+    // Create assets dir if it doesn't exist
+    if (!(yield* fs.exists(assetsDir))) {
+      yield* fs.makeDirectory(assetsDir, { recursive: true });
+    }
+
+    const recordingsDir = path.join(assetsDir, "recordings");
+    if (!(yield* fs.exists(recordingsDir))) {
+      yield* fs.makeDirectory(recordingsDir, { recursive: true });
+    }
+
+    // Create recording directory with ISO datetime name
+    const recordingName = new Date().toISOString().replace(/[:.]/g, "-");
+    const recordingDir = path.join(recordingsDir, recordingName);
+    yield* fs.makeDirectory(recordingDir, { recursive: true });
+
+    // Write recording-meta.json
+    const recordingMeta: RecordingMetaFile = {
+      created: new Date().toISOString(),
+      duration: {
+        milliseconds: metadata.durationMs,
+      },
+    };
+
+    yield* Effect.promise(() =>
+      writeTypedJson({
+        data: recordingMeta,
+        declaration: recordingMetaDeclaration,
+        dirname: recordingDir,
+        filename: RECORDING_META_FILE,
+        pretty: true,
+      }),
+    );
+
+    // Write plugin data
+    for (const pluginInfo of metadata.plugins) {
+      const pluginDir = path.join(
+        recordingDir,
+        packageNameToDirName(pluginInfo.key),
+      );
+      yield* fs.makeDirectory(pluginDir, { recursive: true });
+
+      const data = formData.get(pluginInfo.key);
+      if (data === null) continue;
+
+      if (pluginInfo.isBlob) {
+        // Write blob data with specified filename
+        // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
+        const filename = pluginInfo.filename ?? "data.bin";
+        const blobData = data as Blob;
+        const buffer = yield* Effect.promise(() =>
+          blobData.arrayBuffer().then(Buffer.from),
+        );
+        yield* fs.writeFile(path.join(pluginDir, filename), buffer);
+      } else if (typeof data === "string") {
+        // Write JSON data as raw.json
+        yield* fs.writeFileString(path.join(pluginDir, "raw.json"), data);
+      }
+    }
+
+    // Run post-processing plugins
+    yield* Effect.promise(() =>
+      runPostProcessing(recordingDir, metadata.plugins, dynamicImports),
+    );
+
+    return new Response(null, { status: StatusCodes.CREATED });
+  });
 }
 
 /**

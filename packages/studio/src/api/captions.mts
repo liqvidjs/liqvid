@@ -3,14 +3,15 @@ import * as path from "node:path";
 
 import { renderAudio } from "@liqvid/cli/render-audio";
 import { transcribe } from "@liqvid/cli/transcribe";
-import { LiqvidConfig } from "@liqvid/schemas";
+import { Effect } from "effect";
 import { StatusCodes } from "http-status-codes";
 
-import { CONFIG_FILE } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
-import { loadJson } from "../utils/fs.mts";
+import { loadJsonEffect } from "../utils/effect.mts";
+import { HttpError } from "../utils/errors.mts";
 
 import type { CaptionsMeta } from "./contract.mts";
+import { CaptionsMetaFromJson } from "./contract-effect.mts";
 
 const CAPTIONS_DIR = ".liqvid/captions";
 const META_FILE = "meta.json";
@@ -22,17 +23,9 @@ const activeJobs = new Set<string>();
 /**
  * Read captions metadata from the project.
  */
-async function readCaptionsMeta(
-  projectDir: string,
-): Promise<CaptionsMeta | null> {
+function readCaptionsMeta(projectDir: string) {
   const metaPath = path.join(projectDir, CAPTIONS_DIR, META_FILE);
-
-  try {
-    const content = await fsp.readFile(metaPath, "utf8");
-    return JSON.parse(content) as CaptionsMeta;
-  } catch {
-    return null;
-  }
+  return loadJsonEffect(CaptionsMetaFromJson, metaPath);
 }
 
 /**
@@ -52,19 +45,20 @@ async function writeCaptionsMeta(
 /**
  * List existing captions for a project.
  */
-export async function listCaptions(searchParams: URLSearchParams) {
-  const projectPath = searchParams.get("projectPath");
-  if (!projectPath) {
-    return Response.json(
-      { error: "projectPath is required" },
-      { status: StatusCodes.BAD_REQUEST },
-    );
-  }
+export function listCaptions(searchParams: URLSearchParams) {
+  return Effect.gen(function* () {
+    const projectPath = searchParams.get("projectPath");
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
 
-  const projectDir = path.join(process.cwd(), "app", projectPath);
-  const meta = await readCaptionsMeta(projectDir);
+    const projectDir = path.join(process.cwd(), "app", projectPath);
 
-  return Response.json(meta);
+    return yield* readCaptionsMeta(projectDir);
+  });
 }
 
 /**

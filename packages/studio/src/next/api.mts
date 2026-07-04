@@ -2,6 +2,7 @@ import * as url from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import chalk from "chalk";
 import { Effect, Exit, type FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
@@ -35,7 +36,7 @@ import {
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
-import { HttpError } from "../utils/errors.mts";
+import { FileDecodeError, HttpError } from "../utils/errors.mts";
 
 interface RequestContext {
   params: Promise<{
@@ -78,7 +79,8 @@ export function getHandler(_dynamicImports: DynamicImports) {
         return getRoot();
 
       case listCaptionsOperation.endpoint:
-        return listCaptions(searchParams);
+        program = listCaptions(searchParams);
+        break;
 
       case listRecordingsOperation.endpoint:
         return listRecordings(searchParams);
@@ -158,11 +160,12 @@ export function postHandler(dynamicImports: DynamicImports) {
         break;
 
       case saveRecordingOperation.endpoint:
-        return saveRecording(
+        program = saveRecording(
           searchParams,
           await req.formData(),
           dynamicImports,
         );
+        break;
 
       case startRenderOperation.endpoint:
         return startRender(searchParams, await req.json());
@@ -229,14 +232,20 @@ async function runEffect<A, E>(
         const { error } = reason;
 
         // HTTP errors, expected
-        if (!(error instanceof HttpError)) {
-          break;
+        if (error instanceof HttpError) {
+          return Response.json(
+            { error: error.message },
+            { status: error.status },
+          );
+        } else if (error instanceof FileDecodeError) {
+          console.error(
+            chalk.red(
+              `FileDecodeError in ${error.filename}: ${error.cause.message}`,
+            ),
+          );
         }
 
-        return Response.json(
-          { error: error.message },
-          { status: error.status },
-        );
+        break;
       }
 
       // other error, 500
@@ -246,6 +255,7 @@ async function runEffect<A, E>(
       );
     },
     onSuccess: (v) => {
+      console.log("Effect succeeded with value:", v, v instanceof Response);
       if (v instanceof Response) {
         return v;
       }
