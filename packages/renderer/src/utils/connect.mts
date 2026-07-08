@@ -1,4 +1,6 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: this is fine */
 import cliProgress from "cli-progress";
+import type * as Puppeteer from "puppeteer-core";
 import puppeteer from "puppeteer-core";
 
 import type { ColorScheme, RenderMode } from "../types.mts";
@@ -17,7 +19,7 @@ export async function connect({
   renderMode,
   width,
 }: {
-  browser: puppeteer.Browser;
+  browser: Puppeteer.Browser;
   colorScheme?: ColorScheme;
   height: number;
   url: string;
@@ -32,21 +34,20 @@ export async function connect({
 
   await page.goto(url, { timeout: 0 });
 
-  await page.waitForSelector(".lv-controls");
+  // connect to player API
+  await page.waitForFunction(
+    () =>
+      (window.player = (document.querySelector(".lv-player") as any)?.[
+        Symbol.for("@liqvid/player/api")
+      ]),
+    {
+      timeout: 30_000,
+    },
+  );
 
-  page.evaluate(
-    (colorScheme, renderMode) => {
-      const playerElt = document.querySelector(
-        ".lv-player",
-      ) as HTMLElement | null;
-
-      if (!playerElt) {
-        throw new Error("Player element not found");
-      }
-
-      // biome-ignore lint/suspicious/noExplicitAny: symbol
-      window.player = (playerElt as any)[Symbol.for("@liqvid/player/api")];
-
+  // set various things
+  await page.evaluate(
+    async (colorScheme, renderMode) => {
       player.setColorScheme(colorScheme);
       player.setRenderMode(renderMode);
       player.toggleControls(false);
@@ -140,7 +141,7 @@ export async function getPages({
  * This sends a message to the page and waits for the response.
  */
 export async function callPlayerApi(
-  page: puppeteer.Page,
+  page: Puppeteer.Page,
   method: string,
   args: unknown[],
 ): Promise<unknown> {

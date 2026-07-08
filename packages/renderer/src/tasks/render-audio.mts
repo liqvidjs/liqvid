@@ -20,6 +20,7 @@ export interface RenderAudioOptions {
 export interface RenderAudioResult {
   /** Duration of the rendered audio in seconds */
   duration: number;
+
   /** Path to the saved WAV file */
   path: string;
 }
@@ -45,6 +46,7 @@ export async function renderAudio(
       Boolean,
     ) as string[],
     executablePath,
+    headless: process.env.HEADLESS !== "false",
     timeout: 0,
   });
 
@@ -52,11 +54,14 @@ export async function renderAudio(
     // Connect to the page
     const page = await connect({
       browser,
-      height: 800,
+      height: 0,
       renderMode: "video",
       url,
-      width: 1280,
+      width: 0,
     });
+
+    // send Escape key to page --- can't load audioContext without user input
+    await page.keyboard.press("Escape");
 
     // Render the audio inside the page
     const { base64, duration } = await page.evaluate(renderOfflineInPage);
@@ -84,6 +89,7 @@ export async function renderAudio(
  */
 async function renderOfflineInPage(): Promise<{
   base64: string;
+
   duration: number;
 }> {
   const playback = player.playback;
@@ -98,6 +104,7 @@ async function renderOfflineInPage(): Promise<{
     let lastSize = playback.audioSources.size;
     let lastChange = start;
 
+    const POLLING_INTERVAL = 50;
     const poll = setInterval(() => {
       const now = performance.now();
       const size = playback.audioSources.size;
@@ -111,7 +118,7 @@ async function renderOfflineInPage(): Promise<{
         clearInterval(poll);
         resolve();
       }
-    }, 50);
+    }, POLLING_INTERVAL);
   });
 
   /* renderOffline */
