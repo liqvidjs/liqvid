@@ -1,3 +1,4 @@
+import type { ImageFormat } from "@liqvid/schemas/effect";
 import { parseTime } from "@liqvid/utils";
 import type { CommandModule } from "yargs";
 
@@ -7,11 +8,6 @@ import {
   DEFAULT_CONFIG,
   parseConfig,
 } from "./config.mts";
-
-/**
- * Image format for frames.
- */
-export type ImageFormat = "jpeg" | "png";
 
 /**
  * Options for rendering a video.

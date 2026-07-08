@@ -1,5 +1,4 @@
 import * as child_process from "node:child_process";
-import * as fsp from "node:fs/promises";
 
 import chalk from "chalk";
 

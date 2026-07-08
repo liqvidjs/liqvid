@@ -1,9 +1,9 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { Err, Ok, type Result } from "@liqvid/fp";
-import { LiqvidConfig } from "@liqvid/schemas";
-import type { LiqvidConfigOut } from "@liqvid/schemas/liqvid-config";
+import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
+import { Effect } from "effect";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
@@ -12,6 +12,7 @@ import { LiqvidStudioProvider } from "../providers/hosting/liqvid-studio.mts";
 import { S3Provider } from "../providers/hosting/s3.mts";
 import { SFTPProvider } from "../providers/hosting/sftp.mts";
 import type { MediaHostingProvider } from "../providers/types.mts";
+import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
 
 import { CONFIG_FILE } from "./conventions.mts";
 
@@ -50,38 +51,9 @@ export interface BuildOptions {
 }
 
 /**
- * Load and validate the liqvid.json config file
- */
-async function loadConfig(configPath: string): Promise<LiqvidConfigOut | null> {
-  try {
-    const content = await fsp.readFile(configPath, "utf-8");
-    const rawConfig = JSON.parse(content);
-    const result = LiqvidConfig.safeParse(rawConfig);
-
-    if (!result.success) {
-      console.warn(`Warning: Invalid liqvid.json config:`);
-      for (const issue of result.error.issues) {
-        console.warn(`  - ${issue.path.join(".")}: ${issue.message}`);
-      }
-      return null;
-    }
-
-    return result.data;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      // Config file not found - that's okay for build
-      return null;
-    }
-    throw err;
-  }
-}
-
-/**
  * Get the media provider from the config
  */
-function getMediaProvider(
-  config: LiqvidConfigOut,
-): MediaHostingProvider | null {
+function getMediaProvider(config: LiqvidConfig): MediaHostingProvider | null {
   switch (config.backend.media) {
     case "copy": {
       const copyConfig = config.providers.copy;
@@ -129,10 +101,19 @@ export async function runNextBuild(
   const cwd = options.cwd ?? process.cwd();
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
 
+  const envFiles = loadEnvFiles(process.cwd());
+
   // Load config to get media base URL
-  const config = await loadConfig(configPath);
+  const config = await Effect.runPromise(
+    loadLiqvidConfig({ configPath }).pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(EnvFiles, envFiles),
+    ),
+  );
   const env: Record<string, string> = {
     ...process.env,
+    ...envFiles.production,
+    ...envFiles.local,
     NODE_ENV: "production",
   };
 

@@ -19,10 +19,20 @@
       "types": "./dist/types/tasks/compress.d.mts",
       "import": "./dist/esm/tasks/compress.mjs"
     },
+    "./debug": {
+      "default": "./src/tasks/debug.mts",
+      "types": "./dist/types/tasks/debug.d.mts",
+      "import": "./dist/esm/tasks/debug.mjs"
+    },
     "./render": {
       "@liqvid/dev": "./src/tasks/render.mts",
       "types": "./dist/types/tasks/render.d.mts",
       "import": "./dist/esm/tasks/render.mjs"
+    },
+    "./render-audio": {
+      "default": "./src/tasks/render-audio.mts",
+      "types": "./dist/types/tasks/render-audio.d.mts",
+      "import": "./dist/esm/tasks/render-audio.mjs"
     },
     "./thumbs": {
       "@liqvid/dev": "./src/tasks/thumbs.mts",
@@ -35,9 +45,14 @@
       "import": "./dist/esm/tasks/screenshot.mjs"
     },
     "./transcribe": {
-      "@liqvid/dev": "./src/tasks/transcribe.mts",
+      "default": "./src/tasks/transcribe.mts",
       "types": "./dist/types/tasks/transcribe.d.mts",
       "import": "./dist/esm/tasks/transcribe.mjs"
+    },
+    "./utils": {
+      "default": "./src/utils.mts",
+      "types": "./dist/types/utils.d.mts",
+      "import": "./dist/esm/utils.mjs"
     }
   },
   "bin": {
@@ -70,6 +85,7 @@
     "@aws-sdk/client-s3": "catalog:",
     "@aws-sdk/credential-providers": "catalog:",
     "@aws-sdk/lib-storage": "catalog:",
+    "@effect/platform-node": "catalog:",
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",

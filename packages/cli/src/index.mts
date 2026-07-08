@@ -9,10 +9,12 @@ import { hideBin } from "yargs/helpers";
 import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
 import { compress } from "./tasks/compress.mts";
+import { debugCommand } from "./tasks/debug.mts";
 import { generateImports } from "./tasks/generate-imports.mts";
 import { publish } from "./tasks/publish.mts";
 import { pull } from "./tasks/pull.mts";
 import { render } from "./tasks/render.mts";
+import { renderAudioCommand } from "./tasks/render-audio.mts";
 import { thumbs } from "./tasks/thumbs.mts";
 import { transcribeCommand } from "./tasks/transcribe.mts";
 
@@ -31,10 +33,12 @@ export async function main() {
     .demandCommand(1, "Must specify a command")
     .command(build)
     .command(compress)
+    .command(debugCommand)
     .command(generateImports)
     .command(publish)
     .command(pull)
     .command(render)
+    .command(renderAudioCommand)
     .command(thumbs)
     .command(transcribeCommand)
     .version(version)

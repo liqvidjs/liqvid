@@ -1,47 +1,7 @@
+import type { ScreenshotOptions } from "@liqvid/renderer/screenshot";
 import type { CommandModule } from "yargs";
 
-import {
-  BROWSER_EXECUTABLE,
-  DEFAULT_CONFIG,
-  parseConfig,
-} from "./config.mts";
-
-/**
- * Image format for screenshots.
- */
-export type ImageFormat = "jpeg" | "png";
-
-/**
- * Options for capturing a screenshot.
- */
-export interface ScreenshotOptions {
-  /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable?: string;
-
-  /** Color scheme: light or dark */
-  colorScheme?: "light" | "dark";
-
-  /** Screenshot height */
-  height: number;
-
-  /** Image format for the screenshot */
-  imageFormat?: ImageFormat;
-
-  /** Output filename */
-  output: string;
-
-  /** Quality for JPEG images (0-100) */
-  quality?: number;
-
-  /** Time in seconds to capture */
-  time: number;
-
-  /** URL of video to capture */
-  url: string;
-
-  /** Screenshot width */
-  width: number;
-}
+import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
 
 /**
  * Result of screenshot capture.
@@ -49,8 +9,10 @@ export interface ScreenshotOptions {
 export interface ScreenshotResult {
   /** Path to the saved screenshot */
   path: string;
+
   /** Width of the screenshot */
   width: number;
+
   /** Height of the screenshot */
   height: number;
 }
@@ -78,24 +40,9 @@ export async function screenshot(
     "@liqvid/renderer/screenshot"
   );
 
-  // Apply defaults
-  const colorScheme = options.colorScheme ?? "light";
-  const imageFormat = options.imageFormat ?? "png";
-  const quality = options.quality ?? 80;
+  // TODO: load screenshot configuration from config file here
 
-  const result = await renderScreenshot({
-    browserExecutable: options.browserExecutable ?? "",
-    colorScheme,
-    height: options.height,
-    imageFormat,
-    output: options.output,
-    quality,
-    time: options.time,
-    url: options.url,
-    width: options.width,
-  });
-
-  return result;
+  return await renderScreenshot(options);
 }
 
 /** Capture a screenshot. */
