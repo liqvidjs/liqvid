@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { Effect, FileSystem, Option } from "effect";
+import { Cause, Effect, FileSystem, Option, type PlatformError } from "effect";
 import type { Concurrency } from "effect/Types";
 
 export function safeGetOption<
@@ -37,4 +37,27 @@ export function readDirWithFileTypes(
       { concurrency },
     );
   });
+}
+
+export const existenceOptional = <A, E, R>(
+  effect: Effect.Effect<A, E, R>,
+): Effect.Effect<Option.Option<A>, E, R> => {
+  return effect.pipe(
+    Effect.map(Option.some),
+    Effect.catch((error) => {
+      if (isPlatformError(error) && error.reason._tag === "NotFound") {
+        return Effect.succeed(Option.none());
+      }
+      return Effect.fail(error);
+    }),
+  );
+};
+
+function isPlatformError(error: unknown): error is PlatformError.PlatformError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "_tag" in error &&
+    (error as PlatformError.PlatformError)._tag === "PlatformError"
+  );
 }

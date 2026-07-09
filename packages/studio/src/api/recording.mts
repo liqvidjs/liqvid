@@ -18,7 +18,7 @@ import { RECORDING_META_FILE } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
 
-import { WebApi } from "./contract-effect.mts";
+import { WebApi } from "./contract.mts";
 import {
   type SaveRecordingMetadata,
   SaveRecordingMetadataFromJson,

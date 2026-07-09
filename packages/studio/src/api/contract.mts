@@ -1,199 +1,286 @@
-import { z } from "zod";
+import {
+  ColorScheme,
+  ColorSchemeOption,
+  ImageFormat,
+  RecordingMeta,
+  ScreenshotEntry,
+} from "@liqvid/schemas/effect";
+import { Schema } from "effect";
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  OpenApi,
+} from "effect/unstable/httpapi";
 
-export type Operation<
-  BodyModel extends z.ZodType,
-  ErrorModel extends z.ZodType,
-  ResponseModel extends z.ZodType,
-  SearchModel extends z.ZodType,
-> = {
-  endpoint: string;
-  error?: ErrorModel;
-  response?: ResponseModel;
-  search?: SearchModel;
-} & (
-  | { body?: undefined; method?: "GET" }
-  | {
-      body?: BodyModel;
-      method: "POST";
-    }
-  | {
-      body?: BodyModel;
-      method: "DELETE";
-    }
+import { CaptionsMeta } from "../types/schemas.mts";
+import {
+  ConflictError,
+  InvalidError,
+  NotFoundError,
+} from "../utils/errors.mts";
+
+import { RenderEntry, ThumbsData } from "./schemas.mts";
+
+const projectPathQuery = Schema.Struct({
+  /** path to the project */
+  projectPath: Schema.String,
+});
+
+const urlQuery = Schema.Struct({
+  /** path to the project */
+  url: Schema.String,
+});
+
+/* ------------------------------ captions ------------------------------ */
+const captionsGroup = HttpApiGroup.make("captions")
+  .add(
+    HttpApiEndpoint.get("list", "/captions", {
+      error: NotFoundError,
+      query: projectPathQuery,
+      success: CaptionsMeta,
+    }).annotate(OpenApi.Summary, "List captions for a project"),
+
+    HttpApiEndpoint.post("generate", "/captions/generate", {
+      error: [InvalidError, NotFoundError],
+      payload: Schema.optional(
+        Schema.Struct({
+          /** Whisper model to use */
+          modelName: Schema.optional(Schema.String),
+        }),
+      ),
+      query: projectPathQuery,
+      success: Schema.Struct({
+        /** Status of the generation */
+        status: Schema.Literals(["started", "already_generating"]),
+      }),
+    }).annotate(OpenApi.Summary, "Generate captions for a project"),
+  )
+  .annotate(OpenApi.Title, "Captions");
+
+/* ------------------------------ projects ------------------------------ */
+const projectsGroup = HttpApiGroup.make("projects")
+  .add(
+    HttpApiEndpoint.post("setProjectMeta", "/project-meta", {
+      payload: Schema.Struct({
+        durationMs: Schema.Number,
+      }),
+      query: urlQuery,
+    }).annotate(OpenApi.Summary, "Set project metadata"),
+  )
+  .annotate(OpenApi.Title, "Projects");
+
+/* ------------------------------ renders ------------------------------ */
+const rendersGroup = HttpApiGroup.make("renders")
+  .add(
+    HttpApiEndpoint.get("list", "/renders", {
+      query: projectPathQuery,
+      success: Schema.Array(RenderEntry),
+    }).annotate(OpenApi.Summary, "List renders for a project"),
+  )
+  .add(
+    HttpApiEndpoint.post("start", "/renders/start", {
+      payload: Schema.Struct({
+        /** Color scheme: light or dark */
+        colorScheme: Schema.optional(ColorScheme),
+
+        /** Frames per second */
+        fps: Schema.optional(Schema.Number),
+
+        /** Video height */
+        height: Schema.optional(Schema.Number),
+
+        /** Video width */
+        width: Schema.optional(Schema.Number),
+      }),
+      query: Schema.Struct({
+        projectPath: Schema.String,
+      }),
+      success: Schema.Struct({
+        /** Render ID (datetime folder name) */
+        id: Schema.String,
+      }),
+    }),
+  )
+  .add(
+    HttpApiEndpoint.post("rename", "/renders/rename", {
+      error: [InvalidError, NotFoundError, ConflictError],
+      payload: Schema.Struct({
+        /** New name for the render */
+        newName: Schema.String,
+        /** Current render ID */
+        renderId: Schema.String,
+      }),
+
+      query: projectPathQuery,
+
+      success: Schema.Struct({
+        /** New render ID (folder name) */
+        newId: Schema.String,
+      }),
+    }).annotate(OpenApi.Summary, "Rename a render"),
+  )
+  .annotate(OpenApi.Description, "Static renders of a project")
+  .annotate(OpenApi.Summary, "Renders for a project")
+  .annotate(OpenApi.Title, "Static renders");
+
+/* ------------------------------ recordings ------------------------------ */
+const recordingsGroup = HttpApiGroup.make("recordings").add(
+  HttpApiEndpoint.get("list", "/recordings", {
+    query: {
+      url: Schema.String,
+    },
+    success: Schema.Array(RecordingMeta),
+  }),
 );
 
-/**
- * Schema for plugin recording data.
- * Data can be a Blob (for media) which requires a filename,
- * or any JSON-serializable data.
- */
-export const PluginRecordingData = z.object({
-  data: z.unknown(),
-  /** For Blob data, the filename to save as */
-  filename: z.string().optional(),
-  key: z.string(),
-});
-export type PluginRecordingData = z.infer<typeof PluginRecordingData>;
+/* ------------------------------ screenshots ------------------------------ */
+const targetFilename = Schema.Literals([
+  "opengraph-image.png",
+  "twitter-image.png",
+]);
 
-export const saveRecordingOperation = {
-  endpoint: "/recordings" as const,
-  method: "POST" as const,
-  search: z.object({
-    url: z.string(),
+const screenshotsGroup = HttpApiGroup.make("screenshots")
+  .add(
+    HttpApiEndpoint.get("list", "/screenshots", {
+      query: projectPathQuery,
+      success: Schema.Array(ScreenshotEntry),
+    }).annotate(OpenApi.Summary, "List screenshots for a project"),
+  )
+  .add(
+    HttpApiEndpoint.post("capture", "/screenshots/capture", {
+      payload: Schema.Struct({
+        /** Color scheme: light, dark, or both */
+        colorScheme: Schema.optional(ColorSchemeOption),
+        /** Height of screenshot */
+        height: Schema.Number,
+        /** Time in seconds to capture */
+        time: Schema.Number,
+        /** Width of screenshot */
+        width: Schema.Number,
+      }),
+      query: projectPathQuery,
+      success: ScreenshotEntry,
+    }).annotate(OpenApi.Summary, "Capture a screenshot"),
+  )
+  .add(
+    HttpApiEndpoint.post("copy", "/screenshots/copy", {
+      payload: Schema.Struct({
+        /** Screenshot folder id */
+        screenshotId: Schema.String,
+
+        /** Source filename for "both" mode (light.png or dark.png) */
+        sourceFilename: Schema.optional(
+          Schema.Literals(["light.png", "dark.png"]),
+        ),
+
+        /** Target filename (opengraph-image.png or twitter-image.png) */
+        targetFilename,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(OpenApi.Summary, "Copy a screenshot to the project root"),
+  )
+  .add(
+    HttpApiEndpoint.post("rename", "/screenshots/rename", {
+      error: [InvalidError, NotFoundError, ConflictError],
+      payload: Schema.Struct({
+        /** New name for the screenshot */
+        newName: Schema.String,
+        /** Current screenshot folder id */
+        screenshotId: Schema.String,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({
+        /** New screenshot id (folder name) */
+        newId: Schema.String,
+      }),
+    }).annotate(OpenApi.Summary, "Rename a screenshot"),
+  )
+  .add(
+    HttpApiEndpoint.delete("delete", "/screenshots/delete", {
+      error: NotFoundError,
+      payload: Schema.Struct({
+        /** Screenshot folder id to delete */
+        screenshotId: Schema.String,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(OpenApi.Summary, "Delete a screenshot"),
+  )
+  .add(
+    HttpApiEndpoint.get("checkExists", "/screenshots/check-exists", {
+      query: Schema.Struct({
+        filename: targetFilename,
+        projectPath: Schema.String,
+      }),
+      success: Schema.Struct({ exists: Schema.Boolean }),
+    }).annotate(OpenApi.Summary, "Check whether a project image exists"),
+  );
+
+/* ------------------------------ thumbnails ------------------------------ */
+const thumbsGroup = HttpApiGroup.make("thumbs").add(
+  HttpApiEndpoint.get("list", "/thumbs", {
+    query: projectPathQuery,
+    success: ThumbsData,
   }),
-};
 
-/**
- * Serve static files from the app directory.
- * The `url` param is the path relative to the app directory.
- * Example: /api/liqvid/static/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
- */
-export const staticFileOperation = {
-  endpoint: "/static" as const,
-  search: z.object({
-    url: z.string(),
+  HttpApiEndpoint.post("generate", "/thumbs/generate", {
+    payload: Schema.optional(
+      Schema.Struct({
+        /** Color scheme: light, dark, or both */
+        colorScheme: Schema.optional(ColorSchemeOption),
+
+        /** Number of columns per sheet */
+        cols: Schema.optional(Schema.Number),
+
+        /** Seconds between screenshots */
+        frequency: Schema.optional(Schema.Number),
+
+        /** Height of each thumbnail */
+        height: Schema.optional(Schema.Number),
+
+        /** Image format: jpeg or png */
+        imageFormat: Schema.optional(ImageFormat),
+
+        /** Quality for JPEG images (0-100) */
+        quality: Schema.optional(Schema.Number),
+
+        /** Number of rows per sheet */
+        rows: Schema.optional(Schema.Number),
+
+        /** Width of each thumbnail */
+        width: Schema.optional(Schema.Number),
+      }),
+    ),
+
+    query: projectPathQuery,
+
+    success: Schema.Struct({
+      /** Thumbnail sheets for dark mode (if colorScheme is "dark" or "both") */
+      dark: Schema.optional(Schema.Array(Schema.String)),
+
+      /** Thumbnail sheets for light mode (if colorScheme is "light" or "both") */
+      light: Schema.optional(Schema.Array(Schema.String)),
+
+      /** Number of thumbnail sheets generated per color scheme */
+      numSheets: Schema.Number,
+    }),
   }),
-};
+);
 
-/**
- * Metadata for a render.
- */
-export const RenderMeta = z.object({
-  /** Color scheme used */
-  colorScheme: z.enum(["light", "dark"]),
+/** Liqvid Studio web API */
+export const WebApi = HttpApi.make("LiqvidStudioWebApi")
+  .add(
+    captionsGroup,
+    projectsGroup,
+    recordingsGroup,
+    rendersGroup,
+    screenshotsGroup,
+    thumbsGroup,
+  )
+  .prefix("/api/liqvid")
+  .annotate(OpenApi.Title, "Liqvid Studio Web API")
+  .annotate(OpenApi.Version, "1.0.0");
 
-  /** Timestamp when render was created */
-  createdAt: z.string(),
-
-  /** Duration in seconds */
-  duration: z.number().optional(),
-
-  /** Frames per second */
-  fps: z.number(),
-
-  /** Video height */
-  height: z.number(),
-
-  /** Output filename */
-  output: z.string(),
-
-  /** Render status */
-  status: z.enum(["pending", "rendering", "completed", "failed"]),
-
-  /** Video width */
-  width: z.number(),
-});
-export type RenderMeta = z.infer<typeof RenderMeta>;
-
-/**
- * A render entry with its ID and metadata.
- */
-export const RenderEntry = z.object({
-  /** Unique identifier (datetime folder name) */
-  id: z.string(),
-
-  /** Render metadata */
-  meta: RenderMeta,
-});
-export type RenderEntry = z.infer<typeof RenderEntry>;
-
-export const startRenderOperation = {
-  body: z.object({
-    /** Color scheme: light or dark */
-    colorScheme: z.enum(["light", "dark"]).optional(),
-
-    /** Frames per second */
-    fps: z.number().optional(),
-
-    /** Video height */
-    height: z.number().optional(),
-
-    /** Video width */
-    width: z.number().optional(),
-  }),
-  endpoint: "/renders/start" as const,
-  method: "POST" as const,
-  response: z.object({
-    /** Render ID (datetime folder name) */
-    id: z.string(),
-  }),
-  search: z.object({
-    projectPath: z.string(),
-  }),
-};
-
-export const listRendersOperation = {
-  endpoint: "/renders" as const,
-  response: z.array(RenderEntry),
-  search: z.object({
-    projectPath: z.string(),
-  }),
-};
-
-export const renameRenderOperation = {
-  body: z.object({
-    /** New name for the render */
-    newName: z.string(),
-
-    /** Current render ID */
-    renderId: z.string(),
-  }),
-  endpoint: "/renders/rename" as const,
-  method: "POST" as const,
-  response: z.object({
-    /** New render ID (folder name) */
-    newId: z.string(),
-  }),
-  search: z.object({
-    projectPath: z.string(),
-  }),
-};
-
-/**
- * Transcript entry with word and timing information.
- * Format: [word, startTimeMs, endTimeMs]
- */
-export const TranscriptEntry = z.tuple([z.string(), z.number(), z.number()]);
-export type TranscriptEntry = z.infer<typeof TranscriptEntry>;
-
-/**
- * Captions metadata.
- */
-export const CaptionsMeta = z.object({
-  /** Path to the captions.vtt file */
-  captionsPath: z.string(),
-
-  /** Timestamp when captions were generated */
-  createdAt: z.string(),
-
-  /** Generation status */
-  status: z.enum(["pending", "generating", "completed", "failed"]),
-
-  /** Path to the transcript.json file */
-  transcriptPath: z.string().optional(),
-});
-export type CaptionsMeta = z.infer<typeof CaptionsMeta>;
-
-export const listCaptionsOperation = {
-  endpoint: "/captions" as const,
-  response: CaptionsMeta.nullable(),
-  search: z.object({
-    projectPath: z.string(),
-  }),
-};
-
-export const generateCaptionsOperation = {
-  body: z.object({
-    /** Whisper model to use */
-    modelName: z.string().optional(),
-  }),
-  endpoint: "/captions/generate" as const,
-  method: "POST" as const,
-  response: z.object({
-    /** Status of the generation */
-    status: z.enum(["started", "already_generating"]),
-  }),
-  search: z.object({
-    projectPath: z.string(),
-  }),
-};
+export type WebApi = typeof WebApi;

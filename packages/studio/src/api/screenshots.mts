@@ -7,17 +7,18 @@ import type {
   ScreenshotEntry,
   ScreenshotMeta,
 } from "@liqvid/schemas/screenshot-meta";
-import { Effect, FileSystem } from "effect";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
+import { existenceOptional } from "../utils/effect.mts";
 import {
   ConflictError,
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
 
-import { WebApi } from "./contract-effect.mts";
+import { WebApi } from "./contract.mts";
 
 const SCREENSHOT_META_FILE = "screenshot-meta.json";
 
@@ -148,7 +149,7 @@ export async function copyScreenshotToRoot(
   screenshotId: string,
   targetFilename: "opengraph-image.png" | "twitter-image.png",
   sourceFilename?: "light.png" | "dark.png",
-): Promise<void> {
+) {
   const projectDir = getProjectDir(projectPath);
   const screenshotsDir = getScreenshotsDir(projectPath);
   const sourcePath = path.join(
@@ -190,7 +191,11 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           const fs = yield* FileSystem.FileSystem;
 
-          const entries = yield* fs.readDirectory(screenshotsDir);
+          const entries = (yield* fs
+            .readDirectory(screenshotsDir)
+            .pipe(existenceOptional)).pipe(
+            Option.getOrElse(() => [] as string[]),
+          );
           const screenshots: ScreenshotEntry[] = [];
 
           yield* Effect.all(
@@ -231,16 +236,7 @@ export const screenshotsLive = HttpApiBuilder.group(
           );
 
           return screenshots;
-        }).pipe(
-          Effect.catchTag("PlatformError", (e) => {
-            // A missing screenshots directory just means no screenshots yet.
-            if (e.reason._tag === "NotFound") {
-              return Effect.succeed<readonly ScreenshotEntry[]>([]);
-            }
-
-            return Effect.die(e);
-          }),
-        ),
+        }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
       )
       // capture a new screenshot
       .handle("capture", ({ payload, query: { projectPath } }) =>
@@ -253,14 +249,23 @@ export const screenshotsLive = HttpApiBuilder.group(
           payload: { screenshotId, sourceFilename, targetFilename },
           query: { projectPath },
         }) =>
-          Effect.promise(() =>
-            copyScreenshotToRoot(
-              projectPath,
+          Effect.gen(function* () {
+            const fs = yield* FileSystem.FileSystem;
+
+            const projectDir = getProjectDir(projectPath);
+            const screenshotsDir = getScreenshotsDir(projectPath);
+            const sourcePath = path.join(
+              screenshotsDir,
               screenshotId,
-              targetFilename,
-              sourceFilename,
-            ),
-          ).pipe(Effect.as({ success: true })),
+              sourceFilename ?? "screenshot.png",
+            );
+            const targetPath = path.join(projectDir, targetFilename);
+
+            yield* fs.copyFile(sourcePath, targetPath);
+          }).pipe(
+            Effect.as({ success: true }),
+            Effect.catchTag("PlatformError", Effect.orDie),
+          ),
       )
       // rename a screenshot (changes the folder name)
       .handle(
@@ -268,9 +273,7 @@ export const screenshotsLive = HttpApiBuilder.group(
         ({ payload: { newName, screenshotId }, query: { projectPath } }) =>
           Effect.gen(function* () {
             // Sanitize new name (remove path separators and invalid chars)
-            const sanitizedName = newName
-              .replace(/[/\\:*?"<>|]/g, "-")
-              .trim();
+            const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
             if (!sanitizedName) {
               return yield* new InvalidError({ message: "Invalid name" });
@@ -327,8 +330,14 @@ export const screenshotsLive = HttpApiBuilder.group(
       )
       // check whether a project image (opengraph/twitter) exists
       .handle("checkExists", ({ query: { filename, projectPath } }) =>
-        Effect.promise(() => checkImageExists(projectPath, filename)).pipe(
-          Effect.map((exists) => ({ exists })),
-        ),
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem;
+
+          const filePath = path.join(getProjectDir(projectPath), filename);
+
+          return {
+            exists: yield* fs.exists(filePath),
+          };
+        }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
       ),
 );

@@ -2,23 +2,20 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { Effect, FileSystem } from "effect";
+import { loadJsonEffect } from "@liqvid/cli/utils";
+import { Effect, FileSystem, Option } from "effect";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
+import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
 
-import type { RenderMeta } from "./contract.mts";
+import { WebApi } from "./contract.mts";
+import { RenderMeta } from "./schemas.mts";
 
 const RENDERS_BASE_DIR = ".liqvid/renders";
 const RENDER_META_FILE = "render-meta.json";
-
-interface StartRenderBody {
-  colorScheme?: "light" | "dark";
-  fps?: number;
-  height?: number;
-  width?: number;
-}
 
 /**
  * Generate a unique render ID based on current datetime.
@@ -41,14 +38,8 @@ function generateRenderId(): string {
 /**
  * Read render metadata from a render directory.
  */
-async function readRenderMeta(renderDir: string): Promise<RenderMeta | null> {
-  try {
-    const metaPath = path.join(renderDir, RENDER_META_FILE);
-    const content = await fsp.readFile(metaPath, "utf-8");
-    return JSON.parse(content) as RenderMeta;
-  } catch {
-    return null;
-  }
+function readRenderMeta(renderDir: string) {
+  return loadJsonEffect(RenderMeta, path.join(renderDir, RENDER_META_FILE));
 }
 
 /**
@@ -62,132 +53,29 @@ async function writeRenderMeta(
   await fsp.writeFile(metaPath, JSON.stringify(meta, null, 2));
 }
 
-/**
- * Start a new video render for a project.
- */
-export function startRender(
-  searchParams: URLSearchParams,
-  body: StartRenderBody,
-) {
-  return Effect.gen(function* () {
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
+export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
+  handlers
+    .handle("list", ({ query: { projectPath } }) =>
+      Effect.gen(function* () {
+        const rendersBaseDir = path.join(
+          process.cwd(),
+          "app",
+          projectPath,
+          RENDERS_BASE_DIR,
+        );
 
-    const fs = yield* FileSystem.FileSystem;
-
-    const { basePath, productionServerPort } = getServerState();
-    const projectDir = path.join(process.cwd(), "app", projectPath);
-    const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
-
-    // Generate unique render ID
-    const renderId = generateRenderId();
-    const renderDir = path.join(rendersBaseDir, renderId);
-
-    // Ensure render directory exists
-    yield* fs.makeDirectory(renderDir, { recursive: true });
-
-    // Build the URL for the video
-    const previewPath = basePath
-      ? `${basePath}/${projectPath}`
-      : `/${projectPath}`;
-    const url = `http://localhost:${productionServerPort}${previewPath}`;
-
-    // Apply defaults
-    const colorScheme = body.colorScheme ?? "light";
-    const fps = body.fps ?? 30;
-    const height = body.height ?? 800;
-    const width = body.width ?? 1280;
-    const output = path.join(renderDir, "video.mp4");
-
-    // Create initial metadata
-    const meta: RenderMeta = {
-      colorScheme,
-      createdAt: new Date().toISOString(),
-      fps,
-      height,
-      output: "video.mp4",
-      status: "rendering",
-      width,
-    };
-
-    yield* Effect.promise(() => writeRenderMeta(renderDir, meta));
-
-    // Start render in background (don't await)
-    yield* Effect.sync(() => {
-      renderVideo({
-        colorScheme,
-        fps,
-        height,
-        output,
-        url,
-        width,
-      })
-        .then(async (result) => {
-          // Update metadata with completed status
-          const updatedMeta: RenderMeta = {
-            ...meta,
-            duration: result.duration,
-            status: "completed",
-          };
-          await writeRenderMeta(renderDir, updatedMeta);
-          console.log(`Render ${renderId} completed`);
-        })
-        .catch(async (error) => {
-          // Update metadata with failed status
-          const updatedMeta: RenderMeta = {
-            ...meta,
-            status: "failed",
-          };
-          await writeRenderMeta(renderDir, updatedMeta);
-          console.error(`Render ${renderId} failed:`, error);
-        });
-    });
-
-    return { id: renderId };
-  });
-}
-
-/**
- * List all renders for a project.
- */
-export function listRenders(searchParams: URLSearchParams) {
-  return Effect.gen(function* () {
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    const rendersBaseDir = path.join(
-      process.cwd(),
-      "app",
-      projectPath,
-      RENDERS_BASE_DIR,
-    );
-
-    return yield* Effect.promise(async () => {
-      try {
-        const entries = await fsp.readdir(rendersBaseDir, {
-          withFileTypes: true,
-        });
+        const entries = yield* readDirWithFileTypes(rendersBaseDir);
         const renders: Array<{ id: string; meta: RenderMeta }> = [];
 
-        for (const entry of entries) {
-          if (!entry.isDirectory()) continue;
+        for (const [basename, stats] of entries) {
+          if (stats.type !== "Directory") continue;
 
-          const renderDir = path.join(rendersBaseDir, entry.name);
-          const meta = await readRenderMeta(renderDir);
+          const renderDir = path.join(rendersBaseDir, basename);
+          const $meta =
+            yield* readRenderMeta(renderDir).pipe(existenceOptional);
 
-          if (meta) {
-            renders.push({
-              id: entry.name,
-              meta,
-            });
+          if (Option.isSome($meta)) {
+            renders.push({ id: basename, meta: $meta.value });
           }
         }
 
@@ -199,86 +87,138 @@ export function listRenders(searchParams: URLSearchParams) {
         );
 
         return renders;
-      } catch (error) {
-        // Directory doesn't exist
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-          return [];
+      }).pipe(
+        Effect.catchTag("PlatformError", Effect.orDie),
+        Effect.catchTag("FileDecodeError", Effect.orDie),
+      ),
+    )
+    .handle("rename", ({ query: { projectPath }, payload }) =>
+      Effect.gen(function* () {
+        const { renderId, newName } = payload;
+
+        // Validate inputs
+        if (!renderId || !newName) {
+          return yield* Effect.die({
+            message: "renderId and newName are required",
+            status: StatusCodes.BAD_REQUEST,
+          });
         }
-        throw error;
-      }
-    });
-  });
-}
 
-interface RenameRenderBody {
-  newName: string;
-  renderId: string;
-}
+        // Sanitize new name (remove path separators and other invalid characters)
+        const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
-/**
- * Rename a render (changes the folder name).
- */
-export function renameRender(
-  searchParams: URLSearchParams,
-  body: RenameRenderBody,
-) {
-  return Effect.gen(function* () {
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
+        if (!sanitizedName) {
+          return yield* Effect.die({
+            message: "Invalid name",
+            status: StatusCodes.BAD_REQUEST,
+          });
+        }
 
-    const { renderId, newName } = body;
+        const fs = yield* FileSystem.FileSystem;
 
-    // Validate inputs
-    if (!renderId || !newName) {
-      return yield* Effect.die({
-        message: "renderId and newName are required",
-        status: StatusCodes.BAD_REQUEST,
-      });
-    }
+        const rendersBaseDir = path.join(
+          process.cwd(),
+          "app",
+          projectPath,
+          RENDERS_BASE_DIR,
+        );
 
-    // Sanitize new name (remove path separators and other invalid characters)
-    const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
+        const oldPath = path.join(rendersBaseDir, renderId);
+        const newPath = path.join(rendersBaseDir, sanitizedName);
 
-    if (!sanitizedName) {
-      return yield* Effect.die({
-        message: "Invalid name",
-        status: StatusCodes.BAD_REQUEST,
-      });
-    }
+        // Check if source exists
+        if (!(yield* fs.exists(oldPath))) {
+          return yield* new NotFoundError({
+            message: "render not found",
+          });
+        }
 
-    const fs = yield* FileSystem.FileSystem;
+        // Check if destination already exists
+        if (yield* fs.exists(newPath)) {
+          return yield* new ConflictError({
+            message: "A render with this name already exists",
+          });
+        }
 
-    const rendersBaseDir = path.join(
-      process.cwd(),
-      "app",
-      projectPath,
-      RENDERS_BASE_DIR,
-    );
+        // Rename the directory
+        yield* fs.rename(oldPath, newPath);
 
-    const oldPath = path.join(rendersBaseDir, renderId);
-    const newPath = path.join(rendersBaseDir, sanitizedName);
+        return { newId: sanitizedName };
+      }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+    )
+    .handle("start", ({ query: { projectPath }, payload }) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
 
-    // Check if source exists
-    if (!(yield* fs.exists(oldPath))) {
-      return yield* new NotFoundError({
-        message: "render not found",
-      });
-    }
+        const { basePath, productionServerPort } = getServerState();
+        const projectDir = path.join(process.cwd(), "app", projectPath);
+        const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
 
-    // Check if destination already exists
-    if (yield* fs.exists(newPath)) {
-      return yield* new ConflictError({
-        message: "A render with this name already exists",
-      });
-    }
+        // Generate unique render ID
+        const renderId = generateRenderId();
+        const renderDir = path.join(rendersBaseDir, renderId);
 
-    // Rename the directory
-    yield* fs.rename(oldPath, newPath);
+        // Ensure render directory exists
+        yield* fs.makeDirectory(renderDir, { recursive: true });
 
-    return { newId: sanitizedName };
-  });
-}
+        // Build the URL for the video
+        const previewPath = basePath
+          ? `${basePath}/${projectPath}`
+          : `/${projectPath}`;
+        const url = `http://localhost:${productionServerPort}${previewPath}`;
+
+        // Apply defaults
+        const colorScheme = payload.colorScheme ?? "light";
+        const fps = payload.fps ?? 30;
+        const height = payload.height ?? 800;
+        const width = payload.width ?? 1280;
+        const output = path.join(renderDir, "video.mp4");
+
+        // Create initial metadata
+        const meta: RenderMeta = {
+          colorScheme,
+          createdAt: new Date().toISOString(),
+          fps,
+          height,
+          output: "video.mp4",
+          status: "rendering",
+          width,
+        };
+
+        yield* Effect.promise(() => writeRenderMeta(renderDir, meta));
+
+        // Start render in background (don't await)
+        yield* Effect.sync(() => {
+          renderVideo({
+            colorScheme,
+            fps,
+            height,
+            output,
+            url,
+            width,
+          })
+            .then(async (result) => {
+              // Update metadata with completed status
+              const updatedMeta: RenderMeta = {
+                ...meta,
+                duration: result.duration,
+                status: "completed",
+              };
+              await writeRenderMeta(renderDir, updatedMeta);
+              console.log(`Render ${renderId} completed`);
+            })
+            .catch(async (error) => {
+              // Update metadata with failed status
+              const updatedMeta: RenderMeta = {
+                ...meta,
+                status: "failed",
+              };
+              await writeRenderMeta(renderDir, updatedMeta);
+              console.error(`Render ${renderId} failed:`, error);
+            });
+        });
+
+        return { id: renderId };
+      }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+    ),
+);

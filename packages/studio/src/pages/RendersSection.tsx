@@ -15,10 +15,11 @@ import {
   WarningCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { RenderEntry } from "../api/contract.mts";
-import { listRenders, renameRender, startRender } from "../client.mts";
+import type { RenderEntry } from "../api/schemas.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -78,7 +79,7 @@ export function RendersSection({
   isOpen,
   projectPath,
 }: RendersSectionProps) {
-  const [renders, setRenders] = useState<RenderEntry[]>([]);
+  const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [playingRender, setPlayingRender] = useState<RenderEntry | null>(null);
@@ -99,16 +100,21 @@ export function RendersSection({
 
   const loadRenders = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const result = await listRenders({ search: { projectPath } });
-      if (result.isOk) {
-        setRenders(result.unwrap());
-      }
-    } catch (e) {
-      console.error("Failed to load renders:", e);
-    } finally {
-      setIsLoading(false);
+
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.renders.list({ query: { projectPath } });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      setRenders(result.value);
+    } else {
+      console.error("Failed to load renders:", result.cause);
     }
+
+    setIsLoading(false);
   }, [projectPath]);
 
   useEffect(() => {
@@ -134,26 +140,28 @@ export function RendersSection({
   const handleStartRender = async () => {
     setIsStarting(true);
     setConfigOpen(false);
-    try {
-      const result = await startRender({
-        body: {
-          colorScheme: config.colorScheme,
-          height: config.height,
-          width: config.width,
-        },
-        search: { projectPath },
-      });
 
-      if (result.isOk) {
-        await loadRenders();
-      } else {
-        console.error("Failed to start render:", result.unwrapErr());
-      }
-    } catch (e) {
-      console.error("Failed to start render:", e);
-    } finally {
-      setIsStarting(false);
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.renders.start({
+          payload: {
+            colorScheme: config.colorScheme,
+            height: config.height,
+            width: config.width,
+          },
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      await loadRenders();
+    } else {
+      console.error("Failed to start render:", result.cause);
     }
+
+    setIsStarting(false);
   };
 
   const handleOpenInFinder = async (renderId: string) => {
@@ -169,26 +177,28 @@ export function RendersSection({
     if (!renamingRender || !renameValue.trim()) return;
 
     setIsRenaming(true);
-    try {
-      const result = await renameRender({
-        body: {
-          newName: renameValue.trim(),
-          renderId: renamingRender.id,
-        },
-        search: { projectPath },
-      });
 
-      if (result.isOk) {
-        setRenamingRender(null);
-        await loadRenders();
-      } else {
-        console.error("Failed to rename render:", result.unwrapErr());
-      }
-    } catch (e) {
-      console.error("Failed to rename render:", e);
-    } finally {
-      setIsRenaming(false);
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.renders.rename({
+          payload: {
+            newName: renameValue.trim(),
+            renderId: renamingRender.id,
+          },
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      setRenamingRender(null);
+      await loadRenders();
+    } else {
+      console.error("Failed to rename render:", result.cause);
     }
+
+    setIsRenaming(false);
   };
 
   const handleWidthPreset = (width: number) => {
@@ -500,7 +510,7 @@ export function RendersSection({
             <div className={styles.formField}>
               <label htmlFor="render-name">Name</label>
               <input
-                autoFocus
+                // autoFocus
                 className={shareStyles.textInput}
                 id="render-name"
                 onChange={(e) => setRenameValue(e.target.value)}

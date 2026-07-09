@@ -1,5 +1,6 @@
 "use client";
 
+// biome-ignore lint/style/noRestrictedImports: this is the styled version
 import { Dialog } from "@base-ui/react/dialog";
 import clsx from "clsx";
 import type { ReactNode } from "react";

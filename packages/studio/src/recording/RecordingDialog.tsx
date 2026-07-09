@@ -4,7 +4,7 @@ import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas/effect";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { formatTime, formatTimeDuration, isMac } from "@liqvid/utils";
+import { isMac } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -13,6 +13,7 @@ import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
+import { TimeDuration } from "../ui/Time.tsx";
 import { useToggle } from "../utils/react.mts";
 
 import type { RecordingControlProps } from "./RecordingControl.tsx";
@@ -242,12 +243,7 @@ export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
         {/*   {new Intl.DateTimeFormat("en-US").format(new Date(r.created))} */}
         {/* </time> */}
         {/**/}
-        <time
-          className={styles.recordingDuration}
-          dateTime={formatTimeDuration(r.duration)}
-        >
-          {formatTime(r.duration)}
-        </time>
+        <TimeDuration className={styles.recordingDuration} value={r.duration} />
       </Collapsible.Trigger>
       <Collapsible.Panel className={styles.RecordingRowExpand}>
         {r.plugins.map((p) => {

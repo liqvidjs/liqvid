@@ -6,7 +6,7 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { PROJECT_META_FILE } from "../conventions.mts";
 
-import { WebApi } from "./contract-effect.mts";
+import { WebApi } from "./contract.mts";
 
 export const projectMetaLive = HttpApiBuilder.group(
   WebApi,

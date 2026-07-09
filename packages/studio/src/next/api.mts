@@ -14,22 +14,17 @@ import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
-import { notFound } from "next/navigation";
 
-import { captionsLive, generateCaptions } from "../api/captions.mts";
+import { captionsLive } from "../api/captions.mts";
+import { WebApi } from "../api/contract.mts";
 import {
-  generateCaptionsOperation,
-  listRendersOperation,
-  renameRenderOperation,
   saveRecordingOperation,
-  startRenderOperation,
   staticFileOperation,
-} from "../api/contract.mts";
-import { WebApi } from "../api/contract-effect.mts";
+} from "../api/contract-legacy.mts";
 import { patchDependencies } from "../api/patch-dependencies.mts";
 import { projectMetaLive } from "../api/project-meta.mts";
 import { recordingsLive, saveRecording } from "../api/recording.mts";
-import { listRenders, renameRender, startRender } from "../api/renders.mts";
+import { rendersLive } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import { screenshotsLive } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
@@ -63,6 +58,7 @@ const apiLive = HttpApiBuilder.layer(WebApi).pipe(
     captionsLive,
     projectMetaLive,
     recordingsLive,
+    rendersLive,
     screenshotsLive,
     thumbsLive,
   ]),
@@ -87,6 +83,8 @@ const { handler: webApiHandler } = toWebHandler(appLive);
  */
 const effectApiRoutePrefixes = [
   "/captions",
+  "/captions/generate",
+  "/project-meta",
   "/recordings",
   "/screenshots",
   "/thumbs",
@@ -116,18 +114,8 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     await initializeServer();
 
-    // Routes that have been migrated to the Effect `HttpApi` are delegated to
-    // the generated web handler.
-    if (isEffectApiRoute(route)) {
-      return webApiHandler(req);
-    }
-
-    const { search } = new URL(req.url);
-
-    const searchParams = new URLSearchParams(search ?? "");
-
     let program:
-      | Effect.Effect<unknown, any, EnvFiles | FileSystem.FileSystem>
+      | Effect.Effect<unknown, unknown, EnvFiles | FileSystem.FileSystem>
       | undefined;
 
     switch (route) {
@@ -138,13 +126,9 @@ export function getHandler(_dynamicImports: DynamicImports) {
       case "/patch":
         program = patchDependencies();
         break;
-
-      case listRendersOperation.endpoint:
-        program = listRenders(searchParams);
-        break;
     }
 
-    if (!program && route.startsWith(staticFileOperation.endpoint)) {
+    if (route.startsWith(staticFileOperation.endpoint)) {
       const url = route.slice(staticFileOperation.endpoint.length);
       program = serveStaticFile(url);
     }
@@ -153,10 +137,7 @@ export function getHandler(_dynamicImports: DynamicImports) {
       return runEffect(program);
     }
 
-    return Response.json(
-      { error: "not_found" },
-      { status: StatusCodes.NOT_FOUND },
-    );
+    return webApiHandler(req);
   };
 }
 
@@ -191,33 +172,12 @@ export function postHandler(dynamicImports: DynamicImports) {
       | undefined;
 
     switch (route) {
-      case generateCaptionsOperation.endpoint:
-        program = generateCaptions(searchParams);
-        break;
-
-      // case generateThumbsOperation.endpoint: {
-      //   program = generateThumbs(searchParams, await req.json());
-      //   break;
-      // }
-
-      // case setProjectMetaOperation.endpoint:
-      //   program = setProjectMeta(searchParams, await req.json());
-      //   break;
-
       case saveRecordingOperation.endpoint:
         program = saveRecording(
           searchParams,
           await req.formData(),
           dynamicImports,
         );
-        break;
-
-      case startRenderOperation.endpoint:
-        program = startRender(searchParams, await req.json());
-        break;
-
-      case renameRenderOperation.endpoint:
-        program = renameRender(searchParams, await req.json());
         break;
     }
 
@@ -232,28 +192,13 @@ export function postHandler(dynamicImports: DynamicImports) {
   };
 }
 
-/* -------------------- unsupported methods -------------------- */
-
 /**
  * Liqvid server DELETE handler
  */
 export function deleteHandler(_dynamicImports: DynamicImports) {
-  return async function DELETE(req: Request, { params }: RequestContext) {
-    const paramsObject = await params;
-    const keys = Object.keys(paramsObject);
-    const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
-
-    const route = "/" + routeParams.join("/");
-
+  return async function DELETE(req: Request, _ctx: RequestContext) {
     await initializeServer();
-
-    // Routes that have been migrated to the Effect `HttpApi` are delegated to
-    // the generated web handler.
-    if (isEffectApiRoute(route)) {
-      return webApiHandler(req);
-    }
-
-    notFound();
+    return webApiHandler(req);
   };
 }
 
@@ -261,8 +206,9 @@ export function deleteHandler(_dynamicImports: DynamicImports) {
  * Liqvid server PUT handler
  */
 export function putHandler(_dynamicImports: DynamicImports) {
-  return async function PUT(_req: Request, _ctx: RequestContext) {
-    notFound();
+  return async function PUT(req: Request, _ctx: RequestContext) {
+    await initializeServer();
+    return webApiHandler(req);
   };
 }
 
@@ -270,8 +216,9 @@ export function putHandler(_dynamicImports: DynamicImports) {
  * Liqvid server PATCH handler
  */
 export function patchHandler(_dynamicImports: DynamicImports) {
-  return async function PATCH(_req: Request, _ctx: RequestContext) {
-    notFound();
+  return async function PATCH(req: Request, _ctx: RequestContext) {
+    await initializeServer();
+    return webApiHandler(req);
   };
 }
 
@@ -297,12 +244,7 @@ async function runEffect<A, E>(
         const { error } = reason;
 
         // HTTP errors, expected
-        if (error instanceof HttpError) {
-          return Response.json(
-            { error: error.message },
-            { status: error.status },
-          );
-        } else if (error instanceof FileDecodeError) {
+        if (error instanceof FileDecodeError) {
           console.error(
             chalk.red(`FileDecodeError in ${error.filename}: ${error.cause}`),
           );

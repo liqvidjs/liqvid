@@ -1,5 +1,6 @@
 "use client";
 
+// biome-ignore lint/style/noRestrictedImports: this is the styled version
 import { Select } from "@base-ui/react/select";
 import clsx from "clsx";
 

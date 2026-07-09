@@ -8,7 +8,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
 import type { ThumbsData } from "../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
-import { Time, TimeDuration } from "../ui/Time";
+import { Time, TimeDuration } from "../ui/Time.tsx";
 
 import shareStyles from "./share.module.css";
 

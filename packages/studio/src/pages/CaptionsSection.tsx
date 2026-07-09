@@ -7,10 +7,11 @@ import {
   SpinnerIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
+import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { CaptionsMeta } from "../api/contract.mts";
-import { generateCaptions, listCaptions } from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import type { CaptionsMeta } from "../types/schemas.mts";
 
 import { openCaptionsInFinderAction } from "./root-actions.ts";
 
@@ -29,16 +30,26 @@ export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
 
   const loadCaptions = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const result = await listCaptions({ search: { projectPath } });
-      if (result.isOk) {
-        setCaptionsMeta(result.unwrap());
+
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.captions.list({ query: { projectPath } });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      setCaptionsMeta(result.value);
+    } else {
+      for (const reason of result.cause.reasons) {
+        if (reason._tag === "Fail" && reason.error._tag === "NotFound") {
+        } else {
+          console.error("Failed to load captions:", result.cause);
+        }
       }
-    } catch (e) {
-      console.error("Failed to load captions:", e);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }, [projectPath]);
 
   useEffect(() => {
@@ -63,22 +74,24 @@ export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    try {
-      const result = await generateCaptions({
-        body: {},
-        search: { projectPath },
-      });
 
-      if (result.isOk) {
-        await loadCaptions();
-      } else {
-        console.error("Failed to generate captions:", result.unwrapErr());
-      }
-    } catch (e) {
-      console.error("Failed to generate captions:", e);
-    } finally {
-      setIsGenerating(false);
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.captions.generate({
+          payload: undefined,
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      await loadCaptions();
+    } else {
+      console.error("Failed to generate captions:", result.cause);
     }
+
+    setIsGenerating(false);
   };
 
   const handleOpenInFinder = async () => {

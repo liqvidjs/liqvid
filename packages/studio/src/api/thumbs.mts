@@ -12,7 +12,7 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
 
-import { WebApi } from "./contract-effect.mts";
+import { WebApi } from "./contract.mts";
 
 const THUMBS_BASE_DIR = ".liqvid/thumbs";
 const THUMBS_JOB_FILE = "thumbnails-job.json";
