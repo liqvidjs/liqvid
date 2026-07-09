@@ -1,12 +1,14 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ThumbnailsJob } from "@liqvid/schemas/jobs/thumbnails";
 import { formatTime } from "@liqvid/utils";
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
+import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
-import { generateThumbs, listThumbs } from "../client.mts";
+import type { ThumbsData } from "../api/schemas.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import { Time, TimeDuration } from "../ui/Time";
 
 import shareStyles from "./share.module.css";
 
@@ -16,12 +18,6 @@ interface ThumbnailsSectionProps {
 
   /** Whether the parent dialog is open */
   isOpen: boolean;
-}
-
-interface ThumbsData {
-  dark: string[];
-  light: string[];
-  job: ThumbnailsJob | null;
 }
 
 export function ThumbnailsSection({
@@ -36,16 +32,20 @@ export function ThumbnailsSection({
 
   const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
-    try {
-      const result = await listThumbs({ search: { projectPath } });
-      if (result.isOk) {
-        setThumbsData(result.unwrap());
-      }
-    } catch (e) {
-      console.error("Failed to load thumbnails:", e);
-    } finally {
-      setIsLoading(false);
+
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.thumbs.list({ query: { projectPath } });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      setThumbsData(result.value);
+    } else {
+      console.error("Failed to load thumbnails:", result.cause);
     }
+    setIsLoading(false);
   });
 
   useEffect(() => {
@@ -56,22 +56,24 @@ export function ThumbnailsSection({
 
   const handleGenerate = useEffectEvent(async () => {
     setIsGenerating(true);
-    try {
-      const result = await generateThumbs({
-        body: {},
-        search: { projectPath },
-      });
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
 
-      if (result.isOk) {
-        await loadThumbs();
-      } else {
-        console.error("Failed to generate thumbnails:", result.unwrapErr());
-      }
-    } catch (e) {
-      console.error("Failed to generate thumbnails:", e);
-    } finally {
-      setIsGenerating(false);
+        yield* client.thumbs.generate({
+          payload: undefined,
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      await loadThumbs();
+    } else {
+      console.error("Failed to generate thumbnails:", result.cause);
     }
+
+    setIsGenerating(false);
   });
 
   const hasNoThumbs = thumbsData === null;
@@ -112,7 +114,15 @@ export function ThumbnailsSection({
 
   const getSheetUrl = (colorScheme: "light" | "dark") => {
     if (!thumbInfo) return "";
-    return `/api/liqvid/static${encodeURIComponent(`${projectPath}/.liqvid/thumbs/${colorScheme}/${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`)}`;
+    return `/api/liqvid/static${encodeURIComponent(
+      [
+        projectPath,
+        ".liqvid",
+        "thumbs",
+        colorScheme,
+        `${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`,
+      ].join("/"),
+    )}`;
   };
 
   return (
@@ -199,9 +209,10 @@ export function ThumbnailsSection({
 
           {/* Slider controls */}
           <div className={shareStyles.thumbsSliderControls}>
-            <span className={shareStyles.timeDisplay}>
-              {formatTime(thumbInfo.time * 1000)}
-            </span>
+            <TimeDuration
+              className={shareStyles.timeDisplay}
+              value={{ seconds: thumbInfo.time }}
+            />
             <input
               className={shareStyles.seekSlider}
               max={100}
@@ -211,9 +222,10 @@ export function ThumbnailsSection({
               type="range"
               value={sliderValue}
             />
-            <span className={shareStyles.timeDisplay}>
-              {formatTime(duration.inMilliseconds())}
-            </span>
+            <TimeDuration
+              className={shareStyles.timeDisplay}
+              value={duration}
+            />
           </div>
         </div>
       ) : null}

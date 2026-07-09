@@ -12,9 +12,10 @@ import {
   XIcon,
   YinYangIcon,
 } from "@phosphor-icons/react";
+import { Effect } from "effect";
 import { useEffect, useState } from "react";
 
-import { captureScreenshot } from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -85,21 +86,18 @@ export function ScreenshotModal({
         (width * aspectRatio.height) / aspectRatio.width,
       );
 
-      const result = await captureScreenshot({
-        body: {
-          colorScheme,
-          height,
-          time: previewTime,
-          width,
-        },
-        search: { projectPath },
-      });
+      await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
 
-      if (result.isOk) {
-        onCaptured();
-      } else {
-        console.error("Failed to capture screenshot:", result.unwrapErr());
-      }
+          yield* client.screenshots.capture({
+            payload: { colorScheme, height, time: previewTime, width },
+            query: { projectPath },
+          });
+        }),
+      );
+
+      onCaptured();
     } catch (e) {
       console.error("Failed to capture screenshot:", e);
     } finally {

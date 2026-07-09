@@ -177,30 +177,107 @@ function readThumbsJob(thumbsBaseDir: string) {
 
 export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
   // list existing captions for a project
-  handlers.handle("list", ({ query: { projectPath } }) => {
-    return Effect.gen(function* () {
-      // read directories
-      const thumbsBaseDir = path.join(
-        process.cwd(),
-        "app",
-        projectPath,
-        THUMBS_BASE_DIR,
-      );
+  handlers
+    .handle("list", ({ query: { projectPath } }) => {
+      return Effect.gen(function* () {
+        // read directories
+        const thumbsBaseDir = path.join(
+          process.cwd(),
+          "app",
+          projectPath,
+          THUMBS_BASE_DIR,
+        );
 
-      const [lightSheets, darkSheets, job] = yield* Effect.all(
-        [
-          readThumbSheets(path.join(thumbsBaseDir, "light")),
-          readThumbSheets(path.join(thumbsBaseDir, "dark")),
-          readThumbsJob(thumbsBaseDir),
-        ],
-        { concurrency: "unbounded" },
-      );
+        const [lightSheets, darkSheets, job] = yield* Effect.all(
+          [
+            readThumbSheets(path.join(thumbsBaseDir, "light")),
+            readThumbSheets(path.join(thumbsBaseDir, "dark")),
+            readThumbsJob(thumbsBaseDir),
+          ],
+          { concurrency: "unbounded" },
+        );
 
-      return {
-        dark: darkSheets,
-        job,
-        light: lightSheets,
-      };
-    }).pipe(Effect.orDie);
-  }),
+        return {
+          dark: darkSheets,
+          job,
+          light: lightSheets,
+        };
+      }).pipe(Effect.orDie);
+    })
+    .handle("generate", ({ query: { projectPath }, payload = {} }) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+
+        const { basePath, productionServerPort } = getServerState();
+        const projectDir = path.join(process.cwd(), "app", projectPath);
+        const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
+
+        // Build the URL for the video
+        const previewPath = `${basePath || ""}/${projectPath}/`;
+        const url = `http://localhost:${productionServerPort}${previewPath}`;
+
+        const colorScheme = payload.colorScheme ?? "both";
+
+        // Ensure thumbs base directory exists
+        yield* fs.makeDirectory(thumbsBaseDir, { recursive: true });
+
+        // Resolve options with defaults
+        const { config: $config } = getServerState();
+        const defaults = $config.pipe(
+          Option.flatMapNullishOr(
+            (config) => config.media?.thumbnails?.defaults,
+          ),
+          Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
+        );
+
+        const imageFormat = payload.imageFormat ?? defaults.imageFormat;
+
+        const resolvedOptions: ThumbnailsJobIn = {
+          colorScheme,
+          cols: payload.cols ?? defaults.cols,
+          frequency: payload.frequency ?? defaults.frequency,
+          height: payload.height ?? defaults.height,
+          imageFormat: payload.imageFormat ?? defaults.imageFormat,
+          quality:
+            imageFormat === "jpeg"
+              ? (payload.quality ?? defaults.quality)
+              : undefined,
+          rows: payload.rows ?? defaults.rows,
+          width: payload.width ?? defaults.width,
+        };
+
+        // Save job options to file
+        const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
+        yield* fs.writeFileString(
+          jobFilePath,
+          JSON.stringify(resolvedOptions, null, 2),
+        );
+
+        let lightSheets: string[] = [];
+        let darkSheets: string[] = [];
+
+        if (colorScheme === "light" || colorScheme === "both") {
+          const lightDir = path.join(thumbsBaseDir, "light");
+          lightSheets = yield* generateForScheme(
+            url,
+            lightDir,
+            "light",
+            payload,
+          );
+        }
+
+        if (colorScheme === "dark" || colorScheme === "both") {
+          const darkDir = path.join(thumbsBaseDir, "dark");
+          darkSheets = yield* generateForScheme(url, darkDir, "dark", payload);
+        }
+
+        const numSheets = Math.max(lightSheets.length, darkSheets.length);
+
+        return {
+          dark: darkSheets.length > 0 ? darkSheets : undefined,
+          light: lightSheets.length > 0 ? lightSheets : undefined,
+          numSheets,
+        };
+      }).pipe(Effect.orDie),
+    ),
 );

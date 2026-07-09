@@ -12,14 +12,7 @@ import {
 import { Effect } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import {
-  checkImageExists,
-  clientRuntime,
-  copyScreenshot,
-  deleteScreenshot,
-  LiqvidStudioApiClient,
-  renameScreenshot,
-} from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -29,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/Dialog.tsx";
+import { Time } from "../ui/Time.tsx";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
@@ -100,13 +94,23 @@ export function ScreenshotsSection({
     target: "opengraph-image.png" | "twitter-image.png",
     variant?: "Light" | "Dark" | null,
   ) => {
-    const checkResult = await checkImageExists({
-      search: { filename: target, projectPath },
-    });
+    try {
+      const { exists } = await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
 
-    if (checkResult.isOk && checkResult.unwrap().exists) {
-      setConfirmDialog({ screenshotId, target, variant });
-      return;
+          return yield* client.screenshots.checkExists({
+            query: { filename: target, projectPath },
+          });
+        }),
+      );
+
+      if (exists) {
+        setConfirmDialog({ screenshotId, target, variant });
+        return;
+      }
+    } catch (e) {
+      console.error("Failed to check image existence:", e);
     }
 
     await performCopy(screenshotId, target, variant);
@@ -118,20 +122,22 @@ export function ScreenshotsSection({
     variant?: "Light" | "Dark" | null,
   ) => {
     try {
-      const result = await copyScreenshot({
-        body: {
-          screenshotId,
-          sourceFilename: variant
-            ? (`${variant.toLowerCase()}.png` as "light.png" | "dark.png")
-            : undefined,
-          targetFilename: target,
-        },
-        search: { projectPath },
-      });
+      await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
 
-      if (result.isErr) {
-        console.error("Failed to copy screenshot:", result.unwrapErr());
-      }
+          yield* client.screenshots.copy({
+            payload: {
+              screenshotId,
+              sourceFilename: variant
+                ? (`${variant.toLowerCase()}.png` as "light.png" | "dark.png")
+                : undefined,
+              targetFilename: target,
+            },
+            query: { projectPath },
+          });
+        }),
+      );
     } catch (e) {
       console.error("Failed to copy screenshot:", e);
     }
@@ -153,16 +159,16 @@ export function ScreenshotsSection({
     }
 
     try {
-      const result = await renameScreenshot({
-        body: { newName, screenshotId: renameDialog.screenshotId },
-        search: { projectPath },
-      });
+      await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
 
-      if (result.isErr) {
-        setRenameError("Failed to rename screenshot");
-        console.error("Failed to rename screenshot:", result.unwrapErr());
-        return;
-      }
+          yield* client.screenshots.rename({
+            payload: { newName, screenshotId: renameDialog.screenshotId },
+            query: { projectPath },
+          });
+        }),
+      );
 
       setRenameDialog(null);
       await loadScreenshots();
@@ -176,15 +182,16 @@ export function ScreenshotsSection({
     if (!deleteDialog) return;
 
     try {
-      const result = await deleteScreenshot({
-        body: { screenshotId: deleteDialog.screenshotId },
-        search: { projectPath },
-      });
+      await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
 
-      if (result.isErr) {
-        console.error("Failed to delete screenshot:", result.unwrapErr());
-        return;
-      }
+          yield* client.screenshots.delete({
+            payload: { screenshotId: deleteDialog.screenshotId },
+            query: { projectPath },
+          });
+        }),
+      );
 
       setDeleteDialog(null);
       await loadScreenshots();
@@ -242,9 +249,13 @@ export function ScreenshotsSection({
                     src={`/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`}
                   />
                   <div className={shareStyles.screenshotInfo}>
-                    <span className={shareStyles.screenshotDate}>
-                      {new Date(screenshot.meta.createdAt).toLocaleString()}
+                    <span className={shareStyles.screenshotTitle}>
+                      {screenshot.id ||
+                        new Date(screenshot.meta.createdAt).toLocaleString()}
                       {variant.label && ` (${variant.label})`}
+                    </span>
+                    <span className={shareStyles.screenshotDimensions}>
+                      <Time format="long" value={screenshot.meta.createdAt} />
                     </span>
                     <span className={shareStyles.screenshotDimensions}>
                       {screenshot.meta.width} x {screenshot.meta.height}

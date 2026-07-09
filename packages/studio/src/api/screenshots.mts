@@ -8,7 +8,7 @@ import type {
   ScreenshotMeta,
 } from "@liqvid/schemas/screenshot-meta";
 import { Effect, FileSystem } from "effect";
-import { HttpApiBuilder, type HttpApiEndpoint } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
 import {
@@ -18,8 +18,6 @@ import {
 } from "../utils/errors.mts";
 
 import { WebApi } from "./contract-effect.mts";
-
-type ScreenshotsApi = WebApi["groups"]["screenshots"]["endpoints"];
 
 const SCREENSHOT_META_FILE = "screenshot-meta.json";
 
@@ -180,268 +178,157 @@ export async function checkImageExists(
   }
 }
 
-/**
- * API route handlers
- */
-export function handleListScreenshots({
-  query: { projectPath },
-}: HttpApiEndpoint.Request<ScreenshotsApi["list"]>) {
-  return Effect.gen(function* () {
-    const screenshotsDir = getScreenshotsDir(projectPath);
-
-    const fs = yield* FileSystem.FileSystem;
-
-    const entries = yield* fs.readDirectory(screenshotsDir);
-    const screenshots: ScreenshotEntry[] = [];
-
-    yield* Effect.all(
-      entries.map((name) =>
-        Effect.gen(function* () {
-          const dirname = path.join(screenshotsDir, name);
-
-          const stats = yield* fs.stat(dirname);
-          if (stats.type !== "Directory") return;
-
-          const metaPath = path.join(dirname, SCREENSHOT_META_FILE);
-
-          yield* Effect.gen(function* () {
-            const metaContent = yield* fs.readFileString(metaPath, "utf8");
-            const meta = JSON.parse(metaContent) as ScreenshotMeta;
-
-            // Determine image path based on colorScheme
-            let imagePath: ScreenshotEntry["imagePath"];
-            if (meta.colorScheme === "both") {
-              imagePath = {
-                dark: `/.liqvid/screenshots/${name}/dark.png`,
-                light: `/.liqvid/screenshots/${name}/light.png`,
-              };
-            } else {
-              imagePath = `/.liqvid/screenshots/${name}/screenshot.png`;
-            }
-
-            screenshots.push({
-              id: name,
-              imagePath,
-              meta,
-            });
-          });
-        }),
-      ),
-      { concurrency: 10 },
-    );
-
-    // Sort by creation date, newest first
-    screenshots.sort(
-      (a, b) =>
-        new Date(b.meta.createdAt).getTime() -
-        new Date(a.meta.createdAt).getTime(),
-    );
-
-    return screenshots;
-  }).pipe(
-    Effect.catchTag("PlatformError", (e) => {
-      if (e.reason._tag === "NotFound") {
-        return Effect.succeed([]);
-      }
-
-      return Effect.die(e);
-    }),
-  );
-}
-
-export function handleCaptureScreenshot(request: Request) {
-  return Effect.gen(function* () {
-    const url = new URL(request.url);
-    const projectPath = url.searchParams.get("projectPath");
-
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    return yield* Effect.tryPromise(async () => {
-      const body = (await request.json()) as {
-        colorScheme?: ColorSchemeOption;
-        height: number;
-        time: number;
-        width: number;
-      };
-
-      return await captureScreenshot(projectPath, body);
-    });
-  });
-}
-
-export function handleCopyScreenshot(request: Request) {
-  return Effect.gen(function* () {
-    const url = new URL(request.url);
-    const projectPath = url.searchParams.get("projectPath");
-
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    return yield* Effect.tryPromise(async () => {
-      const body = (await request.json()) as {
-        screenshotId: string;
-        sourceFilename?: "light.png" | "dark.png";
-        targetFilename: "opengraph-image.png" | "twitter-image.png";
-      };
-
-      await copyScreenshotToRoot(
-        projectPath,
-        body.screenshotId,
-        body.targetFilename,
-        body.sourceFilename,
-      );
-
-      return { success: true };
-    });
-  });
-}
-
-interface RenameScreenshotBody {
-  newName: string;
-  screenshotId: string;
-}
-
-/**
- * Rename a screenshot (changes the folder name).
- */
-export function renameScreenshot(request: Request) {
-  return Effect.gen(function* () {
-    const url = new URL(request.url);
-    const projectPath = url.searchParams.get("projectPath");
-
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    const body = (yield* Effect.promise(() =>
-      request.json(),
-    )) as RenameScreenshotBody;
-
-    const { newName, screenshotId } = body;
-
-    if (!screenshotId || !newName) {
-      return yield* Effect.die({
-        message: "screenshotId and newName are required",
-      });
-    }
-
-    // Sanitize new name (remove path separators and other invalid characters)
-    const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
-
-    if (!sanitizedName) {
-      return yield* new InvalidError({
-        message: "Invalid name",
-      });
-    }
-
-    const fs = yield* FileSystem.FileSystem;
-
-    const screenshotsDir = getScreenshotsDir(projectPath);
-    const oldPath = path.join(screenshotsDir, screenshotId);
-    const newPath = path.join(screenshotsDir, sanitizedName);
-
-    // Check if source exists
-    if (!(yield* fs.exists(oldPath))) {
-      return yield* new NotFoundError({
-        message: "Screenshot not found",
-      });
-    }
-
-    // Check if destination already exists
-    if (yield* fs.exists(newPath)) {
-      return yield* new ConflictError({
-        message: "A screenshot with this name already exists",
-      });
-    }
-
-    // Rename the directory
-    yield* fs.rename(oldPath, newPath);
-
-    return { newId: sanitizedName };
-  });
-}
-
-interface DeleteScreenshotBody {
-  screenshotId: string;
-}
-
-/**
- * Delete a screenshot (removes the folder).
- */
-export function deleteScreenshot(request: Request) {
-  return Effect.gen(function* () {
-    const url = new URL(request.url);
-    const projectPath = url.searchParams.get("projectPath");
-
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    const body = (yield* Effect.promise(() =>
-      request.json(),
-    )) as DeleteScreenshotBody;
-
-    const { screenshotId } = body;
-
-    if (!screenshotId) {
-      return yield* Effect.die({
-        message: "screenshotId is required",
-      });
-    }
-
-    const fs = yield* FileSystem.FileSystem;
-
-    const screenshotsDir = getScreenshotsDir(projectPath);
-    const folderPath = path.join(screenshotsDir, screenshotId);
-
-    // Check if the screenshot exists
-    if (!(yield* fs.exists(folderPath))) {
-      return yield* new NotFoundError({
-        message: "Screenshot not found",
-      });
-    }
-
-    // Remove the directory recursively
-    yield* fs.remove(folderPath, { recursive: true });
-
-    return { success: true };
-  });
-}
-
-export async function handleCheckImageExists(
-  request: Request,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const projectPath = url.searchParams.get("projectPath");
-  const filename = url.searchParams.get("filename") as
-    | "opengraph-image.png"
-    | "twitter-image.png"
-    | null;
-
-  if (!projectPath || !filename) {
-    return Response.json(
-      { error: "projectPath and filename are required" },
-      { status: 400 },
-    );
-  }
-
-  const exists = await checkImageExists(projectPath, filename);
-  return Response.json({ exists });
-}
-
 export const screenshotsLive = HttpApiBuilder.group(
   WebApi,
   "screenshots",
-  (handlers) => handlers.handle("list", handleListScreenshots),
+  (handlers) =>
+    handlers
+      // list existing screenshots for a project
+      .handle("list", ({ query: { projectPath } }) =>
+        Effect.gen(function* () {
+          const screenshotsDir = getScreenshotsDir(projectPath);
+
+          const fs = yield* FileSystem.FileSystem;
+
+          const entries = yield* fs.readDirectory(screenshotsDir);
+          const screenshots: ScreenshotEntry[] = [];
+
+          yield* Effect.all(
+            entries.map((name) =>
+              Effect.gen(function* () {
+                const dirname = path.join(screenshotsDir, name);
+
+                const stats = yield* fs.stat(dirname);
+                if (stats.type !== "Directory") return;
+
+                const metaPath = path.join(dirname, SCREENSHOT_META_FILE);
+
+                const metaContent = yield* fs.readFileString(metaPath, "utf8");
+                const meta = JSON.parse(metaContent) as ScreenshotMeta;
+
+                // Determine image path based on colorScheme
+                let imagePath: ScreenshotEntry["imagePath"];
+                if (meta.colorScheme === "both") {
+                  imagePath = {
+                    dark: `/.liqvid/screenshots/${name}/dark.png`,
+                    light: `/.liqvid/screenshots/${name}/light.png`,
+                  };
+                } else {
+                  imagePath = `/.liqvid/screenshots/${name}/screenshot.png`;
+                }
+
+                screenshots.push({ id: name, imagePath, meta });
+              }),
+            ),
+            { concurrency: 10 },
+          );
+
+          // Sort by creation date, newest first
+          screenshots.sort(
+            (a, b) =>
+              new Date(b.meta.createdAt).getTime() -
+              new Date(a.meta.createdAt).getTime(),
+          );
+
+          return screenshots;
+        }).pipe(
+          Effect.catchTag("PlatformError", (e) => {
+            // A missing screenshots directory just means no screenshots yet.
+            if (e.reason._tag === "NotFound") {
+              return Effect.succeed<readonly ScreenshotEntry[]>([]);
+            }
+
+            return Effect.die(e);
+          }),
+        ),
+      )
+      // capture a new screenshot
+      .handle("capture", ({ payload, query: { projectPath } }) =>
+        Effect.promise(() => captureScreenshot(projectPath, payload)),
+      )
+      // copy a screenshot to the project root
+      .handle(
+        "copy",
+        ({
+          payload: { screenshotId, sourceFilename, targetFilename },
+          query: { projectPath },
+        }) =>
+          Effect.promise(() =>
+            copyScreenshotToRoot(
+              projectPath,
+              screenshotId,
+              targetFilename,
+              sourceFilename,
+            ),
+          ).pipe(Effect.as({ success: true })),
+      )
+      // rename a screenshot (changes the folder name)
+      .handle(
+        "rename",
+        ({ payload: { newName, screenshotId }, query: { projectPath } }) =>
+          Effect.gen(function* () {
+            // Sanitize new name (remove path separators and invalid chars)
+            const sanitizedName = newName
+              .replace(/[/\\:*?"<>|]/g, "-")
+              .trim();
+
+            if (!sanitizedName) {
+              return yield* new InvalidError({ message: "Invalid name" });
+            }
+
+            const fs = yield* FileSystem.FileSystem;
+
+            const screenshotsDir = getScreenshotsDir(projectPath);
+            const oldPath = path.join(screenshotsDir, screenshotId);
+            const newPath = path.join(screenshotsDir, sanitizedName);
+
+            // Check if source exists
+            if (!(yield* fs.exists(oldPath))) {
+              return yield* new NotFoundError({
+                message: "Screenshot not found",
+              });
+            }
+
+            // Check if destination already exists
+            if (yield* fs.exists(newPath)) {
+              return yield* new ConflictError({
+                message: "A screenshot with this name already exists",
+              });
+            }
+
+            // Rename the directory
+            yield* fs.rename(oldPath, newPath);
+
+            return { newId: sanitizedName };
+          }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+      )
+      // delete a screenshot (removes the folder)
+      .handle(
+        "delete",
+        ({ payload: { screenshotId }, query: { projectPath } }) =>
+          Effect.gen(function* () {
+            const fs = yield* FileSystem.FileSystem;
+
+            const screenshotsDir = getScreenshotsDir(projectPath);
+            const folderPath = path.join(screenshotsDir, screenshotId);
+
+            // Check if the screenshot exists
+            if (!(yield* fs.exists(folderPath))) {
+              return yield* new NotFoundError({
+                message: "Screenshot not found",
+              });
+            }
+
+            // Remove the directory recursively
+            yield* fs.remove(folderPath, { recursive: true });
+
+            return { success: true };
+          }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+      )
+      // check whether a project image (opengraph/twitter) exists
+      .handle("checkExists", ({ query: { filename, projectPath } }) =>
+        Effect.promise(() => checkImageExists(projectPath, filename)).pipe(
+          Effect.map((exists) => ({ exists })),
+        ),
+      ),
 );

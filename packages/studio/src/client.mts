@@ -8,20 +8,11 @@ import { HttpApiClient } from "effect/unstable/httpapi";
 import type { z } from "zod";
 
 import {
-  captureScreenshotOperation,
-  checkImageExistsOperation,
-  copyScreenshotOperation,
-  deleteScreenshotOperation,
   generateCaptionsOperation,
-  generateThumbsOperation,
   listCaptionsOperation,
-  listRecordingsOperation,
   listRendersOperation,
-  listScreenshotsOperation,
-  listThumbsOperation,
   type Operation,
   renameRenderOperation,
-  renameScreenshotOperation,
   saveRecordingOperation,
   startRenderOperation,
 } from "./api/contract.mts";
@@ -101,8 +92,6 @@ function makeFetcher<
   };
 }
 
-export const listRecordings = makeFetcher(listRecordingsOperation);
-
 interface SaveRecordingOpts {
   search: { url: string };
   body: {
@@ -172,21 +161,6 @@ export async function saveRecording(
 }
 
 /* ------------------------------ operations ------------------------------ */
-export const listScreenshots = makeFetcher(listScreenshotsOperation);
-
-export const captureScreenshot = makeFetcher(captureScreenshotOperation);
-
-export const copyScreenshot = makeFetcher(copyScreenshotOperation);
-
-export const renameScreenshot = makeFetcher(renameScreenshotOperation);
-
-export const deleteScreenshot = makeFetcher(deleteScreenshotOperation);
-
-export const checkImageExists = makeFetcher(checkImageExistsOperation);
-
-export const generateThumbs = makeFetcher(generateThumbsOperation);
-
-export const listThumbs = makeFetcher(listThumbsOperation);
 
 export const startRender = makeFetcher(startRenderOperation);
 

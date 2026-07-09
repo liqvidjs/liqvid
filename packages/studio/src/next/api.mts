@@ -18,14 +18,9 @@ import { notFound } from "next/navigation";
 
 import { captionsLive, generateCaptions } from "../api/captions.mts";
 import {
-  captureScreenshotOperation,
-  copyScreenshotOperation,
-  deleteScreenshotOperation,
   generateCaptionsOperation,
-  generateThumbsOperation,
   listRendersOperation,
   renameRenderOperation,
-  renameScreenshotOperation,
   saveRecordingOperation,
   startRenderOperation,
   staticFileOperation,
@@ -36,15 +31,9 @@ import { projectMetaLive } from "../api/project-meta.mts";
 import { recordingsLive, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
-import {
-  deleteScreenshot,
-  handleCaptureScreenshot,
-  handleCopyScreenshot,
-  renameScreenshot,
-  screenshotsLive,
-} from "../api/screenshots.mts";
+import { screenshotsLive } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
-import { generateThumbs, thumbsLive } from "../api/thumbs.mts";
+import { thumbsLive } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
 
 interface RequestContext {
@@ -89,16 +78,30 @@ const appLive = Layer.mergeAll(
 const { handler: webApiHandler } = toWebHandler(appLive);
 
 /**
- * Set of route paths (relative to {@link API_ROOT}) served by the Effect
- * `HttpApi`. As routes are migrated to the `HttpApi`, add their paths here so
- * the legacy switch-based router delegates to the new handler.
+ * Route paths (relative to the API base) served by the Effect `HttpApi`.
+ *
+ * Entries are matched exactly or as a path prefix (e.g. `/screenshots` also
+ * matches `/screenshots/capture`). As routes are migrated to the `HttpApi`, add
+ * their paths here so the legacy switch-based router delegates to the new
+ * handler.
  */
-const effectApiRoutes = new Set<string>([
+const effectApiRoutePrefixes = [
   "/captions",
   "/recordings",
   "/screenshots",
   "/thumbs",
-]);
+  "/thumbs/generate",
+];
+
+/** Whether a given route should be handled by the Effect `HttpApi`. */
+function isEffectApiRoute(route: string): boolean {
+  return (
+    route.startsWith("/docs") ||
+    effectApiRoutePrefixes.some(
+      (prefix) => route === prefix || route.startsWith(prefix + "/"),
+    )
+  );
+}
 
 /**
  * Liqvid server GET handler
@@ -115,7 +118,7 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     // Routes that have been migrated to the Effect `HttpApi` are delegated to
     // the generated web handler.
-    if (effectApiRoutes.has(route) || route.startsWith("/docs")) {
+    if (isEffectApiRoute(route)) {
       return webApiHandler(req);
     }
 
@@ -171,37 +174,31 @@ export function postHandler(dynamicImports: DynamicImports) {
 
     const route = "/" + routeParams.join("/");
 
+    await initializeServer();
+
+    // Routes that have been migrated to the Effect `HttpApi` are delegated to
+    // the generated web handler.
+    if (isEffectApiRoute(route)) {
+      return webApiHandler(req);
+    }
+
     const { search } = url.parse(req.url, true);
 
     const searchParams = new URLSearchParams(search ?? "");
-
-    await initializeServer();
 
     let program:
       | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
       | undefined;
 
     switch (route) {
-      case captureScreenshotOperation.endpoint:
-        program = handleCaptureScreenshot(req);
-        break;
-
-      case copyScreenshotOperation.endpoint:
-        program = handleCopyScreenshot(req);
-        break;
-
-      case renameScreenshotOperation.endpoint:
-        program = renameScreenshot(req);
-        break;
-
       case generateCaptionsOperation.endpoint:
         program = generateCaptions(searchParams);
         break;
 
-      case generateThumbsOperation.endpoint: {
-        program = generateThumbs(searchParams, await req.json());
-        break;
-      }
+      // case generateThumbsOperation.endpoint: {
+      //   program = generateThumbs(searchParams, await req.json());
+      //   break;
+      // }
 
       // case setProjectMetaOperation.endpoint:
       //   program = setProjectMeta(searchParams, await req.json());
@@ -250,18 +247,10 @@ export function deleteHandler(_dynamicImports: DynamicImports) {
 
     await initializeServer();
 
-    let program:
-      | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
-      | undefined;
-
-    switch (route) {
-      case deleteScreenshotOperation.endpoint:
-        program = deleteScreenshot(req);
-        break;
-    }
-
-    if (program) {
-      return runEffect(program);
+    // Routes that have been migrated to the Effect `HttpApi` are delegated to
+    // the generated web handler.
+    if (isEffectApiRoute(route)) {
+      return webApiHandler(req);
     }
 
     notFound();
