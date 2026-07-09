@@ -63,6 +63,11 @@ export async function renderAudio(
     // send Escape key to page --- can't load audioContext without user input
     await page.keyboard.press("Escape");
 
+    await page.waitForFunction(
+      () =>
+        player.playback.audioContext && player.playback.audioSources.size > 0,
+    );
+
     // Render the audio inside the page
     const { base64, duration } = await page.evaluate(renderOfflineInPage);
 
