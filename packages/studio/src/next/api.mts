@@ -1,10 +1,18 @@
 import * as url from "node:url";
 
-import { NodeFileSystem } from "@effect/platform-node";
+import {
+  NodeFileSystem,
+  NodeHttpPlatform,
+  NodeServices,
+} from "@effect/platform-node";
+import { loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
-import { Effect, Exit, type FileSystem } from "effect";
+import { Effect, Exit, type FileSystem, Layer } from "effect";
+import { Etag } from "effect/unstable/http";
+import { toWebHandler } from "effect/unstable/http/HttpRouter";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
@@ -12,32 +20,36 @@ import { generateCaptions, listCaptions } from "../api/captions.mts";
 import {
   captureScreenshotOperation,
   copyScreenshotOperation,
+  deleteScreenshotOperation,
   generateCaptionsOperation,
   generateThumbsOperation,
   listCaptionsOperation,
   listRecordingsOperation,
   listRendersOperation,
-  listScreenshotsOperation,
   listThumbsOperation,
   renameRenderOperation,
+  renameScreenshotOperation,
   saveRecordingOperation,
   setProjectMetaOperation,
   startRenderOperation,
   staticFileOperation,
 } from "../api/contract.mts";
+import { WebApi } from "../api/contract-effect.mts";
+import { patchDependencies } from "../api/patch-dependencies.mts";
 import { setProjectMeta } from "../api/project-meta.mts";
 import { listRecordings, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import {
+  deleteScreenshot,
   handleCaptureScreenshot,
   handleCopyScreenshot,
-  handleListScreenshots,
+  renameScreenshot,
+  screenshotsLive,
 } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { generateThumbs, listThumbs } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
-import { loadEnvFiles } from "../jobs/preview-server.mts";
 import { FileDecodeError, HttpError } from "../utils/errors.mts";
 
 interface RequestContext {
@@ -56,6 +68,28 @@ export type DynamicImports = Record<
 >;
 
 /**
+ * Web handler for the Effect `HttpApi`.
+ *
+ * The API is assembled from the endpoint definitions in `contract-effect.mts`,
+ * the group implementations (e.g. `screenshotsLive`), and the Node platform
+ * services required to run it. It is built once and reused across requests.
+ */
+const webApiLayer = HttpApiBuilder.layer(WebApi).pipe(
+  Layer.provide(screenshotsLive),
+  Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
+  Layer.provideMerge(NodeFileSystem.layer),
+);
+
+const { handler: webApiHandler } = toWebHandler(webApiLayer);
+
+/**
+ * Set of route paths (relative to {@link API_ROOT}) served by the Effect
+ * `HttpApi`. As routes are migrated to the `HttpApi`, add their paths here so
+ * the legacy switch-based router delegates to the new handler.
+ */
+const effectApiRoutes = new Set<string>(["/screenshots"]);
+
+/**
  * Liqvid server GET handler
  */
 export function getHandler(_dynamicImports: DynamicImports) {
@@ -72,6 +106,12 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     await initializeServer();
 
+    // Routes that have been migrated to the Effect `HttpApi` are delegated to
+    // the generated web handler.
+    if (effectApiRoutes.has(route)) {
+      return webApiHandler(req);
+    }
+
     let program:
       | Effect.Effect<
           unknown,
@@ -85,6 +125,10 @@ export function getHandler(_dynamicImports: DynamicImports) {
         program = getRoot();
         break;
 
+      case "/patch":
+        program = patchDependencies();
+        break;
+
       case listCaptionsOperation.endpoint:
         program = listCaptions(searchParams);
         break;
@@ -95,10 +139,6 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
       case listRendersOperation.endpoint:
         program = listRenders(searchParams);
-        break;
-
-      case listScreenshotsOperation.endpoint:
-        program = handleListScreenshots(req);
         break;
 
       case listThumbsOperation.endpoint: {
@@ -156,6 +196,10 @@ export function postHandler(dynamicImports: DynamicImports) {
         program = handleCopyScreenshot(req);
         break;
 
+      case renameScreenshotOperation.endpoint:
+        program = renameScreenshot(req);
+        break;
+
       case generateCaptionsOperation.endpoint:
         program = generateCaptions(searchParams);
         break;
@@ -203,7 +247,29 @@ export function postHandler(dynamicImports: DynamicImports) {
  * Liqvid server DELETE handler
  */
 export function deleteHandler(_dynamicImports: DynamicImports) {
-  return async function DELETE(_req: Request, _ctx: RequestContext) {
+  return async function DELETE(req: Request, { params }: RequestContext) {
+    const paramsObject = await params;
+    const keys = Object.keys(paramsObject);
+    const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
+
+    const route = "/" + routeParams.join("/");
+
+    await initializeServer();
+
+    let program:
+      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | undefined;
+
+    switch (route) {
+      case deleteScreenshotOperation.endpoint:
+        program = deleteScreenshot(req);
+        break;
+    }
+
+    if (program) {
+      return runEffect(program);
+    }
+
     notFound();
   };
 }

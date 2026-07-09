@@ -30,7 +30,7 @@ export function RebuildButton() {
         });
       } else {
         const { messages } = result.unwrapErr();
-        console.log({ messages });
+
         makeToast({
           message: messages.join("\n"),
           title: "Build failed",

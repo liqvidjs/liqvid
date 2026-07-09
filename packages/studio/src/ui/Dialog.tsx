@@ -98,7 +98,7 @@ export function DialogPopup({
   size = "medium",
   ...props
 }: React.ComponentProps<typeof Dialog.Popup> & {
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "huge";
 }) {
   return (
     <Dialog.Popup

@@ -7,11 +7,18 @@ import type {
   ScreenshotEntry,
   ScreenshotMeta,
 } from "@liqvid/schemas/screenshot-meta";
-import { Effect } from "effect";
+import { Effect, FileSystem } from "effect";
+import { HttpApiBuilder, type HttpApiEndpoint } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
 import { HttpError } from "../utils/errors.mts";
+
+import { WebApi } from "./contract-effect.mts";
+
+type ScreenshotsApi = WebApi["groups"]["screenshots"]["endpoints"];
+
+const SCREENSHOT_META_FILE = "screenshot-meta.json";
 
 /**
  * Get the project directory from a project path.
@@ -34,64 +41,6 @@ function getScreenshotsDir(projectPath: string): string {
 function generateFolderName(): string {
   const now = new Date();
   return now.toISOString().replace(/[:.]/g, "-");
-}
-
-/**
- * List all screenshots for a project
- */
-export async function listScreenshots(projectPath: string) {
-  const screenshotsDir = getScreenshotsDir(projectPath);
-
-  try {
-    const entries = await fsp.readdir(screenshotsDir, { withFileTypes: true });
-    const screenshots: ScreenshotEntry[] = [];
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-
-      const metaPath = path.join(
-        screenshotsDir,
-        entry.name,
-        "screenshot-meta.json",
-      );
-
-      try {
-        const metaContent = await fsp.readFile(metaPath, "utf8");
-        const meta = JSON.parse(metaContent) as ScreenshotMeta;
-
-        // Determine image path based on colorScheme
-        let imagePath: ScreenshotEntry["imagePath"];
-        if (meta.colorScheme === "both") {
-          imagePath = {
-            dark: `/.liqvid/screenshots/${entry.name}/dark.png`,
-            light: `/.liqvid/screenshots/${entry.name}/light.png`,
-          };
-        } else {
-          imagePath = `/.liqvid/screenshots/${entry.name}/screenshot.png`;
-        }
-
-        screenshots.push({
-          id: entry.name,
-          imagePath,
-          meta,
-        });
-      } catch {
-        // Skip folders without valid metadata
-      }
-    }
-
-    // Sort by creation date, newest first
-    screenshots.sort(
-      (a, b) =>
-        new Date(b.meta.createdAt).getTime() -
-        new Date(a.meta.createdAt).getTime(),
-    );
-
-    return screenshots;
-  } catch {
-    // Directory doesn't exist yet
-    return [];
-  }
 }
 
 /**
@@ -181,7 +130,7 @@ export async function captureScreenshot(
 
   // Save metadata
   await fsp.writeFile(
-    path.join(folderPath, "screenshot-meta.json"),
+    path.join(folderPath, SCREENSHOT_META_FILE),
     JSON.stringify(meta, null, 2),
   );
 
@@ -233,20 +182,74 @@ export async function checkImageExists(
 /**
  * API route handlers
  */
-export function handleListScreenshots(request: Request) {
+export function handleListScreenshots({
+  query: { projectPath },
+}: HttpApiEndpoint.Request<ScreenshotsApi["list"]>) {
   return Effect.gen(function* () {
-    const url = new URL(request.url);
-    const projectPath = url.searchParams.get("projectPath");
+    const screenshotsDir = getScreenshotsDir(projectPath);
 
-    if (!projectPath) {
-      return yield* new HttpError({
-        message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
-      });
-    }
+    const fs = yield* FileSystem.FileSystem;
 
-    return yield* Effect.promise(() => listScreenshots(projectPath));
-  });
+    const entries = yield* fs.readDirectory(screenshotsDir);
+    const screenshots: ScreenshotEntry[] = [];
+
+    yield* Effect.all(
+      entries.map((name) =>
+        Effect.gen(function* () {
+          const dirname = path.join(screenshotsDir, name);
+
+          const stats = yield* fs.stat(dirname);
+          if (stats.type !== "Directory") return;
+
+          const metaPath = path.join(dirname, SCREENSHOT_META_FILE);
+
+          yield* Effect.gen(function* () {
+            const metaContent = yield* fs.readFileString(metaPath, "utf8");
+            const meta = JSON.parse(metaContent) as ScreenshotMeta;
+
+            // Determine image path based on colorScheme
+            let imagePath: ScreenshotEntry["imagePath"];
+            if (meta.colorScheme === "both") {
+              imagePath = {
+                dark: `/.liqvid/screenshots/${name}/dark.png`,
+                light: `/.liqvid/screenshots/${name}/light.png`,
+              };
+            } else {
+              imagePath = `/.liqvid/screenshots/${name}/screenshot.png`;
+            }
+
+            screenshots.push({
+              id: name,
+              imagePath,
+              meta,
+            });
+          }).pipe(
+            Effect.catch((e) => {
+              // Skip folders without valid metadata
+              console.error(e);
+
+              return Effect.succeedNone;
+            }),
+          );
+        }),
+      ),
+      { concurrency: 10 },
+    );
+
+    // Sort by creation date, newest first
+    screenshots.sort(
+      (a, b) =>
+        new Date(b.meta.createdAt).getTime() -
+        new Date(a.meta.createdAt).getTime(),
+    );
+
+    return screenshots;
+  }).pipe(
+    // Filesystem failures are unexpected here: turn them into defects so the
+    // API responds with a 500. Any declared (typed) errors added in the future
+    // still flow through the error channel untouched.
+    Effect.catchTag("PlatformError", (cause) => Effect.die(cause)),
+  );
 }
 
 export function handleCaptureScreenshot(request: Request) {
@@ -305,6 +308,130 @@ export function handleCopyScreenshot(request: Request) {
   });
 }
 
+interface RenameScreenshotBody {
+  newName: string;
+  screenshotId: string;
+}
+
+/**
+ * Rename a screenshot (changes the folder name).
+ */
+export function renameScreenshot(request: Request) {
+  return Effect.gen(function* () {
+    const url = new URL(request.url);
+    const projectPath = url.searchParams.get("projectPath");
+
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const body = (yield* Effect.promise(() =>
+      request.json(),
+    )) as RenameScreenshotBody;
+
+    const { newName, screenshotId } = body;
+
+    if (!screenshotId || !newName) {
+      return yield* new HttpError({
+        message: "screenshotId and newName are required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    // Sanitize new name (remove path separators and other invalid characters)
+    const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
+
+    if (!sanitizedName) {
+      return yield* new HttpError({
+        message: "Invalid name",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const fs = yield* FileSystem.FileSystem;
+
+    const screenshotsDir = getScreenshotsDir(projectPath);
+    const oldPath = path.join(screenshotsDir, screenshotId);
+    const newPath = path.join(screenshotsDir, sanitizedName);
+
+    // Check if source exists
+    if (!(yield* fs.exists(oldPath))) {
+      return yield* new HttpError({
+        message: "Screenshot not found",
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    // Check if destination already exists
+    if (yield* fs.exists(newPath)) {
+      return yield* new HttpError({
+        message: "A screenshot with this name already exists",
+        status: StatusCodes.CONFLICT,
+      });
+    }
+
+    // Rename the directory
+    yield* fs.rename(oldPath, newPath);
+
+    return { newId: sanitizedName };
+  });
+}
+
+interface DeleteScreenshotBody {
+  screenshotId: string;
+}
+
+/**
+ * Delete a screenshot (removes the folder).
+ */
+export function deleteScreenshot(request: Request) {
+  return Effect.gen(function* () {
+    const url = new URL(request.url);
+    const projectPath = url.searchParams.get("projectPath");
+
+    if (!projectPath) {
+      return yield* new HttpError({
+        message: "projectPath is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const body = (yield* Effect.promise(() =>
+      request.json(),
+    )) as DeleteScreenshotBody;
+
+    const { screenshotId } = body;
+
+    if (!screenshotId) {
+      return yield* new HttpError({
+        message: "screenshotId is required",
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const fs = yield* FileSystem.FileSystem;
+
+    const screenshotsDir = getScreenshotsDir(projectPath);
+    const folderPath = path.join(screenshotsDir, screenshotId);
+
+    // Check if the screenshot exists
+    if (!(yield* fs.exists(folderPath))) {
+      return yield* new HttpError({
+        message: "Screenshot not found",
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    // Remove the directory recursively
+    yield* fs.remove(folderPath, { recursive: true });
+
+    return { success: true };
+  });
+}
+
 export async function handleCheckImageExists(
   request: Request,
 ): Promise<Response> {
@@ -325,3 +452,9 @@ export async function handleCheckImageExists(
   const exists = await checkImageExists(projectPath, filename);
   return Response.json({ exists });
 }
+
+export const screenshotsLive = HttpApiBuilder.group(
+  WebApi,
+  "screenshots",
+  (handlers) => handlers.handle("list", handleListScreenshots),
+);

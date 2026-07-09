@@ -1,12 +1,17 @@
 /** biome-ignore-all lint/complexity/noBannedTypes: intersection types */
 /** biome-ignore-all lint/suspicious/noExplicitAny: heavy type magic here */
+
 import { Err, Ok, type Result } from "@liqvid/fp";
+import { ManagedRuntime } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
+import { HttpApiClient } from "effect/unstable/httpapi";
 import type { z } from "zod";
 
 import {
   captureScreenshotOperation,
   checkImageExistsOperation,
   copyScreenshotOperation,
+  deleteScreenshotOperation,
   generateCaptionsOperation,
   generateThumbsOperation,
   listCaptionsOperation,
@@ -16,10 +21,12 @@ import {
   listThumbsOperation,
   type Operation,
   renameRenderOperation,
+  renameScreenshotOperation,
   saveRecordingOperation,
   setProjectMetaOperation,
   startRenderOperation,
 } from "./api/contract.mts";
+import { WebApi } from "./api/contract-effect.mts";
 import { fetchJson } from "./utils/dom.mts";
 
 const apiRoot = "/api/liqvid";
@@ -54,6 +61,8 @@ function makeFetcher<
 
   const init: RequestInit = { method };
 
+  const hasBody = method === "POST" || method === "DELETE";
+
   if (responseModel) {
     return async (opts) => {
       const queryString = searchModel
@@ -61,7 +70,7 @@ function makeFetcher<
         : "";
       const url = apiRoot + endpoint + queryString;
 
-      if (method === "POST" && (opts as any).body) {
+      if (hasBody && (opts as any).body) {
         init.body = JSON.stringify((opts as any).body);
       }
       const $res = await fetchJson(responseModel, url, init);
@@ -76,12 +85,13 @@ function makeFetcher<
       : "";
     const url = apiRoot + endpoint + queryString;
 
-    if (method === "POST" && (opts as any).body) {
+    if (hasBody && (opts as any).body) {
       init.body = JSON.stringify((opts as any).body);
     }
 
     try {
       const res = await fetch(url, init);
+      console.log(res);
       if (res.ok) {
         return Ok(undefined as any);
       }
@@ -164,11 +174,16 @@ export async function saveRecording(
   }
 }
 
+/* ------------------------------ operations ------------------------------ */
 export const listScreenshots = makeFetcher(listScreenshotsOperation);
 
 export const captureScreenshot = makeFetcher(captureScreenshotOperation);
 
 export const copyScreenshot = makeFetcher(copyScreenshotOperation);
+
+export const renameScreenshot = makeFetcher(renameScreenshotOperation);
+
+export const deleteScreenshot = makeFetcher(deleteScreenshotOperation);
 
 export const checkImageExists = makeFetcher(checkImageExistsOperation);
 
@@ -185,3 +200,12 @@ export const renameRender = makeFetcher(renameRenderOperation);
 export const listCaptions = makeFetcher(listCaptionsOperation);
 
 export const generateCaptions = makeFetcher(generateCaptionsOperation);
+
+// Bundle the browser/native fetch client layer
+export const clientRuntime = ManagedRuntime.make(FetchHttpClient.layer);
+
+/**
+ * Client to call the Liqvid Studio web API.
+ * Use with Effect.
+ */
+export const LiqvidStudioApiClient = HttpApiClient.make(WebApi);

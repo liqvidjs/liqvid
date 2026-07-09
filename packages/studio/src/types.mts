@@ -38,3 +38,19 @@ export class DirectoryHelper<DS extends string> {
 }
 
 export type Awaitable<T> = T | Promise<T>;
+
+export type LoggableJob = {
+  logs: {
+    debug: unknown[];
+    error: unknown[];
+    log: unknown[];
+  };
+
+  name: string;
+
+  path: string;
+
+  startTime: Date;
+
+  state: "running" | "completed" | "failed";
+};

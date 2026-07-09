@@ -1,11 +1,13 @@
 import * as path from "node:path";
 
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
+import { loadJsonEffect } from "@liqvid/cli/utils";
 import {
-  ThumbnailOptions,
-  type ThumbnailsJob,
-} from "@liqvid/schemas/jobs/thumbnails";
-import { Effect, FileSystem } from "effect";
+  type ThumbnailOptions,
+  ThumbnailsJob,
+  type ThumbnailsJobIn,
+} from "@liqvid/schemas/effect";
+import { Effect, FileSystem, Option } from "effect";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
@@ -53,13 +55,12 @@ function generateForScheme(
   body: GenerateThumbsBody,
 ) {
   return Effect.gen(function* () {
-    const { config } = getServerState();
+    const { config: $config } = getServerState();
     const fs = yield* FileSystem.FileSystem;
 
-    const defaults = ThumbnailOptions.parse(
-      config
-        .map((config) => config.media?.thumbnails?.defaults ?? {})
-        .unwrapOr({}),
+    const defaults = $config.pipe(
+      Option.flatMapNullishOr((config) => config.media?.thumbnails?.defaults),
+      Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
     );
 
     const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
@@ -116,22 +117,25 @@ export function generateThumbs(
     yield* fs.makeDirectory(thumbsBaseDir, { recursive: true });
 
     // Resolve options with defaults
-    const { config } = getServerState();
-    const defaults = ThumbnailOptions.parse(
-      config.map((c) => c.media?.thumbnails?.defaults ?? {}).unwrapOr({}),
+    const { config: $config } = getServerState();
+    const defaults = $config.pipe(
+      Option.flatMapNullishOr((config) => config.media?.thumbnails?.defaults),
+      Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
     );
-    const resolvedOptions: ThumbnailsJob = {
+
+    const imageFormat = body.imageFormat ?? defaults.imageFormat;
+
+    const resolvedOptions: ThumbnailsJobIn = {
       colorScheme,
       cols: body.cols ?? defaults.cols,
       frequency: body.frequency ?? defaults.frequency,
       height: body.height ?? defaults.height,
       imageFormat: body.imageFormat ?? defaults.imageFormat,
+      quality:
+        imageFormat === "jpeg" ? (body.quality ?? defaults.quality) : undefined,
       rows: body.rows ?? defaults.rows,
       width: body.width ?? defaults.width,
     };
-    if (resolvedOptions.imageFormat === "jpeg") {
-      resolvedOptions.quality = body.quality ?? defaults.quality;
-    }
 
     // Save job options to file
     const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
@@ -167,12 +171,8 @@ export function generateThumbs(
  * Read the thumbnail job configuration from a project.
  */
 function readThumbsJob(thumbsBaseDir: string) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-    const content = yield* fs.readFileString(jobFilePath);
-    return JSON.parse(content) as ThumbnailsJob;
-  });
+  const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
+  return loadJsonEffect(ThumbnailsJob, jobFilePath);
 }
 
 /**

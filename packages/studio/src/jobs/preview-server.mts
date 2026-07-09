@@ -3,6 +3,7 @@ import * as http from "node:http";
 import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
+import { loadEnvFiles } from "@liqvid/cli/utils";
 import type { EnvFiles } from "@liqvid/schemas/effect";
 import handler from "serve-handler";
 
@@ -61,17 +62,6 @@ export async function startProductionServer(
   server.listen(port, () => {
     console.log(`Production server running on port ${port}...`);
   });
-}
-
-/**
- * Load all environment files (.env, .env.development, .env.production).
- */
-export function loadEnvFiles(rootDir: string): EnvFiles {
-  return {
-    development: parseEnvFile(path.join(rootDir, ".env.development")),
-    local: parseEnvFile(path.join(rootDir, ".env.local")),
-    production: parseEnvFile(path.join(rootDir, ".env.production")),
-  };
 }
 
 interface LiqvidConfig {
@@ -168,46 +158,6 @@ async function setupPreviewSymlinks(
     fs.symlinkSync(relativePath, symlinkPath);
     console.log(`Created symlink: ${symlinkPath} -> ${relativePath}`);
   }
-}
-
-/**
- * Parse a .env file and return key-value pairs.
- */
-function parseEnvFile(filePath: string): Record<string, string> {
-  const result: Record<string, string> = {};
-
-  try {
-    const content = fs.readFileSync(filePath, "utf-8");
-    for (const line of content.split("\n")) {
-      const trimmed = line.trim();
-      // Skip empty lines and comments
-      if (!trimmed || trimmed.startsWith("#")) {
-        continue;
-      }
-
-      const eqIndex = trimmed.indexOf("=");
-      if (eqIndex === -1) {
-        continue;
-      }
-
-      const key = trimmed.slice(0, eqIndex).trim();
-      let value = trimmed.slice(eqIndex + 1).trim();
-
-      // Remove surrounding quotes if present
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
-      }
-
-      result[key] = value;
-    }
-  } catch {
-    // File doesn't exist or can't be read, return empty object
-  }
-
-  return result;
 }
 
 /**

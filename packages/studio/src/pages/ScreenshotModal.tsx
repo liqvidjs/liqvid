@@ -113,6 +113,7 @@ export function ScreenshotModal({
       <DialogPopup
         aria-describedby={undefined}
         className={shareStyles.previewDialog}
+        size="huge"
       >
         <div className={shareStyles.previewHeader}>
           <DialogTitle>Capture Screenshot</DialogTitle>

@@ -2,23 +2,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { LiqvidConfigFromJson } from "@liqvid/schemas/effect";
+import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
+import { EnvFiles } from "@liqvid/schemas/effect";
 import { Console, Effect } from "effect";
 
-import { EnvFiles } from "../../../schemas/src/env-vars.mts";
 import { CONFIG_FILE } from "../conventions.mts";
 import type { LiqvidServerState } from "../initialize.mts";
-import { loadJsonEffect } from "../utils/effect.mts";
-
-import { loadEnvFiles } from "./preview-server.mts";
-
-/**
- * Load and parse liqvid.json.
- */
-export function loadLiqvidConfig() {
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
-  return loadJsonEffect(LiqvidConfigFromJson, configPath);
-}
 
 /**
  * Reload the config into `state.config`, logging the reason.

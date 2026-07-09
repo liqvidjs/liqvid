@@ -1,15 +1,24 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta } from "@liqvid/schemas/project";
-import type { ScreenshotEntry } from "@liqvid/schemas/screenshot-meta";
-import { CopyIcon, PlusIcon, SpinnerIcon } from "@phosphor-icons/react";
+import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas/effect";
+import {
+  CopyIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  SpinnerIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
+import { Effect } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
 import {
   checkImageExists,
+  clientRuntime,
   copyScreenshot,
-  listScreenshots,
+  deleteScreenshot,
+  LiqvidStudioApiClient,
+  renameScreenshot,
 } from "../client.mts";
 import {
   DialogBackdrop,
@@ -42,28 +51,42 @@ export function ScreenshotsSection({
   productionServerPort,
   project,
 }: ScreenshotsSectionProps) {
-  const [screenshots, setScreenshots] = useState<ScreenshotEntry[]>([]);
+  const [screenshots, setScreenshots] = useState<readonly ScreenshotEntry[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     screenshotId: string;
     target: "opengraph-image.png" | "twitter-image.png";
     variant?: "Light" | "Dark" | null;
   } | null>(null);
+  const [renameDialog, setRenameDialog] = useState<{
+    screenshotId: string;
+  } | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    screenshotId: string;
+  } | null>(null);
 
   const projectPath = project.path;
 
   const loadScreenshots = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const result = await listScreenshots({ search: { projectPath } });
-      if (result.isOk) {
-        setScreenshots(result.unwrap());
-      }
-    } catch (e) {
-      console.error("Failed to load screenshots:", e);
-    } finally {
-      setIsLoading(false);
-    }
+
+    await clientRuntime.runPromise(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+
+        const screenshots = yield* client.screenshots.list({
+          query: { projectPath },
+        });
+
+        setScreenshots(screenshots);
+      }),
+    );
+
+    setIsLoading(false);
   }, [projectPath]);
 
   useEffect(() => {
@@ -114,6 +137,62 @@ export function ScreenshotsSection({
     }
   };
 
+  const openRenameDialog = (screenshotId: string) => {
+    setRenameValue(screenshotId);
+    setRenameError(null);
+    setRenameDialog({ screenshotId });
+  };
+
+  const performRename = async () => {
+    if (!renameDialog) return;
+
+    const newName = renameValue.trim();
+    if (!newName) {
+      setRenameError("Name is required");
+      return;
+    }
+
+    try {
+      const result = await renameScreenshot({
+        body: { newName, screenshotId: renameDialog.screenshotId },
+        search: { projectPath },
+      });
+
+      if (result.isErr) {
+        setRenameError("Failed to rename screenshot");
+        console.error("Failed to rename screenshot:", result.unwrapErr());
+        return;
+      }
+
+      setRenameDialog(null);
+      await loadScreenshots();
+    } catch (e) {
+      setRenameError("Failed to rename screenshot");
+      console.error("Failed to rename screenshot:", e);
+    }
+  };
+
+  const performDelete = async () => {
+    if (!deleteDialog) return;
+
+    try {
+      const result = await deleteScreenshot({
+        body: { screenshotId: deleteDialog.screenshotId },
+        search: { projectPath },
+      });
+
+      if (result.isErr) {
+        console.error("Failed to delete screenshot:", result.unwrapErr());
+        return;
+      }
+
+      setDeleteDialog(null);
+      await loadScreenshots();
+    } catch (e) {
+      console.error("Failed to delete screenshot:", e);
+    }
+  };
+
   return (
     <>
       <div className={shareStyles.section}>
@@ -152,7 +231,7 @@ export function ScreenshotsSection({
                     ] as const)
                   : ([{ label: null, path: imagePath }] as const);
 
-              return variants.map((variant) => (
+              return variants.map((variant, variantIndex) => (
                 <li
                   className={shareStyles.screenshotItem}
                   key={`${screenshot.id}-${variant.label ?? "single"}`}
@@ -200,6 +279,28 @@ export function ScreenshotsSection({
                     >
                       <CopyIcon size={14} /> Twitter
                     </button>
+                    {variantIndex === 0 && (
+                      <>
+                        <button
+                          className={shareStyles.iconButton}
+                          onClick={() => openRenameDialog(screenshot.id)}
+                          title="Rename screenshot"
+                          type="button"
+                        >
+                          <PencilSimpleIcon size={14} />
+                        </button>
+                        <button
+                          className={shareStyles.deleteButton}
+                          onClick={() =>
+                            setDeleteDialog({ screenshotId: screenshot.id })
+                          }
+                          title="Delete screenshot"
+                          type="button"
+                        >
+                          <TrashIcon size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </li>
               ));
@@ -241,6 +342,75 @@ export function ScreenshotsSection({
                 type="button"
               >
                 Replace
+              </button>
+            </div>
+          </DialogPopup>
+        </DialogPortal>
+      </DialogRoot>
+
+      {/* Rename Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setRenameDialog(null)}
+        open={!!renameDialog}
+      >
+        <DialogPortal>
+          <DialogBackdrop />
+          <DialogPopup>
+            <DialogTitle>Rename Screenshot</DialogTitle>
+            <div className={styles.formField}>
+              <label htmlFor="screenshot-rename-input">New name</label>
+              <input
+                id="screenshot-rename-input"
+                onChange={(e) => {
+                  setRenameValue(e.target.value);
+                  setRenameError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    performRename();
+                  }
+                }}
+                value={renameValue}
+              />
+              {renameError && (
+                <span className={styles.fieldError}>{renameError}</span>
+              )}
+            </div>
+            <div className={styles.dialogActions}>
+              <DialogClose>Cancel</DialogClose>
+              <button
+                className={styles.submitButton}
+                onClick={() => performRename()}
+                type="button"
+              >
+                Rename
+              </button>
+            </div>
+          </DialogPopup>
+        </DialogPortal>
+      </DialogRoot>
+
+      {/* Delete Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        open={!!deleteDialog}
+      >
+        <DialogPortal>
+          <DialogBackdrop />
+          <DialogPopup>
+            <DialogTitle>Delete Screenshot</DialogTitle>
+            <p className={shareStyles.confirmMessage}>
+              Are you sure you want to delete this screenshot? This action
+              cannot be undone.
+            </p>
+            <div className={styles.dialogActions}>
+              <DialogClose>Cancel</DialogClose>
+              <button
+                className={shareStyles.deleteConfirmButton}
+                onClick={() => performDelete()}
+                type="button"
+              >
+                Delete
               </button>
             </div>
           </DialogPopup>

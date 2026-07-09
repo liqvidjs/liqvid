@@ -1,22 +1,25 @@
+import { ScreenshotEntry } from "@liqvid/schemas/effect";
 import { Schema } from "effect";
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+} from "effect/unstable/httpapi";
 
-/**
- * Captions metadata.
- */
-export const CaptionsMeta = Schema.Struct({
-  /** Path to the captions.vtt file */
-  captionsPath: Schema.String,
+/** Liqvid Studio web API */
+export const WebApi = HttpApi.make("LiqvidStudioWebApi")
+  .add(
+    HttpApiGroup.make("screenshots").add(
+      HttpApiEndpoint.get("list", "/screenshots", {
+        /** `projectPath` is passed as a URL search param (`?projectPath=...`). */
+        query: Schema.Struct({
+          /** path to the project */
+          projectPath: Schema.String,
+        }),
+        success: Schema.Array(ScreenshotEntry),
+      }),
+    ),
+  )
+  .prefix("/api/liqvid");
 
-  /** Timestamp when captions were generated */
-  createdAt: Schema.String,
-
-  /** Generation status */
-  status: Schema.Literals(["pending", "generating", "completed", "failed"]),
-
-  /** Path to the transcript.json file */
-  transcriptPath: Schema.optional(Schema.String),
-});
-
-export type CaptionsMeta = (typeof CaptionsMeta)["Type"];
-
-export const CaptionsMetaFromJson = Schema.fromJsonString(CaptionsMeta);
+export type WebApi = typeof WebApi;

@@ -17,10 +17,13 @@ export async function rebuildAction() {
 export interface TemplateInfo {
   /** Unique identifier (directory name) */
   id: string;
+
   /** Display name from template.json */
   name: string;
+
   /** Whether this is the default template */
   default?: boolean;
+
   /** Full path to the template directory */
   path: string;
 }

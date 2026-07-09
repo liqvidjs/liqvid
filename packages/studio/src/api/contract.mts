@@ -19,6 +19,10 @@ export type Operation<
       body?: BodyModel;
       method: "POST";
     }
+  | {
+      body?: BodyModel;
+      method: "DELETE";
+    }
 );
 
 export const listRecordingsOperation = {
@@ -116,6 +120,39 @@ export const copyScreenshotOperation = {
   }),
 };
 
+export const renameScreenshotOperation = {
+  body: z.object({
+    /** New name for the screenshot */
+    newName: z.string(),
+    /** Current screenshot folder id */
+    screenshotId: z.string(),
+  }),
+  endpoint: "/screenshots/rename" as const,
+  method: "POST" as const,
+  response: z.object({
+    /** New screenshot id (folder name) */
+    newId: z.string(),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
+export const deleteScreenshotOperation = {
+  body: z.object({
+    /** Screenshot folder id to delete */
+    screenshotId: z.string(),
+  }),
+  endpoint: "/screenshots/delete" as const,
+  method: "DELETE" as const,
+  response: z.object({
+    success: z.boolean(),
+  }),
+  search: z.object({
+    projectPath: z.string(),
+  }),
+};
+
 export const checkImageExistsOperation = {
   endpoint: "/screenshots/check-exists" as const,
   response: z.object({
@@ -193,18 +230,25 @@ export const listThumbsOperation = {
 export const RenderMeta = z.object({
   /** Color scheme used */
   colorScheme: z.enum(["light", "dark"]),
+
   /** Timestamp when render was created */
   createdAt: z.string(),
+
   /** Duration in seconds */
   duration: z.number().optional(),
+
   /** Frames per second */
   fps: z.number(),
+
   /** Video height */
   height: z.number(),
+
   /** Output filename */
   output: z.string(),
+
   /** Render status */
   status: z.enum(["pending", "rendering", "completed", "failed"]),
+
   /** Video width */
   width: z.number(),
 });
@@ -216,6 +260,7 @@ export type RenderMeta = z.infer<typeof RenderMeta>;
 export const RenderEntry = z.object({
   /** Unique identifier (datetime folder name) */
   id: z.string(),
+
   /** Render metadata */
   meta: RenderMeta,
 });
@@ -225,10 +270,13 @@ export const startRenderOperation = {
   body: z.object({
     /** Color scheme: light or dark */
     colorScheme: z.enum(["light", "dark"]).optional(),
+
     /** Frames per second */
     fps: z.number().optional(),
+
     /** Video height */
     height: z.number().optional(),
+
     /** Video width */
     width: z.number().optional(),
   }),
@@ -255,6 +303,7 @@ export const renameRenderOperation = {
   body: z.object({
     /** New name for the render */
     newName: z.string(),
+
     /** Current render ID */
     renderId: z.string(),
   }),
@@ -282,10 +331,13 @@ export type TranscriptEntry = z.infer<typeof TranscriptEntry>;
 export const CaptionsMeta = z.object({
   /** Path to the captions.vtt file */
   captionsPath: z.string(),
+
   /** Timestamp when captions were generated */
   createdAt: z.string(),
+
   /** Generation status */
   status: z.enum(["pending", "generating", "completed", "failed"]),
+
   /** Path to the transcript.json file */
   transcriptPath: z.string().optional(),
 });

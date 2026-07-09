@@ -1,6 +1,7 @@
 import { NodeFileSystem } from "@effect/platform-node";
+import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import type { ProjectMeta } from "@liqvid/schemas";
-import type { LiqvidConfig } from "@liqvid/schemas/effect";
+import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
 import { Effect, Option } from "effect";
 
 import {
@@ -8,8 +9,9 @@ import {
   startProductionServer,
 } from "./jobs/preview-server.mts";
 import { watchAssets } from "./jobs/watch-assets.mts";
-import { loadLiqvidConfig, watchLiqvidConfig } from "./jobs/watch-config.mts";
+import { watchLiqvidConfig } from "./jobs/watch-config.mts";
 import { watchProjectFiles } from "./jobs/watch-project-files.mts";
+import type { LoggableJob } from "./types.mts";
 
 const symbol = Symbol.for("@liqvid/server");
 
@@ -25,6 +27,7 @@ export interface LiqvidServerState {
   config: Option.Option<LiqvidConfig>;
   jobs: {
     productionServer: null | Promise<void>;
+    captioning: Set<LoggableJob>;
     watchAssets: null | Promise<void>;
     watchConfig: null | Promise<void>;
     watchProjectFiles: null | Promise<void>;
@@ -44,9 +47,13 @@ export async function initializeServer() {
   // Load config initially
   if (Option.isNone(state.config)) {
     const config = await Effect.runPromise(
-      loadLiqvidConfig().pipe(Effect.provide(NodeFileSystem.layer)),
+      loadLiqvidConfig().pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+      ),
     );
-    state.config = config;
+
+    state.config = Option.some(config);
   }
 
   jobs.watchAssets ??= watchAssets();
