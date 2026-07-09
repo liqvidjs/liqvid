@@ -5,39 +5,35 @@ import {
   NodeHttpPlatform,
   NodeServices,
 } from "@effect/platform-node";
-import { loadEnvFiles } from "@liqvid/cli/utils";
+import { FileDecodeError, loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
 import { Effect, Exit, type FileSystem, Layer } from "effect";
 import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 import { notFound } from "next/navigation";
 
-import { generateCaptions, listCaptions } from "../api/captions.mts";
+import { captionsLive, generateCaptions } from "../api/captions.mts";
 import {
   captureScreenshotOperation,
   copyScreenshotOperation,
   deleteScreenshotOperation,
   generateCaptionsOperation,
   generateThumbsOperation,
-  listCaptionsOperation,
-  listRecordingsOperation,
   listRendersOperation,
-  listThumbsOperation,
   renameRenderOperation,
   renameScreenshotOperation,
   saveRecordingOperation,
-  setProjectMetaOperation,
   startRenderOperation,
   staticFileOperation,
 } from "../api/contract.mts";
 import { WebApi } from "../api/contract-effect.mts";
 import { patchDependencies } from "../api/patch-dependencies.mts";
-import { setProjectMeta } from "../api/project-meta.mts";
-import { listRecordings, saveRecording } from "../api/recording.mts";
+import { projectMetaLive } from "../api/project-meta.mts";
+import { recordingsLive, saveRecording } from "../api/recording.mts";
 import { listRenders, renameRender, startRender } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import {
@@ -48,9 +44,8 @@ import {
   screenshotsLive,
 } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
-import { generateThumbs, listThumbs } from "../api/thumbs.mts";
+import { generateThumbs, thumbsLive } from "../api/thumbs.mts";
 import { initializeServer } from "../initialize.mts";
-import { FileDecodeError, HttpError } from "../utils/errors.mts";
 
 interface RequestContext {
   params: Promise<{
@@ -74,20 +69,36 @@ export type DynamicImports = Record<
  * the group implementations (e.g. `screenshotsLive`), and the Node platform
  * services required to run it. It is built once and reused across requests.
  */
-const webApiLayer = HttpApiBuilder.layer(WebApi).pipe(
-  Layer.provide(screenshotsLive),
+const apiLive = HttpApiBuilder.layer(WebApi).pipe(
+  Layer.provide([
+    captionsLive,
+    projectMetaLive,
+    recordingsLive,
+    screenshotsLive,
+    thumbsLive,
+  ]),
   Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
   Layer.provideMerge(NodeFileSystem.layer),
 );
 
-const { handler: webApiHandler } = toWebHandler(webApiLayer);
+const appLive = Layer.mergeAll(
+  apiLive,
+  HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }), // Matches the Next.js catch-all base path below
+);
+
+const { handler: webApiHandler } = toWebHandler(appLive);
 
 /**
  * Set of route paths (relative to {@link API_ROOT}) served by the Effect
  * `HttpApi`. As routes are migrated to the `HttpApi`, add their paths here so
  * the legacy switch-based router delegates to the new handler.
  */
-const effectApiRoutes = new Set<string>(["/screenshots"]);
+const effectApiRoutes = new Set<string>([
+  "/captions",
+  "/recordings",
+  "/screenshots",
+  "/thumbs",
+]);
 
 /**
  * Liqvid server GET handler
@@ -100,24 +111,20 @@ export function getHandler(_dynamicImports: DynamicImports) {
 
     const route = "/" + routeParams.join("/");
 
-    const { search } = new URL(req.url);
-
-    const searchParams = new URLSearchParams(search ?? "");
-
     await initializeServer();
 
     // Routes that have been migrated to the Effect `HttpApi` are delegated to
     // the generated web handler.
-    if (effectApiRoutes.has(route)) {
+    if (effectApiRoutes.has(route) || route.startsWith("/docs")) {
       return webApiHandler(req);
     }
 
+    const { search } = new URL(req.url);
+
+    const searchParams = new URLSearchParams(search ?? "");
+
     let program:
-      | Effect.Effect<
-          unknown,
-          HttpError | unknown,
-          EnvFiles | FileSystem.FileSystem
-        >
+      | Effect.Effect<unknown, any, EnvFiles | FileSystem.FileSystem>
       | undefined;
 
     switch (route) {
@@ -129,22 +136,9 @@ export function getHandler(_dynamicImports: DynamicImports) {
         program = patchDependencies();
         break;
 
-      case listCaptionsOperation.endpoint:
-        program = listCaptions(searchParams);
-        break;
-
-      case listRecordingsOperation.endpoint:
-        program = listRecordings(searchParams);
-        break;
-
       case listRendersOperation.endpoint:
         program = listRenders(searchParams);
         break;
-
-      case listThumbsOperation.endpoint: {
-        program = listThumbs(searchParams);
-        break;
-      }
     }
 
     if (!program && route.startsWith(staticFileOperation.endpoint)) {
@@ -184,7 +178,7 @@ export function postHandler(dynamicImports: DynamicImports) {
     await initializeServer();
 
     let program:
-      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
       | undefined;
 
     switch (route) {
@@ -209,9 +203,9 @@ export function postHandler(dynamicImports: DynamicImports) {
         break;
       }
 
-      case setProjectMetaOperation.endpoint:
-        program = setProjectMeta(searchParams, await req.json());
-        break;
+      // case setProjectMetaOperation.endpoint:
+      //   program = setProjectMeta(searchParams, await req.json());
+      //   break;
 
       case saveRecordingOperation.endpoint:
         program = saveRecording(
@@ -257,7 +251,7 @@ export function deleteHandler(_dynamicImports: DynamicImports) {
     await initializeServer();
 
     let program:
-      | Effect.Effect<unknown, HttpError | unknown, FileSystem.FileSystem>
+      | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
       | undefined;
 
     switch (route) {

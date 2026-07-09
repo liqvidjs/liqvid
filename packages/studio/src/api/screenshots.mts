@@ -9,10 +9,13 @@ import type {
 } from "@liqvid/schemas/screenshot-meta";
 import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder, type HttpApiEndpoint } from "effect/unstable/httpapi";
-import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
-import { HttpError } from "../utils/errors.mts";
+import {
+  ConflictError,
+  InvalidError,
+  NotFoundError,
+} from "../utils/errors.mts";
 
 import { WebApi } from "./contract-effect.mts";
 
@@ -75,8 +78,6 @@ export async function captureScreenshot(
     // Capture both light and dark screenshots
     const lightOutputPath = path.join(folderPath, "light.png");
     const darkOutputPath = path.join(folderPath, "dark.png");
-
-    console.log({ darkOutputPath, lightOutputPath });
 
     await screenshot({
       colorScheme: "light",
@@ -223,14 +224,7 @@ export function handleListScreenshots({
               imagePath,
               meta,
             });
-          }).pipe(
-            Effect.catch((e) => {
-              // Skip folders without valid metadata
-              console.error(e);
-
-              return Effect.succeedNone;
-            }),
-          );
+          });
         }),
       ),
       { concurrency: 10 },
@@ -245,10 +239,13 @@ export function handleListScreenshots({
 
     return screenshots;
   }).pipe(
-    // Filesystem failures are unexpected here: turn them into defects so the
-    // API responds with a 500. Any declared (typed) errors added in the future
-    // still flow through the error channel untouched.
-    Effect.catchTag("PlatformError", (cause) => Effect.die(cause)),
+    Effect.catchTag("PlatformError", (e) => {
+      if (e.reason._tag === "NotFound") {
+        return Effect.succeed([]);
+      }
+
+      return Effect.die(e);
+    }),
   );
 }
 
@@ -258,9 +255,8 @@ export function handleCaptureScreenshot(request: Request) {
     const projectPath = url.searchParams.get("projectPath");
 
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -283,9 +279,8 @@ export function handleCopyScreenshot(request: Request) {
     const projectPath = url.searchParams.get("projectPath");
 
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -322,9 +317,8 @@ export function renameScreenshot(request: Request) {
     const projectPath = url.searchParams.get("projectPath");
 
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -335,9 +329,8 @@ export function renameScreenshot(request: Request) {
     const { newName, screenshotId } = body;
 
     if (!screenshotId || !newName) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "screenshotId and newName are required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -345,9 +338,8 @@ export function renameScreenshot(request: Request) {
     const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
     if (!sanitizedName) {
-      return yield* new HttpError({
+      return yield* new InvalidError({
         message: "Invalid name",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -359,17 +351,15 @@ export function renameScreenshot(request: Request) {
 
     // Check if source exists
     if (!(yield* fs.exists(oldPath))) {
-      return yield* new HttpError({
+      return yield* new NotFoundError({
         message: "Screenshot not found",
-        status: StatusCodes.NOT_FOUND,
       });
     }
 
     // Check if destination already exists
     if (yield* fs.exists(newPath)) {
-      return yield* new HttpError({
+      return yield* new ConflictError({
         message: "A screenshot with this name already exists",
-        status: StatusCodes.CONFLICT,
       });
     }
 
@@ -393,9 +383,8 @@ export function deleteScreenshot(request: Request) {
     const projectPath = url.searchParams.get("projectPath");
 
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -406,9 +395,8 @@ export function deleteScreenshot(request: Request) {
     const { screenshotId } = body;
 
     if (!screenshotId) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "screenshotId is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -419,9 +407,8 @@ export function deleteScreenshot(request: Request) {
 
     // Check if the screenshot exists
     if (!(yield* fs.exists(folderPath))) {
-      return yield* new HttpError({
+      return yield* new NotFoundError({
         message: "Screenshot not found",
-        status: StatusCodes.NOT_FOUND,
       });
     }
 

@@ -6,7 +6,7 @@ import { Effect, FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
-import { HttpError } from "../utils/errors.mts";
+import { ConflictError, NotFoundError } from "../utils/errors.mts";
 
 import type { RenderMeta } from "./contract.mts";
 
@@ -72,9 +72,8 @@ export function startRender(
   return Effect.gen(function* () {
     const projectPath = searchParams.get("projectPath");
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -159,9 +158,8 @@ export function listRenders(searchParams: URLSearchParams) {
   return Effect.gen(function* () {
     const projectPath = searchParams.get("projectPath");
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -227,9 +225,8 @@ export function renameRender(
   return Effect.gen(function* () {
     const projectPath = searchParams.get("projectPath");
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -237,7 +234,7 @@ export function renameRender(
 
     // Validate inputs
     if (!renderId || !newName) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "renderId and newName are required",
         status: StatusCodes.BAD_REQUEST,
       });
@@ -247,7 +244,7 @@ export function renameRender(
     const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
     if (!sanitizedName) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "Invalid name",
         status: StatusCodes.BAD_REQUEST,
       });
@@ -267,17 +264,15 @@ export function renameRender(
 
     // Check if source exists
     if (!(yield* fs.exists(oldPath))) {
-      return yield* new HttpError({
-        message: "Render not found",
-        status: StatusCodes.NOT_FOUND,
+      return yield* new NotFoundError({
+        message: "render not found",
       });
     }
 
     // Check if destination already exists
     if (yield* fs.exists(newPath)) {
-      return yield* new HttpError({
+      return yield* new ConflictError({
         message: "A render with this name already exists",
-        status: StatusCodes.CONFLICT,
       });
     }
 

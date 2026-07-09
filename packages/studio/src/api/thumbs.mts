@@ -8,10 +8,11 @@ import {
   type ThumbnailsJobIn,
 } from "@liqvid/schemas/effect";
 import { Effect, FileSystem, Option } from "effect";
-import { StatusCodes } from "http-status-codes";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
-import { HttpError } from "../utils/errors.mts";
+
+import { WebApi } from "./contract-effect.mts";
 
 const THUMBS_BASE_DIR = ".liqvid/thumbs";
 const THUMBS_JOB_FILE = "thumbnails-job.json";
@@ -95,9 +96,8 @@ export function generateThumbs(
     // validate parameters
     const projectPath = searchParams.get("projectPath");
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -175,46 +175,32 @@ function readThumbsJob(thumbsBaseDir: string) {
   return loadJsonEffect(ThumbnailsJob, jobFilePath);
 }
 
-/**
- * List existing thumbnail sheets for a project.
- */
-export function listThumbs(searchParams: URLSearchParams) {
-  return Effect.gen(function* () {
-    // validate parameters
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* new HttpError({
-        message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
-      });
-    }
+export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
+  // list existing captions for a project
+  handlers.handle("list", ({ query: { projectPath } }) => {
+    return Effect.gen(function* () {
+      // read directories
+      const thumbsBaseDir = path.join(
+        process.cwd(),
+        "app",
+        projectPath,
+        THUMBS_BASE_DIR,
+      );
 
-    // read directories
-    const thumbsBaseDir = path.join(
-      process.cwd(),
-      "app",
-      projectPath,
-      THUMBS_BASE_DIR,
-    );
+      const [lightSheets, darkSheets, job] = yield* Effect.all(
+        [
+          readThumbSheets(path.join(thumbsBaseDir, "light")),
+          readThumbSheets(path.join(thumbsBaseDir, "dark")),
+          readThumbsJob(thumbsBaseDir),
+        ],
+        { concurrency: "unbounded" },
+      );
 
-    const [lightSheets, darkSheets, job] = yield* Effect.all(
-      [
-        readThumbSheets(path.join(thumbsBaseDir, "light")),
-        readThumbSheets(path.join(thumbsBaseDir, "dark")),
-        readThumbsJob(thumbsBaseDir),
-      ],
-      { concurrency: "unbounded" },
-    );
-
-    // If no thumbs exist, return null
-    if (lightSheets.length === 0 && darkSheets.length === 0) {
-      return null;
-    }
-
-    return {
-      dark: darkSheets,
-      job,
-      light: lightSheets,
-    };
-  });
-}
+      return {
+        dark: darkSheets,
+        job,
+        light: lightSheets,
+      };
+    }).pipe(Effect.orDie);
+  }),
+);

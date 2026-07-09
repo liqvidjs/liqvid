@@ -8,6 +8,7 @@ import {
   LiqvidStudioPluginApiProvider,
   type PluginContext,
 } from "@liqvid/studio-plugin-api";
+import { Effect } from "effect";
 import {
   createContext,
   useCallback,
@@ -17,10 +18,9 @@ import {
   useState,
 } from "react";
 
-import { setProjectMeta } from "./client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "./client.mts";
 import type { ToastPropsWithTime } from "./ui/Toast.tsx";
 import { Toaster } from "./ui/Toaster.tsx";
-
 import "./palette.css";
 
 export interface StudioPrivateContextShape {
@@ -67,14 +67,20 @@ export function LiqvidDevToolsProvider({
         };
       },
       setDuration: (duration: DurationLike) => {
-        setProjectMeta({
-          body: {
-            durationMs: Duration.inMilliseconds(duration),
-          },
-          search: {
-            url: projectPath,
-          },
-        });
+        clientRuntime.runFork(
+          Effect.gen(function* () {
+            const client = yield* LiqvidStudioApiClient;
+
+            yield* client.projects.setProjectMeta({
+              payload: {
+                durationMs: Duration.inMilliseconds(duration),
+              },
+              query: {
+                url: projectPath,
+              },
+            });
+          }),
+        );
       },
     }),
     [instances, projectPath],

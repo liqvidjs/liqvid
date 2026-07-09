@@ -33,17 +33,6 @@ export const listRecordingsOperation = {
   }),
 };
 
-export const setProjectMetaOperation = {
-  body: z.object({
-    durationMs: z.number(),
-  }),
-  endpoint: "/project-meta" as const,
-  method: "POST" as const,
-  search: z.object({
-    url: z.string(),
-  }),
-};
-
 /**
  * Schema for plugin recording data.
  * Data can be a Blob (for media) which requires a filename,

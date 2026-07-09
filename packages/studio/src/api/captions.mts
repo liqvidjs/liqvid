@@ -11,12 +11,15 @@ import {
   Option,
   type PlatformError,
 } from "effect";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
 import { CaptionsMeta } from "../types/schemas.mts";
 import type { LoggableJob } from "../types.mts";
-import { HttpError } from "../utils/errors.mts";
+import { NotFoundError } from "../utils/errors.mts";
+
+import { WebApi } from "./contract-effect.mts";
 
 const CAPTIONS_DIR = ".liqvid/captions";
 const META_FILE = "meta.json";
@@ -49,48 +52,6 @@ function writeCaptionsMeta(projectDir: string, meta: CaptionsMeta) {
 }
 
 /**
- * List existing captions for a project.
- */
-export function listCaptions(searchParams: URLSearchParams) {
-  return Effect.gen(function* () {
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* new HttpError({
-        message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
-      });
-    }
-
-    const projectDir = path.join(process.cwd(), "app", projectPath);
-
-    return yield* readCaptionsMeta(projectDir).pipe(
-      // A missing captions meta file is not a server error: surface it as 404.
-      Effect.catchTag(
-        "PlatformError",
-        (
-          error,
-        ): Effect.Effect<
-          never,
-          HttpError | PlatformError.PlatformError,
-          never
-        > => {
-          if (error.reason._tag === "NotFound") {
-            return Effect.fail(
-              new HttpError({
-                message: "No captions found for this project",
-                status: StatusCodes.NOT_FOUND,
-              }),
-            );
-          }
-
-          return Effect.fail(error);
-        },
-      ),
-    );
-  });
-}
-
-/**
  * Generate captions for a project using Whisper.
  */
 export function generateCaptions(searchParams: URLSearchParams) {
@@ -104,20 +65,16 @@ export function generateCaptions(searchParams: URLSearchParams) {
 
     const config = yield* Option.match($config, {
       onNone: () =>
-        Effect.fail(
-          new HttpError({
-            message: "config not loaded",
-            status: StatusCodes.INTERNAL_SERVER_ERROR,
-          }),
-        ),
+        Effect.die({
+          message: "config not loaded",
+        }),
       onSome: (c) => Effect.succeed(c),
     });
 
     const projectPath = searchParams.get("projectPath");
     if (!projectPath) {
-      return yield* new HttpError({
+      return yield* Effect.die({
         message: "projectPath is required",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -230,3 +187,30 @@ export function generateCaptions(searchParams: URLSearchParams) {
     return { status: "started" as const };
   });
 }
+
+export const captionsLive = HttpApiBuilder.group(
+  WebApi,
+  "captions",
+  (handlers) =>
+    // list existing captions for a project
+    handlers.handle("list", ({ query: { projectPath } }) => {
+      return Effect.gen(function* () {
+        const projectDir = path.join(process.cwd(), "app", projectPath);
+
+        return yield* readCaptionsMeta(projectDir).pipe(
+          // A missing captions meta file is not a server error: surface it as 404.
+          Effect.catchTag("PlatformError", (error) => {
+            if (error.reason._tag === "NotFound") {
+              return Effect.fail(
+                new NotFoundError({
+                  message: "No captions found for this project",
+                }),
+              );
+            }
+
+            return Effect.die(error);
+          }),
+        );
+      }).pipe(Effect.orDie);
+    }),
+);

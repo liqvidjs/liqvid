@@ -101,4 +101,4 @@ export const ThumbnailOptions = z.object({
 
 export type ThumbnailOptionsIn = z.input<typeof ThumbnailOptions>;
 
-export type ThumbnailOptionsOut = z.output<typeof ThumbnailOptions>;
+export type ThumbnailOptions = z.output<typeof ThumbnailOptions>;

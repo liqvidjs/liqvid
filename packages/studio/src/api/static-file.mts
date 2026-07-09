@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { Effect, FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
 
-import { HttpError } from "../utils/errors.mts";
+import { InvalidError, NotFoundError } from "../utils/errors.mts";
 
 /**
  * MIME type mappings for common file extensions
@@ -52,9 +52,8 @@ export function serveStaticFile(requestedPath: string) {
     // Security: Prevent directory traversal attacks
     const normalizedPath = path.normalize(requestedPath);
     if (normalizedPath.includes("..")) {
-      return yield* new HttpError({
+      return yield* new InvalidError({
         message: "invalid path",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
@@ -64,26 +63,23 @@ export function serveStaticFile(requestedPath: string) {
 
     // Security: Ensure the resolved path is within the app directory
     if (!absolutePath.startsWith(appDir + path.sep)) {
-      return yield* new HttpError({
+      return yield* new InvalidError({
         message: "invalid path",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 
     // Check if file exists
     if (!(yield* fs.exists(absolutePath))) {
-      return yield* new HttpError({
+      return yield* new NotFoundError({
         message: "file not found",
-        status: StatusCodes.NOT_FOUND,
       });
     }
 
     // Check if it's a file (not a directory)
     const stat = yield* fs.stat(absolutePath);
     if (stat.type !== "File") {
-      return yield* new HttpError({
+      return yield* new InvalidError({
         message: "not a file",
-        status: StatusCodes.BAD_REQUEST,
       });
     }
 

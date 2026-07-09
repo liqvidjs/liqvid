@@ -23,7 +23,6 @@ import {
   renameRenderOperation,
   renameScreenshotOperation,
   saveRecordingOperation,
-  setProjectMetaOperation,
   startRenderOperation,
 } from "./api/contract.mts";
 import { WebApi } from "./api/contract-effect.mts";
@@ -103,8 +102,6 @@ function makeFetcher<
 }
 
 export const listRecordings = makeFetcher(listRecordingsOperation);
-
-export const setProjectMeta = makeFetcher(setProjectMetaOperation);
 
 interface SaveRecordingOpts {
   search: { url: string };

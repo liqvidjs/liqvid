@@ -1,17 +1,21 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { Duration } from "@liqvid/duration";
 import type {
   WhisperConfig,
   WhisperModelName,
 } from "@liqvid/schemas/jobs/captioning";
 import { assertType } from "@liqvid/utils";
+import { Effect, FileSystem } from "effect";
+import type { IOptions } from "nodejs-whisper";
 import type { CommandModule } from "yargs";
 
 import { expandTilde } from "../utils/paths.mts";
 
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
+
+export type WhisperLogger = NonNullable<IOptions["logger"]>;
 
 /**
  * Options from `captioning.nodeWhisperOptions` in the config file.
@@ -149,75 +153,91 @@ function parseWhisperJson(jsonContent: string): TranscriptEntry[] {
  * });
  * ```
  */
-export async function transcribe(
-  options: TranscribeOptions,
-): Promise<TranscribeResult> {
-  const { nodewhisper } = await import("nodejs-whisper");
+export function transcribe({
+  logger,
+  ...options
+}: TranscribeOptions & {
+  /** Custom logger to pass to nodejs-whisper */
+  logger?: WhisperLogger;
+}) {
+  return Effect.gen(function* () {
+    const { nodewhisper } = yield* Effect.promise(
+      () => import("nodejs-whisper"),
+    );
 
-  const { audioFile, outputDir, whisperConfig = {} } = options;
+    const fs = yield* FileSystem.FileSystem;
 
-  // Ensure output directory exists
-  await fsp.mkdir(outputDir, { recursive: true });
+    const { audioFile, outputDir, whisperConfig = {} } = options;
 
-  // Resolve absolute paths
-  const absoluteAudioFile = path.resolve(audioFile);
-  const absoluteOutputDir = path.resolve(outputDir);
+    // Ensure output directory exists
+    yield* fs.makeDirectory(outputDir, { recursive: true });
 
-  // Configure whisper options
-  const modelName = whisperConfig.modelName ?? "base.en";
+    // Resolve absolute paths
+    const absoluteAudioFile = path.resolve(audioFile);
+    const absoluteOutputDir = path.resolve(outputDir);
 
-  // Run whisper transcription
-  // nodejs-whisper outputs files next to the input file, so we need to handle that
-  await nodewhisper(absoluteAudioFile, {
-    autoDownloadModelName: whisperConfig.autoDownloadModelName ?? modelName,
-    modelName,
-    modelRootPath: whisperConfig.modelRootPath
-      ? expandTilde(whisperConfig.modelRootPath)
-      : undefined,
-    removeWavFileAfterTranscription: true,
-    whisperOptions: {
-      outputInJson: true,
-      outputInVtt: true,
-      splitOnWord: true,
-      timestamps_length: whisperConfig.timestampsLength ?? 20,
-      translateToEnglish: whisperConfig.translateToEnglish ?? false,
-      wordTimestamps: true,
-    },
-    withCuda: whisperConfig.withCuda ?? false,
-  });
+    // Configure whisper options
+    const modelName = whisperConfig.modelName ?? "base.en";
 
-  // nodejs-whisper creates output files next to the input audio file
-  // with the same base name but different extensions
-  const audioBaseName = path.basename(audioFile, path.extname(audioFile));
-  const audioDir = path.dirname(absoluteAudioFile);
+    // Run whisper transcription
+    // nodejs-whisper outputs files next to the input file, so we need to handle that
+    yield* Effect.promise(() =>
+      nodewhisper(absoluteAudioFile, {
+        autoDownloadModelName: whisperConfig.autoDownloadModelName ?? modelName,
+        logger,
+        modelName,
+        modelRootPath: whisperConfig.modelRootPath
+          ? expandTilde(whisperConfig.modelRootPath)
+          : undefined,
+        removeWavFileAfterTranscription: true,
+        whisperOptions: {
+          outputInJson: true,
+          outputInVtt: true,
+          splitOnWord: true,
+          timestamps_length: whisperConfig.timestampsLength ?? 20,
+          translateToEnglish: whisperConfig.translateToEnglish ?? false,
+          wordTimestamps: true,
+        },
+        withCuda: whisperConfig.withCuda ?? false,
+      }),
+    );
 
-  const sourceVttPath = path.join(audioDir, `${audioBaseName}.vtt`);
-  const sourceJsonPath = path.join(audioDir, `${audioBaseName}.json`);
+    // nodejs-whisper creates output files next to the input audio file
+    // with the same base name but different extensions
+    const audioBaseName = path.basename(audioFile, path.extname(audioFile));
+    const audioDir = path.dirname(absoluteAudioFile);
 
-  const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
-  const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
+    const sourceVttPath = path.join(audioDir, `${audioBaseName}.vtt`);
+    const sourceJsonPath = path.join(audioDir, `${audioBaseName}.json`);
 
-  // Move VTT file to output directory
-  try {
-    await fsp.rename(sourceVttPath, targetVttPath);
-  } catch {
+    const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
+    const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
+
+    // Move VTT file to output directory
+    // try {
+    yield* fs.rename(sourceVttPath, targetVttPath);
+    // } catch {
     // If rename fails (cross-device), copy and delete
-    await fsp.copyFile(sourceVttPath, targetVttPath);
-    await fsp.unlink(sourceVttPath);
-  }
+    //   yield* fs.copyFile(sourceVttPath, targetVttPath);
+    //   yield* fs.remove(sourceVttPath);
+    // }
 
-  // Parse JSON and create transcript with word timings
-  const jsonContent = await fsp.readFile(sourceJsonPath, "utf8");
-  const transcript = parseWhisperJson(jsonContent);
-  await fsp.writeFile(targetJsonPath, JSON.stringify(transcript, null, 2));
+    // Parse JSON and create transcript with word timings
+    const jsonContent = yield* fs.readFileString(sourceJsonPath, "utf8");
+    const transcript = parseWhisperJson(jsonContent);
+    yield* fs.writeFileString(
+      targetJsonPath,
+      JSON.stringify(transcript, null, 2),
+    );
 
-  // Clean up source JSON file
-  await fsp.unlink(sourceJsonPath);
+    // Clean up source JSON file
+    yield* fs.remove(sourceJsonPath);
 
-  return {
-    captionsPath: targetVttPath,
-    transcriptPath: targetJsonPath,
-  };
+    return {
+      captionsPath: targetVttPath,
+      transcriptPath: targetJsonPath,
+    };
+  });
 }
 
 /**
@@ -286,16 +306,18 @@ export const transcribeCommand: CommandModule = {
   command: "transcribe",
   describe: "Transcribe audio to captions using Whisper",
   handler: async (argv) => {
-    const result = await transcribe({
-      audioFile: argv.input as string,
-      outputDir: argv.output as string,
-      whisperConfig: {
-        modelName: argv.model as WhisperModelName,
-        modelRootPath: argv["model-path"] as string | undefined,
-        translateToEnglish: argv.translate as boolean,
-        withCuda: argv.cuda as boolean,
-      },
-    });
+    const result = await Effect.runPromise(
+      transcribe({
+        audioFile: argv.input as string,
+        outputDir: argv.output as string,
+        whisperConfig: {
+          modelName: argv.model as WhisperModelName,
+          modelRootPath: argv["model-path"] as string | undefined,
+          translateToEnglish: argv.translate as boolean,
+          withCuda: argv.cuda as boolean,
+        },
+      }).pipe(Effect.provide(NodeFileSystem.layer)),
+    );
 
     console.log(`Captions written to: ${result.captionsPath}`);
     console.log(`Transcript written to: ${result.transcriptPath}`);

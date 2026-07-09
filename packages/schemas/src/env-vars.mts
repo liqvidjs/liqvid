@@ -8,8 +8,6 @@ import {
   SchemaTransformation,
 } from "effect";
 
-import type { StringWithEnvVars } from "./shared-effect.mts";
-
 // Declaring a tag for a service that generates random numbers
 export const EnvFiles = Context.Service<{
   production: Record<string, string>;

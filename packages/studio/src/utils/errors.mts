@@ -1,12 +1,26 @@
-import { Data, type Schema } from "effect";
+import { Schema } from "effect";
+import { StatusCodes } from "http-status-codes";
 
-// Define a custom error type using Data.TaggedError
-export class HttpError extends Data.TaggedError("HttpError")<{
-  message: string;
-  status: number;
-}> {}
+export class ConflictError extends Schema.TaggedErrorClass<ConflictError>()(
+  "Conflict",
+  {
+    message: Schema.String,
+  },
+  { httpApiStatus: StatusCodes.CONFLICT },
+) {}
 
-export class FileDecodeError extends Data.TaggedError("FileDecodeError")<{
-  filename: string;
-  cause: Schema.SchemaError;
-}> {}
+export class InvalidError extends Schema.TaggedErrorClass<InvalidError>()(
+  "Invalid",
+  {
+    message: Schema.String,
+  },
+  { httpApiStatus: StatusCodes.BAD_REQUEST },
+) {}
+
+export class NotFoundError extends Schema.TaggedErrorClass<NotFoundError>()(
+  "NotFound",
+  {
+    message: Schema.String,
+  },
+  { httpApiStatus: StatusCodes.NOT_FOUND },
+) {}

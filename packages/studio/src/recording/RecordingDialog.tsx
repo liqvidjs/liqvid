@@ -2,13 +2,14 @@ import { Collapsible } from "@base-ui/react/collapsible";
 import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
-import type { RecordingMeta } from "@liqvid/schemas";
+import type { RecordingMeta } from "@liqvid/schemas/effect";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { formatTime, formatTimeDuration, isMac } from "@liqvid/utils";
 import clsx from "clsx";
+import { Effect } from "effect";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
-import { listRecordings } from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
@@ -40,7 +41,7 @@ export function RecordingDialog({
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
 
-  const [recordings, setRecordings] = useState<RecordingMeta[]>([]);
+  const [recordings, setRecordings] = useState<readonly RecordingMeta[]>([]);
 
   const [activeTab, setActiveTab] = usePersistentState({
     default: tabs.configuration,
@@ -103,13 +104,17 @@ export function RecordingDialog({
   );
 
   useEffect(() => {
-    listRecordings({ search: { url: projectPath } }).then(($res) => {
-      if ($res.isErr) {
-        console.error($res.unwrapErr());
-        return;
-      }
-      setRecordings($res.unwrap());
-    });
+    clientRuntime.runPromise(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+
+        const recordings = yield* client.recordings.list({
+          query: { url: projectPath },
+        });
+
+        setRecordings(recordings);
+      }),
+    );
   }, [projectPath]);
 
   return (

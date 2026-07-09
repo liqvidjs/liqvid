@@ -10,11 +10,19 @@ export const ThumbnailsJob = Schema.Struct({
   /** Color scheme */
   colorScheme: ColorSchemeInputSpecifier,
 
-  /** Number of columns per sheet */
-  cols: Schema.Number,
+  /**
+   * Number of columns per sheet
+   * @default 5
+   */
+  cols: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
 
-  /** Seconds between screenshots */
-  frequency: Schema.Number,
+  /**
+   * Seconds between screenshots
+   * @default 1
+   */
+  frequency: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(1)),
+  ),
 
   /**
    * Height of each thumbnail
@@ -25,10 +33,15 @@ export const ThumbnailsJob = Schema.Struct({
   ),
 
   /** Image format: jpeg or png */
-  imageFormat: ImageFormat,
+  imageFormat: ImageFormat.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("jpeg")),
+  ),
 
-  /** Quality for JPEG images (0-100) */
-  quality: JpegQuality,
+  /**
+   * Quality for JPEG images (0-100)
+   * @default 80
+   */
+  quality: JpegQuality.pipe(Schema.withDecodingDefaultType(Effect.succeed(80))),
 
   /**
    * Number of rows per sheet
@@ -45,6 +58,7 @@ export const ThumbnailsJob = Schema.Struct({
   ),
 });
 
+export type ThumbnailsJobIn = (typeof ThumbnailsJob)["Encoded"];
 export type ThumbnailsJob = (typeof ThumbnailsJob)["Type"];
 
 /** Configuration for a thumbnail generation job */
@@ -124,4 +138,4 @@ export const ThumbnailOptions = Schema.Struct({
 
 export type ThumbnailOptionsIn = (typeof ThumbnailOptions)["Encoded"];
 
-export type ThumbnailOptionsOut = (typeof ThumbnailOptions)["Type"];
+export type ThumbnailOptions = (typeof ThumbnailOptions)["Type"];

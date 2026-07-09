@@ -108,5 +108,3 @@ export const LiqvidConfig = Schema.Struct({
 export type LiqvidConfigIn = (typeof LiqvidConfig)["Encoded"];
 
 export type LiqvidConfig = (typeof LiqvidConfig)["Type"];
-
-export const LiqvidConfigFromJson = Schema.fromJsonString(LiqvidConfig);
