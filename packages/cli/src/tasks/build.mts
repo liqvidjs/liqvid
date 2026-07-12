@@ -1,9 +1,8 @@
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { Err, Ok, type Result } from "@liqvid/fp";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
-import { Effect } from "effect";
+import { Effect, Layer, Logger, LogLevel, References } from "effect";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
@@ -38,7 +37,12 @@ export const build: CommandModule = {
   handler: async (args) => {
     const cwd = args.cwd as string;
     const configPath = (args.config as string) ?? path.join(cwd, CONFIG_FILE);
-    await runNextBuild({ configPath, cwd });
+    await Effect.runPromise(
+      runNextBuild({ configPath, cwd }).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.provideService(References.MinimumLogLevel, "Debug"),
+      ),
+    );
   },
 };
 
@@ -95,61 +99,53 @@ export type BuildError = {
 /**
  * Run Next.js build
  */
-export async function runNextBuild(
-  options: BuildOptions = {},
-): Promise<Result<null, BuildError>> {
-  const cwd = options.cwd ?? process.cwd();
-  const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
+export function runNextBuild(options: BuildOptions = {}) {
+  return Effect.gen(function* () {
+    const cwd = options.cwd ?? process.cwd();
+    const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
 
-  const envFiles = loadEnvFiles(process.cwd());
+    const envFiles = loadEnvFiles(process.cwd());
 
-  // Load config to get media base URL
-  const config = await Effect.runPromise(
-    loadLiqvidConfig({ configPath }).pipe(
-      Effect.provide(NodeFileSystem.layer),
+    // Load config to get media base URL
+    const config = yield* loadLiqvidConfig({ configPath }).pipe(
       Effect.provideService(EnvFiles, envFiles),
-    ),
-  );
-  const env: Record<string, string> = {
-    ...process.env,
-    ...envFiles.production,
-    ...envFiles.local,
-    NODE_ENV: "production",
-  };
+    );
 
-  if (config) {
-    const mediaProvider = getMediaProvider(config);
-    if (mediaProvider) {
-      const mediaBaseUrl = mediaProvider.getBaseUrl();
-      env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
+    const env: Record<string, string> = {
+      ...process.env,
+      ...envFiles.production,
+      ...envFiles.local,
+      NODE_ENV: "production",
+    };
+
+    if (config) {
+      const mediaProvider = getMediaProvider(config);
+      if (mediaProvider) {
+        const mediaBaseUrl = mediaProvider.getBaseUrl();
+        env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
+      }
     }
-  }
 
-  console.log("Running 'next build'...");
+    yield* Effect.log("Running 'next build'...");
 
-  try {
-    const buildProcess = execa("npx", ["next", "build"], {
-      cwd,
-      env,
-      reject: false,
-      stderr: "pipe",
-      stdout: "inherit",
-    });
-
-    const result = await buildProcess;
+    const result = yield* Effect.promise(() =>
+      execa("npx", ["next", "build"], {
+        cwd,
+        env,
+        reject: false,
+        stderr: "pipe",
+        stdout: "inherit",
+      }),
+    );
 
     if (result.exitCode !== 0) {
       const stderrOutput = result.stderr || "";
       const messages = parseNextBuildErrors(stderrOutput);
-      return Err({ messages });
+      return yield* Effect.fail({ messages });
     }
 
-    console.log("'next build' completed.");
-    return Ok(null);
-  } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    return Err({ messages: [errorMessage] });
-  }
+    yield* Effect.log("'next build' completed.");
+  });
 }
 
 /**

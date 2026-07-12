@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
-import { loadJsonEffect } from "@liqvid/cli/utils";
+import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
 import {
   type ThumbnailOptions,
   ThumbnailsJob,
@@ -139,10 +139,7 @@ export function generateThumbs(
 
     // Save job options to file
     const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-    yield* fs.writeFileString(
-      jobFilePath,
-      JSON.stringify(resolvedOptions, null, 2),
-    );
+    yield* writeJSON(jobFilePath, resolvedOptions);
 
     let lightSheets: string[] = [];
     let darkSheets: string[] = [];

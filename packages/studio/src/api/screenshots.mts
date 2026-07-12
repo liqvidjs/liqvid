@@ -1,13 +1,9 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { screenshot } from "@liqvid/cli/screenshot";
-import type {
-  ColorSchemeOption,
-  ScreenshotEntry,
-  ScreenshotMeta,
-} from "@liqvid/schemas/screenshot-meta";
-import { Effect, FileSystem, Option } from "effect";
+import { writeJSON } from "@liqvid/cli/utils";
+import type { ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
+import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
@@ -43,140 +39,6 @@ function getScreenshotsDir(projectPath: string): string {
 function generateFolderName(): string {
   const now = new Date();
   return now.toISOString().replace(/[:.]/g, "-");
-}
-
-/**
- * Capture a screenshot using @liqvid/renderer
- */
-export async function captureScreenshot(
-  projectPath: string,
-  options: {
-    time: number;
-    width: number;
-    height: number;
-    colorScheme?: ColorSchemeOption;
-  },
-): Promise<ScreenshotEntry> {
-  const { basePath, productionServerPort } = getServerState();
-
-  const screenshotsDir = getScreenshotsDir(projectPath);
-  const folderId = generateFolderName();
-  const folderPath = path.join(screenshotsDir, folderId);
-
-  // Create the folder
-  await fsp.mkdir(folderPath, { recursive: true });
-
-  const previewPath = `${basePath || ""}/${projectPath}/`;
-  const url = `http://localhost:${productionServerPort}${previewPath}`;
-
-  const colorScheme = options.colorScheme ?? "light";
-
-  let imagePath: ScreenshotEntry["imagePath"];
-
-  if (colorScheme === "both") {
-    // Capture both light and dark screenshots
-    const lightOutputPath = path.join(folderPath, "light.png");
-    const darkOutputPath = path.join(folderPath, "dark.png");
-
-    await screenshot({
-      colorScheme: "light",
-      height: options.height,
-      output: lightOutputPath,
-      time: options.time,
-      url,
-      width: options.width,
-    });
-
-    console.log("light screenshot succeeded");
-
-    await screenshot({
-      colorScheme: "dark",
-      height: options.height,
-      output: darkOutputPath,
-      time: options.time,
-      url,
-      width: options.width,
-    });
-
-    console.log("dark screenshot succeeded");
-
-    imagePath = {
-      dark: `/.liqvid/screenshots/${folderId}/dark.png`,
-      light: `/.liqvid/screenshots/${folderId}/light.png`,
-    };
-  } else {
-    // Capture single screenshot
-    const outputPath = path.join(folderPath, "screenshot.png");
-
-    await screenshot({
-      colorScheme,
-      height: options.height,
-      output: outputPath,
-      time: options.time,
-      url,
-      width: options.width,
-    });
-
-    imagePath = `/.liqvid/screenshots/${folderId}/screenshot.png`;
-  }
-
-  // Create metadata
-  const meta: ScreenshotMeta = {
-    colorScheme,
-    createdAt: new Date().toISOString(),
-    height: options.height,
-    width: options.width,
-  };
-
-  // Save metadata
-  await fsp.writeFile(
-    path.join(folderPath, SCREENSHOT_META_FILE),
-    JSON.stringify(meta, null, 2),
-  );
-
-  return {
-    id: folderId,
-    imagePath,
-    meta,
-  };
-}
-
-/**
- * Copy a screenshot to the project root as opengraph or twitter image
- */
-export async function copyScreenshotToRoot(
-  projectPath: string,
-  screenshotId: string,
-  targetFilename: "opengraph-image.png" | "twitter-image.png",
-  sourceFilename?: "light.png" | "dark.png",
-) {
-  const projectDir = getProjectDir(projectPath);
-  const screenshotsDir = getScreenshotsDir(projectPath);
-  const sourcePath = path.join(
-    screenshotsDir,
-    screenshotId,
-    sourceFilename ?? "screenshot.png",
-  );
-  const targetPath = path.join(projectDir, targetFilename);
-
-  await fsp.copyFile(sourcePath, targetPath);
-}
-
-/**
- * Check if an image file exists in the project root
- */
-export async function checkImageExists(
-  projectPath: string,
-  filename: "opengraph-image.png" | "twitter-image.png",
-): Promise<boolean> {
-  const filePath = path.join(getProjectDir(projectPath), filename);
-
-  try {
-    await fsp.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export const screenshotsLive = HttpApiBuilder.group(
@@ -240,7 +102,95 @@ export const screenshotsLive = HttpApiBuilder.group(
       )
       // capture a new screenshot
       .handle("capture", ({ payload, query: { projectPath } }) =>
-        Effect.promise(() => captureScreenshot(projectPath, payload)),
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem;
+
+          const { basePath, productionServerPort } = getServerState();
+
+          const screenshotsDir = getScreenshotsDir(projectPath);
+          const folderId = generateFolderName();
+          const folderPath = path.join(screenshotsDir, folderId);
+
+          // Create the folder
+          yield* fs.makeDirectory(folderPath, { recursive: true });
+
+          const previewPath = `${basePath || ""}/${projectPath}/`;
+          const url = `http://localhost:${productionServerPort}${previewPath}`;
+
+          const colorScheme = payload.colorScheme ?? "light";
+
+          let imagePath: ScreenshotEntry["imagePath"];
+
+          if (colorScheme === "both") {
+            // Capture both light and dark screenshots
+            const lightOutputPath = path.join(folderPath, "light.png");
+            const darkOutputPath = path.join(folderPath, "dark.png");
+
+            yield* Effect.promise(() =>
+              screenshot({
+                colorScheme: "light",
+                height: payload.height,
+                output: lightOutputPath,
+                time: payload.time,
+                url,
+                width: payload.width,
+              }),
+            );
+
+            yield* Console.log("light screenshot succeeded");
+
+            yield* Effect.promise(() =>
+              screenshot({
+                colorScheme: "dark",
+                height: payload.height,
+                output: darkOutputPath,
+                time: payload.time,
+                url,
+                width: payload.width,
+              }),
+            );
+
+            yield* Console.log("dark screenshot succeeded");
+
+            imagePath = {
+              dark: `/.liqvid/screenshots/${folderId}/dark.png`,
+              light: `/.liqvid/screenshots/${folderId}/light.png`,
+            };
+          } else {
+            // Capture single screenshot
+            const outputPath = path.join(folderPath, "screenshot.png");
+
+            yield* Effect.promise(() =>
+              screenshot({
+                colorScheme,
+                height: payload.height,
+                output: outputPath,
+                time: payload.time,
+                url,
+                width: payload.width,
+              }),
+            );
+
+            imagePath = `/.liqvid/screenshots/${folderId}/screenshot.png`;
+          }
+
+          // Create metadata
+          const meta: ScreenshotMeta = {
+            colorScheme,
+            createdAt: new Date().toISOString(),
+            height: payload.height,
+            width: payload.width,
+          };
+
+          // Save metadata
+          yield* writeJSON(path.join(folderPath, SCREENSHOT_META_FILE), meta);
+
+          return {
+            id: folderId,
+            imagePath,
+            meta,
+          };
+        }).pipe(Effect.orDie),
       )
       // copy a screenshot to the project root
       .handle(

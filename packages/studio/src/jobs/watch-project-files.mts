@@ -8,8 +8,8 @@ import {
   type AspectRatio,
   AutoGenProjectMeta,
   ProjectJson,
-  type ProjectMeta,
 } from "@liqvid/schemas";
+import type { ProjectMeta } from "@liqvid/schemas/effect";
 import { ZodError } from "zod";
 
 import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";

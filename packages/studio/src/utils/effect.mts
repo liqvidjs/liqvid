@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { Cause, Effect, FileSystem, Option, type PlatformError } from "effect";
+import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import type { Concurrency } from "effect/Types";
 
 export function safeGetOption<
@@ -39,6 +39,10 @@ export function readDirWithFileTypes(
   });
 }
 
+/**
+ * Treat file not found errors as Option
+ * All other errors are left as-is
+ */
 export const existenceOptional = <A, E, R>(
   effect: Effect.Effect<A, E, R>,
 ): Effect.Effect<Option.Option<A>, E, R> => {

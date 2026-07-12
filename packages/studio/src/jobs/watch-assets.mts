@@ -136,6 +136,7 @@ export async function watchAssets() {
 
     const biomePath = await getBiomePath(projectDir);
 
+    // generate the types.ts file, debounced to avoid multiple rapid calls
     debounce(() => generateProjectTypes({ biomePath, projectDir }), projectDir);
   });
 }
@@ -191,6 +192,11 @@ export async function runTemplate({
     path.join(TEMPLATES_DIR, template),
     "utf8",
   );
+
+  console.log({
+    cwd: process.cwd(),
+    url: fileURLToPath(import.meta.url),
+  });
 
   try {
     const template = Handlebars.compile(templateHbs);

@@ -2,8 +2,8 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { loadJsonEffect } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option } from "effect";
+import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
@@ -45,12 +45,9 @@ function readRenderMeta(renderDir: string) {
 /**
  * Write render metadata to a render directory.
  */
-async function writeRenderMeta(
-  renderDir: string,
-  meta: RenderMeta,
-): Promise<void> {
+function writeRenderMeta(renderDir: string, meta: RenderMeta) {
   const metaPath = path.join(renderDir, RENDER_META_FILE);
-  await fsp.writeFile(metaPath, JSON.stringify(meta, null, 2));
+  return writeJSON(metaPath, meta);
 }
 
 export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
@@ -185,38 +182,44 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
           width,
         };
 
-        yield* Effect.promise(() => writeRenderMeta(renderDir, meta));
+        yield* writeRenderMeta(renderDir, meta);
 
         // Start render in background (don't await)
-        yield* Effect.sync(() => {
-          renderVideo({
-            colorScheme,
-            fps,
-            height,
-            output,
-            url,
-            width,
-          })
-            .then(async (result) => {
-              // Update metadata with completed status
-              const updatedMeta: RenderMeta = {
-                ...meta,
-                duration: result.duration,
-                status: "completed",
-              };
-              await writeRenderMeta(renderDir, updatedMeta);
-              console.log(`Render ${renderId} completed`);
-            })
-            .catch(async (error) => {
-              // Update metadata with failed status
-              const updatedMeta: RenderMeta = {
-                ...meta,
-                status: "failed",
-              };
-              await writeRenderMeta(renderDir, updatedMeta);
-              console.error(`Render ${renderId} failed:`, error);
-            });
-        });
+        yield* Effect.forkDetach(
+          Effect.gen(function* () {
+            const result = yield* Effect.promise(() =>
+              renderVideo({
+                colorScheme,
+                fps,
+                height,
+                output,
+                url,
+                width,
+              }),
+            );
+
+            // Update metadata with completed status
+            const updatedMeta: RenderMeta = {
+              ...meta,
+              duration: result.duration,
+              status: "completed",
+            };
+            yield* writeRenderMeta(renderDir, updatedMeta);
+            yield* Console.log(`Render ${renderId} completed`);
+          }).pipe(
+            Effect.catch((error) =>
+              Effect.gen(function* () {
+                // Update metadata with failed status
+                const updatedMeta: RenderMeta = {
+                  ...meta,
+                  status: "failed",
+                };
+                yield* writeRenderMeta(renderDir, updatedMeta);
+                yield* Console.error(`Render ${renderId} failed:`, error);
+              }),
+            ),
+          ),
+        );
 
         return { id: renderId };
       }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),

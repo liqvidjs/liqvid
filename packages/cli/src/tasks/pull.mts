@@ -130,7 +130,7 @@ export const pull: CommandModule = {
 
     if (dryRun) {
       console.log("Dry run mode - showing what would be downloaded...\n");
-      await showDryRunInfo(statuses, targetDir, config, mediaFiles);
+      showDryRunInfo(statuses, targetDir, config, mediaFiles);
       process.exit(0);
     }
 
@@ -223,12 +223,12 @@ function createProvider(config: LiqvidConfigOut): S3Provider {
 /**
  * Show what would be downloaded in dry-run mode
  */
-async function showDryRunInfo(
+function showDryRunInfo(
   statuses: FileDownloadStatus[],
   targetDir: string,
   config: LiqvidConfigOut,
   remoteFiles: RemoteFileInfo[],
-): Promise<void> {
+) {
   const bucket = config.providers.s3?.bucket ?? "bucket";
 
   // Build a map for quick lookup of remote file info

@@ -2,10 +2,53 @@ import { Effect, Schema } from "effect";
 
 import { WhisperConfig } from "./jobs/captioning-effect.mts";
 import { ThumbnailOptions } from "./jobs/thumbnails-effect.mts";
+import { ProviderConfigCopy } from "./providers/hosting/copy-effect.mts";
 import { ProviderConfigS3 } from "./providers/hosting/s3-effect.mts";
 import { StringWithEnvVars } from "./shared-effect.mts";
 
+export const Locale = Schema.Literals(["en", "fr", "es", "de", "zh"] as const);
+export type Locale = (typeof Locale)["Type"];
+
+// TODO: implement this
+// 1. Define a helper function to extract member defaults from a Struct's AST
+// export const getStructDefaults = <Fields extends Schema.Struct.Fields>(
+//   schema: Schema.Struct<Fields>
+// ): Schema.Schema.Type<Schema.Struct<Fields>> => {
+//   const defaults: Record<string, any> = {}
+//
+//   // Navigate the AST to pull the default values defined on individual property signatures
+//   if (AST.isTypeLiteral(schema.ast)) {
+//     for (const property of schema.ast.propertySignatures) {
+//       const defaultValueAnnotation = property.annotations[AST.ConstructorDefaultId]
+//
+//       if (defaultValueAnnotation !== undefined) {
+//         // execute or unpack the constructor default (which can be a thunk or an Effect)
+//         const defaultThunk = defaultValueAnnotation as () => unknown
+//         defaults[property.name as string] = defaultThunk()
+//       }
+//     }
+//   }
+//
+//   return defaults as any
+// }
+//
+// // 2. Define your Struct and assign default values to members using pipe()
+// const MyStruct = Schema.Struct({
+//   name: Schema.String.pipe(Schema.withConstructorDefault(() => "Anonymous")),
+//   age: Schema.Number.pipe(Schema.withConstructorDefault(() => 18)),
+//   isAdmin: Schema.Boolean.pipe(Schema.withConstructorDefault(() => false)),
+// })
+//
+// // 3. Infer the parent Struct's default value automatically from its members
+// const myStructDefaultValue = getStructDefaults(MyStruct)
+//
+// // 4. Attach the inferred default value to the parent Struct itself
+// const MyStructWithFallback = MyStruct.pipe(
+//   Schema.withConstructorDefault(() => myStructDefaultValue)
+// )
+
 export const LiqvidConfig = Schema.Struct({
+  /** JSON schema path */
   $schema: Schema.optional(Schema.String),
 
   /** Configure your hosting backends */
@@ -32,8 +75,25 @@ export const LiqvidConfig = Schema.Struct({
    */
   basePath: StringWithEnvVars.pipe(Schema.optional),
 
+  /** Locale for Liqvid Studio user interface. */
+  locale: Locale.pipe(Schema.withDecodingDefaultType(Effect.succeed("en"))),
+
   /** Media config */
   media: Schema.Struct({
+    /** Audio configuration */
+    audio: Schema.Struct({
+      /**
+       * Whether to enable capturing multiple audio tracks.
+       * If false, the audio track will be overwritten each time it is regenerated.
+       * @default false
+       */
+      multiple: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.succeed(false)),
+      ),
+    }).pipe(
+      Schema.withDecodingDefaultType(Effect.succeed({ multiple: false })),
+    ),
+
     /** Captioning configuration */
     captioning: Schema.Struct({
       nodeWhisperOptions: WhisperConfig.pipe(Schema.optional),
@@ -42,14 +102,14 @@ export const LiqvidConfig = Schema.Struct({
     /** Thumbnail generation configuration */
     thumbnails: Schema.Struct({
       defaults: ThumbnailOptions,
-    }),
+    }).pipe(Schema.optional),
   }).pipe(Schema.optional),
 
   providers: Schema.Struct({
     // social
     // bluesky: ProviderConfigBlueSky.optional(),
     // hosting
-    // copy: ProviderConfigCopy.optional(),
+    copy: ProviderConfigCopy.pipe(Schema.optional),
     // facebook: ProviderConfigFacebook.optional(),
     // githubPages: ProviderConfigGitHubPages.optional(),
     // instagram: ProviderConfigInstagram.optional(),

@@ -2,15 +2,13 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { Duration } from "@liqvid/duration";
-import type {
-  WhisperConfig,
-  WhisperModelName,
-} from "@liqvid/schemas/jobs/captioning";
+import type { WhisperConfig, WhisperModelName } from "@liqvid/schemas/effect";
 import { assertType } from "@liqvid/utils";
 import { Effect, FileSystem } from "effect";
 import type { IOptions } from "nodejs-whisper";
 import type { CommandModule } from "yargs";
 
+import { writeJSON } from "../utils/effect.mts";
 import { expandTilde } from "../utils/paths.mts";
 
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
@@ -189,14 +187,10 @@ export function transcribe({
         modelRootPath: whisperConfig.modelRootPath
           ? expandTilde(whisperConfig.modelRootPath)
           : undefined,
-        removeWavFileAfterTranscription: true,
+        removeWavFileAfterTranscription: false,
         whisperOptions: {
-          outputInJson: true,
-          outputInVtt: true,
-          splitOnWord: true,
-          timestamps_length: whisperConfig.timestampsLength ?? 20,
-          translateToEnglish: whisperConfig.translateToEnglish ?? false,
-          wordTimestamps: true,
+          ...whisperConfig.whisperOptions,
+          outputInJsonFull: true,
         },
         withCuda: whisperConfig.withCuda ?? false,
       }),
@@ -213,6 +207,15 @@ export function transcribe({
     const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
     const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
 
+    yield* Effect.log({
+      audioBaseName,
+      audioDir,
+      sourceJsonPath,
+      sourceVttPath,
+      targetJsonPath,
+      targetVttPath,
+    });
+
     // Move VTT file to output directory
     // try {
     yield* fs.rename(sourceVttPath, targetVttPath);
@@ -225,10 +228,7 @@ export function transcribe({
     // Parse JSON and create transcript with word timings
     const jsonContent = yield* fs.readFileString(sourceJsonPath, "utf8");
     const transcript = parseWhisperJson(jsonContent);
-    yield* fs.writeFileString(
-      targetJsonPath,
-      JSON.stringify(transcript, null, 2),
-    );
+    yield* writeJSON(targetJsonPath, transcript);
 
     // Clean up source JSON file
     yield* fs.remove(sourceJsonPath);

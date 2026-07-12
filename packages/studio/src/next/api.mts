@@ -9,12 +9,13 @@ import { FileDecodeError, loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
-import { Effect, Exit, type FileSystem, Layer } from "effect";
+import { Effect, Exit, type FileSystem, Layer, References } from "effect";
 import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
+import { audioLive } from "../api/audio.mts";
 import { captionsLive } from "../api/captions.mts";
 import { WebApi } from "../api/contract.mts";
 import {
@@ -45,61 +46,6 @@ export type DynamicImports = Record<
     } & LiqvidStudioServerPlugin
   >
 >;
-
-/**
- * Web handler for the Effect `HttpApi`.
- *
- * The API is assembled from the endpoint definitions in `contract-effect.mts`,
- * the group implementations (e.g. `screenshotsLive`), and the Node platform
- * services required to run it. It is built once and reused across requests.
- */
-const apiLive = HttpApiBuilder.layer(WebApi).pipe(
-  Layer.provide([
-    captionsLive,
-    projectMetaLive,
-    recordingsLive,
-    rendersLive,
-    screenshotsLive,
-    thumbsLive,
-  ]),
-  Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
-  Layer.provideMerge(NodeFileSystem.layer),
-);
-
-const appLive = Layer.mergeAll(
-  apiLive,
-  HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }), // Matches the Next.js catch-all base path below
-);
-
-const { handler: webApiHandler } = toWebHandler(appLive);
-
-/**
- * Route paths (relative to the API base) served by the Effect `HttpApi`.
- *
- * Entries are matched exactly or as a path prefix (e.g. `/screenshots` also
- * matches `/screenshots/capture`). As routes are migrated to the `HttpApi`, add
- * their paths here so the legacy switch-based router delegates to the new
- * handler.
- */
-const effectApiRoutePrefixes = [
-  "/captions",
-  "/captions/generate",
-  "/project-meta",
-  "/recordings",
-  "/screenshots",
-  "/thumbs",
-  "/thumbs/generate",
-];
-
-/** Whether a given route should be handled by the Effect `HttpApi`. */
-function isEffectApiRoute(route: string): boolean {
-  return (
-    route.startsWith("/docs") ||
-    effectApiRoutePrefixes.some(
-      (prefix) => route === prefix || route.startsWith(prefix + "/"),
-    )
-  );
-}
 
 /**
  * Liqvid server GET handler
@@ -157,38 +103,23 @@ export function postHandler(dynamicImports: DynamicImports) {
 
     await initializeServer();
 
-    // Routes that have been migrated to the Effect `HttpApi` are delegated to
-    // the generated web handler.
-    if (isEffectApiRoute(route)) {
-      return webApiHandler(req);
-    }
-
     const { search } = url.parse(req.url, true);
 
-    const searchParams = new URLSearchParams(search ?? "");
+    if (route === saveRecordingOperation.endpoint) {
+      const searchParams = new URLSearchParams(search ?? "");
 
-    let program:
-      | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
-      | undefined;
-
-    switch (route) {
-      case saveRecordingOperation.endpoint:
-        program = saveRecording(
-          searchParams,
-          await req.formData(),
-          dynamicImports,
-        );
-        break;
-    }
-
-    if (program) {
+      let program:
+        | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
+        | undefined;
+      program = saveRecording(
+        searchParams,
+        await req.formData(),
+        dynamicImports,
+      );
       return runEffect(program);
     }
 
-    return Response.json(
-      { error: "not_found" },
-      { status: StatusCodes.NOT_FOUND },
-    );
+    return webApiHandler(req);
   };
 }
 
@@ -228,6 +159,7 @@ async function runEffect<A, E>(
   const result = await Effect.runPromiseExit(
     program.pipe(
       Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(References.MinimumLogLevel, "All"),
       Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
     ),
   );
@@ -270,3 +202,31 @@ async function runEffect<A, E>(
     },
   });
 }
+
+/**
+ * Web handler for the Effect `HttpApi`.
+ *
+ * The API is assembled from the endpoint definitions in `contract-effect.mts`,
+ * the group implementations (e.g. `screenshotsLive`), and the Node platform
+ * services required to run it. It is built once and reused across requests.
+ */
+const apiLive = HttpApiBuilder.layer(WebApi).pipe(
+  Layer.provide([
+    audioLive,
+    captionsLive,
+    projectMetaLive,
+    recordingsLive,
+    rendersLive,
+    screenshotsLive,
+    thumbsLive,
+  ]),
+  Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
+  Layer.provideMerge(NodeFileSystem.layer),
+);
+
+const appLive = Layer.mergeAll(
+  apiLive,
+  HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }), // Matches the Next.js catch-all base path below
+);
+
+const { handler: webApiHandler } = toWebHandler(appLive);

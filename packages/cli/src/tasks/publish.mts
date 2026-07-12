@@ -1,8 +1,9 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import { LiqvidConfig } from "@liqvid/schemas";
-import type { LiqvidConfigOut } from "@liqvid/schemas/liqvid-config";
+import { NodeFileSystem } from "@effect/platform-node";
+import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
+import { Effect } from "effect";
 import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
@@ -15,6 +16,7 @@ import type {
   HostingProvider,
   MediaHostingProvider,
 } from "../providers/types.mts";
+import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
 
 import { CONFIG_FILE, DEFAULT_MEDIA_PATTERNS } from "./conventions.mts";
 
@@ -90,7 +92,15 @@ export const publish: CommandModule = {
     const searchDir = path.join(cwd, baseDir);
 
     // Load and parse config
-    const config = await loadConfig(configPath);
+    const envFiles = loadEnvFiles(process.cwd());
+
+    // Load config to get media base URL
+    const config = await Effect.runPromise(
+      loadLiqvidConfig({ configPath }).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.provideService(EnvFiles, envFiles),
+      ),
+    );
 
     // Publish content if requested
     if (shouldPublishContent) {
@@ -111,7 +121,7 @@ export const publish: CommandModule = {
  * Publish content files (html/css/js) to the hosting provider.
  */
 async function publishContentFiles(
-  config: LiqvidConfigOut,
+  config: LiqvidConfig,
   cwd: string,
   dryRun: boolean,
 ): Promise<void> {
@@ -145,7 +155,7 @@ async function publishContentFiles(
  * Publish media files to the media hosting provider.
  */
 async function publishMediaFiles(
-  config: LiqvidConfigOut,
+  config: LiqvidConfig,
   searchDir: string,
   baseDir: string,
   dryRun: boolean,
@@ -189,64 +199,9 @@ async function publishMediaFiles(
 }
 
 /**
- * Load and validate the liqvid.json config file
- */
-async function loadConfig(configPath: string): Promise<LiqvidConfigOut> {
-  let rawConfig: unknown;
-
-  try {
-    const content = await fsp.readFile(configPath, "utf-8");
-    rawConfig = JSON.parse(content);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      console.error(`Config file not found: ${configPath}`);
-      console.error(
-        "\nCreate a liqvid.json file with your media hosting configuration.",
-      );
-      console.error("Example:\n");
-      console.error(
-        JSON.stringify(
-          {
-            $schema: "https://liqvidjs.org/schemas/liqvid-config.json",
-            backend: {
-              content: "s3",
-              media: "s3",
-            },
-            providers: {
-              s3: {
-                auth: { profile: "default" },
-                bucket: "my-bucket",
-                prefix: "media",
-                region: "us-east-1",
-              },
-            },
-          },
-          null,
-          2,
-        ),
-      );
-      process.exit(1);
-    }
-    throw err;
-  }
-
-  const result = LiqvidConfig.safeParse(rawConfig);
-
-  if (!result.success) {
-    console.error("Invalid config file:");
-    for (const issue of result.error.issues) {
-      console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
-    }
-    process.exit(1);
-  }
-
-  return result.data;
-}
-
-/**
  * Create the appropriate media provider based on config
  */
-function createMediaProvider(config: LiqvidConfigOut): MediaHostingProvider {
+function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
   const mediaBackend = config.backend.media;
 
   switch (mediaBackend) {

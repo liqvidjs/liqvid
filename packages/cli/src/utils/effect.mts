@@ -2,10 +2,28 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas/effect";
-import { Effect, FileSystem, type PlatformError, Schema } from "effect";
+import {
+  Effect,
+  FileSystem,
+  type Layer,
+  type PlatformError,
+  Schema,
+} from "effect";
 
 import { FileDecodeError } from "../errors.mts";
 import { CONFIG_FILE } from "../tasks/conventions.mts";
+
+export async function agnosticFileSystem(): Promise<{
+  layer: Layer.Layer<FileSystem.FileSystem>;
+}> {
+  if (process.versions.bun) {
+    const mod = await import("@effect/platform-bun");
+    return mod.BunFileSystem;
+  }
+
+  const mod = await import("@effect/platform-node");
+  return mod.NodeFileSystem;
+}
 
 /**
  * Load all environment files (.env, .env.development, .env.production).
@@ -30,7 +48,7 @@ export function loadLiqvidConfig({
   return loadJsonEffect(LiqvidConfig, configPath) as Effect.Effect<
     LiqvidConfig,
     FileDecodeError | PlatformError.PlatformError,
-    EnvFiles
+    EnvFiles | FileSystem.FileSystem
   >;
 }
 
@@ -45,11 +63,7 @@ export function loadLiqvidConfig({
 export function loadJsonEffect<S extends Schema.Top>(
   parser: S,
   filename: string,
-): Effect.Effect<
-  S["Type"],
-  FileDecodeError | PlatformError.PlatformError,
-  FileSystem.FileSystem | Schema.Codec.DecodingServices<S>
-> {
+) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
@@ -101,4 +115,13 @@ function parseEnvFile(filePath: string): Record<string, string> {
   }
 
   return result;
+}
+
+/** Write JSON data to a file, pretty-printed with 2-space indentation. */
+export function writeJSON<T>(path: string, data: T) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const jsonString = JSON.stringify(data, null, 2);
+    yield* fs.writeFileString(path, jsonString);
+  });
 }

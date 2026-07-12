@@ -10,9 +10,9 @@ import {
 
 // Declaring a tag for a service that generates random numbers
 export const EnvFiles = Context.Service<{
-  production: Record<string, string>;
-  local: Record<string, string>;
-  development: Record<string, string>;
+  readonly production: Record<string, string>;
+  readonly local: Record<string, string>;
+  readonly development: Record<string, string>;
 }>("EnvFiles");
 
 export type EnvFiles = (typeof EnvFiles)["Service"];

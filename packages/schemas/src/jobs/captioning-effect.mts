@@ -19,6 +19,78 @@ export const WhisperModelName = Schema.Literals([
 
 export type WhisperModelName = (typeof WhisperModelName)["Type"];
 
+export const WhisperOptions = Schema.Struct({
+  /** disable GPU inference */
+  noGpu: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in csv file */
+  outputInCsv: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in json file */
+  outputInJson: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in json file including more information */
+  outputInJsonFull: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(true)),
+  ),
+
+  /**
+   * get output result in lrc file
+   * @default false
+   */
+  outputInLrc: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in srt file */
+  outputInSrt: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in txt file */
+  outputInText: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in vtt file */
+  outputInVtt: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** get output result in wts file for karaoke */
+  outputInWords: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** split on word rather than on token */
+  splitOnWord: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** amount of dialogue per timestamp pair */
+  timestamps_length: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(20)),
+  ),
+
+  /** translate from source language to english */
+  translateToEnglish: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
+
+  /** word-level timestamps */
+  wordTimestamps: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(true)),
+  ),
+});
+
+export type WhisperOptions = (typeof WhisperOptions)["Type"];
+
 /**
  * Configuration for Whisper transcription.
  */
@@ -59,6 +131,8 @@ export const WhisperConfig = Schema.Struct({
   translateToEnglish: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
   ),
+
+  whisperOptions: WhisperOptions.pipe(Schema.optional),
 
   /**
    * Whether to use CUDA for faster processing.

@@ -1,46 +1,37 @@
 import * as path from "node:path";
 
-import { renderAudio } from "@liqvid/cli/render-audio";
 import { transcribe, type WhisperLogger } from "@liqvid/cli/transcribe";
-import { loadJsonEffect } from "@liqvid/cli/utils";
-import { truncate } from "@liqvid/utils";
-import { Console, Effect, FileSystem, Option } from "effect";
+import { writeJSON } from "@liqvid/cli/utils";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
-import { CaptionsMeta } from "../types/schemas.mts";
+import type { CaptionsMeta } from "../types/schemas.mts";
 import type { LoggableJob } from "../types.mts";
+import { existenceOptional } from "../utils/effect.mts";
 import { NotFoundError } from "../utils/errors.mts";
 
+import { getAudioDir } from "./audio.mts";
 import { WebApi } from "./contract.mts";
 
-const CAPTIONS_DIR = ".liqvid/captions";
-const META_FILE = "meta.json";
 const AUDIO_FILE = "audio.wav";
+const CAPTIONS_META_FILE = "captions-meta.json";
+const CAPTIONS_FILE = "captions.vtt";
+const TRANSCRIPT_FILE = "transcript.json";
 
-/** Track active caption generation jobs */
+/**
+ * Track active caption generation jobs, keyed by `projectPath:audioId`.
+ */
 const activeJobs = new Set<string>();
 
 /**
- * Read captions metadata from the project.
+ * Write captions metadata alongside the audio it captions.
  */
-function readCaptionsMeta(projectDir: string) {
-  const metaPath = path.join(projectDir, CAPTIONS_DIR, META_FILE);
-  return loadJsonEffect(CaptionsMeta, metaPath);
-}
-
-/**
- * Write captions metadata to the project.
- */
-function writeCaptionsMeta(projectDir: string, meta: CaptionsMeta) {
+function writeCaptionsMeta(audioDir: string, meta: CaptionsMeta) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
-
-    const captionsDir = path.join(projectDir, CAPTIONS_DIR);
-    yield* fs.makeDirectory(captionsDir, { recursive: true });
-
-    const metaPath = path.join(captionsDir, META_FILE);
-    yield* fs.writeFileString(metaPath, JSON.stringify(meta, null, 2));
+    yield* fs.makeDirectory(audioDir, { recursive: true });
+    yield* writeJSON(path.join(audioDir, CAPTIONS_META_FILE), meta);
   });
 }
 
@@ -48,53 +39,41 @@ export const captionsLive = HttpApiBuilder.group(
   WebApi,
   "captions",
   (handlers) =>
-    // list existing captions for a project
     handlers
-      .handle("list", ({ query: { projectPath } }) =>
+      // generate captions for a specific audio rendering
+      .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          const projectDir = path.join(process.cwd(), "app", projectPath);
-
-          return yield* readCaptionsMeta(projectDir).pipe(
-            // A missing captions meta file is not a server error: surface it as 404.
-            Effect.catchTag("PlatformError", (error) => {
-              if (error.reason._tag === "NotFound") {
-                return Effect.fail(
-                  new NotFoundError({
-                    message: "No captions found for this project",
-                  }),
-                );
-              }
-
-              return Effect.die(error);
-            }),
-            Effect.catchTag("FileDecodeError", Effect.orDie),
-          );
-        }),
-      )
-      .handle("generate", ({ query: { projectPath } }) =>
-        Effect.gen(function* () {
-          const {
-            basePath,
-            config: $config,
-            productionServerPort,
-            jobs,
-          } = getServerState();
+          const { config: $config, jobs } = getServerState();
 
           const config = yield* Option.match($config, {
-            onNone: () =>
-              Effect.die({
-                message: "config not loaded",
-              }),
+            onNone: () => Effect.die({ message: "config not loaded" }),
             onSome: (c) => Effect.succeed(c),
           });
 
+          const multiple = config.media?.audio?.multiple ?? false;
+          const audioDir = getAudioDir(projectPath, audioId, multiple);
+
+          const fs = yield* FileSystem.FileSystem;
+
+          // The audio must have been rendered first.
+          const audioFile = path.join(audioDir, AUDIO_FILE);
+          if (!(yield* fs.exists(audioFile))) {
+            return yield* new NotFoundError({
+              message: "Audio not found; render audio before captioning",
+            });
+          }
+
+          const jobKey = `${projectPath}:${audioId}`;
+
+          // Check if already generating
+          if (activeJobs.has(jobKey)) {
+            return { status: "already_generating" as const };
+          }
+          activeJobs.add(jobKey);
+
           /** loggable job */
           const job: LoggableJob = {
-            logs: {
-              debug: [],
-              error: [],
-              log: [],
-            },
+            logs: { debug: [], error: [], log: [] },
             name: "captioning",
             path: projectPath,
             startTime: new Date(),
@@ -102,47 +81,19 @@ export const captionsLive = HttpApiBuilder.group(
           };
           jobs.captioning.add(job);
 
-          // get project dir
-          const projectDir = path.join(process.cwd(), "app", projectPath);
-
-          // Check if already generating
-          if (activeJobs.has(projectPath)) {
-            return { status: "already_generating" as const };
-          }
-
-          // Mark as generating
-          activeJobs.add(projectPath);
-
-          const outputDir = path.join(projectDir, CAPTIONS_DIR);
-          const audioFile = path.join(outputDir, AUDIO_FILE);
-
-          // Build the URL for the video
-          const previewPath = `${basePath || ""}/${projectPath}/`;
-          const url = `http://localhost:${productionServerPort}${previewPath}`;
-
           // Write initial metadata
           const initialMeta: CaptionsMeta = {
-            captionsPath: path.join(outputDir, "captions.vtt"),
+            captionsPath: path.join(audioDir, CAPTIONS_FILE),
             createdAt: new Date().toISOString(),
             status: "generating",
-            transcriptPath: path.join(outputDir, "transcript.json"),
+            transcriptPath: path.join(audioDir, TRANSCRIPT_FILE),
           };
-          yield* writeCaptionsMeta(projectDir, initialMeta);
+          yield* writeCaptionsMeta(audioDir, initialMeta);
 
           // Start transcription in background
           yield* Effect.forkDetach(
             Effect.gen(function* () {
               const fiber = Effect.gen(function* () {
-                // Create the audio file by rendering the video's audio track
-                const audioStart = performance.now();
-                yield* Effect.promise(() =>
-                  renderAudio({ output: audioFile, url }),
-                );
-                const audioElapsed = performance.now() - audioStart;
-                yield* Console.log(
-                  `Created audio file for ${projectPath} in ${truncate(audioElapsed / 1000, 2)}s`,
-                );
-
                 const logger: WhisperLogger = {
                   debug(...args) {
                     job.logs.debug.push(...args);
@@ -158,45 +109,72 @@ export const captionsLive = HttpApiBuilder.group(
                 yield* transcribe({
                   audioFile,
                   logger,
-                  outputDir,
+                  outputDir: audioDir,
                   whisperConfig: config.media?.captioning?.nodeWhisperOptions,
                 });
 
-                yield* Console.log("transcribing complete");
+                yield* Effect.logDebug("transcribing complete");
 
-                // Update metadata to completed
-                const completedMeta: CaptionsMeta = {
+                yield* writeCaptionsMeta(audioDir, {
                   ...initialMeta,
                   status: "completed",
-                };
-                yield* writeCaptionsMeta(projectDir, completedMeta);
-
-                yield* Console.log("wrote captions meta file");
+                });
 
                 job.state = "completed";
               });
 
               yield* fiber.pipe(
-                Effect.catch((error) => {
-                  console.error("Failed to generate captions:", error);
-
-                  // Update metadata to failed
-                  const failedMeta: CaptionsMeta = {
+                Effect.tapError((error) =>
+                  Effect.logError("Failed to generate captions:", error),
+                ),
+                Effect.catch(() => {
+                  job.state = "failed";
+                  return writeCaptionsMeta(audioDir, {
                     ...initialMeta,
                     status: "failed",
-                  };
-
-                  job.state = "failed";
-
-                  return writeCaptionsMeta(projectDir, failedMeta);
+                  });
                 }),
               );
 
-              activeJobs.delete(projectPath);
+              activeJobs.delete(jobKey);
             }),
           );
 
           return { status: "started" as const };
         }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+      )
+      // delete captions for an audio rendering (preserving the audio itself)
+      .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
+        Effect.gen(function* () {
+          const { config: $config } = getServerState();
+
+          const config = yield* Option.match($config, {
+            onNone: () => Effect.die({ message: "config not loaded" }),
+            onSome: (c) => Effect.succeed(c),
+          });
+
+          const multiple = config.media?.audio?.multiple ?? false;
+          const audioDir = getAudioDir(projectPath, audioId, multiple);
+
+          const fs = yield* FileSystem.FileSystem;
+
+          const metaPath = path.join(audioDir, CAPTIONS_META_FILE);
+          if (!(yield* fs.exists(metaPath))) {
+            return yield* new NotFoundError({
+              message: "No captions found for this audio",
+            });
+          }
+
+          // Remove only captions-related files; leave the audio intact.
+          for (const file of [
+            CAPTIONS_META_FILE,
+            CAPTIONS_FILE,
+            TRANSCRIPT_FILE,
+          ]) {
+            yield* fs.remove(path.join(audioDir, file)).pipe(existenceOptional);
+          }
+
+          return { success: true };
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       ),
 );

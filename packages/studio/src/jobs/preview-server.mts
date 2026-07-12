@@ -2,9 +2,11 @@ import * as fs from "node:fs";
 import * as http from "node:http";
 import * as path from "node:path";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
 import { loadEnvFiles } from "@liqvid/cli/utils";
 import type { EnvFiles } from "@liqvid/schemas/effect";
+import { Effect } from "effect";
 import handler from "serve-handler";
 
 import { CONFIG_FILE } from "../conventions.mts";
@@ -21,7 +23,9 @@ export async function startProductionServer(
   // Check if 'out' directory exists, if not run 'next build'
   if (!fs.existsSync(previewDir)) {
     console.log("'out' directory not found, running 'next build'...");
-    await runNextBuild();
+    await Effect.runPromise(
+      runNextBuild().pipe(Effect.provide(NodeFileSystem.layer)),
+    );
   }
 
   // Parse environment files

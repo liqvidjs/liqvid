@@ -13,14 +13,13 @@ import {
   OpenApi,
 } from "effect/unstable/httpapi";
 
-import { CaptionsMeta } from "../types/schemas.mts";
 import {
   ConflictError,
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
 
-import { RenderEntry, ThumbsData } from "./schemas.mts";
+import { AudioEntry, RenderEntry, ThumbsData } from "./schemas.mts";
 
 const projectPathQuery = Schema.Struct({
   /** path to the project */
@@ -32,29 +31,88 @@ const urlQuery = Schema.Struct({
   url: Schema.String,
 });
 
+/* ------------------------------ audio ------------------------------ */
+const audioGroup = HttpApiGroup.make("audio")
+  .add(
+    HttpApiEndpoint.get("list", "/audio", {
+      query: projectPathQuery,
+      success: Schema.Struct({
+        items: Schema.Array(AudioEntry),
+        /** Whether the project is configured for multiple audio renderings */
+        multiple: Schema.Boolean,
+      }),
+    }).annotate(OpenApi.Summary, "List audio renderings for a project"),
+  )
+  .add(
+    HttpApiEndpoint.post("generate", "/audio/generate", {
+      payload: Schema.Null,
+      query: projectPathQuery,
+      success: Schema.Struct({
+        /** Id (folder name, or "default" in single-audio mode) */
+        id: Schema.String,
+      }),
+    }).annotate(OpenApi.Summary, "Render a new audio track for a project"),
+  )
+  .add(
+    HttpApiEndpoint.post("rename", "/audio/rename", {
+      error: [InvalidError, NotFoundError, ConflictError],
+      payload: Schema.Struct({
+        /** Current audio id (folder name) */
+        id: Schema.String,
+        /** New name for the audio rendering */
+        newName: Schema.String,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({
+        /** New audio id (folder name) */
+        newId: Schema.String,
+      }),
+    }).annotate(OpenApi.Summary, "Rename an audio rendering"),
+  )
+  .add(
+    HttpApiEndpoint.delete("delete", "/audio/delete", {
+      error: NotFoundError,
+      payload: Schema.Struct({
+        /** Audio id (folder name) to delete */
+        id: Schema.String,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(
+      OpenApi.Summary,
+      "Delete an audio rendering (and its captions)",
+    ),
+  )
+  .annotate(OpenApi.Title, "Audio");
+
 /* ------------------------------ captions ------------------------------ */
 const captionsGroup = HttpApiGroup.make("captions")
   .add(
-    HttpApiEndpoint.get("list", "/captions", {
-      error: NotFoundError,
-      query: projectPathQuery,
-      success: CaptionsMeta,
-    }).annotate(OpenApi.Summary, "List captions for a project"),
-
     HttpApiEndpoint.post("generate", "/captions/generate", {
       error: [InvalidError, NotFoundError],
-      payload: Schema.optional(
-        Schema.Struct({
-          /** Whisper model to use */
-          modelName: Schema.optional(Schema.String),
-        }),
-      ),
+      payload: Schema.Struct({
+        /** Audio id (folder name, or "default") to caption */
+        audioId: Schema.String,
+        /** Whisper model to use */
+        modelName: Schema.optional(Schema.String),
+      }),
       query: projectPathQuery,
       success: Schema.Struct({
         /** Status of the generation */
         status: Schema.Literals(["started", "already_generating"]),
       }),
-    }).annotate(OpenApi.Summary, "Generate captions for a project"),
+    }).annotate(OpenApi.Summary, "Generate captions for an audio rendering"),
+  )
+  .add(
+    HttpApiEndpoint.delete("delete", "/captions/delete", {
+      error: NotFoundError,
+      payload: Schema.Struct({
+        /** Audio id (folder name, or "default") whose captions to delete */
+        audioId: Schema.String,
+      }),
+      query: projectPathQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(OpenApi.Summary, "Delete captions for an audio rendering"),
   )
   .annotate(OpenApi.Title, "Captions");
 
@@ -272,6 +330,7 @@ const thumbsGroup = HttpApiGroup.make("thumbs").add(
 /** Liqvid Studio web API */
 export const WebApi = HttpApi.make("LiqvidStudioWebApi")
   .add(
+    audioGroup,
     captionsGroup,
     projectsGroup,
     recordingsGroup,

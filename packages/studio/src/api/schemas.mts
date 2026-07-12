@@ -1,6 +1,44 @@
 import { ThumbnailsJob } from "@liqvid/schemas/effect";
 import { Schema } from "effect";
 
+import { CaptionsMeta } from "../types/schemas.mts";
+
+/**
+ * On-disk metadata for a single audio rendering (`audio-meta.json`).
+ */
+export const AudioMeta = Schema.Struct({
+  /** Timestamp when audio render was created */
+  createdAt: Schema.String,
+
+  /** Duration in seconds */
+  duration: Schema.Number,
+
+  /** MIME type of audio recording */
+  mimeType: Schema.String,
+
+  /** Name of audio recording */
+  name: Schema.String,
+});
+
+export type AudioMeta = (typeof AudioMeta)["Type"];
+
+/**
+ * An audio rendering as returned by the API: its id (folder name, or
+ * `"default"` in single-audio mode), metadata, and any associated captions.
+ */
+export const AudioEntry = Schema.Struct({
+  /** Captions for this audio recording, if any have been generated */
+  captions: Schema.NullOr(CaptionsMeta),
+
+  /** Folder name for the audio (or `"default"` in single-audio mode) */
+  id: Schema.String,
+
+  /** Audio metadata */
+  meta: AudioMeta,
+});
+
+export type AudioEntry = (typeof AudioEntry)["Type"];
+
 /**
  * Metadata for a render.
  */
