@@ -55,7 +55,7 @@ export function NewProjectButton() {
         // (templates are sorted with default first)
         if (loadedTemplates.length > 0) {
           const defaultTemplate = loadedTemplates.find((t) => t.default);
-          setTemplateId(defaultTemplate?.id ?? loadedTemplates[0].id);
+          setTemplateId(defaultTemplate?.id ?? loadedTemplates[0]!.id);
         }
       });
     }

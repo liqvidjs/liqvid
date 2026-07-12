@@ -18,8 +18,8 @@ import {
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { RenderEntry } from "../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import type { RenderEntry } from "../../api/schemas.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -28,12 +28,11 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog.tsx";
-import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs.tsx";
+} from "../../ui/Dialog.tsx";
+import { RadioTabs, RadioTabsItem } from "../../ui/RadioTabs.tsx";
+import { openRenderInFinderAction } from "../root-actions.ts";
 
-import { openRenderInFinderAction } from "./root-actions.ts";
-
-import styles from "./root.module.css";
+import styles from "../root.module.css";
 import shareStyles from "./share.module.css";
 
 interface RendersSectionProps {

@@ -1,8 +1,7 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { useIframeApi } from "@liqvid/iframe-api/parent/react";
 import { playerApiDeclaration } from "@liqvid/player/iframe-api";
-import type { ProjectMeta } from "@liqvid/schemas/project";
-import type { ColorSchemeOption } from "@liqvid/schemas/screenshot-meta";
+import type { ColorSchemeOption, ProjectMeta } from "@liqvid/schemas/effect";
 import { formatTime } from "@liqvid/utils";
 import {
   CameraIcon,
@@ -15,18 +14,18 @@ import {
 import { Effect } from "effect";
 import { useEffect, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "../ui/Dialog.tsx";
-import { RadioTabs, RadioTabsItem } from "../ui/RadioTabs.tsx";
+} from "../../../ui/Dialog.tsx";
+import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
 
-import styles from "./root.module.css";
-import shareStyles from "./share.module.css";
+import styles from "../../root.module.css";
+import shareStyles from "../share.module.css";
 
 interface ScreenshotModalProps {
   basePath: string;

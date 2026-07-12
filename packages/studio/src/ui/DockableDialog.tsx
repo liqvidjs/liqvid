@@ -18,7 +18,7 @@ import {
 } from "react";
 import { z } from "zod";
 
-import { useToggle } from "../utils/react.mts";
+import { useToggle } from "../utils/react.tsx";
 
 import styles from "./DockableDialog.module.css";
 

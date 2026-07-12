@@ -1,7 +1,7 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta } from "@liqvid/schemas/project";
+import type { ProjectMeta } from "@liqvid/schemas/effect";
 import {
   CameraIcon,
   ClosedCaptioningIcon,
@@ -19,15 +19,15 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
+} from "../../ui/Dialog.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
 
-import { CaptionsSection } from "./CaptionsSection.tsx";
+import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { RendersSection } from "./RendersSection.tsx";
-import { ScreenshotsSection } from "./ScreenshotsSection.tsx";
+import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
-import styles from "./root.module.css";
+import styles from "../root.module.css";
 import shareStyles from "./share.module.css";
 
 interface ShareButtonProps {
@@ -37,12 +37,19 @@ interface ShareButtonProps {
   productionServerPort: number;
 }
 
+import { useTranslations } from "../../utils/react.tsx";
+
+import type T from "./.translations/en.json";
+
+type T = typeof T;
+
 export function ShareButton({
   basePath,
   duration,
   project,
   productionServerPort,
 }: ShareButtonProps) {
+  const t = useTranslations<T>();
   const [open, setOpen] = useState(false);
 
   return (
@@ -66,16 +73,16 @@ export function ShareButton({
           <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
             <TabsList style={{ fontSize: "18px" }}>
               <TabsTrigger value="screenshots">
-                <CameraIcon size={14} /> Screenshots
+                <CameraIcon size={14} /> {t.tabs.screenshots}
               </TabsTrigger>
               <TabsTrigger value="thumbnails">
-                <ImagesIcon size={14} /> Thumbnails
+                <ImagesIcon size={14} /> {t.tabs.thumbnails}
               </TabsTrigger>
               <TabsTrigger value="renders">
-                <FilmStripIcon size={14} /> Renders
+                <FilmStripIcon size={14} /> {t.tabs.renders}
               </TabsTrigger>
               <TabsTrigger value="captions">
-                <ClosedCaptioningIcon size={14} /> Captions
+                <ClosedCaptioningIcon size={14} /> {t.tabs.captions}
               </TabsTrigger>
             </TabsList>
 

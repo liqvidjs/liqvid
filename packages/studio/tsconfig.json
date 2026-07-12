@@ -5,8 +5,9 @@
     "lib": ["es2022", "dom", "dom.iterable"],
     "outDir": "./dist/esm",
     "plugins": [{ "name": "@effect/language-service" }],
+    "resolveJsonModule": true,
     "rootDir": "./src"
   },
   "extends": "../../tsconfig.json",
-  "include": ["./src"]
+  "include": ["./src/**/*.{json,ts,tsx}"]
 }

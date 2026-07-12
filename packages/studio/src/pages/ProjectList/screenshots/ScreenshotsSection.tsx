@@ -12,7 +12,7 @@ import {
 import { Effect } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -21,13 +21,14 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog.tsx";
-import { Time } from "../ui/Time.tsx";
+} from "../../../ui/Dialog.tsx";
+import { Time } from "../../../ui/Time.tsx";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
-import styles from "./root.module.css";
-import shareStyles from "./share.module.css";
+import rootStyles from "../../root.module.css";
+import shareStyles from "../share.module.css";
+import styles from "./screenshots.module.css";
 
 interface ScreenshotsSectionProps {
   basePath: string;
@@ -36,6 +37,147 @@ interface ScreenshotsSectionProps {
   productionServerPort: number;
   /** Whether the parent dialog is open */
   isOpen: boolean;
+}
+
+type CopyTarget = "opengraph-image.png" | "twitter-image.png";
+type VariantLabel = "Light" | "Dark" | null;
+
+async function copyScreenshot(
+  projectPath: string,
+  screenshotId: string,
+  target: CopyTarget,
+  variant?: VariantLabel,
+) {
+  try {
+    await clientRuntime.runPromise(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+
+        yield* client.screenshots.copy({
+          payload: {
+            screenshotId,
+            sourceFilename: variant
+              ? (`${variant.toLowerCase()}.png` as "light.png" | "dark.png")
+              : undefined,
+            targetFilename: target,
+          },
+          query: { projectPath },
+        });
+      }),
+    );
+  } catch (e) {
+    console.error("Failed to copy screenshot:", e);
+  }
+}
+
+interface ScreenshotItemProps {
+  screenshot: ScreenshotEntry;
+  projectPath: string;
+  variant: { label: VariantLabel; path: string };
+  /** Whether this is the first variant of the screenshot */
+  isPrimary: boolean;
+  /** Ask the parent to confirm overwriting an existing target file */
+  onConfirmOverwrite: (
+    screenshotId: string,
+    target: CopyTarget,
+    variant?: VariantLabel,
+  ) => void;
+  onRename: (screenshotId: string) => void;
+  onDelete: (screenshotId: string) => void;
+}
+
+function ScreenshotItem({
+  screenshot,
+  projectPath,
+  variant,
+  isPrimary,
+  onConfirmOverwrite,
+  onRename,
+  onDelete,
+}: ScreenshotItemProps) {
+  const handleCopyAs = async (target: CopyTarget) => {
+    try {
+      const { exists } = await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
+
+          return yield* client.screenshots.checkExists({
+            query: { filename: target, projectPath },
+          });
+        }),
+      );
+
+      if (exists) {
+        onConfirmOverwrite(screenshot.id, target, variant.label);
+        return;
+      }
+    } catch (e) {
+      console.error("Failed to check image existence:", e);
+    }
+
+    await copyScreenshot(projectPath, screenshot.id, target, variant.label);
+  };
+
+  return (
+    <li className={styles.screenshotItem}>
+      <img
+        alt={`Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`}
+        className={styles.screenshotThumbnail}
+        src={`/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`}
+      />
+      <div className={styles.screenshotInfo}>
+        <span className={styles.screenshotTitle}>
+          {screenshot.id ||
+            new Date(screenshot.meta.createdAt).toLocaleString()}
+          {variant.label && ` (${variant.label})`}
+        </span>
+        <span className={styles.screenshotCreated}>
+          <Time format="long" value={screenshot.meta.createdAt} />
+        </span>
+        <span className={styles.screenshotDimensions}>
+          {screenshot.meta.width} x {screenshot.meta.height}
+        </span>
+      </div>
+      <div className={styles.screenshotActions}>
+        <button
+          className={shareStyles.copyButton}
+          onClick={() => handleCopyAs("opengraph-image.png")}
+          title="Use as OpenGraph image"
+          type="button"
+        >
+          <CopyIcon size={14} /> OG
+        </button>
+        <button
+          className={shareStyles.copyButton}
+          onClick={() => handleCopyAs("twitter-image.png")}
+          title="Use as Twitter image"
+          type="button"
+        >
+          <CopyIcon size={14} /> Twitter
+        </button>
+        {isPrimary && (
+          <>
+            <button
+              className={shareStyles.iconButton}
+              onClick={() => onRename(screenshot.id)}
+              title="Rename screenshot"
+              type="button"
+            >
+              <PencilSimpleIcon size={14} />
+            </button>
+            <button
+              className={shareStyles.deleteButton}
+              onClick={() => onDelete(screenshot.id)}
+              title="Delete screenshot"
+              type="button"
+            >
+              <TrashIcon size={14} />
+            </button>
+          </>
+        )}
+      </div>
+    </li>
+  );
 }
 
 export function ScreenshotsSection({
@@ -51,8 +193,8 @@ export function ScreenshotsSection({
   const [isLoading, setIsLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     screenshotId: string;
-    target: "opengraph-image.png" | "twitter-image.png";
-    variant?: "Light" | "Dark" | null;
+    target: CopyTarget;
+    variant?: VariantLabel;
   } | null>(null);
   const [renameDialog, setRenameDialog] = useState<{
     screenshotId: string;
@@ -88,60 +230,6 @@ export function ScreenshotsSection({
       loadScreenshots();
     }
   }, [isOpen, loadScreenshots]);
-
-  const handleCopyAs = async (
-    screenshotId: string,
-    target: "opengraph-image.png" | "twitter-image.png",
-    variant?: "Light" | "Dark" | null,
-  ) => {
-    try {
-      const { exists } = await clientRuntime.runPromise(
-        Effect.gen(function* () {
-          const client = yield* LiqvidStudioApiClient;
-
-          return yield* client.screenshots.checkExists({
-            query: { filename: target, projectPath },
-          });
-        }),
-      );
-
-      if (exists) {
-        setConfirmDialog({ screenshotId, target, variant });
-        return;
-      }
-    } catch (e) {
-      console.error("Failed to check image existence:", e);
-    }
-
-    await performCopy(screenshotId, target, variant);
-  };
-
-  const performCopy = async (
-    screenshotId: string,
-    target: "opengraph-image.png" | "twitter-image.png",
-    variant?: "Light" | "Dark" | null,
-  ) => {
-    try {
-      await clientRuntime.runPromise(
-        Effect.gen(function* () {
-          const client = yield* LiqvidStudioApiClient;
-
-          yield* client.screenshots.copy({
-            payload: {
-              screenshotId,
-              sourceFilename: variant
-                ? (`${variant.toLowerCase()}.png` as "light.png" | "dark.png")
-                : undefined,
-              targetFilename: target,
-            },
-            query: { projectPath },
-          });
-        }),
-      );
-    } catch (e) {
-      console.error("Failed to copy screenshot:", e);
-    }
-  };
 
   const openRenameDialog = (screenshotId: string) => {
     setRenameValue(screenshotId);
@@ -227,7 +315,7 @@ export function ScreenshotsSection({
             No screenshots yet. Click "Add" to capture one.
           </p>
         ) : (
-          <ul className={shareStyles.screenshotList}>
+          <ul className={styles.screenshotList}>
             {screenshots.map((screenshot) => {
               const { imagePath } = screenshot;
               const variants =
@@ -239,81 +327,18 @@ export function ScreenshotsSection({
                   : ([{ label: null, path: imagePath }] as const);
 
               return variants.map((variant, variantIndex) => (
-                <li
-                  className={shareStyles.screenshotItem}
+                <ScreenshotItem
+                  isPrimary={variantIndex === 0}
                   key={`${screenshot.id}-${variant.label ?? "single"}`}
-                >
-                  <img
-                    alt={`Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`}
-                    className={shareStyles.screenshotThumbnail}
-                    src={`/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`}
-                  />
-                  <div className={shareStyles.screenshotInfo}>
-                    <span className={shareStyles.screenshotTitle}>
-                      {screenshot.id ||
-                        new Date(screenshot.meta.createdAt).toLocaleString()}
-                      {variant.label && ` (${variant.label})`}
-                    </span>
-                    <span className={shareStyles.screenshotDimensions}>
-                      <Time format="long" value={screenshot.meta.createdAt} />
-                    </span>
-                    <span className={shareStyles.screenshotDimensions}>
-                      {screenshot.meta.width} x {screenshot.meta.height}
-                    </span>
-                  </div>
-                  <div className={shareStyles.screenshotActions}>
-                    <button
-                      className={shareStyles.copyButton}
-                      onClick={() =>
-                        handleCopyAs(
-                          screenshot.id,
-                          "opengraph-image.png",
-                          variant.label,
-                        )
-                      }
-                      title="Use as OpenGraph image"
-                      type="button"
-                    >
-                      <CopyIcon size={14} /> OG
-                    </button>
-                    <button
-                      className={shareStyles.copyButton}
-                      onClick={() =>
-                        handleCopyAs(
-                          screenshot.id,
-                          "twitter-image.png",
-                          variant.label,
-                        )
-                      }
-                      title="Use as Twitter image"
-                      type="button"
-                    >
-                      <CopyIcon size={14} /> Twitter
-                    </button>
-                    {variantIndex === 0 && (
-                      <>
-                        <button
-                          className={shareStyles.iconButton}
-                          onClick={() => openRenameDialog(screenshot.id)}
-                          title="Rename screenshot"
-                          type="button"
-                        >
-                          <PencilSimpleIcon size={14} />
-                        </button>
-                        <button
-                          className={shareStyles.deleteButton}
-                          onClick={() =>
-                            setDeleteDialog({ screenshotId: screenshot.id })
-                          }
-                          title="Delete screenshot"
-                          type="button"
-                        >
-                          <TrashIcon size={14} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </li>
+                  onConfirmOverwrite={(screenshotId, target, label) =>
+                    setConfirmDialog({ screenshotId, target, variant: label })
+                  }
+                  onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
+                  onRename={openRenameDialog}
+                  projectPath={projectPath}
+                  screenshot={screenshot}
+                  variant={variant}
+                />
               ));
             })}
           </ul>
@@ -336,13 +361,14 @@ export function ScreenshotsSection({
               </code>{" "}
               already exists. Do you want to replace it?
             </p>
-            <div className={styles.dialogActions}>
+            <div className={rootStyles.dialogActions}>
               <DialogClose>Cancel</DialogClose>
               <button
-                className={styles.submitButton}
+                className={rootStyles.submitButton}
                 onClick={() => {
                   if (confirmDialog) {
-                    performCopy(
+                    copyScreenshot(
+                      projectPath,
                       confirmDialog.screenshotId,
                       confirmDialog.target,
                       confirmDialog.variant,
@@ -368,7 +394,7 @@ export function ScreenshotsSection({
           <DialogBackdrop />
           <DialogPopup>
             <DialogTitle>Rename Screenshot</DialogTitle>
-            <div className={styles.formField}>
+            <div className={rootStyles.formField}>
               <label htmlFor="screenshot-rename-input">New name</label>
               <input
                 id="screenshot-rename-input"
@@ -384,13 +410,13 @@ export function ScreenshotsSection({
                 value={renameValue}
               />
               {renameError && (
-                <span className={styles.fieldError}>{renameError}</span>
+                <span className={rootStyles.fieldError}>{renameError}</span>
               )}
             </div>
-            <div className={styles.dialogActions}>
+            <div className={rootStyles.dialogActions}>
               <DialogClose>Cancel</DialogClose>
               <button
-                className={styles.submitButton}
+                className={rootStyles.submitButton}
                 onClick={() => performRename()}
                 type="button"
               >
@@ -414,7 +440,7 @@ export function ScreenshotsSection({
               Are you sure you want to delete this screenshot? This action
               cannot be undone.
             </p>
-            <div className={styles.dialogActions}>
+            <div className={rootStyles.dialogActions}>
               <DialogClose>Cancel</DialogClose>
               <button
                 className={shareStyles.deleteConfirmButton}

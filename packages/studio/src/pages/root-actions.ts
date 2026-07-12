@@ -4,13 +4,20 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
+import { writeJSON } from "@liqvid/cli/utils";
 import { serialize } from "@liqvid/ssr";
+import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
+import { readDirWithFileTypes } from "../utils/effect.mts";
+
 export async function rebuildAction() {
-  const result = await runNextBuild();
+  const result = await Effect.runPromise(
+    runNextBuild().pipe(Effect.provide(NodeFileSystem.layer)),
+  );
   return serialize(result);
 }
 
@@ -169,15 +176,18 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
 /**
  * Compile a Handlebars template and write it to the output path.
  */
-async function compileTemplate(
+function compileTemplate(
   templatePath: string,
   outputPath: string,
   data: Record<string, unknown>,
-): Promise<void> {
-  const templateContent = await fsp.readFile(templatePath, "utf8");
-  const template = Handlebars.compile(templateContent);
-  const result = template(data);
-  await fsp.writeFile(outputPath, result);
+) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const templateContent = yield* fs.readFileString(templatePath);
+    const template = Handlebars.compile(templateContent);
+    const result = template(data);
+    yield* fs.writeFileString(outputPath, result);
+  });
 }
 
 /**
@@ -185,107 +195,123 @@ async function compileTemplate(
  * Files ending in .hbs are compiled with Handlebars and have the .hbs extension removed.
  * Other files are copied as-is. template.json is skipped.
  */
-async function copyTemplateDir(
+function copyTemplateDir(
   srcDir: string,
   destDir: string,
   data: Record<string, unknown>,
-): Promise<void> {
-  await fsp.mkdir(destDir, { recursive: true });
+): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem> {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    yield* fs.makeDirectory(destDir, { recursive: true });
 
-  const entries = await fsp.readdir(srcDir, { withFileTypes: true });
+    const entries = yield* readDirWithFileTypes(srcDir);
 
-  for (const entry of entries) {
-    const srcPath = path.join(srcDir, entry.name);
-    const destName = entry.name.endsWith(".hbs")
-      ? entry.name.slice(0, -4)
-      : entry.name;
-    const destPath = path.join(destDir, destName);
+    for (const [basename, stats] of entries) {
+      const srcPath = path.join(srcDir, basename);
+      const destName = basename.endsWith(".hbs")
+        ? basename.slice(0, -4)
+        : basename;
+      const destPath = path.join(destDir, destName);
 
-    if (entry.name === "template.json") {
-      // Skip template.json
-      continue;
+      if (basename === "template.json") {
+        // Skip template.json
+        continue;
+      }
+
+      if (stats.type === "Directory") {
+        yield* copyTemplateDir(srcPath, destPath, data);
+      } else if (basename.endsWith(".hbs")) {
+        yield* compileTemplate(srcPath, destPath, data);
+      } else {
+        yield* fs.copyFile(srcPath, destPath);
+      }
     }
-
-    if (entry.isDirectory()) {
-      await copyTemplateDir(srcPath, destPath, data);
-    } else if (entry.name.endsWith(".hbs")) {
-      await compileTemplate(srcPath, destPath, data);
-    } else {
-      await fsp.copyFile(srcPath, destPath);
-    }
-  }
+  });
 }
 
 export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
-  try {
-    const { name, projectPath, templateId } = input;
+  const result = await Effect.runPromiseExit(
+    Effect.gen(function* () {
+      const { name, projectPath, templateId } = input;
 
-    // Validate project path
-    if (!projectPath || projectPath.includes("..")) {
-      return { error: "Invalid project path", success: false };
-    }
+      // Validate project path
+      if (!projectPath || projectPath.includes("..")) {
+        return { error: "Invalid project path", success: false };
+      }
 
-    // Validate and load template
-    const templates = await loadTemplatesAction();
-    const template = templates.find((t) => t.id === templateId);
-    if (!template) {
-      return { error: "Template not found", success: false };
-    }
+      // Validate and load template
+      const templates = yield* Effect.promise(() => loadTemplatesAction());
+      const template = templates.find((t) => t.id === templateId);
+      if (!template) {
+        return { error: "Template not found", success: false };
+      }
 
-    const fullProjectPath = path.join(APP_DIR, projectPath);
+      const fullProjectPath = path.join(APP_DIR, projectPath);
 
-    // Check if directory already exists
-    try {
-      await fsp.access(fullProjectPath);
-      return { error: "Project already exists at this path", success: false };
-    } catch {
-      // Directory doesn't exist, which is what we want
-    }
+      const fs = yield* FileSystem.FileSystem;
 
-    // Create base directory structure
-    await fsp.mkdir(fullProjectPath, { recursive: true });
-    await fsp.mkdir(path.join(fullProjectPath, ".liqvid", "recordings"), {
-      recursive: true,
-    });
+      // Check if directory already exists
+      if (yield* fs.exists(fullProjectPath)) {
+        return yield* Effect.fail({
+          error: "Project already exists at this path",
+          success: false,
+        });
+      }
 
-    const templateData = { name };
-
-    // Copy and compile template files
-    await copyTemplateDir(template.path, fullProjectPath, templateData);
-
-    // Create shared files (project.json and .liqvid files)
-    await compileTemplate(
-      path.join(TEMPLATES_DIR, "project.json.hbs"),
-      path.join(fullProjectPath, "project.json"),
-      templateData,
-    );
-
-    // Generate .liqvid/project-meta.json (initial empty duration)
-    await fsp.writeFile(
-      path.join(fullProjectPath, ".liqvid", "project-meta.json"),
-      JSON.stringify({ duration: { milliseconds: 0 } }, null, 2),
-    );
-
-    // Generate .liqvid/types.ts (initial structure)
-    await compileTemplate(
-      path.join(TEMPLATES_DIR, "types.ts.hbs"),
-      path.join(fullProjectPath, ".liqvid", "types.ts"),
-      {
-        directoryStructure: {
-          "project-meta.json": null,
-          recordings: {},
+      // Create base directory structure
+      yield* fs.makeDirectory(fullProjectPath, { recursive: true });
+      yield* fs.makeDirectory(
+        path.join(fullProjectPath, ".liqvid", "recordings"),
+        {
+          recursive: true,
         },
-      },
-    );
+      );
 
-    return { success: true };
-  } catch (e) {
-    console.error("Failed to create project:", e);
-    return {
-      error: e instanceof Error ? e.message : "Unknown error",
-      success: false,
-    };
-  }
+      const templateData = { name };
+
+      // Copy and compile template files
+      yield* copyTemplateDir(template.path, fullProjectPath, templateData);
+
+      // Create shared files (project.json and .liqvid files)
+      yield* compileTemplate(
+        path.join(TEMPLATES_DIR, "project.json.hbs"),
+        path.join(fullProjectPath, "project.json"),
+        templateData,
+      );
+
+      // Generate .liqvid/project-meta.json (initial empty duration)
+      yield* writeJSON(
+        path.join(fullProjectPath, ".liqvid", "project-meta.json"),
+        { duration: { milliseconds: 0 } },
+      );
+
+      // Generate .liqvid/types.ts (initial structure)
+      yield* compileTemplate(
+        path.join(TEMPLATES_DIR, "types.ts.hbs"),
+        path.join(fullProjectPath, ".liqvid", "types.ts"),
+        {
+          directoryStructure: {
+            "project-meta.json": null,
+            recordings: {},
+          },
+        },
+      );
+
+      return { success: true };
+    }).pipe(Effect.provide(NodeFileSystem.layer)),
+  );
+
+  return Exit.match(result, {
+    onFailure: (e) => {
+      console.error("Failed to create project:", e);
+
+      return {
+        error: e instanceof Error ? e.message : "Unknown error",
+        success: false,
+      };
+    },
+    onSuccess: (value) => value,
+  });
 }

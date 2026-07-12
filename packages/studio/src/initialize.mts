@@ -1,7 +1,11 @@
 import { NodeFileSystem } from "@effect/platform-node";
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
-import type { ProjectMeta } from "@liqvid/schemas";
-import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
+import {
+  EnvFiles,
+  type LiqvidConfig,
+  type Locale,
+  type ProjectMeta,
+} from "@liqvid/schemas/effect";
 import { Effect, Option } from "effect";
 
 import {
@@ -25,6 +29,7 @@ export interface LiqvidServerState {
    * The full parsed liqvid.config.json
    */
   config: Option.Option<LiqvidConfig>;
+  locale: Locale;
   jobs: {
     productionServer: null | Promise<void>;
     captioning: Set<LoggableJob>;
@@ -53,6 +58,8 @@ export async function initializeServer() {
       ),
     );
 
+    state.locale = config.locale ?? state.locale;
+
     state.config = Option.some(config);
   }
 
@@ -77,11 +84,13 @@ export function getServerState(): LiqvidServerState {
       basePath: "",
       config: Option.none(),
       jobs: {
+        captioning: new Set(),
         productionServer: null,
         watchAssets: null,
         watchConfig: null,
         watchProjectFiles: null,
       },
+      locale: "en",
       productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
       projects: {},
     };

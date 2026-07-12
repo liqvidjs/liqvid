@@ -1,0 +1,12 @@
+{
+  "copyEmbedCode": "Copier le code d'intégration",
+  "folderView": "Affichage dossier",
+  "openInFinder": "Ouvrir dans Finder",
+  "preview": "Aperçu",
+  "tabs": {
+    "captions": "Sous-titres",
+    "renders": "Rendus",
+    "screenshots": "Captures d'écran",
+    "thumbnails": "Vignettes"
+  }
+}

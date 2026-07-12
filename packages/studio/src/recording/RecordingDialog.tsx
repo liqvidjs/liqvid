@@ -14,7 +14,7 @@ import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 import { TimeDuration } from "../ui/Time.tsx";
-import { useToggle } from "../utils/react.mts";
+import { useToggle } from "../utils/react.tsx";
 
 import type { RecordingControlProps } from "./RecordingControl.tsx";
 

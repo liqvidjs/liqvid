@@ -1,14 +1,13 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import { formatTime } from "@liqvid/utils";
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
-import type { ThumbsData } from "../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
-import { Time, TimeDuration } from "../ui/Time.tsx";
+import type { ThumbsData } from "../../api/schemas.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
+import { TimeDuration } from "../../ui/Time.tsx";
 
 import shareStyles from "./share.module.css";
 

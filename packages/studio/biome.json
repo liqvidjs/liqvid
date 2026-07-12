@@ -3,6 +3,7 @@
   "linter": {
     "rules": {
       "style": {
+        "noJsxLiterals": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {

@@ -1,9 +1,10 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
+import type { SerializedProjectMeta } from "@liqvid/schemas";
+import type { ProjectMeta } from "@liqvid/schemas/effect";
 import { deserialize } from "@liqvid/ssr";
-import { formatTime, formatTimeDuration, omit } from "@liqvid/utils";
+import { omit } from "@liqvid/utils";
 import {
   CaretDownIcon,
   CaretRightIcon,
@@ -12,84 +13,34 @@ import {
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
+import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../../cookies.ts";
+import { TimeDuration } from "../../ui/Time.tsx";
+import { TranslationProvider } from "../../utils/react.tsx";
 
-import { EmbedButton } from "./homepage/EmbedButton.tsx";
-import { OpenInFinderButton } from "./homepage/OpenInFinderButton.tsx";
-import { ProductionLink } from "./homepage/ProductionLink.tsx";
+import { EmbedButton } from "./EmbedButton.tsx";
+import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
+import { ProductionLink } from "./ProductionLink.tsx";
 import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
 
-type ProjectListProps = {
+import type T from "./.translations/en.json";
+
+type T = typeof T;
+
+export type ProjectListProps = {
   basePath: string;
   initialCollapsedFolders: string[];
   initialFolderView: boolean;
   productionServerPort: number;
   projects: Record<string, SerializedProjectMeta>;
+  t: T;
 };
 
 interface FolderNode {
   name: string;
   projects: Array<[string, ProjectMeta]>;
   subfolders: Map<string, FolderNode>;
-}
-
-/**
- * Build a folder tree from project paths.
- * Projects are grouped by their path prefix (directory structure).
- */
-function buildFolderTree(
-  projects: Record<string, ProjectMeta>,
-): Map<string, FolderNode> {
-  const root = new Map<string, FolderNode>();
-
-  const sortedProjects = Object.entries(projects).sort(([, a], [, b]) =>
-    a.path.localeCompare(b.path),
-  );
-
-  for (const [key, project] of sortedProjects) {
-    const parts = project.path.split("/").filter(Boolean);
-
-    if (parts.length === 1) {
-      // Top-level project (no folder)
-      const folderName = "";
-      if (!root.has(folderName)) {
-        root.set(folderName, {
-          name: folderName,
-          projects: [],
-          subfolders: new Map(),
-        });
-      }
-      root.get(folderName)!.projects.push([key, project]);
-    } else {
-      // Project in a nested folder - traverse/create the folder tree
-      // The last part is the project name, so we only use parts[0..n-1] as folders
-      const folderParts = parts.slice(0, -1);
-
-      let currentLevel = root;
-      for (let i = 0; i < folderParts.length; i++) {
-        const folderName = folderParts[i]!;
-        if (!currentLevel.has(folderName)) {
-          currentLevel.set(folderName, {
-            name: folderName,
-            projects: [],
-            subfolders: new Map(),
-          });
-        }
-        const folder = currentLevel.get(folderName)!;
-        if (i === folderParts.length - 1) {
-          // This is the deepest folder - add the project here
-          folder.projects.push([key, project]);
-        } else {
-          // Continue traversing deeper
-          currentLevel = folder.subfolders;
-        }
-      }
-    }
-  }
-
-  return root;
 }
 
 /**
@@ -109,12 +60,13 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
-export function ProjectList({
+export function ProjectListClient({
   basePath,
   initialCollapsedFolders,
   initialFolderView,
   productionServerPort,
   projects: dehydratedProjects,
+  t,
 }: ProjectListProps) {
   const projects = useMemo(
     (): Record<string, ProjectMeta> =>
@@ -159,10 +111,10 @@ export function ProjectList({
   const folderTree = buildFolderTree(projects);
 
   return (
-    <>
+    <TranslationProvider t={t}>
       <div className={styles.viewToggle}>
         <label className={styles.toggleLabel}>
-          <span>Folder view</span>
+          <span>{t.folderView}</span>
           <button
             aria-checked={folderView}
             className={styles.toggleSwitch}
@@ -223,7 +175,7 @@ export function ProjectList({
           ))}
         </ul>
       )}
-    </>
+    </TranslationProvider>
   );
 }
 
@@ -356,13 +308,65 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
       }}
     >
       {duration && (
-        <time
-          className={styles.duration}
-          dateTime={formatTimeDuration(duration)}
-        >
-          {formatTime(duration)}
-        </time>
+        <TimeDuration className={styles.duration} value={duration} />
       )}
     </div>
   );
+}
+
+/**
+ * Build a folder tree from project paths.
+ * Projects are grouped by their path prefix (directory structure).
+ */
+function buildFolderTree(
+  projects: Record<string, ProjectMeta>,
+): Map<string, FolderNode> {
+  const root = new Map<string, FolderNode>();
+
+  const sortedProjects = Object.entries(projects).sort(([, a], [, b]) =>
+    a.path.localeCompare(b.path),
+  );
+
+  for (const [key, project] of sortedProjects) {
+    const parts = project.path.split("/").filter(Boolean);
+
+    if (parts.length === 1) {
+      // Top-level project (no folder)
+      const folderName = "";
+      if (!root.has(folderName)) {
+        root.set(folderName, {
+          name: folderName,
+          projects: [],
+          subfolders: new Map(),
+        });
+      }
+      root.get(folderName)!.projects.push([key, project]);
+    } else {
+      // Project in a nested folder - traverse/create the folder tree
+      // The last part is the project name, so we only use parts[0..n-1] as folders
+      const folderParts = parts.slice(0, -1);
+
+      let currentLevel = root;
+      for (let i = 0; i < folderParts.length; i++) {
+        const folderName = folderParts[i]!;
+        if (!currentLevel.has(folderName)) {
+          currentLevel.set(folderName, {
+            name: folderName,
+            projects: [],
+            subfolders: new Map(),
+          });
+        }
+        const folder = currentLevel.get(folderName)!;
+        if (i === folderParts.length - 1) {
+          // This is the deepest folder - add the project here
+          folder.projects.push([key, project]);
+        } else {
+          // Continue traversing deeper
+          currentLevel = folder.subfolders;
+        }
+      }
+    }
+  }
+
+  return root;
 }
