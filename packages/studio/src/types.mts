@@ -44,6 +44,7 @@ export type Awaitable<T> = T | Promise<T>;
 export type StructuredLogType = "debug" | "error" | "info" | "log" | "warn";
 
 export type StructuredLog = {
+  annotations?: Record<string, unknown>;
   message: unknown[];
   timestamp: Date;
   type: StructuredLogType;

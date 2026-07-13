@@ -19,6 +19,7 @@ declare global {
         event: "readystatechange",
         listener: () => void,
       ) => void;
+      audioContext: AudioContext | undefined;
       audioSources: Set<{ buffer: AudioBuffer; startTime: number }>;
       currentTime: number;
       duration: number;

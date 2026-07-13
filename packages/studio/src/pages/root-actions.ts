@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
 import { writeJSON } from "@liqvid/cli/utils";
+import type { AutoGenProjectMeta } from "@liqvid/schemas/effect";
 import { serialize } from "@liqvid/ssr";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import { execa } from "execa";
@@ -293,7 +294,7 @@ export async function createProjectAction(
       );
 
       // Generate .liqvid/project-meta.json (initial empty duration)
-      yield* writeJSON(
+      yield* writeJSON<AutoGenProjectMeta>(
         path.join(fullProjectPath, ".liqvid", "project-meta.json"),
         { duration: { milliseconds: 0 } },
       );

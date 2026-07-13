@@ -1,4 +1,5 @@
 import type { RenderAudioResult } from "@liqvid/renderer/render-audio";
+import { Effect } from "effect";
 import type { CommandModule } from "yargs";
 
 import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
@@ -30,17 +31,17 @@ export interface RenderAudioOptions {
  * });
  * ```
  */
-export async function renderAudio(
-  options: RenderAudioOptions,
-): Promise<RenderAudioResult> {
-  const { renderAudio: renderAudioTask } = await import(
-    "@liqvid/renderer/render-audio"
-  );
+export function renderAudio(options: RenderAudioOptions) {
+  return Effect.gen(function* () {
+    const { renderAudio: renderAudioTask } = yield* Effect.promise(
+      () => import("@liqvid/renderer/render-audio"),
+    );
 
-  return renderAudioTask({
-    browserExecutable: options.browserExecutable ?? "",
-    output: options.output,
-    url: options.url,
+    return yield* renderAudioTask({
+      browserExecutable: options.browserExecutable ?? "",
+      output: options.output,
+      url: options.url,
+    });
   });
 }
 

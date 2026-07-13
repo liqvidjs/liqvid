@@ -6,19 +6,43 @@ import { CaptionsMeta } from "../types/schemas.mts";
 /**
  * On-disk metadata for a single audio rendering (`audio-meta.json`).
  */
-export const AudioMeta = Schema.Struct({
+const AudioMetaBase = Schema.Struct({
   /** Timestamp when audio render was created */
   createdAt: Schema.String,
-
-  /** Duration in seconds */
-  duration: Schema.Number,
 
   /** MIME type of audio recording */
   mimeType: Schema.String,
 
   /** Name of audio recording */
-  name: Schema.String,
+  // name: Schema.String,
 });
+
+const AudioMetaFailed = AudioMetaBase.pipe(
+  Schema.fieldsAssign({
+    state: Schema.Literal("failed"),
+  }),
+);
+
+const AudioMetaRunning = AudioMetaBase.pipe(
+  Schema.fieldsAssign({
+    state: Schema.Literal("running"),
+  }),
+);
+
+const AudioMetaCompleted = AudioMetaBase.pipe(
+  Schema.fieldsAssign({
+    /** Duration in seconds */
+    duration: Schema.Number,
+
+    state: Schema.Literal("completed"),
+  }),
+);
+
+export const AudioMeta = Schema.Union([
+  AudioMetaCompleted,
+  AudioMetaFailed,
+  AudioMetaRunning,
+]);
 
 export type AudioMeta = (typeof AudioMeta)["Type"];
 

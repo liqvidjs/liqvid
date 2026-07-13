@@ -1,10 +1,8 @@
-import { promises as fsp } from "node:fs";
-import os from "node:os";
 import path from "node:path";
 
-import cliProgress from "cli-progress";
+import { Effect, FileSystem } from "effect";
 import jimp from "jimp";
-import type puppeteer from "puppeteer-core";
+import type * as puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
@@ -12,11 +10,12 @@ import { captureRange } from "../utils/capture.mts";
 import { validateConcurrency } from "../utils/concurrency.mts";
 import { getPages } from "../utils/connect.mts";
 import { Pool } from "../utils/pool.mts";
+import { Progress } from "../utils/progress.mts";
 
 /**
 Create thumbnail sheets for a Liqvid video.
 */
-export async function thumbs({
+export function thumbs({
   browserExecutable,
   browserHeight,
   browserWidth,
@@ -49,101 +48,115 @@ export async function thumbs({
   url: string;
   width: number;
 }) {
-  let step = 1;
-  const total = 3;
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // validation
-  const executablePath = await getEnsureChrome(browserExecutable);
+    let step = 1;
+    const total = 3;
 
-  if (path.extname(output) !== `.${imageFormat}`) {
-    console.error(
-      `Error: File pattern '${output}' does not match format '${imageFormat}'.`,
+    // validation
+    const executablePath = yield* Effect.promise(() =>
+      getEnsureChrome(browserExecutable),
     );
-    process.exit(1);
-  }
 
-  concurrency = validateConcurrency(concurrency);
+    if (path.extname(output) !== `.${imageFormat}`) {
+      return yield* Effect.die(
+        `File pattern '${output}' does not match format '${imageFormat}'.`,
+      );
+    }
 
-  // browserHeight / browserWidth default to height/width
-  browserHeight ??= height;
-  browserWidth ??= width;
+    concurrency = validateConcurrency(concurrency);
 
-  // make directories
-  const [tmpDir] = await Promise.all([
-    fsp.mkdtemp(path.join(os.tmpdir(), "liqvid.thumbs")),
-    fsp.mkdir(path.dirname(output), { recursive: true }),
-  ]);
+    // browserHeight / browserWidth default to height/width
+    browserHeight ??= height;
+    browserWidth ??= width;
 
-  console.log(`Connecting to ${url} with ${concurrency} browser instances...`);
+    // make directories
+    const [tmpDir] = yield* Effect.all([
+      fs.makeTempDirectory({ prefix: "liqvid.thumbs" }),
+      fs.makeDirectory(path.dirname(output), { recursive: true }),
+    ]);
 
-  // pool of puppeteer instances
-  console.log(`(${step++}/${total}) Connecting to players...`);
-  const pages = await getPages({
-    colorScheme,
-    concurrency,
-    executablePath,
-    height: browserHeight,
-    renderMode: "thumbs",
-    url,
-    width: browserWidth,
+    yield* Effect.log(
+      `Connecting to ${url} with ${concurrency} browser instances...`,
+    );
+
+    // pool of puppeteer instances
+    yield* Effect.logDebug("testing debug logging");
+    yield* Effect.log(`(${step++}/${total}) Connecting to players...`);
+    yield* Effect.logDebug("testing debug logging");
+
+    const { numThumbs } = yield* Effect.gen(function* () {
+      const pages = yield* getPages({
+        colorScheme,
+        concurrency,
+        executablePath,
+        height: browserHeight,
+        renderMode: "thumbs",
+        url,
+        width: browserWidth,
+      });
+
+      const pool = new Pool(pages);
+      for (const page of pages) {
+        (page as any).client = yield* Effect.promise(() =>
+          page.target().createCDPSession(),
+        );
+      }
+
+      // calculate how many thumbs
+      const durationSeconds = yield* Effect.promise(() =>
+        pages[0]!.evaluate(() => {
+          return player.playback.duration;
+        }),
+      );
+
+      const numThumbs = Math.ceil(durationSeconds / frequency);
+
+      // grab thumbs and assemble them
+      yield* Effect.log(`(${step++}/${total}) Capturing thumbs...`);
+      yield* captureRange({
+        count: numThumbs,
+        filename: (i) => path.join(tmpDir, `${i}.${imageFormat}`),
+        imageFormat,
+        pool,
+        time: (i) => i * frequency,
+      });
+
+      return { numThumbs };
+    }).pipe(Effect.scoped);
+
+    yield* Effect.log(`(${step++}/${total}) Assembling sheets...`);
+    yield* assembleSheets({
+      cols,
+      height,
+      imageFormat,
+      numThumbs,
+      output,
+      quality,
+      rows,
+      tmpDir,
+      width,
+    });
+
+    // clean up tmp files
+    yield* Effect.log("Cleaning up...");
+    yield* fs.remove(tmpDir, { recursive: true });
+
+    // done
+    yield* Effect.log("Done!");
   });
-  const pool = new Pool(pages);
-  for (const page of pages) {
-    (page as any).client = await page.target().createCDPSession();
-  }
-
-  // calculate how many thumbs
-  const durationSeconds = await pages[0]!.evaluate(() => {
-    return player.playback.duration;
-  });
-
-  const numThumbs = Math.ceil(durationSeconds / frequency);
-
-  // grab thumbs and assemble them
-  console.log(`(${step++}/${total}) Capturing thumbs...`);
-  await captureRange({
-    count: numThumbs,
-    filename: (i) => path.join(tmpDir, `${i}.${imageFormat}`),
-    imageFormat,
-    pool,
-    time: (i) => i * frequency,
-  });
-
-  // close chrome instances
-  pages[0]!.browser().close();
-
-  console.log(`(${step++}/${total}) Assembling sheets...`);
-  await assembleSheets({
-    cols,
-    height,
-    imageFormat,
-    numThumbs,
-    output,
-    pool,
-    quality,
-    rows,
-    tmpDir,
-    width,
-  });
-
-  // clean up tmp files
-  console.log("Cleaning up...");
-  await fsp.rm(tmpDir, { recursive: true });
-
-  // done
-  console.log("Done!");
 }
 
 /**
 Assemble thumb screenshots into sheets.
 */
-async function assembleSheets({
+function assembleSheets({
   cols,
   height,
   imageFormat,
   numThumbs,
   output,
-  pool,
   quality,
   rows,
   tmpDir,
@@ -154,57 +167,52 @@ async function assembleSheets({
   imageFormat: ImageFormat;
   numThumbs: number;
   output: string;
-  pool: Pool<puppeteer.Page>;
   quality: number;
   rows: number;
   tmpDir: string;
   width: number;
 }) {
-  const numSheets = Math.ceil(numThumbs / cols / rows);
+  return Effect.gen(function* () {
+    const numSheets = Math.ceil(numThumbs / cols / rows);
 
-  // progress bar
-  const sheetsBar = new cliProgress.SingleBar(
-    {
-      autopadding: true,
-      clearOnComplete: true,
-      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-      hideCursor: true,
-    },
-    cliProgress.Presets.shades_classic,
-  );
+    // progress bar
+    const progress = yield* Progress;
+    const sheetsBar = new progress.SingleBar();
 
-  sheetsBar.start(numThumbs, 0);
+    sheetsBar.start(numThumbs, 0);
 
-  await Promise.all(
-    new Array(numSheets).fill(null).map(async (_, sheetNum) => {
-      // get available puppeteer instance
-      const page = await pool.acquire();
+    yield* Effect.promise(() =>
+      Promise.all(
+        new Array(numSheets).fill(null).map(async (_, sheetNum) => {
+          const sheet = new jimp(cols * width, rows * height);
 
-      const sheet = new jimp(cols * width, rows * height);
+          // blit thumbs into here
+          await Promise.all(
+            new Array(cols * rows).fill(null).map(async (_, i) => {
+              const index = sheetNum * cols * rows + i;
+              if (index >= numThumbs) return;
 
-      // blit thumbs into here
-      await Promise.all(
-        new Array(cols * rows).fill(null).map(async (_, i) => {
-          const index = sheetNum * cols * rows + i;
-          if (index >= numThumbs) return;
-
-          const thumb = await jimp.read(
-            path.join(tmpDir, `${index}.${imageFormat}`),
+              const thumb = await jimp.read(
+                path.join(tmpDir, `${index}.${imageFormat}`),
+              );
+              if (imageFormat === "jpeg") {
+                thumb.quality(quality);
+              }
+              thumb.resize(width, height);
+              sheet.blit(
+                thumb,
+                (i % cols) * width,
+                Math.floor(i / rows) * height,
+              );
+              sheetsBar.increment();
+            }),
           );
-          if (imageFormat === "jpeg") {
-            thumb.quality(quality);
-          }
-          thumb.resize(width, height);
-          sheet.blit(thumb, (i % cols) * width, Math.floor(i / rows) * height);
-          sheetsBar.increment();
+
+          await sheet.writeAsync(output.replace("%s", sheetNum.toString()));
         }),
-      );
+      ),
+    );
 
-      await sheet.writeAsync(output.replace("%s", sheetNum.toString()));
-
-      // release puppeteer instance
-      pool.release(page);
-    }),
-  );
-  sheetsBar.stop();
+    sheetsBar.stop();
+  });
 }

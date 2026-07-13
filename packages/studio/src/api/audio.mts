@@ -14,6 +14,7 @@ import {
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
+import { createJob } from "../utils/jobs.mts";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
@@ -173,23 +174,33 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         yield* fs.makeDirectory(audioDir, { recursive: true });
 
         const output = path.join(audioDir, AUDIO_FILE);
+        const metaOutput = path.join(audioDir, AUDIO_META_FILE);
 
         // Build the URL for the video
         const previewPath = `${basePath || ""}/${projectPath}/`;
         const url = `http://localhost:${productionServerPort}${previewPath}`;
 
-        const { duration } = yield* Effect.promise(() =>
-          renderAudio({ output, url }),
-        );
-
         const meta: AudioMeta = {
           createdAt: new Date().toISOString(),
-          duration,
           mimeType: "audio/wav",
-          name: id,
+          state: "running",
         };
 
-        yield* writeJSON(path.join(audioDir, AUDIO_META_FILE), meta);
+        yield* writeJSON(metaOutput, meta);
+
+        yield* createJob(
+          "render-audio",
+          renderAudio({ output, url }).pipe(
+            Effect.tap(({ duration }) =>
+              writeJSON<AudioMeta>(metaOutput, {
+                ...meta,
+                duration,
+                state: "completed",
+              }),
+            ),
+          ),
+          { path: projectPath },
+        );
 
         return { id };
       }).pipe(Effect.catchTag("PlatformError", Effect.die)),

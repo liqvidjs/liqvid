@@ -1,10 +1,11 @@
 import { promises as fsp } from "node:fs";
 import * as path from "node:path";
 
-import puppeteer from "puppeteer-core";
+import { Effect } from "effect";
 
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { connect } from "../utils/connect.mts";
+import { acquireBrowser } from "../utils/effect.mts";
 
 export interface RenderAudioOptions {
   /** Path to Chrome/ium executable */
@@ -32,27 +33,27 @@ export interface RenderAudioResult {
  * audio sources offline using an {@link OfflineAudioContext}, and saves
  * the result as a WAV file.
  */
-export async function renderAudio(
-  options: RenderAudioOptions,
-): Promise<RenderAudioResult> {
-  const { browserExecutable, output, url } = options;
+export function renderAudio(options: RenderAudioOptions) {
+  return Effect.gen(function* () {
+    const { browserExecutable, output, url } = options;
 
-  // Find browser executable
-  const executablePath = await getEnsureChrome(browserExecutable ?? "");
+    // Find browser executable
+    const executablePath = yield* Effect.promise(() =>
+      getEnsureChrome(browserExecutable ?? ""),
+    );
 
-  // Launch browser
-  const browser = await puppeteer.launch({
-    args: [process.platform === "linux" ? "--single-process" : ""].filter(
-      Boolean,
-    ) as string[],
-    executablePath,
-    headless: process.env.HEADLESS !== "false",
-    timeout: 0,
-  });
+    // Launch browser
+    const browser = yield* acquireBrowser({
+      args: [process.platform === "linux" ? "--single-process" : ""].filter(
+        Boolean,
+      ) as string[],
+      executablePath,
+      headless: process.env.HEADLESS !== "false",
+      timeout: 0,
+    });
 
-  try {
     // Connect to the page
-    const page = await connect({
+    const page = yield* connect({
       browser,
       height: 0,
       renderMode: "video",
@@ -60,30 +61,32 @@ export async function renderAudio(
       width: 0,
     });
 
-    // send Escape key to page --- can't load audioContext without user input
-    await page.keyboard.press("Escape");
+    const { duration } = yield* Effect.promise(async () => {
+      // send Escape key to page --- can't load audioContext without user input
+      await page.keyboard.press("Escape");
 
-    await page.waitForFunction(
-      () =>
-        player.playback.audioContext && player.playback.audioSources.size > 0,
-    );
+      await page.waitForFunction(
+        () =>
+          player.playback.audioContext && player.playback.audioSources.size > 0,
+      );
 
-    // Render the audio inside the page
-    const { base64, duration } = await page.evaluate(renderOfflineInPage);
+      // Render the audio inside the page
+      const { base64, duration } = await page.evaluate(renderOfflineInPage);
 
-    // Ensure output directory exists
-    await fsp.mkdir(path.dirname(output), { recursive: true });
+      // Ensure output directory exists
+      await fsp.mkdir(path.dirname(output), { recursive: true });
 
-    // Save the WAV file
-    await fsp.writeFile(output, base64, "base64");
+      // Save the WAV file
+      await fsp.writeFile(output, base64, "base64");
+
+      return { duration };
+    });
 
     return {
       duration,
       path: output,
     };
-  } finally {
-    await browser.close();
-  }
+  }).pipe(Effect.scoped);
 }
 
 /**
@@ -92,7 +95,22 @@ export async function renderAudio(
  * This function is serialized and executed inside the browser page,
  * so it must be entirely self-contained.
  */
-async function renderOfflineInPage(): Promise<{
+async function renderOfflineInPage({
+  channels = 1,
+  sampleRate = 16_000,
+}: {
+  /**
+   * Number of channels to use
+   * @default 1
+   */
+  channels?: number;
+
+  /**
+   * Sample rate
+   * @default 16000
+   */
+  sampleRate?: number;
+}): Promise<{
   base64: string;
 
   duration: number;
@@ -127,8 +145,6 @@ async function renderOfflineInPage(): Promise<{
   });
 
   /* renderOffline */
-  const sampleRate = 44100;
-  const numberOfChannels = 2;
   const lengthInSamples = Math.ceil(duration * sampleRate);
 
   if (lengthInSamples === 0) {
@@ -137,7 +153,7 @@ async function renderOfflineInPage(): Promise<{
 
   // Create offline audio context
   const offlineContext = new OfflineAudioContext(
-    numberOfChannels,
+    channels,
     lengthInSamples,
     sampleRate,
   );

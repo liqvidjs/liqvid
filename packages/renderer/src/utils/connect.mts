@@ -1,9 +1,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: this is fine */
 import cliProgress from "cli-progress";
+import { Effect } from "effect";
 import type * as Puppeteer from "puppeteer-core";
-import puppeteer from "puppeteer-core";
 
 import type { ColorScheme, RenderMode } from "../types.mts";
+
+import { acquireBrowser } from "./effect.mts";
+import { Progress } from "./progress.mts";
 
 /** Namespace for the Liqvid player iframe API */
 export const PLAYER_API_NAMESPACE = "@liqvid/player";
@@ -11,7 +14,7 @@ export const PLAYER_API_NAMESPACE = "@liqvid/player";
 /**
  * Connect to a page running Liqvid.
  */
-export async function connect({
+export function connect({
   browser,
   colorScheme = "light",
   height,
@@ -26,53 +29,81 @@ export async function connect({
   width: number;
   renderMode: RenderMode;
 }) {
-  // init page
-  const page = await browser.newPage();
-  page.setViewport({ height, width });
-  page.on("error", console.error);
-  page.on("pageerror", console.error);
+  return Effect.gen(function* () {
+    yield* Effect.logDebug("got new page");
 
-  await page.goto(url, { timeout: 0 });
+    // init page
+    const page = yield* Effect.acquireRelease(
+      Effect.promise(() => browser.newPage()),
+      (page) => Effect.promise(() => page.close()),
+    ).pipe(
+      Effect.tapCause((c) => Effect.logError(JSON.stringify(c, null, 2))),
+      Effect.tapError(Effect.logError),
+      Effect.orDie,
+    );
+    page.setViewport({ height, width });
+    page.on("error", console.error);
+    page.on("pageerror", console.error);
 
-  // connect to player API
-  await page.waitForFunction(
-    () =>
-      (window.player = (document.querySelector(".lv-player") as any)?.[
-        Symbol.for("@liqvid/player/api")
+    yield* Effect.promise(() => page.goto(url, { timeout: 0 }));
+
+    yield* Effect.logDebug(`connected to url`);
+
+    // connect to player API
+    yield* Effect.promise(() =>
+      page.waitForFunction(
+        () =>
+          (window.player = (document.querySelector(".lv-player") as any)?.[
+            Symbol.for("@liqvid/player/api")
+          ]),
+        {
+          timeout: 30_000,
+        },
+      ),
+    );
+
+    yield* Effect.logDebug("found liqvid player api");
+
+    // set various things
+    yield* Effect.promise(() =>
+      page.evaluate(
+        async (colorScheme, renderMode) => {
+          player.setColorScheme(colorScheme);
+          player.setRenderMode(renderMode);
+          player.toggleControls(false);
+
+          document.body.style.background = "transparent";
+        },
+        colorScheme,
+        renderMode,
+      ),
+    );
+
+    yield* Effect.logDebug("called the player api for setup");
+
+    // set color scheme for whole page also
+    yield* Effect.promise(() =>
+      page.emulateMediaFeatures([
+        {
+          name: "prefers-color-scheme",
+          value: colorScheme,
+        },
       ]),
-    {
-      timeout: 30_000,
-    },
-  );
+    );
 
-  // set various things
-  await page.evaluate(
-    async (colorScheme, renderMode) => {
-      player.setColorScheme(colorScheme);
-      player.setRenderMode(renderMode);
-      player.toggleControls(false);
+    yield* Effect.logDebug("set color scheme");
 
-      document.body.style.background = "transparent";
-    },
-    colorScheme,
-    renderMode,
-  );
+    yield* Effect.logDebug("page ready");
 
-  // set color scheme for whole page also
-  await page.emulateMediaFeatures([
-    {
-      name: "prefers-color-scheme",
-      value: colorScheme,
-    },
-  ]);
-
-  return page;
+    return page;
+    // biome-ignore assist/source/useSortedKeys: meaningful order (url is most important)
+  }).pipe(Effect.annotateLogs({ url, colorScheme, height, width }));
 }
 
 /**
 Connect to players.
 */
-export async function getPages({
+export function getPages({
   colorScheme = "light",
   concurrency,
   executablePath,
@@ -89,51 +120,80 @@ export async function getPages({
   url: string;
   width: number;
 }) {
-  // progress bar
-  const playerBar = new cliProgress.SingleBar(
-    {
-      autopadding: true,
-      clearOnComplete: true,
-      etaBuffer: 1,
-      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
-      hideCursor: true,
-    },
-    cliProgress.Presets.shades_classic,
-  );
-  playerBar.start(concurrency, 0);
+  return Effect.gen(function* () {
+    // progress bar
+    const progress = yield* Progress;
+    const playerBar = new progress.SingleBar(
+      {
+        etaBuffer: 1,
+      },
+      cliProgress.Presets.shades_classic,
+    );
+    playerBar.start(concurrency, 0);
 
-  // get local browser
-  const browser = await puppeteer.launch({
-    acceptInsecureCerts: true,
-    args: [process.platform === "linux" ? "--single-process" : null].filter(
-      Boolean,
-    ) as string[],
-    browser: "chrome",
-    executablePath,
-    headless: process.env.HEADLESS !== "false",
-    timeout: 0,
-  });
+    yield* Effect.logDebug("acquiring browser");
 
-  // array of Page objects
-  const pages = await Promise.all(
-    new Array(concurrency).fill(null).map(async () => {
-      const page = await connect({
-        browser,
-        colorScheme,
-        height,
-        renderMode,
-        url,
-        width,
-      });
+    // get local browser
+    const browser = yield* acquireBrowser({
+      acceptInsecureCerts: true,
+      args: [process.platform === "linux" ? "--single-process" : null].filter(
+        Boolean,
+      ) as string[],
+      browser: "chrome",
+      executablePath,
+      headless: process.env.HEADLESS !== "false",
+      timeout: 0,
+    });
 
-      playerBar.increment();
+    yield* Effect.logDebug("acquired browser");
 
-      return page;
+    // array of Page objects
+    const pages = yield* Effect.all(
+      new Array(concurrency).fill(null).map((_, i) => {
+        return Effect.gen(function* () {
+          yield* Effect.logDebug(`effect number ${i}`);
+          return yield* connect({
+            browser,
+            colorScheme,
+            height,
+            renderMode,
+            url,
+            width,
+          }).pipe(
+            Effect.tap(() =>
+              Effect.sync(() => {
+                playerBar.increment();
+              }),
+            ),
+          );
+        });
+      }),
+      { concurrency: "unbounded" },
+    );
+
+    playerBar.stop();
+
+    yield* Effect.logDebug("connected to all pages");
+
+    // TODO: legacy, may not be needed anymore
+    yield* Effect.all(
+      pages.map((page) =>
+        Effect.promise(async () => {
+          (page as any).client = await page.target().createCDPSession();
+        }),
+      ),
+    );
+
+    yield* Effect.logDebug("created CDP sessions");
+
+    return pages;
+  }).pipe(
+    Effect.annotateLogs({
+      concurrency,
+      renderMode,
+      url,
     }),
   );
-  playerBar.stop();
-
-  return pages;
 }
 
 /**

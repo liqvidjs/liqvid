@@ -1,14 +1,15 @@
-import { promises as fsp } from "node:fs";
 import * as path from "node:path";
 
-import puppeteer from "puppeteer-core";
+import { Effect, FileSystem } from "effect";
+import type * as Puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { capture } from "../utils/capture.mts";
 import { connect } from "../utils/connect.mts";
+import { acquireBrowser } from "../utils/effect.mts";
 
-export interface ScreenshotOptions {
+export type ScreenshotOptions = {
   /** Path to Chrome/ium executable */
   browserExecutable?: string;
 
@@ -18,13 +19,19 @@ export interface ScreenshotOptions {
   /** Screenshot height */
   height: number;
 
-  /** Image format */
+  /**
+   * Image format
+   * @deprecated use `screenshotOptions.type` instead
+   */
   imageFormat?: ImageFormat;
 
   /** Output path for the screenshot */
   output: string;
 
-  /** Image quality (for JPEG) */
+  /**
+   * Image quality (for JPEG)
+   * @deprecated use `screenshotOptions.quality` instead
+   */
   quality?: number;
 
   /** Time in seconds to capture */
@@ -35,13 +42,22 @@ export interface ScreenshotOptions {
 
   /** Screenshot width */
   width: number;
-}
+
+  /** Additional options for Puppeteer screenshot */
+  screenshotOptions?: Exclude<
+    Puppeteer.ScreenshotOptions,
+    // legacy
+    "path" | "quality" | "type"
+  >;
+};
 
 export interface ScreenshotResult {
   /** Path to the saved screenshot */
   path: string;
+
   /** Width of the screenshot */
   width: number;
+
   /** Height of the screenshot */
   height: number;
 }
@@ -49,36 +65,38 @@ export interface ScreenshotResult {
 /**
  * Capture a single screenshot from a Liqvid player.
  */
-export async function screenshot(
-  options: ScreenshotOptions,
-): Promise<ScreenshotResult> {
-  const {
-    browserExecutable,
-    colorScheme = "light",
-    height,
-    imageFormat = "png",
-    output,
-    quality = 80,
-    time,
-    url,
-    width,
-  } = options;
+export function screenshot(options: ScreenshotOptions) {
+  return Effect.gen(function* () {
+    const {
+      browserExecutable,
+      colorScheme = "light",
+      height,
+      imageFormat = "png",
+      output,
+      quality = 80,
+      time,
+      url,
+      width,
+      screenshotOptions,
+    } = options;
 
-  // Find browser executable
-  const executablePath = await getEnsureChrome(browserExecutable ?? "");
+    // Find browser executable
+    const executablePath = yield* Effect.promise(() =>
+      getEnsureChrome(browserExecutable ?? ""),
+    );
 
-  // Launch browser
-  const browser = await puppeteer.launch({
-    args: [process.platform === "linux" ? "--single-process" : ""].filter(
-      Boolean,
-    ) as string[],
-    executablePath,
-    timeout: 0,
-  });
+    // Launch browser
+    const browser = yield* acquireBrowser({
+      args: [process.platform === "linux" ? "--single-process" : ""].filter(
+        Boolean,
+      ) as string[],
+      executablePath,
+      headless: process.env.HEADLESS !== "false",
+      timeout: 0,
+    });
 
-  try {
     // Connect to the page
-    const page = await connect({
+    const page = yield* connect({
       browser,
       colorScheme,
       height,
@@ -88,27 +106,29 @@ export async function screenshot(
     });
 
     // Create CDP session for capture utility
-    // biome-ignore lint/suspicious/noExplicitAny: puppeteer internal API
-    (page as any).client = await page.target().createCDPSession();
+    (page as any).client = yield* Effect.promise(() => page.createCDPSession());
+
+    const fs = yield* FileSystem.FileSystem;
 
     // Ensure output directory exists
-    await fsp.mkdir(path.dirname(output), { recursive: true });
+    yield* fs.makeDirectory(path.dirname(output), { recursive: true });
 
     // Capture screenshot using the shared capture utility
-    await capture({
-      page,
-      path: output,
-      quality,
-      time,
-      type: imageFormat,
-    });
+    yield* Effect.promise(() =>
+      capture({
+        page,
+        path: output,
+        quality,
+        time,
+        type: imageFormat,
+        ...screenshotOptions,
+      }),
+    );
 
     return {
       height,
       path: output,
       width,
     };
-  } finally {
-    await browser.close();
-  }
+  }).pipe(Effect.scoped);
 }

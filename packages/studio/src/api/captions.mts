@@ -2,13 +2,12 @@ import * as path from "node:path";
 
 import { transcribe, type WhisperLogger } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option, type PlatformError } from "effect";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
 import type { CaptionsMeta } from "../types/schemas.mts";
 import type { LoggableJob } from "../types.mts";
-import { existenceOptional } from "../utils/effect.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 
@@ -44,7 +43,7 @@ export const captionsLive = HttpApiBuilder.group(
       // generate captions for a specific audio rendering
       .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          const { config: $config, jobs } = getServerState();
+          const { config: $config } = getServerState();
 
           const config = yield* Option.match($config, {
             onNone: () => Effect.die({ message: "config not loaded" }),
@@ -84,47 +83,7 @@ export const captionsLive = HttpApiBuilder.group(
           // Start transcription in background
           const fiber = Effect.gen(function* () {
             const fiber = Effect.gen(function* () {
-              const logger: WhisperLogger = {
-                debug(...args) {
-                  if (args.length === 2) {
-                    if (args[0] === "Stdout:") {
-                      job.logs.push({
-                        message: args[1],
-                        timestamp: new Date(),
-                        type: "log",
-                      });
-                      return;
-                    } else if (args[0] === "Stderr:") {
-                      job.logs.push({
-                        message: args[1],
-                        timestamp: new Date(),
-                        type: "error",
-                      });
-                      return;
-                    }
-                  }
-
-                  job.logs.push({
-                    message: args,
-                    timestamp: new Date(),
-                    type: "debug",
-                  });
-                },
-                error(...args) {
-                  job.logs.push({
-                    message: args,
-                    timestamp: new Date(),
-                    type: "error",
-                  });
-                },
-                log(...args) {
-                  job.logs.push({
-                    message: args,
-                    timestamp: new Date(),
-                    type: "log",
-                  });
-                },
-              };
+              const logger: WhisperLogger = makeWhisperLogger(job);
 
               yield* transcribe({
                 audioFile,
@@ -139,21 +98,18 @@ export const captionsLive = HttpApiBuilder.group(
                 ...initialMeta,
                 status: "completed",
               });
-
-              job.state = "completed";
             });
 
             yield* fiber.pipe(
               Effect.tapError((error) =>
                 Effect.logError("Failed to generate captions:", error),
               ),
-              Effect.catch(() => {
-                job.state = "failed";
-                return writeCaptionsMeta(audioDir, {
+              Effect.tapError(() =>
+                writeCaptionsMeta(audioDir, {
                   ...initialMeta,
                   status: "failed",
-                });
-              }),
+                }),
+              ),
             );
 
             activeJobs.delete(jobKey);
@@ -165,7 +121,7 @@ export const captionsLive = HttpApiBuilder.group(
           });
 
           return { status: "started" as const };
-        }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       )
       // delete captions for an audio rendering (preserving the audio itself)
       .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
@@ -195,10 +151,54 @@ export const captionsLive = HttpApiBuilder.group(
             CAPTIONS_FILE,
             TRANSCRIPT_FILE,
           ]) {
-            yield* fs.remove(path.join(audioDir, file)).pipe(existenceOptional);
+            yield* fs.remove(path.join(audioDir, file), { force: true });
           }
 
           return { success: true };
         }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       ),
 );
+
+function makeWhisperLogger<A, E>(job: LoggableJob<A, E>): WhisperLogger {
+  return {
+    debug(...args) {
+      if (args.length === 2) {
+        if (args[0] === "Stdout:") {
+          job.logs.push({
+            message: args[1],
+            timestamp: new Date(),
+            type: "log",
+          });
+          return;
+        } else if (args[0] === "Stderr:") {
+          job.logs.push({
+            message: args[1],
+            timestamp: new Date(),
+            type: "error",
+          });
+          return;
+        }
+      }
+
+      job.logs.push({
+        message: args,
+        timestamp: new Date(),
+        type: "debug",
+      });
+    },
+    error(...args) {
+      job.logs.push({
+        message: args,
+        timestamp: new Date(),
+        type: "error",
+      });
+    },
+    log(...args) {
+      job.logs.push({
+        message: args,
+        timestamp: new Date(),
+        type: "log",
+      });
+    },
+  };
+}

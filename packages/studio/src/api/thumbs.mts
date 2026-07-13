@@ -1,19 +1,16 @@
 import * as path from "node:path";
 
-import type { ThumbsResult } from "@liqvid/cli/thumbs";
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
-import { loadJsonEffect, Progress, writeJSON } from "@liqvid/cli/utils";
+import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
 import {
   type ThumbnailOptions,
   ThumbnailsJob,
   type ThumbnailsJobIn,
 } from "@liqvid/schemas/effect";
-import { Effect, FileSystem, Option, type PlatformError } from "effect";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
-import type { LoggableJob } from "../types.mts";
-import { jobProgressLayer } from "../utils/effect.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 
@@ -77,24 +74,18 @@ function generateForScheme(
     // Ensure output directory exists
     yield* fs.makeDirectory(outputDir, { recursive: true });
 
-    const job: LoggableJob<ThumbsResult, PlatformError.PlatformError> =
-      yield* createJob(
-        "thumbnails",
-        generateThumbsApi({
-          ...defaults,
-          ...body,
-          colorScheme,
-          imageFormat,
-          output: outputPattern,
-          url,
-        }).pipe(
-          Effect.provideServiceEffect(
-            Progress,
-            Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
-          ),
-        ),
-        { path: projectPath },
-      );
+    yield* createJob(
+      "thumbnails",
+      generateThumbsApi({
+        ...defaults,
+        ...body,
+        colorScheme,
+        imageFormat,
+        output: outputPattern,
+        url,
+      }),
+      { path: projectPath },
+    );
 
     return yield* readThumbSheets(outputDir);
   });

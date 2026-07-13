@@ -28,8 +28,6 @@ async function cancelJob(formData: FormData) {
   if (!job) return;
 
   await Effect.runPromise(Fiber.interrupt(job.fiber));
-
-  job.state = "cancelled";
 }
 
 async function deleteJob(formData: FormData) {
@@ -110,6 +108,11 @@ export async function Jobs() {
                       format="date-and-time"
                       value={log.timestamp}
                     />
+                    {log.annotations && (
+                      <pre className={styles.annotations}>
+                        {JSON.stringify(log.annotations)}
+                      </pre>
+                    )}
                     {(() => {
                       if (typeof msg === "string" || typeof msg === "number") {
                         return <pre className={styles.message}>{msg}</pre>;

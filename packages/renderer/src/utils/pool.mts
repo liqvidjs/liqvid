@@ -8,6 +8,12 @@ export class Pool<T> {
   }
 
   acquire() {
+    console.log(
+      "acquire called, instances:",
+      this.instances.length,
+      "queue:",
+      this.queue.length,
+    );
     const instance = this.instances.shift();
     if (undefined !== instance) {
       return Promise.resolve(instance);

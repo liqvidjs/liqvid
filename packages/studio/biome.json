@@ -13,6 +13,9 @@
             }
           }
         }
+      },
+      "suspicious": {
+        "noConsole": "warn"
       }
     }
   }

@@ -112,3 +112,16 @@
 .warningIcon {
   fill: red;
 }
+
+.annotations {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.5em;
+  color: #666;
+  opacity: 0;
+
+  :hover > & {
+    opacity: 1;
+  }
+}

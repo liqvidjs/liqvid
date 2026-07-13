@@ -12,8 +12,6 @@ import type { Concurrency } from "effect/Types";
 
 import type { LoggableJob } from "../types.mts";
 
-import { NotFoundError } from "./errors.mts";
-
 export function safeGetOption<
   M extends {
     get(key: string): unknown;
@@ -80,9 +78,8 @@ function isPlatformError(error: unknown): error is PlatformError.PlatformError {
 /**
  * Log progress bars to a job.
  */
-export const jobProgressLayer = (
-  // biome-ignore lint/suspicious/noExplicitAny: variance
-  job: LoggableJob<any, any>,
+export const jobProgressLayer = <A, E>(
+  job: LoggableJob<A, E>,
 ): Context.Service.Shape<typeof Progress> => ({
   SingleBar: class SingleBar {
     #message: { __kind: "progress"; total: number; value: number } | undefined;

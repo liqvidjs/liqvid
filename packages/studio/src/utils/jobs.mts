@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import { Progress } from "@liqvid/cli/utils";
 import { Effect, Logger, type LogLevel, References } from "effect";
 
 import { getServerState } from "../initialize.mts";
@@ -7,6 +7,8 @@ import type {
   StructuredLog,
   StructuredLogType,
 } from "../types.mts";
+
+import { jobProgressLayer } from "./effect.mts";
 
 /**
  * Start a job in a detached fiber and add it to the global list of jobs.
@@ -26,7 +28,8 @@ export function createJob<A, E, R>(
     const id = crypto.randomUUID();
 
     // Custom logger that outputs log messages to the console
-    const logger = Logger.make(({ date, logLevel, message }) => {
+    const logger = Logger.make(({ date, fiber, logLevel, message }) => {
+      const annotations = fiber.getRef(References.CurrentLogAnnotations);
       const mappedType = (
         {
           All: "log",
@@ -41,6 +44,7 @@ export function createJob<A, E, R>(
       )[logLevel];
 
       logs.push({
+        annotations,
         message: message as unknown[],
         timestamp: date,
         type: mappedType,
@@ -50,17 +54,33 @@ export function createJob<A, E, R>(
     const job: LoggableJob<A, E> = {
       fiber: yield* Effect.forkDetach(
         effect.pipe(
+          // logging
           Effect.provideService(References.MinimumLogLevel, "All"),
           Effect.provide(Logger.layer([logger])),
-          Effect.onInterrupt(() => {
-            console.log(
-              chalk.magenta(
-                `interrupted fiber ${name}[${options?.path ?? ""}]:${id}`,
-              ),
-            );
 
-            return Effect.void;
-          }),
+          Effect.provideServiceEffect(
+            Progress,
+            Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
+          ),
+
+          // mark cancelled
+          Effect.onInterrupt(() =>
+            Effect.sync(() => {
+              job.state = "cancelled";
+            }),
+          ),
+          // mark failed
+          Effect.tapError(() =>
+            Effect.sync(() => {
+              job.state = "failed";
+            }),
+          ),
+          // mark completed
+          Effect.tap(
+            Effect.sync(() => {
+              job.state = "completed";
+            }),
+          ),
         ),
       ),
       id,
