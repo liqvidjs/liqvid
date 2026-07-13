@@ -249,6 +249,9 @@ export const recordingsLive = HttpApiBuilder.group(
         recordings.sort((a, b) => compare(a.created, b.created));
 
         return recordings;
-      }).pipe(Effect.orDie),
+      }).pipe(
+        Effect.catchTag("FileDecodeError", Effect.die),
+        Effect.catchTag("PlatformError", Effect.die),
+      ),
     ),
 );

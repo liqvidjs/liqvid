@@ -1,0 +1,30 @@
+.button {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 0.3em 0.5em;
+  font-size: 0.75rem;
+  color: light-dark(#333, #fff);
+  cursor: pointer;
+  background: light-dark(#f0f0f0, #333);
+  border: 1px solid light-dark(#ccc, #555);
+  border-radius: 4px;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: light-dark(#fafafa, #444);
+  }
+
+  &:disabled {
+    &,
+    &:hover {
+      color: light-dark(#aaa, #eee);
+      cursor: default;
+      background: light-dark(#f0f0f0, #333);
+    }
+  }
+
+  &:active {
+    background: light-dark(#d0d0d0, #333);
+  }
+}

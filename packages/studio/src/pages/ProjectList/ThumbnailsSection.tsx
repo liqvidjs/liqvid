@@ -8,8 +8,13 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import type { ThumbsData } from "../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
 import { TimeDuration } from "../../ui/Time.tsx";
+import { useTranslations } from "../../utils/react.tsx";
 
 import shareStyles from "./share.module.css";
+
+import type T from "./.translations/en.json";
+
+type T = typeof T;
 
 interface ThumbnailsSectionProps {
   duration: Duration;
@@ -24,6 +29,7 @@ export function ThumbnailsSection({
   isOpen,
   projectPath,
 }: ThumbnailsSectionProps) {
+  const t = useTranslations<T>().thumbs;
   const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -42,7 +48,16 @@ export function ThumbnailsSection({
     if (Exit.isSuccess(result)) {
       setThumbsData(result.value);
     } else {
-      console.error("Failed to load thumbnails:", result.cause);
+      if (
+        result.cause.reasons.every(
+          (reason) =>
+            reason._tag === "Fail" && reason.error._tag === "NotFound",
+        )
+      ) {
+        // this is ok
+      } else {
+        console.error("Failed to load thumbnails:", result.cause);
+      }
     }
     setIsLoading(false);
   });
@@ -140,7 +155,7 @@ export function ThumbnailsSection({
             </>
           ) : (
             <>
-              <ImagesIcon size={16} /> Generate
+              <ImagesIcon size={16} /> {t.generate}
             </>
           )}
         </button>

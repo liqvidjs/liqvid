@@ -1,8 +1,8 @@
 import * as path from "node:path";
 
 import { screenshot } from "@liqvid/cli/screenshot";
-import { writeJSON } from "@liqvid/cli/utils";
-import type { ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
+import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
 import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
@@ -23,7 +23,8 @@ const SCREENSHOT_META_FILE = "screenshot-meta.json";
  * The project path is relative to the app/ directory.
  */
 function getProjectDir(projectPath: string): string {
-  return path.join(process.cwd(), "app", projectPath);
+  const { cwd } = getServerState();
+  return path.join(cwd, "app", projectPath);
 }
 
 /**
@@ -68,10 +69,10 @@ export const screenshotsLive = HttpApiBuilder.group(
                 const stats = yield* fs.stat(dirname);
                 if (stats.type !== "Directory") return;
 
-                const metaPath = path.join(dirname, SCREENSHOT_META_FILE);
-
-                const metaContent = yield* fs.readFileString(metaPath, "utf8");
-                const meta = JSON.parse(metaContent) as ScreenshotMeta;
+                const meta = yield* loadJsonEffect(
+                  ScreenshotMeta,
+                  path.join(dirname, SCREENSHOT_META_FILE),
+                );
 
                 // Determine image path based on colorScheme
                 let imagePath: ScreenshotEntry["imagePath"];
@@ -98,7 +99,10 @@ export const screenshotsLive = HttpApiBuilder.group(
           );
 
           return screenshots;
-        }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+        }).pipe(
+          Effect.catchTag("FileDecodeError", Effect.die),
+          Effect.catchTag("PlatformError", Effect.die),
+        ),
       )
       // capture a new screenshot
       .handle("capture", ({ payload, query: { projectPath } }) =>
@@ -190,7 +194,11 @@ export const screenshotsLive = HttpApiBuilder.group(
             imagePath,
             meta,
           };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTags({
+            PlatformError: Effect.die,
+          }),
+        ),
       )
       // copy a screenshot to the project root
       .handle(
@@ -214,7 +222,7 @@ export const screenshotsLive = HttpApiBuilder.group(
             yield* fs.copyFile(sourcePath, targetPath);
           }).pipe(
             Effect.as({ success: true }),
-            Effect.catchTag("PlatformError", Effect.orDie),
+            Effect.catchTag("PlatformError", Effect.die),
           ),
       )
       // rename a screenshot (changes the folder name)
@@ -288,6 +296,6 @@ export const screenshotsLive = HttpApiBuilder.group(
           return {
             exists: yield* fs.exists(filePath),
           };
-        }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       ),
 );

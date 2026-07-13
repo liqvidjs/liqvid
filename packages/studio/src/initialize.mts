@@ -25,6 +25,13 @@ export interface LiqvidServerState {
    * Resolved from liqvid.json basePath with environment variable interpolation.
    */
   basePath: string;
+
+  /**
+   * Current working directory.
+   * Use instead of `process.cwd()` because `nodejs-whisper` can overwrite that.
+   */
+  cwd: string;
+
   /**
    * The full parsed liqvid.config.json
    */
@@ -32,13 +39,18 @@ export interface LiqvidServerState {
   locale: Locale;
   jobs: {
     productionServer: null | Promise<void>;
-    captioning: Set<LoggableJob>;
+    // biome-ignore lint/suspicious/noExplicitAny: variance
+    new: Map<string, LoggableJob<any, any>>;
     watchAssets: null | Promise<void>;
     watchConfig: null | Promise<void>;
     watchProjectFiles: null | Promise<void>;
   };
   productionServerPort: number;
   projects: Record<string, ProjectMeta>;
+
+  started: {
+    productionServer: boolean;
+  };
 }
 
 type GlobalThis = {
@@ -47,14 +59,17 @@ type GlobalThis = {
 
 export async function initializeServer() {
   const state = getServerState();
-  const { jobs, projects } = state;
+  const { cwd, jobs, projects, started } = state;
+
+  let envFiles: EnvFiles;
 
   // Load config initially
   if (Option.isNone(state.config)) {
+    envFiles ??= loadEnvFiles(cwd);
     const config = await Effect.runPromise(
       loadLiqvidConfig().pipe(
         Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+        Effect.provideService(EnvFiles, envFiles),
       ),
     );
 
@@ -73,7 +88,16 @@ export async function initializeServer() {
     watchProjectFiles(projects),
   );
 
-  jobs.productionServer ??= startProductionServer(state);
+  if (!started.productionServer) {
+    envFiles ??= loadEnvFiles(cwd);
+    Effect.runFork(
+      startProductionServer(state).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.provideService(EnvFiles, envFiles),
+      ),
+    );
+    started.productionServer = true;
+  }
 
   await jobs.watchProjectFiles;
 }
@@ -83,8 +107,9 @@ export function getServerState(): LiqvidServerState {
     (globalThis as unknown as GlobalThis)[symbol] = {
       basePath: "",
       config: Option.none(),
+      cwd: process.cwd(),
       jobs: {
-        captioning: new Set(),
+        new: new Map(),
         productionServer: null,
         watchAssets: null,
         watchConfig: null,
@@ -93,6 +118,9 @@ export function getServerState(): LiqvidServerState {
       locale: "en",
       productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
       projects: {},
+      started: {
+        productionServer: false,
+      },
     };
   }
 

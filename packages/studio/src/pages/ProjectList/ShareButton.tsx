@@ -23,11 +23,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
-import { RendersSection } from "./RendersSection.tsx";
+import { RendersSection } from "./renders/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
-import styles from "../root.module.css";
+import rootStyles from "../root.module.css";
 import shareStyles from "./share.module.css";
 
 interface ShareButtonProps {
@@ -55,20 +55,20 @@ export function ShareButton({
   return (
     <DialogRoot onOpenChange={setOpen} open={open}>
       <DialogTrigger
-        className={styles.rebuildButton}
+        className={rootStyles.rebuildButton}
         title="Share options"
         type="button"
       >
         <ShareFatIcon size={16} weight="fill" />
       </DialogTrigger>
       <DialogPortal>
-        <DialogBackdrop className={styles.dialogOverlay} />
+        <DialogBackdrop />
         <DialogPopup
           aria-describedby={undefined}
-          className={`${styles.dialog} ${shareStyles.shareDialog}`}
+          className={`${rootStyles.dialog} ${shareStyles.shareDialog}`}
           size="large"
         >
-          <DialogTitle className={styles.dialogTitle}>Share</DialogTitle>
+          <DialogTitle className={rootStyles.dialogTitle}>Share</DialogTitle>
 
           <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
             <TabsList style={{ fontSize: "18px" }}>
@@ -117,8 +117,8 @@ export function ShareButton({
             </TabsContent>
           </Tabs>
 
-          <div className={styles.dialogActions}>
-            <DialogClose>Close</DialogClose>
+          <div className={rootStyles.dialogActions}>
+            <DialogClose>{t.dialogClose}</DialogClose>
           </div>
         </DialogPopup>
       </DialogPortal>

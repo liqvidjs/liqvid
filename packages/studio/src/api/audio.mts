@@ -27,7 +27,8 @@ export const SINGLE_AUDIO_ID = "default";
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
 function getAudioBaseDir(projectPath: string): string {
-  return path.join(process.cwd(), "app", projectPath, AUDIO_BASE_DIR);
+  const { cwd } = getServerState();
+  return path.join(cwd, "app", projectPath, AUDIO_BASE_DIR);
 }
 
 /**
@@ -129,6 +130,8 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
             Effect.map(Option.getOrElse(() => [])),
           );
 
+          console.log({ entries });
+
           const maybeItems = yield* Effect.all(
             entries
               .filter(([, stats]) => stats.type === "Directory")
@@ -151,8 +154,8 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
 
         return { items, multiple };
       }).pipe(
-        Effect.catchTag("PlatformError", Effect.orDie),
-        Effect.catchTag("FileDecodeError", Effect.orDie),
+        Effect.catchTag("PlatformError", Effect.die),
+        Effect.catchTag("FileDecodeError", Effect.die),
       ),
     )
     // render a new audio track
@@ -189,7 +192,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         yield* writeJSON(path.join(audioDir, AUDIO_META_FILE), meta);
 
         return { id };
-      }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     )
     // rename an audio rendering (multiple-audio mode only)
     .handle("rename", ({ payload: { id, newName }, query: { projectPath } }) =>

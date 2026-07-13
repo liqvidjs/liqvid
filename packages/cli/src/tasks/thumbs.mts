@@ -1,8 +1,12 @@
+import { NodeFileSystem } from "@effect/platform-node";
 import {
   ThumbnailOptions,
   type ThumbnailOptionsIn,
 } from "@liqvid/schemas/jobs/thumbnails";
+import { Console, Effect, Exit, FileSystem } from "effect";
 import type { CommandModule } from "yargs";
+
+import { defaultCliProgressLayer } from "../utils/progress.mts";
 
 import {
   BROWSER_EXECUTABLE,
@@ -39,7 +43,7 @@ export interface ThumbsResult {
  * });
  * ```
  */
-export async function generateThumbs(
+export function generateThumbs(
   options: ThumbnailOptionsIn & {
     /**
      * Pattern for output filenames
@@ -51,67 +55,67 @@ export async function generateThumbs(
     /** URL of video to generate thumbs for */
     url: string;
   },
-): Promise<ThumbsResult> {
-  const path = await import("node:path");
-  const fsp = await import("node:fs/promises");
+) {
+  return Effect.gen(function* () {
+    const path = yield* Effect.promise(() => import("node:path"));
+    const fs = yield* FileSystem.FileSystem;
 
-  const { thumbs: renderThumbs } = await import("@liqvid/renderer/thumbs");
+    const { thumbs: renderThumbs } = yield* Effect.promise(
+      () => import("@liqvid/renderer/thumbs"),
+    );
 
-  const schema = ThumbnailOptions.def.shape;
+    const schema = ThumbnailOptions.def.shape;
 
-  // Apply defaults
-  const cols = options.cols ?? schema.cols.def.defaultValue;
-  const rows = options.rows ?? schema.rows.def.defaultValue;
-  const frequency = options.frequency ?? schema.frequency.def.defaultValue;
-  const width = options.width ?? schema.width.def.defaultValue;
-  const height = options.height ?? schema.height.def.defaultValue;
-  const imageFormat =
-    options.imageFormat ?? schema.imageFormat.def.defaultValue;
-  const colorScheme =
-    options.colorScheme ?? schema.colorScheme.def.defaultValue;
-  const quality = options.quality ?? schema.quality.def.defaultValue;
-  const concurrency =
-    options.concurrency ?? schema.concurrency.def.defaultValue;
+    // Apply defaults
+    const cols = options.cols ?? schema.cols.def.defaultValue;
+    const rows = options.rows ?? schema.rows.def.defaultValue;
+    const frequency = options.frequency ?? schema.frequency.def.defaultValue;
+    const width = options.width ?? schema.width.def.defaultValue;
+    const height = options.height ?? schema.height.def.defaultValue;
+    const imageFormat =
+      options.imageFormat ?? schema.imageFormat.def.defaultValue;
+    const colorScheme =
+      options.colorScheme ?? schema.colorScheme.def.defaultValue;
+    const quality = options.quality ?? schema.quality.def.defaultValue;
+    const concurrency =
+      options.concurrency ?? schema.concurrency.def.defaultValue;
 
-  await renderThumbs({
-    browserExecutable: options.browserExecutable ?? "",
-    browserHeight: options.browserHeight ?? height,
-    browserWidth: options.browserWidth ?? width,
-    colorScheme,
-    cols,
-    concurrency,
-    frequency,
-    height,
-    imageFormat,
-    output: options.output,
-    quality,
-    rows,
-    url: options.url,
-    width,
-  });
+    yield* renderThumbs({
+      browserExecutable: options.browserExecutable ?? "",
+      browserHeight: options.browserHeight ?? height,
+      browserWidth: options.browserWidth ?? width,
+      colorScheme,
+      cols,
+      concurrency,
+      frequency,
+      height,
+      imageFormat,
+      output: options.output,
+      quality,
+      rows,
+      url: options.url,
+      width,
+    });
 
-  // Calculate number of sheets based on video duration
-  // Since we don't have direct access to the result, we'll read the output directory
+    // Calculate number of sheets based on video duration
+    // Since we don't have direct access to the result, we'll read the output directory
 
-  const outputDir = path.dirname(options.output);
-  const ext = `.${imageFormat}`;
+    const outputDir = path.dirname(options.output);
+    const ext = `.${imageFormat}`;
 
-  try {
-    const files = await fsp.readdir(outputDir);
+    const files = yield* fs
+      .readDirectory(outputDir)
+      .pipe(Effect.catch(() => Effect.succeed([])));
+
     const sheets = files.filter(
       (f) => /^\d+\.(jpeg|png)$/.test(f) && f.endsWith(ext),
     );
+
     return {
       numSheets: sheets.length,
       output: options.output,
     };
-  } catch {
-    // Output directory doesn't exist or other error
-    return {
-      numSheets: 0,
-      output: options.output,
-    };
-  }
+  });
 }
 
 /**
@@ -249,8 +253,20 @@ export const thumbs: CommandModule = {
   describe: "Generate thumbnails",
   handler: async (argv) => {
     const { thumbs: renderThumbs } = await import("@liqvid/renderer/thumbs");
-    // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-    await renderThumbs(argv as any);
+
+    const exit = await Effect.runPromiseExit(
+      // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
+      renderThumbs(argv as any).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.tapError(Console.error),
+        Effect.provide(defaultCliProgressLayer()),
+      ),
+    );
+
+    if (Exit.isFailure(exit)) {
+      process.exit(1);
+    }
+
     process.exit(0);
   },
 };

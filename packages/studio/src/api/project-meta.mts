@@ -38,6 +38,6 @@ export const projectMetaLive = HttpApiBuilder.group(
             2,
           ),
         );
-      }).pipe(Effect.orDie),
+      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     ),
 );

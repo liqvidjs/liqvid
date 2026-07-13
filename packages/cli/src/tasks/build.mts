@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
-import { Effect, Layer, Logger, LogLevel, References } from "effect";
+import { Effect, References } from "effect";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
@@ -104,7 +104,7 @@ export function runNextBuild(options: BuildOptions = {}) {
     const cwd = options.cwd ?? process.cwd();
     const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
 
-    const envFiles = loadEnvFiles(process.cwd());
+    const envFiles = loadEnvFiles(cwd);
 
     // Load config to get media base URL
     const config = yield* loadLiqvidConfig({ configPath }).pipe(

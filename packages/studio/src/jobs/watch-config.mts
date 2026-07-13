@@ -7,7 +7,7 @@ import { EnvFiles } from "@liqvid/schemas/effect";
 import { Console, Effect } from "effect";
 
 import { CONFIG_FILE } from "../conventions.mts";
-import type { LiqvidServerState } from "../initialize.mts";
+import { getServerState, type LiqvidServerState } from "../initialize.mts";
 
 /**
  * Reload the config into `state.config`, logging the reason.
@@ -24,17 +24,17 @@ function reloadConfig(state: LiqvidServerState, message: string) {
  */
 export function watchLiqvidConfig(state: LiqvidServerState) {
   return Effect.sync(() => {
-    const configPath = path.join(process.cwd(), CONFIG_FILE);
+    const { cwd } = getServerState();
+    const configPath = path.join(cwd, CONFIG_FILE);
 
     /** Watch the config file itself for changes. */
     const watchConfigFile = () => {
       fs.watch(configPath, (eventType) => {
-        console.log({ configPath, eventType });
         if (eventType === "change") {
           Effect.runPromise(
             reloadConfig(state, `${CONFIG_FILE} changed, reloading...`).pipe(
               Effect.provide(NodeFileSystem.layer),
-              Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+              Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
             ),
           );
         }
@@ -44,15 +44,12 @@ export function watchLiqvidConfig(state: LiqvidServerState) {
     try {
       watchConfigFile();
     } catch {
-      // Config file doesn't exist, watch the directory for it to be created
-      const dir = process.cwd();
-
-      fs.watch(dir, (_eventType, filename) => {
+      fs.watch(cwd, (_eventType, filename) => {
         if (filename === CONFIG_FILE) {
           Effect.runPromise(
             reloadConfig(state, `${CONFIG_FILE} detected, loading...`).pipe(
               Effect.provide(NodeFileSystem.layer),
-              Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+              Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
             ),
           );
 

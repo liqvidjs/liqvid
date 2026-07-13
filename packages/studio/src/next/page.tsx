@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { Jobs } from "../pages/jobs/jobs.tsx";
 import { Homepage } from "../pages/root.tsx";
 
 export default async function Pages({
@@ -18,6 +19,8 @@ export default async function Pages({
   switch (route) {
     case "/":
       return <Homepage />;
+    case "/jobs":
+      return <Jobs />;
   }
 
   notFound();

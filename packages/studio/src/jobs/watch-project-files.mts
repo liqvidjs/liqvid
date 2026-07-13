@@ -3,7 +3,6 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { Duration } from "@liqvid/duration";
-import type { Maybe } from "@liqvid/fp";
 import {
   type AspectRatio,
   AutoGenProjectMeta,
@@ -13,7 +12,8 @@ import type { ProjectMeta } from "@liqvid/schemas/effect";
 import { ZodError } from "zod";
 
 import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
-import { getBiomePath, loadJson, walkDir } from "../utils/fs.mts";
+import { getServerState } from "../initialize.mts";
+import { loadJson, walkDir } from "../utils/fs.mts";
 
 import { ASSETS_DIRNAME } from "./watch-assets.mts";
 
@@ -26,9 +26,10 @@ interface Context {
   projects: Projects;
 }
 
-const TARGET_DIR = path.join(process.cwd(), "app");
-
 export async function watchProjectFiles(projects: Projects) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   // initial check
   await walkDir(
     TARGET_DIR,
@@ -88,12 +89,12 @@ export async function watchProjectFiles(projects: Projects) {
  */
 async function handleProjectJson({ dirname, filename, projects }: Context) {
   const entryFile = path.join(dirname, "page.tsx");
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
 
   if (!fs.existsSync(entryFile)) {
     return;
   }
-
-  const biomePath = await getBiomePath(dirname);
 
   // read project file
   const $project = await loadJson(ProjectJson, filename);
@@ -119,20 +120,21 @@ async function handleProjectJson({ dirname, filename, projects }: Context) {
 
   projects[meta.path] = meta;
 
-  await generateProjectDir({ biomePath, dirname });
+  await generateProjectDir({ dirname });
 }
 
 /**
  * Handle new or deleted project.json files
  */
 async function createProject({ dirname, filename, projects }: Context) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   const entryFile = path.join(dirname, "page.tsx");
 
   if (!fs.existsSync(entryFile)) {
     return;
   }
-
-  const biomePath = await getBiomePath(dirname);
 
   // read project file
   const $project = await loadJson(ProjectJson, filename);
@@ -179,7 +181,7 @@ async function createProject({ dirname, filename, projects }: Context) {
 
   projects[meta.path] = meta;
 
-  await generateProjectDir({ biomePath, dirname });
+  await generateProjectDir({ dirname });
 }
 
 /**
@@ -190,6 +192,9 @@ async function handleProjectMeta({
   filename,
   projects,
 }: Context) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   const projectPath = path.relative(TARGET_DIR, path.dirname(dotLiqvidDir));
 
   const $projectMeta = await loadJson(AutoGenProjectMeta, filename);
@@ -271,6 +276,9 @@ function handleOpenGraphImage({
   dirname: string;
   projects: Projects;
 }) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   const projectPath = path.relative(TARGET_DIR, dirname);
   const project = projects[projectPath];
   if (!project) return;
@@ -288,6 +296,9 @@ function handleTwitterImage({
   dirname: string;
   projects: Projects;
 }) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   const projectPath = path.relative(TARGET_DIR, dirname);
   const project = projects[projectPath];
   if (!project) return;
@@ -322,12 +333,7 @@ function parseAspectRatio(value: unknown): AspectRatio {
 
   throw new Error(`Invalid aspect ratio: ${value}`);
 }
-async function generateProjectDir({
-  dirname,
-}: {
-  biomePath: Maybe<string>;
-  dirname: string;
-}) {
+async function generateProjectDir({ dirname }: { dirname: string }) {
   const assetsDir = path.join(dirname, ASSETS_DIRNAME);
   if (!fs.existsSync(assetsDir)) {
     await fsp.mkdir(assetsDir);

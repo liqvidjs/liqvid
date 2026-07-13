@@ -1,5 +1,9 @@
+import { NodeFileSystem } from "@effect/platform-node";
 import type { ScreenshotOptions } from "@liqvid/renderer/screenshot";
+import { Console, Effect, Exit } from "effect";
 import type { CommandModule } from "yargs";
+
+import { defaultCliProgressLayer } from "../utils/progress.mts";
 
 import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
 
@@ -42,7 +46,9 @@ export async function screenshot(
 
   // TODO: load screenshot configuration from config file here
 
-  return await renderScreenshot(options);
+  return Effect.runPromise(
+    renderScreenshot(options).pipe(Effect.provide(NodeFileSystem.layer)),
+  );
 }
 
 /** Capture a screenshot. */
@@ -115,8 +121,19 @@ export const screenshotCommand: CommandModule = {
     const { screenshot: renderScreenshot } = await import(
       "@liqvid/renderer/screenshot"
     );
-    // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-    await renderScreenshot(argv as any);
+    const exit = await Effect.runPromiseExit(
+      // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
+      renderScreenshot(argv as any).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.tapError(Console.error),
+        Effect.provide(defaultCliProgressLayer()),
+      ),
+    );
+
+    if (Exit.isFailure(exit)) {
+      process.exit(1);
+    }
+
     process.exit(0);
   },
 };

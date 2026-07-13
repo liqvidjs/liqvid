@@ -1,4 +1,4 @@
-import type { EnvFiles } from "../jobs/preview-server.mts";
+import type { EnvFiles } from "@liqvid/schemas/effect";
 
 /** Pending debounced calls to generateProjectTypes, keyed by assetsDir */
 const pendingCalls = new Map<string, NodeJS.Timeout>();

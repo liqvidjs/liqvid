@@ -1,12 +1,19 @@
 {
   "copyEmbedCode": "Copy embed code",
+  "dialogClose": "Close",
   "folderView": "Folder view",
   "openInFinder": "Open in Finder",
   "preview": "Preview",
+  "renders": {
+    "render": "Render"
+  },
   "tabs": {
     "captions": "Sous-titres",
     "renders": "Renders",
     "screenshots": "Screenshots",
     "thumbnails": "Thumbnails"
+  },
+  "thumbs": {
+    "generate": "Generate"
   }
 }

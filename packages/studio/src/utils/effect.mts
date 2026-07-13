@@ -1,7 +1,18 @@
 import path from "node:path";
 
-import { Effect, FileSystem, Option, type PlatformError } from "effect";
+import type { Progress } from "@liqvid/cli/utils";
+import {
+  type Context,
+  Effect,
+  FileSystem,
+  Option,
+  type PlatformError,
+} from "effect";
 import type { Concurrency } from "effect/Types";
+
+import type { LoggableJob } from "../types.mts";
+
+import { NotFoundError } from "./errors.mts";
 
 export function safeGetOption<
   M extends {
@@ -65,3 +76,38 @@ function isPlatformError(error: unknown): error is PlatformError.PlatformError {
     (error as PlatformError.PlatformError)._tag === "PlatformError"
   );
 }
+
+/**
+ * Log progress bars to a job.
+ */
+export const jobProgressLayer = (
+  // biome-ignore lint/suspicious/noExplicitAny: variance
+  job: LoggableJob<any, any>,
+): Context.Service.Shape<typeof Progress> => ({
+  SingleBar: class SingleBar {
+    #message: { __kind: "progress"; total: number; value: number } | undefined;
+
+    start(total: number, startValue: number) {
+      this.#message = { __kind: "progress", total, value: startValue };
+      job.logs.push({
+        message: [this.#message],
+        timestamp: new Date(),
+        type: "log",
+      });
+    }
+
+    increment(step = 1) {
+      if (!this.#message) return;
+      this.#message.value += step;
+    }
+
+    stop() {
+      this.#message = undefined;
+    }
+
+    update(current: number) {
+      if (!this.#message) return;
+      this.#message.value = current;
+    }
+  },
+});

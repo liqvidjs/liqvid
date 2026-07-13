@@ -49,11 +49,12 @@ export function Time({
   format = "long",
   locale = "en-US",
   value,
+  ...props
 }: {
   format?: TimeFormat;
   locale?: Language;
   value: Date | number | string;
-}) {
+} & Omit<React.ComponentProps<"time">, "dateTime">) {
   if (!(value instanceof Date)) {
     value = new Date(value);
   }
@@ -62,7 +63,7 @@ export function Time({
   const displayer = new Intl.DateTimeFormat(locale, displayers[format]).format;
 
   return (
-    <time dateTime={serializer(value)} suppressHydrationWarning>
+    <time dateTime={serializer(value)} suppressHydrationWarning {...props}>
       {displayer(value)}
     </time>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { AspectRatio } from "@liqvid/schemas";
 import {
   CheckCircleIcon,
@@ -18,8 +19,8 @@ import {
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { RenderEntry } from "../../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
+import type { RenderEntry } from "../../../api/schemas.mts";
+import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
 import {
   DialogBackdrop,
   DialogClose,
@@ -28,12 +29,18 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../../ui/Dialog.tsx";
-import { RadioTabs, RadioTabsItem } from "../../ui/RadioTabs.tsx";
-import { openRenderInFinderAction } from "../root-actions.ts";
+} from "../../../ui/Dialog.tsx";
+import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
+import { useTranslations } from "../../../utils/react.tsx";
+import { openRenderInFinderAction } from "../../root-actions.ts";
 
-import styles from "../root.module.css";
-import shareStyles from "./share.module.css";
+import rootStyles from "../../root.module.css";
+import shareStyles from "../share.module.css";
+import styles from "./renders.module.css";
+
+import type T from "../.translations/en.json";
+
+type T = typeof T;
 
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
@@ -44,8 +51,6 @@ interface RendersSectionProps {
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
-
-type ColorScheme = "light" | "dark";
 
 interface RenderConfig {
   colorScheme: ColorScheme;
@@ -78,6 +83,7 @@ export function RendersSection({
   isOpen,
   projectPath,
 }: RendersSectionProps) {
+  const t = useTranslations<T>().renders;
   const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -300,7 +306,7 @@ export function RendersSection({
                 </>
               ) : (
                 <>
-                  <FilmStripIcon size={16} /> Render
+                  <FilmStripIcon size={16} /> {t.render}
                 </>
               )}
             </DialogTrigger>
@@ -309,7 +315,7 @@ export function RendersSection({
               <DialogPopup>
                 <DialogTitle>Render Settings</DialogTitle>
 
-                <div className={styles.formField}>
+                <div className={rootStyles.formField}>
                   <span id="render-color-scheme-label">Color Scheme</span>
                   <RadioTabs<ColorScheme>
                     aria-labelledby="render-color-scheme-label"
@@ -323,7 +329,7 @@ export function RendersSection({
                   </RadioTabs>
                 </div>
 
-                <div className={styles.formField}>
+                <div className={rootStyles.formField}>
                   <span>Resolution</span>
                   <div className={shareStyles.resolutionPresets}>
                     {WIDTH_PRESETS.map((width) => (
@@ -338,9 +344,9 @@ export function RendersSection({
                       </button>
                     ))}
                   </div>
-                  <div className={shareStyles.dimensionInputs}>
+                  <div className={styles.dimensionInputs}>
                     <input
-                      className={shareStyles.dimensionInput}
+                      className={styles.dimensionInput}
                       min={1}
                       onChange={(e) =>
                         handleWidthChange(
@@ -350,9 +356,9 @@ export function RendersSection({
                       type="number"
                       value={config.width}
                     />
-                    <span className={shareStyles.dimensionSeparator}>×</span>
+                    <span className={styles.dimensionSeparator}>×</span>
                     <input
-                      className={shareStyles.dimensionInput}
+                      className={styles.dimensionInput}
                       min={1}
                       onChange={(e) =>
                         handleHeightChange(
@@ -364,7 +370,7 @@ export function RendersSection({
                     />
                     <button
                       aria-pressed={lockAspectRatio}
-                      className={shareStyles.lockButton}
+                      className={styles.lockButton}
                       data-active={lockAspectRatio}
                       onClick={handleToggleLock}
                       title={
@@ -383,10 +389,10 @@ export function RendersSection({
                   </div>
                 </div>
 
-                <div className={styles.dialogActions}>
+                <div className={rootStyles.dialogActions}>
                   <DialogClose>Cancel</DialogClose>
                   <button
-                    className={styles.submitButton}
+                    className={rootStyles.submitButton}
                     onClick={handleStartRender}
                     type="button"
                   >
@@ -469,12 +475,10 @@ export function RendersSection({
         open={!!playingRender}
       >
         <DialogPortal>
-          <DialogBackdrop className={styles.dialogOverlay} />
-          <DialogPopup
-            className={`${styles.dialog} ${shareStyles.videoDialog}`}
-          >
-            <div className={shareStyles.videoHeader}>
-              <DialogTitle className={styles.dialogTitle}>
+          <DialogBackdrop />
+          <DialogPopup className={`${rootStyles.dialog} ${styles.videoDialog}`}>
+            <div className={styles.videoHeader}>
+              <DialogTitle className={rootStyles.dialogTitle}>
                 {playingRender?.id}
               </DialogTitle>
               <DialogClose className={shareStyles.closeButton}>
@@ -484,7 +488,7 @@ export function RendersSection({
             {playingRender && (
               <video
                 autoPlay
-                className={shareStyles.videoPlayer}
+                className={styles.videoPlayer}
                 controls
                 src={getVideoUrl(playingRender)}
               >
@@ -501,12 +505,12 @@ export function RendersSection({
         open={!!renamingRender}
       >
         <DialogPortal>
-          <DialogBackdrop className={styles.dialogOverlay} />
-          <DialogPopup className={styles.dialog}>
-            <DialogTitle className={styles.dialogTitle}>
+          <DialogBackdrop />
+          <DialogPopup className={rootStyles.dialog}>
+            <DialogTitle className={rootStyles.dialogTitle}>
               Rename Render
             </DialogTitle>
-            <div className={styles.formField}>
+            <div className={rootStyles.formField}>
               <label htmlFor="render-name">Name</label>
               <input
                 // autoFocus
@@ -522,10 +526,10 @@ export function RendersSection({
                 value={renameValue}
               />
             </div>
-            <div className={styles.dialogActions}>
+            <div className={rootStyles.dialogActions}>
               <DialogClose>Cancel</DialogClose>
               <button
-                className={styles.submitButton}
+                className={rootStyles.submitButton}
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
                 type="button"

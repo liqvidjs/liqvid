@@ -1,16 +1,21 @@
 import * as path from "node:path";
 
+import type { ThumbsResult } from "@liqvid/cli/thumbs";
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
-import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import { loadJsonEffect, Progress, writeJSON } from "@liqvid/cli/utils";
 import {
   type ThumbnailOptions,
   ThumbnailsJob,
   type ThumbnailsJobIn,
 } from "@liqvid/schemas/effect";
-import { Effect, FileSystem, Option } from "effect";
+import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
+import type { LoggableJob } from "../types.mts";
+import { jobProgressLayer } from "../utils/effect.mts";
+import { NotFoundError } from "../utils/errors.mts";
+import { createJob } from "../utils/jobs.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -36,6 +41,7 @@ function readThumbSheets(dir: string) {
     const fs = yield* FileSystem.FileSystem;
 
     const files = yield* fs.readDirectory(dir);
+
     return files
       .filter((f) => /^\d+\.(jpeg|png)$/.test(f))
       .sort((a, b) => {
@@ -54,6 +60,7 @@ function generateForScheme(
   outputDir: string,
   colorScheme: "light" | "dark",
   body: GenerateThumbsBody,
+  projectPath: string,
 ) {
   return Effect.gen(function* () {
     const { config: $config } = getServerState();
@@ -70,97 +77,26 @@ function generateForScheme(
     // Ensure output directory exists
     yield* fs.makeDirectory(outputDir, { recursive: true });
 
-    yield* Effect.promise(() =>
-      generateThumbsApi({
-        ...defaults,
-        ...body,
-        colorScheme,
-        imageFormat,
-        output: outputPattern,
-        url,
-      }),
-    );
+    const job: LoggableJob<ThumbsResult, PlatformError.PlatformError> =
+      yield* createJob(
+        "thumbnails",
+        generateThumbsApi({
+          ...defaults,
+          ...body,
+          colorScheme,
+          imageFormat,
+          output: outputPattern,
+          url,
+        }).pipe(
+          Effect.provideServiceEffect(
+            Progress,
+            Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
+          ),
+        ),
+        { path: projectPath },
+      );
 
     return yield* readThumbSheets(outputDir);
-  });
-}
-
-/**
- * Generate thumbnail sheets for a project.
- */
-export function generateThumbs(
-  searchParams: URLSearchParams,
-  body: GenerateThumbsBody,
-) {
-  return Effect.gen(function* () {
-    // validate parameters
-    const projectPath = searchParams.get("projectPath");
-    if (!projectPath) {
-      return yield* Effect.die({
-        message: "projectPath is required",
-      });
-    }
-
-    const fs = yield* FileSystem.FileSystem;
-
-    const { basePath, productionServerPort } = getServerState();
-    const projectDir = path.join(process.cwd(), "app", projectPath);
-    const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
-
-    // Build the URL for the video
-    const previewPath = `${basePath || ""}/${projectPath}/`;
-    const url = `http://localhost:${productionServerPort}${previewPath}`;
-
-    const colorScheme = body.colorScheme ?? "both";
-
-    // Ensure thumbs base directory exists
-    yield* fs.makeDirectory(thumbsBaseDir, { recursive: true });
-
-    // Resolve options with defaults
-    const { config: $config } = getServerState();
-    const defaults = $config.pipe(
-      Option.flatMapNullishOr((config) => config.media?.thumbnails?.defaults),
-      Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
-    );
-
-    const imageFormat = body.imageFormat ?? defaults.imageFormat;
-
-    const resolvedOptions: ThumbnailsJobIn = {
-      colorScheme,
-      cols: body.cols ?? defaults.cols,
-      frequency: body.frequency ?? defaults.frequency,
-      height: body.height ?? defaults.height,
-      imageFormat: body.imageFormat ?? defaults.imageFormat,
-      quality:
-        imageFormat === "jpeg" ? (body.quality ?? defaults.quality) : undefined,
-      rows: body.rows ?? defaults.rows,
-      width: body.width ?? defaults.width,
-    };
-
-    // Save job options to file
-    const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-    yield* writeJSON(jobFilePath, resolvedOptions);
-
-    let lightSheets: string[] = [];
-    let darkSheets: string[] = [];
-
-    if (colorScheme === "light" || colorScheme === "both") {
-      const lightDir = path.join(thumbsBaseDir, "light");
-      lightSheets = yield* generateForScheme(url, lightDir, "light", body);
-    }
-
-    if (colorScheme === "dark" || colorScheme === "both") {
-      const darkDir = path.join(thumbsBaseDir, "dark");
-      darkSheets = yield* generateForScheme(url, darkDir, "dark", body);
-    }
-
-    const numSheets = Math.max(lightSheets.length, darkSheets.length);
-
-    return {
-      dark: darkSheets.length > 0 ? darkSheets : undefined,
-      light: lightSheets.length > 0 ? lightSheets : undefined,
-      numSheets,
-    };
   });
 }
 
@@ -173,17 +109,26 @@ function readThumbsJob(thumbsBaseDir: string) {
 }
 
 export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
-  // list existing captions for a project
+  // list thumbnails for project
   handlers
-    .handle("list", ({ query: { projectPath } }) => {
-      return Effect.gen(function* () {
+    .handle("list", ({ query: { projectPath } }) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+
+        const { cwd } = getServerState();
         // read directories
         const thumbsBaseDir = path.join(
-          process.cwd(),
+          cwd,
           "app",
           projectPath,
           THUMBS_BASE_DIR,
         );
+
+        if (!(yield* fs.exists(thumbsBaseDir))) {
+          return yield* new NotFoundError({
+            message: "no thumbnails for this project",
+          });
+        }
 
         const [lightSheets, darkSheets, job] = yield* Effect.all(
           [
@@ -199,14 +144,19 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           job,
           light: lightSheets,
         };
-      }).pipe(Effect.orDie);
-    })
+      }).pipe(
+        Effect.catchTags({
+          FileDecodeError: Effect.die,
+          PlatformError: Effect.die,
+        }),
+      ),
+    )
     .handle("generate", ({ query: { projectPath }, payload = {} }) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { basePath, productionServerPort } = getServerState();
-        const projectDir = path.join(process.cwd(), "app", projectPath);
+        const { basePath, cwd, productionServerPort } = getServerState();
+        const projectDir = path.join(cwd, "app", projectPath);
         const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
         // Build the URL for the video
@@ -245,10 +195,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
 
         // Save job options to file
         const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-        yield* fs.writeFileString(
-          jobFilePath,
-          JSON.stringify(resolvedOptions, null, 2),
-        );
+        yield* writeJSON(jobFilePath, resolvedOptions);
 
         let lightSheets: string[] = [];
         let darkSheets: string[] = [];
@@ -260,12 +207,19 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
             lightDir,
             "light",
             payload,
+            projectPath,
           );
         }
 
         if (colorScheme === "dark" || colorScheme === "both") {
           const darkDir = path.join(thumbsBaseDir, "dark");
-          darkSheets = yield* generateForScheme(url, darkDir, "dark", payload);
+          darkSheets = yield* generateForScheme(
+            url,
+            darkDir,
+            "dark",
+            payload,
+            projectPath,
+          );
         }
 
         const numSheets = Math.max(lightSheets.length, darkSheets.length);
@@ -275,6 +229,10 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           light: lightSheets.length > 0 ? lightSheets : undefined,
           numSheets,
         };
-      }).pipe(Effect.orDie),
+      }).pipe(
+        Effect.catchTags({
+          PlatformError: Effect.die,
+        }),
+      ),
     ),
 );

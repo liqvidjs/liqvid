@@ -46,18 +46,6 @@
   }
 }
 
-.productionLink {
-  width: min-content;
-  margin-left: auto;
-  color: light-dark(#666, #999);
-  text-align: right;
-  text-decoration: none;
-
-  &:hover {
-    color: light-dark(#333, #fff);
-  }
-}
-
 .newProjectButton {
   padding: 0.5rem 1rem;
   font-weight: 500;

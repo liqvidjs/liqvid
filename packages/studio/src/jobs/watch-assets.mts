@@ -4,10 +4,12 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Maybe } from "@liqvid/fp";
+import chalk from "chalk";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
 import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
+import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
 import { debounce } from "../utils/misc.mts";
@@ -65,7 +67,6 @@ function shouldIgnoreEvent(basename: string, filename: string): boolean {
   return false;
 }
 
-const TARGET_DIR = path.join(process.cwd(), "app");
 const TEMPLATES_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -102,6 +103,9 @@ async function isProjectDirectory(dir: string): Promise<boolean> {
 async function findProjectDirectory(filePath: string): Promise<string | null> {
   let dir = path.dirname(filePath);
 
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
+
   while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
     if (await isProjectDirectory(dir)) {
       return dir;
@@ -121,6 +125,9 @@ export async function watchAssets() {
   Handlebars.registerHelper("json", (obj) => {
     return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
   });
+
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, "app");
 
   fs.watch(TARGET_DIR, { recursive: true }, async (_eventName, relPath) => {
     if (!relPath) return;
@@ -188,15 +195,11 @@ export async function runTemplate({
   /** Path to the template file */
   template: string;
 }) {
+  const { cwd } = getServerState();
   const templateHbs = await fsp.readFile(
     path.join(TEMPLATES_DIR, template),
     "utf8",
   );
-
-  console.log({
-    cwd: process.cwd(),
-    url: fileURLToPath(import.meta.url),
-  });
 
   try {
     const template = Handlebars.compile(templateHbs);
@@ -206,9 +209,10 @@ export async function runTemplate({
 
     // invoke biome
     if (biomePath.isSome) {
-      await execa(biomePath.unwrap(), ["check", "--fix", out]);
+      await execa(biomePath.unwrap(), ["check", "--fix", out], { cwd });
     }
   } catch (e) {
+    console.error(chalk.red(JSON.stringify({ cwd })));
     console.error(e);
   }
 }

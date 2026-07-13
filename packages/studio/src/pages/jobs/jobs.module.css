@@ -1,0 +1,114 @@
+.main {
+  width: 75%;
+  margin: 0 auto;
+
+  h1 {
+    font-size: 2.4em;
+  }
+}
+
+.header {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.state {
+  &[data-state="completed"] {
+    color: green;
+  }
+
+  &[data-state="failed"] {
+    color: red;
+  }
+
+  &[data-state="running"] {
+    color: blue;
+  }
+}
+
+.job {
+  margin: 1em 0;
+}
+
+.logGroup {
+  border: 1px solid #ddd;
+  border-radius: 2px;
+}
+
+.log {
+  --bg: #fffffa;
+  --border: #eed;
+  position: relative;
+  padding: 0.1em 0.2em;
+  overflow: auto;
+
+  scrollbar-width: thin;
+
+  background-color: var(--bg);
+
+  &:nth-of-type(even) {
+    --bg: #eeeeea;
+    --border: #ddc;
+  }
+
+  &[data-level="debug"] {
+    color: purple;
+  }
+
+  &[data-level="error"] {
+    color: red;
+  }
+}
+
+.timestamp {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* display: none; */
+  flex-shrink: 0;
+  padding: 1px 4px;
+  font-size: 0.6em;
+  color: #666;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-style: none none solid solid;
+  border-radius: 0 0 0 2px;
+  opacity: 0;
+
+  transition: opacity 150ms ease-in-out;
+
+  :hover > & {
+    opacity: 1;
+    /* display: block; */
+  }
+}
+
+.progress {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.cancelledIcon {
+  fill: grey;
+}
+
+.completedIcon {
+  fill: green;
+}
+
+.runningIcon {
+  fill: var(--accent-solid);
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.warningIcon {
+  fill: red;
+}

@@ -279,6 +279,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
 /* ------------------------------ thumbnails ------------------------------ */
 const thumbsGroup = HttpApiGroup.make("thumbs").add(
   HttpApiEndpoint.get("list", "/thumbs", {
+    error: [NotFoundError],
     query: projectPathQuery,
     success: ThumbsData,
   }),

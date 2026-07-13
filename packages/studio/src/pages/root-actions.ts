@@ -12,6 +12,7 @@ import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
+import { getServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
 
 export async function rebuildAction() {
@@ -55,14 +56,15 @@ const TEMPLATES_DIR = path.join(
 
 const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, "projects");
 
-const APP_DIR = path.join(process.cwd(), "app");
-
 /**
  * Open project in Finder
  */
 export async function openInFinderAction(
   projectPath: string,
 ): Promise<{ success: boolean }> {
+  const { cwd } = getServerState();
+  const APP_DIR = path.join(cwd, "app");
+
   try {
     // Validate path to prevent directory traversal
     if (projectPath.includes("..")) {
@@ -84,6 +86,9 @@ export async function openRenderInFinderAction(
   projectPath: string,
   renderId: string,
 ): Promise<{ success: boolean }> {
+  const { cwd } = getServerState();
+  const APP_DIR = path.join(cwd, "app");
+
   try {
     // Validate paths to prevent directory traversal
     if (projectPath.includes("..") || renderId.includes("..")) {
@@ -110,6 +115,9 @@ export async function openRenderInFinderAction(
 export async function openCaptionsInFinderAction(
   projectPath: string,
 ): Promise<{ success: boolean }> {
+  const { cwd } = getServerState();
+  const APP_DIR = path.join(cwd, "app");
+
   try {
     // Validate path to prevent directory traversal
     if (projectPath.includes("..")) {
@@ -232,6 +240,9 @@ function copyTemplateDir(
 export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
+  const { cwd } = getServerState();
+  const APP_DIR = path.join(cwd, "app");
+
   const result = await Effect.runPromiseExit(
     Effect.gen(function* () {
       const { name, projectPath, templateId } = input;

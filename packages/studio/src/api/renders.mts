@@ -1,21 +1,26 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
-import { Console, Effect, FileSystem, Option } from "effect";
+import { loadJsonEffect, Progress, writeJSON } from "@liqvid/cli/utils";
+import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
-import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
+import type { LoggableJob } from "../types.mts";
+import {
+  existenceOptional,
+  jobProgressLayer,
+  readDirWithFileTypes,
+} from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
+import { createJob } from "../utils/jobs.mts";
 
 import { WebApi } from "./contract.mts";
 import { RenderMeta } from "./schemas.mts";
 
-const RENDERS_BASE_DIR = ".liqvid/renders";
 const RENDER_META_FILE = "render-meta.json";
+const RENDERS_BASE_DIR = ".liqvid/renders";
 
 /**
  * Generate a unique render ID based on current datetime.
@@ -54,14 +59,19 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
   handlers
     .handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
+        const { cwd } = getServerState();
         const rendersBaseDir = path.join(
-          process.cwd(),
+          cwd,
           "app",
           projectPath,
           RENDERS_BASE_DIR,
         );
 
-        const entries = yield* readDirWithFileTypes(rendersBaseDir);
+        const entries = yield* readDirWithFileTypes(rendersBaseDir).pipe(
+          Effect.catchReason("PlatformError", "NotFound", () =>
+            Effect.succeed([]),
+          ),
+        );
         const renders: Array<{ id: string; meta: RenderMeta }> = [];
 
         for (const [basename, stats] of entries) {
@@ -85,12 +95,13 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
 
         return renders;
       }).pipe(
-        Effect.catchTag("PlatformError", Effect.orDie),
-        Effect.catchTag("FileDecodeError", Effect.orDie),
+        Effect.catchTag("PlatformError", Effect.die),
+        Effect.catchTag("FileDecodeError", Effect.die),
       ),
     )
     .handle("rename", ({ query: { projectPath }, payload }) =>
       Effect.gen(function* () {
+        const { cwd } = getServerState();
         const { renderId, newName } = payload;
 
         // Validate inputs
@@ -114,7 +125,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const rendersBaseDir = path.join(
-          process.cwd(),
+          cwd,
           "app",
           projectPath,
           RENDERS_BASE_DIR,
@@ -141,14 +152,14 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         yield* fs.rename(oldPath, newPath);
 
         return { newId: sanitizedName };
-      }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     )
     .handle("start", ({ query: { projectPath }, payload }) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { basePath, productionServerPort } = getServerState();
-        const projectDir = path.join(process.cwd(), "app", projectPath);
+        const { basePath, cwd, productionServerPort } = getServerState();
+        const projectDir = path.join(cwd, "app", projectPath);
         const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
 
         // Generate unique render ID
@@ -182,46 +193,51 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
           width,
         };
 
-        yield* writeRenderMeta(renderDir, meta);
+        const fiber = Effect.gen(function* () {
+          yield* writeRenderMeta(renderDir, meta);
 
-        // Start render in background (don't await)
-        yield* Effect.forkDetach(
-          Effect.gen(function* () {
-            const result = yield* Effect.promise(() =>
-              renderVideo({
-                colorScheme,
-                fps,
-                height,
-                output,
-                url,
-                width,
-              }),
-            );
+          const result = yield* renderVideo({
+            colorScheme,
+            fps,
+            height,
+            output,
+            url,
+            width,
+          });
 
-            // Update metadata with completed status
-            const updatedMeta: RenderMeta = {
-              ...meta,
-              duration: result.duration,
-              status: "completed",
-            };
-            yield* writeRenderMeta(renderDir, updatedMeta);
-            yield* Console.log(`Render ${renderId} completed`);
-          }).pipe(
-            Effect.catch((error) =>
-              Effect.gen(function* () {
-                // Update metadata with failed status
-                const updatedMeta: RenderMeta = {
-                  ...meta,
-                  status: "failed",
-                };
-                yield* writeRenderMeta(renderDir, updatedMeta);
-                yield* Console.error(`Render ${renderId} failed:`, error);
-              }),
-            ),
+          // Update metadata with completed status
+          const updatedMeta: RenderMeta = {
+            ...meta,
+            duration: result.duration,
+            status: "completed",
+          };
+
+          yield* writeRenderMeta(renderDir, updatedMeta);
+          yield* Effect.log(`Render ${renderId} completed`);
+        }).pipe(
+          Effect.catch((error) =>
+            Effect.gen(function* () {
+              // Update metadata with failed status
+              const updatedMeta: RenderMeta = {
+                ...meta,
+                status: "failed",
+              };
+              yield* writeRenderMeta(renderDir, updatedMeta);
+              yield* Effect.logError(`Render ${renderId} failed:`, error);
+            }),
           ),
         );
 
+        // Start render in background (don't await)
+        const job: LoggableJob<void, PlatformError.PlatformError> =
+          yield* createJob("render", fiber).pipe(
+            Effect.provideServiceEffect(
+              Progress,
+              Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
+            ),
+          );
+
         return { id: renderId };
-      }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),
+      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     ),
 );

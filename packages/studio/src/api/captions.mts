@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { transcribe, type WhisperLogger } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option } from "effect";
+import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
@@ -10,6 +10,7 @@ import type { CaptionsMeta } from "../types/schemas.mts";
 import type { LoggableJob } from "../types.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import { NotFoundError } from "../utils/errors.mts";
+import { createJob } from "../utils/jobs.mts";
 
 import { getAudioDir } from "./audio.mts";
 import { WebApi } from "./contract.mts";
@@ -71,16 +72,6 @@ export const captionsLive = HttpApiBuilder.group(
           }
           activeJobs.add(jobKey);
 
-          /** loggable job */
-          const job: LoggableJob = {
-            logs: { debug: [], error: [], log: [] },
-            name: "captioning",
-            path: projectPath,
-            startTime: new Date(),
-            state: "running",
-          };
-          jobs.captioning.add(job);
-
           // Write initial metadata
           const initialMeta: CaptionsMeta = {
             captionsPath: path.join(audioDir, CAPTIONS_FILE),
@@ -91,54 +82,87 @@ export const captionsLive = HttpApiBuilder.group(
           yield* writeCaptionsMeta(audioDir, initialMeta);
 
           // Start transcription in background
-          yield* Effect.forkDetach(
-            Effect.gen(function* () {
-              const fiber = Effect.gen(function* () {
-                const logger: WhisperLogger = {
-                  debug(...args) {
-                    job.logs.debug.push(...args);
-                  },
-                  error(...args) {
-                    job.logs.error.push(...args);
-                  },
-                  log(...args) {
-                    job.logs.log.push(...args);
-                  },
-                };
+          const fiber = Effect.gen(function* () {
+            const fiber = Effect.gen(function* () {
+              const logger: WhisperLogger = {
+                debug(...args) {
+                  if (args.length === 2) {
+                    if (args[0] === "Stdout:") {
+                      job.logs.push({
+                        message: args[1],
+                        timestamp: new Date(),
+                        type: "log",
+                      });
+                      return;
+                    } else if (args[0] === "Stderr:") {
+                      job.logs.push({
+                        message: args[1],
+                        timestamp: new Date(),
+                        type: "error",
+                      });
+                      return;
+                    }
+                  }
 
-                yield* transcribe({
-                  audioFile,
-                  logger,
-                  outputDir: audioDir,
-                  whisperConfig: config.media?.captioning?.nodeWhisperOptions,
-                });
+                  job.logs.push({
+                    message: args,
+                    timestamp: new Date(),
+                    type: "debug",
+                  });
+                },
+                error(...args) {
+                  job.logs.push({
+                    message: args,
+                    timestamp: new Date(),
+                    type: "error",
+                  });
+                },
+                log(...args) {
+                  job.logs.push({
+                    message: args,
+                    timestamp: new Date(),
+                    type: "log",
+                  });
+                },
+              };
 
-                yield* Effect.logDebug("transcribing complete");
-
-                yield* writeCaptionsMeta(audioDir, {
-                  ...initialMeta,
-                  status: "completed",
-                });
-
-                job.state = "completed";
+              yield* transcribe({
+                audioFile,
+                logger,
+                outputDir: audioDir,
+                whisperConfig: config.media?.captioning?.nodeWhisperOptions,
               });
 
-              yield* fiber.pipe(
-                Effect.tapError((error) =>
-                  Effect.logError("Failed to generate captions:", error),
-                ),
-                Effect.catch(() => {
-                  job.state = "failed";
-                  return writeCaptionsMeta(audioDir, {
-                    ...initialMeta,
-                    status: "failed",
-                  });
-                }),
-              );
+              yield* Effect.logDebug("transcribing complete");
 
-              activeJobs.delete(jobKey);
-            }),
-          );
+              yield* writeCaptionsMeta(audioDir, {
+                ...initialMeta,
+                status: "completed",
+              });
+
+              job.state = "completed";
+            });
+
+            yield* fiber.pipe(
+              Effect.tapError((error) =>
+                Effect.logError("Failed to generate captions:", error),
+              ),
+              Effect.catch(() => {
+                job.state = "failed";
+                return writeCaptionsMeta(audioDir, {
+                  ...initialMeta,
+                  status: "failed",
+                });
+              }),
+            );
+
+            activeJobs.delete(jobKey);
+          });
+
+          /** loggable job */
+          const job = yield* createJob("captioning", fiber, {
+            path: projectPath,
+          });
 
           return { status: "started" as const };
         }).pipe(Effect.catchTag("PlatformError", Effect.orDie)),

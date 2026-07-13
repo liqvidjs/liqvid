@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { Effect, FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
 
+import { getServerState } from "../initialize.mts";
 import { InvalidError, NotFoundError } from "../utils/errors.mts";
 
 /**
@@ -48,6 +49,7 @@ function getMimeType(filePath: string): string {
 export function serveStaticFile(requestedPath: string) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
+    const { cwd } = getServerState();
 
     // Security: Prevent directory traversal attacks
     const normalizedPath = path.normalize(requestedPath);
@@ -58,7 +60,7 @@ export function serveStaticFile(requestedPath: string) {
     }
 
     // Resolve relative to the app directory
-    const appDir = path.join(process.cwd(), "app");
+    const appDir = path.join(cwd, "app");
     const absolutePath = path.join(appDir, normalizedPath);
 
     // Security: Ensure the resolved path is within the app directory

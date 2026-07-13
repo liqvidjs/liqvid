@@ -30,7 +30,7 @@ import { getRoot } from "../api/root.mts";
 import { screenshotsLive } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { thumbsLive } from "../api/thumbs.mts";
-import { initializeServer } from "../initialize.mts";
+import { getServerState, initializeServer } from "../initialize.mts";
 
 interface RequestContext {
   params: Promise<{
@@ -156,11 +156,12 @@ export function patchHandler(_dynamicImports: DynamicImports) {
 async function runEffect<A, E>(
   program: Effect.Effect<A, E, FileSystem.FileSystem | EnvFiles>,
 ) {
+  const { cwd } = getServerState();
   const result = await Effect.runPromiseExit(
     program.pipe(
       Effect.provide(NodeFileSystem.layer),
       Effect.provideService(References.MinimumLogLevel, "All"),
-      Effect.provideService(EnvFiles, loadEnvFiles(process.cwd())),
+      Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
     ),
   );
 
@@ -222,6 +223,7 @@ const apiLive = HttpApiBuilder.layer(WebApi).pipe(
   ]),
   Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
   Layer.provideMerge(NodeFileSystem.layer),
+  Layer.provideMerge(Layer.succeed(References.MinimumLogLevel, "All")),
 );
 
 const appLive = Layer.mergeAll(

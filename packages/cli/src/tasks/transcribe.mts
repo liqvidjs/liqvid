@@ -159,9 +159,11 @@ export function transcribe({
   logger?: WhisperLogger;
 }) {
   return Effect.gen(function* () {
+    const originalCwd = process.cwd();
     const { nodewhisper } = yield* Effect.promise(
       () => import("nodejs-whisper"),
     );
+    process.chdir(originalCwd);
 
     const fs = yield* FileSystem.FileSystem;
 
@@ -179,7 +181,7 @@ export function transcribe({
 
     // Run whisper transcription
     // nodejs-whisper outputs files next to the input file, so we need to handle that
-    yield* Effect.promise(() =>
+    yield* Effect.tryPromise(() =>
       nodewhisper(absoluteAudioFile, {
         autoDownloadModelName: whisperConfig.autoDownloadModelName ?? modelName,
         logger,
@@ -193,8 +195,10 @@ export function transcribe({
           outputInJsonFull: true,
         },
         withCuda: whisperConfig.withCuda ?? false,
+      }).finally(() => {
+        process.chdir(originalCwd);
       }),
-    );
+    ).pipe(Effect.catch(Effect.logError));
 
     // nodejs-whisper creates output files next to the input audio file
     // with the same base name but different extensions
@@ -207,7 +211,7 @@ export function transcribe({
     const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
     const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
 
-    yield* Effect.log({
+    yield* Effect.logDebug({
       audioBaseName,
       audioDir,
       sourceJsonPath,
