@@ -46,6 +46,12 @@
   background: #afa;
 }
 
+.activeWord {
+  color: var(--accent-solid);
+  background: transparent;
+  border-radius: 3px;
+}
+
 .captionBreak {
   position: relative;
 

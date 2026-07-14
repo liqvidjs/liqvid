@@ -2,7 +2,11 @@
 
 import type { TranscriptEntry } from "@liqvid/cli/transcribe";
 import { useEventListener } from "@liqvid/event-emitter/react";
-import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import {
+  usePlayback,
+  usePlaybackEvent,
+  useTime,
+} from "@liqvid/playback/react";
 import {
   between,
   type CleanUpFn,
@@ -111,6 +115,36 @@ export function CaptionsEditor({
 
   const { captionBreaks, selection, transcript } = useStore(store);
 
+  const [activeWord, setActiveWord] = useState(-1);
+
+  useTime(
+    (t) => activeWordIndex(transcript, t * 1000),
+    (index) => setActiveWord(index),
+  );
+
+  /**
+   * Renders the words `[from, to)`, wrapping the active word (if it falls in
+   * this range) in a single `<mark>`. Keeps tag usage minimal: at most one
+   * extra element and text node split per range.
+   */
+  const renderRange = (from: number, to: number) => {
+    const text = join(transcript.slice(from, to));
+
+    if (activeWord < from || activeWord >= to) return text;
+
+    const before = join(transcript.slice(from, activeWord));
+    const word = transcript[activeWord]![0];
+    const after = join(transcript.slice(activeWord + 1, to));
+
+    return (
+      <>
+        {before ? `${before} ` : ""}
+        <mark className={styles.activeWord}>{word}</mark>
+        {after ? ` ${after}` : ""}
+      </>
+    );
+  };
+
   if (transcript.length === 0) return;
 
   return (
@@ -145,7 +179,7 @@ export function CaptionsEditor({
               if (!hasSelection) {
                 return (
                   <Fragment key={`${breakIndex}/${i}`}>
-                    {join(transcript.slice(startIndex, endIndex))}{" "}
+                    {renderRange(startIndex, endIndex)}{" "}
                     <span className={styles.captionBreak} />{" "}
                   </Fragment>
                 );
@@ -153,15 +187,15 @@ export function CaptionsEditor({
 
               return (
                 <Fragment key={`${breakIndex}/${i}`}>
-                  {join(transcript.slice(startIndex, markStart))}{" "}
+                  {renderRange(startIndex, markStart)}{" "}
                   {hasSelection && (
                     <>
                       <mark className={styles.selection} key={selection.start}>
-                        {join(transcript.slice(markStart, markEnd))}
+                        {renderRange(markStart, markEnd)}
                       </mark>{" "}
                     </>
                   )}
-                  {join(transcript.slice(markEnd, endIndex))}{" "}
+                  {renderRange(markEnd, endIndex)}{" "}
                   <span className={styles.captionBreak} />{" "}
                 </Fragment>
               );
@@ -255,4 +289,23 @@ function join(words: readonly TranscriptEntry[]) {
     (acc, curr, index) => acc + (index > 0 ? " " : "") + curr[0],
     "",
   );
+}
+
+/**
+ * Returns the index of the word active at time `t` (in ms), or -1 if none.
+ */
+function activeWordIndex(transcript: Transcript, t: number): number {
+  let lo = 0;
+  let hi = transcript.length - 1;
+
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const [, start, end] = transcript[mid]!;
+
+    if (t < start) hi = mid - 1;
+    else if (t >= end) lo = mid + 1;
+    else return mid;
+  }
+
+  return -1;
 }
