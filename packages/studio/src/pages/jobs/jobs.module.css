@@ -29,6 +29,7 @@
 
 .job {
   margin: 1em 0;
+  /* overflow: auto; */
 }
 
 .logGroup {
@@ -40,8 +41,8 @@
   --bg: #fffffa;
   --border: #eed;
   position: relative;
+  width: 100%;
   padding: 0.1em 0.2em;
-  overflow: auto;
 
   scrollbar-width: thin;
 
@@ -124,4 +125,8 @@
   :hover > & {
     opacity: 1;
   }
+}
+
+.message {
+  white-space: pre-wrap;
 }

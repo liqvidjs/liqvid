@@ -22,7 +22,6 @@ import {
   saveRecordingOperation,
   staticFileOperation,
 } from "../api/contract-legacy.mts";
-import { patchDependencies } from "../api/patch-dependencies.mts";
 import { projectMetaLive } from "../api/project-meta.mts";
 import { recordingsLive, saveRecording } from "../api/recording.mts";
 import { rendersLive } from "../api/renders.mts";
@@ -67,10 +66,6 @@ export function getHandler(_dynamicImports: DynamicImports) {
     switch (route) {
       case "/":
         program = getRoot();
-        break;
-
-      case "/patch":
-        program = patchDependencies();
         break;
     }
 

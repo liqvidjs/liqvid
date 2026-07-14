@@ -122,7 +122,7 @@ export async function Jobs() {
                         return (
                           <div className={styles.progress}>
                             <progress max={msg.total} value={msg.value} />
-                            {msg.value} / {msg.total}
+                            {msg.formattedValue} / {msg.formattedTotal}
                           </div>
                         );
                       }
@@ -149,6 +149,8 @@ export async function Jobs() {
 function isProgressEvent(msg: unknown): msg is {
   value: number;
   total: number;
+  formattedValue: string;
+  formattedTotal: string;
 } {
   return (
     typeof msg === "object" &&

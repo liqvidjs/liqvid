@@ -1,13 +1,12 @@
 import * as path from "node:path";
 
-import { transcribe, type WhisperLogger } from "@liqvid/cli/transcribe";
+import { transcribe } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { getServerState } from "../initialize.mts";
 import type { CaptionsMeta } from "../types/schemas.mts";
-import type { LoggableJob } from "../types.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 
@@ -20,9 +19,12 @@ const CAPTIONS_FILE = "captions.vtt";
 const TRANSCRIPT_FILE = "transcript.json";
 
 /**
- * Track active caption generation jobs, keyed by `projectPath:audioId`.
+ * The name given to a captioning job, uniquely identifying the audio it
+ * captions so we can detect whether generation is already in progress.
  */
-const activeJobs = new Set<string>();
+function captioningJobName(projectPath: string, audioId: string): string {
+  return `captioning:${projectPath}:${audioId}`;
+}
 
 /**
  * Write captions metadata alongside the audio it captions.
@@ -43,7 +45,7 @@ export const captionsLive = HttpApiBuilder.group(
       // generate captions for a specific audio rendering
       .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          const { config: $config } = getServerState();
+          const { config: $config, jobs } = getServerState();
 
           const config = yield* Option.match($config, {
             onNone: () => Effect.die({ message: "config not loaded" }),
@@ -63,60 +65,53 @@ export const captionsLive = HttpApiBuilder.group(
             });
           }
 
-          const jobKey = `${projectPath}:${audioId}`;
-
-          // Check if already generating
-          if (activeJobs.has(jobKey)) {
-            return { status: "already_generating" as const };
+          // Check if a captioning job for this audio is already running.
+          const jobName = captioningJobName(projectPath, audioId);
+          for (const job of jobs.new.values()) {
+            if (job.name === jobName && job.state === "running") {
+              return { status: "already_generating" as const };
+            }
           }
-          activeJobs.add(jobKey);
 
-          // Write initial metadata
           const initialMeta: CaptionsMeta = {
             captionsPath: path.join(audioDir, CAPTIONS_FILE),
             createdAt: new Date().toISOString(),
             status: "generating",
             transcriptPath: path.join(audioDir, TRANSCRIPT_FILE),
           };
-          yield* writeCaptionsMeta(audioDir, initialMeta);
 
-          // Start transcription in background
+          // Start transcription in the background. The initial metadata is
+          // written inside the job so that no `yield*` occurs between the
+          // "already running" check and `createJob` (which registers the
+          // running job synchronously), avoiding a check-then-create race.
           const fiber = Effect.gen(function* () {
-            const fiber = Effect.gen(function* () {
-              const logger: WhisperLogger = makeWhisperLogger(job);
+            yield* writeCaptionsMeta(audioDir, initialMeta);
 
-              yield* transcribe({
-                audioFile,
-                logger,
-                outputDir: audioDir,
-                whisperConfig: config.media?.captioning?.nodeWhisperOptions,
-              });
-
-              yield* Effect.logDebug("transcribing complete");
-
-              yield* writeCaptionsMeta(audioDir, {
+            yield* transcribe({
+              audioFile,
+              outputDir: audioDir,
+              whisperConfig: config.media?.captioning?.smartWhisperOptions,
+            });
+          }).pipe(
+            Effect.tap(() => Effect.logDebug("transcribing complete")),
+            Effect.tap(() =>
+              writeCaptionsMeta(audioDir, {
                 ...initialMeta,
                 status: "completed",
-              });
-            });
+              }),
+            ),
+            Effect.tapError((error) =>
+              Effect.logError("Failed to generate captions:", error),
+            ),
+            Effect.tapError(() =>
+              writeCaptionsMeta(audioDir, {
+                ...initialMeta,
+                status: "failed",
+              }),
+            ),
+          );
 
-            yield* fiber.pipe(
-              Effect.tapError((error) =>
-                Effect.logError("Failed to generate captions:", error),
-              ),
-              Effect.tapError(() =>
-                writeCaptionsMeta(audioDir, {
-                  ...initialMeta,
-                  status: "failed",
-                }),
-              ),
-            );
-
-            activeJobs.delete(jobKey);
-          });
-
-          /** loggable job */
-          const job = yield* createJob("captioning", fiber, {
+          yield* createJob(jobName, fiber, {
             path: projectPath,
           });
 
@@ -158,47 +153,3 @@ export const captionsLive = HttpApiBuilder.group(
         }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       ),
 );
-
-function makeWhisperLogger<A, E>(job: LoggableJob<A, E>): WhisperLogger {
-  return {
-    debug(...args) {
-      if (args.length === 2) {
-        if (args[0] === "Stdout:") {
-          job.logs.push({
-            message: args[1],
-            timestamp: new Date(),
-            type: "log",
-          });
-          return;
-        } else if (args[0] === "Stderr:") {
-          job.logs.push({
-            message: args[1],
-            timestamp: new Date(),
-            type: "error",
-          });
-          return;
-        }
-      }
-
-      job.logs.push({
-        message: args,
-        timestamp: new Date(),
-        type: "debug",
-      });
-    },
-    error(...args) {
-      job.logs.push({
-        message: args,
-        timestamp: new Date(),
-        type: "error",
-      });
-    },
-    log(...args) {
-      job.logs.push({
-        message: args,
-        timestamp: new Date(),
-        type: "log",
-      });
-    },
-  };
-}

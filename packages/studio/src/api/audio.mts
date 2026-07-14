@@ -254,18 +254,10 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         const audioDir = getAudioDir(projectPath, id, multiple);
 
         if (multiple) {
-          // Remove the whole directory, which also removes captions files.
-          if (!(yield* fs.exists(audioDir))) {
-            return yield* new NotFoundError({ message: "Audio not found" });
-          }
-          yield* fs.remove(audioDir, { recursive: true });
+          yield* fs.remove(audioDir, { force: true, recursive: true });
         } else {
           // Single-audio mode: audio and captions share `.liqvid/audio`, so
           // only remove the audio-related files (leave other content intact).
-          const audioFile = path.join(audioDir, AUDIO_FILE);
-          if (!(yield* fs.exists(audioFile))) {
-            return yield* new NotFoundError({ message: "Audio not found" });
-          }
 
           for (const file of [
             AUDIO_FILE,
@@ -274,7 +266,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
             "transcript.json",
             "captions-meta.json",
           ]) {
-            yield* fs.remove(path.join(audioDir, file)).pipe(existenceOptional);
+            yield* fs.remove(path.join(audioDir, file), { force: true });
           }
         }
 

@@ -20,3 +20,15 @@ export const CaptionsMeta = Schema.Struct({
 export type CaptionsMeta = (typeof CaptionsMeta)["Type"];
 
 export const CaptionsMetaFromJson = Schema.fromJsonString(CaptionsMeta);
+
+export const TranscriptWord = Schema.Tuple([
+  Schema.String,
+  Schema.Number,
+  Schema.Number,
+]);
+
+export type TranscriptWord = (typeof TranscriptWord)["Type"];
+
+export const Transcript = Schema.Array(TranscriptWord);
+
+export type Transcript = (typeof Transcript)["Type"];

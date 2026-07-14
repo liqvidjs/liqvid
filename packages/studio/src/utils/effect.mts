@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import type { Progress } from "@liqvid/cli/utils";
+import type { Progress, SingleBarOptions } from "@liqvid/cli/utils";
 import {
   type Context,
   Effect,
@@ -75,6 +75,14 @@ function isPlatformError(error: unknown): error is PlatformError.PlatformError {
   );
 }
 
+interface ProgressMessage {
+  __kind: "progress";
+  total: number;
+  value: number;
+  formattedTotal: string;
+  formattedValue: string;
+}
+
 /**
  * Log progress bars to a job.
  */
@@ -82,10 +90,21 @@ export const jobProgressLayer = <A, E>(
   job: LoggableJob<A, E>,
 ): Context.Service.Shape<typeof Progress> => ({
   SingleBar: class SingleBar {
-    #message: { __kind: "progress"; total: number; value: number } | undefined;
+    #message: ProgressMessage | undefined;
+    #formatValue: (value: number) => string;
+
+    constructor({ formatValue }: SingleBarOptions = {}) {
+      this.#formatValue = formatValue ?? String;
+    }
 
     start(total: number, startValue: number) {
-      this.#message = { __kind: "progress", total, value: startValue };
+      this.#message = {
+        __kind: "progress",
+        formattedTotal: this.#formatValue(total),
+        formattedValue: this.#formatValue(startValue),
+        total,
+        value: startValue,
+      };
       job.logs.push({
         message: [this.#message],
         timestamp: new Date(),
@@ -96,6 +115,7 @@ export const jobProgressLayer = <A, E>(
     increment(step = 1) {
       if (!this.#message) return;
       this.#message.value += step;
+      this.#message.formattedValue = this.#formatValue(this.#message.value);
     }
 
     stop() {
@@ -105,6 +125,7 @@ export const jobProgressLayer = <A, E>(
     update(current: number) {
       if (!this.#message) return;
       this.#message.value = current;
+      this.#message.formattedValue = this.#formatValue(current);
     }
   },
 });

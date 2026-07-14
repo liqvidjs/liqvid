@@ -27,8 +27,7 @@ export interface LiqvidServerState {
   basePath: string;
 
   /**
-   * Current working directory.
-   * Use instead of `process.cwd()` because `nodejs-whisper` can overwrite that.
+   * Current working directory, captured at initialization time.
    */
   cwd: string;
 
