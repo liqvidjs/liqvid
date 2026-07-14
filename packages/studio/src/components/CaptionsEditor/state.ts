@@ -43,6 +43,10 @@ export type EndNextCaptionAction = {
   action: "end-next-caption";
 };
 
+export type ToggleCaptionBreakAction = {
+  action: "toggle-caption-break";
+};
+
 export type InsertWordAction = {
   action: "insert-word";
   index: number;
@@ -76,7 +80,8 @@ export type Action =
   | SelectionForwardAction
   | SelectionSetAction
   | StartPrevCaptionAction
-  | StartPrevSentenceAction;
+  | StartPrevSentenceAction
+  | ToggleCaptionBreakAction;
 
 /* ------------------------------ misc types ------------------------------ */
 export type TranscriptSelection = {

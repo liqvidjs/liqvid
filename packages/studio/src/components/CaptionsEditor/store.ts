@@ -1,13 +1,19 @@
 import { createStore } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
-import type { State, Transcript } from "./state.ts";
+import type { State } from "./state.ts";
 
 export const makeStore = () =>
-  createStore<State>()(() => ({
-    captionBreaks: [],
+  createStore<State>()(
+    subscribeWithSelector(
+      () =>
+        ({
+          captionBreaks: [],
 
-    selection: { end: 0, start: 0 },
+          selection: { end: 0, start: 0 },
 
-    stack: [],
-    transcript: [],
-  }));
+          stack: [],
+          transcript: [],
+        }) as State,
+    ),
+  );

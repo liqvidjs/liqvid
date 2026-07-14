@@ -77,6 +77,20 @@ export function apply(prev: State, action: Action): State {
       return { ...prev, selection: { end: i, start: i } };
     }
 
+    case "toggle-caption-break": {
+      const index = prev.selection.end;
+
+      const captionBreaks = prev.captionBreaks.includes(index)
+        ? prev.captionBreaks.filter((breakIndex) => breakIndex !== index)
+        : [...prev.captionBreaks, index].sort((a, b) => a - b);
+
+      return {
+        ...prev,
+        captionBreaks,
+        stack: [...prev.stack, action],
+      };
+    }
+
     case "identity":
       return prev;
 
@@ -140,6 +154,7 @@ export function invert(prev: State, action: Action): Action {
       };
 
     case "identity":
+    case "toggle-caption-break":
       return action;
 
     case "insert-word":
