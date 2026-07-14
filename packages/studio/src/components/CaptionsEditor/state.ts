@@ -4,9 +4,17 @@ import type { TranscriptEntry } from "@liqvid/cli/transcribe";
 export type State = {
   captionBreaks: number[];
 
+  /** Indices where a transcript break (`<br>`) is rendered. Independent of
+   * caption breaks. */
+  transcriptBreaks: number[];
+
   selection: TranscriptSelection;
 
-  stack: readonly Action[];
+  /** Actions that have been applied, in order, for undo. */
+  undoStack: readonly Action[];
+
+  /** Actions that have been undone, for redo. */
+  redoStack: readonly Action[];
 
   transcript: readonly TranscriptEntry[];
 };
@@ -47,6 +55,18 @@ export type ToggleCaptionBreakAction = {
   action: "toggle-caption-break";
 };
 
+export type StartPrevTranscriptBreakAction = {
+  action: "start-prev-transcript-break";
+};
+
+export type EndNextTranscriptBreakAction = {
+  action: "end-next-transcript-break";
+};
+
+export type ToggleTranscriptBreakAction = {
+  action: "toggle-transcript-break";
+};
+
 export type InsertWordAction = {
   action: "insert-word";
   index: number;
@@ -74,6 +94,7 @@ export type Action =
   | DeleteWordAction
   | EndNextCaptionAction
   | EndNextSentenceAction
+  | EndNextTranscriptBreakAction
   | IdentityAction
   | InsertWordAction
   | SelectionBackwardAction
@@ -81,7 +102,9 @@ export type Action =
   | SelectionSetAction
   | StartPrevCaptionAction
   | StartPrevSentenceAction
-  | ToggleCaptionBreakAction;
+  | StartPrevTranscriptBreakAction
+  | ToggleCaptionBreakAction
+  | ToggleTranscriptBreakAction;
 
 /* ------------------------------ misc types ------------------------------ */
 export type TranscriptSelection = {

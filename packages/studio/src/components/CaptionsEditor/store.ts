@@ -9,11 +9,11 @@ export const makeStore = () =>
       () =>
         ({
           captionBreaks: [],
-
+          redoStack: [],
           selection: { end: 0, start: 0 },
-
-          stack: [],
           transcript: [],
+          transcriptBreaks: [],
+          undoStack: [],
         }) as State,
     ),
   );
