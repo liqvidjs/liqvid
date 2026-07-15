@@ -22,6 +22,7 @@ import { clientRuntime, LiqvidStudioApiClient } from "./client.mts";
 import type { ToastPropsWithTime } from "./ui/Toast.tsx";
 import { Toaster } from "./ui/Toaster.tsx";
 import "./palette.css";
+import { WebSocketProvider } from "./components/WebSocketProvider.tsx";
 
 export interface StudioPrivateContextShape {
   instances: Record<string, Set<unknown>>;
@@ -111,23 +112,25 @@ export function LiqvidDevToolsProvider({
   usePlaybackEvent("durationchange", updateDuration);
 
   return (
-    <LiqvidStudioPluginApiProvider plugins={plugins} value={api}>
-      <RecordingProvider plugins={recordingPlugins}>
-        <StudioPrivateContext.Provider value={privateContext}>
-          {plugins?.map((plugin) => {
-            if (!plugin.useConfigurePlugin) return null;
-            return (
-              <CallHook
-                key={plugin.package}
-                usePlugin={plugin.useConfigurePlugin}
-              />
-            );
-          })}
-          {children}
-        </StudioPrivateContext.Provider>
-        <Toaster {...{ toasts }} />
-      </RecordingProvider>
-    </LiqvidStudioPluginApiProvider>
+    <WebSocketProvider>
+      <LiqvidStudioPluginApiProvider plugins={plugins} value={api}>
+        <RecordingProvider plugins={recordingPlugins}>
+          <StudioPrivateContext.Provider value={privateContext}>
+            {plugins?.map((plugin) => {
+              if (!plugin.useConfigurePlugin) return null;
+              return (
+                <CallHook
+                  key={plugin.package}
+                  usePlugin={plugin.useConfigurePlugin}
+                />
+              );
+            })}
+            {children}
+          </StudioPrivateContext.Provider>
+          <Toaster {...{ toasts }} />
+        </RecordingProvider>
+      </LiqvidStudioPluginApiProvider>
+    </WebSocketProvider>
   );
 }
 

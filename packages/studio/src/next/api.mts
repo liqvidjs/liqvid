@@ -9,13 +9,18 @@ import { FileDecodeError, loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
-import { Effect, Exit, type FileSystem, Layer, References } from "effect";
+import {
+  Effect,
+  Exit,
+  type FileSystem,
+  Layer,
+  Logger,
+  References,
+} from "effect";
 import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
-import type { NextRequest } from "next/server";
-import type { WebSocket, WebSocketServer } from "ws";
 
 import { audioLive } from "../api/audio.mts";
 import { captionsLive } from "../api/captions.mts";
@@ -66,9 +71,21 @@ export function getHandler(_dynamicImports: DynamicImports) {
       | undefined;
 
     switch (route) {
+      // display server state for debugging
       case "/":
         program = getRoot();
         break;
+
+      // WebSockets
+      case "/ws": {
+        const headers = new Headers();
+        headers.set("Connection", "Upgrade");
+        headers.set("Upgrade", "websocket");
+        return new Response("Upgrade Required", {
+          headers,
+          status: StatusCodes.UPGRADE_REQUIRED,
+        });
+      }
     }
 
     if (route.startsWith(staticFileOperation.endpoint)) {
@@ -144,28 +161,7 @@ export function patchHandler(_dynamicImports: DynamicImports) {
   };
 }
 
-/**
- * Liqvid server UPGRADE handler
- */
-export function upgradeHandler(_dynamicImports: DynamicImports) {
-  return async function UPGRADE(
-    client: WebSocket,
-    server: WebSocketServer,
-    request: NextRequest,
-    context: RouteContext<any>,
-  ) {
-    console.log("A client connected");
-
-    client.on("message", (message) => {
-      console.log("Received message:", message);
-      client.send(message);
-    });
-
-    client.once("close", () => {
-      console.log("A client disconnected");
-    });
-  };
-}
+export { upgradeHandler } from "./websockets.mts";
 
 async function runEffect<A, E>(
   program: Effect.Effect<A, E, FileSystem.FileSystem | EnvFiles>,
@@ -173,7 +169,12 @@ async function runEffect<A, E>(
   const { cwd } = getServerState();
   const result = await Effect.runPromiseExit(
     program.pipe(
-      Effect.provide(NodeFileSystem.layer),
+      Effect.provide(
+        Layer.mergeAll(
+          NodeFileSystem.layer,
+          Logger.layer([Logger.consolePretty()]),
+        ),
+      ),
       Effect.provideService(References.MinimumLogLevel, "All"),
       Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
     ),
@@ -237,6 +238,9 @@ const apiLive = HttpApiBuilder.layer(WebApi).pipe(
   ]),
   Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
   Layer.provideMerge(NodeFileSystem.layer),
+  Layer.provide(
+    Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
+  ),
   Layer.provideMerge(Layer.succeed(References.MinimumLogLevel, "All")),
 );
 

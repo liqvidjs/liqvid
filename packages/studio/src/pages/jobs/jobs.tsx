@@ -1,17 +1,12 @@
-import {
-  CheckCircleIcon,
-  SpinnerIcon,
-  WarningCircleIcon,
-  XCircleIcon,
-} from "@phosphor-icons/react/dist/ssr";
+import { pick } from "@liqvid/utils";
 import { Effect, Fiber } from "effect";
 
+import { WebSocketProvider } from "../../components/WebSocketProvider.tsx";
 import { getServerState } from "../../initialize.mts";
-import { Button } from "../../ui/Button.tsx";
-import { Time } from "../../ui/Time.tsx";
+import { broadcast } from "../../next/websockets.mts";
 import { getTranslations } from "../../utils/i18n.mts";
 
-import styles from "./jobs.module.css";
+import { JobsClient } from "./jobs.client.tsx";
 
 import type T from "./.translations/en.json";
 
@@ -39,123 +34,30 @@ async function deleteJob(formData: FormData) {
   const { jobs } = getServerState();
 
   jobs.new.delete(id);
+
+  await broadcast("jobs", { data: { id }, type: "deleteJob" });
 }
 
 export async function Jobs() {
   const t = await getTranslations<T>(import.meta.url);
 
-  const { jobs } = getServerState();
+  const { jobs: serverJobs } = getServerState();
 
-  return (
-    <main className={styles.main}>
-      <h1>Jobs</h1>
+  type Job = React.ComponentProps<typeof JobsClient>["jobs"][string];
 
-      <ul>
-        {Array.from(jobs.new.values()).map((job) => (
-          <li className={styles.job} key={job.id}>
-            <header className={styles.header}>
-              {job.state === "cancelled" && (
-                <XCircleIcon className={styles.cancelledIcon} weight="fill">
-                  <title>{t.cancelled}</title>
-                </XCircleIcon>
-              )}
-              {job.state === "completed" && (
-                <CheckCircleIcon className={styles.completedIcon} weight="fill">
-                  <title>{t.completed}</title>
-                </CheckCircleIcon>
-              )}
-              {job.state === "running" && (
-                <SpinnerIcon className={styles.runningIcon}>
-                  <title>{t.running}</title>
-                </SpinnerIcon>
-              )}
-              {job.state === "failed" && (
-                <WarningCircleIcon className={styles.warningIcon} weight="fill">
-                  <title>{t.failed}</title>
-                </WarningCircleIcon>
-              )}
-              <pre>{job.path}</pre>
-              &gt;
-              <span>{job.name}</span>
-              <form action={cancelJob}>
-                <input name="id" type="hidden" value={job.id} />
-
-                {job.state === "running" ? (
-                  <Button formAction={cancelJob} type="submit">
-                    {t.cancel}
-                  </Button>
-                ) : (
-                  <Button formAction={deleteJob} type="submit">
-                    {t.delete}
-                  </Button>
-                )}
-              </form>
-            </header>
-
-            <ol className={styles.logGroup}>
-              {job.logs.map((log, i) => {
-                const msg =
-                  log.message.length === 1 ? log.message[0] : log.message;
-
-                return (
-                  <li
-                    className={styles.log}
-                    data-level={log.type}
-                    key={`${log.type}:${log.timestamp.toISOString()}:${i}`}
-                  >
-                    <Time
-                      className={styles.timestamp}
-                      format="date-and-time"
-                      value={log.timestamp}
-                    />
-                    {log.annotations && (
-                      <pre className={styles.annotations}>
-                        {JSON.stringify(log.annotations)}
-                      </pre>
-                    )}
-                    {(() => {
-                      if (typeof msg === "string" || typeof msg === "number") {
-                        return <pre className={styles.message}>{msg}</pre>;
-                      }
-
-                      if (isProgressEvent(msg)) {
-                        return (
-                          <div className={styles.progress}>
-                            <progress max={msg.total} value={msg.value} />
-                            {msg.formattedValue} / {msg.formattedTotal}
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <pre className={styles.message}>
-                          {JSON.stringify(msg, null, 2)}
-                        </pre>
-                      );
-                    })()}
-                  </li>
-                );
-              })}
-            </ol>
-          </li>
-        ))}
-      </ul>
-
-      {/* <pre>{JSON.stringify(Array.from(jobs.captioning), null, 2)}</pre> */}
-    </main>
+  const jobs = Object.fromEntries(
+    Array.from(serverJobs.new.entries()).map(
+      ([id, job]) =>
+        [id, pick(job, ["id", "logs", "name", "path", "state"])] as [
+          string,
+          Job,
+        ],
+    ),
   );
-}
 
-function isProgressEvent(msg: unknown): msg is {
-  value: number;
-  total: number;
-  formattedValue: string;
-  formattedTotal: string;
-} {
   return (
-    typeof msg === "object" &&
-    msg !== null &&
-    "__kind" in msg &&
-    msg.__kind === "progress"
+    <WebSocketProvider>
+      <JobsClient {...{ cancelJob, deleteJob, jobs, t }} />
+    </WebSocketProvider>
   );
 }
