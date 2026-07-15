@@ -15,11 +15,13 @@ export type PlaybackEvent =
   | "pause"
   | "play"
   | "ratechange"
+  | "readystatechange"
   | "seeked"
   | "seeking"
   | "stop"
   | "timeupdate"
-  | "volumechange";
+  | "volumechange"
+  | "waiting";
 
 export type PlaybackEventsMap<P extends CorePlayback> = {
   [key in PlaybackEvent]: {
@@ -28,34 +30,45 @@ export type PlaybackEventsMap<P extends CorePlayback> = {
   };
 };
 
-declare let webkitAudioContext: typeof AudioContext;
-
 /**
  * Audio source registration for offline rendering.
  */
 export interface AudioSourceRegistration {
   /** The decoded audio buffer */
   buffer: AudioBuffer;
+
   /** Start time in seconds (when the audio begins in the timeline) */
   startTime: number;
 }
 
-/**
- * Progress callback for offline rendering.
- */
-export type OfflineRenderProgress = (progress: number) => void;
+export type ReadyStateItem = {
+  readyState: number;
+};
+
+declare let webkitAudioContext: typeof AudioContext;
 
 /**
  * Class pretending to be a media element advancing in time.
  *
  * Imitates {@link HTMLMediaElement} to a certain extent, although it does not implement that interface.
  */
-export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
-  /** Audio context owned by this playback */
-  audioContext: AudioContext | undefined;
+export class CorePlayback extends EventEmitter<
+  PlaybackEventsMap<CorePlayback>
+> {
+  /** No information is available about the media resource. */
+  static HAVE_NOTHING = 0;
 
-  /** Audio node owned by this playback */
-  audioNode: GainNode | undefined;
+  /** Enough of the media resource has been retrieved that the metadata attributes are initialized. Seeking will no longer raise an exception. */
+  static HAVE_METADATA = 1;
+
+  /** Data is available for the current playback position, but not enough to actually play more than one frame. */
+  static HAVE_CURRENT_DATA = 2;
+
+  /** Data for the current playback position as well as for at least a little bit of time into the future is available (in other words, at least two frames of video, for example). */
+  static HAVE_FUTURE_DATA = 3;
+
+  /** Enough data is available—and the download rate is high enough—that the media can be played through to the end without interruption. */
+  static HAVE_ENOUGH_DATA = 4;
 
   /** Flag indicating whether playback is currently paused. */
   paused = true;
@@ -66,6 +79,14 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
    */
   readonly textTracks: SyntheticTextTrackList;
 
+  /* ------------------------------ extensions from base SyntheticPlayback ------------------------------ */
+
+  /** Audio context owned by this playback */
+  audioContext: AudioContext | undefined;
+
+  /** Audio node owned by this playback */
+  audioNode: GainNode | undefined;
+
   /**
    * Registered audio sources for offline rendering.
    * Audio components should register their decoded buffers here.
@@ -74,6 +95,7 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
 
   /* private fields */
   private __playingFromMs = 0;
+  private __readyStateItems: Set<ReadyStateItem> = new Set();
   private __startTimeMs = performance.now();
 
   /* private fields exposed by getters */
@@ -184,6 +206,14 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__emit("ratechange");
   }
 
+  /** Returns a unsigned short (enumeration) indicating the readiness state of the media. */
+  get readyState(): number {
+    return Array.from(this.__readyStateItems).reduce(
+      (acc, curr) => Math.min(acc, curr.readyState),
+      CorePlayback.HAVE_ENOUGH_DATA,
+    );
+  }
+
   /** Gets or sets a flag that indicates whether the playback is currently moving to a new position. */
   get seeking(): boolean {
     return this.__seeking;
@@ -199,33 +229,6 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__seeking = val;
     if (this.__seeking) this.__emit("seeking");
     else this.__emit("seeked");
-  }
-
-  /**
-   * Pause playback.
-   *
-   * @emits pause
-   */
-  pause(): void {
-    this.paused = true;
-    this.__playingFromMs = this.currentTime * 1000;
-
-    this.__emit("pause");
-  }
-
-  /**
-   * Start or resume playback.
-   *
-   * @emits play
-   */
-  play(): void {
-    this.paused = false;
-
-    // this is necessary for currentTime to be correct when playing from stop state
-    this.__currentTimeMs = this.__playingFromMs;
-    this.__startTimeMs = performance.now();
-
-    this.__emit("play");
   }
 
   /** Gets or sets the volume level for the playback. */
@@ -252,6 +255,33 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.__emit("volumechange");
   }
 
+  /* ------------------------------ public methods ------------------------------ */
+  /**
+   * Pause playback.
+   *
+   * @emits pause
+   */
+  pause(): void {
+    this.paused = true;
+    this.__playingFromMs = this.currentTime * 1000;
+
+    this.__emit("pause");
+  }
+
+  /**
+   * Start or resume playback.
+   *
+   * @emits play
+   */
+  play(): void {
+    this.paused = false;
+
+    // this is necessary for currentTime to be correct when playing from stop state
+    this.__currentTimeMs = this.__playingFromMs;
+    this.__startTimeMs = performance.now();
+
+    this.__emit("play");
+  }
   /**
    * Stop playback and reset pointer to start
    *
@@ -304,6 +334,24 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.audioSources.add(registration);
   }
 
+  registerReadyStateItem(item: ReadyStateItem): void {
+    const readyState = this.readyState;
+    this.__readyStateItems.add(item);
+
+    if (item.readyState < readyState) {
+      this.__emit("readystatechange");
+    }
+  }
+
+  updateReadyStateItem(item: ReadyStateItem, newReadyState: number): void {
+    const prevReadyState = this.readyState;
+    item.readyState = newReadyState;
+
+    if (this.readyState !== prevReadyState) {
+      this.__emit("readystatechange");
+    }
+  }
+
   /**
    * Unregister an audio source from offline rendering.
    *
@@ -313,107 +361,16 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
     this.audioSources.delete(registration);
   }
 
-  /**
-   * Render all registered audio sources to an AudioBuffer using OfflineAudioContext.
-   * This renders as fast as possible (not real-time).
-   *
-   * @param onProgress - Optional callback for progress updates (0-1)
-   * @returns The rendered audio buffer
-   */
-  async renderOffline(
-    onProgress?: OfflineRenderProgress,
-  ): Promise<AudioBuffer> {
-    if (!IS_CLIENT) {
-      throw new Error("renderOffline can only be called in the browser");
+  unregisterReadyStateItem(item: ReadyStateItem): void {
+    const prev = this.readyState;
+    this.__readyStateItems.delete(item);
+
+    if (this.readyState !== prev) {
+      this.__emit("readystatechange");
     }
-
-    const sampleRate = 44100;
-    const numberOfChannels = 2;
-    const lengthInSamples = Math.ceil(this.duration * sampleRate);
-
-    if (lengthInSamples === 0) {
-      throw new Error("Cannot render audio: duration is 0");
-    }
-
-    // Create offline audio context
-    const offlineContext = new OfflineAudioContext(
-      numberOfChannels,
-      lengthInSamples,
-      sampleRate,
-    );
-
-    // Create a master gain node
-    const masterGain = offlineContext.createGain();
-    masterGain.connect(offlineContext.destination);
-
-    // Schedule all registered audio sources
-    for (const registration of this.audioSources) {
-      const { buffer, startTime } = registration;
-
-      // Skip if the audio starts after the playback ends
-      if (startTime >= this.duration) continue;
-
-      // Create a buffer source for each registered audio
-      const sourceNode = offlineContext.createBufferSource();
-      sourceNode.buffer = buffer;
-      sourceNode.connect(masterGain);
-
-      // Calculate when to start (in samples)
-      const startTimeInContext = Math.max(0, startTime);
-
-      // Calculate offset within the buffer (if startTime is negative)
-      const offsetInBuffer = startTime < 0 ? -startTime : 0;
-
-      // Calculate how long to play
-      const maxDuration = this.duration - startTimeInContext;
-      const bufferDuration = buffer.duration - offsetInBuffer;
-      const playDuration = Math.min(maxDuration, bufferDuration);
-
-      if (playDuration > 0) {
-        sourceNode.start(startTimeInContext, offsetInBuffer, playDuration);
-      }
-    }
-
-    // Render the audio
-    if (onProgress) {
-      // OfflineAudioContext doesn't have native progress events,
-      // so we estimate progress based on time
-      const startRenderTime = performance.now();
-      const estimatedRenderTime = this.duration * 100; // rough estimate: 100ms per second of audio
-
-      const progressInterval = setInterval(() => {
-        const elapsed = performance.now() - startRenderTime;
-        const progress = Math.min(elapsed / estimatedRenderTime, 0.99);
-        onProgress(progress);
-      }, 100);
-
-      try {
-        const renderedBuffer = await offlineContext.startRendering();
-        clearInterval(progressInterval);
-        onProgress(1);
-        return renderedBuffer;
-      } catch (error) {
-        clearInterval(progressInterval);
-        throw error;
-      }
-    }
-
-    return offlineContext.startRendering();
   }
 
-  /**
-   * Render all registered audio sources and return as a Blob.
-   * This encodes the audio as WAV format.
-   *
-   * @param onProgress - Optional callback for progress updates (0-1)
-   * @returns The rendered audio as a WAV Blob
-   */
-  async renderOfflineAsWav(onProgress?: OfflineRenderProgress): Promise<Blob> {
-    const audioBuffer = await this.renderOffline(onProgress);
-    return audioBufferToWav(audioBuffer);
-  }
-
-  /* private methods */
+  /* ------------------------------ private methods ------------------------------ */
 
   /**
    * @emits timeupdate
@@ -502,76 +459,4 @@ export class CorePlayback extends EventEmitter<PlaybackEventsMap> {
   private __emit(eventName: PlaybackEvent) {
     this.emit(eventName, { target: this, type: eventName });
   }
-}
-
-/**
- * Convert an AudioBuffer to a WAV Blob.
- */
-function audioBufferToWav(buffer: AudioBuffer): Blob {
-  const numberOfChannels = buffer.numberOfChannels;
-  const sampleRate = buffer.sampleRate;
-  const format = 1; // PCM
-  const bitDepth = 16;
-
-  const bytesPerSample = bitDepth / 8;
-  const blockAlign = numberOfChannels * bytesPerSample;
-
-  // Interleave channels
-  const interleaved = interleaveChannels(buffer);
-  const dataLength = interleaved.length * bytesPerSample;
-  const headerLength = 44;
-  const totalLength = headerLength + dataLength;
-
-  const arrayBuffer = new ArrayBuffer(totalLength);
-  const view = new DataView(arrayBuffer);
-
-  // WAV header
-  writeString(view, 0, "RIFF");
-  view.setUint32(4, totalLength - 8, true);
-  writeString(view, 8, "WAVE");
-  writeString(view, 12, "fmt ");
-  view.setUint32(16, 16, true); // fmt chunk size
-  view.setUint16(20, format, true);
-  view.setUint16(22, numberOfChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * blockAlign, true); // byte rate
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bitDepth, true);
-  writeString(view, 36, "data");
-  view.setUint32(40, dataLength, true);
-
-  // Write audio data
-  const offset = 44;
-  for (let i = 0; i < interleaved.length; i++) {
-    const sample = Math.max(-1, Math.min(1, interleaved[i]!));
-    const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-    view.setInt16(offset + i * 2, intSample, true);
-  }
-
-  return new Blob([arrayBuffer], { type: "audio/wav" });
-}
-
-function writeString(view: DataView, offset: number, str: string): void {
-  for (let i = 0; i < str.length; i++) {
-    view.setUint8(offset + i, str.charCodeAt(i));
-  }
-}
-
-function interleaveChannels(buffer: AudioBuffer): Float32Array {
-  const numberOfChannels = buffer.numberOfChannels;
-  const length = buffer.length;
-  const result = new Float32Array(length * numberOfChannels);
-
-  const channels: Float32Array[] = [];
-  for (let c = 0; c < numberOfChannels; c++) {
-    channels.push(buffer.getChannelData(c));
-  }
-
-  for (let i = 0; i < length; i++) {
-    for (let c = 0; c < numberOfChannels; c++) {
-      result[i * numberOfChannels + c] = channels[c]![i]!;
-    }
-  }
-
-  return result;
 }

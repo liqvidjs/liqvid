@@ -1,6 +1,11 @@
-import { Duration, type DurationLike } from "@liqvid/duration";
-import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
-import { useStable } from "@liqvid/utils";
+import type { DurationLike } from "@liqvid/duration";
+import { useEventListener } from "@liqvid/event-emitter/react";
+import {
+  usePlayback,
+  usePlaybackEvent,
+  useReadyStateItem,
+} from "@liqvid/playback/react";
+import { useStableDuration } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface MediaProps {
@@ -13,7 +18,7 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   ref: React.RefObject<T | null>,
   start: DurationLike = {},
 ) {
-  const start$ = useStable(start, (a, b) => a.equals(b), Duration.from);
+  const start$ = useStableDuration(start);
   const playback = usePlayback();
 
   const [end, setEnd] = useState(() =>
@@ -176,6 +181,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   useEffect(() => {
     onVolumeChange();
   }, [onVolumeChange]);
+
+  /* ------------------------------ readyState ------------------------------ */
+  useSyncReadyState(ref);
 }
 
 /**
@@ -188,4 +196,30 @@ export function useSyncMedia<T extends HTMLMediaElement>(
  */
 function hasEnded(media: HTMLMediaElement, threshold = 0.5): boolean {
   return media.ended || media.duration - media.currentTime < threshold;
+}
+
+function useSyncReadyState(ref: React.RefObject<HTMLMediaElement | null>) {
+  const { setReadyState } = useReadyStateItem();
+
+  const updateReadyState = () => {
+    if (!ref.current) return;
+    setReadyState(ref.current.readyState);
+  };
+
+  useEventListener(ref.current, "canplay", updateReadyState);
+  useEventListener(ref.current, "canplaythrough", updateReadyState);
+  useEventListener(ref.current, "loadeddata", updateReadyState);
+  useEventListener(ref.current, "loadedmetadata", updateReadyState);
+  useEventListener(ref.current, "waiting", updateReadyState);
+
+  useEventListener(ref.current, "seeking", () => {
+    if (!ref.current) return;
+    if (!(ref.current instanceof HTMLVideoElement)) return;
+
+    setReadyState(HTMLMediaElement.HAVE_METADATA);
+
+    ref.current.requestVideoFrameCallback(() => {
+      setReadyState(ref.current?.readyState ?? HTMLMediaElement.HAVE_NOTHING);
+    });
+  });
 }

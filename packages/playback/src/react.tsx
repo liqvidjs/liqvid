@@ -202,3 +202,27 @@ export function usePlaybackEvent<
 ) {
   useEventListener(usePlaybackOptional(), eventName, callback);
 }
+
+export function useReadyStateItem(defaultValue = 4) {
+  const [readyState, setReadyState] = useState(defaultValue);
+
+  const [item] = useState(() => ({
+    readyState,
+  }));
+
+  const playback = usePlayback();
+
+  useEffect(() => {
+    playback.registerReadyStateItem(item);
+
+    return () => {
+      playback.unregisterReadyStateItem(item);
+    };
+  }, [playback, item]);
+
+  useEffect(() => {
+    playback.updateReadyStateItem(item, readyState);
+  }, [playback, item, readyState]);
+
+  return { readyState, setReadyState };
+}

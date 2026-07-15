@@ -13,16 +13,16 @@ declare global {
   }
 }
 
+const supportsCommitStyles =
+  typeof Animation !== "undefined" &&
+  typeof Animation.prototype.commitStyles === "function";
+
 interface CommittedAnimation {
   delay: number;
   keyframes: Keyframe[] | PropertyIndexedKeyframes;
   options: number | KeyframeEffectOptions | undefined;
   target: Element;
 }
-
-const supportsCommitStyles =
-  typeof Animation !== "undefined" &&
-  typeof Animation.prototype.commitStyles === "function";
 
 /** Extended {@link CorePlayback Playback} supporting rich durations and the Web Animation API */
 export class Playback extends CorePlayback {
@@ -61,12 +61,12 @@ export class Playback extends CorePlayback {
   }
 
   /** Get or set the current time as a {@link Duration} */
-  get currentTime$() {
+  get currentTime$(): Duration {
     return this.__$currentTime;
   }
 
-  set currentTime$(d: Duration) {
-    this.currentTime = d.inSeconds();
+  set currentTime$(d: DurationLike) {
+    this.currentTime = Duration.inSeconds(d);
   }
 
   get duration$() {
@@ -107,6 +107,8 @@ export class Playback extends CorePlayback {
       return anim;
     };
   }
+
+  /* ------------------------------ private methods ------------------------------ */
 
   /**
    * Internal method to create and adopt an animation
