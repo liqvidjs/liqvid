@@ -6,6 +6,7 @@ import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
 import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
+import { ASSETS_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import {
@@ -31,7 +32,7 @@ function getProjectDir(projectPath: string): string {
  * Get the screenshots directory for a project
  */
 function getScreenshotsDir(projectPath: string): string {
-  return path.join(getProjectDir(projectPath), ".liqvid", "screenshots");
+  return path.join(getProjectDir(projectPath), ASSETS_DIR, "screenshots");
 }
 
 /**

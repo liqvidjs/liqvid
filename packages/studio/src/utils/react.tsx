@@ -44,14 +44,19 @@ export function TranslationProvider<T>({
   );
 }
 
-export function useAsyncTranslations<T>(defaultValue: T, url: string) {
+/**
+ * For client components that we don't control (may be consumed by users),
+ * asynchronously load translations, using default locale until the
+ * translations are loaded.
+ */
+export function useAsyncTranslations<T>(defaultValue: T, componentDir: string) {
   const [translations, setTranslations] = useState<T>(defaultValue);
 
   useEffect(() => {
-    getTranslationsFromServer<T>(url).then((localized) => {
+    getTranslationsFromServer<T>(componentDir).then((localized) => {
       setTranslations({ ...defaultValue, ...localized });
     });
-  }, [url, defaultValue]);
+  }, [componentDir, defaultValue]);
 
   return translations;
 }

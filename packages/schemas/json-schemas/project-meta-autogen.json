@@ -1,43 +1,321 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
     "duration": {
+      "additionalProperties": false,
       "properties": {
         "d": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "days": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "h": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "hours": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "m": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "milliseconds": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "minutes": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "ms": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "s": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "seconds": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "w": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "weeks": {
-          "type": "number"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "type": "object"

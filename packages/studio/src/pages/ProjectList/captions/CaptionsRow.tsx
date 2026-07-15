@@ -11,6 +11,7 @@ import { useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { AUDIO_WAV } from "../../../conventions.mts";
 import { Time, TimeDuration } from "../../../ui/Time.tsx";
 
 import shareStyles from "../share.module.css";
@@ -147,7 +148,7 @@ export function CaptionRow({
       <div className={shareStyles.renderInfo}>
         <div className={shareStyles.renderHeader}>
           <span className={shareStyles.renderName}>
-            {multiple ? entry.meta.name : "audio.wav"}
+            {multiple ? entry.meta.name : AUDIO_WAV}
           </span>
           {entry.captions && (
             <span className={shareStyles.renderStatus}>

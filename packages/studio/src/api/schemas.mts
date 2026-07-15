@@ -1,5 +1,5 @@
 import { ThumbnailsJob } from "@liqvid/schemas/effect";
-import { Schema } from "effect";
+import { type Fiber, Schema } from "effect";
 
 import { CaptionsMeta } from "../types/schemas.mts";
 
@@ -117,3 +117,62 @@ export const ThumbsData = Schema.Struct({
 });
 
 export type ThumbsData = (typeof ThumbsData)["Type"];
+
+export const StructuredLogType = Schema.Literals([
+  "debug",
+  "error",
+  "info",
+  "log",
+  "warn",
+]);
+
+export type StructuredLogType = (typeof StructuredLogType)["Type"];
+
+export const StructuredLog = Schema.Struct({
+  /** Annotations for the log message */
+  annotations: Schema.Record(Schema.String, Schema.Unknown),
+
+  /** Log message */
+  message: Schema.Array(Schema.Unknown),
+
+  /** Timestamp of the log message */
+  timestamp: Schema.Date,
+
+  /** Log level */
+  type: StructuredLogType,
+});
+
+export type StructuredLog = (typeof StructuredLog)["Type"];
+
+export const LoggableJobState = Schema.Literals([
+  "running",
+  "completed",
+  "cancelled",
+  "failed",
+]);
+
+export type LoggableJobState = (typeof LoggableJobState)["Type"];
+
+export const LoggableJobClient = Schema.Struct({
+  id: Schema.String,
+
+  logs: Schema.Array(StructuredLog),
+
+  name: Schema.String,
+
+  path: Schema.optional(Schema.String),
+
+  startTime: Schema.Date,
+
+  state: LoggableJobState,
+});
+
+export type LoggableJobClient = (typeof LoggableJobClient)["Type"];
+
+export const LoggableJob = LoggableJobClient.pipe(
+  Schema.fieldsAssign({
+    fiber: Schema.Unknown as Schema.Schema<Fiber.Fiber<unknown, unknown>>,
+  }),
+);
+
+export type LoggableJob = (typeof LoggableJob)["Type"];

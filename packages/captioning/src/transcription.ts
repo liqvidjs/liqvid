@@ -4,7 +4,7 @@ import path from "node:path";
 import { IamAuthenticator } from "ibm-watson/auth";
 import SpeechToTextV1 from "ibm-watson/speech-to-text/v1";
 
-import { toWebVTT } from "./webvtt";
+import { toWebVTT } from "./webvtt.ts";
 
 /**
  * Transcript with per-word timings

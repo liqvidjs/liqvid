@@ -6,7 +6,7 @@ import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
 import handler from "serve-handler";
 
-import { CONFIG_FILE } from "../conventions.mts";
+import { ASSETS_DIR, CONFIG_FILE } from "../conventions.mts";
 import { getServerState, type LiqvidServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
 
@@ -15,7 +15,7 @@ export const DEFAULT_PRODUCTION_SERVER_PORT = 4000;
 export function startProductionServer(state: LiqvidServerState) {
   return Effect.gen(function* () {
     const { cwd } = state;
-    const previewDir = path.join(cwd, ".liqvid", "preview");
+    const previewDir = path.join(cwd, ASSETS_DIR, "preview");
 
     const fs = yield* FileSystem.FileSystem;
 

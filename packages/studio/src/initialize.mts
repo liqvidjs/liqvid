@@ -8,6 +8,7 @@ import {
 } from "@liqvid/schemas/effect";
 import { Effect, Option } from "effect";
 
+import type { LoggableJob } from "./api/schemas.mts";
 import {
   DEFAULT_PRODUCTION_SERVER_PORT,
   startProductionServer,
@@ -15,7 +16,6 @@ import {
 import { watchAssets } from "./jobs/watch-assets.mts";
 import { watchLiqvidConfig } from "./jobs/watch-config.mts";
 import { watchProjectFiles } from "./jobs/watch-project-files.mts";
-import type { LoggableJob } from "./types.mts";
 
 const symbol = Symbol.for("@liqvid/server");
 
@@ -72,7 +72,7 @@ export async function initializeServer() {
       ),
     );
 
-    state.locale = config.locale ?? state.locale;
+    state.locale = config.ui?.locale ?? state.locale;
 
     state.config = Option.some(config);
   }

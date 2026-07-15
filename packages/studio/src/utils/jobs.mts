@@ -1,12 +1,12 @@
 import { Progress } from "@liqvid/cli/utils";
 import { Effect, Logger, type LogLevel, References } from "effect";
 
-import { getServerState } from "../initialize.mts";
 import type {
   LoggableJob,
   StructuredLog,
   StructuredLogType,
-} from "../types.mts";
+} from "../api/schemas.mts";
+import { getServerState } from "../initialize.mts";
 
 import { jobProgressLayer } from "./effect.mts";
 

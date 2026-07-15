@@ -1,3 +1,5 @@
+import { IS_SERVER } from "@liqvid/ssr";
+
 export interface Directory {
   [key: string]: Directory | null;
 }
@@ -55,6 +57,11 @@ export class DirectoryHelper<
       v?: string;
     },
   ): Promise<T> {
+    // TODO: maybe support RSC here
+    if (IS_SERVER) {
+      return null as T;
+    }
+
     const url = this.file(filename, options?.v);
 
     if (!globalFetchCache.has(url)) {

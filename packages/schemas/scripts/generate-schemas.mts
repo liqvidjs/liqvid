@@ -1,30 +1,33 @@
 /**
- * Generate JSON Schema files from Zod schemas.
+ * Generate JSON Schema files from Effect schemas.
  * Run with: node --experimental-strip-types scripts/generate-schemas.mts
  */
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { toJSONSchema, type ZodType } from "zod";
+import { Schema } from "effect";
 
-import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
+import { ThumbnailsJob } from "../src/jobs/thumbnails-effect.mts";
 // Import schemas
-import { LiqvidConfig } from "../src/liqvid-config-zod.mts";
+import { LiqvidConfig } from "../src/liqvid-config-effect.mts";
 import {
   AspectRatio,
   AspectRatioSpecifier,
   AutoGenProjectMeta,
   ProjectJson,
-} from "../src/project.mts";
-import { RecordingMeta, RecordingMetaFile } from "../src/recording-meta.mts";
+} from "../src/project-effect.mts";
+import {
+  RecordingMeta,
+  RecordingMetaFile,
+} from "../src/recording-meta-effect.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, "..", "json-schemas");
 
 interface SchemaEntry {
   name: string;
-  schema: ZodType;
+  schema: Schema.Top;
 }
 
 const schemas: SchemaEntry[] = [
@@ -57,7 +60,17 @@ async function main() {
     console.log(`  ${filename}...`);
 
     const filepath = path.join(OUTPUT_DIR, filename);
-    const jsonSchema = toJSONSchema(schema, { io: "input" });
+    const document = Schema.toJsonSchemaDocument(schema);
+
+    // Assemble a self-contained JSON Schema document, hoisting any shared
+    // definitions into a `$defs` block (draft 2020-12).
+    const jsonSchema = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      ...document.schema,
+      ...(Object.keys(document.definitions).length > 0
+        ? { $defs: document.definitions }
+        : {}),
+    };
 
     await fsp.writeFile(filepath, JSON.stringify(jsonSchema, null, 2) + "\n");
   }

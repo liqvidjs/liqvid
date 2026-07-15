@@ -8,13 +8,15 @@ import chalk from "chalk";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
-import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
+import {
+  ASSETS_DIR,
+  PROJECT_FILE,
+  PROJECT_META_FILE,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
 import { debounce } from "../utils/misc.mts";
-
-export const ASSETS_DIRNAME = ".liqvid";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -159,7 +161,7 @@ async function generateProjectTypes({
   projectDir: string;
 }) {
   const directoryStructure = await listProjectDir(projectDir);
-  const assetsDir = path.join(projectDir, ASSETS_DIRNAME);
+  const assetsDir = path.join(projectDir, ASSETS_DIR);
 
   // Ensure .liqvid directory exists
   await fsp.mkdir(assetsDir, { recursive: true });

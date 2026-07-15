@@ -160,3 +160,23 @@ export function formatTimeMs(time: number | DurationLike): string {
     String(milliseconds).padStart(3, "0").replace(/0+$/, "")
   );
 }
+
+/**
+ * Format a millisecond timestamp as a VTT cue time (`HH:MM:SS.mmm`).
+ */
+export function formatVttTimestamp(ms: number | DurationLike): string {
+  if (typeof ms !== "number") {
+    ms = Duration.inMilliseconds(ms);
+  }
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const millis = Math.round(ms % 1000);
+
+  const pad = (value: number, length = 2) =>
+    value.toString().padStart(length, "0");
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(millis, 3)}`;
+}

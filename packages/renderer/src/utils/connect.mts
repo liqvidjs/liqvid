@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: this is fine */
 import cliProgress from "cli-progress";
-import { Effect } from "effect";
+import { Cause, Effect } from "effect";
 import type * as Puppeteer from "puppeteer-core";
 
 import type { ColorScheme, RenderMode } from "../types.mts";
@@ -37,8 +37,7 @@ export function connect({
       Effect.promise(() => browser.newPage()),
       (page) => Effect.promise(() => page.close()),
     ).pipe(
-      Effect.tapCause((c) => Effect.logError(JSON.stringify(c, null, 2))),
-      Effect.tapError(Effect.logError),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       Effect.orDie,
     );
     page.setViewport({ height, width });
@@ -123,12 +122,9 @@ export function getPages({
   return Effect.gen(function* () {
     // progress bar
     const progress = yield* Progress;
-    const playerBar = new progress.SingleBar(
-      {
-        etaBuffer: 1,
-      },
-      cliProgress.Presets.shades_classic,
-    );
+    const playerBar = new progress.SingleBar({
+      etaBuffer: 1,
+    });
     playerBar.start(concurrency, 0);
 
     yield* Effect.logDebug("acquiring browser");

@@ -10,7 +10,7 @@ import {
 } from "effect";
 import type { Concurrency } from "effect/Types";
 
-import type { LoggableJob } from "../types.mts";
+import type { LoggableJob } from "../api/schemas.mts";
 
 export function safeGetOption<
   M extends {

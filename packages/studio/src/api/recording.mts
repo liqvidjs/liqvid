@@ -14,7 +14,7 @@ import { Effect, FileSystem, Option, type PlatformError, Schema } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
-import { RECORDING_META_FILE } from "../conventions.mts";
+import { ASSETS_DIR, RECORDING_META_FILE } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
 
@@ -61,7 +61,7 @@ export function saveRecording(
       projectDir = path.dirname(projectDir);
     }
 
-    const assetsDir = path.join(projectDir, ".liqvid");
+    const assetsDir = path.join(projectDir, ASSETS_DIR);
 
     // Create assets dir if it doesn't exist
     if (!(yield* fs.exists(assetsDir))) {
@@ -190,7 +190,7 @@ export const recordingsLive = HttpApiBuilder.group(
 
         const fs = yield* FileSystem.FileSystem;
 
-        const assetsDir = path.join(projectDir, ".liqvid");
+        const assetsDir = path.join(projectDir, ASSETS_DIR);
 
         // error if assets dir doesn't exist
         if (!(yield* fs.exists(assetsDir))) {

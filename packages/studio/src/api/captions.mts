@@ -5,6 +5,12 @@ import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
+import {
+  AUDIO_WAV,
+  CAPTIONS_FILE,
+  CAPTIONS_META,
+  RICH_TRANSCRIPT,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { CaptionsMeta } from "../types/schemas.mts";
 import { NotFoundError } from "../utils/errors.mts";
@@ -12,11 +18,6 @@ import { createJob } from "../utils/jobs.mts";
 
 import { getAudioDir } from "./audio.mts";
 import { WebApi } from "./contract.mts";
-
-const AUDIO_FILE = "audio.wav";
-const CAPTIONS_META_FILE = "captions-meta.json";
-const CAPTIONS_FILE = "captions.vtt";
-const TRANSCRIPT_FILE = "transcript.json";
 
 /**
  * The name given to a captioning job, uniquely identifying the audio it
@@ -33,7 +34,7 @@ function writeCaptionsMeta(audioDir: string, meta: CaptionsMeta) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     yield* fs.makeDirectory(audioDir, { recursive: true });
-    yield* writeJSON(path.join(audioDir, CAPTIONS_META_FILE), meta);
+    yield* writeJSON(path.join(audioDir, CAPTIONS_META), meta);
   });
 }
 
@@ -58,7 +59,7 @@ export const captionsLive = HttpApiBuilder.group(
           const fs = yield* FileSystem.FileSystem;
 
           // The audio must have been rendered first.
-          const audioFile = path.join(audioDir, AUDIO_FILE);
+          const audioFile = path.join(audioDir, AUDIO_WAV);
           if (!(yield* fs.exists(audioFile))) {
             return yield* new NotFoundError({
               message: "Audio not found; render audio before captioning",
@@ -77,7 +78,7 @@ export const captionsLive = HttpApiBuilder.group(
             captionsPath: path.join(audioDir, CAPTIONS_FILE),
             createdAt: new Date().toISOString(),
             status: "generating",
-            transcriptPath: path.join(audioDir, TRANSCRIPT_FILE),
+            transcriptPath: path.join(audioDir, RICH_TRANSCRIPT),
           };
 
           // Start transcription in the background. The initial metadata is
@@ -133,7 +134,7 @@ export const captionsLive = HttpApiBuilder.group(
 
           const fs = yield* FileSystem.FileSystem;
 
-          const metaPath = path.join(audioDir, CAPTIONS_META_FILE);
+          const metaPath = path.join(audioDir, CAPTIONS_META);
           if (!(yield* fs.exists(metaPath))) {
             return yield* new NotFoundError({
               message: "No captions found for this audio",
@@ -141,11 +142,7 @@ export const captionsLive = HttpApiBuilder.group(
           }
 
           // Remove only captions-related files; leave the audio intact.
-          for (const file of [
-            CAPTIONS_META_FILE,
-            CAPTIONS_FILE,
-            TRANSCRIPT_FILE,
-          ]) {
+          for (const file of [CAPTIONS_META, CAPTIONS_FILE, RICH_TRANSCRIPT]) {
             yield* fs.remove(path.join(audioDir, file), { force: true });
           }
 

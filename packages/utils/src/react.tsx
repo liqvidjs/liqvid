@@ -242,3 +242,22 @@ export function useStable<Pre, Post>(
 
   return prev.current;
 }
+
+/**
+ * Get the initial value of an expression.
+ *
+ * This returns a stable value. To avoid `useExhaustiveDependencies` warnings,
+ * add the following to `biome.json`:
+ * ```json
+ * "useExhaustiveDependencies": {
+ *   "level": "on",
+ *   "options": {
+ *     "hooks": [{ "name": "useInitial", "stableResult": true }]
+ *   }
+ * }
+ * ```
+ */
+export function useInitial<T>(val: T): T {
+  const ref = useRef<T>(val);
+  return ref.current;
+}

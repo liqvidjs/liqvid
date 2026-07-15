@@ -2,6 +2,10 @@ import { Effect, Schema } from "effect";
 
 /**
  * Available Whisper model names.
+ *
+ * These correspond to the ggml models managed by `smart-whisper`
+ * (see its `MODELS` map). When a model name is used, `smart-whisper`
+ * downloads it on demand into its managed model directory.
  */
 export const WhisperModelName = Schema.Literals([
   "tiny",
@@ -13,97 +17,78 @@ export const WhisperModelName = Schema.Literals([
   "medium",
   "medium.en",
   "large-v1",
-  "large",
+  "large-v2",
+  "large-v3",
   "large-v3-turbo",
 ]);
 
 export type WhisperModelName = (typeof WhisperModelName)["Type"];
 
+/**
+ * Options forwarded to `smart-whisper`'s transcription parameters.
+ *
+ * These map onto a subset of `TranscribeParams` from `smart-whisper`.
+ */
 export const WhisperOptions = Schema.Struct({
-  /** disable GPU inference */
-  noGpu: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in csv file */
-  outputInCsv: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in json file */
-  outputInJson: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in json file including more information */
-  outputInJsonFull: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(true)),
+  /**
+   * Spoken language code (e.g. `"en"`, `"de"`). Use `"auto"` to detect.
+   * @default "auto"
+   */
+  language: Schema.String.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("auto")),
   ),
 
   /**
-   * get output result in lrc file
+   * Maximum segment length in characters (`0` = no limit).
+   * @default 0
+   */
+  maxLen: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(0))),
+
+  /**
+   * Number of threads to use for inference.
+   * If omitted, `smart-whisper` picks a sensible default.
+   */
+  nThreads: Schema.Number.pipe(Schema.optional),
+
+  /**
+   * Split segments on word rather than on token boundaries.
    * @default false
    */
-  outputInLrc: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in srt file */
-  outputInSrt: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in txt file */
-  outputInText: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in vtt file */
-  outputInVtt: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** get output result in wts file for karaoke */
-  outputInWords: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** split on word rather than on token */
   splitOnWord: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
   ),
 
-  /** amount of dialogue per timestamp pair */
-  timestamps_length: Schema.Number.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(20)),
-  ),
-
-  /** translate from source language to english */
-  translateToEnglish: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
-
-  /** word-level timestamps */
-  wordTimestamps: Schema.Boolean.pipe(
+  /**
+   * Emit per-token timestamps (required for word-level timing).
+   * @default true
+   */
+  tokenTimestamps: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(true)),
+  ),
+
+  /** Translate from the source language to English. */
+  translate: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
   ),
 });
 
 export type WhisperOptions = (typeof WhisperOptions)["Type"];
 
 /**
- * Configuration for Whisper transcription.
+ * Configuration for Whisper transcription via `smart-whisper`.
  */
-
 export const WhisperConfig = Schema.Struct({
   /**
-   * Auto-download a model if not present.
-   * If set, the model will be downloaded automatically.
+   * Use the GPU for inference (Metal on macOS; BYOL elsewhere).
+   * @default false
    */
-  autoDownloadModelName: WhisperModelName.pipe(Schema.optional),
+  gpu: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 
   /**
-   * Name of the Whisper model to use.
+   * Name of the Whisper model to use. When set (and `modelPath` is not),
+   * `smart-whisper` downloads it on demand into its managed directory.
    * @default "base.en"
    */
   modelName: WhisperModelName.pipe(
@@ -111,18 +96,10 @@ export const WhisperConfig = Schema.Struct({
   ),
 
   /**
-   * Directory containing the Whisper model files.
-   * If not specified, uses the default nodejs-whisper location.
+   * Explicit path to a ggml Whisper model file. When set, this takes
+   * precedence over {@link WhisperConfig.modelName} and no download occurs.
    */
-  modelRootPath: Schema.String.pipe(Schema.optional),
-
-  /**
-   * Amount of dialogue per timestamp pair.
-   * @default 20
-   */
-  timestampsLength: Schema.Number.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(20)),
-  ),
+  modelPath: Schema.String.pipe(Schema.optional),
 
   /**
    * Whether to translate to English.
@@ -133,14 +110,6 @@ export const WhisperConfig = Schema.Struct({
   ),
 
   whisperOptions: WhisperOptions.pipe(Schema.optional),
-
-  /**
-   * Whether to use CUDA for faster processing.
-   * @default false
-   */
-  withCuda: Schema.Boolean.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(false)),
-  ),
 });
 
 export type WhisperConfigIn = (typeof WhisperConfig)["Encoded"];

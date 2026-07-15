@@ -10,13 +10,25 @@ import {
   ProjectJson,
   type ProjectMeta,
 } from "@liqvid/schemas/effect";
-import { Effect, FileSystem, type PlatformError, PubSub, Stream } from "effect";
+import chalk from "chalk";
+import {
+  Cause,
+  Effect,
+  FileSystem,
+  Layer,
+  Logger,
+  type PlatformError,
+  PubSub,
+  Stream,
+} from "effect";
 
-import { PROJECT_FILE, PROJECT_META_FILE } from "../conventions.mts";
+import {
+  ASSETS_DIR,
+  PROJECT_FILE,
+  PROJECT_META_FILE,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { walkDir } from "../utils/fs.mts";
-
-import { ASSETS_DIRNAME } from "./watch-assets.mts";
 
 type Projects = Record<string, ProjectMeta>;
 
@@ -38,6 +50,7 @@ interface WatchEvent {
 }
 
 export async function watchProjectFiles(projects: Projects) {
+  console.log(chalk.blue("Watching project files..."));
   const { cwd } = getServerState();
   const TARGET_DIR = path.join(cwd, "app");
 
@@ -49,14 +62,24 @@ export async function watchProjectFiles(projects: Projects) {
       if (basename === "project.json") {
         await Effect.runPromise(
           createProject({ basename, dirname, filename, projects }).pipe(
-            Effect.provide(NodeFileSystem.layer),
-            Effect.tapError(Effect.logError),
+            Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+            Effect.provide(
+              Layer.mergeAll(
+                NodeFileSystem.layer,
+                Logger.layer([
+                  Logger.consolePretty({
+                    colors: true,
+                    mode: "tty",
+                  }),
+                ]),
+              ),
+            ),
           ),
         );
       }
     },
     ({ basename }) => {
-      if (basename === ".liqvid") return false;
+      if (basename === ASSETS_DIR) return false;
       return true;
     },
   );
@@ -73,7 +96,7 @@ export async function watchProjectFiles(projects: Projects) {
       yield* Stream.fromPubSub(pubsub).pipe(
         Stream.runForEach((event) =>
           handleWatchEvent(event, projects).pipe(
-            Effect.tapError(Effect.logError),
+            Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
             Effect.ignore,
           ),
         ),
@@ -84,9 +107,17 @@ export async function watchProjectFiles(projects: Projects) {
       // keeping the scope (and the forked consumer) alive.
       yield* watchFileEvents(TARGET_DIR).pipe(
         Stream.runForEach((event) => PubSub.publish(pubsub, event)),
-        Effect.tapError(Effect.logError),
+        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       );
-    }).pipe(Effect.scoped, Effect.provide(NodeFileSystem.layer)),
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          NodeFileSystem.layer,
+          Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
+        ),
+      ),
+      Effect.scoped,
+    ),
   );
 }
 
@@ -145,7 +176,7 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
         }
       }
     }
-  });
+  }).pipe(Effect.annotateLogs({ operation: "handleWatchEvent" }));
 }
 
 /**
@@ -177,7 +208,7 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
 
     projects[meta.path] = meta;
 
-    yield* generateProjectDir({ dirname });
+    yield* generateAssetsDir({ dirname });
   });
 }
 
@@ -203,7 +234,7 @@ function createProject({ dirname, filename, projects }: Context) {
     // read duration
     const duration = yield* loadJsonEffect(
       AutoGenProjectMeta,
-      path.join(dirname, ".liqvid", PROJECT_META_FILE),
+      path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
     ).pipe(Effect.map((meta) => new Duration(meta.duration)));
 
     const meta: ProjectMeta = {
@@ -217,8 +248,8 @@ function createProject({ dirname, filename, projects }: Context) {
 
     projects[meta.path] = meta;
 
-    yield* generateProjectDir({ dirname });
-  });
+    yield* generateAssetsDir({ dirname });
+  }).pipe(Effect.annotateLogs({ operation: "createProject" }));
 }
 
 /**
@@ -233,9 +264,12 @@ function handleProjectMeta({
     const { cwd } = getServerState();
     const TARGET_DIR = path.join(cwd, "app");
 
-    const projectPath = path.relative(TARGET_DIR, path.dirname(dotLiqvidDir));
+    const projectPath = path.dirname(dotLiqvidDir);
 
-    const projectMeta = yield* loadJsonEffect(AutoGenProjectMeta, filename);
+    const projectMeta = yield* loadJsonEffect(
+      AutoGenProjectMeta,
+      path.join(TARGET_DIR, filename),
+    );
 
     const project = projects[projectPath];
     if (!project) {
@@ -244,7 +278,7 @@ function handleProjectMeta({
     }
 
     project.duration = new Duration(projectMeta.duration);
-  });
+  }).pipe(Effect.annotateLogs({ operation: "handleProjectMeta" }));
 }
 
 const OPENGRAPH_IMAGE_FILENAMES = [
@@ -361,11 +395,11 @@ function parseAspectRatio(value: unknown): AspectRatio {
   throw new Error(`Invalid aspect ratio: ${value}`);
 }
 
-function generateProjectDir({ dirname }: { dirname: string }) {
+function generateAssetsDir({ dirname }: { dirname: string }) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    const assetsDir = path.join(dirname, ASSETS_DIRNAME);
+    const assetsDir = path.join(dirname, ASSETS_DIR);
 
     if (yield* fs.exists(assetsDir)) return;
 

@@ -1,4 +1,4 @@
-import {Transcript} from "./transcription";
+import type { Transcript } from "./transcription";
 
 /**
  * Convert rich {@link Transcript} to WebVTT string
@@ -24,7 +24,7 @@ export function toWebVTT(transcript: Transcript) {
   return captions.join("\n");
 }
 
-/* WebVTT requires mm:ss whereas @liqvid/utils/time produces [m]m:ss */
+/* WebVTT requires mm:ss whereas @liqvid/utils produces [m]m:ss */
 function formatTime(time: number): string {
   if (time < 0) {
     return "-" + formatTime(-time);

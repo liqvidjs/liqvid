@@ -1,7 +1,7 @@
 "use client";
 
 import { type StringValueConfig, usePersistentState } from "@liqvid/hydration";
-import { makeContext } from "@liqvid/utils";
+import { makeContext, useInitial } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 export type ColorScheme = "light" | "dark";
@@ -72,13 +72,13 @@ export const useColorScheme = colorSchemeContext.use;
  */
 export function ColorSchemeMetaTag() {
   const { colorScheme } = useColorScheme();
-  const initialColorScheme = useRef(colorScheme);
+  const initialColorScheme = useInitial(colorScheme);
   const meta = useRef<HTMLMetaElement>(null);
 
   useEffect(() => {
     meta.current = document.createElement("meta");
     meta.current.setAttribute("name", "color-scheme");
-    meta.current.setAttribute("content", initialColorScheme.current);
+    meta.current.setAttribute("content", initialColorScheme);
 
     document.head.appendChild(meta.current);
 

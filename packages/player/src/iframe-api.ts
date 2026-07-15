@@ -3,7 +3,7 @@
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
 import { z } from "zod";
 
-import { RenderMode } from "./render-mode";
+import { RenderMode } from "./render-mode.ts";
 
 /**
  * API declaration for Liqvid player iframe communication.

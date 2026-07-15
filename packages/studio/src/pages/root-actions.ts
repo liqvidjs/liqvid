@@ -13,6 +13,11 @@ import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
+import {
+  ASSETS_DIR,
+  PROJECT_FILE,
+  PROJECT_META_FILE,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
 
@@ -98,7 +103,7 @@ export async function openRenderInFinderAction(
     const fullPath = path.join(
       APP_DIR,
       projectPath,
-      ".liqvid",
+      ASSETS_DIR,
       "renders",
       renderId,
     );
@@ -124,7 +129,7 @@ export async function openCaptionsInFinderAction(
     if (projectPath.includes("..")) {
       return { success: false };
     }
-    const fullPath = path.join(APP_DIR, projectPath, ".liqvid", "captions");
+    const fullPath = path.join(APP_DIR, projectPath, ASSETS_DIR, "captions");
     await execa("open", [fullPath]);
     return { success: true };
   } catch (e) {
@@ -275,7 +280,7 @@ export async function createProjectAction(
       // Create base directory structure
       yield* fs.makeDirectory(fullProjectPath, { recursive: true });
       yield* fs.makeDirectory(
-        path.join(fullProjectPath, ".liqvid", "recordings"),
+        path.join(fullProjectPath, ASSETS_DIR, "recordings"),
         {
           recursive: true,
         },
@@ -289,23 +294,23 @@ export async function createProjectAction(
       // Create shared files (project.json and .liqvid files)
       yield* compileTemplate(
         path.join(TEMPLATES_DIR, "project.json.hbs"),
-        path.join(fullProjectPath, "project.json"),
+        path.join(fullProjectPath, PROJECT_FILE),
         templateData,
       );
 
       // Generate .liqvid/project-meta.json (initial empty duration)
       yield* writeJSON<AutoGenProjectMeta>(
-        path.join(fullProjectPath, ".liqvid", "project-meta.json"),
+        path.join(fullProjectPath, ASSETS_DIR, PROJECT_META_FILE),
         { duration: { milliseconds: 0 } },
       );
 
       // Generate .liqvid/types.ts (initial structure)
       yield* compileTemplate(
         path.join(TEMPLATES_DIR, "types.ts.hbs"),
-        path.join(fullProjectPath, ".liqvid", "types.ts"),
+        path.join(fullProjectPath, ASSETS_DIR, "types.ts"),
         {
           directoryStructure: {
-            "project-meta.json": null,
+            [PROJECT_META_FILE]: null,
             recordings: {},
           },
         },

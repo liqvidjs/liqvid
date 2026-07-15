@@ -15,7 +15,6 @@ import {
   normalizeAspectRatio,
 } from "./aspect-ratio.ts";
 import { Canvas } from "./Canvas.tsx";
-import { Captions } from "./Captions.tsx";
 import { Controls } from "./Controls.tsx";
 import { PlayerContext, type RenderingTask } from "./hooks.ts";
 import { playerApiDeclaration } from "./iframe-api.ts";
@@ -119,15 +118,15 @@ export function Root({
   }, [api]);
 
   useEffect(() => {
-    if (ref.current) {
-      // biome-ignore lint/suspicious/noExplicitAny: symbol
-      (ref.current as any)[API_SYMBOL] = {
-        playback,
-        setColorScheme: api.setColorScheme,
-        setRenderMode: api.setRenderMode,
-        toggleControls: api.toggleControls,
-      };
-    }
+    if (!ref.current) return;
+
+    // biome-ignore lint/suspicious/noExplicitAny: symbol
+    (ref.current as any)[API_SYMBOL] = {
+      playback,
+      setColorScheme: api.setColorScheme,
+      setRenderMode: api.setRenderMode,
+      toggleControls: api.toggleControls,
+    };
   }, [api, playback]);
 
   const inner = (
@@ -179,4 +178,4 @@ export function Root({
   );
 }
 
-export const Player = { Canvas, Captions, Controls, Root };
+export const Player = { Canvas, Controls, Root };

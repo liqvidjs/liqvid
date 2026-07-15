@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
-import { PROJECT_META_FILE } from "../conventions.mts";
+import { ASSETS_DIR, PROJECT_META_FILE } from "../conventions.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -18,7 +18,7 @@ export const projectMetaLive = HttpApiBuilder.group(
         if (projectPath.endsWith("page.tsx")) {
           projectPath = path.dirname(projectPath);
         }
-        const assetsDir = path.join(projectPath, ".liqvid");
+        const assetsDir = path.join(projectPath, ASSETS_DIR);
         const projectMetaFile = path.join(assetsDir, PROJECT_META_FILE);
 
         const fs = yield* FileSystem.FileSystem;
@@ -38,6 +38,11 @@ export const projectMetaLive = HttpApiBuilder.group(
             2,
           ),
         );
-      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+      }).pipe(
+        Effect.annotateLogs({
+          operation: "setProjectMeta",
+        }),
+        Effect.catchTag("PlatformError", Effect.die),
+      ),
     ),
 );

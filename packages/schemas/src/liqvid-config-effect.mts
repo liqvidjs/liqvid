@@ -75,9 +75,6 @@ export const LiqvidConfig = Schema.Struct({
    */
   basePath: StringWithEnvVars.pipe(Schema.optional),
 
-  /** Locale for Liqvid Studio user interface. */
-  locale: Locale.pipe(Schema.withDecodingDefaultType(Effect.succeed("en"))),
-
   /** Media config */
   media: Schema.Struct({
     /** Audio configuration */
@@ -96,7 +93,7 @@ export const LiqvidConfig = Schema.Struct({
 
     /** Captioning configuration */
     captioning: Schema.Struct({
-      nodeWhisperOptions: WhisperConfig.pipe(Schema.optional),
+      smartWhisperOptions: WhisperConfig.pipe(Schema.optional),
     }).pipe(Schema.optional),
 
     /** Thumbnail generation configuration */
@@ -162,6 +159,11 @@ export const LiqvidConfig = Schema.Struct({
         ),
       ),
     }).pipe(Schema.optional),
+  }).pipe(Schema.optional),
+
+  ui: Schema.Struct({
+    /** Locale for Liqvid Studio user interface. */
+    locale: Locale.pipe(Schema.withDecodingDefaultType(Effect.succeed("en"))),
   }).pipe(Schema.optional),
 });
 

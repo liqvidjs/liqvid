@@ -6,6 +6,14 @@ import type { LiqvidConfig } from "@liqvid/schemas/effect";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
+import {
+  ASSETS_DIR,
+  AUDIO_DIR,
+  AUDIO_WAV,
+  CAPTIONS_FILE,
+  CAPTIONS_META,
+  RICH_TRANSCRIPT,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { CaptionsMeta } from "../types/schemas.mts";
 import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
@@ -19,8 +27,6 @@ import { createJob } from "../utils/jobs.mts";
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
 
-const AUDIO_BASE_DIR = ".liqvid/audio";
-const AUDIO_FILE = "audio.wav";
 const AUDIO_META_FILE = "audio-meta.json";
 
 /** Id used for the single audio rendering when `audio.multiple` is false. */
@@ -29,7 +35,7 @@ export const SINGLE_AUDIO_ID = "default";
 /** Absolute path to the `.liqvid/audio` directory for a project. */
 function getAudioBaseDir(projectPath: string): string {
   const { cwd } = getServerState();
-  return path.join(cwd, "app", projectPath, AUDIO_BASE_DIR);
+  return path.join(cwd, "app", projectPath, ASSETS_DIR, AUDIO_DIR);
 }
 
 /**
@@ -72,10 +78,7 @@ function readAudioMeta(audioDir: string) {
  * Captions metadata lives alongside the audio in the same directory.
  */
 export function readCaptionsMeta(audioDir: string) {
-  return loadJsonEffect(
-    CaptionsMeta,
-    path.join(audioDir, "captions-meta.json"),
-  );
+  return loadJsonEffect(CaptionsMeta, path.join(audioDir, CAPTIONS_META));
 }
 
 /**
@@ -173,7 +176,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
         yield* fs.makeDirectory(audioDir, { recursive: true });
 
-        const output = path.join(audioDir, AUDIO_FILE);
+        const output = path.join(audioDir, AUDIO_WAV);
         const metaOutput = path.join(audioDir, AUDIO_META_FILE);
 
         // Build the URL for the video
@@ -260,11 +263,11 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
           // only remove the audio-related files (leave other content intact).
 
           for (const file of [
-            AUDIO_FILE,
+            AUDIO_WAV,
             AUDIO_META_FILE,
-            "captions.vtt",
-            "transcript.json",
-            "captions-meta.json",
+            CAPTIONS_FILE,
+            RICH_TRANSCRIPT,
+            CAPTIONS_META,
           ]) {
             yield* fs.remove(path.join(audioDir, file), { force: true });
           }

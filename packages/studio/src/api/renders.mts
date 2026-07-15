@@ -7,7 +7,6 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
 
 import { getServerState } from "../initialize.mts";
-import type { LoggableJob } from "../types.mts";
 import {
   existenceOptional,
   jobProgressLayer,
@@ -17,6 +16,7 @@ import { ConflictError, NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 
 import { WebApi } from "./contract.mts";
+import type { LoggableJob } from "./schemas.mts";
 import { RenderMeta } from "./schemas.mts";
 
 const RENDER_META_FILE = "render-meta.json";

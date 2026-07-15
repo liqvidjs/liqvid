@@ -1,5 +1,6 @@
 import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { useInitial } from "@liqvid/utils";
 import { useEffect, useRef, useState } from "react";
 
 import { recording, shortcuts, vimCompartment } from "../extensions.ts";
@@ -57,7 +58,7 @@ export function Editor({
 
   // changing content, filename, or groupId is not supported
   // changing extensions or readOnly is done separately
-  const initialSettings = useRef({
+  const initialSettings = useInitial({
     content,
     extensions,
     filename,
@@ -70,7 +71,7 @@ export function Editor({
     if (!ref.current) return;
 
     const { content, extensions, filename, groupId, readOnly } =
-      initialSettings.current;
+      initialSettings;
 
     // create editor
     const view = new EditorView({

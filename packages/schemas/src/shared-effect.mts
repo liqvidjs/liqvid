@@ -43,3 +43,35 @@ export const StringWithEnvVars = Schema.String.pipe(
   decodeEnvVar,
 );
 export type StringWithEnvVars = (typeof StringWithEnvVars)["Type"];
+
+/**
+ * Transcript entry with word and timing information.
+ * Format: [word, startTimeMs, endTimeMs]
+ */
+export const TranscriptEntry = Schema.Tuple([
+  Schema.String,
+  Schema.Number.pipe(
+    Schema.annotate({ description: "Start time in milliseconds" }),
+  ),
+  Schema.Number.pipe(
+    Schema.annotate({ description: "End time in milliseconds" }),
+  ),
+]);
+
+export type TranscriptEntry = (typeof TranscriptEntry)["Type"];
+
+/**
+ * Rich transcript with per-word timings and caption/transcript breaks.
+ */
+export const RichTranscript = Schema.Struct({
+  /** Array of indices indicating where caption breaks occur */
+  captionBreaks: Schema.Array(Schema.Number),
+
+  /** Array of indices indicating where paragraph breaks occur */
+  paragraphBreaks: Schema.Array(Schema.Number),
+
+  /** Array of transcript entries with word and timing information */
+  words: Schema.Array(TranscriptEntry),
+});
+
+export type RichTranscript = (typeof RichTranscript)["Type"];

@@ -1,10 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
     "$schema": {
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "backend": {
+      "additionalProperties": false,
       "properties": {
         "content": {
           "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
@@ -19,342 +28,762 @@
       "type": "object"
     },
     "basePath": {
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "media": {
-      "properties": {
-        "captioning": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
           "properties": {
-            "nodeWhisperOptions": {
-              "properties": {
-                "autoDownloadModelName": {
-                  "enum": [
-                    "tiny",
-                    "tiny.en",
-                    "base",
-                    "base.en",
-                    "small",
-                    "small.en",
-                    "medium",
-                    "medium.en",
-                    "large-v1",
-                    "large",
-                    "large-v3-turbo"
-                  ],
-                  "type": "string"
-                },
-                "modelName": {
-                  "default": "base.en",
-                  "enum": [
-                    "tiny",
-                    "tiny.en",
-                    "base",
-                    "base.en",
-                    "small",
-                    "small.en",
-                    "medium",
-                    "medium.en",
-                    "large-v1",
-                    "large",
-                    "large-v3-turbo"
-                  ],
-                  "type": "string"
-                },
-                "modelRootPath": {
-                  "type": "string"
-                },
-                "timestampsLength": {
-                  "default": 20,
-                  "type": "number"
-                },
-                "translateToEnglish": {
-                  "default": false,
-                  "type": "boolean"
-                },
-                "withCuda": {
-                  "default": false,
-                  "type": "boolean"
-                }
-              },
-              "type": "object"
-            }
-          },
-          "type": "object"
-        },
-        "thumbnails": {
-          "properties": {
-            "defaults": {
-              "properties": {
-                "browserExecutable": {
-                  "type": "string"
-                },
-                "browserHeight": {
-                  "type": "number"
-                },
-                "browserWidth": {
-                  "type": "number"
-                },
-                "colorScheme": {
-                  "default": "light",
-                  "enum": ["light", "dark"],
-                  "type": "string"
-                },
-                "cols": {
-                  "default": 5,
-                  "type": "number"
-                },
-                "concurrency": {
-                  "default": 1,
-                  "type": "number"
-                },
-                "frequency": {
-                  "default": 4,
-                  "type": "number"
-                },
-                "height": {
-                  "default": 90,
-                  "type": "number"
-                },
-                "imageFormat": {
-                  "default": "png",
-                  "enum": ["jpeg", "png"],
-                  "type": "string"
-                },
-                "quality": {
-                  "default": 80,
-                  "type": "number"
-                },
-                "rows": {
-                  "default": 5,
-                  "type": "number"
-                },
-                "width": {
-                  "default": 160,
-                  "type": "number"
-                }
-              },
-              "type": "object"
-            }
-          },
-          "required": ["defaults"],
-          "type": "object"
-        }
-      },
-      "required": ["thumbnails"],
-      "type": "object"
-    },
-    "providers": {
-      "properties": {
-        "bluesky": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
-        },
-        "copy": {
-          "properties": {
-            "clean": {
-              "default": false,
-              "type": "boolean"
-            },
-            "destination": {
+            "audio": {
               "anyOf": [
                 {
-                  "type": "string"
-                },
-                {
+                  "additionalProperties": false,
                   "properties": {
-                    "hosting": {
-                      "type": "string"
-                    },
-                    "media": {
-                      "type": "string"
+                    "multiple": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
-                  "required": ["hosting", "media"],
                   "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "captioning": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "smartWhisperOptions": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "gpu": {
+                              "anyOf": [
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "modelName": {
+                              "anyOf": [
+                                {
+                                  "enum": [
+                                    "tiny",
+                                    "tiny.en",
+                                    "base",
+                                    "base.en",
+                                    "small",
+                                    "small.en",
+                                    "medium",
+                                    "medium.en",
+                                    "large-v1",
+                                    "large-v2",
+                                    "large-v3",
+                                    "large-v3-turbo"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "modelPath": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "translateToEnglish": {
+                              "anyOf": [
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "whisperOptions": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "language": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "maxLen": {
+                                      "anyOf": [
+                                        {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "enum": ["NaN"],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "enum": ["Infinity"],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "enum": ["-Infinity"],
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "nThreads": {
+                                      "anyOf": [
+                                        {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "enum": ["NaN"],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "enum": ["Infinity"],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "enum": ["-Infinity"],
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "splitOnWord": {
+                                      "anyOf": [
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "tokenTimestamps": {
+                                      "anyOf": [
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "translate": {
+                                      "anyOf": [
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "thumbnails": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "defaults": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "browserExecutable": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "browserHeight": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "browserWidth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "colorScheme": {
+                          "anyOf": [
+                            {
+                              "enum": ["light", "dark"],
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "cols": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "concurrency": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "frequency": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "imageFormat": {
+                          "anyOf": [
+                            {
+                              "enum": ["jpeg", "png"],
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "quality": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "rows": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "enum": ["NaN"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["Infinity"],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": ["-Infinity"],
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": ["defaults"],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
                 }
               ]
             }
           },
-          "required": ["destination"],
           "type": "object"
         },
-        "facebook": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
-        },
-        "githubPages": {
-          "properties": {
-            "repository": {
-              "type": "string"
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "providers": {
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "clean": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "hosting": {
+                          "type": "string"
+                        },
+                        "media": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["hosting", "media"],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": ["destination"],
+              "type": "object"
             },
-            "root": {
-              "type": "boolean"
-            },
-            "username": {
-              "type": "string"
+            {
+              "type": "null"
             }
-          },
-          "required": ["repository", "username"],
-          "type": "object"
-        },
-        "instagram": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
-        },
-        "liqvidStudio": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
+          ]
         },
         "s3": {
-          "properties": {
-            "auth": {
-              "oneOf": [
-                {
-                  "properties": {
-                    "profile": {
-                      "type": "string"
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "auth": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "profile": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": ["profile"],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["profile", "type"],
+                      "type": "object"
                     },
-                    "type": {
-                      "const": "profile",
-                      "type": "string"
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "accessKeyId": {
+                          "anyOf": [
+                            {
+                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "endpoint": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "region": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "secretAccessKey": {
+                          "anyOf": [
+                            {
+                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "type": {
+                          "enum": ["explicit"],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["type"],
+                      "type": "object"
                     }
-                  },
-                  "required": ["profile", "type"],
-                  "type": "object"
+                  ]
                 },
-                {
-                  "properties": {
-                    "accessKeyId": {
-                      "default": "{env:AWS_ACCESS_KEY_ID}",
-                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
+                "bucket": {
+                  "type": "string"
+                },
+                "domain": {
+                  "type": "string"
+                },
+                "prefix": {
+                  "anyOf": [
+                    {
                       "type": "string"
                     },
-                    "endpoint": {
-                      "type": "string"
-                    },
-                    "region": {
-                      "default": "us-east-1",
-                      "type": "string"
-                    },
-                    "secretAccessKey": {
-                      "default": "{env:AWS_SECRET_ACCESS_KEY}",
-                      "pattern": "^\\{env:[\\s\\S]{0,}\\}$",
-                      "type": "string"
-                    },
-                    "type": {
-                      "const": "explicit",
-                      "type": "string"
+                    {
+                      "type": "null"
                     }
-                  },
-                  "required": ["type"],
-                  "type": "object"
+                  ]
+                },
+                "region": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
-              ]
+              },
+              "required": ["auth", "bucket", "domain"],
+              "type": "object"
             },
-            "bucket": {
-              "type": "string"
-            },
-            "domain": {
-              "type": "string"
-            },
-            "prefix": {
-              "type": "string"
-            },
-            "region": {
-              "type": "string"
+            {
+              "type": "null"
             }
-          },
-          "required": ["auth", "bucket", "domain"],
-          "type": "object"
-        },
-        "sftp": {
-          "properties": {
-            "host": {
-              "type": "string"
-            },
-            "path": {
-              "type": "string"
-            }
-          },
-          "required": ["host", "path"],
-          "type": "object"
-        },
-        "twitter": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
-        },
-        "youtube": {
-          "properties": {
-            "username": {
-              "type": "string"
-            }
-          },
-          "required": ["username"],
-          "type": "object"
+          ]
         }
       },
       "type": "object"
     },
     "publishing": {
-      "properties": {
-        "delete": {
-          "default": false,
-          "type": "boolean"
-        },
-        "include": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
           "properties": {
-            "media": {
-              "default": [
-                "**/*.gif",
-                "**/*.jpeg",
-                "**/*.jpg",
-                "**/*.m3u8",
-                "**/*.mov",
-                "**/*.mp4",
-                "**/*.png",
-                "**/*.webm",
-                "!**/opengraph-image.*",
-                "!**/twitter-image.*",
-                "**/.liqvid/**/*.ts",
-                "!**/.liqvid/types.ts",
-                "!**/*.d.ts",
-                "!**/*.d.json.ts"
-              ],
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
+            "delete": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "include": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "media": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "type": "object"
+        },
+        {
+          "type": "null"
         }
-      },
-      "type": "object"
+      ]
+    },
+    "ui": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "locale": {
+              "anyOf": [
+                {
+                  "enum": ["en", "fr", "es", "de", "zh"],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": ["backend", "providers"],

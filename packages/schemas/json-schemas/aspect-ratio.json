@@ -1,11 +1,44 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
     "height": {
-      "type": "number"
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "enum": ["NaN"],
+          "type": "string"
+        },
+        {
+          "enum": ["Infinity"],
+          "type": "string"
+        },
+        {
+          "enum": ["-Infinity"],
+          "type": "string"
+        }
+      ]
     },
     "width": {
-      "type": "number"
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "enum": ["NaN"],
+          "type": "string"
+        },
+        {
+          "enum": ["Infinity"],
+          "type": "string"
+        },
+        {
+          "enum": ["-Infinity"],
+          "type": "string"
+        }
+      ]
     }
   },
   "required": ["height", "width"],

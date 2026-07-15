@@ -1,4 +1,5 @@
 export * from "./collections.ts";
+export * from "./dev.ts";
 export * from "./duration-react.ts";
 export * from "./interaction.ts";
 export * from "./math.ts";

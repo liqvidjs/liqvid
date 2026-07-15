@@ -1,36 +1,186 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
     "colorScheme": {
       "enum": ["light", "dark", "both"],
       "type": "string"
     },
     "cols": {
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["NaN"],
+              "type": "string"
+            },
+            {
+              "enum": ["Infinity"],
+              "type": "string"
+            },
+            {
+              "enum": ["-Infinity"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "frequency": {
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["NaN"],
+              "type": "string"
+            },
+            {
+              "enum": ["Infinity"],
+              "type": "string"
+            },
+            {
+              "enum": ["-Infinity"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "height": {
-      "default": 90,
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["NaN"],
+              "type": "string"
+            },
+            {
+              "enum": ["Infinity"],
+              "type": "string"
+            },
+            {
+              "enum": ["-Infinity"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "imageFormat": {
-      "enum": ["jpeg", "png"],
-      "type": "string"
+      "anyOf": [
+        {
+          "enum": ["jpeg", "png"],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "quality": {
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "rows": {
-      "default": 5,
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["NaN"],
+              "type": "string"
+            },
+            {
+              "enum": ["Infinity"],
+              "type": "string"
+            },
+            {
+              "enum": ["-Infinity"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "width": {
-      "default": 160,
-      "type": "number"
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["NaN"],
+              "type": "string"
+            },
+            {
+              "enum": ["Infinity"],
+              "type": "string"
+            },
+            {
+              "enum": ["-Infinity"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
-  "required": ["colorScheme", "cols", "frequency", "imageFormat"],
+  "required": ["colorScheme"],
   "type": "object"
 }

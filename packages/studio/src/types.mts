@@ -1,5 +1,3 @@
-import type { Fiber } from "effect";
-
 import type { Directory } from "./types/assets.mts";
 
 export interface ProjectFile {
@@ -40,30 +38,3 @@ export class DirectoryHelper<DS extends string> {
 }
 
 export type Awaitable<T> = T | Promise<T>;
-
-export type StructuredLogType = "debug" | "error" | "info" | "log" | "warn";
-
-export type StructuredLog = {
-  annotations?: Record<string, unknown>;
-  message: unknown[];
-  timestamp: Date;
-  type: StructuredLogType;
-};
-
-export type LoggableJob<out A = unknown, out E = never> = {
-  fiber: Fiber.Fiber<A, E>;
-
-  id: string;
-
-  logs: StructuredLog[];
-
-  name: string;
-
-  path?: string;
-
-  startTime: Date;
-
-  state: LoggableJobState;
-};
-
-type LoggableJobState = "running" | "completed" | "cancelled" | "failed";

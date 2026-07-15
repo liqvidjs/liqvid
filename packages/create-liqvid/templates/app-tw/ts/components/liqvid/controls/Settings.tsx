@@ -121,6 +121,7 @@ export function Settings() {
 				// get index, this is kind of ugly
 				let i = -1;
 				let temp = e.currentTarget as Element;
+				// biome-ignore lint/suspicious/noAssignInExpressions: this is idiomatic
 				while ((temp = temp.previousElementSibling)) i++;
 
 				// hide old tracks

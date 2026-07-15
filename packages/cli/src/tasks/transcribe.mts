@@ -12,6 +12,7 @@ import { Effect, FileSystem, Layer } from "effect";
 import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
 import type { CommandModule } from "yargs";
 
+import { CAPTIONS_FILE, RICH_TRANSCRIPT } from "../conventions.mts";
 import { writeJSON } from "../utils/effect.mts";
 import { expandTilde } from "../utils/paths.mts";
 import { defaultCliProgressLayer } from "../utils/progress.mts";
@@ -311,8 +312,8 @@ export function transcribe({
     const absoluteAudioFile = path.resolve(audioFile);
     const absoluteOutputDir = path.resolve(outputDir);
 
-    const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
-    const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
+    const targetVttPath = path.join(absoluteOutputDir, CAPTIONS_FILE);
+    const targetJsonPath = path.join(absoluteOutputDir, RICH_TRANSCRIPT);
 
     // Load the model (downloading it on demand if referenced by name).
     yield* Effect.logDebug("finding model");
