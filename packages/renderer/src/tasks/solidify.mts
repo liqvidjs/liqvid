@@ -165,7 +165,7 @@ export function solidify({
             Effect.promise(() => page.close({ runBeforeUnload: false })),
           ),
         ),
-    );
+    ).pipe(Effect.scoped);
 
     // stitch them
     if (!sequence) {

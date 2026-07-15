@@ -16,6 +16,18 @@ export interface RenderAudioOptions {
 
   /** URL of the Liqvid player */
   url: string;
+
+  /**
+   * Number of channels to use
+   * @default 1
+   */
+  channels?: number;
+
+  /**
+   * Sample rate
+   * @default 16000
+   */
+  sampleRate?: number;
 }
 
 export interface RenderAudioResult {
@@ -33,10 +45,14 @@ export interface RenderAudioResult {
  * audio sources offline using an {@link OfflineAudioContext}, and saves
  * the result as a WAV file.
  */
-export function renderAudio(options: RenderAudioOptions) {
+export function renderAudio({
+  browserExecutable,
+  channels = 1,
+  sampleRate = 16_000,
+  output,
+  url,
+}: RenderAudioOptions) {
   return Effect.gen(function* () {
-    const { browserExecutable, output, url } = options;
-
     // Find browser executable
     const executablePath = yield* Effect.promise(() =>
       getEnsureChrome(browserExecutable ?? ""),
@@ -61,7 +77,7 @@ export function renderAudio(options: RenderAudioOptions) {
       width: 0,
     });
 
-    const { duration } = yield* Effect.promise(async () => {
+    yield* Effect.promise(async () => {
       // send Escape key to page --- can't load audioContext without user input
       await page.keyboard.press("Escape");
 
@@ -69,9 +85,16 @@ export function renderAudio(options: RenderAudioOptions) {
         () =>
           player.playback.audioContext && player.playback.audioSources.size > 0,
       );
+    });
 
+    yield* Effect.logDebug("got audio sources");
+
+    const { duration } = yield* Effect.promise(async () => {
       // Render the audio inside the page
-      const { base64, duration } = await page.evaluate(renderOfflineInPage);
+      const { base64, duration } = await page.evaluate(renderOfflineInPage, {
+        channels,
+        sampleRate,
+      });
 
       // Ensure output directory exists
       await fsp.mkdir(path.dirname(output), { recursive: true });
@@ -82,11 +105,16 @@ export function renderAudio(options: RenderAudioOptions) {
       return { duration };
     });
 
+    yield* Effect.logDebug("done!");
+
     return {
       duration,
       path: output,
     };
-  }).pipe(Effect.scoped);
+  }).pipe(
+    Effect.annotateLogs({ channels, output, sampleRate, url }),
+    Effect.scoped,
+  );
 }
 
 /**
@@ -110,7 +138,7 @@ async function renderOfflineInPage({
    * @default 16000
    */
   sampleRate?: number;
-}): Promise<{
+} = {}): Promise<{
   base64: string;
 
   duration: number;
