@@ -21,28 +21,28 @@ export type DurationLike = Duration | DurationOptions;
  */
 export type DurationOptions = {
   /** shortcut for days */
-  d?: number;
-  days?: number;
+  readonly d?: number;
+  readonly days?: number;
 
   /** shortcut for hours */
-  h?: number;
-  hours?: number;
+  readonly h?: number;
+  readonly hours?: number;
 
   /** shortcut for milliseconds */
-  ms?: number;
-  milliseconds?: number;
+  readonly ms?: number;
+  readonly milliseconds?: number;
 
   /** shortcut for minutes */
-  m?: number;
-  minutes?: number;
+  readonly m?: number;
+  readonly minutes?: number;
 
   /** shortcut for seconds */
-  s?: number;
-  seconds?: number;
+  readonly s?: number;
+  readonly seconds?: number;
 
   /** shortcut for weeks */
-  w?: number;
-  weeks?: number;
+  readonly w?: number;
+  readonly weeks?: number;
 };
 
 export type SerializedDuration = DurationOptions &

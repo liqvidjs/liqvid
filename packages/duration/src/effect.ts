@@ -6,28 +6,28 @@ import { Schema } from "effect";
  */
 export const DurationOptions = Schema.Struct({
   /** shortcut for days */
-  d: Schema.Option(Schema.Number),
-  days: Schema.Option(Schema.Number),
+  d: Schema.Number.pipe(Schema.optional),
+  days: Schema.Number.pipe(Schema.optional),
 
   // /** shortcut for hours */
-  h: Schema.Option(Schema.Number),
-  hours: Schema.Option(Schema.Number),
+  h: Schema.Number.pipe(Schema.optional),
+  hours: Schema.Number.pipe(Schema.optional),
 
   /** shortcut for minutes */
-  m: Schema.Option(Schema.Number),
-  milliseconds: Schema.Option(Schema.Number),
-  minutes: Schema.Option(Schema.Number),
+  m: Schema.Number.pipe(Schema.optional),
+  milliseconds: Schema.Number.pipe(Schema.optional),
+  minutes: Schema.Number.pipe(Schema.optional),
 
   /** shortcut for milliseconds */
-  ms: Schema.Option(Schema.Number),
+  ms: Schema.Number.pipe(Schema.optional),
 
   /** shortcut for seconds */
-  s: Schema.Option(Schema.Number),
-  seconds: Schema.Option(Schema.Number),
+  s: Schema.Number.pipe(Schema.optional),
+  seconds: Schema.Number.pipe(Schema.optional),
 
   /** shortcut for weeks */
-  w: Schema.Option(Schema.Number),
-  weeks: Schema.Option(Schema.Number),
+  w: Schema.Number.pipe(Schema.optional),
+  weeks: Schema.Number.pipe(Schema.optional),
 });
 
 export type DurationOptions = Schema.Schema.Type<typeof DurationOptions>;
