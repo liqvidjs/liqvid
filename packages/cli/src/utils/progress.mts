@@ -1,4 +1,4 @@
-import { Progress } from "@liqvid/renderer";
+import { Progress, type SingleBarOptions } from "@liqvid/renderer";
 import cliProgress from "cli-progress";
 import { Effect, Layer } from "effect";
 
@@ -12,8 +12,25 @@ export const cliProgressLayer = (
         SingleBar: class SingleBar {
           #bar: cliProgress.SingleBar;
 
-          constructor() {
-            this.#bar = new cliProgress.SingleBar(...options);
+          constructor({ formatValue }: SingleBarOptions = {}) {
+            const [barOptions, ...rest] = options;
+
+            this.#bar = new cliProgress.SingleBar(
+              {
+                ...barOptions,
+                // Only format the "value" and "total" fields; leave
+                // percentage/eta/duration to cli-progress's own formatter.
+                ...(formatValue
+                  ? {
+                      formatValue: (value, opts, type) =>
+                        type === "value" || type === "total"
+                          ? formatValue(value)
+                          : cliProgress.Format.ValueFormat(value, opts, type),
+                    }
+                  : {}),
+              },
+              ...rest,
+            );
           }
 
           start(total: number, startValue: number) {

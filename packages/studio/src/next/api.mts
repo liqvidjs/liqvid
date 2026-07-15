@@ -14,6 +14,8 @@ import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
+import type { NextRequest } from "next/server";
+import type { WebSocket, WebSocketServer } from "ws";
 
 import { audioLive } from "../api/audio.mts";
 import { captionsLive } from "../api/captions.mts";
@@ -103,15 +105,9 @@ export function postHandler(dynamicImports: DynamicImports) {
     if (route === saveRecordingOperation.endpoint) {
       const searchParams = new URLSearchParams(search ?? "");
 
-      let program:
-        | Effect.Effect<unknown, unknown, FileSystem.FileSystem>
-        | undefined;
-      program = saveRecording(
-        searchParams,
-        await req.formData(),
-        dynamicImports,
+      return runEffect(
+        saveRecording(searchParams, await req.formData(), dynamicImports),
       );
-      return runEffect(program);
     }
 
     return webApiHandler(req);
@@ -145,6 +141,29 @@ export function patchHandler(_dynamicImports: DynamicImports) {
   return async function PATCH(req: Request, _ctx: RequestContext) {
     await initializeServer();
     return webApiHandler(req);
+  };
+}
+
+/**
+ * Liqvid server UPGRADE handler
+ */
+export function upgradeHandler(_dynamicImports: DynamicImports) {
+  return async function UPGRADE(
+    client: WebSocket,
+    server: WebSocketServer,
+    request: NextRequest,
+    context: RouteContext<any>,
+  ) {
+    console.log("A client connected");
+
+    client.on("message", (message) => {
+      console.log("Received message:", message);
+      client.send(message);
+    });
+
+    client.once("close", () => {
+      console.log("A client disconnected");
+    });
   };
 }
 

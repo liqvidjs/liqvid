@@ -1,16 +1,15 @@
 "use client";
 
-import type { TranscriptEntry } from "@liqvid/cli/transcribe";
-import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePlayback, usePlaybackEvent, useTime } from "@liqvid/playback/react";
+import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas/effect";
 import {
   between,
   type CleanUpFn,
   formatTimeMs,
-  isMac,
   parseTime,
   pick,
 } from "@liqvid/utils";
+import { DotsThreeIcon } from "@phosphor-icons/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
@@ -18,65 +17,24 @@ import { useStudioPrivateApi } from "../../LiqvidDevToolsProvider.tsx";
 import type { Transcript } from "../../types/schemas.mts";
 import type { Awaitable } from "../../types.mts";
 import { Button } from "../../ui/Button.tsx";
+import {
+  MenuItem,
+  MenuPopup,
+  MenuPortal,
+  MenuPositioner,
+  MenuRoot,
+  MenuTrigger,
+} from "../../ui/Menu.tsx";
+import { useAsyncTranslations } from "../../utils/react.tsx";
 
 import { saveCaptions } from "./server.ts";
+import { type Shortcuts, useCaptionsEditorShortcuts } from "./shortcuts.ts";
 import { makeStore } from "./store.ts";
-import { apply, redo, undo } from "./utils.ts";
+import { apply } from "./utils.ts";
 
 import styles from "./CaptionsEditor.module.css";
 
-type Shortcuts = {
-  /** Move the cursor one word backward. */
-  selectionBackward: string;
-
-  /** Move the cursor one word forward. */
-  selectionForward: string;
-
-  /** Move the cursor to the start of the previous sentence. */
-  startPrevSentence: string;
-
-  /** Move the cursor to the end of the next sentence. */
-  endNextSentence: string;
-
-  /** Move the cursor to the start of the previous caption. */
-  startPrevCaption: string;
-
-  /** Move the cursor to the end of the next caption. */
-  endNextCaption: string;
-
-  /** Toggle a caption break at the current cursor position. */
-  toggleCaptionBreak: string;
-
-  /** Move the cursor to the start of the previous transcript break. */
-  startPrevTranscriptBreak: string;
-
-  /** Move the cursor to the end of the next transcript break. */
-  endNextTranscriptBreak: string;
-
-  /** Toggle a transcript break at the current cursor position. */
-  toggleTranscriptBreak: string;
-
-  /** Seek playback to the start time of the currently selected word. */
-  seekToSelection: string;
-
-  /** Save the current captions and transcript. */
-  save: string;
-};
-
-const defaultShortcuts: Shortcuts = {
-  endNextCaption: "]",
-  endNextSentence: ")",
-  endNextTranscriptBreak: "}",
-  save: "s",
-  seekToSelection: "g",
-  selectionBackward: "w",
-  selectionForward: "e",
-  startPrevCaption: "[",
-  startPrevSentence: "(",
-  startPrevTranscriptBreak: "{",
-  toggleCaptionBreak: "\\",
-  toggleTranscriptBreak: "|",
-};
+import Translations from "./.translations/en.json";
 
 export function CaptionsEditor({
   shortcuts = {},
@@ -84,13 +42,13 @@ export function CaptionsEditor({
   vtt,
 }: {
   shortcuts?: Partial<Shortcuts>;
-  transcript: Awaitable<Transcript>;
+  transcript: Awaitable<RichTranscript>;
   vtt: Awaitable<string>;
 }) {
-  const keys = { ...defaultShortcuts, ...shortcuts };
   const [store] = useState(() => makeStore());
   const { projectPath } = useStudioPrivateApi();
-  const playback = usePlayback();
+
+  const t = useAsyncTranslations(Translations, "src/components/CaptionsEditor");
 
   useEffect(() => {
     Promise.all([propTranscript, vtt]).then(([transcript, vtt]) => {
@@ -103,8 +61,8 @@ export function CaptionsEditor({
       for (const [, , end] of lines) {
         const endTime = parseTime(end);
 
-        for (; cursor < transcript.length; cursor++) {
-          const [, , wordEnd] = transcript[cursor]!;
+        for (; cursor < transcript.words.length; cursor++) {
+          const [, , wordEnd] = transcript.words[cursor]!;
 
           if (wordEnd > endTime) {
             captionBreaks.push(cursor - 1);
@@ -113,7 +71,7 @@ export function CaptionsEditor({
         }
       }
 
-      store.setState({ captionBreaks, transcript });
+      store.setState({ captionBreaks, transcript: transcript.words });
     });
   }, [propTranscript, store, vtt]);
 
@@ -121,90 +79,14 @@ export function CaptionsEditor({
     console.log(document.getSelection());
   };
 
-  useEventListener(globalThis?.window, "keydown", (e) => {
-    switch (e.key) {
-      case keys.selectionBackward:
-        store.setState((state) =>
-          apply(state, { action: "selection-backward" }),
-        );
-        break;
-      case keys.selectionForward:
-        store.setState((state) =>
-          apply(state, { action: "selection-forward" }),
-        );
-        break;
-      case keys.startPrevSentence:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-sentence" }),
-        );
-        break;
-      case keys.endNextSentence:
-        store.setState((state) =>
-          apply(state, { action: "end-next-sentence" }),
-        );
-        break;
-      case keys.startPrevCaption:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-caption" }),
-        );
-        break;
-      case keys.endNextCaption:
-        store.setState((state) => apply(state, { action: "end-next-caption" }));
-        break;
-      case keys.toggleCaptionBreak:
-        store.setState((state) =>
-          apply(state, { action: "toggle-caption-break" }),
-        );
-        break;
-      case keys.startPrevTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-transcript-break" }),
-        );
-        break;
-      case keys.endNextTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "end-next-transcript-break" }),
-        );
-        break;
-      case keys.toggleTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "toggle-transcript-break" }),
-        );
-        break;
-      case keys.seekToSelection: {
-        const { selection, transcript } = store.getState();
-        const word = transcript[selection.start];
-        if (word) {
-          playback.currentTime$ = { milliseconds: word[1] };
-        }
-        break;
-      }
-      case "s": {
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-        const { captionBreaks, transcript } = store.getState();
-        saveCaptions({ captionBreaks, projectPath, transcript });
-        break;
-      }
+  useCaptionsEditorShortcuts(store, shortcuts, projectPath);
 
-      case "z":
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-
-        // Shift+Cmd/Ctrl+Z redoes, matching common editor conventions.
-        store.setState((state) => (e.shiftKey ? redo(state) : undo(state)));
-        break;
-      case "y":
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-
-        store.setState((state) => redo(state));
-        break;
-    }
-  });
-
-  const { captionBreaks, selection, transcript, transcriptBreaks } =
-    useStore(store);
+  const {
+    captionBreaks,
+    selection,
+    transcript,
+    paragraphBreaks: transcriptBreaks,
+  } = useStore(store);
 
   const [activeWord, setActiveWord] = useState(-1);
 
@@ -295,7 +177,7 @@ export function CaptionsEditor({
             pick(store.getState(), [
               //"captionBreaks",
               "selection",
-              "transcriptBreaks",
+              "paragraphBreaks",
             ]),
           )}
         </pre>
@@ -305,34 +187,107 @@ export function CaptionsEditor({
           }
           type="submit"
         >
-          Save
+          {t.save}
         </Button>
+        <MenuRoot>
+          <MenuTrigger>
+            <DotsThreeIcon weight="bold" />
+            {"Actions"}
+          </MenuTrigger>
+          <MenuPortal>
+            <MenuPositioner sideOffset={4}>
+              <MenuPopup>
+                <MenuItem
+                  onClick={() =>
+                    store.setState((state) =>
+                      apply(state, {
+                        action: "set-caption-breaks",
+                        captionBreaks: sentenceBreaks(state.transcript),
+                      }),
+                    )
+                  }
+                >
+                  {"Break after every sentence"}
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    store.setState((state) =>
+                      apply(state, {
+                        action: "set-caption-breaks",
+                        captionBreaks: [],
+                      }),
+                    )
+                  }
+                >
+                  {"Clear all caption breaks"}
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    store.setState((state) =>
+                      apply(state, {
+                        action: "set-transcript-breaks",
+                        transcriptBreaks: [],
+                      }),
+                    )
+                  }
+                >
+                  {"Clear all paragraph breaks"}
+                </MenuItem>
+              </MenuPopup>
+            </MenuPositioner>
+          </MenuPortal>
+        </MenuRoot>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
         {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
         <div className={styles.transcript} onClick={onClick}>
           <div className={styles.stripes}>
-            {captionSegments(captionBreaks, transcript.length).map((segment) => {
-              const { startIndex, endIndex, hasCaptionBreak, i } = segment;
+            {captionSegments(captionBreaks, transcript.length).map(
+              (segment) => {
+                const { startIndex, endIndex, hasCaptionBreak, i } = segment;
 
-              const hasSelection =
-                between(startIndex, selection.start, endIndex) ||
-                between(startIndex, selection.end, endIndex);
+                const hasSelection =
+                  between(startIndex, selection.start, endIndex) ||
+                  between(startIndex, selection.end, endIndex);
 
-              const markStart = Math.min(selection.start, endIndex);
-              const markEnd = Math.min(selection.end, endIndex) + 1;
+                const markStart = Math.min(selection.start, endIndex);
+                const markEnd = Math.min(selection.end, endIndex) + 1;
 
-              // Attach the scroll target to the segment that contains the
-              // selection start (the anchor of a possibly multi-segment mark).
-              const isAnchorSegment = between(
-                startIndex,
-                selection.start,
-                endIndex,
-              );
+                // Attach the scroll target to the segment that contains the
+                // selection start (the anchor of a possibly multi-segment mark).
+                const isAnchorSegment = between(
+                  startIndex,
+                  selection.start,
+                  endIndex,
+                );
 
-              if (!hasSelection) {
+                if (!hasSelection) {
+                  return (
+                    <Fragment key={`${startIndex}/${i}`}>
+                      {renderRange(startIndex, endIndex)}{" "}
+                      {hasCaptionBreak && (
+                        <>
+                          <span className={styles.captionBreak} />{" "}
+                        </>
+                      )}
+                    </Fragment>
+                  );
+                }
+
                 return (
                   <Fragment key={`${startIndex}/${i}`}>
-                    {renderRange(startIndex, endIndex)}{" "}
+                    {renderRange(startIndex, markStart)}{" "}
+                    {hasSelection && (
+                      <>
+                        <mark
+                          className={styles.selection}
+                          key={selection.start}
+                          ref={isAnchorSegment ? selectionRef : undefined}
+                        >
+                          {renderRange(markStart, markEnd)}
+                        </mark>{" "}
+                      </>
+                    )}
+                    {renderRange(markEnd, endIndex)}{" "}
                     {hasCaptionBreak && (
                       <>
                         <span className={styles.captionBreak} />{" "}
@@ -340,42 +295,14 @@ export function CaptionsEditor({
                     )}
                   </Fragment>
                 );
-              }
-
-              return (
-                <Fragment key={`${startIndex}/${i}`}>
-                  {renderRange(startIndex, markStart)}{" "}
-                  {hasSelection && (
-                    <>
-                      <mark
-                        className={styles.selection}
-                        key={selection.start}
-                        ref={isAnchorSegment ? selectionRef : undefined}
-                      >
-                        {renderRange(markStart, markEnd)}
-                      </mark>{" "}
-                    </>
-                  )}
-                  {renderRange(markEnd, endIndex)}{" "}
-                  {hasCaptionBreak && (
-                    <>
-                      <span className={styles.captionBreak} />{" "}
-                    </>
-                  )}
-                </Fragment>
-              );
-            })}
+              },
+            )}
           </div>
         </div>
       </div>
       <CaptionsPreview store={store} />
     </>
   );
-}
-
-/** Returns true if Cmd on Mac, or Ctrl on other platforms, is pressed. */
-function hasModKey(e: KeyboardEvent) {
-  return isMac ? e.metaKey : e.ctrlKey;
 }
 
 type CaptionSegment = {
@@ -388,6 +315,20 @@ type CaptionSegment = {
   /** Whether a caption break marker follows this segment. */
   hasCaptionBreak: boolean;
 };
+
+/**
+ * Returns caption break indices after every sentence, i.e. after each word
+ * ending in ".". The final word is excluded since a break there is redundant.
+ */
+function sentenceBreaks(transcript: Transcript): number[] {
+  const breaks: number[] = [];
+
+  for (let i = 0; i < transcript.length - 1; i++) {
+    if (transcript[i]![0].endsWith(".")) breaks.push(i);
+  }
+
+  return breaks;
+}
 
 /**
  * Splits the transcript into caption segments. Each caption break ends a

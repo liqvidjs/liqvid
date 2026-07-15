@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
+import { formatVttTimestamp } from "@liqvid/utils";
 import chalk from "chalk";
 import { Effect, Exit, FileSystem } from "effect";
 import { StatusCodes } from "http-status-codes";
@@ -49,7 +50,7 @@ export async function saveCaptions({
             ? transcript[transcript.length - 1]![2]
             : transcript[captionBreaks[i]! + 1]![1];
 
-        file += `${formatTimeVtt(transcript[startIndex]![1])} --> ${formatTimeVtt(end)}\n`;
+        file += `${formatVttTimestamp(transcript[startIndex]![1])} --> ${formatVttTimestamp(end)}\n`;
         file +=
           transcript
             .slice(startIndex, endIndex + 1)
@@ -72,15 +73,3 @@ export async function saveCaptions({
     throw new Error("Failed to save captions");
   }
 }
-
-function formatTimeVtt(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const milliseconds = ms % 1000;
-
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(milliseconds, 3)}`;
-}
-
-const pad = (x: number, length = 2) => String(x).padStart(length, "0");

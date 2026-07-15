@@ -1,0 +1,61 @@
+/* Menu (Base UI) */
+
+.Positioner {
+  z-index: 100;
+  outline: none;
+}
+
+.Popup {
+  min-width: 12rem;
+  padding: 0.25rem;
+  outline: none;
+  background: light-dark(#fff, #2a2a2a);
+  border: 1px solid light-dark(#d1d5db, #4b5563);
+  border-radius: 4px;
+  box-shadow:
+    0 10px 38px -10px rgb(0 0 0 / 0.35),
+    0 10px 20px -15px rgb(0 0 0 / 0.2);
+}
+
+.Item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: light-dark(#1f1f1f, #fff);
+  cursor: pointer;
+  user-select: none;
+  border-radius: 3px;
+
+  &:focus,
+  &[data-highlighted] {
+    outline: none;
+    background: light-dark(#f3f4f6, #374151);
+  }
+}
+
+.Separator {
+  height: 1px;
+  margin: 0.25rem 0;
+  background: light-dark(#e5e7eb, #4b5563);
+}
+
+.Trigger {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: inherit;
+  cursor: pointer;
+  background: light-dark(#fff, #2a2a2a);
+  border: 1px solid light-dark(#d1d5db, #4b5563);
+  border-radius: 4px;
+
+  &:focus {
+    outline: 2px solid light-dark(#2563eb, #3b82f6);
+    outline-offset: 1px;
+    border-color: light-dark(#2563eb, #3b82f6);
+  }
+}

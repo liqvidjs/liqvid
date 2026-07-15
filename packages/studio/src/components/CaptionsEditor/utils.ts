@@ -7,12 +7,6 @@ export function apply(prev: State, action: Action, append = true): State {
   if (action.action === "identity") return prev;
 
   const next = { ...prev };
-  // Only mutating actions are recorded for undo/redo; pure selection and
-  // navigation moves do not affect the stacks.
-  if (append && isMutating(action)) {
-    next.undoStack = [...prev.undoStack, action];
-    next.redoStack = [];
-  }
 
   switch (action.action) {
     case "change-word":
@@ -97,17 +91,17 @@ export function apply(prev: State, action: Action, append = true): State {
     case "toggle-transcript-break": {
       const index = prev.selection.end;
 
-      next.transcriptBreaks = prev.transcriptBreaks.includes(index)
-        ? prev.transcriptBreaks.filter((breakIndex) => breakIndex !== index)
-        : [...prev.transcriptBreaks, index].sort((a, b) => a - b);
+      next.paragraphBreaks = prev.paragraphBreaks.includes(index)
+        ? prev.paragraphBreaks.filter((breakIndex) => breakIndex !== index)
+        : [...prev.paragraphBreaks, index].sort((a, b) => a - b);
       break;
     }
 
     case "start-prev-transcript-break": {
       // Jump to the word after the largest transcript break strictly before
       // the current selection start, falling back to 0.
-      for (let i = prev.transcriptBreaks.length - 1; i >= 0; --i) {
-        const breakIndex = prev.transcriptBreaks[i]!;
+      for (let i = prev.paragraphBreaks.length - 1; i >= 0; --i) {
+        const breakIndex = prev.paragraphBreaks[i]!;
         if (breakIndex + 1 >= prev.selection.start) continue;
 
         const index = breakIndex + 1;
@@ -123,7 +117,7 @@ export function apply(prev: State, action: Action, append = true): State {
       // Jump to the smallest transcript break strictly after the current
       // selection end, falling back to the last word.
       let i = prev.transcript.length - 1;
-      for (const breakIndex of prev.transcriptBreaks) {
+      for (const breakIndex of prev.paragraphBreaks) {
         if (breakIndex > prev.selection.end) {
           i = breakIndex;
           break;
@@ -133,6 +127,14 @@ export function apply(prev: State, action: Action, append = true): State {
       next.selection = { end: i, start: i };
       break;
     }
+
+    case "set-caption-breaks":
+      next.captionBreaks = action.captionBreaks;
+      break;
+
+    case "set-transcript-breaks":
+      next.paragraphBreaks = action.transcriptBreaks;
+      break;
 
     case "insert-word":
       next.transcript = [
@@ -168,23 +170,53 @@ export function apply(prev: State, action: Action, append = true): State {
       break;
   }
 
+  // Record mutating actions for undo/redo. Toggles are normalized to the
+  // concrete `set-*-breaks` result they produced, so that undo/redo does not
+  // depend on the selection at the time they are replayed.
+  if (append) {
+    const recorded = record(action, prev, next);
+    if (recorded) {
+      next.undoStack = [...prev.undoStack, recorded];
+      next.redoStack = [];
+    }
+  }
+
   return next;
 }
 
 /**
- * Returns whether an action mutates the transcript or caption breaks (and is
- * thus recorded for undo/redo), as opposed to a pure selection/navigation move.
+ * Returns the action to record on the undo stack for a just-applied action, or
+ * `undefined` if the action is not recorded (pure selection/navigation moves).
+ * Toggles are recorded as the resulting `set-*-breaks` array so replaying them
+ * is deterministic regardless of the current selection.
  */
-function isMutating(action: Action): boolean {
+function record(action: Action, prev: State, next: State): Action | undefined {
   switch (action.action) {
     case "change-word":
     case "delete-word":
     case "insert-word":
+      return action;
+
+    // Set actions capture the previous array so undo can restore it regardless
+    // of the state at replay time.
+    case "set-caption-breaks":
     case "toggle-caption-break":
+      return {
+        action: "set-caption-breaks",
+        captionBreaks: next.captionBreaks,
+        prevCaptionBreaks: prev.captionBreaks,
+      };
+
+    case "set-transcript-breaks":
     case "toggle-transcript-break":
-      return true;
+      return {
+        action: "set-transcript-breaks",
+        prevTranscriptBreaks: prev.paragraphBreaks,
+        transcriptBreaks: next.paragraphBreaks,
+      };
+
     default:
-      return false;
+      return undefined;
   }
 }
 
@@ -202,6 +234,9 @@ export function invert(prev: State, action: Action): Action {
         value: prev.transcript[action.index]![0],
       };
 
+    // Toggles are normalized to `set-*-breaks` before being recorded, so they
+    // never reach undo/redo directly; they invert to themselves for
+    // completeness alongside the pure navigation moves.
     case "end-next-caption":
     case "end-next-sentence":
     case "end-next-transcript-break":
@@ -217,6 +252,22 @@ export function invert(prev: State, action: Action): Action {
       return {
         action: "delete-word",
         index: action.index,
+      };
+
+    // Restore the array captured when the action was recorded. Swapping the
+    // arrays makes the inverse itself invertible, so redo works too.
+    case "set-caption-breaks":
+      return {
+        action: "set-caption-breaks",
+        captionBreaks: action.prevCaptionBreaks ?? prev.captionBreaks,
+        prevCaptionBreaks: action.captionBreaks,
+      };
+
+    case "set-transcript-breaks":
+      return {
+        action: "set-transcript-breaks",
+        prevTranscriptBreaks: action.transcriptBreaks,
+        transcriptBreaks: action.prevTranscriptBreaks ?? prev.paragraphBreaks,
       };
 
     case "selection-backward":

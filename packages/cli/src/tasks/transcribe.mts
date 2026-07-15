@@ -1,48 +1,39 @@
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { Duration } from "@liqvid/duration";
-import type { WhisperConfig, WhisperModelName } from "@liqvid/schemas/effect";
-import { assertType } from "@liqvid/utils";
-import { Effect, FileSystem } from "effect";
-import type { IOptions } from "nodejs-whisper";
+import type {
+  RichTranscript,
+  TranscriptEntry,
+  WhisperConfig,
+  WhisperModelName,
+} from "@liqvid/schemas/effect";
+import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
+import { Effect, FileSystem, Layer } from "effect";
+import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
 import type { CommandModule } from "yargs";
 
 import { writeJSON } from "../utils/effect.mts";
 import { expandTilde } from "../utils/paths.mts";
+import { defaultCliProgressLayer } from "../utils/progress.mts";
+import { Progress } from "../utils.mts";
 
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
 
-export type WhisperLogger = NonNullable<IOptions["logger"]>;
-
 /**
  * Options from `captioning.nodeWhisperOptions` in the config file.
- * These match the nodejs-whisper option names.
  */
 interface NodeWhisperOptions {
-  autoDownloadModelName?: string;
+  gpu?: boolean;
   modelName?: string;
-  modelRootPath?: string;
-  timestamps_length?: number;
-  withCuda?: boolean;
+  modelPath?: string;
 }
-
-/**
- * Transcript entry with word and timing information.
- * Format: [word, startTimeMs, endTimeMs]
- */
-export type TranscriptEntry = [
-  word: string,
-  startTimeMs: number,
-  endTimeMs: number,
-];
 
 /**
  * Options for transcribing audio.
  */
 export interface TranscribeOptions {
   /**
-   * Path to the audio file to transcribe.
+   * Path to the audio file to transcribe. Must be a mono 16kHz PCM WAV file.
    */
   audioFile: string;
 
@@ -72,78 +63,233 @@ export interface TranscribeResult {
   transcriptPath: string;
 }
 
-/**
- * Parse VTT timestamp to milliseconds.
- * Format: HH:MM:SS.mmm or MM:SS.mmm
- */
-function parseVttTimestamp(timestamp: string): number {
-  const parts = timestamp.split(":");
-  let hours = 0;
-  let minutes = 0;
-  let seconds = 0;
+/** Required PCM sample rate for whisper.cpp. */
+const WHISPER_SAMPLE_RATE = 16_000;
 
-  if (parts.length === 3) {
-    assertType<[string, string, string]>(parts);
-    hours = Number.parseInt(parts[0], 10);
-    minutes = Number.parseInt(parts[1], 10);
-    seconds = Number.parseFloat(parts[2]);
-  } else if (parts.length === 2) {
-    assertType<[string, string]>(parts);
-    minutes = Number.parseInt(parts[0], 10);
-    seconds = Number.parseFloat(parts[1]);
+/**
+ * Decode a PCM WAV file into a mono `Float32Array` at 16kHz, as required by
+ * `smart-whisper`. Supports 16-bit and 32-bit integer as well as 32-bit float
+ * PCM. Multi-channel audio is downmixed by averaging channels.
+ */
+function decodeWav(buffer: Uint8Array): Float32Array {
+  const view = new DataView(
+    buffer.buffer,
+    buffer.byteOffset,
+    buffer.byteLength,
+  );
+
+  const readTag = (offset: number) =>
+    String.fromCharCode(
+      view.getUint8(offset),
+      view.getUint8(offset + 1),
+      view.getUint8(offset + 2),
+      view.getUint8(offset + 3),
+    );
+
+  if (readTag(0) !== "RIFF" || readTag(8) !== "WAVE") {
+    throw new Error("Not a valid WAV file");
   }
 
-  return Math.round(new Duration({ hours, minutes, seconds }).inMilliseconds());
-}
+  // Walk the chunks to find `fmt ` and `data`.
+  let offset = 12;
+  let audioFormat = 1;
+  let numChannels = 1;
+  let sampleRate = WHISPER_SAMPLE_RATE;
+  let bitsPerSample = 16;
+  let dataOffset = -1;
+  let dataLength = 0;
 
-/**
- * Parse the JSON output from nodejs-whisper to extract word timings.
- */
-function parseWhisperJson(jsonContent: string): TranscriptEntry[] {
-  const data = JSON.parse(jsonContent);
-  const entries: TranscriptEntry[] = [];
+  while (offset + 8 <= view.byteLength) {
+    const chunkId = readTag(offset);
+    const chunkSize = view.getUint32(offset + 4, true);
+    const body = offset + 8;
 
-  // nodejs-whisper outputs an array of transcription segments
-  if (Array.isArray(data.transcription)) {
-    for (const segment of data.transcription) {
-      // Each segment has timestamps property with start/end and text
-      if (segment.timestamps) {
-        const startMs =
-          Math.round(
-            segment.timestamps.from.split(",").map(Number)[0] * 1000,
-          ) || parseVttTimestamp(segment.timestamps.from);
-        const endMs =
-          Math.round(segment.timestamps.to.split(",").map(Number)[0] * 1000) ||
-          parseVttTimestamp(segment.timestamps.to);
+    if (chunkId === "fmt ") {
+      audioFormat = view.getUint16(body, true);
+      numChannels = view.getUint16(body + 2, true);
+      sampleRate = view.getUint32(body + 4, true);
+      bitsPerSample = view.getUint16(body + 14, true);
+    } else if (chunkId === "data") {
+      dataOffset = body;
+      dataLength = chunkSize;
+    }
 
-        // Split segment text into words and distribute time evenly
-        const words = segment.text.trim().split(/\s+/).filter(Boolean);
-        if (words.length > 0) {
-          const duration = endMs - startMs;
-          const wordDuration = duration / words.length;
+    // Chunks are word-aligned (padded to even byte counts).
+    offset = body + chunkSize + (chunkSize % 2);
+  }
 
-          for (let i = 0; i < words.length; i++) {
-            const wordStart = Math.round(startMs + i * wordDuration);
-            const wordEnd = Math.round(startMs + (i + 1) * wordDuration);
-            entries.push([words[i], wordStart, wordEnd]);
-          }
-        }
+  if (dataOffset < 0) {
+    throw new Error("WAV file has no data chunk");
+  }
+
+  if (sampleRate !== WHISPER_SAMPLE_RATE) {
+    throw new Error(
+      `WAV sample rate must be ${WHISPER_SAMPLE_RATE}Hz, got ${sampleRate}Hz`,
+    );
+  }
+
+  const bytesPerSample = bitsPerSample / 8;
+  const totalSamples = Math.floor(dataLength / bytesPerSample);
+  const frameCount = Math.floor(totalSamples / numChannels);
+  const pcm = new Float32Array(frameCount);
+
+  const readSample = (sampleOffset: number): number => {
+    const at = dataOffset + sampleOffset * bytesPerSample;
+    // 3 == WAVE_FORMAT_IEEE_FLOAT
+    if (audioFormat === 3 && bitsPerSample === 32) {
+      return view.getFloat32(at, true);
+    }
+    if (bitsPerSample === 16) {
+      return view.getInt16(at, true) / 0x8000;
+    }
+    if (bitsPerSample === 32) {
+      return view.getInt32(at, true) / 0x80000000;
+    }
+    throw new Error(`Unsupported WAV bit depth: ${bitsPerSample}`);
+  };
+
+  for (let frame = 0; frame < frameCount; frame++) {
+    if (numChannels === 1) {
+      pcm[frame] = readSample(frame);
+    } else {
+      let sum = 0;
+      for (let channel = 0; channel < numChannels; channel++) {
+        sum += readSample(frame * numChannels + channel);
       }
+      pcm[frame] = sum / numChannels;
     }
   }
 
-  return entries;
+  return pcm;
 }
 
 /**
- * Transcribe an audio file using Whisper.
+ * Build word-level transcript entries from a detailed `smart-whisper` result.
+ *
+ * When per-token timestamps are available they are used directly; otherwise
+ * the segment text is split into words with time distributed evenly.
+ */
+function buildTranscript(
+  segments: TranscribeDetailedResult<boolean>[],
+): RichTranscript {
+  const entries: TranscriptEntry[] = [];
+
+  for (const segment of segments) {
+    const tokensWithTiming = segment.tokens.filter(
+      (token) =>
+        typeof token.from === "number" &&
+        typeof token.to === "number" &&
+        token.text.trim().length > 0 &&
+        // whisper.cpp emits special tokens wrapped in square brackets.
+        !token.text.trim().startsWith("["),
+    );
+
+    if (tokensWithTiming.length > 0) {
+      // Merge sub-word tokens into whole words. Whisper tokens for a new word
+      // are typically prefixed with a leading space.
+      let currentWord = "";
+      let wordStart = 0;
+      let wordEnd = 0;
+
+      const flush = () => {
+        const word = currentWord.trim();
+        if (word.length > 0) {
+          entries.push([word, wordStart, wordEnd]);
+        }
+        currentWord = "";
+      };
+
+      for (const token of tokensWithTiming) {
+        const startsNewWord = token.text.startsWith(" ");
+        if (startsNewWord && currentWord.length > 0) {
+          flush();
+        }
+        if (currentWord.length === 0) {
+          wordStart = token.from as number;
+        }
+        currentWord += token.text;
+        wordEnd = token.to as number;
+      }
+      flush();
+      continue;
+    }
+
+    // Fall back to distributing the segment time across its words.
+    const words = segment.text.trim().split(/\s+/).filter(Boolean);
+    if (words.length === 0) continue;
+
+    const duration = segment.to - segment.from;
+    const wordDuration = duration / words.length;
+
+    for (let i = 0; i < words.length; i++) {
+      const wordStart = Math.round(segment.from + i * wordDuration);
+      const wordEnd = Math.round(segment.from + (i + 1) * wordDuration);
+      entries.push([words[i]!, wordStart, wordEnd]);
+    }
+  }
+
+  return {
+    captionBreaks: [],
+    paragraphBreaks: [],
+    words: entries,
+  };
+}
+
+/**
+ * Render segments to WebVTT.
+ */
+function buildVtt(segments: TranscribeDetailedResult<boolean>[]): string {
+  const cues = segments
+    .filter((segment) => segment.text.trim().length > 0)
+    .map((segment) => {
+      const from = formatVttTimestamp(segment.from);
+      const to = formatVttTimestamp(segment.to);
+      return `${from} --> ${to}\n${segment.text.trim()}`;
+    });
+
+  return `WEBVTT\n\n${cues.join("\n\n")}\n`;
+}
+
+/**
+ * Resolve a whisper model file path, downloading a named model on demand.
+ */
+function resolveModel(whisperConfig: Partial<WhisperConfig>) {
+  return Effect.gen(function* () {
+    const { manager } = yield* Effect.tryPromise(async () => {
+      const whisper = await import("smart-whisper");
+      return whisper;
+    }).pipe(
+      Effect.tapCause((cause) =>
+        Effect.sync(() => console.dir(cause, { depth: null })),
+      ),
+    );
+
+    yield* Effect.logDebug("imported smart-whisper");
+
+    if (whisperConfig.modelPath) {
+      return expandTilde(whisperConfig.modelPath);
+    }
+
+    const modelName = whisperConfig.modelName ?? "base.en";
+
+    if (!manager.check(modelName)) {
+      yield* Effect.log(`Downloading Whisper model "${modelName}"...`);
+      yield* Effect.tryPromise(() => manager.download(modelName));
+    }
+
+    return manager.resolve(modelName);
+  });
+}
+
+/**
+ * Transcribe an audio file using Whisper (via `smart-whisper`).
  *
  * @example
  * ```ts
  * import { transcribe } from "@liqvid/cli/transcribe";
  *
  * await transcribe({
- *   audioFile: "./audio.webm",
+ *   audioFile: "./audio.wav",
  *   outputDir: "./captions",
  *   whisperConfig: {
  *     modelName: "base.en",
@@ -152,90 +298,116 @@ function parseWhisperJson(jsonContent: string): TranscriptEntry[] {
  * ```
  */
 export function transcribe({
-  logger,
-  ...options
-}: TranscribeOptions & {
-  /** Custom logger to pass to nodejs-whisper */
-  logger?: WhisperLogger;
-}) {
+  audioFile,
+  outputDir,
+  whisperConfig = {},
+}: TranscribeOptions) {
   return Effect.gen(function* () {
-    const originalCwd = process.cwd();
-    const { nodewhisper } = yield* Effect.promise(
-      () => import("nodejs-whisper"),
-    );
-    process.chdir(originalCwd);
-
     const fs = yield* FileSystem.FileSystem;
-
-    const { audioFile, outputDir, whisperConfig = {} } = options;
 
     // Ensure output directory exists
     yield* fs.makeDirectory(outputDir, { recursive: true });
 
-    // Resolve absolute paths
     const absoluteAudioFile = path.resolve(audioFile);
     const absoluteOutputDir = path.resolve(outputDir);
-
-    // Configure whisper options
-    const modelName = whisperConfig.modelName ?? "base.en";
-
-    // Run whisper transcription
-    // nodejs-whisper outputs files next to the input file, so we need to handle that
-    yield* Effect.tryPromise(() =>
-      nodewhisper(absoluteAudioFile, {
-        autoDownloadModelName: whisperConfig.autoDownloadModelName ?? modelName,
-        logger,
-        modelName,
-        modelRootPath: whisperConfig.modelRootPath
-          ? expandTilde(whisperConfig.modelRootPath)
-          : undefined,
-        removeWavFileAfterTranscription: false,
-        whisperOptions: {
-          ...whisperConfig.whisperOptions,
-          outputInJsonFull: true,
-        },
-        withCuda: whisperConfig.withCuda ?? false,
-      }).finally(() => {
-        process.chdir(originalCwd);
-      }),
-    ).pipe(Effect.catch(Effect.logError));
-
-    // nodejs-whisper creates output files next to the input audio file
-    // with the same base name but different extensions
-    const audioBaseName = path.basename(audioFile, path.extname(audioFile));
-    const audioDir = path.dirname(absoluteAudioFile);
-
-    const sourceVttPath = path.join(audioDir, `${audioBaseName}.vtt`);
-    const sourceJsonPath = path.join(audioDir, `${audioBaseName}.json`);
 
     const targetVttPath = path.join(absoluteOutputDir, "captions.vtt");
     const targetJsonPath = path.join(absoluteOutputDir, "transcript.json");
 
-    yield* Effect.logDebug({
-      audioBaseName,
-      audioDir,
-      sourceJsonPath,
-      sourceVttPath,
-      targetJsonPath,
-      targetVttPath,
-    });
+    // Load the model (downloading it on demand if referenced by name).
+    yield* Effect.logDebug("finding model");
+    const modelFile = yield* resolveModel(whisperConfig);
+    yield* Effect.logDebug(`Using Whisper model at ${modelFile}`);
 
-    // Move VTT file to output directory
-    // try {
-    yield* fs.rename(sourceVttPath, targetVttPath);
-    // } catch {
-    // If rename fails (cross-device), copy and delete
-    //   yield* fs.copyFile(sourceVttPath, targetVttPath);
-    //   yield* fs.remove(sourceVttPath);
-    // }
+    yield* Effect.logDebug("decoding wav");
 
-    // Parse JSON and create transcript with word timings
-    const jsonContent = yield* fs.readFileString(sourceJsonPath, "utf8");
-    const transcript = parseWhisperJson(jsonContent);
+    // Decode the WAV file to mono 16kHz PCM.
+    const wavBytes = yield* fs.readFile(absoluteAudioFile);
+    const pcm = decodeWav(wavBytes);
+
+    // Total audio duration in milliseconds, used for the progress bar total.
+    const durationMs = Math.round((pcm.length / WHISPER_SAMPLE_RATE) * 1000);
+
+    const { SingleBar } = yield* Progress;
+
+    const opts = whisperConfig.whisperOptions;
+    const params: Partial<TranscribeParams<"detail", true>> = {
+      format: "detail",
+      language: opts?.language ?? "auto",
+      max_len: opts?.maxLen ?? 0,
+      split_on_word: opts?.splitOnWord ?? false,
+      token_timestamps: true,
+      translate: whisperConfig.translateToEnglish ?? opts?.translate ?? false,
+      ...(opts?.nThreads !== undefined ? { n_threads: opts.nThreads } : {}),
+    };
+
+    yield* Effect.logDebug("getting context");
+
+    // Capture the current Effect context so the synchronous `transcribed`
+    // event callback below can fork `Effect.log` fibers in real time,
+    // preserving the caller's loggers and annotations.
+    const context = yield* Effect.context<never>();
+
+    yield* Effect.logDebug("got context");
+
+    const segments = yield* Effect.acquireUseRelease(
+      // acquire: load the model and start the progress bar
+      Effect.tryPromise(async () => {
+        const { Whisper } = await import("smart-whisper");
+        const whisper = new Whisper(modelFile, {
+          gpu: whisperConfig.gpu ?? false,
+        });
+        const bar = new SingleBar({ formatValue: formatTimeMs });
+        bar.start(durationMs, 0);
+        return { bar, whisper };
+      }),
+      // use: run the transcription
+      ({ bar, whisper }) =>
+        Effect.tryPromise(async () => {
+          const task = await whisper.transcribe(pcm, params);
+
+          // Forward each segment to Effect.log as soon as it is transcribed,
+          // rather than waiting for the whole result, and advance the
+          // progress bar to the segment's end time.
+          task.on("transcribed", (segment) => {
+            bar.update(Math.min(segment.to, durationMs));
+
+            const text = segment.text.trim();
+            if (text.length === 0) return;
+
+            const line = `[${formatVttTimestamp(segment.from)} --> ${formatVttTimestamp(segment.to)}] ${text}`;
+
+            Effect.runForkWith(context)(Effect.log(line));
+          });
+
+          return task.result;
+        }),
+      // release: stop the progress bar and free the model
+      ({ bar, whisper }) =>
+        Effect.promise(async () => {
+          bar.update(durationMs);
+          bar.stop();
+          await whisper.free();
+        }),
+    ).pipe(
+      Effect.tapError((error) =>
+        Effect.logError("Transcription failed:", error),
+      ),
+    );
+
+    yield* Effect.logDebug(`Transcribed ${segments.length} segments`);
+
+    // Write captions and transcript.
+    const vtt = buildVtt(segments);
+    yield* fs.writeFileString(targetVttPath, vtt);
+
+    const transcript = buildTranscript(segments);
     yield* writeJSON(targetJsonPath, transcript);
 
-    // Clean up source JSON file
-    yield* fs.remove(sourceJsonPath);
+    yield* writeJSON(
+      path.join(absoluteOutputDir, "transcript-raw.json"),
+      segments,
+    );
 
     return {
       captionsPath: targetVttPath,
@@ -251,9 +423,9 @@ function transformNodeWhisperOptions(
   config: NodeWhisperOptions,
 ): Record<string, unknown> {
   return {
-    cuda: config.withCuda,
+    gpu: config.gpu,
     model: config.modelName,
-    "model-path": config.modelRootPath,
+    "model-path": config.modelPath,
   };
 }
 
@@ -269,13 +441,13 @@ export const transcribeCommand: CommandModule = {
       )
       .default("config", DEFAULT_CONFIG)
       .example([
-        ["liqvid transcribe -i ./audio.webm -o ./captions"],
-        ["liqvid transcribe -i ./audio.mp4 -o ./captions --model base.en"],
+        ["liqvid transcribe -i ./audio.wav -o ./captions"],
+        ["liqvid transcribe -i ./audio.wav -o ./captions --model base.en"],
       ])
       .option("input", {
         alias: "i",
         demandOption: true,
-        desc: "Path to the audio file to transcribe",
+        desc: "Path to the audio file to transcribe (mono 16kHz WAV)",
         normalize: true,
         type: "string",
       })
@@ -293,12 +465,12 @@ export const transcribeCommand: CommandModule = {
         type: "string",
       })
       .option("model-path", {
-        desc: "Directory containing Whisper model files",
+        desc: "Path to a ggml Whisper model file",
         type: "string",
       })
-      .option("cuda", {
+      .option("gpu", {
         default: false,
-        desc: "Use CUDA for faster processing",
+        desc: "Use the GPU for inference",
         type: "boolean",
       })
       .option("translate", {
@@ -315,12 +487,16 @@ export const transcribeCommand: CommandModule = {
         audioFile: argv.input as string,
         outputDir: argv.output as string,
         whisperConfig: {
+          gpu: argv.gpu as boolean,
           modelName: argv.model as WhisperModelName,
-          modelRootPath: argv["model-path"] as string | undefined,
+          modelPath: argv["model-path"] as string | undefined,
           translateToEnglish: argv.translate as boolean,
-          withCuda: argv.cuda as boolean,
         },
-      }).pipe(Effect.provide(NodeFileSystem.layer)),
+      }).pipe(
+        Effect.provide(
+          Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+        ),
+      ),
     );
 
     console.log(`Captions written to: ${result.captionsPath}`);
