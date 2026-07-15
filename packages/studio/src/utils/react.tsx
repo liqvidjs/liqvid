@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import { getTranslationsFromServer } from "../server-actions.ts";
 
 export function useToggle(defaultValue?: boolean): {
   set: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,4 +42,16 @@ export function TranslationProvider<T>({
       {children}
     </translationContext.Provider>
   );
+}
+
+export function useAsyncTranslations<T>(defaultValue: T, url: string) {
+  const [translations, setTranslations] = useState<T>(defaultValue);
+
+  useEffect(() => {
+    getTranslationsFromServer<T>(url).then((localized) => {
+      setTranslations({ ...defaultValue, ...localized });
+    });
+  }, [url, defaultValue]);
+
+  return translations;
 }
