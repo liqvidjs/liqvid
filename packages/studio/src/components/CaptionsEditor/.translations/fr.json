@@ -1,3 +1,7 @@
 {
+  "actions": "Actions",
+  "breakAfterEverySentence": "Insérer un saut de caption après chaque phrase",
+  "clearCaptionBreaks": "Effacer tous les sauts de caption",
+  "clearParagraphBreaks": "Effacer tous les sauts de paragraphe",
   "save": "Sauvegarder"
 }

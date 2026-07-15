@@ -2,11 +2,11 @@ import type { TranscriptEntry } from "@liqvid/schemas/effect";
 
 /* ------------------------------ state ------------------------------ */
 export type State = {
-  captionBreaks: number[];
+  captionBreaks: readonly number[];
 
   /** Indices where a transcript break (`<br>`) is rendered. Independent of
    * caption breaks. */
-  paragraphBreaks: number[];
+  paragraphBreaks: readonly number[];
 
   selection: TranscriptSelection;
 
@@ -16,7 +16,7 @@ export type State = {
   /** Actions that have been undone, for redo. */
   redoStack: readonly Action[];
 
-  transcript: readonly TranscriptEntry[];
+  words: readonly TranscriptEntry[];
 };
 
 /* ------------------------------ actions ------------------------------ */

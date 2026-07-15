@@ -10,19 +10,26 @@ export function apply(prev: State, action: Action, append = true): State {
 
   switch (action.action) {
     case "change-word":
-      next.transcript = prev.transcript.map((entry, i) =>
+      next.words = prev.words.map((entry, i) =>
         i === action.index ? [action.value, entry[1], entry[2]] : entry,
       );
       break;
 
-    case "delete-word":
-      next.transcript = prev.transcript.filter((_, i) => i !== action.index);
+    case "delete-word": {
+      next.words = prev.words.filter((_, i) => i !== action.index);
+
+      // Collapse the selection onto the word that now occupies the deleted
+      // slot (the following word), or the previous word when the last word was
+      // deleted. Clamp to a valid index for the shortened transcript.
+      const index = Math.max(0, Math.min(action.index, next.words.length - 1));
+      next.selection = { end: index, start: index };
       break;
+    }
 
     case "start-prev-sentence": {
       let i = prev.selection.start - 2;
       for (; i >= 0; --i) {
-        if (prev.transcript[i]![0].endsWith(".")) {
+        if (prev.words[i]![0].endsWith(".")) {
           i++;
           break;
         }
@@ -36,11 +43,11 @@ export function apply(prev: State, action: Action, append = true): State {
 
     case "end-next-sentence": {
       let i = prev.selection.end + 1;
-      for (; i < prev.transcript.length; ++i) {
-        if (prev.transcript[i]![0].endsWith(".")) break;
+      for (; i < prev.words.length; ++i) {
+        if (prev.words[i]![0].endsWith(".")) break;
       }
 
-      i = Math.min(i, prev.transcript.length - 1);
+      i = Math.min(i, prev.words.length - 1);
 
       next.selection = { end: i, start: i };
       break;
@@ -67,7 +74,7 @@ export function apply(prev: State, action: Action, append = true): State {
       // Caption ends are the caption break indices. Jump to the smallest
       // caption break strictly after the current selection end, falling back
       // to the last word.
-      let i = prev.transcript.length - 1;
+      let i = prev.words.length - 1;
       for (const breakIndex of prev.captionBreaks) {
         if (breakIndex > prev.selection.end) {
           i = breakIndex;
@@ -116,7 +123,7 @@ export function apply(prev: State, action: Action, append = true): State {
     case "end-next-transcript-break": {
       // Jump to the smallest transcript break strictly after the current
       // selection end, falling back to the last word.
-      let i = prev.transcript.length - 1;
+      let i = prev.words.length - 1;
       for (const breakIndex of prev.paragraphBreaks) {
         if (breakIndex > prev.selection.end) {
           i = breakIndex;
@@ -137,10 +144,10 @@ export function apply(prev: State, action: Action, append = true): State {
       break;
 
     case "insert-word":
-      next.transcript = [
-        ...prev.transcript.slice(0, action.index),
+      next.words = [
+        ...prev.words.slice(0, action.index),
         [action.value, action.startTime, action.endTime],
-        ...prev.transcript.slice(action.index),
+        ...prev.words.slice(action.index),
       ];
       break;
 
@@ -154,10 +161,7 @@ export function apply(prev: State, action: Action, append = true): State {
     }
 
     case "selection-forward": {
-      const newEnd = Math.min(
-        prev.transcript.length - 1,
-        prev.selection.end + 1,
-      );
+      const newEnd = Math.min(prev.words.length - 1, prev.selection.end + 1);
       next.selection = {
         end: newEnd,
         start: newEnd,
@@ -228,10 +232,10 @@ export function invert(prev: State, action: Action): Action {
     case "delete-word":
       return {
         action: "insert-word",
-        endTime: prev.transcript[action.index]![2],
+        endTime: prev.words[action.index]![2],
         index: action.index,
-        startTime: prev.transcript[action.index]![1],
-        value: prev.transcript[action.index]![0],
+        startTime: prev.words[action.index]![1],
+        value: prev.words[action.index]![0],
       };
 
     // Toggles are normalized to `set-*-breaks` before being recorded, so they
@@ -282,7 +286,7 @@ export function invert(prev: State, action: Action): Action {
       return {
         action: "change-word",
         index: action.index,
-        value: prev.transcript[action.index]![0],
+        value: prev.words[action.index]![0],
       };
   }
 }

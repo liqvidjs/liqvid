@@ -1,3 +1,7 @@
 {
+  "actions": "Actions",
+  "breakAfterEverySentence": "Break after every sentence",
+  "clearCaptionBreaks": "Clear all caption breaks",
+  "clearParagraphBreaks": "Clear all paragraph breaks",
   "save": "Save"
 }

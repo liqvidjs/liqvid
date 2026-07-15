@@ -1,5 +1,5 @@
 import type { DurationLike } from "@liqvid/duration";
-import { formatTime, formatTimeDuration } from "@liqvid/utils";
+import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
 
 import { toISODateString } from "../utils/time.mts";
 
@@ -27,10 +27,17 @@ const displayers: Record<TimeFormat, Intl.DateTimeFormatOptions> = {
 /** Display a formatted duration. */
 export function TimeDuration({
   children,
+  format = "seconds",
   value,
   ...attrs
 }: Omit<React.TimeHTMLAttributes<HTMLTimeElement>, "dateTime"> & {
   children?: React.ReactNode;
+  /**
+   * Example values:
+   * - `seconds`: 1:23
+   * - `milliseconds`: 1:23.456
+   */
+  format?: "seconds" | "milliseconds";
   value: DurationLike;
 }) {
   return (
@@ -39,7 +46,8 @@ export function TimeDuration({
       suppressHydrationWarning
       {...attrs}
     >
-      {children ?? formatTime(value)}
+      {children ??
+        { milliseconds: formatTimeMs, seconds: formatTime }[format](value)}
     </time>
   );
 }

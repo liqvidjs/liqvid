@@ -3,7 +3,7 @@ import { usePlayback } from "@liqvid/playback/react";
 import { isMac } from "@liqvid/utils";
 
 import { saveCaptions } from "./server.ts";
-import type { makeStore } from "./store.ts";
+import type { makeStore, Store } from "./store.ts";
 import { apply, redo, undo } from "./utils.ts";
 
 export type Shortcuts = {
@@ -40,11 +40,15 @@ export type Shortcuts = {
   /** Seek playback to the start time of the currently selected word. */
   seekToSelection: string;
 
+  /** Delete the currently selected word. */
+  deleteWord: string;
+
   /** Save the current captions and transcript. */
   save: string;
 };
 
 export const defaultShortcuts: Shortcuts = {
+  deleteWord: "Delete",
   endNextCaption: "]",
   endNextSentence: ")",
   endNextTranscriptBreak: "}",
@@ -59,11 +63,15 @@ export const defaultShortcuts: Shortcuts = {
   toggleTranscriptBreak: "|",
 };
 
-/** @package */
+/** @package Wire up shortcuts for the captions editor */
 export function useCaptionsEditorShortcuts(
-  store: ReturnType<typeof makeStore>,
+  store: Store,
   shortcuts: Partial<Shortcuts>,
-  projectPath: string,
+  {
+    save,
+  }: {
+    save: () => Promise<void>;
+  },
 ) {
   const keys = { ...defaultShortcuts, ...shortcuts };
   const playback = usePlayback();
@@ -119,18 +127,26 @@ export function useCaptionsEditorShortcuts(
         );
         break;
       case keys.seekToSelection: {
-        const { selection, transcript } = store.getState();
+        const { selection, words: transcript } = store.getState();
         const word = transcript[selection.start];
         if (word) {
           playback.currentTime$ = { milliseconds: word[1] };
         }
         break;
       }
+      case keys.deleteWord:
+        store.setState((state) => {
+          if (state.words.length === 0) return state;
+          return apply(state, {
+            action: "delete-word",
+            index: state.selection.start,
+          });
+        });
+        break;
       case "s": {
         if (!hasModKey(e)) return;
         e.preventDefault();
-        const { captionBreaks, transcript } = store.getState();
-        saveCaptions({ captionBreaks, projectPath, transcript });
+        save();
         break;
       }
 

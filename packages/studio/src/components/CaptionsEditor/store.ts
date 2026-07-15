@@ -12,8 +12,10 @@ export const makeStore = () =>
           paragraphBreaks: [],
           redoStack: [],
           selection: { end: 0, start: 0 },
-          transcript: [],
           undoStack: [],
+          words: [],
         }) as State,
     ),
   );
+
+export type Store = ReturnType<typeof makeStore>;
