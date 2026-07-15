@@ -1,0 +1,19 @@
+{
+  "copyEmbedCode": "Copiar el código de inserción",
+  "dialogClose": "Cerrar",
+  "folderView": "Affichage dossier",
+  "openInFinder": "Abrir en Finder",
+  "preview": "Previa",
+  "renders": {
+    "render": "Renderizar"
+  },
+  "tabs": {
+    "captions": "Subtítulos",
+    "renders": "Renders",
+    "screenshots": "Capturas de pantalla",
+    "thumbnails": "Miniaturas"
+  },
+  "thumbs": {
+    "generate": "Generar"
+  }
+}

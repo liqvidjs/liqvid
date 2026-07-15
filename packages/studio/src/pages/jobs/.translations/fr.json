@@ -4,5 +4,6 @@
   "completed": "Complété",
   "delete": "Supprimer",
   "failed": "Échoué",
-  "running": "En cours"
+  "running": "En cours",
+  "title": "Tâches"
 }

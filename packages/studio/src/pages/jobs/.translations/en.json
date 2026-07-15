@@ -4,5 +4,6 @@
   "completed": "Completed",
   "delete": "Delete",
   "failed": "Failed",
-  "running": "Running"
+  "running": "Running",
+  "title": "Jobs"
 }
