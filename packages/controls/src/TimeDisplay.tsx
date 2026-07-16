@@ -9,7 +9,7 @@ export function TimeDisplay() {
   const forceUpdate = useForceUpdate();
 
   usePlaybackEvent("durationchange", forceUpdate);
-  usePlaybackEvent("seek", forceUpdate);
+  // usePlaybackEvent("seek", forceUpdate);
 
   useTime(() => {
     const timeElt = timeRef.current;
