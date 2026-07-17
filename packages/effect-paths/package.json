@@ -1,0 +1,49 @@
+{
+  "name": "effect-paths",
+  "version": "1.0.0",
+  "description": "Effect helpers adding type safety for dealing with absolute vs relative and file vs directory",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git",
+    "directory": "packages/ssr"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "lint": "biome check --fix",
+    "test": "jest",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@effect/language-service": "catalog:dev",
+    "@effect/tsgo": "catalog:dev",
+    "@types/node": "catalog:dev",
+    "effect": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "effect": "catalog:peer"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "dist/types/index.d.ts"
+}
