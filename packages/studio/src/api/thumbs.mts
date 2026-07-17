@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
-import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import {
   type ThumbnailOptions,
   ThumbnailsJob,
@@ -96,7 +96,7 @@ function generateForScheme(
  */
 function readThumbsJob(thumbsBaseDir: string) {
   const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-  return loadJsonEffect(ThumbnailsJob, jobFilePath);
+  return loadJson(ThumbnailsJob, jobFilePath);
 }
 
 export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
@@ -110,7 +110,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         // read directories
         const thumbsBaseDir = path.join(
           cwd,
-          "app",
+          NEXT_APP_DIR,
           projectPath,
           THUMBS_BASE_DIR,
         );
@@ -147,7 +147,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(cwd, "app", projectPath);
+        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
         const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
         // Build the URL for the video

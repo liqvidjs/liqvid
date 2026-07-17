@@ -37,6 +37,7 @@ import { screenshotsLive } from "../api/screenshots.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { thumbsLive } from "../api/thumbs.mts";
 import { getServerState, initializeServer } from "../initialize.mts";
+import { getLogLevel } from "../utils/misc.mts";
 
 interface RequestContext {
   params: Promise<{
@@ -175,7 +176,7 @@ async function runEffect<A, E>(
           Logger.layer([Logger.consolePretty()]),
         ),
       ),
-      Effect.provideService(References.MinimumLogLevel, "All"),
+      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
       Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
     ),
   );

@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { screenshot } from "@liqvid/cli/screenshot";
-import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
 import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -25,7 +25,7 @@ const SCREENSHOT_META_FILE = "screenshot-meta.json";
  */
 function getProjectDir(projectPath: string): string {
   const { cwd } = getServerState();
-  return path.join(cwd, "app", projectPath);
+  return path.join(cwd, NEXT_APP_DIR, projectPath);
 }
 
 /**
@@ -70,7 +70,7 @@ export const screenshotsLive = HttpApiBuilder.group(
                 const stats = yield* fs.stat(dirname);
                 if (stats.type !== "Directory") return;
 
-                const meta = yield* loadJsonEffect(
+                const meta = yield* loadJson(
                   ScreenshotMeta,
                   path.join(dirname, SCREENSHOT_META_FILE),
                 );

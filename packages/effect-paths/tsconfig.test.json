@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationDir": "./dist/types",
-    "outDir": "./dist/esm",
-    "rootDir": "./test",
+    "noEmit": true,
+    "rootDir": "./tests",
     "target": "esnext"
   },
   "extends": "../../tsconfig.json",
-  "include": ["./test"]
+  "include": ["./src", "./tests"]
 }

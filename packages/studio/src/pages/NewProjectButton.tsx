@@ -31,7 +31,11 @@ import {
 
 import styles from "./root.module.css";
 
-export function NewProjectButton() {
+import type T from "./.translations/en.json";
+
+type T = typeof T;
+
+export function NewProjectButton({ t }: { t: T }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [projectPath, setProjectPath] = useState("");
@@ -103,7 +107,7 @@ export function NewProjectButton() {
   return (
     <DialogRoot onOpenChange={setOpen} open={open}>
       <DialogTrigger
-        render={<IconButton title="Create a new project" variant="primary" />}
+        render={<IconButton title={t.newProject} variant="primary" />}
       >
         <PlusIcon />
       </DialogTrigger>

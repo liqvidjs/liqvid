@@ -9,6 +9,7 @@ import type {
 import { getServerState } from "../initialize.mts";
 
 import { jobProgressLayer } from "./effect.mts";
+import { getLogLevel } from "./misc.mts";
 
 /**
  * Start a job in a detached fiber and add it to the global list of jobs.
@@ -55,7 +56,7 @@ export function createJob<A, E, R>(
       fiber: yield* Effect.forkDetach(
         effect.pipe(
           // logging
-          Effect.provideService(References.MinimumLogLevel, "All"),
+          Effect.provideService(References.MinimumLogLevel, getLogLevel()),
           Effect.provide(Logger.layer([logger])),
 
           Effect.provideServiceEffect(

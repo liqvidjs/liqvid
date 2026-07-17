@@ -2,16 +2,11 @@
 
 import { usePlayback, usePlaybackEvent, useTime } from "@liqvid/playback/react";
 import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas/effect";
-import {
-  between,
-  type CleanUpFn,
-  formatTimeMs,
-  injectGlobal,
-  parseTime,
-} from "@liqvid/utils";
+import { between, type CleanUpFn } from "@liqvid/utils";
 import {
   DotsThreeIcon,
   FloppyDiskIcon,
+  KeyboardIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -21,6 +16,14 @@ import { useStudioPrivateApi } from "../../LiqvidDevToolsProvider.tsx";
 import type { Transcript } from "../../types/schemas.mts";
 import type { Awaitable } from "../../types.mts";
 import { Button } from "../../ui/Button.tsx";
+import {
+  DialogBackdrop,
+  DialogClose,
+  DialogPopup,
+  DialogPortal,
+  DialogRoot,
+  DialogTrigger,
+} from "../../ui/Dialog.tsx";
 import {
   MenuItem,
   MenuPopup,
@@ -33,10 +36,11 @@ import { TimeDuration } from "../../ui/Time.tsx";
 import { useAsyncTranslations } from "../../utils/react.tsx";
 import { useChannel } from "../WebSocketProvider.tsx";
 
+import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { saveCaptions } from "./server.ts";
 import { type Shortcuts, useCaptionsEditorShortcuts } from "./shortcuts.ts";
 import { makeStore, type Store } from "./store.ts";
-import { apply } from "./utils.ts";
+import { activeWordIndex, apply, isSentenceEnd } from "./utils.ts";
 
 import styles from "./CaptionsEditor.module.css";
 
@@ -46,13 +50,11 @@ export function CaptionsEditor({
   displayProps = {},
   shortcuts = {},
   transcript: propTranscript,
-  vtt,
 }: {
   className?: string;
   displayProps?: React.HTMLAttributes<HTMLDivElement>;
   shortcuts?: Partial<Shortcuts>;
   transcript: Awaitable<RichTranscript>;
-  vtt: Awaitable<string>;
 }) {
   const [store] = useState(() => makeStore());
   const { projectPath } = useStudioPrivateApi();
@@ -64,39 +66,31 @@ export function CaptionsEditor({
   const t = useAsyncTranslations(Translations, "src/components/CaptionsEditor");
 
   useEffect(() => {
-    Promise.all([propTranscript, vtt]).then(
-      ([{ paragraphBreaks, words }, vtt]) => {
-        let cursor = 0;
-        const captionBreaks: number[] = [];
-        const lines = vtt.matchAll(
-          /^(\d\d:\d\d:\d\d\.\d\d\d) --> (\d\d:\d\d:\d\d\.\d\d\d)/gm,
-        ) as unknown as RegExpStringIterator<[string, string, string]>;
-
-        for (const [, , end] of lines) {
-          const endTime = parseTime(end);
-
-          for (; cursor < words.length; cursor++) {
-            const [, , wordEnd] = words[cursor]!;
-
-            if (wordEnd > endTime) {
-              captionBreaks.push(cursor - 1);
-              break;
-            }
-          }
-        }
-
+    Promise.resolve(propTranscript).then(
+      ({ captionBreaks, paragraphBreaks, words }) => {
         store.setState({
           captionBreaks,
           paragraphBreaks,
-          words,
+          words: words,
         });
       },
     );
-  }, [propTranscript, store, vtt]);
+  }, [propTranscript, store]);
+
+  const stripesRef = useRef<HTMLDivElement>(null);
 
   const onClick = useSelectOnClick(store);
-  const { highlight, onMouseLeave, onMouseMove, stripesRef } =
-    useHoverHighlight(store);
+  const { highlight, onMouseLeave, onMouseMove } = useHoverHighlight(
+    store,
+    stripesRef,
+  );
+  const {
+    begin: beginEdit,
+    cancel: cancelEdit,
+    commit: commitEdit,
+    editing,
+    setValue: setEditValue,
+  } = useWordEditor(store, stripesRef);
 
   const [saving, setSaving] = useState(false);
 
@@ -120,7 +114,10 @@ export function CaptionsEditor({
     }
   };
 
-  useCaptionsEditorShortcuts(store, shortcuts, { save });
+  useCaptionsEditorShortcuts(store, shortcuts, {
+    editWord: () => beginEdit(store.getState().selection.start),
+    save,
+  });
 
   const {
     captionBreaks,
@@ -171,15 +168,20 @@ export function CaptionsEditor({
    * Renders the words `[from, to)`, inserting a `<br>` after any word that has
    * a transcript break. Splits the range into sub-ranges only at break points,
    * keeping tag usage minimal.
+   *
+   * `skipBreakAt` suppresses the `<br>` for a single word index. This is used
+   * when a paragraph break coincides with a caption break: the caption break
+   * marker is rendered first, and the caller emits the paragraph `<br>` after
+   * it (see the segment rendering below).
    */
-  const renderRange = (from: number, to: number) => {
+  const renderRange = (from: number, to: number, skipBreakAt?: number) => {
     // Every break whose word `[from, to)` contains gets a `<br>` after that
     // word. Using `index < to` (rather than `to - 1`) ensures a break on the
     // last word of the range still renders, so breaks are never dropped when a
     // selection boundary happens to fall on the break. Each break index lives
     // in exactly one sub-range, so this never double-renders.
     const breaks = transcriptBreaks.filter(
-      (index) => index >= from && index < to,
+      (index) => index >= from && index < to && index !== skipBreakAt,
     );
 
     if (breaks.length === 0) return renderWords(from, to);
@@ -207,183 +209,243 @@ export function CaptionsEditor({
   if (transcript.length === 0) return;
 
   return (
-    <>
-      <div className={styles.backdrop} />
-      <div className={styles.CaptionsEditor} data-affords="click">
-        <div className={styles.actions}>
-          <Button disabled={saving} onClick={save} type="submit">
-            {saving ? (
-              <SpinnerIcon className={styles.spinner} size={16} />
-            ) : (
-              <FloppyDiskIcon />
-            )}
-            {t.save}
-          </Button>
-          <MenuRoot>
-            <MenuTrigger>
-              <DotsThreeIcon weight="bold" />
-              {t.actions}
-            </MenuTrigger>
-            <MenuPortal>
-              <MenuPositioner sideOffset={4}>
-                <MenuPopup>
-                  <MenuItem
-                    onClick={() =>
-                      store.setState((state) =>
-                        apply(state, {
-                          action: "set-caption-breaks",
-                          captionBreaks: sentenceBreaks(state.words),
-                        }),
-                      )
-                    }
-                  >
-                    {t.breakAfterEverySentence}
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() =>
-                      store.setState((state) =>
-                        apply(state, {
-                          action: "set-caption-breaks",
-                          captionBreaks: [],
-                        }),
-                      )
-                    }
-                  >
-                    {t.clearCaptionBreaks}
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() =>
-                      store.setState((state) =>
-                        apply(state, {
-                          action: "set-transcript-breaks",
-                          transcriptBreaks: [],
-                        }),
-                      )
-                    }
-                  >
-                    {t.clearParagraphBreaks}
-                  </MenuItem>
-                </MenuPopup>
-              </MenuPositioner>
-            </MenuPortal>
-          </MenuRoot>
-        </div>
+    <DialogRoot open>
+      <DialogPortal>
+        <DialogBackdrop />
+        <DialogPopup className={styles.CaptionsEditor}>
+          <div data-affords="click">
+            <div className={styles.actions}>
+              {/* save affordance */}
+              <Button disabled={saving} onClick={save} type="submit">
+                {saving ? (
+                  <SpinnerIcon className={styles.spinner} size={16} />
+                ) : (
+                  <FloppyDiskIcon />
+                )}
+                {t.save}
+              </Button>
 
-        <div className={styles.time}>
-          <TimeDuration
-            format="milliseconds"
-            value={{ ms: transcript[selection.start]![1] }}
-          />
-          {" → "}
-          <TimeDuration
-            format="milliseconds"
-            value={{ ms: transcript[selection.end]![2] }}
-          />
-        </div>
-        {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
-        {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
-        <div
-          className={styles.transcript}
-          onClick={onClick}
-          onMouseLeave={onMouseLeave}
-          onMouseMove={onMouseMove}
-        >
-          <div className={styles.stripes} ref={stripesRef}>
-            {highlight && (
-              <div
-                className={styles.hoverWord}
-                style={{
-                  height: highlight.height,
-                  left: highlight.left,
-                  top: highlight.top,
-                  width: highlight.width,
-                }}
+              {/* menu for break actions */}
+              <MenuRoot>
+                <MenuTrigger>
+                  <DotsThreeIcon weight="bold" />
+                  {t.actions}
+                </MenuTrigger>
+                <MenuPortal>
+                  <MenuPositioner sideOffset={4}>
+                    <MenuPopup>
+                      <MenuItem
+                        onClick={() =>
+                          store.setState((state) =>
+                            apply(state, {
+                              action: "set-caption-breaks",
+                              captionBreaks: sentenceBreaks(state.words),
+                            }),
+                          )
+                        }
+                      >
+                        {t.breakAfterEverySentence}
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          store.setState((state) =>
+                            apply(state, {
+                              action: "set-caption-breaks",
+                              captionBreaks: [],
+                            }),
+                          )
+                        }
+                      >
+                        {t.clearCaptionBreaks}
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          store.setState((state) =>
+                            apply(state, {
+                              action: "set-transcript-breaks",
+                              transcriptBreaks: [],
+                            }),
+                          )
+                        }
+                      >
+                        {t.clearParagraphBreaks}
+                      </MenuItem>
+                    </MenuPopup>
+                  </MenuPositioner>
+                </MenuPortal>
+              </MenuRoot>
+
+              {/* keyboard shortcuts */}
+              <DialogRoot>
+                <DialogTrigger render={<Button />}>
+                  <KeyboardIcon />
+                  {t.keyboardShortcuts}
+                </DialogTrigger>
+                <ShortcutsDialog shortcuts={shortcuts} t={t} />
+              </DialogRoot>
+
+              {/* close button */}
+              <DialogClose style={{ marginLeft: "auto" }} title={t.close} />
+            </div>
+
+            <div className={styles.time}>
+              <TimeDuration
+                format="milliseconds"
+                value={{ ms: transcript[selection.start]![1] }}
               />
-            )}
-            {captionSegments(captionBreaks, transcript.length).map(
-              (segment) => {
-                const { startIndex, endIndex, hasCaptionBreak, i } = segment;
+              {" → "}
+              <TimeDuration
+                format="milliseconds"
+                value={{ ms: transcript[selection.end]![2] }}
+              />
+            </div>
+            {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
+            {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
+            <div
+              className={styles.transcript}
+              onClick={onClick}
+              onMouseLeave={onMouseLeave}
+              onMouseMove={onMouseMove}
+            >
+              <div className={styles.stripes} ref={stripesRef}>
+                {highlight && (
+                  <div
+                    className={styles.hoverWord}
+                    style={{
+                      height: highlight.height,
+                      left: highlight.left,
+                      top: highlight.top,
+                      width: highlight.width,
+                    }}
+                  />
+                )}
+                {editing && (
+                  <input
+                    // biome-ignore lint/a11y/noAutofocus: focus is the point of the inline editor
+                    autoFocus
+                    className={styles.wordInput}
+                    data-affords="keys"
+                    onBlur={cancelEdit}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        commitEdit();
+                      } else if (e.key === "Escape") {
+                        e.preventDefault();
+                        cancelEdit();
+                      }
+                    }}
+                    style={{
+                      left: editing.rect.left,
+                      top: editing.rect.top,
+                    }}
+                    value={editing.value}
+                  />
+                )}
+                {captionSegments(captionBreaks, transcript.length).map(
+                  (segment) => {
+                    const { startIndex, endIndex, hasCaptionBreak, i } =
+                      segment;
 
-                const hasSelection =
-                  between(startIndex, selection.start, endIndex) ||
-                  between(startIndex, selection.end, endIndex);
+                    const hasSelection =
+                      between(startIndex, selection.start, endIndex) ||
+                      between(startIndex, selection.end, endIndex);
 
-                const markStart = Math.min(selection.start, endIndex);
-                const markEnd = Math.min(selection.end, endIndex) + 1;
+                    const markStart = Math.min(selection.start, endIndex);
+                    const markEnd = Math.min(selection.end, endIndex) + 1;
 
-                // Attach the scroll target to the segment that contains the
-                // selection start (the anchor of a possibly multi-segment mark).
-                const isAnchorSegment = between(
-                  startIndex,
-                  selection.start,
-                  endIndex,
-                );
+                    // Attach the scroll target to the segment that contains the
+                    // selection start (the anchor of a possibly multi-segment mark).
+                    const isAnchorSegment = between(
+                      startIndex,
+                      selection.start,
+                      endIndex,
+                    );
 
-                if (!hasSelection) {
-                  return (
-                    <Fragment key={`${startIndex}/${i}`}>
-                      {renderRange(startIndex, endIndex)}{" "}
-                      {hasCaptionBreak && (
-                        <>
-                          <span className={styles.captionBreak} />{" "}
-                        </>
-                      )}
-                    </Fragment>
-                  );
-                }
+                    // The caption break falls after the segment's last word. If
+                    // that word also has a paragraph break, render the caption
+                    // break first and emit the paragraph `<br>` after it, so its
+                    // `<br>` is suppressed inside `renderRange` (via
+                    // `skipBreakAt`) and re-emitted below.
+                    const captionBreakWord = endIndex - 1;
+                    const coincidingParagraphBreak =
+                      hasCaptionBreak &&
+                      transcriptBreaks.includes(captionBreakWord);
+                    const skipBreakAt = coincidingParagraphBreak
+                      ? captionBreakWord
+                      : undefined;
 
-                return (
-                  <Fragment key={`${startIndex}/${i}`}>
-                    {renderRange(startIndex, markStart)}{" "}
-                    {hasSelection && (
-                      <>
-                        <mark
-                          className={styles.selection}
-                          key={selection.start}
-                          ref={isAnchorSegment ? selectionRef : undefined}
-                        >
-                          {renderRange(markStart, markEnd)}
-                        </mark>{" "}
-                      </>
-                    )}
-                    {renderRange(markEnd, endIndex)}{" "}
-                    {hasCaptionBreak && (
+                    const captionBreakMarker = hasCaptionBreak && (
                       <>
                         <span className={styles.captionBreak} />{" "}
+                        {coincidingParagraphBreak && <br />}
                       </>
-                    )}
-                  </Fragment>
-                );
-              },
-            )}
+                    );
+
+                    if (!hasSelection) {
+                      return (
+                        <Fragment key={`${startIndex}/${i}`}>
+                          {renderRange(startIndex, endIndex, skipBreakAt)}{" "}
+                          {captionBreakMarker}
+                        </Fragment>
+                      );
+                    }
+
+                    return (
+                      <Fragment key={`${startIndex}/${i}`}>
+                        {renderRange(startIndex, markStart, skipBreakAt)}{" "}
+                        {hasSelection && (
+                          <>
+                            <mark
+                              className={styles.selection}
+                              key={selection.start}
+                              ref={isAnchorSegment ? selectionRef : undefined}
+                            >
+                              {renderRange(markStart, markEnd, skipBreakAt)}
+                            </mark>{" "}
+                          </>
+                        )}
+                        {renderRange(markEnd, endIndex, skipBreakAt)}{" "}
+                        {captionBreakMarker}
+                      </Fragment>
+                    );
+                  },
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <CaptionsPreview store={store} {...displayProps} />
-    </>
+        </DialogPopup>
+        <CaptionsPreview store={store} {...displayProps} />
+      </DialogPortal>
+    </DialogRoot>
   );
 }
 
 type CaptionSegment = {
   /** Segment index (matches the caption break index, or one past the last). */
   i: number;
+
   /** First word index of the segment (inclusive). */
   startIndex: number;
+
   /** One past the last word index of the segment (exclusive). */
   endIndex: number;
+
   /** Whether a caption break marker follows this segment. */
   hasCaptionBreak: boolean;
 };
 
 /**
- * Returns caption break indices after every sentence, i.e. after each word
- * ending in ".". The final word is excluded since a break there is redundant.
+ * Returns caption break indices after every sentence, i.e. after each token
+ * ending in one of `.!?`. The final token is excluded since a break there is redundant.
  */
 function sentenceBreaks(transcript: Transcript): number[] {
   const breaks: number[] = [];
 
   for (let i = 0; i < transcript.length - 1; i++) {
-    if (transcript[i]![0].endsWith(".")) breaks.push(i);
+    if (isSentenceEnd(transcript[i]!)) breaks.push(i);
   }
 
   return breaks;
@@ -427,8 +489,6 @@ function CaptionsPreview({
   const { captionBreaks } = store.getState();
 
   const playback = usePlayback();
-
-  injectGlobal({ playback });
 
   const captionIndex = useRef(0);
 
@@ -509,25 +569,6 @@ function join(words: readonly TranscriptEntry[]) {
 }
 
 /**
- * Returns the index of the word active at time `t` (in ms), or -1 if none.
- */
-function activeWordIndex(transcript: Transcript, t: number): number {
-  let lo = 0;
-  let hi = transcript.length - 1;
-
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    const [, start, end] = transcript[mid]!;
-
-    if (t < start) hi = mid - 1;
-    else if (t >= end) lo = mid + 1;
-    else return mid;
-  }
-
-  return -1;
-}
-
-/**
  * Select a word when it is clicked.
  *
  * Determining the word index from the click is awkward because the transcript
@@ -583,8 +624,10 @@ type Highlight = { left: number; top: number; width: number; height: number };
  * index via {@link wordIndexAtCaret}. The word's box is then measured with a
  * DOM {@link Range} (see {@link wordRect}).
  */
-function useHoverHighlight(store: Store) {
-  const stripesRef = useRef<HTMLDivElement>(null);
+function useHoverHighlight(
+  store: Store,
+  stripesRef: React.RefObject<HTMLDivElement | null>,
+) {
   const [highlight, setHighlight] = useState<Highlight | null>(null);
 
   // Remember the word currently highlighted so a `mousemove` that stays within
@@ -612,22 +655,8 @@ function useHoverHighlight(store: Store) {
       return;
     }
 
-    const rect = wordRect(container, words, index);
-    if (!rect) {
-      setHighlight(null);
-      return;
-    }
-
-    // Convert the viewport-space word rect into coordinates relative to the
-    // `.stripes` content box, accounting for scroll offset so the highlight
-    // stays pinned to the word as the transcript scrolls.
-    const base = container.getBoundingClientRect();
-    setHighlight({
-      height: rect.height,
-      left: rect.left - base.left + container.scrollLeft,
-      top: rect.top - base.top + container.scrollTop,
-      width: rect.width,
-    });
+    const rect = wordRectRelativeToStripes(container, words, index);
+    setHighlight(rect);
   };
 
   const onMouseLeave = () => {
@@ -635,7 +664,87 @@ function useHoverHighlight(store: Store) {
     setHighlight(null);
   };
 
-  return { highlight, onMouseLeave, onMouseMove, stripesRef };
+  return { highlight, onMouseLeave, onMouseMove };
+}
+
+/**
+ * Returns the box of `wordIndex` in coordinates relative to the `.stripes`
+ * content box (accounting for scroll offset, so the box stays pinned to the
+ * word as the transcript scrolls), or `null` if it cannot be resolved.
+ */
+function wordRectRelativeToStripes(
+  container: HTMLElement,
+  words: readonly TranscriptEntry[],
+  wordIndex: number,
+): Highlight | null {
+  const rect = wordRect(container, words, wordIndex);
+  if (!rect) return null;
+
+  const base = container.getBoundingClientRect();
+  return {
+    height: rect.height,
+    left: rect.left - base.left + container.scrollLeft,
+    top: rect.top - base.top + container.scrollTop,
+    width: rect.width,
+  };
+}
+
+/** State of an in-progress word edit. */
+type WordEdit = { index: number; value: string; rect: Highlight };
+
+/**
+ * Manages inline editing of a word via an absolutely-positioned `<input>`.
+ *
+ * The input is not mounted inside the transcript markup (which would complicate
+ * the DOM the click/hover word-mapping relies on); instead the caller renders
+ * it as an overlay in the `.stripes` box, positioned over the word via
+ * {@link wordRectRelativeToStripes}. `begin` seeds the input with the word's
+ * text; `commit` dispatches a `change-word`; `cancel` aborts.
+ */
+function useWordEditor(
+  store: Store,
+  stripesRef: React.RefObject<HTMLDivElement | null>,
+) {
+  const [editing, setEditing] = useState<WordEdit | null>(null);
+
+  const begin = (index: number) => {
+    const container = stripesRef.current;
+    if (!container) return;
+
+    const { words } = store.getState();
+    const word = words[index]?.[0];
+    if (word === undefined) return;
+
+    const rect = wordRectRelativeToStripes(container, words, index);
+    if (!rect) return;
+
+    setEditing({ index, rect, value: word });
+  };
+
+  const commit = () => {
+    // Close the editor, then apply the change. The store update must happen
+    // outside the `setEditing` updater — updaters must be pure, and mutating the
+    // store there triggers a re-render mid-render ("Cannot update a component
+    // while rendering a different component").
+    if (editing) {
+      const { index, value } = editing;
+      store.setState((state) => {
+        const current = state.words[index]?.[0];
+        if (current === undefined || current === value) return state;
+
+        return apply(state, { action: "change-word", index, value });
+      });
+    }
+
+    setEditing(null);
+  };
+
+  const cancel = () => setEditing(null);
+
+  const setValue = (value: string) =>
+    setEditing((edit) => (edit ? { ...edit, value } : edit));
+
+  return { begin, cancel, commit, editing, setValue };
 }
 
 /**

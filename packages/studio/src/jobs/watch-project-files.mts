@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { loadJsonEffect } from "@liqvid/cli/utils";
+import { loadJson } from "@liqvid/cli/utils";
 import { Duration } from "@liqvid/duration";
 import type { AspectRatio } from "@liqvid/schemas";
 import {
@@ -19,23 +19,33 @@ import {
   Logger,
   type PlatformError,
   PubSub,
+  References,
   Stream,
 } from "effect";
+import {
+  type AbsoluteDir,
+  AbsoluteFile,
+  type RelativeDir,
+  RelativeFile,
+  type RelativePath,
+} from "effect-paths";
 
 import {
   ASSETS_DIR,
+  NEXT_APP_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { walkDir } from "../utils/fs.mts";
+import { getLogLevel } from "../utils/misc.mts";
 
 type Projects = Record<string, ProjectMeta>;
 
 interface Context {
-  basename: string;
-  dirname: string;
-  filename: string;
+  basename: RelativeFile;
+  dirname: AbsoluteDir;
+  filename: AbsoluteFile;
   projects: Projects;
 }
 
@@ -43,23 +53,29 @@ interface Context {
  * A file-system change event within the watched project tree, with the raw
  * relative path already resolved into its constituent parts.
  */
-interface WatchEvent {
-  basename: string;
-  dirname: string;
-  filename: string;
-}
+type WatchEvent =
+  | {
+      basename: RelativeFile;
+      dirname: AbsoluteDir;
+      filename: AbsoluteFile;
+    }
+  | {
+      basename: RelativeDir;
+      dirname: AbsoluteDir;
+      filename: AbsoluteDir;
+    };
 
 export async function watchProjectFiles(projects: Projects) {
   console.log(chalk.blue("Watching project files..."));
   const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, "app");
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
   // initial check
   await walkDir(
     TARGET_DIR,
     async ({ basename, dirname, filename }) => {
       // initialize project metadata
-      if (basename === "project.json") {
+      if (basename === PROJECT_FILE) {
         await Effect.runPromise(
           createProject({ basename, dirname, filename, projects }).pipe(
             Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
@@ -116,6 +132,7 @@ export async function watchProjectFiles(projects: Projects) {
           Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
         ),
       ),
+      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
       Effect.scoped,
     ),
   );
@@ -127,7 +144,7 @@ export async function watchProjectFiles(projects: Projects) {
  * decomposed into its constituent parts.
  */
 function watchFileEvents(
-  targetDir: string,
+  targetDir: AbsoluteDir,
 ): Stream.Stream<
   WatchEvent,
   PlatformError.PlatformError,
@@ -139,12 +156,14 @@ function watchFileEvents(
 
       return fs.watch(targetDir).pipe(
         Stream.map((event) => {
-          const filename = event.path;
+          const rel = event.path as RelativePath;
+          const filename = path.join(targetDir, rel);
+
           return {
-            basename: path.basename(filename),
+            basename: path.basename(rel),
             dirname: path.dirname(filename),
             filename,
-          } satisfies WatchEvent;
+          } as WatchEvent;
         }),
       );
     }),
@@ -158,13 +177,25 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
   return Effect.gen(function* () {
     const { basename, dirname, filename } = event;
 
+    yield* Effect.log("watchEvent", event);
+
     switch (basename) {
       case PROJECT_FILE: {
-        yield* handleProjectJson({ basename, dirname, filename, projects });
+        yield* handleProjectJson({
+          basename,
+          dirname,
+          filename: AbsoluteFile(filename),
+          projects,
+        });
         break;
       }
       case PROJECT_META_FILE: {
-        yield* handleProjectMeta({ basename, dirname, filename, projects });
+        yield* handleProjectMeta({
+          basename,
+          dirname,
+          filename: AbsoluteFile(filename),
+          projects,
+        });
         break;
       }
       default: {
@@ -176,26 +207,36 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
         }
       }
     }
-  }).pipe(Effect.annotateLogs({ operation: "handleWatchEvent" }));
+  }).pipe(Effect.annotateLogs({ _operation: "handleWatchEvent" }));
 }
 
 /**
  * Handle new or deleted project.json files
  */
 function handleProjectJson({ dirname, filename, projects }: Context) {
+  const { cwd } = getServerState();
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
+
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    const entryFile = path.join(dirname, "page.tsx");
-    const { cwd } = getServerState();
-    const TARGET_DIR = path.join(cwd, "app");
+    yield* Effect.logInfo(`handling project.json change`);
+
+    const entryFile = path.join(dirname, RelativeFile("page.tsx"));
+
+    yield* Effect.logDebug("debug testing");
 
     if (!(yield* fs.exists(entryFile))) {
+      yield* Effect.log(`no page.tsx found in ${dirname}, skipping`).pipe(
+        Effect.annotateLogs({ entryFile }),
+      );
       return;
     }
 
     // read project file
-    const project = yield* loadJsonEffect(ProjectJson, filename);
+    const project = yield* loadJson(ProjectJson, filename);
+
+    yield* Effect.log(`loaded project.json`, project);
 
     const meta: ProjectMeta = {
       ...project,
@@ -206,10 +247,18 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
       twitter: hasTwitterImage(dirname),
     };
 
+    yield* Effect.logDebug("got project meta", meta);
+
     projects[meta.path] = meta;
 
+    yield* Effect.logDebug("generating assets dir");
+
     yield* generateAssetsDir({ dirname });
-  });
+
+    yield* Effect.logDebug("generated assets dir");
+  }).pipe(
+    Effect.annotateLogs({ _operation: "handleProjectJson", dirname, filename }),
+  );
 }
 
 /**
@@ -220,19 +269,19 @@ function createProject({ dirname, filename, projects }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
     const { cwd } = getServerState();
-    const TARGET_DIR = path.join(cwd, "app");
+    const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
-    const entryFile = path.join(dirname, "page.tsx");
+    const entryFile = path.join(dirname, RelativeFile("page.tsx"));
 
     if (!(yield* fs.exists(entryFile))) {
       return;
     }
 
     // read project file
-    const project = yield* loadJsonEffect(ProjectJson, filename);
+    const project = yield* loadJson(ProjectJson, filename);
 
     // read duration
-    const duration = yield* loadJsonEffect(
+    const duration = yield* loadJson(
       AutoGenProjectMeta,
       path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
     ).pipe(Effect.map((meta) => new Duration(meta.duration)));
@@ -249,7 +298,7 @@ function createProject({ dirname, filename, projects }: Context) {
     projects[meta.path] = meta;
 
     yield* generateAssetsDir({ dirname });
-  }).pipe(Effect.annotateLogs({ operation: "createProject" }));
+  }).pipe(Effect.annotateLogs({ _operation: "createProject" }));
 }
 
 /**
@@ -261,15 +310,9 @@ function handleProjectMeta({
   projects,
 }: Context) {
   return Effect.gen(function* () {
-    const { cwd } = getServerState();
-    const TARGET_DIR = path.join(cwd, "app");
-
     const projectPath = path.dirname(dotLiqvidDir);
 
-    const projectMeta = yield* loadJsonEffect(
-      AutoGenProjectMeta,
-      path.join(TARGET_DIR, filename),
-    );
+    const projectMeta = yield* loadJson(AutoGenProjectMeta, filename);
 
     const project = projects[projectPath];
     if (!project) {
@@ -278,7 +321,7 @@ function handleProjectMeta({
     }
 
     project.duration = new Duration(projectMeta.duration);
-  }).pipe(Effect.annotateLogs({ operation: "handleProjectMeta" }));
+  }).pipe(Effect.annotateLogs({ _operation: "handleProjectMeta" }));
 }
 
 const OPENGRAPH_IMAGE_FILENAMES = [
@@ -338,7 +381,7 @@ function handleOpenGraphImage({
   projects: Projects;
 }) {
   const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, "app");
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
   const projectPath = path.relative(TARGET_DIR, dirname);
   const project = projects[projectPath];
@@ -358,7 +401,7 @@ function handleTwitterImage({
   projects: Projects;
 }) {
   const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, "app");
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
   const projectPath = path.relative(TARGET_DIR, dirname);
   const project = projects[projectPath];
@@ -395,7 +438,7 @@ function parseAspectRatio(value: unknown): AspectRatio {
   throw new Error(`Invalid aspect ratio: ${value}`);
 }
 
-function generateAssetsDir({ dirname }: { dirname: string }) {
+function generateAssetsDir({ dirname }: { dirname: AbsoluteDir }) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 

@@ -7,7 +7,7 @@ import type { WebSocket, WebSocketServer } from "ws";
 import {
   type ChannelMessage,
   type ChannelName,
-  Envelope,
+  EnvelopeFromJson,
 } from "../lib/websockets/channels.ts";
 
 import type { DynamicImports } from "./api.mts";
@@ -44,7 +44,10 @@ export function broadcast<C extends ChannelName>(
 ): Promise<void> {
   return runtime.runPromise(
     Effect.gen(function* () {
-      const frame = yield* Schema.encodeEffect(Envelope)({ channel, message });
+      const frame = yield* Schema.encodeEffect(EnvelopeFromJson)({
+        channel,
+        message,
+      });
 
       yield* Effect.forEach(
         connections,
@@ -81,7 +84,7 @@ const handleConnection = (client: WebSocket) =>
     // currently does not act on client-sent messages, but decoding validates
     // the wire format and surfaces malformed frames.
     yield* socket.runString((data) =>
-      Schema.decodeEffect(Schema.fromJsonString(Envelope))(data).pipe(
+      Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
         Effect.catchTag("SchemaError", (error) =>
           Effect.logWarning("Received malformed WebSocket frame", error),
         ),
@@ -97,8 +100,7 @@ export function upgradeHandler(_dynamicImports: DynamicImports) {
     client: WebSocket,
     _server: WebSocketServer,
     _request: NextRequest,
-    // biome-ignore lint/suspicious/noExplicitAny: RouteContext is generic over the route's params, unused here
-    _context: RouteContext<any>,
+    _context: unknown,
   ) {
     const fiber = runtime.runFork(
       handleConnection(client).pipe(

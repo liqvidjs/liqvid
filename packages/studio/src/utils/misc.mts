@@ -1,4 +1,8 @@
 import type { EnvFiles } from "@liqvid/schemas/effect";
+import { type LogLevel, Option } from "effect";
+import { RelativeDir } from "effect-paths";
+
+import { getServerState } from "../initialize.mts";
 
 /** Pending debounced calls to generateProjectTypes, keyed by assetsDir */
 const pendingCalls = new Map<string, NodeJS.Timeout>();
@@ -72,3 +76,21 @@ export function interpolateEnvVars(str: string, envFiles: EnvFiles): string {
     }
   });
 }
+
+export function getLogLevel(): LogLevel.LogLevel {
+  const { config } = getServerState();
+
+  const level = Option.flatMapNullishOr(
+    config,
+    (cfg) => cfg.logging?.level,
+  ).pipe(Option.getOrElse(() => "info"));
+
+  switch (level) {
+    case "debug":
+      return "All";
+    default:
+      return "Info";
+  }
+}
+
+export const UP = RelativeDir("..");

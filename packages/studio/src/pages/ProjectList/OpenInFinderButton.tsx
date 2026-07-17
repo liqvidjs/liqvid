@@ -1,6 +1,7 @@
 "use client";
 
 import { FolderOpenIcon } from "@phosphor-icons/react";
+import type { RelativeDir } from "effect-paths";
 
 import { useTranslations } from "../../utils/react.tsx";
 import { openInFinderAction } from "../root-actions.ts";
@@ -11,7 +12,11 @@ import type T from "./.translations/en.json";
 
 type T = typeof T;
 
-export function OpenInFinderButton({ projectPath }: { projectPath: string }) {
+export function OpenInFinderButton({
+  projectPath,
+}: {
+  projectPath: RelativeDir;
+}) {
   const t = useTranslations<T>();
   async function handleClick() {
     await openInFinderAction(projectPath);

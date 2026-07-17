@@ -1,14 +1,14 @@
 {
   "name": "effect-paths",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Effect helpers adding type safety for dealing with absolute vs relative and file vs directory",
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/v3/packages/effect-paths#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git",
-    "directory": "packages/ssr"
+    "directory": "packages/effect-paths"
   },
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"

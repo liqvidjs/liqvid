@@ -9,6 +9,7 @@ import {
   type PlatformError,
 } from "effect";
 import type { Concurrency } from "effect/Types";
+import type { AbsoluteDir, RelativePath } from "effect-paths";
 
 import type { LoggableJob } from "../api/schemas.mts";
 
@@ -25,7 +26,7 @@ export function safeGetOption<
 }
 
 export function readDirWithFileTypes(
-  dirname: string,
+  dirname: AbsoluteDir,
   {
     concurrency,
     recursive,
@@ -39,8 +40,10 @@ export function readDirWithFileTypes(
     return yield* Effect.all(
       files.map((basename) =>
         Effect.gen(function* () {
-          const stats = yield* fs.stat(path.join(dirname, basename));
-          return [basename, stats] as const;
+          const stats = yield* fs.stat(
+            path.join(dirname, basename as RelativePath),
+          );
+          return [basename as RelativePath, stats] as const;
         }),
       ),
       { concurrency },
@@ -86,8 +89,8 @@ interface ProgressMessage {
 /**
  * Log progress bars to a job.
  */
-export const jobProgressLayer = <A, E>(
-  job: LoggableJob<A, E>,
+export const jobProgressLayer = (
+  job: LoggableJob,
 ): Context.Service.Shape<typeof Progress> => ({
   SingleBar: class SingleBar {
     #message: ProgressMessage | undefined;
@@ -106,6 +109,7 @@ export const jobProgressLayer = <A, E>(
         value: startValue,
       };
       job.logs.push({
+        annotations: {},
         message: [this.#message],
         timestamp: new Date(),
         type: "log",

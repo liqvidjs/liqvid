@@ -16,6 +16,10 @@ export type State = {
   /** Actions that have been undone, for redo. */
   redoStack: readonly Action[];
 
+  /**
+   * The transcript entries, in order. Initially these correspond to single words,
+   * but after editing they could contain whitespace.
+   */
   words: readonly TranscriptEntry[];
 };
 
@@ -28,11 +32,40 @@ export type ChangeWordAction = {
   action: "change-word";
   index: number;
   value: string;
+
+  /** The word's previous text, captured at record time so undo can restore it
+   * (by undo, `prev` already holds the changed value). */
+  prevValue?: string;
+};
+
+export type MergeWordAction = {
+  action: "merge-word";
+  index: number;
+
+  /**
+   * The two merged entries (`index` and `index + 1`) and the break arrays
+   * before merging, captured at record time so undo can restore them exactly
+   * (by undo, `prev` holds the merged word and shifted breaks).
+   */
+  prevEntries?: readonly [TranscriptEntry, TranscriptEntry];
+  prevCaptionBreaks?: readonly number[];
+  prevParagraphBreaks?: readonly number[];
 };
 
 export type DeleteWordAction = {
   action: "delete-word";
   index: number;
+
+  /** The removed entry, captured at record time so undo can reinsert it. */
+  deleted?: TranscriptEntry;
+
+  /**
+   * The break arrays before deletion, captured at record time so undo can
+   * restore them exactly (deletion may drop a break that shifting cannot
+   * recover).
+   */
+  prevCaptionBreaks?: readonly number[];
+  prevParagraphBreaks?: readonly number[];
 };
 
 export type StartPrevSentenceAction = {
@@ -41,6 +74,10 @@ export type StartPrevSentenceAction = {
 
 export type EndNextSentenceAction = {
   action: "end-next-sentence";
+};
+
+export type EndNextCommaAction = {
+  action: "end-next-comma";
 };
 
 export type StartPrevCaptionAction = {
@@ -69,18 +106,18 @@ export type ToggleTranscriptBreakAction = {
 
 export type SetCaptionBreaksAction = {
   action: "set-caption-breaks";
-  captionBreaks: number[];
+  captionBreaks: readonly number[];
 
   /** The array before applying, captured at record time for undo. */
-  prevCaptionBreaks?: number[];
+  prevCaptionBreaks?: readonly number[];
 };
 
 export type SetTranscriptBreaksAction = {
   action: "set-transcript-breaks";
-  transcriptBreaks: number[];
+  transcriptBreaks: readonly number[];
 
   /** The array before applying, captured at record time for undo. */
-  prevTranscriptBreaks?: number[];
+  prevTranscriptBreaks?: readonly number[];
 };
 
 export type InsertWordAction = {
@@ -90,6 +127,21 @@ export type InsertWordAction = {
 
   startTime: number;
   endTime: number;
+
+  /**
+   * Break arrays to restore verbatim. Used when inverting a `delete-word`,
+   * which may have removed a break that plain index shifting cannot recover.
+   * When omitted, breaks at or after `index` are shifted up by one.
+   */
+  captionBreaks?: readonly number[];
+  paragraphBreaks?: readonly number[];
+
+  /**
+   * When set, also overwrite the word immediately before the insertion
+   * (`words[index - 1]`) with this entry. Used when inverting a `merge-word`
+   * to split the merged word back into its two originals.
+   */
+  restorePrev?: TranscriptEntry;
 };
 
 export type SelectionBackwardAction = {
@@ -109,10 +161,12 @@ export type Action =
   | ChangeWordAction
   | DeleteWordAction
   | EndNextCaptionAction
+  | EndNextCommaAction
   | EndNextSentenceAction
   | EndNextTranscriptBreakAction
   | IdentityAction
   | InsertWordAction
+  | MergeWordAction
   | SelectionBackwardAction
   | SelectionForwardAction
   | SelectionSetAction

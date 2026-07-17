@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { type FileDecodeError, loadJsonEffect } from "@liqvid/cli/utils";
+import { type FileDecodeError, loadJson } from "@liqvid/cli/utils";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas/effect";
 import {
   dirNameToPackageName,
@@ -25,6 +25,7 @@ import {
 } from "./types.mts";
 
 const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas/recording-meta";
+
 declare const data: RecordingMeta;
 export default data;`;
 
@@ -215,7 +216,7 @@ export const recordingsLive = HttpApiBuilder.group(
               const dir = path.join(recordingsDir, filename);
               acc.push(
                 Effect.gen(function* () {
-                  const file = yield* loadJsonEffect(
+                  const file = yield* loadJson(
                     RecordingMetaFile,
                     path.join(dir, RECORDING_META_FILE),
                   );

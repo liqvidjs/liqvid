@@ -11,7 +11,7 @@ export type {
 } from "@liqvid/studio-plugin-api";
 
 export * from "./assets.mts";
-export * from "./components//CaptionsEditor/CaptionsEditor.tsx";
+export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
 
 /* ------------------------- ambidextrous components ------------------------- */
 

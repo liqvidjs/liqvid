@@ -13,7 +13,7 @@
   font-weight: 500;
 
   color: #fff;
-  background-color: light-dark(#0003, #fff2);
+  background-color: #aaa;
 
   &[disabled] {
     pointer-events: none;

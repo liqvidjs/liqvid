@@ -1,7 +1,12 @@
 import path from "node:path";
 
 import { renderAudio } from "@liqvid/cli/render-audio";
-import { loadJsonEffect, writeJSON } from "@liqvid/cli/utils";
+import {
+  loadJson,
+  type RelativeDir,
+  RelativeFile,
+  writeJSON,
+} from "@liqvid/cli/utils";
 import type { LiqvidConfig } from "@liqvid/schemas/effect";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -12,6 +17,7 @@ import {
   AUDIO_WAV,
   CAPTIONS_FILE,
   CAPTIONS_META,
+  NEXT_APP_DIR,
   RICH_TRANSCRIPT,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
@@ -27,15 +33,15 @@ import { createJob } from "../utils/jobs.mts";
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
 
-const AUDIO_META_FILE = "audio-meta.json";
+const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 
 /** Id used for the single audio rendering when `audio.multiple` is false. */
 export const SINGLE_AUDIO_ID = "default";
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
-function getAudioBaseDir(projectPath: string): string {
+function getAudioBaseDir(projectPath: RelativeDir) {
   const { cwd } = getServerState();
-  return path.join(cwd, "app", projectPath, ASSETS_DIR, AUDIO_DIR);
+  return path.join(cwd, NEXT_APP_DIR, projectPath, ASSETS_DIR, AUDIO_DIR);
 }
 
 /**
@@ -45,8 +51,8 @@ function getAudioBaseDir(projectPath: string): string {
  * it is `.liqvid/audio/<id>`.
  */
 export function getAudioDir(
-  projectPath: string,
-  id: string,
+  projectPath: RelativeDir,
+  id: RelativeDir,
   multiple: boolean,
 ): string {
   const base = getAudioBaseDir(projectPath);
@@ -68,8 +74,8 @@ function isMultiple(config: LiqvidConfig): boolean {
   return config.media?.audio?.multiple ?? false;
 }
 
-function readAudioMeta(audioDir: string) {
-  return loadJsonEffect(AudioMeta, path.join(audioDir, AUDIO_META_FILE));
+function readAudioMeta(audioDir: RelativeDir) {
+  return loadJson(AudioMeta, path.join(audioDir, AUDIO_META_FILE));
 }
 
 /**
@@ -77,8 +83,8 @@ function readAudioMeta(audioDir: string) {
  *
  * Captions metadata lives alongside the audio in the same directory.
  */
-export function readCaptionsMeta(audioDir: string) {
-  return loadJsonEffect(CaptionsMeta, path.join(audioDir, CAPTIONS_META));
+export function readCaptionsMeta(audioDir: RelativeDir) {
+  return loadJson(CaptionsMeta, path.join(audioDir, CAPTIONS_META));
 }
 
 /**

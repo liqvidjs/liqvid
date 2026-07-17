@@ -1,11 +1,13 @@
-import "./effect-filesystem.d.ts";
+import type fs from "node:fs";
+
+import { Brand } from "effect";
+
 import "./fs-promises.d.ts";
 import "./fs.d.ts";
+import "./import-meta.d.ts";
 import "./path.d.ts";
 import "./process.d.ts";
 import "./url.d.ts";
-
-import { Brand } from "effect";
 
 /* ------------------------------ absolute ------------------------------ */
 /** Absolute directory path */
@@ -40,3 +42,25 @@ export type AnyFile = AbsoluteFile | RelativeFile;
 
 /** Absolute/relative directory path */
 export type AnyDir = AbsoluteDir | RelativeDir;
+
+/* ------------------------------ utils ------------------------------ */
+export type AbsoluteToRelative<P extends AbsolutePath> = P extends AbsoluteDir
+  ? RelativeDir
+  : P extends AbsoluteFile
+    ? RelativeFile
+    : P;
+
+export type RelativeToAbsolute<P extends RelativePath> = P extends RelativeDir
+  ? AbsoluteDir
+  : P extends RelativeFile
+    ? AbsoluteFile
+    : P;
+
+/* ------------------------------ Dirent ------------------------------ */
+export interface Dirent<Name extends RelativePath = RelativePath>
+  extends Omit<fs.Dirent<Name>, "isDirectory" | "isFile" | "name"> {
+  isDirectory(): this is Dirent<RelativeDir>;
+  isFile(): this is Dirent<RelativeFile>;
+  name: Name;
+  parentPath: AbsoluteDir;
+}

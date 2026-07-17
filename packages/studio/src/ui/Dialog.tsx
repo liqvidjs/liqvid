@@ -2,6 +2,8 @@
 
 // biome-ignore lint/style/noRestrictedImports: this is the styled version
 import { Dialog } from "@base-ui/react/dialog";
+import { useColorScheme } from "@liqvid/color-scheme/react";
+import { XIcon } from "@phosphor-icons/react";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import {
@@ -24,12 +26,16 @@ interface DialogApi {
 
   /** Whether the dialog is currently open */
   isOpen: boolean;
+
+  /** The nesting level of the dialog. */
+  level: number;
 }
 
 const DialogApiContext = createContext<DialogApi>({
   close() {},
   isDialog: false,
   isOpen: false,
+  level: 0,
 });
 DialogApiContext.displayName = "DialogApi";
 export function useDialogApi() {
@@ -52,6 +58,8 @@ export function DialogRoot({
   // open state
   const [open, setOpen] = useState(defaultOpen);
 
+  const parent = useDialogApi();
+
   /** setOpen() wrapper which updates ancestor dropdown */
   const wrappedOnOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -70,8 +78,9 @@ export function DialogRoot({
       get isOpen() {
         return controlledOpen ?? open;
       },
+      level: parent.level + 1,
     }),
-    [controlledOpen, open],
+    [controlledOpen, open, parent.level],
   );
 
   return (
@@ -89,9 +98,14 @@ export function DialogRoot({
 
 export function DialogClose({
   className,
+  children = <XIcon size={24} />,
   ...props
 }: React.ComponentProps<typeof Dialog.Close>) {
-  return <Dialog.Close className={clsx(styles.Close, className)} {...props} />;
+  return (
+    <Dialog.Close className={clsx(styles.Close, className)} {...props}>
+      {children}
+    </Dialog.Close>
+  );
 }
 
 export function DialogPopup({
@@ -101,9 +115,14 @@ export function DialogPopup({
 }: React.ComponentProps<typeof Dialog.Popup> & {
   size?: "small" | "medium" | "large" | "huge";
 }) {
+  const { level } = useDialogApi();
+  const { colorScheme } = useColorScheme();
+
   return (
     <Dialog.Popup
       className={clsx(styles.Content, styles[size], className)}
+      data-color-scheme={colorScheme}
+      style={{ colorScheme, zIndex: 20 * level }}
       {...props}
     />
   );

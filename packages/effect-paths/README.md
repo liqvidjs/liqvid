@@ -1,5 +1,14 @@
 # effect-paths
 
+This provides helpers for working with paths in [Effect-TS](https://effect.website). Specifically, it provides branded types for absolute vs relative paths, and for directories vs files. This uses Effect v4 Beta.
+
+
+## Installation
+
+```bash
+npm install effect-paths
+```
+
 ## Example
 
 ```ts
@@ -24,6 +33,6 @@ const f = path.join(
   RelativeFile("package.json") as RelativePath,
 );
 
-// never
+// Error
 const g = path.join(RelativeFile("x"), RelativeFile("a"));
 ```

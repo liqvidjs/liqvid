@@ -9,10 +9,19 @@ import {
   type PlatformError,
   Schema,
 } from "effect";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  type AbsolutePath,
+  RelativeFile,
+} from "effect-paths";
 
 import { FileDecodeError } from "../errors.mts";
 import { CONFIG_FILE } from "../tasks/conventions.mts";
 
+/**
+ * Get the file-system layer appropriate to the execution environment (Node, Bun, etc.)
+ */
 export async function agnosticFileSystem(): Promise<{
   layer: Layer.Layer<FileSystem.FileSystem>;
 }> {
@@ -28,11 +37,15 @@ export async function agnosticFileSystem(): Promise<{
 /**
  * Load all environment files (.env, .env.development, .env.production).
  */
-export function loadEnvFiles(rootDir: string): EnvFiles {
+export function loadEnvFiles(rootDir: AbsoluteDir): EnvFiles {
   return {
-    development: parseEnvFile(path.join(rootDir, ".env.development")),
-    local: parseEnvFile(path.join(rootDir, ".env.local")),
-    production: parseEnvFile(path.join(rootDir, ".env.production")),
+    development: parseEnvFile(
+      path.join(rootDir, RelativeFile(".env.development")),
+    ),
+    local: parseEnvFile(path.join(rootDir, RelativeFile(".env.local"))),
+    production: parseEnvFile(
+      path.join(rootDir, RelativeFile(".env.production")),
+    ),
   };
 }
 
@@ -42,10 +55,10 @@ export function loadEnvFiles(rootDir: string): EnvFiles {
 export function loadLiqvidConfig({
   configPath = path.join(process.cwd(), CONFIG_FILE),
 }: {
-  configPath?: string;
+  configPath?: AbsoluteFile;
 } = {}) {
   // TODO: should not have to specify this
-  return loadJsonEffect(LiqvidConfig, configPath) as Effect.Effect<
+  return loadJson(LiqvidConfig, configPath) as Effect.Effect<
     LiqvidConfig,
     FileDecodeError | PlatformError.PlatformError,
     EnvFiles | FileSystem.FileSystem
@@ -60,9 +73,9 @@ export function loadLiqvidConfig({
  * (e.g. `EnvFiles`) surface those requirements to the caller instead of being
  * erased to `unknown`.
  */
-export function loadJsonEffect<S extends Schema.Top>(
+export function loadJson<S extends Schema.Top>(
   parser: S,
-  filename: string,
+  filename: AbsoluteFile,
 ) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -80,7 +93,7 @@ export function loadJsonEffect<S extends Schema.Top>(
 /**
  * Parse a .env file and return key-value pairs.
  */
-function parseEnvFile(filePath: string): Record<string, string> {
+function parseEnvFile(filePath: AbsolutePath): Record<string, string> {
   const result: Record<string, string> = {};
 
   try {

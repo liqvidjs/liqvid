@@ -60,7 +60,7 @@ export function serveStaticFile(requestedPath: string) {
     }
 
     // Resolve relative to the app directory
-    const appDir = path.join(cwd, "app");
+    const appDir = path.join(cwd, NEXT_APP_DIR);
     const absolutePath = path.join(appDir, normalizedPath);
 
     // Security: Ensure the resolved path is within the app directory

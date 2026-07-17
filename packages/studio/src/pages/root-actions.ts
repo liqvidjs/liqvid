@@ -10,16 +10,25 @@ import { writeJSON } from "@liqvid/cli/utils";
 import type { AutoGenProjectMeta } from "@liqvid/schemas/effect";
 import { serialize } from "@liqvid/ssr";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
+import {
+  type AbsoluteDir,
+  RelativeDir,
+  RelativeFile,
+  type RelativePath,
+} from "effect-paths";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
 import {
   ASSETS_DIR,
+  NEXT_APP_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  TEMPLATE_FILE,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
+import { UP } from "../utils/misc.mts";
 
 export async function rebuildAction() {
   const result = await Effect.runPromise(
@@ -39,12 +48,12 @@ export interface TemplateInfo {
   default?: boolean;
 
   /** Full path to the template directory */
-  path: string;
+  path: AbsoluteDir;
 }
 
 interface CreateProjectInput {
   name: string;
-  projectPath: string;
+  projectPath: RelativeDir;
   templateId: string;
 }
 
@@ -55,21 +64,21 @@ interface CreateProjectResult {
 
 const TEMPLATES_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "templates",
+  UP,
+  UP,
+  RelativeDir("templates"),
 );
 
-const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, "projects");
+const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, RelativeDir("projects"));
 
 /**
  * Open project in Finder
  */
 export async function openInFinderAction(
-  projectPath: string,
+  projectPath: RelativeDir,
 ): Promise<{ success: boolean }> {
   const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, "app");
+  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
 
   try {
     // Validate path to prevent directory traversal
@@ -89,11 +98,11 @@ export async function openInFinderAction(
  * Open a render folder in Finder
  */
 export async function openRenderInFinderAction(
-  projectPath: string,
+  projectPath: RelativeDir,
   renderId: string,
 ): Promise<{ success: boolean }> {
   const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, "app");
+  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
 
   try {
     // Validate paths to prevent directory traversal
@@ -104,8 +113,8 @@ export async function openRenderInFinderAction(
       APP_DIR,
       projectPath,
       ASSETS_DIR,
-      "renders",
-      renderId,
+      RelativeDir("renders"),
+      RelativeDir(renderId),
     );
     await execa("open", [fullPath]);
     return { success: true };
@@ -119,17 +128,22 @@ export async function openRenderInFinderAction(
  * Open captions folder in Finder
  */
 export async function openCaptionsInFinderAction(
-  projectPath: string,
+  projectPath: RelativeDir,
 ): Promise<{ success: boolean }> {
   const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, "app");
+  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
 
   try {
     // Validate path to prevent directory traversal
     if (projectPath.includes("..")) {
       return { success: false };
     }
-    const fullPath = path.join(APP_DIR, projectPath, ASSETS_DIR, "captions");
+    const fullPath = path.join(
+      APP_DIR,
+      projectPath,
+      ASSETS_DIR,
+      RelativeDir("captions"),
+    );
     await execa("open", [fullPath]);
     return { success: true };
   } catch (e) {
@@ -154,7 +168,7 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
       if (!entry.isDirectory()) continue;
 
       const templateDir = path.join(PROJECT_TEMPLATES_DIR, entry.name);
-      const templateJsonPath = path.join(templateDir, "template.json");
+      const templateJsonPath = path.join(templateDir, TEMPLATE_FILE);
 
       try {
         const content = await fsp.readFile(templateJsonPath, "utf8");
@@ -210,8 +224,8 @@ function compileTemplate(
  * Other files are copied as-is. template.json is skipped.
  */
 function copyTemplateDir(
-  srcDir: string,
-  destDir: string,
+  srcDir: AbsoluteDir,
+  destDir: AbsoluteDir,
   data: Record<string, unknown>,
 ): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem> {
   return Effect.gen(function* () {
@@ -223,17 +237,21 @@ function copyTemplateDir(
     for (const [basename, stats] of entries) {
       const srcPath = path.join(srcDir, basename);
       const destName = basename.endsWith(".hbs")
-        ? basename.slice(0, -4)
+        ? (basename.slice(0, -4) as RelativePath)
         : basename;
       const destPath = path.join(destDir, destName);
 
-      if (basename === "template.json") {
+      if (basename === TEMPLATE_FILE) {
         // Skip template.json
         continue;
       }
 
       if (stats.type === "Directory") {
-        yield* copyTemplateDir(srcPath, destPath, data);
+        yield* copyTemplateDir(
+          srcPath as AbsoluteDir,
+          destPath as AbsoluteDir,
+          data,
+        );
       } else if (basename.endsWith(".hbs")) {
         yield* compileTemplate(srcPath, destPath, data);
       } else {
@@ -247,7 +265,7 @@ export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
   const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, "app");
+  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
 
   const result = await Effect.runPromiseExit(
     Effect.gen(function* () {
@@ -280,7 +298,7 @@ export async function createProjectAction(
       // Create base directory structure
       yield* fs.makeDirectory(fullProjectPath, { recursive: true });
       yield* fs.makeDirectory(
-        path.join(fullProjectPath, ASSETS_DIR, "recordings"),
+        path.join(fullProjectPath, ASSETS_DIR, RelativeDir("recordings")),
         {
           recursive: true,
         },
@@ -293,7 +311,7 @@ export async function createProjectAction(
 
       // Create shared files (project.json and .liqvid files)
       yield* compileTemplate(
-        path.join(TEMPLATES_DIR, "project.json.hbs"),
+        path.join(TEMPLATES_DIR, RelativeFile("project.json.hbs")),
         path.join(fullProjectPath, PROJECT_FILE),
         templateData,
       );
@@ -306,8 +324,8 @@ export async function createProjectAction(
 
       // Generate .liqvid/types.ts (initial structure)
       yield* compileTemplate(
-        path.join(TEMPLATES_DIR, "types.ts.hbs"),
-        path.join(fullProjectPath, ASSETS_DIR, "types.ts"),
+        path.join(TEMPLATES_DIR, RelativeFile("types.ts.hbs")),
+        path.join(fullProjectPath, ASSETS_DIR, RelativeFile("types.ts")),
         {
           directoryStructure: {
             [PROJECT_META_FILE]: null,

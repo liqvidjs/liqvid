@@ -1,12 +1,7 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-
-import { NodeFileSystem } from "@effect/platform-node";
-import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
+import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
-import { Console, Effect } from "effect";
+import { Console, Effect, FileSystem, Stream } from "effect";
 
-import { CONFIG_FILE } from "../conventions.mts";
 import { getServerState, type LiqvidServerState } from "../initialize.mts";
 
 /**
@@ -20,47 +15,31 @@ function reloadConfig(state: LiqvidServerState, message: string) {
 }
 
 /**
- * Watch liqvid.config.json for changes and reload when modified.
+ * Watch liqvid.json for changes and reload when modified.
+ *
+ * Uses the Effect `FileSystem.watch` API, which yields a `Stream` of
+ * `WatchEvent`s. We watch the containing directory (rather than the file
+ * itself) so that the watch keeps working even when the config file does not
+ * exist yet — a bare file watch would fail on `stat`, and would also be torn
+ * down if the file were removed. Node reports the changed entry as a path
+ * relative to the watched directory, so we filter on the config basename.
  */
 export function watchLiqvidConfig(state: LiqvidServerState) {
-  return Effect.sync(() => {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
-    const configPath = path.join(cwd, CONFIG_FILE);
 
-    /** Watch the config file itself for changes. */
-    const watchConfigFile = () => {
-      fs.watch(configPath, (eventType) => {
-        if (eventType === "change") {
-          Effect.runPromise(
-            reloadConfig(state, `${CONFIG_FILE} changed, reloading...`).pipe(
-              Effect.provide(NodeFileSystem.layer),
-              Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
-            ),
-          );
-        }
-      });
-    };
-
-    try {
-      watchConfigFile();
-    } catch {
-      fs.watch(cwd, (_eventType, filename) => {
-        if (filename === CONFIG_FILE) {
-          Effect.runPromise(
-            reloadConfig(state, `${CONFIG_FILE} detected, loading...`).pipe(
-              Effect.provide(NodeFileSystem.layer),
-              Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
-            ),
-          );
-
-          // Now watch the file itself for changes
-          try {
-            watchConfigFile();
-          } catch {
-            // File may have been deleted again
-          }
-        }
-      });
-    }
-  });
+    yield* fs.watch(cwd).pipe(
+      // Only react to events touching the config file itself.
+      Stream.filter((event) => event.path === CONFIG_FILE),
+      Stream.runForEach((event) =>
+        reloadConfig(
+          state,
+          event._tag === "Create"
+            ? `${CONFIG_FILE} detected, loading...`
+            : `${CONFIG_FILE} changed, reloading...`,
+        ),
+      ),
+    );
+  }).pipe(Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)));
 }

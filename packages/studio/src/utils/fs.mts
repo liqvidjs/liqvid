@@ -1,45 +1,28 @@
-import { readdirSync, statSync } from "node:fs";
+import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
-import { readdir } from "node:fs/promises";
 import * as path from "node:path";
 
-import { Err, Maybe, type Result, safeJsonParse } from "@liqvid/fp";
-import { fromZod } from "@liqvid/fp/zod";
-import type { z } from "zod";
+import { Option } from "effect";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeDir,
+  RelativeFile,
+} from "effect-paths";
 
 import type { Awaitable } from "../types.mts";
 
-export async function loadJson<T extends z.ZodType>(
-  Model: T,
-  filename: string,
-): Promise<
-  Result<
-    z.core.output<T>,
-    z.ZodError<z.core.output<T>> | SyntaxError | NodeJS.ErrnoException
-  >
-> {
-  try {
-    const file = await fsp.readFile(filename, "utf8");
-
-    return safeJsonParse<z.core.output<T>>(file).flatMap((json) =>
-      fromZod(Model.safeParse(json)),
-    );
-  } catch (err) {
-    return Err(err as NodeJS.ErrnoException);
-  }
-}
-
 export function findUpwards(
-  dirname: string,
-  callback: (dir: string) => boolean | Promise<boolean>,
-): Promise<string | null> {
+  dirname: AbsoluteDir,
+  callback: (dir: AbsoluteDir) => boolean | Promise<boolean>,
+): Promise<Option.Option<AbsoluteDir>> {
   return new Promise((resolve, reject) => {
-    const checkDirectory = async (dir: string): Promise<string | null> => {
+    const checkDirectory = async (dir: AbsoluteDir) => {
       try {
         // Check if current directory matches callback
         const result = await Promise.resolve(callback(dir));
         if (result) {
-          return dir;
+          return Option.some(dir);
         }
 
         // Get parent directory
@@ -47,14 +30,14 @@ export function findUpwards(
 
         // If we've reached the root directory, stop searching
         if (parentDir === dir) {
-          return null;
+          return Option.none();
         }
 
         // Continue searching upwards
         return await checkDirectory(parentDir);
       } catch (error) {
         reject(error);
-        return null;
+        return Option.none();
       }
     };
 
@@ -64,36 +47,43 @@ export function findUpwards(
 
 /** Callback to process a file */
 export type WalkingCallback = (file: {
-  basename: string;
-  dirname: string;
-  filename: string;
+  basename: RelativeFile;
+  dirname: AbsoluteDir;
+  filename: AbsoluteFile;
 }) => Awaitable<void>;
 
 /** Walk a directory recursively */
 export async function walkDir(
   /** Directory to walk */
-  dir: string,
+  dir: AbsoluteDir,
 
   /** Callback to run for each file */
   callback: WalkingCallback,
 
   /** Callback to decide whether to descend into a directory */
   shouldProcessDir: (dir: {
-    basename: string;
-    dirname: string;
+    basename: RelativeDir;
+    dirname: AbsoluteDir;
   }) => Awaitable<boolean> = () => true,
 ) {
-  const files = await readdir(dir, { withFileTypes: true });
+  const files = await fsp.readdir(dir, { withFileTypes: true });
 
   await Promise.all(
     files.map(async (dirent) => {
-      const qualified = path.join(dirent.parentPath, dirent.name);
-
       if (dirent.isDirectory()) {
-        if (shouldProcessDir({ basename: dirent.name, dirname: qualified })) {
+        const qualified = path.join(dirent.parentPath, dirent.name);
+
+        if (
+          shouldProcessDir({
+            basename: dirent.name,
+            dirname: qualified,
+          })
+        ) {
           await walkDir(qualified, callback, shouldProcessDir);
         }
       } else if (dirent.isFile()) {
+        const qualified = path.join(dirent.parentPath, dirent.name);
+
         await callback({
           basename: dirent.name,
           dirname: dirent.parentPath,
@@ -107,21 +97,21 @@ export async function walkDir(
 /** Synchronously walk a directory recursively */
 export function walkDirSync(
   /** Directory to walk */
-  dir: string,
+  dir: AbsoluteDir,
 
   /** Callback to call for each file */
-  callback: (path: string) => void,
+  callback: (path: AbsoluteFile) => void,
 ) {
-  const files = readdirSync(dir);
+  const files = fs.readdirSync(dir);
 
   for (const file of files) {
     const qualified = path.join(dir, file);
-    const stats = statSync(qualified);
+    const stats = fs.statSync(qualified);
 
     if (stats.isDirectory()) {
-      walkDirSync(qualified, callback);
+      walkDirSync(qualified as AbsoluteDir, callback);
     } else if (stats.isFile()) {
-      callback(qualified);
+      callback(qualified as AbsoluteFile);
     }
   }
 }
@@ -129,13 +119,22 @@ export function walkDirSync(
 /**
  * Get the path to the Biome executable, if available
  */
-export async function getBiomePath(dirname: string): Promise<Maybe<string>> {
+export async function getBiomePath(
+  dirname: AbsoluteDir,
+): Promise<Option.Option<AbsoluteFile>> {
   const packageDir = await findUpwards(dirname, async (dir) => {
     const files = await fsp.readdir(dir);
-    return files.includes("package.json");
+    return files.includes(RelativeFile("package.json"));
   });
 
-  return Maybe.nullish(packageDir).map((dir) =>
-    path.join(dir, "node_modules", ".bin", "biome"),
+  return packageDir.pipe(
+    Option.map((dir) =>
+      path.join(
+        dir,
+        RelativeDir("node_modules"),
+        RelativeDir(".bin"),
+        RelativeFile("biome"),
+      ),
+    ),
   );
 }

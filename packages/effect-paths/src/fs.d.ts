@@ -1,12 +1,9 @@
-declare module "node:fs" {
-  import type {
-    AbsoluteDir,
-    AbsoluteFile,
-    AnyPath,
-    RelativePath,
-  } from "effect-paths";
+import type fs from "node:fs";
 
-  function readdirSync<P extends AnyPath>(
+declare module "node:fs" {
+  import type { AbsoluteDir, Dirent, RelativePath } from "effect-paths";
+
+  function readdirSync<P extends fs.PathLike>(
     path: P,
     options?:
       | {
@@ -16,12 +13,19 @@ declare module "node:fs" {
         }
       | BufferEncoding
       | null,
-  ): P extends AbsoluteDir ? RelativePath[] : never;
+  ): P extends AbsoluteDir
+    ? RelativePath[]
+    : P extends AnyPath
+      ? Error & { message: "must pass an absolute directory" }
+      : string[];
 
-  // readFileSync
-  function readFileSync<P extends AnyPath>(
-    ...args: [path: P, ...unknown[]]
-  ): P extends AbsoluteFile ? string : never;
+  function readdirSync(
+    path: PathLike,
+    options: ObjectEncodingOptions & {
+      withFileTypes: true;
+      recursive?: boolean | undefined;
+    },
+  ): Dirent[];
 
   // watch
   function watch(

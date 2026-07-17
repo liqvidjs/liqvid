@@ -9,6 +9,7 @@ import type {
 } from "@liqvid/schemas/effect";
 import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
 import { Effect, FileSystem, Layer } from "effect";
+import { type AnyDir, type AnyFile, RelativeFile } from "effect-paths";
 import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
 import type { CommandModule } from "yargs";
 
@@ -36,32 +37,17 @@ export interface TranscribeOptions {
   /**
    * Path to the audio file to transcribe. Must be a mono 16kHz PCM WAV file.
    */
-  audioFile: string;
+  audioFile: AnyFile;
 
   /**
    * Output directory for the generated files.
    */
-  outputDir: string;
+  outputDir: AnyDir;
 
   /**
    * Whisper configuration options.
    */
   whisperConfig?: Partial<WhisperConfig>;
-}
-
-/**
- * Result of transcription.
- */
-export interface TranscribeResult {
-  /**
-   * Path to the generated captions.vtt file.
-   */
-  captionsPath: string;
-
-  /**
-   * Path to the generated transcript.json file.
-   */
-  transcriptPath: string;
 }
 
 /** Required PCM sample rate for whisper.cpp. */
@@ -230,10 +216,42 @@ function buildTranscript(
   }
 
   return {
-    captionBreaks: [],
+    captionBreaks: captionBreaksFromSegments(segments, entries),
     paragraphBreaks: [],
     words: entries,
   };
+}
+
+/**
+ * Derive caption break indices from the segment boundaries: a break is placed
+ * after the last word that ends within each segment's time span, so that each
+ * caption corresponds to one transcription segment (mirroring the VTT cues,
+ * which are the non-empty segments).
+ */
+function captionBreaksFromSegments(
+  segments: TranscribeDetailedResult<boolean>[],
+  entries: readonly TranscriptEntry[],
+): number[] {
+  const captionBreaks: number[] = [];
+  let cursor = 0;
+
+  for (const segment of segments) {
+    // Only non-empty segments become VTT cues / caption boundaries.
+    if (segment.text.trim().length === 0) continue;
+
+    const endTime = segment.to;
+
+    for (; cursor < entries.length; cursor++) {
+      const wordEnd = entries[cursor]![2];
+
+      if (wordEnd > endTime) {
+        captionBreaks.push(cursor - 1);
+        break;
+      }
+    }
+  }
+
+  return captionBreaks;
 }
 
 /**
@@ -406,7 +424,7 @@ export function transcribe({
     yield* writeJSON(targetJsonPath, transcript);
 
     yield* writeJSON(
-      path.join(absoluteOutputDir, "transcript-raw.json"),
+      path.join(absoluteOutputDir, RelativeFile("transcript-raw.json")),
       segments,
     );
 
@@ -485,8 +503,8 @@ export const transcribeCommand: CommandModule = {
   handler: async (argv) => {
     const result = await Effect.runPromise(
       transcribe({
-        audioFile: argv.input as string,
-        outputDir: argv.output as string,
+        audioFile: argv.input as AnyFile,
+        outputDir: argv.output as AnyDir,
         whisperConfig: {
           gpu: argv.gpu as boolean,
           modelName: argv.model as WhisperModelName,

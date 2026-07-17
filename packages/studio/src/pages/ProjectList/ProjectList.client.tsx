@@ -10,9 +10,11 @@ import {
   CaretRightIcon,
   FolderIcon,
 } from "@phosphor-icons/react";
+import type { RelativeDir } from "effect-paths";
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
+import { useChannel } from "../../components/WebSocketProvider.tsx";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../../cookies.ts";
 import { TimeDuration } from "../../ui/Time.tsx";
 import { TranslationProvider } from "../../utils/react.tsx";
@@ -33,7 +35,7 @@ export type ProjectListProps = {
   initialCollapsedFolders: string[];
   initialFolderView: boolean;
   productionServerPort: number;
-  projects: Record<string, SerializedProjectMeta>;
+  projects: Record<RelativeDir, SerializedProjectMeta>;
   t: T;
 };
 
@@ -79,6 +81,15 @@ export function ProjectListClient({
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
     () => new Set(initialCollapsedFolders),
   );
+
+  useChannel("projects", {
+    deleteProject: (data) => {
+      console.log(data);
+    },
+    updateProject: (data) => {
+      console.log(data);
+    },
+  });
 
   function handleFolderViewChange(enabled: boolean) {
     setFolderView(enabled);

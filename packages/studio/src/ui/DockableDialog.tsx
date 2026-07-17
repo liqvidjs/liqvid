@@ -3,7 +3,7 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import { onClickReact, onDragReact } from "@liqvid/utils";
+import { onClickReact, onDragReact, useToggle } from "@liqvid/utils";
 import { Portal } from "@radix-ui/react-portal";
 import clsx from "clsx";
 import {
@@ -17,8 +17,6 @@ import {
   useRef,
 } from "react";
 import { z } from "zod";
-
-import { useToggle } from "../utils/react.tsx";
 
 import styles from "./DockableDialog.module.css";
 

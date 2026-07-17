@@ -3,20 +3,30 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { Maybe } from "@liqvid/fp";
+import { assertType } from "@liqvid/utils";
 import chalk from "chalk";
+import { Option } from "effect";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  type AbsolutePath,
+  RelativeDir,
+  RelativeFile,
+  type RelativePath,
+} from "effect-paths";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
 import {
   ASSETS_DIR,
+  NEXT_APP_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
-import { debounce } from "../utils/misc.mts";
+import { debounce, UP } from "../utils/misc.mts";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -71,16 +81,16 @@ function shouldIgnoreEvent(basename: string, filename: string): boolean {
 
 const TEMPLATES_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "templates",
+  UP,
+  UP,
+  RelativeDir("templates"),
 );
 
 /**
  * Check if a directory is a project directory.
  * A project directory contains both project.json and page.tsx.
  */
-async function isProjectDirectory(dir: string): Promise<boolean> {
+async function isProjectDirectory(dir: AbsoluteDir): Promise<boolean> {
   try {
     const [hasProjectJson, hasPageTsx] = await Promise.all([
       fsp
@@ -88,7 +98,7 @@ async function isProjectDirectory(dir: string): Promise<boolean> {
         .then(() => true)
         .catch(() => false),
       fsp
-        .access(path.join(dir, "page.tsx"))
+        .access(path.join(dir, RelativeFile("page.tsx")))
         .then(() => true)
         .catch(() => false),
     ]);
@@ -102,25 +112,27 @@ async function isProjectDirectory(dir: string): Promise<boolean> {
  * Find the project directory that contains the given file path.
  * Walks up the directory tree until it finds a project directory or reaches TARGET_DIR.
  */
-async function findProjectDirectory(filePath: string): Promise<string | null> {
+async function findProjectDirectory(
+  filePath: AbsolutePath,
+): Promise<Option.Option<AbsoluteDir>> {
   let dir = path.dirname(filePath);
 
   const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, "app");
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
   while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
     if (await isProjectDirectory(dir)) {
-      return dir;
+      return Option.some(dir);
     }
     dir = path.dirname(dir);
   }
 
   // Check if TARGET_DIR itself is a project directory
   if (dir === TARGET_DIR && (await isProjectDirectory(dir))) {
-    return dir;
+    return Option.some(dir);
   }
 
-  return null;
+  return Option.none();
 }
 
 export async function watchAssets() {
@@ -129,25 +141,33 @@ export async function watchAssets() {
   });
 
   const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, "app");
+  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
 
-  fs.watch(TARGET_DIR, { recursive: true }, async (_eventName, relPath) => {
-    if (!relPath) return;
+  fs.watch(
+    TARGET_DIR,
+    { recursive: true },
+    async (_eventName, relPath: RelativePath | null) => {
+      if (!relPath) return;
 
-    const filename = path.join(TARGET_DIR, relPath);
-    const basename = path.basename(filename);
+      const filename = path.join(TARGET_DIR, relPath);
+      const basename = path.basename(filename);
 
-    if (shouldIgnoreEvent(basename, filename)) return;
+      if (shouldIgnoreEvent(basename, filename)) return;
 
-    // Find the project directory containing this file
-    const projectDir = await findProjectDirectory(filename);
-    if (!projectDir) return;
+      // Find the project directory containing this file
+      const $projectDir = await findProjectDirectory(filename);
+      if (Option.isNone($projectDir)) return;
+      const projectDir = $projectDir.value;
 
-    const biomePath = await getBiomePath(projectDir);
+      const biomePath = await getBiomePath(projectDir);
 
-    // generate the types.ts file, debounced to avoid multiple rapid calls
-    debounce(() => generateProjectTypes({ biomePath, projectDir }), projectDir);
-  });
+      // generate the types.ts file, debounced to avoid multiple rapid calls
+      debounce(
+        () => generateProjectTypes({ biomePath, projectDir }),
+        projectDir,
+      );
+    },
+  );
 }
 
 /**
@@ -157,8 +177,8 @@ async function generateProjectTypes({
   biomePath,
   projectDir,
 }: {
-  biomePath: Maybe<string>;
-  projectDir: string;
+  biomePath: Option.Option<AbsoluteFile>;
+  projectDir: AbsoluteDir;
 }) {
   const directoryStructure = await listProjectDir(projectDir);
   const assetsDir = path.join(projectDir, ASSETS_DIR);
@@ -171,8 +191,8 @@ async function generateProjectTypes({
     data: {
       directoryStructure,
     },
-    out: path.join(assetsDir, "types.ts"),
-    template: "types.ts.hbs",
+    out: path.join(assetsDir, RelativeFile("types.ts")),
+    template: RelativeFile("types.ts.hbs"),
   });
 }
 
@@ -186,18 +206,19 @@ export async function runTemplate({
   template,
 }: {
   /** Path to the Biome executable. */
-  biomePath: Maybe<string>;
+  biomePath: Option.Option<AbsoluteFile>;
 
   /** Data to pass to the template */
   data: unknown;
 
   /** Path to the output file */
-  out: string;
+  out: AbsoluteFile;
 
   /** Path to the template file */
-  template: string;
+  template: RelativeFile;
 }) {
   const { cwd } = getServerState();
+
   const templateHbs = await fsp.readFile(
     path.join(TEMPLATES_DIR, template),
     "utf8",
@@ -210,8 +231,8 @@ export async function runTemplate({
     await fsp.writeFile(out, result);
 
     // invoke biome
-    if (biomePath.isSome) {
-      await execa(biomePath.unwrap(), ["check", "--fix", out], { cwd });
+    if (Option.isSome(biomePath)) {
+      await execa(biomePath.value, ["check", "--fix", out], { cwd });
     }
   } catch (e) {
     console.error(chalk.red(JSON.stringify({ cwd })));
@@ -226,16 +247,18 @@ export async function runTemplate({
  * @param relativePath - The path relative to projectDir (defaults to "")
  */
 async function listProjectDir(
-  projectDir: string,
-  currentDir: string = projectDir,
-  relativePath: string = "",
+  projectDir: AbsoluteDir,
+  currentDir: AbsoluteDir = projectDir,
+  relativePath: RelativeDir = RelativeDir(""),
 ): Promise<Directory> {
   const entries = await fsp.readdir(currentDir);
 
   const results = await Promise.all(
     entries.map(async (basename) => {
       const fullPath = path.join(currentDir, basename);
-      const relPath = relativePath ? `${relativePath}/${basename}` : basename;
+      const relPath = relativePath
+        ? path.join(relativePath, basename)
+        : basename;
 
       // Check if this entry should be excluded
       if (shouldExclude(relPath, basename)) {
@@ -244,6 +267,9 @@ async function listProjectDir(
 
       const stats = await fsp.stat(fullPath);
       if (stats.isDirectory()) {
+        assertType<AbsoluteDir>(fullPath);
+        assertType<RelativeDir>(relPath);
+
         const subDir = await listProjectDir(projectDir, fullPath, relPath);
         // Only include non-empty directories
         if (Object.keys(subDir).length > 0) {
@@ -258,7 +284,7 @@ async function listProjectDir(
 
   return Object.fromEntries(
     results.filter(
-      (entry): entry is [string, Directory | null] => entry !== null,
+      (entry): entry is [RelativePath, Directory | null] => entry !== null,
     ),
   );
 }

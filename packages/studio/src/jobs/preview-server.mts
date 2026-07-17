@@ -2,11 +2,12 @@ import * as http from "node:http";
 import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
-import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
+import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
+import { type AbsoluteDir, RelativeDir, type RelativePath } from "effect-paths";
 import handler from "serve-handler";
 
-import { ASSETS_DIR, CONFIG_FILE } from "../conventions.mts";
+import { BUILD_DIR, PREVIEW_DIR, ROOT_HIDDEN_DIR } from "../conventions.mts";
 import { getServerState, type LiqvidServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
 
@@ -15,7 +16,7 @@ export const DEFAULT_PRODUCTION_SERVER_PORT = 4000;
 export function startProductionServer(state: LiqvidServerState) {
   return Effect.gen(function* () {
     const { cwd } = state;
-    const previewDir = path.join(cwd, ASSETS_DIR, "preview");
+    const previewDir = path.join(cwd, ROOT_HIDDEN_DIR, PREVIEW_DIR);
 
     const fs = yield* FileSystem.FileSystem;
 
@@ -72,7 +73,7 @@ export function startProductionServer(state: LiqvidServerState) {
  * Setup symlinks in the preview directory to support basePath.
  * For example, if basePath is "/videos", creates .liqvid/preview/videos -> ../../out
  */
-function setupPreviewSymlinks(previewDir: string, basePath: string) {
+function setupPreviewSymlinks(previewDir: AbsoluteDir, basePath: string) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
@@ -89,13 +90,13 @@ function setupPreviewSymlinks(previewDir: string, basePath: string) {
 
     if (!basePath) {
       // No basePath configured, symlink preview directly to out
-      const outPath = path.join(cwd, "out");
+      const outPath = path.join(cwd, BUILD_DIR);
       if (yield* fs.exists(outPath)) {
         // Copy/symlink contents from out to preview
         const outEntries = yield* fs.readDirectory(outPath);
         for (const basename of outEntries) {
-          const srcPath = path.join(outPath, basename);
-          const destPath = path.join(previewDir, basename);
+          const srcPath = path.join(outPath, basename as RelativePath);
+          const destPath = path.join(previewDir, basename as RelativePath);
 
           // Remove existing if present
           if (yield* fs.exists(destPath)) {
@@ -111,14 +112,14 @@ function setupPreviewSymlinks(previewDir: string, basePath: string) {
 
     // basePath is configured (e.g., "/videos")
     // Create symlink: .liqvid/preview/videos -> ../../out
-    const normalizedBasePath = basePath.replace(/^\/+/, ""); // Remove leading slashes
+    const normalizedBasePath = RelativeDir(basePath.replace(/^\/+/, "")); // Remove leading slashes
     const symlinkPath = path.join(previewDir, normalizedBasePath);
 
     // Ensure parent directories exist
     yield* fs.makeDirectory(path.dirname(symlinkPath), { recursive: true });
 
     // Calculate relative path from symlink location to 'out' directory
-    const outPath = path.join(cwd, "out");
+    const outPath = path.join(cwd, BUILD_DIR);
     const relativePath = path.relative(path.dirname(symlinkPath), outPath);
 
     // Remove existing symlink/directory if present

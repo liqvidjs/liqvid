@@ -1,18 +1,18 @@
 .CaptionsEditor {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  z-index: 50;
+  width: max-content;
+
+  max-width: unset;
+  height: max-content;
   padding: 0.5em 1em;
   pointer-events: all;
   cursor: text;
   user-select: text;
-  background: light-dark(white, #222);
+  /* background: light-dark(white, #222); */
   border: 1px solid #000;
   border-radius: 6px;
 
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  translate: -50% 0;
+  transform: translate(-50%, -70%);
 }
 
 .time {
@@ -72,7 +72,7 @@
 }
 
 .hoverWord {
-  --pad-x: 4px;
+  --pad-x: 2px;
   --pad-y: 1px;
   position: absolute;
   z-index: 1;
@@ -84,6 +84,23 @@
   translate: calc(-1 * var(--pad-x)) calc(-1 * var(--pad-y));
 }
 
+.wordInput {
+  --pad-x: 2px;
+  --pad-y: 1px;
+
+  position: absolute;
+  z-index: 2;
+  min-width: 4em;
+  padding: var(--pad-y) var(--pad-x);
+  font: inherit;
+  color: inherit;
+  outline: none;
+  background: light-dark(#fff, #222);
+  border: 1px solid var(--accent-solid, #58f);
+  border-radius: 2px;
+  translate: calc(-1 * var(--pad-x)) calc(-1 * var(--pad-y));
+}
+
 .selection {
   --pad-x: 4px;
   --pad-y: 1px;
@@ -91,7 +108,9 @@
   position: relative;
   z-index: 0;
   color: inherit;
-  background: transparent;
+
+  /** repeat background on the element itself for tokens with spaces */
+  background: light-dark(#acf, #79e);
 
   /* do this on the ::before to avoid causing reflow
    * at the end of lines
@@ -138,7 +157,7 @@
   position: absolute;
   bottom: 10%;
   left: 50%;
-  z-index: 50;
+  z-index: 10;
   width: max-content;
   padding: 0.4em 0.8em;
   color: #fff;
@@ -152,7 +171,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 40;
+  z-index: 5;
   width: 100%;
   height: 100%;
   background: #000a;

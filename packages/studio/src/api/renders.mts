@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { loadJsonEffect, Progress, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, Progress, writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { StatusCodes } from "http-status-codes";
@@ -44,7 +44,7 @@ function generateRenderId(): string {
  * Read render metadata from a render directory.
  */
 function readRenderMeta(renderDir: string) {
-  return loadJsonEffect(RenderMeta, path.join(renderDir, RENDER_META_FILE));
+  return loadJson(RenderMeta, path.join(renderDir, RENDER_META_FILE));
 }
 
 /**
@@ -62,7 +62,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const { cwd } = getServerState();
         const rendersBaseDir = path.join(
           cwd,
-          "app",
+          NEXT_APP_DIR,
           projectPath,
           RENDERS_BASE_DIR,
         );
@@ -126,7 +126,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
 
         const rendersBaseDir = path.join(
           cwd,
-          "app",
+          NEXT_APP_DIR,
           projectPath,
           RENDERS_BASE_DIR,
         );
@@ -159,7 +159,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(cwd, "app", projectPath);
+        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
         const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
 
         // Generate unique render ID

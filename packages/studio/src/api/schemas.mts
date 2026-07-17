@@ -156,7 +156,7 @@ export type LoggableJobState = (typeof LoggableJobState)["Type"];
 export const LoggableJobClient = Schema.Struct({
   id: Schema.String,
 
-  logs: Schema.Array(StructuredLog),
+  logs: Schema.Array(StructuredLog).pipe(Schema.mutable),
 
   name: Schema.String,
 

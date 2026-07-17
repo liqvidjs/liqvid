@@ -9,7 +9,7 @@ import {
   type ChannelMessage,
   type ChannelName,
   type Channels,
-  Envelope,
+  EnvelopeFromJson,
 } from "../lib/websockets/channels.ts";
 
 /**
@@ -23,7 +23,6 @@ type Subscriber<C extends ChannelName> = (message: ChannelMessage<C>) => void;
  */
 const runtime = ManagedRuntime.make(Socket.layerWebSocketConstructorGlobal);
 
-const DecodeEnvelope = Schema.fromJsonString(Envelope);
 
 /**
  * Wraps a single WebSocket connection, decoding envelope frames and fanning
@@ -38,13 +37,13 @@ class WebSocketClient {
 
   constructor(url: string) {
     this.#fiber = runtime.runFork(
-      Effect.gen(this, function* () {
+      Effect.gen({ self: this }, function* () {
         const socket = yield* Socket.makeWebSocket(toAbsoluteUrl(url));
 
         this.#write = yield* socket.writer;
 
         yield* socket.runString((data) =>
-          Schema.decodeEffect(DecodeEnvelope)(data).pipe(
+          Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
             Effect.andThen(({ channel, message }) => {
               const subscribers = this.#subscribers.get(channel);
               if (!subscribers) return Effect.void;
@@ -83,7 +82,7 @@ class WebSocketClient {
     if (!write) return;
 
     runtime.runFork(
-      Schema.encodeEffect(Envelope)({ channel, message }).pipe(
+      Schema.encodeEffect(EnvelopeFromJson)({ channel, message }).pipe(
         Effect.andThen(write),
         Effect.ignore,
       ),

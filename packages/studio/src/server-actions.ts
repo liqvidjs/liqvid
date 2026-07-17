@@ -3,22 +3,25 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
 
-import { getServerState } from "./initialize.mts";
+import { type RelativeDir, RelativeFile } from "effect-paths";
+
+import { TRANSLATIONS_DIR } from "./conventions.mts";
+import { getLocale } from "./utils/i18n.mts";
 import { STUDIO_ROOT } from "./utils/server.mts";
 
 export async function getTranslationsFromServer<T>(
-  componentPath: string,
+  componentPath: RelativeDir,
 ): Promise<T> {
-  const { locale } = getServerState();
+  const locale = getLocale();
   const translationsDir = path.join(
     STUDIO_ROOT,
     componentPath,
-    ".translations",
+    TRANSLATIONS_DIR,
   );
 
   try {
     const translationsJson = await fsp.readFile(
-      path.join(translationsDir, `${locale}.json`),
+      path.join(translationsDir, RelativeFile(`${locale}.json`)),
       "utf8",
     );
 

@@ -3,10 +3,10 @@ import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import {
   EnvFiles,
   type LiqvidConfig,
-  type Locale,
   type ProjectMeta,
 } from "@liqvid/schemas/effect";
 import { Effect, Option } from "effect";
+import type { AbsoluteDir } from "effect-paths";
 
 import type { LoggableJob } from "./api/schemas.mts";
 import {
@@ -29,17 +29,15 @@ export interface LiqvidServerState {
   /**
    * Current working directory, captured at initialization time.
    */
-  cwd: string;
+  cwd: AbsoluteDir;
 
   /**
    * The full parsed liqvid.config.json
    */
   config: Option.Option<LiqvidConfig>;
-  locale: Locale;
   jobs: {
     productionServer: null | Promise<void>;
-    // biome-ignore lint/suspicious/noExplicitAny: variance
-    new: Map<string, LoggableJob<any, any>>;
+    new: Map<string, LoggableJob>;
     watchAssets: null | Promise<void>;
     watchConfig: null | Promise<void>;
     watchProjectFiles: null | Promise<void>;
@@ -71,8 +69,6 @@ export async function initializeServer() {
         Effect.provideService(EnvFiles, envFiles),
       ),
     );
-
-    state.locale = config.ui?.locale ?? state.locale;
 
     state.config = Option.some(config);
   }
@@ -114,7 +110,6 @@ export function getServerState(): LiqvidServerState {
         watchConfig: null,
         watchProjectFiles: null,
       },
-      locale: "en",
       productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
       projects: {},
       started: {

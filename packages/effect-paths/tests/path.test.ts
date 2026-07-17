@@ -13,16 +13,16 @@ const relativeFile = RelativeFile("");
 
 const plainString = "";
 
-type AbsoluteFirst = Error & {
-  message: "Only the first argument can be an absolute path";
+type ErrorAbsoluteFirst = Error & {
+  message: "You can only pass absolute paths in the first position";
 };
 
-type FilesLast = Error & {
+type ErrorFilesLast = Error & {
   message: "You can only pass files in the last position";
 };
 
-type AllWrapped = Error & {
-  message: "You can only pass AnyPath types to path.join";
+type ErrorAllWrapped = Error & {
+  message: "If any arguments to path.join are AllPath, all of them must be";
 };
 
 /* ------------------------------ path.join ------------------------------ */
@@ -32,8 +32,8 @@ path.join(absoluteDir, relativeDir, relativeFile) satisfies AbsoluteFile;
 path.join(absoluteDir, relativeDir) satisfies AbsoluteDir;
 path.join(absoluteDir, relativeDir, relativeDir) satisfies AbsoluteDir;
 
-path.join(absoluteDir, absoluteDir) satisfies AbsoluteFirst;
-path.join(absoluteFile, relativeFile) satisfies FilesLast;
+path.join(relativeDir, relativeFile) satisfies RelativeFile;
+path.join(relativeDir, relativeDir) satisfies RelativeDir;
 
 // singletons
 path.join(absoluteDir) satisfies AbsoluteDir;
@@ -42,4 +42,6 @@ path.join(relativeFile) satisfies RelativeFile;
 path.join(relativeDir) satisfies RelativeDir;
 
 // invalid
-path.join(absoluteDir, plainString) satisfies AllWrapped;
+path.join(absoluteDir, absoluteDir) satisfies ErrorAbsoluteFirst;
+path.join(absoluteFile, relativeFile) satisfies ErrorFilesLast;
+path.join(absoluteDir, plainString) satisfies ErrorAllWrapped;

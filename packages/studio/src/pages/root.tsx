@@ -37,7 +37,7 @@ export async function Homepage() {
     <main className={styles.main}>
       <div className={styles.headerRow}>
         <h1 className={styles.header}>{t.title}</h1>
-        <NewProjectButton />
+        <NewProjectButton t={t} />
         <RebuildButton />
       </div>
       <ProjectList

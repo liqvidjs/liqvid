@@ -1,3 +1,5 @@
-export const CAPTIONS_FILE = "captions.vtt";
+import { RelativeFile } from "effect-paths";
 
-export const RICH_TRANSCRIPT = "transcript.json";
+export const CAPTIONS_FILE = RelativeFile("captions.vtt");
+
+export const RICH_TRANSCRIPT = RelativeFile("transcript.json");

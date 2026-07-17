@@ -4,7 +4,7 @@ import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas/effect";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { isMac } from "@liqvid/utils";
+import { isMac, useToggle } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -14,7 +14,6 @@ import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 import { TimeDuration } from "../ui/Time.tsx";
-import { useToggle } from "../utils/react.tsx";
 
 import type { RecordingControlProps } from "./RecordingControl.tsx";
 
