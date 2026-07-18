@@ -20,12 +20,13 @@ import {
   type PlatformError,
   PubSub,
   References,
+  type Schema,
   Stream,
 } from "effect";
 import {
-  type AbsoluteDir,
+  AbsoluteDir,
   AbsoluteFile,
-  type RelativeDir,
+  RelativeDir,
   RelativeFile,
   type RelativePath,
 } from "effect-paths";
@@ -37,10 +38,11 @@ import {
   PROJECT_META_FILE,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
+import { broadcast } from "../next/websockets.mts";
 import { walkDir } from "../utils/fs.mts";
 import { getLogLevel } from "../utils/misc.mts";
 
-type Projects = Record<string, ProjectMeta>;
+type Projects = Record<string, Schema.Struct.Mutable<ProjectMeta>>;
 
 interface Context {
   basename: RelativeFile;
@@ -58,11 +60,13 @@ type WatchEvent =
       basename: RelativeFile;
       dirname: AbsoluteDir;
       filename: AbsoluteFile;
+      kind: "file";
     }
   | {
       basename: RelativeDir;
       dirname: AbsoluteDir;
       filename: AbsoluteDir;
+      kind: "dir";
     };
 
 export async function watchProjectFiles(projects: Projects) {
@@ -109,13 +113,33 @@ export async function watchProjectFiles(projects: Projects) {
       const pubsub = yield* PubSub.unbounded<WatchEvent>();
 
       // Consumer: subscribe to the Pub/Sub and dispatch each event.
+      //
+      // The OS watcher (and editors' atomic-save shuffles) frequently emit
+      // several events for a single logical file change, which would otherwise
+      // fan out into duplicate broadcasts. Group events by their resolved
+      // filename and debounce each group so a burst collapses into a single
+      // dispatch. Idle groups are torn down after `idleTimeToLive`.
       yield* Stream.fromPubSub(pubsub).pipe(
-        Stream.runForEach((event) =>
-          handleWatchEvent(event, projects).pipe(
-            Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-            Effect.ignore,
-          ),
+        Stream.groupBy(
+          (event) => Effect.succeed([event.filename, event] as const),
+          { idleTimeToLive: "1 seconds" },
         ),
+        Stream.mapEffect(
+          ([, group]) =>
+            group.pipe(
+              Stream.debounce("50 millis"),
+              Stream.runForEach((event) =>
+                handleWatchEvent(event, projects).pipe(
+                  Effect.tapCause((cause) =>
+                    Effect.logError(Cause.pretty(cause)),
+                  ),
+                  Effect.ignore,
+                ),
+              ),
+            ),
+          { concurrency: "unbounded" },
+        ),
+        Stream.runDrain,
         Effect.forkScoped,
       );
 
@@ -155,19 +179,98 @@ function watchFileEvents(
       const fs = yield* FileSystem.FileSystem;
 
       return fs.watch(targetDir).pipe(
-        Stream.map((event) => {
-          const rel = event.path as RelativePath;
-          const filename = path.join(targetDir, rel);
+        Stream.mapEffect((event) =>
+          Effect.gen(function* () {
+            // Editors like Vim save atomically: they write a backup/temp file
+            // (e.g. `project.json~`) and rename it over the real file. The
+            // rename-over-existing is frequently coalesced or dropped by the
+            // OS watcher, so we only reliably see the temp-file event. Map it
+            // back onto the real file so downstream handlers still fire.
+            const rawRel = event.path as RelativePath;
+            const rel = normalizeEditorTempPath(rawRel);
+            const rewritten = rel !== rawRel;
+            const filename = path.join(targetDir, rel);
 
-          return {
-            basename: path.basename(rel),
-            dirname: path.dirname(filename),
-            filename,
-          } as WatchEvent;
-        }),
+            // When the path was rewritten from a temp file, the event's `_tag`
+            // describes the temp file, not the real file — so ignore it and
+            // inspect the real file directly.
+            const isDir = yield* isDirectory(
+              filename,
+              rewritten ? undefined : event,
+            );
+            const dirname = AbsoluteDir(path.dirname(filename));
+
+            return isDir
+              ? ({
+                  basename: RelativeDir(path.basename(rel)),
+                  dirname,
+                  filename: AbsoluteDir(filename),
+                  kind: "dir",
+                } satisfies WatchEvent)
+              : ({
+                  basename: RelativeFile(path.basename(rel)),
+                  dirname,
+                  filename: AbsoluteFile(filename),
+                  kind: "file",
+                } satisfies WatchEvent);
+          }),
+        ),
       );
     }),
   );
+}
+
+/**
+ * Determine whether a watched path refers to a directory. For creation and
+ * modification events the path still exists, so we consult the file system.
+ * For removal events the path is already gone, so we fall back to a heuristic:
+ * paths without an extension are treated as directories.
+ */
+function isDirectory(
+  filename: string,
+  event: FileSystem.WatchEvent | undefined,
+): Effect.Effect<boolean, never, FileSystem.FileSystem> {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    if (event?._tag === "Remove") {
+      return path.extname(filename) === "";
+    }
+
+    const info = yield* fs.stat(filename).pipe(Effect.option);
+    if (info._tag === "None") {
+      return path.extname(filename) === "";
+    }
+
+    return info.value.type === "Directory";
+  });
+}
+
+/**
+ * Rewrite an editor backup/temp path to the real file it shadows.
+ *
+ * Editors save atomically via a sidecar file that they then rename over the
+ * target. The watcher often only surfaces the sidecar event, so we map it back
+ * to the real file. Recognized patterns:
+ *
+ * - Vim backup:            `project.json~`       → `project.json`
+ * - Vim/Emacs numbered:    `project.json.4913`   → (left as-is; not a shadow)
+ * - JetBrains/generic:     `project.json.tmp`    → `project.json`
+ *
+ * Paths that don't match a known temp pattern are returned unchanged.
+ */
+function normalizeEditorTempPath(rel: RelativePath): RelativePath {
+  // Vim backup files: trailing tilde.
+  if (rel.endsWith("~")) {
+    return rel.slice(0, -1) as RelativePath;
+  }
+
+  // Generic `.tmp` sidecar next to the real file.
+  if (rel.endsWith(".tmp")) {
+    return rel.slice(0, -".tmp".length) as RelativePath;
+  }
+
+  return rel;
 }
 
 /**
@@ -175,9 +278,11 @@ function watchFileEvents(
  */
 function handleWatchEvent(event: WatchEvent, projects: Projects) {
   return Effect.gen(function* () {
+    if (event.kind !== "file") return;
+
     const { basename, dirname, filename } = event;
 
-    yield* Effect.log("watchEvent", event);
+    yield* Effect.logDebug("watchEvent", event);
 
     switch (basename) {
       case PROJECT_FILE: {
@@ -220,11 +325,9 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    yield* Effect.logInfo(`handling project.json change`);
+    yield* Effect.logDebug(`handling project.json change`);
 
     const entryFile = path.join(dirname, RelativeFile("page.tsx"));
-
-    yield* Effect.logDebug("debug testing");
 
     if (!(yield* fs.exists(entryFile))) {
       yield* Effect.log(`no page.tsx found in ${dirname}, skipping`).pipe(
@@ -241,7 +344,7 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
-      duration: new Duration({ milliseconds: 1000 }),
+      duration: new Duration({ seconds: 1000 }),
       openGraph: hasOpenGraphImage(dirname),
       path: path.relative(TARGET_DIR, dirname),
       twitter: hasTwitterImage(dirname),
@@ -250,6 +353,8 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
     yield* Effect.logDebug("got project meta", meta);
 
     projects[meta.path] = meta;
+
+    yield* broadcast("projects", { data: meta, type: "updateProject" });
 
     yield* Effect.logDebug("generating assets dir");
 
@@ -329,33 +434,33 @@ const OPENGRAPH_IMAGE_FILENAMES = [
   "opengraph-image.jpeg",
   "opengraph-image.jpg",
   "opengraph-image.png",
-];
+].map(RelativeFile);
 
 const TWITTER_IMAGE_FILENAMES = [
   "twitter-image.gif",
   "twitter-image.jpeg",
   "twitter-image.jpg",
   "twitter-image.png",
-];
+].map(RelativeFile);
 
 /**
  * Whether a filename is an Open Graph image.
  */
-function isOpenGraphImage(basename: string) {
+function isOpenGraphImage(basename: RelativeFile) {
   return OPENGRAPH_IMAGE_FILENAMES.includes(basename);
 }
 
 /**
  * Whether a filename is a Twitter image.
  */
-function isTwitterImage(basename: string) {
+function isTwitterImage(basename: RelativeFile) {
   return TWITTER_IMAGE_FILENAMES.includes(basename);
 }
 
 /**
  * Whether a project has an Open Graph image defined.
  */
-function hasOpenGraphImage(dirname: string) {
+function hasOpenGraphImage(dirname: AbsoluteDir) {
   return OPENGRAPH_IMAGE_FILENAMES.some((f) =>
     fs.existsSync(path.join(dirname, f)),
   );
@@ -364,7 +469,7 @@ function hasOpenGraphImage(dirname: string) {
 /**
  * Whether a project has a Twitter image defined.
  */
-function hasTwitterImage(dirname: string) {
+function hasTwitterImage(dirname: AbsoluteDir) {
   return TWITTER_IMAGE_FILENAMES.some((f) =>
     fs.existsSync(path.join(dirname, f)),
   );
@@ -377,7 +482,7 @@ function handleOpenGraphImage({
   dirname,
   projects,
 }: {
-  dirname: string;
+  dirname: AbsoluteDir;
   projects: Projects;
 }) {
   const { cwd } = getServerState();
@@ -397,7 +502,7 @@ function handleTwitterImage({
   dirname,
   projects,
 }: {
-  dirname: string;
+  dirname: AbsoluteDir;
   projects: Projects;
 }) {
   const { cwd } = getServerState();

@@ -1,9 +1,10 @@
 "use client";
 
+import { IS_CLIENT } from "@liqvid/ssr";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import {
   type ChannelMessage,
@@ -22,7 +23,6 @@ type Subscriber<C extends ChannelName> = (message: ChannelMessage<C>) => void;
  * socket layer.
  */
 const runtime = ManagedRuntime.make(Socket.layerWebSocketConstructorGlobal);
-
 
 /**
  * Wraps a single WebSocket connection, decoding envelope frames and fanning
@@ -95,9 +95,12 @@ class WebSocketClient {
       set = new Set();
       this.#subscribers.set(channel, set);
     }
+
+    console.debug("subscribing to channel", channel);
     set.add(cb as Subscriber<ChannelName>);
 
     return () => {
+      console.debug("unsubscribing from channel", channel);
       set.delete(cb as Subscriber<ChannelName>);
     };
   }
@@ -115,10 +118,10 @@ const WebSocketContext = createContext<WebSocketClient | null>(null);
 
 /** @scopeException ../../app/providers.tsx */
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const client = useMemo(() => {
-    if (typeof window === "undefined") return null;
+  const [client] = useState(() => {
+    if (!IS_CLIENT) return null;
     return new WebSocketClient("/api/liqvid/ws");
-  }, []);
+  });
 
   useEffect(() => {
     return () => {

@@ -35,7 +35,9 @@ async function deleteJob(formData: FormData) {
 
   jobs.new.delete(id);
 
-  await broadcast("jobs", { data: { id }, type: "deleteJob" });
+  await Effect.runPromise(
+    broadcast("jobs", { data: { id }, type: "deleteJob" }),
+  );
 }
 
 export async function Jobs() {

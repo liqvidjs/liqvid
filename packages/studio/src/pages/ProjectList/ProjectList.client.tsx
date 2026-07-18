@@ -10,7 +10,7 @@ import {
   CaretRightIcon,
   FolderIcon,
 } from "@phosphor-icons/react";
-import type { RelativeDir } from "effect-paths";
+import { RelativeDir } from "effect-paths";
 import { useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -57,7 +57,7 @@ function countTotalProjects(folder: FolderNode): number {
 }
 
 const cookieOptions = {
-  maxAge: 60 * 60 * 24 * 365, // 1 year
+  maxAge: Duration.inSeconds({ days: 365 }),
   path: "/",
   sameSite: "lax" as const,
 };
@@ -70,12 +70,11 @@ export function ProjectListClient({
   projects: dehydratedProjects,
   t,
 }: ProjectListProps) {
-  const projects = useMemo(
+  const [projects, setProjects] = useState(
     (): Record<string, ProjectMeta> =>
       deserialize(dehydratedProjects, {
         "@liqvid/duration": Duration.fromJSON,
       }),
-    [dehydratedProjects],
   );
   const [folderView, setFolderView] = useState(initialFolderView);
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
@@ -84,10 +83,14 @@ export function ProjectListClient({
 
   useChannel("projects", {
     deleteProject: (data) => {
-      console.log(data);
+      setProjects((prev) => {
+        const next = { ...prev };
+        delete next[data.path];
+        return next;
+      });
     },
     updateProject: (data) => {
-      console.log(data);
+      setProjects((prev) => ({ ...prev, [data.path]: data }));
     },
   });
 
@@ -295,7 +298,7 @@ function ProjectItem({
           productionServerPort={productionServerPort}
           project={project}
         />
-        <OpenInFinderButton projectPath={project.path} />
+        <OpenInFinderButton projectPath={RelativeDir(project.path)} />
         <ProductionLink
           href={`http://localhost:${productionServerPort}${previewPath}`}
         />

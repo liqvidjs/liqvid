@@ -1,14 +1,24 @@
 import { NodeSocket } from "@effect/platform-node";
-import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
+import {
+  Cause,
+  Effect,
+  Fiber,
+  Logger,
+  ManagedRuntime,
+  References,
+  Schema,
+} from "effect";
 import { Socket } from "effect/unstable/socket";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
 
+import { getServerState } from "../initialize.mts";
 import {
   type ChannelMessage,
   type ChannelName,
   EnvelopeFromJson,
 } from "../lib/websockets/channels.ts";
+import { getLogLevel } from "../utils/misc.mts";
 
 import type { DynamicImports } from "./api.mts";
 
@@ -19,16 +29,6 @@ import type { DynamicImports } from "./api.mts";
  * sockets rather than dialing out), but providing it keeps the layer complete.
  */
 const runtime = ManagedRuntime.make(NodeSocket.layerWebSocketConstructor);
-
-/* ------------------------------ registry ------------------------------ */
-type Writer = (frame: string) => Effect.Effect<void, Socket.SocketError>;
-
-/**
- * Connections currently subscribed to each channel, keyed by channel name.
- * Every connection is subscribed to every channel for now; the envelope's
- * `channel` field is what routes messages on the client.
- */
-const connections = new Set<Writer>();
 
 /**
  * Broadcast a message on a channel to every connected client.
@@ -41,20 +41,28 @@ const connections = new Set<Writer>();
 export function broadcast<C extends ChannelName>(
   channel: C,
   message: ChannelMessage<C>,
-): Promise<void> {
-  return runtime.runPromise(
-    Effect.gen(function* () {
-      const frame = yield* Schema.encodeEffect(EnvelopeFromJson)({
-        channel,
-        message,
-      });
+) {
+  const { wsConnections } = getServerState();
 
-      yield* Effect.forEach(
-        connections,
-        (write) => Effect.ignore(write(frame)),
-        { concurrency: "unbounded", discard: true },
-      );
-    }).pipe(Effect.orDie),
+  return Effect.gen(function* () {
+    const frame = yield* Schema.encodeEffect(EnvelopeFromJson)({
+      channel,
+      message,
+    });
+
+    yield* Effect.logDebug("broadcasting WebSocket message");
+
+    yield* Effect.forEach(
+      wsConnections,
+      (write) => Effect.ignore(write(frame)),
+      {
+        concurrency: "unbounded",
+        discard: true,
+      },
+    );
+  }).pipe(
+    Effect.annotateLogs({ channel, connections: wsConnections.size, message }),
+    Effect.orDie,
   );
 }
 
@@ -65,6 +73,7 @@ export function broadcast<C extends ChannelName>(
  */
 const handleConnection = (client: WebSocket) =>
   Effect.gen(function* () {
+    const { wsConnections } = getServerState();
     // The `ws` socket API is structurally compatible with the browser
     // `WebSocket` interface that `fromWebSocket` expects.
     const socket = yield* Socket.fromWebSocket(
@@ -72,11 +81,12 @@ const handleConnection = (client: WebSocket) =>
     );
 
     const write = yield* socket.writer;
-    connections.add(write);
+    yield* Effect.logDebug("new WebSocket connection");
+    wsConnections.add(write);
 
     yield* Effect.addFinalizer(() =>
       Effect.sync(() => {
-        connections.delete(write);
+        wsConnections.delete(write);
       }),
     );
 
@@ -107,6 +117,8 @@ export function upgradeHandler(_dynamicImports: DynamicImports) {
         Effect.catchCause((cause) =>
           Effect.logDebug("WebSocket connection closed", Cause.pretty(cause)),
         ),
+        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+        Effect.provide(Logger.layer([Logger.consolePretty()])),
       ),
     );
 

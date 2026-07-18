@@ -234,7 +234,7 @@ function copyTemplateDir(
 
     const entries = yield* readDirWithFileTypes(srcDir);
 
-    for (const [basename, stats] of entries) {
+    for (const [basename, kind] of entries) {
       const srcPath = path.join(srcDir, basename);
       const destName = basename.endsWith(".hbs")
         ? (basename.slice(0, -4) as RelativePath)
@@ -246,7 +246,7 @@ function copyTemplateDir(
         continue;
       }
 
-      if (stats.type === "Directory") {
+      if (kind === "Directory") {
         yield* copyTemplateDir(
           srcPath as AbsoluteDir,
           destPath as AbsoluteDir,

@@ -1,6 +1,7 @@
 import { serialize } from "@liqvid/ssr";
 import { cookies } from "next/headers";
 
+import { WebSocketProvider } from "../components/WebSocketProvider.tsx";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
 import { getServerState, initializeServer } from "../initialize.mts";
 
@@ -34,19 +35,21 @@ export async function Homepage() {
     : [];
 
   return (
-    <main className={styles.main}>
-      <div className={styles.headerRow}>
-        <h1 className={styles.header}>{t.title}</h1>
-        <NewProjectButton t={t} />
-        <RebuildButton />
-      </div>
-      <ProjectList
-        basePath={basePath}
-        initialCollapsedFolders={initialCollapsedFolders}
-        initialFolderView={initialFolderView}
-        productionServerPort={productionServerPort}
-        projects={serialize(projects)}
-      />
-    </main>
+    <WebSocketProvider>
+      <main className={styles.main}>
+        <div className={styles.headerRow}>
+          <h1 className={styles.header}>{t.title}</h1>
+          <NewProjectButton t={t} />
+          <RebuildButton />
+        </div>
+        <ProjectList
+          basePath={basePath}
+          initialCollapsedFolders={initialCollapsedFolders}
+          initialFolderView={initialFolderView}
+          productionServerPort={productionServerPort}
+          projects={serialize(projects)}
+        />
+      </main>
+    </WebSocketProvider>
   );
 }
