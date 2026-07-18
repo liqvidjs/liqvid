@@ -341,12 +341,15 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
 
     yield* Effect.log(`loaded project.json`, project);
 
+    const projectPath = path.relative(TARGET_DIR, dirname);
+
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
-      duration: new Duration({ seconds: 1000 }),
+      duration:
+        projects[projectPath]?.duration ?? new Duration({ seconds: 1000 }),
       openGraph: hasOpenGraphImage(dirname),
-      path: path.relative(TARGET_DIR, dirname),
+      path: projectPath,
       twitter: hasTwitterImage(dirname),
     };
 

@@ -1,4 +1,5 @@
 import { NodeSocket } from "@effect/platform-node";
+import { serialize } from "@liqvid/ssr";
 import {
   Cause,
   Effect,
@@ -45,10 +46,12 @@ export function broadcast<C extends ChannelName>(
   const { wsConnections } = getServerState();
 
   return Effect.gen(function* () {
-    const frame = yield* Schema.encodeEffect(EnvelopeFromJson)({
-      channel,
-      message,
-    });
+    const frame = yield* Schema.encodeEffect(EnvelopeFromJson)(
+      serialize({
+        channel,
+        message,
+      }),
+    );
 
     yield* Effect.logDebug("broadcasting WebSocket message");
 
@@ -114,9 +117,9 @@ export function upgradeHandler(_dynamicImports: DynamicImports) {
   ) {
     const fiber = runtime.runFork(
       handleConnection(client).pipe(
-        Effect.catchCause((cause) =>
-          Effect.logDebug("WebSocket connection closed", Cause.pretty(cause)),
-        ),
+        // Effect.catchCause((cause) =>
+        //   Effect.logDebug("WebSocket connection closed", Cause.pretty(cause)),
+        // ),
         Effect.provideService(References.MinimumLogLevel, getLogLevel()),
         Effect.provide(Logger.layer([Logger.consolePretty()])),
       ),

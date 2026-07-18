@@ -1,6 +1,7 @@
 "use client";
 
-import { IS_CLIENT } from "@liqvid/ssr";
+import { Duration } from "@liqvid/duration";
+import { deserialize, IS_CLIENT } from "@liqvid/ssr";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
@@ -47,6 +48,11 @@ class WebSocketClient {
             Effect.andThen(({ channel, message }) => {
               const subscribers = this.#subscribers.get(channel);
               if (!subscribers) return Effect.void;
+
+              // biome-ignore lint/suspicious/noExplicitAny: excessive type deepness
+              message = deserialize(message as any, {
+                "@liqvid/duration": Duration.fromJSON,
+              });
 
               for (const cb of subscribers) {
                 cb(message as ChannelMessage<ChannelName>);
