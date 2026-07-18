@@ -1,4 +1,4 @@
-import type { Duration, SerializedDuration } from "@liqvid/duration";
+import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
 import { Effect, Schema } from "effect";
 import type { z } from "zod";
@@ -40,20 +40,16 @@ export const AutoGenProjectMeta = Schema.Struct({
 });
 export type AutoGenProjectMeta = z.infer<typeof AutoGenProjectMeta>;
 
-export type ProjectMeta = {
-  aspectRatio: AspectRatio;
-  duration: Duration;
-  name: string;
-  openGraph: boolean;
-  path: string;
-  twitter: boolean;
-};
+export const ProjectMeta = Schema.Struct({
+  aspectRatio: AspectRatio,
+  duration: DurationOptions.pipe(Schema.decodeTo(Schema.instanceOf(Duration))),
+  name: Schema.String,
+  openGraph: Schema.Boolean,
 
-export type SerializedProjectMeta = {
-  aspectRatio: AspectRatio;
-  duration: SerializedDuration;
-  name: string;
-  openGraph: boolean;
-  path: string;
-  twitter: boolean;
-};
+  path: Schema.String,
+
+  twitter: Schema.Boolean,
+});
+
+export type ProjectMeta = (typeof ProjectMeta)["Type"];
+export type SerializedProjectMeta = (typeof ProjectMeta)["Encoded"];

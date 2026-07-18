@@ -75,3 +75,7 @@ export const RichTranscript = Schema.Struct({
 });
 
 export type RichTranscript = (typeof RichTranscript)["Type"];
+
+export const LogLevel = Schema.Literals(["debug", "info"]);
+
+export type LogLevel = (typeof LogLevel)["Type"];

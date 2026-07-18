@@ -37,6 +37,30 @@
         }
       ]
     },
+    "logging": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "anyOf": [
+                {
+                  "enum": ["debug", "info"],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "media": {
       "anyOf": [
         {

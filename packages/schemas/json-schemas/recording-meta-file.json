@@ -8,27 +8,319 @@
     "duration": {
       "additionalProperties": false,
       "properties": {
+        "d": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "days": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "h": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hours": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "m": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "milliseconds": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
             },
             {
-              "enum": ["NaN"],
-              "type": "string"
+              "type": "null"
+            }
+          ]
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
             },
             {
-              "enum": ["Infinity"],
-              "type": "string"
+              "type": "null"
+            }
+          ]
+        },
+        "ms": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
             },
             {
-              "enum": ["-Infinity"],
-              "type": "string"
+              "type": "null"
+            }
+          ]
+        },
+        "s": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seconds": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "w": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weeks": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["NaN"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["Infinity"],
+                  "type": "string"
+                },
+                {
+                  "enum": ["-Infinity"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
             }
           ]
         }
       },
-      "required": ["milliseconds"],
       "type": "object"
     }
   },
