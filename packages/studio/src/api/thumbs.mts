@@ -9,15 +9,23 @@ import {
 } from "@liqvid/schemas/effect";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
+import {
+  ASSETS_DIR,
+  DARK_DIR,
+  LIGHT_DIR,
+  NEXT_APP_DIR,
+  THUMBS_DIR,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 
 import { WebApi } from "./contract.mts";
 
-const THUMBS_BASE_DIR = ".liqvid/thumbs";
-const THUMBS_JOB_FILE = "thumbnails-job.json";
+const THUMBS_BASE_DIR = path.join(ASSETS_DIR, THUMBS_DIR);
+const THUMBS_JOB_FILE = RelativeFile("thumbnails-job.json");
 
 interface GenerateThumbsBody {
   colorScheme?: "light" | "dark" | "both";
@@ -54,7 +62,7 @@ function readThumbSheets(dir: string) {
  */
 function generateForScheme(
   url: string,
-  outputDir: string,
+  outputDir: AbsoluteDir,
   colorScheme: "light" | "dark",
   body: GenerateThumbsBody,
   projectPath: string,
@@ -69,7 +77,10 @@ function generateForScheme(
     );
 
     const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
-    const outputPattern = path.join(outputDir, `%s.${imageFormat}`);
+    const outputPattern = path.join(
+      outputDir,
+      RelativeFile(`%s.${imageFormat}`),
+    );
 
     // Ensure output directory exists
     yield* fs.makeDirectory(outputDir, { recursive: true });
@@ -94,7 +105,7 @@ function generateForScheme(
 /**
  * Read the thumbnail job configuration from a project.
  */
-function readThumbsJob(thumbsBaseDir: string) {
+function readThumbsJob(thumbsBaseDir: AbsoluteDir) {
   const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
   return loadJson(ThumbnailsJob, jobFilePath);
 }
@@ -111,8 +122,9 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const thumbsBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          projectPath,
-          THUMBS_BASE_DIR,
+          RelativeDir(projectPath),
+          ASSETS_DIR,
+          THUMBS_DIR,
         );
 
         if (!(yield* fs.exists(thumbsBaseDir))) {
@@ -123,8 +135,8 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
 
         const [lightSheets, darkSheets, job] = yield* Effect.all(
           [
-            readThumbSheets(path.join(thumbsBaseDir, "light")),
-            readThumbSheets(path.join(thumbsBaseDir, "dark")),
+            readThumbSheets(path.join(thumbsBaseDir, RelativeDir("light"))),
+            readThumbSheets(path.join(thumbsBaseDir, RelativeDir("dark"))),
             readThumbsJob(thumbsBaseDir),
           ],
           { concurrency: "unbounded" },
@@ -147,7 +159,11 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
+        const projectDir = path.join(
+          cwd,
+          NEXT_APP_DIR,
+          RelativeDir(projectPath),
+        );
         const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
         // Build the URL for the video
@@ -192,7 +208,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         let darkSheets: string[] = [];
 
         if (colorScheme === "light" || colorScheme === "both") {
-          const lightDir = path.join(thumbsBaseDir, "light");
+          const lightDir = path.join(thumbsBaseDir, LIGHT_DIR);
           lightSheets = yield* generateForScheme(
             url,
             lightDir,
@@ -203,7 +219,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         }
 
         if (colorScheme === "dark" || colorScheme === "both") {
-          const darkDir = path.join(thumbsBaseDir, "dark");
+          const darkDir = path.join(thumbsBaseDir, DARK_DIR);
           darkSheets = yield* generateForScheme(
             url,
             darkDir,

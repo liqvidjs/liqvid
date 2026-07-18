@@ -3,10 +3,22 @@ import * as path from "node:path";
 import { screenshot } from "@liqvid/cli/screenshot";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
+import { assertType } from "@liqvid/utils";
 import { Console, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import {
+  type AbsoluteDir,
+  RelativeDir,
+  RelativeFile,
+  type RelativePath,
+} from "effect-paths";
 
-import { ASSETS_DIR } from "../conventions.mts";
+import {
+  ASSETS_DIR,
+  NEXT_APP_DIR,
+  SCREENSHOT_FILE as SCREENSHOT_PNG,
+  SCREENSHOTS_DIR,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import {
@@ -17,13 +29,13 @@ import {
 
 import { WebApi } from "./contract.mts";
 
-const SCREENSHOT_META_FILE = "screenshot-meta.json";
+const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
 
 /**
  * Get the project directory from a project path.
  * The project path is relative to the app/ directory.
  */
-function getProjectDir(projectPath: string): string {
+function getProjectDir(projectPath: RelativeDir) {
   const { cwd } = getServerState();
   return path.join(cwd, NEXT_APP_DIR, projectPath);
 }
@@ -31,16 +43,16 @@ function getProjectDir(projectPath: string): string {
 /**
  * Get the screenshots directory for a project
  */
-function getScreenshotsDir(projectPath: string): string {
-  return path.join(getProjectDir(projectPath), ASSETS_DIR, "screenshots");
+function getScreenshotsDir(projectPath: RelativeDir) {
+  return path.join(getProjectDir(projectPath), ASSETS_DIR, SCREENSHOTS_DIR);
 }
 
 /**
  * Generate a datetime-based folder name
  */
-function generateFolderName(): string {
+function generateFolderName() {
   const now = new Date();
-  return now.toISOString().replace(/[:.]/g, "-");
+  return RelativeDir(now.toISOString().replace(/[:.]/g, "-"));
 }
 
 export const screenshotsLive = HttpApiBuilder.group(
@@ -51,7 +63,7 @@ export const screenshotsLive = HttpApiBuilder.group(
       // list existing screenshots for a project
       .handle("list", ({ query: { projectPath } }) =>
         Effect.gen(function* () {
-          const screenshotsDir = getScreenshotsDir(projectPath);
+          const screenshotsDir = getScreenshotsDir(RelativeDir(projectPath));
 
           const fs = yield* FileSystem.FileSystem;
 
@@ -59,7 +71,7 @@ export const screenshotsLive = HttpApiBuilder.group(
             .readDirectory(screenshotsDir)
             .pipe(existenceOptional)).pipe(
             Option.getOrElse(() => [] as string[]),
-          );
+          ) as RelativePath[];
           const screenshots: ScreenshotEntry[] = [];
 
           yield* Effect.all(
@@ -69,6 +81,7 @@ export const screenshotsLive = HttpApiBuilder.group(
 
                 const stats = yield* fs.stat(dirname);
                 if (stats.type !== "Directory") return;
+                assertType<AbsoluteDir>(dirname);
 
                 const meta = yield* loadJson(
                   ScreenshotMeta,
@@ -112,7 +125,7 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           const { basePath, productionServerPort } = getServerState();
 
-          const screenshotsDir = getScreenshotsDir(projectPath);
+          const screenshotsDir = getScreenshotsDir(RelativeDir(projectPath));
           const folderId = generateFolderName();
           const folderPath = path.join(screenshotsDir, folderId);
 
@@ -128,8 +141,14 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           if (colorScheme === "both") {
             // Capture both light and dark screenshots
-            const lightOutputPath = path.join(folderPath, "light.png");
-            const darkOutputPath = path.join(folderPath, "dark.png");
+            const lightOutputPath = path.join(
+              folderPath,
+              RelativeFile("light.png"),
+            );
+            const darkOutputPath = path.join(
+              folderPath,
+              RelativeFile("dark.png"),
+            );
 
             yield* Effect.promise(() =>
               screenshot({
@@ -163,7 +182,10 @@ export const screenshotsLive = HttpApiBuilder.group(
             };
           } else {
             // Capture single screenshot
-            const outputPath = path.join(folderPath, "screenshot.png");
+            const outputPath = path.join(
+              folderPath,
+              RelativeFile("screenshot.png"),
+            );
 
             yield* Effect.promise(() =>
               screenshot({
@@ -210,15 +232,19 @@ export const screenshotsLive = HttpApiBuilder.group(
         }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
+            assertType<RelativeDir>(projectPath);
 
             const projectDir = getProjectDir(projectPath);
             const screenshotsDir = getScreenshotsDir(projectPath);
             const sourcePath = path.join(
               screenshotsDir,
-              screenshotId,
-              sourceFilename ?? "screenshot.png",
+              RelativeDir(screenshotId),
+              sourceFilename ? RelativeFile(sourceFilename) : SCREENSHOT_PNG,
             );
-            const targetPath = path.join(projectDir, targetFilename);
+            const targetPath = path.join(
+              projectDir,
+              RelativeFile(targetFilename),
+            );
 
             yield* fs.copyFile(sourcePath, targetPath);
           }).pipe(
@@ -231,6 +257,8 @@ export const screenshotsLive = HttpApiBuilder.group(
         "rename",
         ({ payload: { newName, screenshotId }, query: { projectPath } }) =>
           Effect.gen(function* () {
+            assertType<RelativeDir>(projectPath);
+
             // Sanitize new name (remove path separators and invalid chars)
             const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
@@ -241,8 +269,14 @@ export const screenshotsLive = HttpApiBuilder.group(
             const fs = yield* FileSystem.FileSystem;
 
             const screenshotsDir = getScreenshotsDir(projectPath);
-            const oldPath = path.join(screenshotsDir, screenshotId);
-            const newPath = path.join(screenshotsDir, sanitizedName);
+            const oldPath = path.join(
+              screenshotsDir,
+              RelativeDir(screenshotId),
+            );
+            const newPath = path.join(
+              screenshotsDir,
+              RelativeDir(sanitizedName),
+            );
 
             // Check if source exists
             if (!(yield* fs.exists(oldPath))) {
@@ -270,9 +304,13 @@ export const screenshotsLive = HttpApiBuilder.group(
         ({ payload: { screenshotId }, query: { projectPath } }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
+            assertType<RelativeDir>(projectPath);
 
             const screenshotsDir = getScreenshotsDir(projectPath);
-            const folderPath = path.join(screenshotsDir, screenshotId);
+            const folderPath = path.join(
+              screenshotsDir,
+              RelativeDir(screenshotId),
+            );
 
             // Check if the screenshot exists
             if (!(yield* fs.exists(folderPath))) {
@@ -290,6 +328,8 @@ export const screenshotsLive = HttpApiBuilder.group(
       // check whether a project image (opengraph/twitter) exists
       .handle("checkExists", ({ query: { filename, projectPath } }) =>
         Effect.gen(function* () {
+          assertType<RelativeFile>(filename);
+          assertType<RelativeDir>(projectPath);
           const fs = yield* FileSystem.FileSystem;
 
           const filePath = path.join(getProjectDir(projectPath), filename);

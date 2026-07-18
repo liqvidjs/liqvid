@@ -17,6 +17,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
+import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import type { RenderEntry } from "../../../api/schemas.mts";
@@ -46,7 +47,7 @@ interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
   aspectRatio?: AspectRatio;
 
-  projectPath: string;
+  projectPath: RelativeDir;
 
   /** Whether the parent dialog is open */
   isOpen: boolean;

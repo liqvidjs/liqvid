@@ -7,7 +7,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
 import type { ThumbsData } from "../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
-import { ASSETS_DIR } from "../../conventions.mts";
+import { ASSETS_DIR, THUMBS_DIR } from "../../conventions.mts";
 import { TimeDuration } from "../../ui/Time.tsx";
 import { useTranslations } from "../../utils/react.tsx";
 
@@ -133,7 +133,7 @@ export function ThumbnailsSection({
       [
         projectPath,
         ASSETS_DIR,
-        "thumbs",
+        THUMBS_DIR,
         colorScheme,
         `${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`,
       ].join("/"),

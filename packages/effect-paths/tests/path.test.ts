@@ -31,6 +31,12 @@ path.join(absoluteDir, relativeDir, relativeFile) satisfies AbsoluteFile;
 
 path.join(absoluteDir, relativeDir) satisfies AbsoluteDir;
 path.join(absoluteDir, relativeDir, relativeDir) satisfies AbsoluteDir;
+path.join(
+  absoluteDir,
+  relativeDir,
+  relativeDir,
+  relativeDir,
+) satisfies AbsoluteDir;
 
 path.join(relativeDir, relativeFile) satisfies RelativeFile;
 path.join(relativeDir, relativeDir) satisfies RelativeDir;

@@ -9,7 +9,12 @@ import {
   type PlatformError,
 } from "effect";
 import type { Concurrency } from "effect/Types";
-import type { AbsoluteDir, RelativePath } from "effect-paths";
+import type {
+  AbsoluteDir,
+  RelativeDir,
+  RelativeFile,
+  RelativePath,
+} from "effect-paths";
 
 import type { LoggableJob } from "../api/schemas.mts";
 
@@ -43,7 +48,9 @@ export function readDirWithFileTypes(
           const stats = yield* fs.stat(
             path.join(dirname, basename as RelativePath),
           );
-          return [basename as RelativePath, stats] as const;
+          return [basename, stats.type] as
+            | [RelativeFile, "File"]
+            | [RelativeDir, "Directory"];
         }),
       ),
       { concurrency },

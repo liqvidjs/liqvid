@@ -1,15 +1,12 @@
 import path from "node:path";
 
 import { renderAudio } from "@liqvid/cli/render-audio";
-import {
-  loadJson,
-  type RelativeDir,
-  RelativeFile,
-  writeJSON,
-} from "@liqvid/cli/utils";
+import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import type { LiqvidConfig } from "@liqvid/schemas/effect";
+import { assertType } from "@liqvid/utils";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
 import {
   ASSETS_DIR,
@@ -36,7 +33,7 @@ import { type AudioEntry, AudioMeta } from "./schemas.mts";
 const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 
 /** Id used for the single audio rendering when `audio.multiple` is false. */
-export const SINGLE_AUDIO_ID = "default";
+export const SINGLE_AUDIO_ID = RelativeDir("default");
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
 function getAudioBaseDir(projectPath: RelativeDir) {
@@ -54,7 +51,7 @@ export function getAudioDir(
   projectPath: RelativeDir,
   id: RelativeDir,
   multiple: boolean,
-): string {
+) {
   const base = getAudioBaseDir(projectPath);
   return multiple ? path.join(base, id) : base;
 }
@@ -74,7 +71,7 @@ function isMultiple(config: LiqvidConfig): boolean {
   return config.media?.audio?.multiple ?? false;
 }
 
-function readAudioMeta(audioDir: RelativeDir) {
+function readAudioMeta(audioDir: AbsoluteDir) {
   return loadJson(AudioMeta, path.join(audioDir, AUDIO_META_FILE));
 }
 
@@ -83,26 +80,28 @@ function readAudioMeta(audioDir: RelativeDir) {
  *
  * Captions metadata lives alongside the audio in the same directory.
  */
-export function readCaptionsMeta(audioDir: RelativeDir) {
+export function readCaptionsMeta(audioDir: AbsoluteDir) {
   return loadJson(CaptionsMeta, path.join(audioDir, CAPTIONS_META));
 }
 
 /**
  * Generate a datetime-based folder name (used for multiple-audio mode ids).
  */
-function generateAudioId(): string {
+function generateAudioId() {
   const now = new Date();
   const pad = (n: number, len = 2) => String(n).padStart(len, "0");
 
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    "-",
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join("");
+  return RelativeDir(
+    [
+      now.getFullYear(),
+      pad(now.getMonth() + 1),
+      pad(now.getDate()),
+      "-",
+      pad(now.getHours()),
+      pad(now.getMinutes()),
+      pad(now.getSeconds()),
+    ].join(""),
+  );
 }
 
 export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
@@ -110,13 +109,15 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // list existing audio renderings for a project
     .handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
+        assertType<RelativeDir>(projectPath);
+
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 
         const baseDir = getAudioBaseDir(projectPath);
 
         /** Build an entry for one audio directory, or none if it has no meta. */
-        const readEntry = (id: string, audioDir: string) =>
+        const readEntry = (id: string, audioDir: AbsoluteDir) =>
           Effect.gen(function* () {
             const $meta =
               yield* readAudioMeta(audioDir).pipe(existenceOptional);
@@ -144,8 +145,10 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
 
           const maybeItems = yield* Effect.all(
             entries
-              .filter(([, stats]) => stats.type === "Directory")
-              .map(([id]) => readEntry(id, path.join(baseDir, id))),
+              .filter((entry) => entry[1] === "Directory")
+              .map(([id]) =>
+                readEntry(id, path.join(baseDir, RelativeDir(id))),
+              ),
             { concurrency: 10 },
           );
 
@@ -171,6 +174,8 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // render a new audio track
     .handle("generate", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
+        assertType<RelativeDir>(projectPath);
+
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 
@@ -217,6 +222,8 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // rename an audio rendering (multiple-audio mode only)
     .handle("rename", ({ payload: { id, newName }, query: { projectPath } }) =>
       Effect.gen(function* () {
+        assertType<RelativeDir>(projectPath);
+
         const config = yield* getConfig();
 
         if (!isMultiple(config)) {
@@ -235,8 +242,8 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const baseDir = getAudioBaseDir(projectPath);
-        const oldPath = path.join(baseDir, id);
-        const newPath = path.join(baseDir, sanitizedName);
+        const oldPath = path.join(baseDir, RelativeDir(id));
+        const newPath = path.join(baseDir, RelativeDir(sanitizedName));
 
         if (!(yield* fs.exists(oldPath))) {
           return yield* new NotFoundError({ message: "Audio not found" });
@@ -256,11 +263,13 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // delete an audio rendering (and any associated captions)
     .handle("delete", ({ payload: { id }, query: { projectPath } }) =>
       Effect.gen(function* () {
+        assertType<RelativeDir>(projectPath);
+
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 
         const fs = yield* FileSystem.FileSystem;
-        const audioDir = getAudioDir(projectPath, id, multiple);
+        const audioDir = getAudioDir(projectPath, RelativeDir(id), multiple);
 
         if (multiple) {
           yield* fs.remove(audioDir, { force: true, recursive: true });

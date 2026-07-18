@@ -35,6 +35,23 @@ export const CAPTIONS_META = RelativeFile("captions-meta.json");
 
 export const RICH_TRANSCRIPT = RelativeFile("transcript.json");
 
+/* ------------------------------ screenshots ------------------------------ */
+export const SCREENSHOTS_DIR = RelativeDir("screenshots");
+
+export const SCREENSHOT_FILE = RelativeFile("screenshot.png");
+
+/* ------------------------------ thumbnails ------------------------------ */
+export const THUMBS_DIR = RelativeDir("thumbs");
+
+export const LIGHT_DIR = RelativeDir("light");
+
+export const DARK_DIR = RelativeDir("dark");
+
 /* ------------------------------ templates ------------------------------ */
 
 export const TEMPLATE_FILE = RelativeFile("template.json");
+
+/* ------------------------------ renders ------------------------------ */
+export const RENDER_META_FILE = RelativeFile("render-meta.json");
+
+export const RENDERS_DIR = RelativeDir("renders");

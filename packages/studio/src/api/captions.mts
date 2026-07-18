@@ -2,8 +2,10 @@ import * as path from "node:path";
 
 import { transcribe } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
+import { assertType } from "@liqvid/utils";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { type AbsoluteDir, RelativeDir } from "effect-paths";
 
 import {
   AUDIO_WAV,
@@ -23,14 +25,14 @@ import { WebApi } from "./contract.mts";
  * The name given to a captioning job, uniquely identifying the audio it
  * captions so we can detect whether generation is already in progress.
  */
-function captioningJobName(projectPath: string, audioId: string): string {
+function captioningJobName(projectPath: RelativeDir, audioId: string): string {
   return `captioning:${projectPath}:${audioId}`;
 }
 
 /**
  * Write captions metadata alongside the audio it captions.
  */
-function writeCaptionsMeta(audioDir: string, meta: CaptionsMeta) {
+function writeCaptionsMeta(audioDir: AbsoluteDir, meta: CaptionsMeta) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     yield* fs.makeDirectory(audioDir, { recursive: true });
@@ -46,6 +48,7 @@ export const captionsLive = HttpApiBuilder.group(
       // generate captions for a specific audio rendering
       .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
+          assertType<RelativeDir>(projectPath);
           const { config: $config, jobs } = getServerState();
 
           const config = yield* Option.match($config, {
@@ -54,7 +57,11 @@ export const captionsLive = HttpApiBuilder.group(
           });
 
           const multiple = config.media?.audio?.multiple ?? false;
-          const audioDir = getAudioDir(projectPath, audioId, multiple);
+          const audioDir = getAudioDir(
+            projectPath,
+            RelativeDir(audioId),
+            multiple,
+          );
 
           const fs = yield* FileSystem.FileSystem;
 
@@ -122,6 +129,7 @@ export const captionsLive = HttpApiBuilder.group(
       // delete captions for an audio rendering (preserving the audio itself)
       .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
+          assertType<RelativeDir>(projectPath);
           const { config: $config } = getServerState();
 
           const config = yield* Option.match($config, {
@@ -130,7 +138,11 @@ export const captionsLive = HttpApiBuilder.group(
           });
 
           const multiple = config.media?.audio?.multiple ?? false;
-          const audioDir = getAudioDir(projectPath, audioId, multiple);
+          const audioDir = getAudioDir(
+            projectPath,
+            RelativeDir(audioId),
+            multiple,
+          );
 
           const fs = yield* FileSystem.FileSystem;
 

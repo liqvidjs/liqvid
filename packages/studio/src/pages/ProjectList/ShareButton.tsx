@@ -37,6 +37,8 @@ interface ShareButtonProps {
   productionServerPort: number;
 }
 
+import { RelativeDir } from "effect-paths";
+
 import { useTranslations } from "../../utils/react.tsx";
 
 import type T from "./.translations/en.json";
@@ -108,7 +110,7 @@ export function ShareButton({
               <RendersSection
                 aspectRatio={project.aspectRatio}
                 isOpen={open}
-                projectPath={project.path}
+                projectPath={RelativeDir(project.path)}
               />
             </TabsContent>
 

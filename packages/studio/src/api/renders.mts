@@ -2,10 +2,17 @@ import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
 import { loadJson, Progress, writeJSON } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option, type PlatformError } from "effect";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
+import {
+  ASSETS_DIR,
+  NEXT_APP_DIR,
+  RENDER_META_FILE,
+  RENDERS_DIR,
+} from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import {
   existenceOptional,
@@ -18,9 +25,6 @@ import { createJob } from "../utils/jobs.mts";
 import { WebApi } from "./contract.mts";
 import type { LoggableJob } from "./schemas.mts";
 import { RenderMeta } from "./schemas.mts";
-
-const RENDER_META_FILE = "render-meta.json";
-const RENDERS_BASE_DIR = ".liqvid/renders";
 
 /**
  * Generate a unique render ID based on current datetime.
@@ -43,14 +47,14 @@ function generateRenderId(): string {
 /**
  * Read render metadata from a render directory.
  */
-function readRenderMeta(renderDir: string) {
+function readRenderMeta(renderDir: AbsoluteDir) {
   return loadJson(RenderMeta, path.join(renderDir, RENDER_META_FILE));
 }
 
 /**
  * Write render metadata to a render directory.
  */
-function writeRenderMeta(renderDir: string, meta: RenderMeta) {
+function writeRenderMeta(renderDir: AbsoluteDir, meta: RenderMeta) {
   const metaPath = path.join(renderDir, RENDER_META_FILE);
   return writeJSON(metaPath, meta);
 }
@@ -63,8 +67,9 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const rendersBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          projectPath,
-          RENDERS_BASE_DIR,
+          RelativeDir(projectPath),
+          ASSETS_DIR,
+          RENDERS_DIR,
         );
 
         const entries = yield* readDirWithFileTypes(rendersBaseDir).pipe(
@@ -74,8 +79,9 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         );
         const renders: Array<{ id: string; meta: RenderMeta }> = [];
 
-        for (const [basename, stats] of entries) {
-          if (stats.type !== "Directory") continue;
+        for (const entry of entries) {
+          if (entry[1] !== "Directory") continue;
+          const basename = entry[0];
 
           const renderDir = path.join(rendersBaseDir, basename);
           const $meta =
@@ -127,12 +133,13 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const rendersBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          projectPath,
-          RENDERS_BASE_DIR,
+          RelativeDir(projectPath),
+          ASSETS_DIR,
+          RENDERS_DIR,
         );
 
-        const oldPath = path.join(rendersBaseDir, renderId);
-        const newPath = path.join(rendersBaseDir, sanitizedName);
+        const oldPath = path.join(rendersBaseDir, RelativeDir(renderId));
+        const newPath = path.join(rendersBaseDir, RelativeDir(sanitizedName));
 
         // Check if source exists
         if (!(yield* fs.exists(oldPath))) {
@@ -159,12 +166,16 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
-        const rendersBaseDir = path.join(projectDir, RENDERS_BASE_DIR);
+        const projectDir = path.join(
+          cwd,
+          NEXT_APP_DIR,
+          RelativeDir(projectPath),
+        );
+        const rendersBaseDir = path.join(projectDir, ASSETS_DIR, RENDERS_DIR);
 
         // Generate unique render ID
         const renderId = generateRenderId();
-        const renderDir = path.join(rendersBaseDir, renderId);
+        const renderDir = path.join(rendersBaseDir, RelativeDir(renderId));
 
         // Ensure render directory exists
         yield* fs.makeDirectory(renderDir, { recursive: true });
@@ -180,7 +191,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fps = payload.fps ?? 30;
         const height = payload.height ?? 800;
         const width = payload.width ?? 1280;
-        const output = path.join(renderDir, "video.mp4");
+        const output = path.join(renderDir, RelativeFile("video.mp4"));
 
         // Create initial metadata
         const meta: RenderMeta = {
@@ -229,13 +240,12 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         );
 
         // Start render in background (don't await)
-        const job: LoggableJob<void, PlatformError.PlatformError> =
-          yield* createJob("render", fiber).pipe(
-            Effect.provideServiceEffect(
-              Progress,
-              Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
-            ),
-          );
+        const job: LoggableJob = yield* createJob("render", fiber).pipe(
+          Effect.provideServiceEffect(
+            Progress,
+            Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
+          ),
+        );
 
         return { id: renderId };
       }).pipe(Effect.catchTag("PlatformError", Effect.die)),

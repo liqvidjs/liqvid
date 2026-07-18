@@ -1,8 +1,10 @@
 import * as path from "node:path";
 
 import { Effect, FileSystem } from "effect";
+import { RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
+import { NEXT_APP_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { InvalidError, NotFoundError } from "../utils/errors.mts";
 
@@ -61,7 +63,7 @@ export function serveStaticFile(requestedPath: string) {
 
     // Resolve relative to the app directory
     const appDir = path.join(cwd, NEXT_APP_DIR);
-    const absolutePath = path.join(appDir, normalizedPath);
+    const absolutePath = path.join(appDir, RelativeFile(normalizedPath));
 
     // Security: Ensure the resolved path is within the app directory
     if (!absolutePath.startsWith(appDir + path.sep)) {

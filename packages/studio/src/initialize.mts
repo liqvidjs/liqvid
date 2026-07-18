@@ -6,6 +6,7 @@ import {
   type ProjectMeta,
 } from "@liqvid/schemas/effect";
 import { Effect, Option } from "effect";
+import type { Socket } from "effect/unstable/socket";
 import type { AbsoluteDir } from "effect-paths";
 
 import type { LoggableJob } from "./api/schemas.mts";
@@ -48,6 +49,15 @@ export interface LiqvidServerState {
   started: {
     productionServer: boolean;
   };
+
+  /**
+   * Connections currently subscribed to each channel, keyed by channel name.
+   * Every connection is subscribed to every channel for now; the envelope's
+   * `channel` field is what routes messages on the client.
+   */
+  wsConnections: Set<
+    (frame: string) => Effect.Effect<void, Socket.SocketError>
+  >;
 }
 
 type GlobalThis = {
@@ -115,6 +125,7 @@ export function getServerState(): LiqvidServerState {
       started: {
         productionServer: false,
       },
+      wsConnections: new Set(),
     };
   }
 

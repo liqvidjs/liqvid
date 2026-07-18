@@ -1,6 +1,6 @@
 import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas/effect";
-import { Console, Effect, FileSystem, Stream } from "effect";
+import { Effect, FileSystem, Stream } from "effect";
 
 import { getServerState, type LiqvidServerState } from "../initialize.mts";
 
@@ -9,7 +9,7 @@ import { getServerState, type LiqvidServerState } from "../initialize.mts";
  */
 function reloadConfig(state: LiqvidServerState, message: string) {
   return Effect.gen(function* () {
-    yield* Console.log(message);
+    yield* Effect.log(message);
     state.config = yield* loadLiqvidConfig().pipe(Effect.option);
   });
 }
