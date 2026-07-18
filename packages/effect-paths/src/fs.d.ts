@@ -13,9 +13,9 @@ declare module "node:fs" {
         }
       | BufferEncoding
       | null,
-  ): P extends AbsoluteDir
+  ): P extends import("effect-paths").AbsoluteDir
     ? RelativePath[]
-    : P extends AnyPath
+    : P extends import("effect-paths").AnyPath
       ? Error & { message: "must pass an absolute directory" }
       : string[];
 

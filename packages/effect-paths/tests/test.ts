@@ -1,18 +1,3 @@
-# effect-paths
-
-This provides helpers for working with paths in [Effect-TS](https://effect.website). Specifically, it provides branded types for absolute vs relative paths, and for directories vs files. We also extend Node types (`fs`, `fs/promises`, `path`, etc.) to use these branded types.
-
- This uses Effect v4 Beta, although it may also work with v3, I haven't tried.
-
-## Installation
-
-```bash
-npm install effect-paths
-```
-
-## Example
-
-```ts
 import fs from "node:fs";
 import path from "node:path";
 
@@ -72,4 +57,3 @@ const entry = entries[0]!;
 
 entry.parentPath satisfies AbsoluteDir;
 entry.name satisfies RelativePath;
-```
