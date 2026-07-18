@@ -13,3 +13,5 @@ export function assertType<K>(a: unknown): asserts a is K {}
  * would have the same signature, but is not a cleanup function.
  */
 export type CleanUpFn = () => void;
+
+export type Awaitable<T> = T | Promise<T>;

@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useReducer,
@@ -10,6 +11,7 @@ import {
 } from "react";
 
 import { anyHover, onDrag as htmlOnDrag } from "./interaction.ts";
+import type { Awaitable } from "./types.ts";
 
 /**
  * Create a context guaranteed to be unique. Useful in case multiple versions of package are accidentally loaded.
@@ -260,4 +262,35 @@ export function useStable<Pre, Post>(
 export function useInitial<T>(val: T): T {
   const ref = useRef<T>(val);
   return ref.current;
+}
+
+/**
+ * Get the resolved value of an {@link Awaitable}
+ */
+export function useAwaitable<T>(value: Awaitable<T>): T | null {
+  const [resolved, setResolved] = useState<T | null>(
+    value instanceof Promise ? null : value,
+  );
+
+  useEffect(() => {
+    if (value instanceof Promise) {
+      value.then(setResolved);
+    }
+  }, [value]);
+
+  return resolved;
+}
+
+export function useToggle(defaultValue?: boolean): {
+  set: React.Dispatch<React.SetStateAction<boolean>>;
+  toggle: () => void;
+  value: boolean;
+} {
+  const [value, set] = useState(!!defaultValue);
+
+  const toggle = useCallback(() => {
+    set((x) => !x);
+  }, []);
+
+  return { set, toggle, value };
 }

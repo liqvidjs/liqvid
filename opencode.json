@@ -1,6 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "disabled_providers": ["amazon-bedrock"],
+  "mcp": {
+    "next-devtools": {
+      "command": ["npx", "-y", "next-devtools-mcp@latest"],
+      "type": "local"
+    }
+  },
   "permission": {
     "external_directory": "deny",
     "bash": {
@@ -18,6 +24,7 @@
       "npm list": "allow",
       "npm run build *": "allow",
       "npx biome *": "allow",
+      "npx jest *": "allow",
       "npx tsc --noEmit *": "allow",
       "pnpm add *": "allow",
       "pnpm build *": "allow",

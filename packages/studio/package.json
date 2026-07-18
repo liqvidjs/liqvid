@@ -58,18 +58,22 @@
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
+    "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "chalk": "catalog:",
     "clsx": "catalog:",
     "effect": "catalog:",
+    "effect-paths": "workspace:^",
     "execa": "catalog:",
     "handlebars": "catalog:",
     "http-status-codes": "catalog:",
     "lodash.debounce": "catalog:",
+    "ts-morph": "catalog:",
     "universal-cookie": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
@@ -80,13 +84,16 @@
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
     "@types/serve-handler": "catalog:dev",
+    "@types/ws": "catalog:dev",
     "concurrently": "catalog:dev",
     "jest": "catalog:dev",
     "next": "catalog:",
+    "next-ws": "catalog:peer",
     "ts-jest": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
-    "typescript": "catalog:dev"
+    "typescript": "catalog:dev",
+    "ws": "catalog:peer"
   },
   "peerDependencies": {
     "@liqvid/cli": "workspace:^2.0.0-alpha.0",
@@ -104,9 +111,11 @@
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
-    "nodejs-whisper": "catalog:peer",
+    "next-ws": "catalog:peer",
     "react": "catalog:peer",
-    "serve-handler": "^6.1.7"
+    "serve-handler": "^6.1.7",
+    "smart-whisper": "catalog:peer",
+    "ws": "catalog:peer"
   },
   "sideEffects": false,
   "type": "module"

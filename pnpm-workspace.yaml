@@ -1,3 +1,16 @@
+allowBuilds:
+  "@swc/core": true
+  bufferutil: set this to true or false
+  core-js: set this to true or false
+  es5-ext: set this to true or false
+  esbuild: set this to true or false
+  msgpackr-extract: set this to true or false
+  sharp: true
+  smart-whisper: true
+  unrs-resolver: set this to true or false
+  utf-8-validate: set this to true or false
+  workerd: set this to true or false
+
 packages:
   - packages/**
   - "!**/tests/**"
@@ -28,7 +41,8 @@ catalog:
   "@dnd-kit/core": ^6.3.1
   "@dnd-kit/sortable": ^10.0.0
   "@dnd-kit/utilities": ^3.2.2
-  "@effect/platform-node": 4.0.0-beta.93
+  "@effect/platform-bun": 4.0.0-beta.98
+  "@effect/platform-node": 4.0.0-beta.98
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
@@ -38,12 +52,9 @@ catalog:
   "@lqv/cursor": ^0.2.1
   "@lqv/playback": ^0.2.2
   "@phosphor-icons/react": ^2.1.10
-  "@puppeteer/browsers": ^3.0.5
+  "@puppeteer/browsers": ^3.0.6
   "@radix-ui/react-collapsible": ^1.1.12
-  "@radix-ui/react-dialog": ^1.1.15
   "@radix-ui/react-portal": ^1.1.10
-  "@radix-ui/react-radio-group": ^1.3.8
-  "@radix-ui/react-select": ^2.2.6
   "@radix-ui/react-slot": ^1.2.3
   "@radix-ui/react-tabs": ^1.1.13
   "@react-router/dev": ^7.9.6
@@ -78,7 +89,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-beta.93
+  effect: 4.0.0-beta.98
   execa: ^9.6.1
   fast-glob: 3.3.3
   handlebars: ^4.7.8
@@ -99,7 +110,7 @@ catalog:
   postcss: ^8.5.6
   prism-react-renderer: ^2.4.1
   prismjs: ^1.30.0
-  puppeteer-core: ^24.38.0
+  puppeteer-core: ^25.3.0
   radix-ui: ^1.4.3
   rangetouch: ^2.0.1
   react: ^19.2.7
@@ -116,17 +127,18 @@ catalog:
   tailwind-merge: ^3.3.1
   three: ^0.183.1
   three-stdlib: 2.36.1
+  ts-morph: ^28.0.0
   tsd: ^0.33.0
   typescript: ^5.9
   universal-cookie: ^8.0.1
   yargs: ^18.0.0
   yargs-parser: ^21.1.1
   zod: ^4.3
-  zustand: ^5
+  zustand: ^5.0.14
 
 catalogs:
   dev:
-    "@biomejs/biome": 2.5.0
+    "@biomejs/biome": 2.5.3
     "@codemirror/autocomplete": 6.20.2
     "@codemirror/collab": 6.1.1
     "@codemirror/commands": 6.10.3
@@ -151,6 +163,7 @@ catalogs:
     "@docusaurus/theme-common": 3.10.1
     "@docusaurus/types": 3.10.1
     "@effect/language-service": ^0.86.2
+    "@effect/tsgo": ^0.16.3
     "@jest/globals": ^30.3.0
     "@lezer/highlight": 1.2.3
     "@types/babel__standalone": ^7.1.9
@@ -165,21 +178,22 @@ catalogs:
     "@types/react-dom": ^19
     "@types/serve-handler": ^6.1.4
     "@types/three": ">=0.183"
+    "@types/ws": ^8.18.1
     "@types/yargs": ^17.0.35
     "@types/yargs-parser": ^21.0.3
     concurrently: ^9.2.1
     csstype: ^3.2.3
-    effect: ">=4.0.0-beta.0"
+    effect: 4.0.0-beta.98
     jest: ^30.2.0
     js-yaml: ^4.1.1
     next: 16.2.10
     nib: ^1.2.0
     no-private-imports: ^0.0.1
     no-restricted-imports: ^0.0.1
-    nodejs-whisper: ^0.3.0
     portless: ^0.12.0
     raw-loader: ^4.0.2
     skulpt: ^1.2
+    smart-whisper: ^0.8.1
     stylus: ^0.64.0
     tailwindcss: ^4.1.12
     ts-jest: ^29.4.6
@@ -213,13 +227,15 @@ catalogs:
     katex: ">=0.16"
     mathjax: ">=3"
     next: ">=16"
-    nodejs-whisper: ^0.3.0
+    next-ws: ^2.2.8
     prettier: ^3.8.1
     react: ">=19"
     react-dom: ">=19"
     react-inspector: ^9.0.0
     skulpt: ^1.2
+    smart-whisper: ">=0.8.1"
     three: ">=0.183"
+    ws: ^8.21.0
     zod: ">=4"
 
 overrides:

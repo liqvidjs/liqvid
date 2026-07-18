@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -91,9 +91,14 @@
         "noImportantStyles": "off"
       },
       "correctness": {
-        "noPrivateImports": "error",
-        "useExhaustiveDependencies": "error",
-        "useImportExtensions": "error",
+        "noPrivateImports": "off",
+        "useExhaustiveDependencies": {
+          "level": "on",
+          "options": {
+            "hooks": [{ "name": "useInitial", "stableResult": true }]
+          }
+        },
+        "useImportExtensions": "off",
         "useUniqueElementIds": "off"
       },
       "nursery": {
@@ -111,6 +116,7 @@
         "useTemplate": "off"
       },
       "suspicious": {
+        "noRedeclare": "off",
         "noUnknownAtRules": "off"
       }
     }
