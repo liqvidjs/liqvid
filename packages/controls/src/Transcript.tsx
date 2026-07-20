@@ -4,18 +4,11 @@ import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas/effect";
 import {
   type Awaitable,
   formatTime,
-  formatTimeMs,
   makeContext,
   range,
   useAwaitable,
 } from "@liqvid/utils";
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useState,
-} from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 type TranscriptContext = {
   body: HTMLDivElement | null;
@@ -48,10 +41,14 @@ type TranscriptLink = HTMLAnchorElement & {
   dataset: { start: string; end: string };
 };
 
+/**
+ * Render the transcript content.
+ */
 function TranscriptBody({
   renderWord = (_token, props) => <a {...props} />,
   ...props
 }: {
+  /** Render a word */
   renderWord: (
     token: TranscriptEntry,
     props: React.AnchorHTMLAttributes<HTMLAnchorElement>,
@@ -126,6 +123,9 @@ function TranscriptBody({
   );
 }
 
+/**
+ * Render times vertically along the transcript
+ */
 function TranscriptTimes({
   interval = { seconds: 20 },
   renderLink = (_time, props) => <button {...props} />,
@@ -144,12 +144,12 @@ function TranscriptTimes({
 
   const intervalMs = Duration.inMilliseconds(interval);
 
+  const [measured, setMeasured] = useState(false);
+
   useEffect(() => {
     if (!body || !transcript) return;
 
     let j = 0;
-
-    console.log(getActiveWord(transcript, new Duration({ minutes: 1 })));
 
     for (let i = 1; i < times.length; ++i) {
       let y = 0;
@@ -169,10 +169,12 @@ function TranscriptTimes({
         times[i]!.style.top = `${y * 100}%`;
       }
     }
+
+    setMeasured(true);
   }, [body, transcript, intervalMs, links, times]);
 
   return (
-    <div {...props}>
+    <div data-affords="click" {...props}>
       {range(Math.ceil(playback.duration$.dividedBy(interval))).map((i) => (
         <Fragment key={i}>
           {renderLink(Duration.from(interval).times(i), {
@@ -181,14 +183,9 @@ function TranscriptTimes({
                 {formatTime(intervalMs * i)}
               </time>
             ),
+            hidden: !measured, // avoid bad positioning before the words are measured
             onClick: (e) => {
               e.preventDefault();
-              console.log(
-                getActiveWord(
-                  transcript!,
-                  new Duration({ milliseconds: intervalMs * i }),
-                ),
-              );
               playback.currentTime$ = { milliseconds: intervalMs * i };
             },
             ref: (el) => {
@@ -223,7 +220,7 @@ function TranscriptSearch({
     token: { start: number; end: number; word: string },
   ) => boolean;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
-  const { body, links } = useTranscriptApi();
+  const { links } = useTranscriptApi();
 
   // search terms
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

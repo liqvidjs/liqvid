@@ -6,7 +6,7 @@ import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import type { SyntheticTextTrack } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
 import { usePlayer } from "@liqvid/player";
-import { injectGlobal, useInitial } from "@liqvid/utils";
+import { useInitial } from "@liqvid/utils";
 import { useCallback, useEffect, useState } from "react";
 
 import { convertShortcuts } from "./utils.ts";
@@ -143,7 +143,7 @@ function CaptionsDisplay(props: Omit<React.ComponentProps<"div">, "children">) {
     setCaptions(activeCaptions);
   }, [playback]);
 
-  useEventListener(playback.textTracks, updateCaptions);
+  useEventListener(playback.textTracks, "change", updateCaptions);
   useEventListener(playback.textTracks, "addtrack", updateCaptions);
   useEventListener(playback.textTracks, "removetrack", updateCaptions);
 

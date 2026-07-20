@@ -18,9 +18,9 @@ type ColorSchemeToggleProps = {
 };
 
 export function ColorSchemeToggle({
-  className,
   render,
   shortcuts,
+  ...props
 }: ColorSchemeToggleProps) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
 
@@ -35,8 +35,8 @@ export function ColorSchemeToggle({
     { colorScheme },
     {
       "aria-keyshortcuts": convertShortcuts(shortcuts),
-      className: clsx("lv-controls-color-scheme lv-controls-button", className),
       ...events,
+      ...props,
     },
   );
 }
