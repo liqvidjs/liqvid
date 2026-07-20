@@ -12,6 +12,7 @@ import {
   HttpApiGroup,
   OpenApi,
 } from "effect/unstable/httpapi";
+import { RelativeDir } from "effect-paths";
 
 import {
   ConflictError,
@@ -23,7 +24,7 @@ import { AudioEntry, RenderEntry, ThumbsData } from "./schemas.mts";
 
 const projectPathQuery = Schema.Struct({
   /** path to the project */
-  projectPath: Schema.String,
+  projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
 });
 
 const urlQuery = Schema.Struct({
@@ -152,7 +153,9 @@ const rendersGroup = HttpApiGroup.make("renders")
         width: Schema.optional(Schema.Number),
       }),
       query: Schema.Struct({
-        projectPath: Schema.String,
+        projectPath: Schema.String.pipe(
+          Schema.fromBrand("RelativeDir", RelativeDir),
+        ),
       }),
       success: Schema.Struct({
         /** Render ID (datetime folder name) */
@@ -270,7 +273,9 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     HttpApiEndpoint.get("checkExists", "/screenshots/check-exists", {
       query: Schema.Struct({
         filename: targetFilename,
-        projectPath: Schema.String,
+        projectPath: Schema.String.pipe(
+          Schema.fromBrand("RelativeDir", RelativeDir),
+        ),
       }),
       success: Schema.Struct({ exists: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Check whether a project image exists"),

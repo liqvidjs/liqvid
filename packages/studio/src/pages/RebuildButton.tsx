@@ -5,6 +5,7 @@ import { Result } from "@liqvid/fp";
 import { deserialize, IS_CLIENT } from "@liqvid/ssr";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { PackageIcon } from "@phosphor-icons/react";
+import { Exit } from "effect";
 import { useCallback, useState } from "react";
 
 import { IconButton } from "../ui/IconButton.tsx";
@@ -18,21 +19,16 @@ export function RebuildButton() {
   const handleRebuild = useCallback(async () => {
     setIsBuilding(true);
     try {
-      const serializedResult = await rebuildAction();
-      const result = deserialize(serializedResult, {
-        "@liqvid/fp/result": Result.parse<null, BuildError>,
-      });
+      const exit = await rebuildAction();
 
-      if (result.isOk) {
+      if (Exit.isSuccess(exit)) {
         makeToast({
           title: "Build completed",
           type: "success",
         });
       } else {
-        const { messages } = result.unwrapErr();
-
         makeToast({
-          message: messages.join("\n"),
+          message: exit.cause.reasons.join("\n"),
           title: "Build failed",
           type: "negative",
         });

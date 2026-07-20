@@ -242,7 +242,7 @@ const apiLive = HttpApiBuilder.layer(WebApi).pipe(
   Layer.provide(
     Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
   ),
-  Layer.provideMerge(Layer.succeed(References.MinimumLogLevel, "All")),
+  Layer.provideMerge(Layer.succeed(References.MinimumLogLevel, getLogLevel())),
 );
 
 const appLive = Layer.mergeAll(

@@ -122,7 +122,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const thumbsBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          RelativeDir(projectPath),
+          projectPath,
           ASSETS_DIR,
           THUMBS_DIR,
         );
@@ -159,11 +159,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(
-          cwd,
-          NEXT_APP_DIR,
-          RelativeDir(projectPath),
-        );
+        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
         const thumbsBaseDir = path.join(projectDir, THUMBS_BASE_DIR);
 
         // Build the URL for the video

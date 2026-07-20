@@ -13,6 +13,7 @@ export async function getTranslationsFromServer<T>(
   componentPath: RelativeDir,
 ): Promise<T> {
   const locale = getLocale();
+
   const translationsDir = path.join(
     STUDIO_ROOT,
     componentPath,

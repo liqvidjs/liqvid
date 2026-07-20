@@ -125,7 +125,7 @@ export function RecordingDialog({
       <DockableDialog.Content>
         <div>
           <Tabs onValueChange={setActiveTab} value={activeTab}>
-            <TabsList>
+            <TabsList style={{ fontSize: "16px" }}>
               <TabsTrigger
                 className="lv-recording-tabs"
                 value={tabs.configuration}

@@ -67,7 +67,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const rendersBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          RelativeDir(projectPath),
+          projectPath,
           ASSETS_DIR,
           RENDERS_DIR,
         );
@@ -133,7 +133,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const rendersBaseDir = path.join(
           cwd,
           NEXT_APP_DIR,
-          RelativeDir(projectPath),
+          projectPath,
           ASSETS_DIR,
           RENDERS_DIR,
         );
@@ -166,11 +166,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(
-          cwd,
-          NEXT_APP_DIR,
-          RelativeDir(projectPath),
-        );
+        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
         const rendersBaseDir = path.join(projectDir, ASSETS_DIR, RENDERS_DIR);
 
         // Generate unique render ID

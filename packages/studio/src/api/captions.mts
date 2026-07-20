@@ -2,7 +2,6 @@ import * as path from "node:path";
 
 import { transcribe } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
-import { assertType } from "@liqvid/utils";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir } from "effect-paths";
@@ -48,7 +47,6 @@ export const captionsLive = HttpApiBuilder.group(
       // generate captions for a specific audio rendering
       .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          assertType<RelativeDir>(projectPath);
           const { config: $config, jobs } = getServerState();
 
           const config = yield* Option.match($config, {
@@ -129,7 +127,6 @@ export const captionsLive = HttpApiBuilder.group(
       // delete captions for an audio rendering (preserving the audio itself)
       .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          assertType<RelativeDir>(projectPath);
           const { config: $config } = getServerState();
 
           const config = yield* Option.match($config, {

@@ -1,3 +1,4 @@
+import type { RelativeDir } from "effect-paths";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { getTranslationsFromServer } from "../server-actions.ts";
@@ -29,7 +30,10 @@ export function TranslationProvider<T>({
  * asynchronously load translations, using default locale until the
  * translations are loaded.
  */
-export function useAsyncTranslations<T>(defaultValue: T, componentDir: string) {
+export function useAsyncTranslations<T>(
+  defaultValue: T,
+  componentDir: RelativeDir,
+) {
   const [translations, setTranslations] = useState<T>(defaultValue);
 
   useEffect(() => {

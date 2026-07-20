@@ -40,6 +40,10 @@ export const SCREENSHOTS_DIR = RelativeDir("screenshots");
 
 export const SCREENSHOT_FILE = RelativeFile("screenshot.png");
 
+export const SCREENSHOT_FILE_DARK = RelativeFile("dark.png");
+
+export const SCREENSHOT_FILE_LIGHT = RelativeFile("light.png");
+
 /* ------------------------------ thumbnails ------------------------------ */
 export const THUMBS_DIR = RelativeDir("thumbs");
 

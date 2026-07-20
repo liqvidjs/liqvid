@@ -4,7 +4,7 @@ import { screenshot } from "@liqvid/cli/screenshot";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas/effect";
 import { assertType } from "@liqvid/utils";
-import { Console, Effect, FileSystem, Option } from "effect";
+import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import {
   type AbsoluteDir,
@@ -16,6 +16,8 @@ import {
 import {
   ASSETS_DIR,
   NEXT_APP_DIR,
+  SCREENSHOT_FILE_DARK,
+  SCREENSHOT_FILE_LIGHT,
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
 } from "../conventions.mts";
@@ -63,7 +65,7 @@ export const screenshotsLive = HttpApiBuilder.group(
       // list existing screenshots for a project
       .handle("list", ({ query: { projectPath } }) =>
         Effect.gen(function* () {
-          const screenshotsDir = getScreenshotsDir(RelativeDir(projectPath));
+          const screenshotsDir = getScreenshotsDir(projectPath);
 
           const fs = yield* FileSystem.FileSystem;
 
@@ -125,7 +127,7 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           const { basePath, productionServerPort } = getServerState();
 
-          const screenshotsDir = getScreenshotsDir(RelativeDir(projectPath));
+          const screenshotsDir = getScreenshotsDir(projectPath);
           const folderId = generateFolderName();
           const folderPath = path.join(screenshotsDir, folderId);
 
@@ -143,12 +145,9 @@ export const screenshotsLive = HttpApiBuilder.group(
             // Capture both light and dark screenshots
             const lightOutputPath = path.join(
               folderPath,
-              RelativeFile("light.png"),
+              SCREENSHOT_FILE_LIGHT,
             );
-            const darkOutputPath = path.join(
-              folderPath,
-              RelativeFile("dark.png"),
-            );
+            const darkOutputPath = path.join(folderPath, SCREENSHOT_FILE_DARK);
 
             yield* Effect.promise(() =>
               screenshot({
@@ -161,7 +160,7 @@ export const screenshotsLive = HttpApiBuilder.group(
               }),
             );
 
-            yield* Console.log("light screenshot succeeded");
+            yield* Effect.logDebug("light screenshot succeeded");
 
             yield* Effect.promise(() =>
               screenshot({
@@ -174,11 +173,25 @@ export const screenshotsLive = HttpApiBuilder.group(
               }),
             );
 
-            yield* Console.log("dark screenshot succeeded");
+            yield* Effect.logDebug("dark screenshot succeeded");
 
             imagePath = {
-              dark: `/.liqvid/screenshots/${folderId}/dark.png`,
-              light: `/.liqvid/screenshots/${folderId}/light.png`,
+              dark:
+                "/" +
+                path.join(
+                  ASSETS_DIR,
+                  SCREENSHOTS_DIR,
+                  folderId,
+                  SCREENSHOT_FILE_DARK,
+                ),
+              light:
+                "/" +
+                path.join(
+                  ASSETS_DIR,
+                  SCREENSHOTS_DIR,
+                  folderId,
+                  SCREENSHOT_FILE_LIGHT,
+                ),
             };
           } else {
             // Capture single screenshot
@@ -198,7 +211,14 @@ export const screenshotsLive = HttpApiBuilder.group(
               }),
             );
 
-            imagePath = `/.liqvid/screenshots/${folderId}/screenshot.png`;
+            imagePath =
+              "/" +
+              path.join(
+                ASSETS_DIR,
+                SCREENSHOTS_DIR,
+                RelativeDir(folderId),
+                SCREENSHOT_PNG,
+              );
           }
 
           // Create metadata
@@ -218,6 +238,10 @@ export const screenshotsLive = HttpApiBuilder.group(
             meta,
           };
         }).pipe(
+          Effect.annotateLogs({
+            ...payload,
+            projectPath,
+          }),
           Effect.catchTags({
             PlatformError: Effect.die,
           }),
@@ -232,7 +256,6 @@ export const screenshotsLive = HttpApiBuilder.group(
         }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
-            assertType<RelativeDir>(projectPath);
 
             const projectDir = getProjectDir(projectPath);
             const screenshotsDir = getScreenshotsDir(projectPath);
@@ -257,8 +280,6 @@ export const screenshotsLive = HttpApiBuilder.group(
         "rename",
         ({ payload: { newName, screenshotId }, query: { projectPath } }) =>
           Effect.gen(function* () {
-            assertType<RelativeDir>(projectPath);
-
             // Sanitize new name (remove path separators and invalid chars)
             const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
@@ -304,7 +325,6 @@ export const screenshotsLive = HttpApiBuilder.group(
         ({ payload: { screenshotId }, query: { projectPath } }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
-            assertType<RelativeDir>(projectPath);
 
             const screenshotsDir = getScreenshotsDir(projectPath);
             const folderPath = path.join(
@@ -329,7 +349,6 @@ export const screenshotsLive = HttpApiBuilder.group(
       .handle("checkExists", ({ query: { filename, projectPath } }) =>
         Effect.gen(function* () {
           assertType<RelativeFile>(filename);
-          assertType<RelativeDir>(projectPath);
           const fs = yield* FileSystem.FileSystem;
 
           const filePath = path.join(getProjectDir(projectPath), filename);

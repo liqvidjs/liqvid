@@ -11,7 +11,7 @@ import {
   FolderIcon,
 } from "@phosphor-icons/react";
 import { RelativeDir } from "effect-paths";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "../../components/WebSocketProvider.tsx";
@@ -88,6 +88,9 @@ export function ProjectListClient({
         delete next[data.path];
         return next;
       });
+    },
+    newProject: (data) => {
+      setProjects((prev) => ({ ...prev, [data.path]: data }));
     },
     updateProject: (data) => {
       setProjects((prev) => ({ ...prev, [data.path]: data }));

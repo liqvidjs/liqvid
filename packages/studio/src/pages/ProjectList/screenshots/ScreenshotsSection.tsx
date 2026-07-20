@@ -10,6 +10,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import { Effect } from "effect";
+import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
@@ -43,7 +44,7 @@ type CopyTarget = "opengraph-image.png" | "twitter-image.png";
 type VariantLabel = "Light" | "Dark" | null;
 
 async function copyScreenshot(
-  projectPath: string,
+  projectPath: RelativeDir,
   screenshotId: string,
   target: CopyTarget,
   variant?: VariantLabel,
@@ -72,7 +73,7 @@ async function copyScreenshot(
 
 interface ScreenshotItemProps {
   screenshot: ScreenshotEntry;
-  projectPath: string;
+  projectPath: RelativeDir;
   variant: { label: VariantLabel; path: string };
   /** Whether this is the first variant of the screenshot */
   isPrimary: boolean;

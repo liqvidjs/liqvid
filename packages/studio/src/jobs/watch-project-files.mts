@@ -355,9 +355,13 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
 
     yield* Effect.logDebug("got project meta", meta);
 
-    projects[meta.path] = meta;
+    if (projectPath in meta) {
+      yield* broadcast("projects", { data: meta, type: "updateProject" });
+    } else {
+      yield* broadcast("projects", { data: meta, type: "newProject" });
+    }
 
-    yield* broadcast("projects", { data: meta, type: "updateProject" });
+    projects[projectPath] = meta;
 
     yield* Effect.logDebug("generating assets dir");
 

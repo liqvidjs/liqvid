@@ -3,7 +3,6 @@ import path from "node:path";
 import { renderAudio } from "@liqvid/cli/render-audio";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import type { LiqvidConfig } from "@liqvid/schemas/effect";
-import { assertType } from "@liqvid/utils";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
@@ -109,8 +108,6 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // list existing audio renderings for a project
     .handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
-        assertType<RelativeDir>(projectPath);
-
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 
@@ -174,8 +171,6 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // render a new audio track
     .handle("generate", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
-        assertType<RelativeDir>(projectPath);
-
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 
@@ -222,8 +217,6 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // rename an audio rendering (multiple-audio mode only)
     .handle("rename", ({ payload: { id, newName }, query: { projectPath } }) =>
       Effect.gen(function* () {
-        assertType<RelativeDir>(projectPath);
-
         const config = yield* getConfig();
 
         if (!isMultiple(config)) {
@@ -263,8 +256,6 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     // delete an audio rendering (and any associated captions)
     .handle("delete", ({ payload: { id }, query: { projectPath } }) =>
       Effect.gen(function* () {
-        assertType<RelativeDir>(projectPath);
-
         const config = yield* getConfig();
         const multiple = isMultiple(config);
 

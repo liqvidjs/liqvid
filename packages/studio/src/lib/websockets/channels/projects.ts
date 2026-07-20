@@ -1,7 +1,16 @@
 import { ProjectMeta } from "@liqvid/schemas/effect";
 import { Schema } from "effect";
 
-/** Message sent when a project is delete */
+/** Message sent when a project is created */
+export const NewProjectMessage = Schema.Struct({
+  data: ProjectMeta,
+
+  type: Schema.Literal("newProject"),
+}).pipe(
+  Schema.annotate({ description: "Message sent when a project is created" }),
+);
+
+/** Message sent when a project is deleted */
 export const DeleteProjectMessage = Schema.Struct({
   data: Schema.Struct({
     /** ID of the project that was deleted */
@@ -26,5 +35,6 @@ export const UpdateProjectMessage = Schema.Struct({
 export const ProjectMessage = Schema.Union([
   // project messages
   DeleteProjectMessage,
+  NewProjectMessage,
   UpdateProjectMessage,
 ]);

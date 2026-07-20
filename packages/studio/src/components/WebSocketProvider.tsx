@@ -5,7 +5,7 @@ import { deserialize, IS_CLIENT } from "@liqvid/ssr";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import {
   type ChannelMessage,
@@ -102,11 +102,9 @@ class WebSocketClient {
       this.#subscribers.set(channel, set);
     }
 
-    console.debug("subscribing to channel", channel);
     set.add(cb as Subscriber<ChannelName>);
 
     return () => {
-      console.debug("unsubscribing from channel", channel);
       set.delete(cb as Subscriber<ChannelName>);
     };
   }

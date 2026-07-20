@@ -31,10 +31,10 @@ import { readDirWithFileTypes } from "../utils/effect.mts";
 import { UP } from "../utils/misc.mts";
 
 export async function rebuildAction() {
-  const result = await Effect.runPromise(
+  const result = await Effect.runPromiseExit(
     runNextBuild().pipe(Effect.provide(NodeFileSystem.layer)),
   );
-  return serialize(result);
+  return serialize(result) as typeof result;
 }
 
 export interface TemplateInfo {
