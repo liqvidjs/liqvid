@@ -71,14 +71,16 @@ export function screenshot(options: ScreenshotOptions) {
       browserExecutable,
       colorScheme = "light",
       height,
-      imageFormat = "png",
       output,
-      quality = 80,
       time,
       url,
       width,
       screenshotOptions,
     } = options;
+
+    if (screenshotOptions && screenshotOptions.type !== "jpeg") {
+      screenshotOptions.quality = undefined;
+    }
 
     // Find browser executable
     const executablePath = yield* Effect.promise(() =>
@@ -118,9 +120,7 @@ export function screenshot(options: ScreenshotOptions) {
       capture({
         page,
         path: output,
-        quality,
         time,
-        type: imageFormat,
         ...screenshotOptions,
       }),
     );
