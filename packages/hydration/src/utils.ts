@@ -1,3 +1,6 @@
+import { IS_CLIENT, IS_SERVER } from "@liqvid/ssr";
+import { useEffect, useState } from "react";
+
 import { golf } from "./golf.ts";
 import type { ComparisonVariant, StringVariant } from "./types.ts";
 
@@ -69,4 +72,17 @@ export function comparisonCondition<T>(o: ComparisonVariant<T>) {
 
 export function stringCondition(o: StringVariant) {
   return comparisonCondition(o);
+}
+
+/**
+ * For some reason needs to be a function
+ */
+export function useVeryFirstRender() {
+  const symbol = Symbol.for("@liqvid/hydration/veryFirstRenderCompleted");
+
+  useEffect(() => {
+    (window as { [symbol]?: boolean })[symbol] = true;
+  }, [symbol]);
+
+  return () => IS_CLIENT && !Object.hasOwn(window, symbol);
 }

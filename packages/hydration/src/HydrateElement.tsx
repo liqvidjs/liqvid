@@ -42,10 +42,10 @@ export function HydrateElement<
 
   return (
     <HydrateOnClient
-      hydrationFn={`(...a)=>{let n=d.getElementById(${JSON.stringify(id)});(${hydrationFn})(n,...a);n.removeAttribute("id")}`}
+      hydrationFn={`(...a)=>{let n=d.querySelector('[data-lvh=${JSON.stringify(id)}]');(${hydrationFn})(n,...a);n.removeAttribute("data-lvh")}`}
       {...props}
     >
-      <Slot id={id}>{children}</Slot>
+      <Slot data-lvh={id}>{children}</Slot>
     </HydrateOnClient>
   );
 }
