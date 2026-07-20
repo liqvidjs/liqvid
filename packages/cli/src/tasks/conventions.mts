@@ -28,6 +28,7 @@ export const DEFAULT_MEDIA_PATTERNS = [
 
   // assets dir
   "**/.liqvid/**/*",
+  "!**/.liqvid/project-meta.json",
 
   // distinguish Transport Stream files from TypeScript files
   "**/.liqvid/**/*.ts",

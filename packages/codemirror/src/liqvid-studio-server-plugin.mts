@@ -9,7 +9,8 @@ const RAW_JSON = "raw.json";
 const RAW_DTS = "raw.d.json.ts";
 
 /** TypeScript declaration for JSON files */
-const declaration = `import type { Action, CMState } from "@lqv/codemirror";
+const declaration = `import type { RecordingData } from "@liqvid/recording";
+import type { Action, CMState } from "@lqv/codemirror";
 
 declare const data: RecordingData<Action, CMState>;
 export default data;
