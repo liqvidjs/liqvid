@@ -69,7 +69,7 @@ export class Playback extends CorePlayback {
     this.currentTime = Duration.inSeconds(d);
   }
 
-  get duration$() {
+  get duration$(): Duration {
     return this.__$duration;
   }
 
