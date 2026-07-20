@@ -108,6 +108,7 @@ catalog:
   next: 16.2.10
   pluralize: ^8.0.0
   postcss: ^8.5.6
+  prettier-plugin-glsl: ^0.3.0
   prism-react-renderer: ^2.4.1
   prismjs: ^1.30.0
   puppeteer-core: ^25.3.0
@@ -184,6 +185,7 @@ catalogs:
     concurrently: ^9.2.1
     csstype: ^3.2.3
     effect: 4.0.0-beta.98
+    glslx: ^0.3.1
     jest: ^30.2.0
     js-yaml: ^4.1.1
     next: 16.2.10
@@ -191,6 +193,7 @@ catalogs:
     no-private-imports: ^0.0.1
     no-restricted-imports: ^0.0.1
     portless: ^0.12.0
+    prettier-plugin-glsl: ^0.3.0
     raw-loader: ^4.0.2
     skulpt: ^1.2
     smart-whisper: ^0.8.1
@@ -222,6 +225,7 @@ catalogs:
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
     effect: ">=4.0.0-beta.0"
+    glslx: ^0.3.1
     hls.js: ^1.6.16
     jszip: ^3.10.1
     katex: ">=0.16"
@@ -229,6 +233,7 @@ catalogs:
     next: ">=16"
     next-ws: ^2.2.8
     prettier: ^3.8.1
+    prettier-plugin-glsl: ^0.3.0
     react: ">=19"
     react-dom: ">=19"
     react-inspector: ^9.0.0

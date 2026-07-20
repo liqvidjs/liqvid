@@ -45,7 +45,7 @@
       "rtk lint biome": "allow",
       "rtk ls *": "allow",
       "rtk tsc *": "allow",
-      "tail *": "deny",
+      "tail *": "allow",
       "tsc --noEmit *": "allow"
     }
   },
