@@ -1,10 +1,12 @@
 declare module "node:path" {
   import type {
     AbsoluteDir,
+    AbsoluteFile,
     AbsolutePath,
     AbsoluteToRelative,
     AnyDir,
     AnyPath,
+    FileExtn,
     RelativeDir,
     RelativeFile,
     RelativePath,
@@ -19,6 +21,16 @@ declare module "node:path" {
   function dirname<P extends AnyPath>(
     path: P,
   ): P extends AbsolutePath ? AbsoluteDir : RelativeDir;
+
+  function extname<P extends AnyPath>(path: P): FileExtn;
+
+  function isAbsolute<P extends string>(
+    path: P,
+  ): path is P extends AnyDir
+    ? AbsoluteDir
+    : P extends AnyFile
+      ? AbsoluteFile
+      : boolean;
 
   /* ------------------------------ join ------------------------------ */
   function join<P extends AnyPath>(singleton: P): P;
@@ -56,6 +68,9 @@ declare module "node:path" {
       : Error & {
           message: "If any arguments to path.join are AllPath, all of them must be";
         };
+
+  /* ------------------------------ /join ------------------------------ */
+  function normalize<P extends AnyPath>(path: P): P;
 
   function relative<P extends AnyPath>(
     from: AnyPath,

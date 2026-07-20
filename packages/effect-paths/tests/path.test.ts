@@ -1,7 +1,18 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: testing types */
 import path from "node:path";
 
-import { AbsoluteDir, AbsoluteFile, RelativeDir, RelativeFile } from "../src";
+import {
+  AbsoluteDir,
+  AbsoluteFile,
+  type AbsolutePath,
+  type AnyDir,
+  type AnyFile,
+  type AnyPath,
+  type FileExtn,
+  RelativeDir,
+  RelativeFile,
+  type RelativePath,
+} from "../src";
 
 const absoluteDir = AbsoluteDir("");
 
@@ -10,6 +21,12 @@ const relativeDir = RelativeDir("");
 const absoluteFile = AbsoluteFile("");
 
 const relativeFile = RelativeFile("");
+
+const anyFile = absoluteFile as AnyFile;
+
+const anyDir = absoluteDir as AnyDir;
+
+const anyPath = anyFile as AnyPath;
 
 const plainString = "";
 
@@ -24,6 +41,38 @@ type ErrorFilesLast = Error & {
 type ErrorAllWrapped = Error & {
   message: "If any arguments to path.join are AllPath, all of them must be";
 };
+
+/* ------------------------------ path.basename ------------------------------ */
+path.basename(absoluteDir) satisfies RelativeDir;
+path.basename(absoluteFile) satisfies RelativeFile;
+
+/* ------------------------------ path.dirname ------------------------------ */
+path.dirname(absoluteDir) satisfies AbsoluteDir;
+path.dirname(absoluteFile) satisfies AbsoluteDir;
+path.dirname(relativeDir) satisfies RelativeDir;
+path.dirname(relativeFile) satisfies RelativeDir;
+
+/* ------------------------------ path.extname ------------------------------ */
+path.extname(absoluteFile) satisfies FileExtn;
+
+/* ------------------------------ path.isAbsolute ------------------------------ */
+if (path.isAbsolute(anyDir)) {
+  anyDir satisfies AbsoluteDir;
+} else {
+  anyDir satisfies RelativeDir;
+}
+
+if (path.isAbsolute(anyFile)) {
+  anyFile satisfies AbsoluteFile;
+} else {
+  anyFile satisfies RelativeFile;
+}
+
+if (path.isAbsolute(anyPath)) {
+  anyPath satisfies AbsolutePath;
+} else {
+  anyPath satisfies RelativePath;
+}
 
 /* ------------------------------ path.join ------------------------------ */
 path.join(absoluteDir, relativeFile) satisfies AbsoluteFile;
@@ -51,3 +100,14 @@ path.join(relativeDir) satisfies RelativeDir;
 path.join(absoluteDir, absoluteDir) satisfies ErrorAbsoluteFirst;
 path.join(absoluteFile, relativeFile) satisfies ErrorFilesLast;
 path.join(absoluteDir, plainString) satisfies ErrorAllWrapped;
+
+/* ------------------------------ path.normalize ------------------------------ */
+path.normalize(absoluteDir) satisfies AbsoluteDir;
+path.normalize(absoluteFile) satisfies AbsoluteFile;
+path.normalize(relativeDir) satisfies RelativeDir;
+path.normalize(relativeFile) satisfies RelativeFile;
+
+/* ------------------------------ path.resolve ------------------------------ */
+path.resolve(relativeDir) satisfies AbsoluteDir;
+path.resolve(relativeFile) satisfies AbsoluteFile;
+path.resolve(anyPath) satisfies AbsolutePath;

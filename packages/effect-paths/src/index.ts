@@ -43,6 +43,10 @@ export type AnyFile = AbsoluteFile | RelativeFile;
 /** Absolute/relative directory path */
 export type AnyDir = AbsoluteDir | RelativeDir;
 
+/* ------------------------------ file extensions ------------------------------ */
+/** File extension */
+export type FileExtn = string & Brand.Brand<"FileExtn">;
+
 /* ------------------------------ utils ------------------------------ */
 export type AbsoluteToRelative<P extends AbsolutePath> = P extends AbsoluteDir
   ? RelativeDir

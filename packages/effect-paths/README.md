@@ -23,7 +23,7 @@ import {
   RelativeDir,
   RelativeFile,
   type RelativePath,
-} from "../src/index.ts";
+} from "effect-paths";
 
 // process.cwd() now returns AbsoluteDir
 process.cwd() satisfies AbsoluteDir;
