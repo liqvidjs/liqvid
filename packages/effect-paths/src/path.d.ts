@@ -24,6 +24,23 @@ declare module "node:path" {
 
   function extname<P extends AnyPath>(path: P): FileExtn;
 
+  /* ------------------------------ format ------------------------------ */
+  interface FormatInputPathObject {
+    dir?: AnyDir;
+    root?: AnyDir;
+    base?: RelativePath;
+    name?: string;
+    ext?: FileExtn;
+  }
+
+  function format(
+    pathObject: FormatInputPathObject & { dir: AbsoluteDir },
+  ): AbsolutePath;
+  function format(
+    pathObject: FormatInputPathObject & { root: AbsoluteDir },
+  ): AbsolutePath;
+  function format(pathObject: FormatInputPathObject): RelativePath;
+  /* ------------------------------ /format ------------------------------ */
   function isAbsolute<P extends string>(
     path: P,
   ): path is P extends AnyDir
@@ -70,7 +87,30 @@ declare module "node:path" {
         };
 
   /* ------------------------------ /join ------------------------------ */
+
   function normalize<P extends AnyPath>(path: P): P;
+
+  /* ------------------------------ parse ------------------------------ */
+  type BrandedParsedPath<Dir extends AnyDir, Base extends RelativePath> = {
+    root: Dir extends AbsolutePath ? AbsoluteDir : RelativeDir;
+    dir: Dir;
+    base: Base;
+    ext: Base extends AnyFile ? FileExtn : "";
+    name: string;
+  };
+
+  function parse<P extends AnyPath>(
+    path: P,
+  ): P extends AbsolutePath
+    ? BrandedParsedPath<
+        AbsoluteDir,
+        P extends AnyDir ? RelativeDir : RelativeFile
+      >
+    : BrandedParsedPath<
+        RelativeDir,
+        P extends AnyDir ? RelativeDir : RelativeFile
+      >;
+  /* ------------------------------ /parse ------------------------------ */
 
   function relative<P extends AnyPath>(
     from: AnyPath,

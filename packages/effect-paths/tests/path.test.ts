@@ -55,6 +55,12 @@ path.dirname(relativeFile) satisfies RelativeDir;
 /* ------------------------------ path.extname ------------------------------ */
 path.extname(absoluteFile) satisfies FileExtn;
 
+/* ------------------------------ path.format ------------------------------ */
+path.format({ base: relativeFile, dir: absoluteDir }) satisfies AbsolutePath;
+path.format({ base: relativeFile, root: absoluteDir }) satisfies AbsolutePath;
+path.format({ base: relativeFile, dir: relativeDir }) satisfies RelativePath;
+path.format({ base: relativeDir, dir: relativeDir }) satisfies RelativePath;
+
 /* ------------------------------ path.isAbsolute ------------------------------ */
 if (path.isAbsolute(anyDir)) {
   anyDir satisfies AbsoluteDir;
@@ -106,6 +112,33 @@ path.normalize(absoluteDir) satisfies AbsoluteDir;
 path.normalize(absoluteFile) satisfies AbsoluteFile;
 path.normalize(relativeDir) satisfies RelativeDir;
 path.normalize(relativeFile) satisfies RelativeFile;
+
+/* ------------------------------ path.parse ------------------------------ */
+path.parse(absoluteFile) satisfies {
+  root: AbsoluteDir;
+  dir: AbsoluteDir;
+  base: RelativeFile;
+  ext: FileExtn;
+};
+
+path.parse(absoluteDir) satisfies {
+  root: AbsoluteDir;
+  dir: AbsoluteDir;
+  base: RelativeDir;
+};
+
+path.parse(relativeFile) satisfies {
+  root: RelativeDir;
+  dir: RelativeDir;
+  base: RelativeFile;
+  ext: FileExtn;
+};
+
+path.parse(relativeDir) satisfies {
+  root: RelativeDir;
+  dir: RelativeDir;
+  base: RelativeDir;
+};
 
 /* ------------------------------ path.resolve ------------------------------ */
 path.resolve(relativeDir) satisfies AbsoluteDir;
