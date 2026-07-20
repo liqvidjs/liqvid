@@ -1,6 +1,8 @@
 import { EditorSelection, type SelectionRange } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
+import type * as prettier from "prettier";
 import { useCallback } from "react";
+import type { SetOptional } from "type-fest";
 
 import { selectActiveFile } from "../selectors.ts";
 import { useLiveCodeStore } from "../store.ts";
@@ -25,37 +27,46 @@ export function useFormatActiveFile() {
     // Dynamically import prettier and plugins
     const prettier = await import("prettier");
 
-    let formatter: Formatter;
+    let supportsCursorPreservation = true;
+
+    let options: SetOptional<prettier.CursorOptions, "cursorOffset">;
     switch (extn) {
       case "css": {
         const cssPlugin = await import("prettier/plugins/postcss");
-        formatter = (code) =>
-          prettier.format(code, {
-            filepath: filename,
-            parser: "css",
-            plugins: [cssPlugin.default],
-          });
+        options = {
+          filepath: filename,
+          parser: "css",
+          plugins: [cssPlugin.default],
+        };
+        break;
+      }
+      case "glsl": {
+        // https://github.com/NaridaL/glsl-language-toolkit/issues/47
+        supportsCursorPreservation = false;
+        const glslPlugin = await import("prettier-plugin-glsl");
+        options = {
+          filepath: filename,
+          plugins: [glslPlugin],
+        };
         break;
       }
       case "html": {
         const htmlPlugin = await import("prettier/plugins/html");
-        formatter = (code) =>
-          prettier.format(code, {
-            filepath: filename,
-            parser: "html",
-            plugins: [htmlPlugin.default],
-          });
+        options = {
+          filepath: filename,
+          parser: "html",
+          plugins: [htmlPlugin.default],
+        };
         break;
       }
       case "js":
       case "jsx": {
         const babelPlugin = await import("prettier/plugins/babel");
         const estreePlugin = await import("prettier/plugins/estree");
-        formatter = (code) =>
-          prettier.format(code, {
-            filepath: filename,
-            plugins: [estreePlugin.default, babelPlugin.default],
-          });
+        options = {
+          filepath: filename,
+          plugins: [estreePlugin.default, babelPlugin.default],
+        };
         break;
       }
 
@@ -63,44 +74,89 @@ export function useFormatActiveFile() {
       case "tsx": {
         const estreePlugin = await import("prettier/plugins/estree");
         const typescriptPlugin = await import("prettier/plugins/typescript");
-        formatter = (code) =>
-          prettier.format(code, {
-            filepath: filename,
-            plugins: [estreePlugin.default, typescriptPlugin.default],
-          });
+        options = {
+          filepath: filename,
+          plugins: [estreePlugin.default, typescriptPlugin.default],
+        };
         break;
       }
       default:
-        formatter = Promise.resolve;
+        return;
     }
 
-    formatView(view, formatter);
+    if (supportsCursorPreservation) {
+      formatViewWithCursor(view, (code, cursorOffset) =>
+        prettier.formatWithCursor(code, { ...options, cursorOffset }),
+      );
+    } else {
+      // Some plugins (e.g. prettier-plugin-glsl) don't support the cursor API,
+      // so fall back to guessing the new cursor position.
+      formatViewGuessCursor(view, (code) => prettier.format(code, options));
+    }
   }, [store.getState]);
+}
+
+/** Apply formatted text and selection to the view. */
+function applyFormatting(
+  view: EditorView,
+  formatted: string,
+  selection: EditorSelection,
+) {
+  view.dispatch(
+    view.state.update({
+      changes: {
+        from: 0,
+        insert: formatted,
+        to: view.state.doc.length,
+      },
+      selection,
+    }),
+  );
+}
+
+type CursorFormatter = (
+  code: string,
+  cursorOffset: number,
+) => Promise<prettier.CursorResult>;
+
+/** Format using Prettier's official cursor-preservation API. */
+async function formatViewWithCursor(
+  view: EditorView,
+  formatter: CursorFormatter,
+) {
+  const unformatted = viewContents(view);
+  const { anchor, head } = view.state.selection.main;
+
+  try {
+    // formatWithCursor tracks a single cursor, so format once per selection
+    // endpoint (reusing the result when the selection is empty).
+    const anchorResult = await formatter(unformatted, anchor);
+    const headResult =
+      anchor === head ? anchorResult : await formatter(unformatted, head);
+
+    applyFormatting(
+      view,
+      anchorResult.formatted,
+      EditorSelection.single(anchorResult.cursorOffset, headResult.cursorOffset),
+    );
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 type Formatter = (code: string) => Promise<string>;
 
-async function formatView(view: EditorView, formatter: Formatter) {
+/** Format then guess the new cursor position (for plugins lacking the API). */
+async function formatViewGuessCursor(view: EditorView, formatter: Formatter) {
   const unformatted = viewContents(view);
 
   try {
     const formatted = await formatter(unformatted);
 
-    const newSelection = preserveSelection(
-      view.state.selection.main,
-      unformatted,
+    applyFormatting(
+      view,
       formatted,
-    );
-
-    view.dispatch(
-      view.state.update({
-        changes: {
-          from: 0,
-          insert: formatted,
-          to: view.state.doc.length,
-        },
-        selection: newSelection,
-      }),
+      preserveSelection(view.state.selection.main, unformatted, formatted),
     );
   } catch (e) {
     console.error(e);
@@ -111,8 +167,10 @@ async function formatView(view: EditorView, formatter: Formatter) {
 const aestheticChars = /[\s(),;]/g;
 
 /**
- * Preserve selection when formatting with Prettier
- * TODO: there is an actual API for doing this
+ * Preserve selection when formatting with Prettier.
+ *
+ * Prettier's `formatWithCursor` is the proper way to do this, but some plugins
+ * (e.g. prettier-plugin-glsl) don't support it, so this guesses instead.
  */
 function preserveSelection(
   selection: SelectionRange,
