@@ -57,6 +57,12 @@ declare module "node:path" {
     ...tail: [...RelativeDir[], T]
   ): RelativeToAbsolute<T>;
 
+  // needed for splat syntax
+  function join<T extends RelativePath>(
+    head: AbsoluteDir,
+    ...tail: RelativeDir[]
+  ): AbsoluteDir;
+
   function join<T extends RelativePath>(...args: [...RelativeDir[], T]): T;
 
   /** @deprecated You can only pass files in the last position */
@@ -75,7 +81,6 @@ declare module "node:path" {
         message: "You can only pass absolute paths in the first position";
       };
 
-  /** @deprecated If any arguments to path.join are AllPath, all of them must be */
   function join<T extends string[]>(
     ...args: T
   ): Extract<T[number], AnyPath> extends never

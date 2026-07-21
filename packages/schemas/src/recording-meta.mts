@@ -1,15 +1,16 @@
-import { z } from "zod";
+import { DurationOptions } from "@liqvid/duration/effect";
+import { Schema } from "effect";
 
-export const RecordingMetaFile = z.object({
-  created: z.iso.datetime(),
-  duration: z.object({
-    milliseconds: z.number(),
-  }),
+export const RecordingMetaFile = Schema.Struct({
+  // TODO: enforce date format
+  created: Schema.String,
+  duration: DurationOptions,
 });
-export type RecordingMetaFile = z.infer<typeof RecordingMetaFile>;
+export type RecordingMetaFile = (typeof RecordingMetaFile)["Type"];
 
-export const RecordingMeta = RecordingMetaFile.extend({
-  name: z.string(),
-  plugins: z.array(z.string()),
+export const RecordingMeta = Schema.Struct({
+  ...RecordingMetaFile.fields,
+  name: Schema.String,
+  plugins: Schema.Array(Schema.String),
 });
-export type RecordingMeta = z.infer<typeof RecordingMeta>;
+export type RecordingMeta = (typeof RecordingMeta)["Type"];

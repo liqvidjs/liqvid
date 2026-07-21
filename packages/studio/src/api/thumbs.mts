@@ -6,7 +6,7 @@ import {
   type ThumbnailOptions,
   ThumbnailsJob,
   type ThumbnailsJobIn,
-} from "@liqvid/schemas/effect";
+} from "@liqvid/schemas";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";

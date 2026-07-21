@@ -1,5 +1,5 @@
 import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
-import { EnvFiles } from "@liqvid/schemas/effect";
+import { EnvFiles } from "@liqvid/schemas";
 import { Effect, FileSystem, Stream } from "effect";
 
 import { getServerState, type LiqvidServerState } from "../initialize.mts";

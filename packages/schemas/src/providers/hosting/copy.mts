@@ -1,28 +1,30 @@
-import { z } from "zod";
+import { Effect, Schema } from "effect";
 
 /**
  * Destination for the copy provider.
  * Can be a single directory path, or separate paths for hosting vs media mode.
  */
-export const CopyDestination = z.union([
-  z.string(),
-  z.object({
-    hosting: z.string(),
-    media: z.string(),
+export const CopyDestination = Schema.Union([
+  Schema.String,
+  Schema.Struct({
+    hosting: Schema.String,
+    media: Schema.String,
   }),
 ]);
-export type CopyDestination = z.infer<typeof CopyDestination>;
+export type CopyDestination = (typeof CopyDestination)["Type"];
 
 /**
  * Configuration for the copy provider.
  * Copies the output directory to another location on disk.
  */
-export const ProviderConfigCopy = z.object({
+export const ProviderConfigCopy = Schema.Struct({
   /**
    * Whether to clean the destination directory before copying.
    * @default false
    */
-  clean: z.boolean().default(false).optional(),
+  clean: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 
   /**
    * The destination to copy to.
@@ -30,4 +32,4 @@ export const ProviderConfigCopy = z.object({
    */
   destination: CopyDestination,
 });
-export type ProviderConfigCopy = z.infer<typeof ProviderConfigCopy>;
+export type ProviderConfigCopy = (typeof ProviderConfigCopy)["Type"];

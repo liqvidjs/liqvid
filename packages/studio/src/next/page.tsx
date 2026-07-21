@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Jobs } from "../pages/jobs/jobs.tsx";
 import { Homepage } from "../pages/root.tsx";
+import { Settings } from "../pages/settings/server.tsx";
 import { getTranslations } from "../utils/i18n.mts";
 
 type Params = {
@@ -25,6 +26,8 @@ export default async function Pages({
       return <Homepage />;
     case "/jobs":
       return <Jobs />;
+    case "/settings":
+      return <Settings />;
   }
 
   notFound();
@@ -53,6 +56,13 @@ export async function generateMetadata({
       t = await getTranslations<T>(
         import.meta.url,
         RelativeDir("../pages/jobs"),
+      );
+      break;
+
+    case "/settings":
+      t = await getTranslations<T>(
+        import.meta.url,
+        RelativeDir("../pages/settings"),
       );
       break;
     default:

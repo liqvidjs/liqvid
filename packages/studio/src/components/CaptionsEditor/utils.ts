@@ -1,4 +1,4 @@
-import type { TranscriptEntry } from "@liqvid/schemas/effect";
+import type { TranscriptEntry } from "@liqvid/schemas";
 
 import type { Action, State, Transcript } from "./state.ts";
 

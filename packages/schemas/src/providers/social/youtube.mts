@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigYouTube = z.object({
-  username: z.string(),
+export const ProviderConfigYouTube = Schema.Struct({
+  username: Schema.String,
 });
-export type ProviderConfigYouTube = z.infer<typeof ProviderConfigYouTube>;
+export type ProviderConfigYouTube = (typeof ProviderConfigYouTube)["Type"];

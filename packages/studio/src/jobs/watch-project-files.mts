@@ -4,12 +4,12 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { loadJson } from "@liqvid/cli/utils";
 import { Duration } from "@liqvid/duration";
-import type { AspectRatio } from "@liqvid/schemas";
 import {
+  type AspectRatio,
   AutoGenProjectMeta,
   ProjectJson,
   type ProjectMeta,
-} from "@liqvid/schemas/effect";
+} from "@liqvid/schemas";
 import chalk from "chalk";
 import {
   Cause,

@@ -1,104 +1,141 @@
-import { z } from "zod";
+import { Effect, Schema } from "effect";
 
-export const ThumbnailsJob = z.object({
+import {
+  ColorSchemeInputSpecifier,
+  ImageFormat,
+  JpegQuality,
+} from "../shared.mts";
+
+export const ThumbnailsJob = Schema.Struct({
   /** Color scheme */
-  colorScheme: z.enum(["light", "dark", "both"]),
-  /** Number of columns per sheet */
-  cols: z.number(),
-
-  /** Seconds between screenshots */
-  frequency: z.number(),
-
-  /**
-   * Height of each thumbnail
-   * @default 100
-   */
-  height: z.number().optional().default(90),
-
-  /** Image format: jpeg or png */
-  imageFormat: z.enum(["jpeg", "png"]),
-
-  /** Quality for JPEG images (0-100) */
-  quality: z.number().optional(),
-
-  /**
-   * Number of rows per sheet
-   * @default 5
-   */
-  rows: z.number().optional().default(5),
-
-  /**
-   * Width of each thumbnail
-   * @default 160
-   */
-  width: z.number().optional().default(160),
-});
-
-export type ThumbnailsJob = z.infer<typeof ThumbnailsJob>;
-
-/** Configuration for a thumbnail generation job */
-export const ThumbnailOptions = z.object({
-  /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable: z.string().optional(),
-
-  /** Height of screenshot before resizing */
-  browserHeight: z.number().optional(),
-
-  /** Width of screenshot before resizing */
-  browserWidth: z.number().optional(),
-
-  /**
-   * Color scheme
-   * @default "light"
-   */
-  colorScheme: z.enum(["light", "dark"]).optional().default("light"),
+  colorScheme: ColorSchemeInputSpecifier,
 
   /**
    * Number of columns per sheet
    * @default 5
    */
-  cols: z.number().optional().default(5),
-
-  /**
-   * Number of concurrent browser instances
-   * @default 1
-   */
-  concurrency: z.number().optional().default(1),
+  cols: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
 
   /**
    * Seconds between screenshots
-   * @default 4
+   * @default 1
    */
-  frequency: z.number().optional().default(4),
+  frequency: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(1)),
+  ),
 
   /**
    * Height of each thumbnail
-   * @default 100
+   * @default 90
    */
-  height: z.number().optional().default(90),
+  height: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(90)),
+  ),
+
+  /** Image format: jpeg or png */
+  imageFormat: ImageFormat.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("jpeg")),
+  ),
 
   /**
-   * Image format: jpeg or png
-   * @default "png"
+   * Quality for JPEG images (0-100)
+   * @default 80
    */
-  imageFormat: z.enum(["jpeg", "png"]).optional().default("png"),
-
-  /** Quality for JPEG images (0-100) */
-  quality: z.number().optional().default(80),
+  quality: JpegQuality.pipe(Schema.withDecodingDefaultType(Effect.succeed(80))),
 
   /**
    * Number of rows per sheet
    * @default 5
    */
-  rows: z.number().optional().default(5),
+  rows: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
 
   /**
    * Width of each thumbnail
    * @default 160
    */
-  width: z.number().optional().default(160),
+  width: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(160)),
+  ),
 });
 
-export type ThumbnailOptionsIn = z.input<typeof ThumbnailOptions>;
+export type ThumbnailsJobIn = (typeof ThumbnailsJob)["Encoded"];
+export type ThumbnailsJob = (typeof ThumbnailsJob)["Type"];
 
-export type ThumbnailOptions = z.output<typeof ThumbnailOptions>;
+/** Configuration for a thumbnail generation job */
+export const ThumbnailOptions = Schema.Struct({
+  /** Path to browser executable (optional, will auto-detect) */
+  browserExecutable: Schema.String.pipe(Schema.optional),
+
+  /** Height of screenshot before resizing */
+  browserHeight: Schema.Number.pipe(Schema.optional),
+
+  /** Width of screenshot before resizing */
+  browserWidth: Schema.Number.pipe(Schema.optional),
+
+  /**
+   * Color scheme
+   * @default "light"
+   */
+  colorScheme: Schema.Literals(["light", "dark"]).pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("light")),
+  ),
+
+  /**
+   * Number of columns per sheet
+   * @default 5
+   */
+  cols: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+
+  /**
+   * Number of concurrent browser instances
+   * @default 1
+   */
+  concurrency: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(1)),
+  ),
+
+  /**
+   * Seconds between screenshots
+   * @default 4
+   */
+  frequency: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(4)),
+  ),
+
+  /**
+   * Height of each thumbnail
+   * @default 90
+   */
+  height: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(90)),
+  ),
+
+  /**
+   * Image format: jpeg or png
+   * @default "png"
+   */
+  imageFormat: ImageFormat.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("png")),
+  ),
+
+  /** Quality for JPEG images (0-100) */
+  quality: JpegQuality,
+
+  /**
+   * Number of rows per sheet
+   * @default 5
+   */
+  rows: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+
+  /**
+   * Width of each thumbnail
+   * @default 160
+   */
+  width: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(160)),
+  ),
+});
+
+export type ThumbnailOptionsIn = (typeof ThumbnailOptions)["Encoded"];
+
+export type ThumbnailOptions = (typeof ThumbnailOptions)["Type"];

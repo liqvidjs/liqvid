@@ -1,47 +1,47 @@
-import * as z from "zod";
+import { Schema } from "effect";
 
 /**
  * Color scheme options for screenshots
  */
-export const ColorSchemeOption = z.enum(["light", "dark", "both"]);
+export const ColorSchemeOption = Schema.Literals(["light", "dark", "both"]);
 
-export type ColorSchemeOption = z.infer<typeof ColorSchemeOption>;
+export type ColorSchemeOption = (typeof ColorSchemeOption)["Type"];
 
 /**
  * Metadata for a captured screenshot
  */
-export const ScreenshotMeta = z.object({
+export const ScreenshotMeta = Schema.Struct({
   /** Color scheme used for the screenshot */
   colorScheme: ColorSchemeOption,
 
   /** ISO datetime of creation */
-  createdAt: z.string(),
+  createdAt: Schema.String,
 
   /** Height of screenshot */
-  height: z.number(),
+  height: Schema.Number,
 
   /** Width of screenshot */
-  width: z.number(),
+  width: Schema.Number,
 });
 
-export type ScreenshotMeta = z.infer<typeof ScreenshotMeta>;
+export type ScreenshotMeta = (typeof ScreenshotMeta)["Type"];
 
 /**
  * Screenshot entry with folder name and metadata
  */
-export const ScreenshotEntry = z.object({
+export const ScreenshotEntry = Schema.Struct({
   /** Folder name (datetime-based) */
-  id: z.string(),
+  id: Schema.String,
 
   /**
    * Path to the screenshot image.
    * For "both" mode, this will be an object with light and dark paths.
    */
-  imagePath: z.union([
-    z.string(),
-    z.object({
-      dark: z.string(),
-      light: z.string(),
+  imagePath: Schema.Union([
+    Schema.String,
+    Schema.Struct({
+      dark: Schema.String,
+      light: Schema.String,
     }),
   ]),
 
@@ -49,4 +49,4 @@ export const ScreenshotEntry = z.object({
   meta: ScreenshotMeta,
 });
 
-export type ScreenshotEntry = z.infer<typeof ScreenshotEntry>;
+export type ScreenshotEntry = (typeof ScreenshotEntry)["Type"];

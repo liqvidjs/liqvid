@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigTwitter = z.object({
-  username: z.string(),
+export const ProviderConfigTwitter = Schema.Struct({
+  username: Schema.String,
 });
-export type ProviderConfigTwitter = z.infer<typeof ProviderConfigTwitter>;
+export type ProviderConfigTwitter = (typeof ProviderConfigTwitter)["Type"];

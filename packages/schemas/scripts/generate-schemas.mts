@@ -8,19 +8,19 @@ import { fileURLToPath } from "node:url";
 
 import { Schema } from "effect";
 
-import { ThumbnailsJob } from "../src/jobs/thumbnails-effect.mts";
+import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 // Import schemas
-import { LiqvidConfig } from "../src/liqvid-config-effect.mts";
+import { LiqvidConfig } from "../src/liqvid-config.mts";
 import {
   AspectRatio,
   AspectRatioSpecifier,
   AutoGenProjectMeta,
   ProjectJson,
-} from "../src/project-effect.mts";
+} from "../src/project.mts";
 import {
   RecordingMeta,
   RecordingMetaFile,
-} from "../src/recording-meta-effect.mts";
+} from "../src/recording-meta.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, "..", "json-schemas");

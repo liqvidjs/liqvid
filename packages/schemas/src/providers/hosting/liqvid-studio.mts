@@ -1,8 +1,7 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigLiqvidStudio = z.object({
-  username: z.string(),
+export const ProviderConfigLiqvidStudio = Schema.Struct({
+  username: Schema.String,
 });
-export type ProviderConfigLiqvidStudio = z.infer<
-  typeof ProviderConfigLiqvidStudio
->;
+export type ProviderConfigLiqvidStudio =
+  (typeof ProviderConfigLiqvidStudio)["Type"];

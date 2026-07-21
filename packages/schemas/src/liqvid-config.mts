@@ -1,52 +1,17 @@
 import { Effect, Schema } from "effect";
 
-import { WhisperConfig } from "./jobs/captioning-effect.mts";
-import { ThumbnailOptions } from "./jobs/thumbnails-effect.mts";
-import { ProviderConfigCopy } from "./providers/hosting/copy-effect.mts";
-import { ProviderConfigS3 } from "./providers/hosting/s3-effect.mts";
-import { LogLevel, StringWithEnvVars } from "./shared-effect.mts";
+import { WhisperConfig } from "./jobs/captioning.mts";
+import { ThumbnailOptions } from "./jobs/thumbnails.mts";
+import { ProviderConfigCopy } from "./providers/hosting/copy.mts";
+import { ProviderConfigGitHubPages } from "./providers/hosting/github-pages.mts";
+import { ProviderConfigLiqvidStudio } from "./providers/hosting/liqvid-studio.mts";
+import { ProviderConfigS3 } from "./providers/hosting/s3.mts";
+import { ProviderConfigSFTP } from "./providers/hosting/sftp.mts";
+import { LogLevel, StringWithEnvVars } from "./shared.mts";
 
 /** Supported locales. */
 export const Locale = Schema.Literals(["en", "fr", "es", "de", "zh"] as const);
 export type Locale = (typeof Locale)["Type"];
-
-// TODO: implement this
-// 1. Define a helper function to extract member defaults from a Struct's AST
-// export const getStructDefaults = <Fields extends Schema.Struct.Fields>(
-//   schema: Schema.Struct<Fields>
-// ): Schema.Schema.Type<Schema.Struct<Fields>> => {
-//   const defaults: Record<string, any> = {}
-//
-//   // Navigate the AST to pull the default values defined on individual property signatures
-//   if (AST.isTypeLiteral(schema.ast)) {
-//     for (const property of schema.ast.propertySignatures) {
-//       const defaultValueAnnotation = property.annotations[AST.ConstructorDefaultId]
-//
-//       if (defaultValueAnnotation !== undefined) {
-//         // execute or unpack the constructor default (which can be a thunk or an Effect)
-//         const defaultThunk = defaultValueAnnotation as () => unknown
-//         defaults[property.name as string] = defaultThunk()
-//       }
-//     }
-//   }
-//
-//   return defaults as any
-// }
-//
-// // 2. Define your Struct and assign default values to members using pipe()
-// const MyStruct = Schema.Struct({
-//   name: Schema.String.pipe(Schema.withConstructorDefault(() => "Anonymous")),
-//   age: Schema.Number.pipe(Schema.withConstructorDefault(() => 18)),
-//   isAdmin: Schema.Boolean.pipe(Schema.withConstructorDefault(() => false)),
-// })
-//
-// // 3. Infer the parent Struct's default value automatically from its members
-// const myStructDefaultValue = getStructDefaults(MyStruct)
-//
-// // 4. Attach the inferred default value to the parent Struct itself
-// const MyStructWithFallback = MyStruct.pipe(
-//   Schema.withConstructorDefault(() => myStructDefaultValue)
-// )
 
 export const LiqvidConfig = Schema.Struct({
   /** JSON schema path */
@@ -63,13 +28,15 @@ export const LiqvidConfig = Schema.Struct({
       "liqvidStudio",
       "s3",
       "sftp",
-    ]),
+    ]).pipe(Schema.optional),
 
     /**
      * Provider hosting your media files (audio, video, and thumbnails)
      */
-    media: Schema.Literals(["copy", "liqvidStudio", "s3", "sftp"]),
-  }),
+    media: Schema.Literals(["copy", "liqvidStudio", "s3", "sftp"]).pipe(
+      Schema.optional,
+    ),
+  }).pipe(Schema.optional),
 
   /**
    * Base path that content is hosted under. Should match the basePath in your framework configuration.
@@ -115,18 +82,12 @@ export const LiqvidConfig = Schema.Struct({
   }).pipe(Schema.optional),
 
   providers: Schema.Struct({
-    // social
-    // bluesky: ProviderConfigBlueSky.optional(),
     // hosting
     copy: ProviderConfigCopy.pipe(Schema.optional),
-    // facebook: ProviderConfigFacebook.optional(),
-    // githubPages: ProviderConfigGitHubPages.optional(),
-    // instagram: ProviderConfigInstagram.optional(),
-    // liqvidStudio: ProviderConfigLiqvidStudio.optional(),
+    githubPages: ProviderConfigGitHubPages.pipe(Schema.optional),
+    liqvidStudio: ProviderConfigLiqvidStudio.pipe(Schema.optional),
     s3: ProviderConfigS3.pipe(Schema.optional),
-    // sftp: ProviderConfigSFTP.optional(),
-    // twitter: ProviderConfigTwitter.optional(),
-    // youtube: ProviderConfigYouTube.optional(),
+    sftp: ProviderConfigSFTP.pipe(Schema.optional),
   }),
 
   /** Publishing configuration */
@@ -209,3 +170,6 @@ export const LiqvidConfig = Schema.Struct({
 export type LiqvidConfigIn = (typeof LiqvidConfig)["Encoded"];
 
 export type LiqvidConfig = (typeof LiqvidConfig)["Type"];
+
+/** @deprecated Use {@link LiqvidConfig} (the decoded type) instead. */
+export type LiqvidConfigOut = (typeof LiqvidConfig)["Type"];

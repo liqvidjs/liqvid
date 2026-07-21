@@ -13,19 +13,39 @@
       ]
     },
     "backend": {
-      "additionalProperties": false,
-      "properties": {
-        "content": {
-          "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
-          "type": "string"
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "anyOf": [
+                {
+                  "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "media": {
+              "anyOf": [
+                {
+                  "enum": ["copy", "liqvidStudio", "s3", "sftp"],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object"
         },
-        "media": {
-          "enum": ["copy", "liqvidStudio", "s3", "sftp"],
-          "type": "string"
+        {
+          "type": "null"
         }
-      },
-      "required": ["content", "media"],
-      "type": "object"
+      ]
     },
     "basePath": {
       "anyOf": [
@@ -615,6 +635,53 @@
             }
           ]
         },
+        "githubPages": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "repository": {
+                  "type": "string"
+                },
+                "root": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": ["repository", "username"],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "liqvidStudio": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": ["username"],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "s3": {
           "anyOf": [
             {
@@ -725,6 +792,26 @@
               "type": "null"
             }
           ]
+        },
+        "sftp": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "host": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": ["host", "path"],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "type": "object"
@@ -810,6 +897,6 @@
       ]
     }
   },
-  "required": ["backend", "providers"],
+  "required": ["providers"],
   "type": "object"
 }

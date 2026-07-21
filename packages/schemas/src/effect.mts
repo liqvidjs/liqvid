@@ -1,10 +1,3 @@
-export * from "./env-vars.mts";
-export * from "./jobs/captioning-effect.mts";
-export * from "./jobs/thumbnails-effect.mts";
-export * from "./liqvid-config-effect.mts";
-export * from "./project-effect.mts";
-export * from "./providers/hosting/copy-effect.mts";
-export * from "./providers/hosting/s3-effect.mts";
-export * from "./recording-meta-effect.mts";
-export * from "./screenshot-meta-effect.mts";
-export * from "./shared-effect.mts";
+// Kept for backwards compatibility: the schemas package is now Effect-native,
+// so `@liqvid/schemas/effect` mirrors the default entry point.
+export * from "./index.mts";

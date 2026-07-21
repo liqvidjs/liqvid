@@ -1,4 +1,4 @@
-import z from "zod";
+import { Effect, Schema } from "effect";
 
 /**
  * Available Whisper model names.
@@ -7,7 +7,7 @@ import z from "zod";
  * (see its `MODELS` map). When a model name is used, `smart-whisper`
  * downloads it on demand into its managed model directory.
  */
-export const WhisperModelName = z.enum([
+export const WhisperModelName = Schema.Literals([
   "tiny",
   "tiny.en",
   "base",
@@ -21,75 +21,97 @@ export const WhisperModelName = z.enum([
   "large-v3",
   "large-v3-turbo",
 ]);
-export type WhisperModelName = z.infer<typeof WhisperModelName>;
+
+export type WhisperModelName = (typeof WhisperModelName)["Type"];
 
 /**
  * Options forwarded to `smart-whisper`'s transcription parameters.
+ *
+ * These map onto a subset of `TranscribeParams` from `smart-whisper`.
  */
-export const WhisperOptions = z.object({
+export const WhisperOptions = Schema.Struct({
   /**
    * Spoken language code (e.g. `"en"`, `"de"`). Use `"auto"` to detect.
    * @default "auto"
    */
-  language: z.string().default("auto"),
+  language: Schema.String.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("auto")),
+  ),
 
   /**
    * Maximum segment length in characters (`0` = no limit).
    * @default 0
    */
-  maxLen: z.number().default(0),
+  maxLen: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(0))),
 
   /**
    * Number of threads to use for inference.
+   * If omitted, `smart-whisper` picks a sensible default.
    */
-  nThreads: z.number().optional(),
+  nThreads: Schema.Number.pipe(Schema.optional),
 
   /**
    * Split segments on word rather than on token boundaries.
    * @default false
    */
-  splitOnWord: z.boolean().default(false),
+  splitOnWord: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 
   /**
    * Emit per-token timestamps (required for word-level timing).
    * @default true
    */
-  tokenTimestamps: z.boolean().default(true),
+  tokenTimestamps: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(true)),
+  ),
 
   /** Translate from the source language to English. */
-  translate: z.boolean().default(false),
+  translate: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 });
-export type WhisperOptions = z.infer<typeof WhisperOptions>;
+
+export type WhisperOptions = (typeof WhisperOptions)["Type"];
 
 /**
  * Configuration for Whisper transcription via `smart-whisper`.
  */
-export const WhisperConfig = z.object({
+export const WhisperConfig = Schema.Struct({
   /**
    * Use the GPU for inference (Metal on macOS; BYOL elsewhere).
    * @default false
    */
-  gpu: z.boolean().default(false).optional(),
+  gpu: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 
   /**
    * Name of the Whisper model to use. When set (and `modelPath` is not),
    * `smart-whisper` downloads it on demand into its managed directory.
    * @default "base.en"
    */
-  modelName: WhisperModelName.default("base.en"),
+  modelName: WhisperModelName.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed("base.en")),
+  ),
 
   /**
    * Explicit path to a ggml Whisper model file. When set, this takes
-   * precedence over `modelName` and no download occurs.
+   * precedence over {@link WhisperConfig.modelName} and no download occurs.
    */
-  modelPath: z.string().optional(),
+  modelPath: Schema.String.pipe(Schema.optional),
 
   /**
    * Whether to translate to English.
    * @default false
    */
-  translateToEnglish: z.boolean().default(false).optional(),
+  translateToEnglish: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(false)),
+  ),
 
-  whisperOptions: WhisperOptions.optional(),
+  whisperOptions: WhisperOptions.pipe(Schema.optional),
 });
-export type WhisperConfig = z.infer<typeof WhisperConfig>;
+
+export type WhisperConfigIn = (typeof WhisperConfig)["Encoded"];
+
+export type WhisperConfig = (typeof WhisperConfig)["Type"];

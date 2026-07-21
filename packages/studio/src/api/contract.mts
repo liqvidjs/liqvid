@@ -2,9 +2,10 @@ import {
   ColorScheme,
   ColorSchemeOption,
   ImageFormat,
+  Locale,
   RecordingMeta,
   ScreenshotEntry,
-} from "@liqvid/schemas/effect";
+} from "@liqvid/schemas";
 import { Schema } from "effect";
 import {
   HttpApi,
@@ -281,6 +282,30 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     }).annotate(OpenApi.Summary, "Check whether a project image exists"),
   );
 
+/* ------------------------------ settings ------------------------------ */
+const settingsGroup = HttpApiGroup.make("settings")
+  .add(
+    HttpApiEndpoint.get("getLocale", "/settings/locale", {
+      success: Schema.Struct({
+        /** Current UI locale */
+        locale: Locale,
+      }),
+    }).annotate(OpenApi.Summary, "Get the current UI locale"),
+  )
+  .add(
+    HttpApiEndpoint.post("setLocale", "/settings/locale", {
+      payload: Schema.Struct({
+        /** Locale to set for the Liqvid Studio UI */
+        locale: Locale,
+      }),
+      success: Schema.Struct({
+        /** The locale that was set */
+        locale: Locale,
+      }),
+    }).annotate(OpenApi.Summary, "Update the UI locale in liqvid.json"),
+  )
+  .annotate(OpenApi.Title, "Settings");
+
 /* ------------------------------ thumbnails ------------------------------ */
 const thumbsGroup = HttpApiGroup.make("thumbs").add(
   HttpApiEndpoint.get("list", "/thumbs", {
@@ -342,6 +367,7 @@ export const WebApi = HttpApi.make("LiqvidStudioWebApi")
     recordingsGroup,
     rendersGroup,
     screenshotsGroup,
+    settingsGroup,
     thumbsGroup,
   )
   .prefix("/api/liqvid")

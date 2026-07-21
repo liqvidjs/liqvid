@@ -4,7 +4,6 @@ import { Brand } from "effect";
 
 import "./fs-promises.d.ts";
 import "./fs.d.ts";
-import "./import-meta.d.ts";
 import "./path.d.ts";
 import "./process.d.ts";
 import "./url.d.ts";

@@ -1,54 +1,67 @@
-import type { Duration, SerializedDuration } from "@liqvid/duration";
-import { DurationOptions } from "@liqvid/duration/zod";
-import { z } from "zod";
+import type { SerializedDuration } from "@liqvid/duration";
+import { Duration } from "@liqvid/duration";
+import { DurationOptions } from "@liqvid/duration/effect";
+import { Effect, Schema } from "effect";
+import { RelativeDir } from "effect-paths";
 
-export const AspectRatio = z.object({
-  height: z.number(),
-  width: z.number(),
+export const AspectRatio = Schema.Struct({
+  height: Schema.Number,
+  width: Schema.Number,
 });
-export type AspectRatio = z.infer<typeof AspectRatio>;
+export type AspectRatio = (typeof AspectRatio)["Type"];
 
-export const AspectRatioSpecifier = z.union([
-  z.templateLiteral([z.number(), ":", z.number()]),
-  z.tuple([z.number(), z.number()]),
+export const AspectRatioSpecifier = Schema.Union([
+  Schema.TemplateLiteral([Schema.Number, ":", Schema.Number]),
+  Schema.Tuple([Schema.Number, Schema.Number]),
   AspectRatio,
 ]);
-export type AspectRatioSpecifier = z.infer<typeof AspectRatioSpecifier>;
+export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Type"];
 
 /**
  * project.json files
  */
-export const ProjectJson = z.object({
-  aspectRatio: AspectRatioSpecifier.optional().default({
-    height: 9,
-    width: 16,
-  }),
-  name: z.string(),
+export const ProjectJson = Schema.Struct({
+  aspectRatio: AspectRatioSpecifier.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.succeed({
+        height: 9,
+        width: 16,
+      }),
+    ),
+  ),
+  name: Schema.String,
 });
-export type ProjectJson = z.infer<typeof ProjectJson>;
+export type ProjectJson = (typeof ProjectJson)["Type"];
 
 /**
  * auto-generated project-meta.json files
  */
-export const AutoGenProjectMeta = z.object({
+export const AutoGenProjectMeta = Schema.Struct({
   duration: DurationOptions,
 });
-export type AutoGenProjectMeta = z.infer<typeof AutoGenProjectMeta>;
+export type AutoGenProjectMeta = (typeof AutoGenProjectMeta)["Type"];
 
-export type ProjectMeta = {
-  aspectRatio: AspectRatio;
-  duration: Duration;
-  name: string;
-  openGraph: boolean;
-  path: string;
-  twitter: boolean;
-};
+export const ProjectMeta = Schema.Struct({
+  aspectRatio: AspectRatio,
+  duration: DurationOptions.pipe(Schema.decodeTo(Schema.instanceOf(Duration))),
+  name: Schema.String,
+  openGraph: Schema.Boolean,
 
-export type SerializedProjectMeta = {
-  aspectRatio: AspectRatio;
+  path: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+
+  twitter: Schema.Boolean,
+});
+
+export type ProjectMeta = (typeof ProjectMeta)["Type"];
+
+/**
+ * Wire representation of {@link ProjectMeta}. The `duration` field carries the
+ * `@liqvid/duration` serialization marker so it can be revived with
+ * `deserialize` on the client.
+ */
+export type SerializedProjectMeta = Omit<
+  (typeof ProjectMeta)["Encoded"],
+  "duration"
+> & {
   duration: SerializedDuration;
-  name: string;
-  openGraph: boolean;
-  path: string;
-  twitter: boolean;
 };

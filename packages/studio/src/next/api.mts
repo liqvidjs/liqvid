@@ -6,7 +6,7 @@ import {
   NodeServices,
 } from "@effect/platform-node";
 import { FileDecodeError, loadEnvFiles } from "@liqvid/cli/utils";
-import { EnvFiles } from "@liqvid/schemas/effect";
+import { EnvFiles } from "@liqvid/schemas";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
 import {
@@ -25,15 +25,12 @@ import { StatusCodes } from "http-status-codes";
 import { audioLive } from "../api/audio.mts";
 import { captionsLive } from "../api/captions.mts";
 import { WebApi } from "../api/contract.mts";
-import {
-  saveRecordingOperation,
-  staticFileOperation,
-} from "../api/contract-legacy.mts";
 import { projectMetaLive } from "../api/project-meta.mts";
 import { recordingsLive, saveRecording } from "../api/recording.mts";
 import { rendersLive } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import { screenshotsLive } from "../api/screenshots.mts";
+import { settingsLive } from "../api/settings.mts";
 import { serveStaticFile } from "../api/static-file.mts";
 import { thumbsLive } from "../api/thumbs.mts";
 import { getServerState, initializeServer } from "../initialize.mts";
@@ -89,8 +86,8 @@ export function getHandler(_dynamicImports: DynamicImports) {
       }
     }
 
-    if (route.startsWith(staticFileOperation.endpoint)) {
-      const url = route.slice(staticFileOperation.endpoint.length);
+    if (route.startsWith("/static")) {
+      const url = route.slice("/static".length);
       program = serveStaticFile(url);
     }
 
@@ -120,7 +117,7 @@ export function postHandler(dynamicImports: DynamicImports) {
 
     const { search } = url.parse(req.url, true);
 
-    if (route === saveRecordingOperation.endpoint) {
+    if (route === "/recordings") {
       const searchParams = new URLSearchParams(search ?? "");
 
       return runEffect(
@@ -235,6 +232,7 @@ const apiLive = HttpApiBuilder.layer(WebApi).pipe(
     recordingsLive,
     rendersLive,
     screenshotsLive,
+    settingsLive,
     thumbsLive,
   ]),
   Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),

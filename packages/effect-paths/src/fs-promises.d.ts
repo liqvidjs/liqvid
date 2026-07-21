@@ -19,7 +19,7 @@ declare module "node:fs/promises" {
       ? import("effect-paths").Dirent[]
       : P extends import("effect-paths").AnyPath
         ? Error & { message: "Must pass an absolute directory" }
-        : Dirent[]
+        : import("node:fs").Dirent[]
   >;
 
   function readdir<P extends PathLike>(

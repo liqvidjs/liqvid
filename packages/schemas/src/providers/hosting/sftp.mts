@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigSFTP = z.object({
-  host: z.string(),
-  path: z.string(),
+export const ProviderConfigSFTP = Schema.Struct({
+  host: Schema.String,
+  path: Schema.String,
 });
-export type ProviderConfigSFTP = z.infer<typeof ProviderConfigSFTP>;
+export type ProviderConfigSFTP = (typeof ProviderConfigSFTP)["Type"];

@@ -1,12 +1,14 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { compress } from "@liqvid/recording/utils";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
+import { Effect, FileSystem } from "effect";
+import type { AbsoluteDir } from "effect-paths";
+import { RelativeFile } from "effect-paths";
 
-const RAW_JSON = "raw.json";
-const RAW_DTS = "raw.d.json.ts";
+const RAW_JSON = RelativeFile("raw.json");
+const RAW_DTS = RelativeFile("raw.d.json.ts");
 
 /** TypeScript declaration for JSON files */
 const declaration = `import type { RecordingData } from "@liqvid/recording";
@@ -20,33 +22,31 @@ export default data;
  * Post-process @lqv/codemirror recording data.
  * Creates raw.d.json.ts declaration file.
  */
-async function postProcessRecording({
-  dirname,
-}: {
-  dirname: string;
-}): Promise<void> {
-  const rawJsonPath = path.join(dirname, RAW_JSON);
-  const rawDtsPath = path.join(dirname, RAW_DTS);
+function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // Check if raw.json exists
-  try {
-    await fsp.access(rawJsonPath);
-  } catch {
-    // raw.json doesn't exist, nothing to do
-    return;
-  }
+    const rawJsonPath = path.join(dirname, RAW_JSON);
+    const rawDtsPath = path.join(dirname, RAW_DTS);
 
-  // Write raw.d.json.ts
-  await fsp.writeFile(rawDtsPath, declaration);
+    // Check if raw.json exists
+    if (!(yield* fs.exists(rawJsonPath))) {
+      // raw.json doesn't exist, nothing to do
+      return;
+    }
 
-  // copy compressed data
-  const data = JSON.parse(await fsp.readFile(rawJsonPath, "utf8"));
+    // Write raw.d.json.ts
+    yield* fs.writeFileString(rawDtsPath, declaration);
 
-  await writeTypedJson({
-    data: compress(data, 2),
-    declaration,
-    dirname,
-    filename: "recording.json",
+    // copy compressed data
+    const data = JSON.parse(yield* fs.readFileString(rawJsonPath, "utf8"));
+
+    yield* writeTypedJson({
+      data: compress(data, 2),
+      declaration,
+      dirname,
+      filename: RelativeFile("recording.json"),
+    });
   });
 }
 

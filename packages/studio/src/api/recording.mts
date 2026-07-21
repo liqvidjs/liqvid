@@ -2,19 +2,31 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { type FileDecodeError, loadJson } from "@liqvid/cli/utils";
-import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas/effect";
+import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,
   type LiqvidStudioServerPlugin,
   packageNameToDirName,
 } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
-import { compare } from "@liqvid/utils";
-import { Effect, FileSystem, Option, type PlatformError, Schema } from "effect";
+import { assertType, compare } from "@liqvid/utils";
+import {
+  Cause,
+  Effect,
+  FileSystem,
+  Option,
+  type PlatformError,
+  Schema,
+} from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { ASSETS_DIR, RECORDING_META_FILE } from "../conventions.mts";
+import {
+  ASSETS_DIR,
+  RECORDING_META_FILE,
+  RECORDINGS_DIR,
+} from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
 
@@ -24,7 +36,7 @@ import {
   SaveRecordingMetadataFromJson,
 } from "./types.mts";
 
-const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas/recording-meta";
+const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas";
 
 declare const data: RecordingMeta;
 export default data;`;
@@ -61,6 +73,7 @@ export function saveRecording(
     if (projectDir.endsWith("page.tsx")) {
       projectDir = path.dirname(projectDir);
     }
+    assertType<AbsoluteDir>(projectDir);
 
     const assetsDir = path.join(projectDir, ASSETS_DIR);
 
@@ -69,14 +82,14 @@ export function saveRecording(
       yield* fs.makeDirectory(assetsDir, { recursive: true });
     }
 
-    const recordingsDir = path.join(assetsDir, "recordings");
+    const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
     if (!(yield* fs.exists(recordingsDir))) {
       yield* fs.makeDirectory(recordingsDir, { recursive: true });
     }
 
     // Create recording directory with ISO datetime name
     const recordingName = new Date().toISOString().replace(/[:.]/g, "-");
-    const recordingDir = path.join(recordingsDir, recordingName);
+    const recordingDir = path.join(recordingsDir, RelativeDir(recordingName));
     yield* fs.makeDirectory(recordingDir, { recursive: true });
 
     // Write recording-meta.json
@@ -87,15 +100,13 @@ export function saveRecording(
       },
     };
 
-    yield* Effect.promise(() =>
-      writeTypedJson({
-        data: recordingMeta,
-        declaration: recordingMetaDeclaration,
-        dirname: recordingDir,
-        filename: RECORDING_META_FILE,
-        pretty: true,
-      }),
-    );
+    yield* writeTypedJson({
+      data: recordingMeta,
+      declaration: recordingMetaDeclaration,
+      dirname: recordingDir,
+      filename: RECORDING_META_FILE,
+      pretty: true,
+    });
 
     // Write plugin data
     for (const pluginInfo of metadata.plugins) {
@@ -111,7 +122,7 @@ export function saveRecording(
       if (pluginInfo.isBlob) {
         // Write blob data with specified filename
         // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
-        const filename = pluginInfo.filename ?? "data.bin";
+        const filename = pluginInfo.filename ?? RelativeFile("data.bin");
         const blobData = data as Blob;
         const buffer = yield* Effect.promise(() =>
           blobData.arrayBuffer().then(Buffer.from),
@@ -119,14 +130,15 @@ export function saveRecording(
         yield* fs.writeFile(path.join(pluginDir, filename), buffer);
       } else if (typeof data === "string") {
         // Write JSON data as raw.json
-        yield* fs.writeFileString(path.join(pluginDir, "raw.json"), data);
+        yield* fs.writeFileString(
+          path.join(pluginDir, RelativeFile("raw.json")),
+          data,
+        );
       }
     }
 
     // Run post-processing plugins
-    yield* Effect.promise(() =>
-      runPostProcessing(recordingDir, metadata.plugins, dynamicImports),
-    );
+    yield* runPostProcessing(recordingDir, metadata.plugins, dynamicImports);
 
     return new Response(null, { status: StatusCodes.CREATED });
   });
@@ -135,47 +147,59 @@ export function saveRecording(
 /**
  * Attempt to discover and run post-processing plugins.
  */
-async function runPostProcessing(
-  recordingDir: string,
+function runPostProcessing(
+  recordingDir: AbsoluteDir,
   plugins: SaveRecordingMetadata["plugins"],
   dynamicImports: DynamicImports,
-): Promise<void> {
-  for (const pluginInfo of plugins) {
-    const pluginDir = path.join(
-      recordingDir,
-      packageNameToDirName(pluginInfo.key),
-    );
+) {
+  return Effect.gen(function* () {
+    for (const pluginInfo of plugins) {
+      const pluginDir = path.join(
+        recordingDir,
+        packageNameToDirName(pluginInfo.key),
+      );
 
-    const dynamicImporter =
-      dynamicImports[`${pluginInfo.key}/liqvid-studio-server-plugin`];
+      const dynamicImporter =
+        dynamicImports[`${pluginInfo.key}/liqvid-studio-server-plugin`];
 
-    // no server plugin
-    if (!dynamicImporter) {
-      continue;
+      // no server plugin
+      if (!dynamicImporter) {
+        continue;
+      }
+
+      const serverPlugin: {
+        default?: LiqvidStudioServerPlugin;
+      } & LiqvidStudioServerPlugin = yield* Effect.tryPromise(
+        dynamicImporter,
+      ).pipe(
+        Effect.tapCause((cause) =>
+          Effect.logError(
+            `error loading server plugin for ${pluginInfo.key}`,
+            Cause.pretty(cause),
+          ),
+        ),
+      );
+
+      const plugin = serverPlugin.default ?? serverPlugin;
+
+      if (!plugin.postProcessRecording) continue;
+
+      const program = plugin.postProcessRecording({ dirname: pluginDir });
+
+      if (program instanceof Promise) {
+        yield* Effect.tryPromise(() => program).pipe(
+          Effect.tapCause((cause) =>
+            Effect.logError(
+              `error running postProcessRecording for ${pluginInfo.key}`,
+              Cause.pretty(cause),
+            ),
+          ),
+        );
+      } else {
+        yield* program;
+      }
     }
-
-    let serverPlugin: {
-      default?: LiqvidStudioServerPlugin;
-    } & LiqvidStudioServerPlugin;
-
-    try {
-      // Try to import the server plugin
-      serverPlugin = await dynamicImporter();
-    } catch (e) {
-      console.error(`error loading server plugin for ${pluginInfo.key}`, e);
-      continue;
-    }
-
-    const plugin = serverPlugin.default ?? serverPlugin;
-
-    if (!plugin.postProcessRecording) continue;
-
-    try {
-      await plugin.postProcessRecording({ dirname: pluginDir });
-    } catch (e) {
-      console.error(`error in ${pluginInfo.key}`, e);
-    }
-  }
+  });
 }
 
 export const recordingsLive = HttpApiBuilder.group(
@@ -188,6 +212,7 @@ export const recordingsLive = HttpApiBuilder.group(
         if (projectDir.endsWith("page.tsx")) {
           projectDir = path.dirname(projectDir);
         }
+        assertType<AbsoluteDir>(projectDir);
 
         const fs = yield* FileSystem.FileSystem;
 
@@ -200,7 +225,7 @@ export const recordingsLive = HttpApiBuilder.group(
           });
         }
 
-        const recordingsDir = path.join(assetsDir, "recordings");
+        const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
 
         if (!(yield* fs.exists(recordingsDir))) {
           return [] as RecordingMeta[];
@@ -210,8 +235,8 @@ export const recordingsLive = HttpApiBuilder.group(
 
         const recordings = yield* Effect.all(
           recordingDirs.reduce(
-            (acc, [filename, stats]) => {
-              if (stats.type !== "Directory") return acc;
+            (acc, [filename, kind]) => {
+              if (kind !== "Directory") return acc;
 
               const dir = path.join(recordingsDir, filename);
               acc.push(
@@ -226,8 +251,8 @@ export const recordingsLive = HttpApiBuilder.group(
                   return {
                     ...file,
                     name: dirNameToPackageName(filename),
-                    plugins: children.reduce((acc, [name, stats]) => {
-                      if (stats.type === "Directory") {
+                    plugins: children.reduce((acc, [name, kind]) => {
+                      if (kind === "Directory") {
                         acc.push(dirNameToPackageName(name));
                       }
                       return acc;

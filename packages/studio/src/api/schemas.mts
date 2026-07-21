@@ -1,4 +1,4 @@
-import { ThumbnailsJob } from "@liqvid/schemas/effect";
+import { ThumbnailsJob } from "@liqvid/schemas";
 import { type Fiber, Schema } from "effect";
 
 import { CaptionsMeta } from "../types/schemas.mts";

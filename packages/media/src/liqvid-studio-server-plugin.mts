@@ -3,12 +3,16 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
+import { RelativeDir, RelativeFile } from "effect-paths";
 import { execa } from "execa";
 
-const AUDIO_WEBM = "audio.webm";
-const VIDEO_WEBM = "video.webm";
-const AUDIO_MP4 = "audio.mp4";
-const HLS_DIR = "hls";
+const AUDIO_MP4 = RelativeFile("audio.mp4");
+const AUDIO_WEBM = RelativeFile("audio.webm");
+const VIDEO_ORIGINAL = RelativeFile("video-original.webm");
+const VIDEO_WEBM = RelativeFile("video.webm");
+
+const HLS_DIR = RelativeDir("hls");
 
 /**
  * Check if ffmpeg is available.
@@ -25,11 +29,11 @@ async function checkFfmpeg(): Promise<boolean> {
 /**
  * Re-encode WebM file to fix timing/seeking issues from browser recording.
  */
-async function fixWebmTiming(inputPath: string): Promise<void> {
+async function fixWebmTiming(inputPath: AbsoluteFile): Promise<void> {
   const dir = path.dirname(inputPath);
   const ext = path.extname(inputPath);
   const base = path.basename(inputPath, ext);
-  const tempPath = path.join(dir, `${base}-fixed${ext}`);
+  const tempPath = path.join(dir, RelativeFile(`${base}-fixed${ext}`));
 
   await execa("ffmpeg", ["-y", "-i", inputPath, "-c", "copy", tempPath]);
 
@@ -95,12 +99,15 @@ async function stripAudio(
  * Encode video to HLS format for adaptive streaming.
  * Creates two quality levels: 360p (lo-fi) and original (hi-fi).
  */
-async function encodeHls(inputPath: string, outputDir: string): Promise<void> {
+async function encodeHls(
+  inputPath: AbsoluteFile,
+  outputDir: AbsoluteDir,
+): Promise<void> {
   await fsp.mkdir(outputDir, { recursive: true });
 
   // Create subdirectories for each quality level
-  const v0Dir = path.join(outputDir, "v0");
-  const v1Dir = path.join(outputDir, "v1");
+  const v0Dir = path.join(outputDir, RelativeDir("v0"));
+  const v1Dir = path.join(outputDir, RelativeDir("v1"));
   await fsp.mkdir(v0Dir, { recursive: true });
   await fsp.mkdir(v1Dir, { recursive: true });
 
@@ -163,25 +170,29 @@ async function encodeHls(inputPath: string, outputDir: string): Promise<void> {
     "-hls_segment_type",
     "mpegts",
     "-hls_segment_filename",
-    path.join(outputDir, "v%v/data%02d.ts"),
+    path.join(outputDir, RelativeFile("v%v/data%02d.ts")),
     "-master_pl_name",
     "stream.m3u8",
     "-var_stream_map",
     "v:0 v:1",
-    path.join(outputDir, "v%v.m3u8"),
+    path.join(outputDir, RelativeFile("v%v.m3u8")),
   ]);
 
   // Move playlist files into their respective directories
   for (const i of [0, 1]) {
-    const srcPlaylist = path.join(outputDir, `v${i}.m3u8`);
-    const dstPlaylist = path.join(outputDir, `v${i}`, `v${i}.m3u8`);
+    const srcPlaylist = path.join(outputDir, RelativeFile(`v${i}.m3u8`));
+    const dstPlaylist = path.join(
+      outputDir,
+      RelativeDir(`v${i}`),
+      RelativeFile(`v${i}.m3u8`),
+    );
     if (fs.existsSync(srcPlaylist)) {
       await fsp.rename(srcPlaylist, dstPlaylist);
     }
   }
 
   // Fix the master playlist to reference the correct paths
-  const masterPlaylist = path.join(outputDir, "stream.m3u8");
+  const masterPlaylist = path.join(outputDir, RelativeFile("stream.m3u8"));
   if (fs.existsSync(masterPlaylist)) {
     let content = await fsp.readFile(masterPlaylist, "utf-8");
     content = content.replace(/^v(\d+)\.m3u8$/gm, "v$1/v$1.m3u8");
@@ -194,7 +205,7 @@ async function encodeHls(inputPath: string, outputDir: string): Promise<void> {
  * - Fix WebM timing for seeking
  * - Create MP4/AAC version
  */
-async function processAudioOnly(dirname: string): Promise<void> {
+async function processAudioOnly(dirname: AbsoluteDir): Promise<void> {
   const audioWebm = path.join(dirname, AUDIO_WEBM);
   const audioMp4 = path.join(dirname, AUDIO_MP4);
 
@@ -214,14 +225,14 @@ async function processAudioOnly(dirname: string): Promise<void> {
  * - Encode audio to MP4
  * - Encode video to HLS
  */
-async function processVideo(dirname: string): Promise<void> {
+async function processVideo(dirname: AbsoluteDir): Promise<void> {
   const videoWebm = path.join(dirname, VIDEO_WEBM);
   const audioWebm = path.join(dirname, AUDIO_WEBM);
   const audioMp4 = path.join(dirname, AUDIO_MP4);
   const hlsDir = path.join(dirname, HLS_DIR);
 
   // We need a temp file for the original video since we'll overwrite video.webm
-  const tempVideo = path.join(dirname, "video-original.webm");
+  const tempVideo = path.join(dirname, VIDEO_ORIGINAL);
   await fsp.rename(videoWebm, tempVideo);
 
   try {
@@ -261,7 +272,7 @@ async function processVideo(dirname: string): Promise<void> {
 async function postProcessRecording({
   dirname,
 }: {
-  dirname: string;
+  dirname: AbsoluteDir;
 }): Promise<void> {
   // Check if ffmpeg is available
   if (!(await checkFfmpeg())) {

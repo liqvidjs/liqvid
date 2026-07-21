@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigFacebook = z.object({
-  username: z.string(),
+export const ProviderConfigFacebook = Schema.Struct({
+  username: Schema.String,
 });
-export type ProviderConfigFacebook = z.infer<typeof ProviderConfigFacebook>;
+export type ProviderConfigFacebook = (typeof ProviderConfigFacebook)["Type"];

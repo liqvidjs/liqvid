@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { writeJSON } from "@liqvid/cli/utils";
-import type { RichTranscript } from "@liqvid/schemas/effect";
+import type { RichTranscript } from "@liqvid/schemas";
 import { formatVttTimestamp, wait } from "@liqvid/utils";
 import chalk from "chalk";
 import { Cause, Effect, Exit, FileSystem } from "effect";

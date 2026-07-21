@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { renderAudio } from "@liqvid/cli/render-audio";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
-import type { LiqvidConfig } from "@liqvid/schemas/effect";
+import type { LiqvidConfig } from "@liqvid/schemas";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";

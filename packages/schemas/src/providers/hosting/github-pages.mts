@@ -1,10 +1,9 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const ProviderConfigGitHubPages = z.object({
-  repository: z.string(),
-  root: z.boolean().optional(),
-  username: z.string(),
+export const ProviderConfigGitHubPages = Schema.Struct({
+  repository: Schema.String,
+  root: Schema.Boolean.pipe(Schema.optional),
+  username: Schema.String,
 });
-export type ProviderConfigGitHubPages = z.infer<
-  typeof ProviderConfigGitHubPages
->;
+export type ProviderConfigGitHubPages =
+  (typeof ProviderConfigGitHubPages)["Type"];
