@@ -4,6 +4,7 @@ import * as path from "node:path";
 
 import { Err, Ok, type Result } from "@liqvid/fp";
 import chalk from "chalk";
+import type { AbsoluteDir, AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import type { CommandModule } from "yargs";
 
@@ -16,10 +17,10 @@ import {
 /** Options for the compress command */
 export type CompressOptions = {
   /** Directory to scan for PNG files (if not specified, uses media patterns) */
-  input?: string;
+  input?: AbsoluteDir;
 
   /** Base directory for media file search (default: "app") */
-  baseDir?: string;
+  baseDir?: RelativeDir;
 
   /** Compression quality (0-100, lower = smaller file) */
   quality?: number;
@@ -37,7 +38,7 @@ export type CompressOptions = {
 /** Result for a single file compression */
 export type FileCompressionResult = {
   /** Path to the file */
-  filePath: string;
+  filePath: AbsoluteFile;
 
   /** Original file size in bytes */
   originalSize: number;
@@ -76,21 +77,23 @@ export type CompressError = {
 /**
  * Find all PNG files in a directory recursively
  */
-async function findPngFilesInDir(dir: string): Promise<string[]> {
-  const pngFiles: string[] = [];
+async function findPngFilesInDir(dir: AbsoluteDir): Promise<AbsoluteFile[]> {
+  const pngFiles: AbsoluteFile[] = [];
 
-  async function scanDir(currentDir: string): Promise<void> {
+  async function scanDir(currentDir: AbsoluteDir): Promise<void> {
     const entries = await fsp.readdir(currentDir, { withFileTypes: true });
 
     for (const entry of entries) {
-      const fullPath = path.join(currentDir, entry.name);
-
       if (entry.isDirectory()) {
+        const fullPath = path.join(currentDir, entry.name);
+
         // Skip node_modules and hidden directories
         if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
           await scanDir(fullPath);
         }
       } else if (entry.isFile() && entry.name.toLowerCase().endsWith(".png")) {
+        const fullPath = path.join(currentDir, entry.name);
+
         pngFiles.push(fullPath);
       }
     }
@@ -103,18 +106,20 @@ async function findPngFilesInDir(dir: string): Promise<string[]> {
 /**
  * Find PNG files using media glob patterns
  */
-async function findPngFilesWithPatterns(baseDir: string): Promise<string[]> {
+async function findPngFilesWithPatterns(
+  baseDir: AbsoluteDir,
+): Promise<AbsoluteFile[]> {
   // Filter patterns to only include PNG-related ones
   const pngPatterns = DEFAULT_MEDIA_PATTERNS.filter(
     (p) => p.includes("*.png") || p.startsWith("!"),
   );
 
-  const files = await fg(pngPatterns, {
+  const files = (await fg(pngPatterns, {
     absolute: true,
     cwd: baseDir,
     dot: true,
     onlyFiles: true,
-  });
+  })) as AbsoluteFile[];
 
   return files.filter((f) => f.toLowerCase().endsWith(".png"));
 }
@@ -134,7 +139,7 @@ function formatBytes(bytes: number): string {
  * Compress a single PNG file
  */
 async function compressFile(
-  filePath: string,
+  filePath: AbsoluteFile,
   quality: number,
   compressionLevel: number,
   dryRun: boolean,
@@ -183,7 +188,7 @@ async function compressFile(
  * Process files in batches
  */
 async function processBatch(
-  files: string[],
+  files: AbsoluteFile[],
   quality: number,
   compressionLevel: number,
   batchSize: number,
@@ -233,7 +238,7 @@ export async function runCompress(
     quality = 80,
   } = options;
 
-  let pngFiles: string[];
+  let pngFiles: AbsoluteFile[];
   // let displayPath: string;
 
   if (input) {
@@ -447,11 +452,11 @@ export const compress: CommandModule = {
   describe: "Compress PNG files in media directories",
   handler: async (argv) => {
     const result = await runCompress({
-      baseDir: argv["base-dir"] as string,
+      baseDir: argv["base-dir"] as RelativeDir | undefined,
       batchSize: argv["batch-size"] as number,
       compressionLevel: argv["compression-level"] as number,
       dryRun: argv["dry-run"] as boolean,
-      input: argv.input as string | undefined,
+      input: argv.input as AbsoluteDir | undefined,
       quality: argv.quality as number,
     });
 

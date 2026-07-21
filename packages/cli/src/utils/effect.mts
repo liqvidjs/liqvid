@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas/effect";
+import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas";
 import {
   Effect,
   FileSystem,
@@ -58,11 +58,24 @@ export function loadLiqvidConfig({
   configPath?: AbsoluteFile;
 } = {}) {
   // TODO: should not have to specify this
-  return loadJson(LiqvidConfig, configPath) as Effect.Effect<
-    LiqvidConfig,
-    FileDecodeError | PlatformError.PlatformError,
-    EnvFiles | FileSystem.FileSystem
-  >;
+  return (
+    loadJson(LiqvidConfig, configPath) as Effect.Effect<
+      LiqvidConfig,
+      FileDecodeError | PlatformError.PlatformError,
+      EnvFiles | FileSystem.FileSystem
+    >
+  ).pipe(
+    Effect.catchReason("PlatformError", "NotFound", () =>
+      Effect.fail(
+        "Liqvid config file not found. Please create a liqvid.json file in the root of your project.",
+      ),
+    ),
+    Effect.catchTag("FileDecodeError", (error) =>
+      Effect.fail(
+        `The ${CONFIG_FILE} configuration file is invalid: ${error.cause}`,
+      ),
+    ),
+  );
 }
 
 /**

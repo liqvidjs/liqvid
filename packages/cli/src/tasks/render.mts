@@ -1,5 +1,5 @@
 import { NodeFileSystem } from "@effect/platform-node";
-import type { ImageFormat } from "@liqvid/schemas/effect";
+import type { ImageFormat } from "@liqvid/schemas";
 import { parseTime } from "@liqvid/utils";
 import { Console, Effect, Exit } from "effect";
 import type { CommandModule } from "yargs";

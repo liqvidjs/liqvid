@@ -1,9 +1,6 @@
 import { NodeFileSystem } from "@effect/platform-node";
-import {
-  ThumbnailOptions,
-  type ThumbnailOptionsIn,
-} from "@liqvid/schemas/jobs/thumbnails";
-import { Console, Effect, Exit, FileSystem } from "effect";
+import { ThumbnailOptions, type ThumbnailOptionsIn } from "@liqvid/schemas";
+import { Console, Effect, Exit, FileSystem, Schema } from "effect";
 import type { CommandModule } from "yargs";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";
@@ -64,21 +61,19 @@ export function generateThumbs(
       () => import("@liqvid/renderer/thumbs"),
     );
 
-    const schema = ThumbnailOptions.def.shape;
+    // Decode an empty object to obtain the schema's default values.
+    const defaults = Schema.decodeUnknownSync(ThumbnailOptions)({});
 
     // Apply defaults
-    const cols = options.cols ?? schema.cols.def.defaultValue;
-    const rows = options.rows ?? schema.rows.def.defaultValue;
-    const frequency = options.frequency ?? schema.frequency.def.defaultValue;
-    const width = options.width ?? schema.width.def.defaultValue;
-    const height = options.height ?? schema.height.def.defaultValue;
-    const imageFormat =
-      options.imageFormat ?? schema.imageFormat.def.defaultValue;
-    const colorScheme =
-      options.colorScheme ?? schema.colorScheme.def.defaultValue;
-    const quality = options.quality ?? schema.quality.def.defaultValue;
-    const concurrency =
-      options.concurrency ?? schema.concurrency.def.defaultValue;
+    const cols = options.cols ?? defaults.cols;
+    const rows = options.rows ?? defaults.rows;
+    const frequency = options.frequency ?? defaults.frequency;
+    const width = options.width ?? defaults.width;
+    const height = options.height ?? defaults.height;
+    const imageFormat = options.imageFormat ?? defaults.imageFormat;
+    const colorScheme = options.colorScheme ?? defaults.colorScheme;
+    const quality = options.quality ?? defaults.quality;
+    const concurrency = options.concurrency ?? defaults.concurrency;
 
     yield* renderThumbs({
       browserExecutable: options.browserExecutable ?? "",

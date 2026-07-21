@@ -3,14 +3,32 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeDir,
+  RelativeFile,
+} from "effect-paths";
 import Handlebars from "handlebars";
 import type { CommandModule } from "yargs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = path.join(__dirname, "..", "..", "..", "templates");
+
+const UP = RelativeDir("..");
+
+const TEMPLATES_DIR = path.join(
+  __dirname,
+  UP,
+  UP,
+  UP,
+  RelativeDir("templates"),
+);
 
 const LIQVID_STUDIO_SERVER_PLUGIN = "./liqvid-studio-server-plugin";
-const OUTPUT_FILENAME = ".dynamic-imports.ts";
+
+const DYNAMIC_IMPORTS_TEMPLATE = RelativeFile("dynamic-imports.ts.hbs");
+
+const OUTPUT_FILENAME = RelativeFile(".dynamic-imports.ts");
 
 interface PackageJson {
   name?: string;
@@ -24,11 +42,14 @@ interface PackageJson {
  */
 async function hasServerPlugin(
   packageName: string,
-  nodeModulesDir: string,
+  nodeModulesDir: AbsoluteDir,
 ): Promise<boolean> {
   // Handle scoped packages
-  const packageDir = path.join(nodeModulesDir, ...packageName.split("/"));
-  const packageJsonPath = path.join(packageDir, "package.json");
+  const packageDir = path.join(
+    nodeModulesDir,
+    ...(packageName.split("/") as RelativeDir[]),
+  );
+  const packageJsonPath = path.join(packageDir, RelativeFile("package.json"));
 
   if (!fs.existsSync(packageJsonPath)) {
     return false;
@@ -52,8 +73,8 @@ async function hasServerPlugin(
 /**
  * Find all dependencies with liqvid-studio-server-plugin exports.
  */
-async function findPlugins(cwd: string): Promise<string[]> {
-  const packageJsonPath = path.join(cwd, "package.json");
+async function findPlugins(cwd: AbsoluteDir): Promise<string[]> {
+  const packageJsonPath = path.join(cwd, RelativeFile("package.json"));
 
   if (!fs.existsSync(packageJsonPath)) {
     throw new Error(`No package.json found in ${cwd}`);
@@ -68,7 +89,7 @@ async function findPlugins(cwd: string): Promise<string[]> {
     ...Object.keys(packageJson.devDependencies ?? {}),
   ];
 
-  const nodeModulesDir = path.join(cwd, "node_modules");
+  const nodeModulesDir = path.join(cwd, RelativeDir("node_modules"));
 
   const plugins: string[] = [];
 
@@ -85,8 +106,8 @@ async function findPlugins(cwd: string): Promise<string[]> {
  * Generate the dynamic-imports file content.
  */
 async function generateContent(plugins: string[]): Promise<string> {
-  const templatePath = path.join(TEMPLATES_DIR, "dynamic-imports.ts.hbs");
-  const templateSource = await fsp.readFile(templatePath, "utf-8");
+  const templatePath = path.join(TEMPLATES_DIR, DYNAMIC_IMPORTS_TEMPLATE);
+  const templateSource = await fsp.readFile(templatePath, "utf8");
   const template = Handlebars.compile(templateSource);
   return template({ plugins });
 }
@@ -111,9 +132,9 @@ export const generateImports: CommandModule = {
   command: "generate-imports",
   describe: "Generate dynamic-imports file for server plugins",
   handler: async (args) => {
-    const cwd = args.cwd as string;
+    const cwd = args.cwd as AbsoluteDir;
     const outputPath =
-      (args.output as string) ?? path.join(cwd, OUTPUT_FILENAME);
+      (args.output as AbsoluteFile) ?? path.join(cwd, OUTPUT_FILENAME);
 
     console.log("Scanning dependencies for server plugins...");
 

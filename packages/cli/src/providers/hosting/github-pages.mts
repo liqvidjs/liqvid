@@ -1,4 +1,4 @@
-import type { ProviderConfigGitHubPages } from "@liqvid/schemas/providers";
+import type { ProviderConfigGitHubPages } from "@liqvid/schemas";
 
 import type { HostingProvider } from "../types.mts";
 

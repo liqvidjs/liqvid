@@ -1,6 +1,7 @@
 import { NodeFileSystem } from "@effect/platform-node";
 import type { ScreenshotOptions } from "@liqvid/renderer/screenshot";
 import { Console, Effect, Exit } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 import type { CommandModule } from "yargs";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";
@@ -12,7 +13,7 @@ import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
  */
 export interface ScreenshotResult {
   /** Path to the saved screenshot */
-  path: string;
+  path: AbsoluteFile;
 
   /** Width of the screenshot */
   width: number;

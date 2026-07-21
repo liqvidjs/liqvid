@@ -1,4 +1,4 @@
-import type { ProviderConfigSFTP } from "@liqvid/schemas/providers";
+import type { ProviderConfigSFTP } from "@liqvid/schemas";
 
 import { rsyncRemoteDirectory } from "../../utils/rsync.mts";
 import type {

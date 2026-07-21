@@ -1,7 +1,7 @@
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import type { ProviderConfigCopy } from "@liqvid/schemas/effect";
+import type { ProviderConfigCopy } from "@liqvid/schemas";
 
 import { expandTilde } from "../../utils/paths.mts";
 import type {

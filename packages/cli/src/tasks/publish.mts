@@ -2,7 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
+import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Effect } from "effect";
 import fg from "fast-glob";
 import pluralize from "pluralize";
@@ -77,45 +77,95 @@ export const publish: CommandModule = {
     const cwd = argv.cwd as string;
     const baseDir = argv["base-dir"] as string;
     const dryRun = argv["dry-run"] as boolean;
-    const publishContent = argv.content as boolean;
-    const publishMedia = argv.media as boolean;
+    const contentFlag = argv.content as boolean;
+    const mediaFlag = argv.media as boolean;
     const configPath = (argv.config as string) ?? path.join(cwd, CONFIG_FILE);
 
     // If neither --content nor --media is specified, publish both
-    const shouldPublishContent =
-      publishContent || (!publishContent && !publishMedia);
-    const shouldPublishMedia =
-      publishMedia || (!publishContent && !publishMedia);
-
-    // The base directory is where we search for media files
-    // and paths are computed relative to it
-    const searchDir = path.join(cwd, baseDir);
-
-    // Load and parse config
-    const envFiles = loadEnvFiles(process.cwd());
-
-    // Load config to get media base URL
-    const config = await Effect.runPromise(
-      loadLiqvidConfig({ configPath }).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(EnvFiles, envFiles),
-      ),
-    );
+    const shouldPublishContent = contentFlag || (!contentFlag && !mediaFlag);
+    const shouldPublishMedia = mediaFlag || (!contentFlag && !mediaFlag);
 
     // Publish content if requested
     if (shouldPublishContent) {
-      await publishContentFiles(config, cwd, dryRun);
+      await publishContent({ baseDir, configPath, cwd, dryRun });
     }
 
     // Publish media if requested
     if (shouldPublishMedia) {
-      await publishMediaFiles(config, searchDir, baseDir, dryRun);
+      await publishMedia({ baseDir, configPath, cwd, dryRun });
     }
 
     console.log("\nPublish complete!");
     process.exit(0);
   },
 };
+
+export interface PublishOptions {
+  /** Base directory containing media files (relative to cwd). Defaults to "app". */
+  baseDir?: string;
+
+  /** Path to liqvid.json config file */
+  configPath?: string;
+
+  /** Working directory. Defaults to `process.cwd()`. */
+  cwd?: string;
+
+  /** Show what would be uploaded without actually uploading */
+  dryRun?: boolean;
+}
+
+/**
+ * Load the parsed Liqvid config for the given cwd/configPath.
+ */
+async function loadConfig(cwd: string, configPath: string) {
+  const envFiles = loadEnvFiles(cwd);
+
+  return Effect.runPromise(
+    loadLiqvidConfig({ configPath }).pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(EnvFiles, envFiles),
+    ),
+  );
+}
+
+/**
+ * Publish content files (html/css/js) to the configured hosting provider.
+ *
+ * Equivalent to `liqvid publish --content`.
+ */
+export async function publishContent(
+  options: PublishOptions = {},
+): Promise<void> {
+  const cwd = options.cwd ?? process.cwd();
+  const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
+  const dryRun = options.dryRun ?? false;
+
+  const config = await loadConfig(cwd, configPath);
+
+  await publishContentFiles(config, cwd, dryRun);
+}
+
+/**
+ * Publish media files to the configured media hosting provider.
+ *
+ * Equivalent to `liqvid publish --media`.
+ */
+export async function publishMedia(
+  options: PublishOptions = {},
+): Promise<void> {
+  const cwd = options.cwd ?? process.cwd();
+  const baseDir = options.baseDir ?? "app";
+  const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
+  const dryRun = options.dryRun ?? false;
+
+  // The base directory is where we search for media files
+  // and paths are computed relative to it
+  const searchDir = path.join(cwd, baseDir);
+
+  const config = await loadConfig(cwd, configPath);
+
+  await publishMediaFiles(config, searchDir, baseDir, dryRun);
+}
 
 /**
  * Publish content files (html/css/js) to the hosting provider.
@@ -202,7 +252,12 @@ async function publishMediaFiles(
  * Create the appropriate media provider based on config
  */
 function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
-  const mediaBackend = config.backend.media;
+  const mediaBackend = config.backend?.media;
+  if (!mediaBackend) {
+    throw new Error(
+      "No media backend configured. Please set `backend.media` in liqvid.json",
+    );
+  }
 
   switch (mediaBackend) {
     case "copy": {
@@ -249,7 +304,7 @@ function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
 /**
  * Create the appropriate hosting provider based on config
  */
-function createHostingProvider(config: LiqvidConfigOut): HostingProvider {
+function createHostingProvider(config: LiqvidConfig): HostingProvider {
   const contentBackend = config.backend.content;
 
   switch (contentBackend) {
@@ -295,7 +350,7 @@ async function showDryRunInfo(
   provider: MediaHostingProvider,
   mediaFiles: string[],
   rootDir: string,
-  _config: LiqvidConfigOut,
+  _config: LiqvidConfig,
 ): Promise<void> {
   // Check which files need to be uploaded
   const statuses = await provider.checkFiles(mediaFiles, rootDir);

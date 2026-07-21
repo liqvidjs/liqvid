@@ -6,7 +6,7 @@ import type {
   TranscriptEntry,
   WhisperConfig,
   WhisperModelName,
-} from "@liqvid/schemas/effect";
+} from "@liqvid/schemas";
 import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
 import { Effect, FileSystem, Layer } from "effect";
 import { type AnyDir, type AnyFile, RelativeFile } from "effect-paths";

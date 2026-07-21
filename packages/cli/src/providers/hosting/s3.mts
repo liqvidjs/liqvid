@@ -10,7 +10,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
-import type { ProviderConfigS3 } from "@liqvid/schemas/effect";
+import type { ProviderConfigS3 } from "@liqvid/schemas";
 import { Redacted } from "effect";
 
 import { parallelMap } from "../../utils/parallel.mts";

@@ -1,4 +1,4 @@
-import type { ProviderConfigLiqvidStudio } from "@liqvid/schemas/providers";
+import type { ProviderConfigLiqvidStudio } from "@liqvid/schemas";
 
 import type {
   FileDownloadStatus,

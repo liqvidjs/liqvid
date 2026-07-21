@@ -1,5 +1,5 @@
-import type { RenderAudioResult } from "@liqvid/renderer/render-audio";
-import { Effect } from "effect";
+import { Effect, Exit } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 import type { CommandModule } from "yargs";
 
 import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
@@ -9,10 +9,10 @@ import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
  */
 export interface RenderAudioOptions {
   /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /** Output filename */
-  output: string;
+  output: AbsoluteFile;
 
   /** URL of video to render audio for */
   url: string;
@@ -79,7 +79,13 @@ export const renderAudioCommand: CommandModule = {
       "@liqvid/renderer/render-audio"
     );
     // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-    await renderAudioTask(argv as any);
+    const exit = await Effect.runPromiseExit(renderAudioTask(argv as any));
+
+    if (Exit.isFailure(exit)) {
+      console.error(exit.cause);
+      process.exit(1);
+    }
+
     process.exit(0);
   },
 };

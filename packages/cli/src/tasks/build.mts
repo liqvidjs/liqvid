@@ -1,8 +1,9 @@
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas/effect";
-import { Effect, References } from "effect";
+import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
+import { Effect, Option, References } from "effect";
+import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
@@ -35,8 +36,9 @@ export const build: CommandModule = {
   command: "build",
   describe: "Build project",
   handler: async (args) => {
-    const cwd = args.cwd as string;
-    const configPath = (args.config as string) ?? path.join(cwd, CONFIG_FILE);
+    const cwd = args.cwd as AbsoluteDir;
+    const configPath =
+      (args.config as AbsoluteFile) ?? path.join(cwd, CONFIG_FILE);
     await Effect.runPromise(
       runNextBuild({ configPath, cwd }).pipe(
         Effect.provide(NodeFileSystem.layer),
@@ -48,44 +50,44 @@ export const build: CommandModule = {
 
 export interface BuildOptions {
   /** Path to liqvid.json config file */
-  configPath?: string;
+  configPath?: AbsoluteFile;
 
   /** Working directory */
-  cwd?: string;
+  cwd?: AbsoluteDir;
 }
 
 /**
  * Get the media provider from the config
  */
-function getMediaProvider(config: LiqvidConfig): MediaHostingProvider | null {
+function getMediaProvider(
+  config: LiqvidConfig,
+): Option.Option<MediaHostingProvider> {
+  if (!config.backend?.media) {
+    return Option.none();
+  }
+
   switch (config.backend.media) {
     case "copy": {
-      const copyConfig = config.providers.copy;
-      if (!copyConfig) {
-        return null;
-      }
-      return new CopyProvider(copyConfig);
+      return Option.fromNullishOr(config.providers.copy).pipe(
+        Option.map((copyConfig) => new CopyProvider(copyConfig)),
+      );
     }
     case "liqvidStudio": {
-      const liqvidStudioConfig = config.providers.liqvidStudio;
-      if (!liqvidStudioConfig) {
-        return null;
-      }
-      return new LiqvidStudioProvider(liqvidStudioConfig);
+      return Option.fromNullishOr(config.providers.liqvidStudio).pipe(
+        Option.map(
+          (liqvidStudioConfig) => new LiqvidStudioProvider(liqvidStudioConfig),
+        ),
+      );
     }
-    case "s3": {
-      const s3Config = config.providers.s3;
-      if (!s3Config) {
-        return null;
-      }
-      return new S3Provider(s3Config);
-    }
+
+    case "s3":
+      return Option.fromNullishOr(config.providers.s3).pipe(
+        Option.map((s3Config) => new S3Provider(s3Config)),
+      );
     case "sftp": {
-      const sftpConfig = config.providers.sftp;
-      if (!sftpConfig) {
-        return null;
-      }
-      return new SFTPProvider(sftpConfig);
+      return Option.fromNullishOr(config.providers.sftp).pipe(
+        Option.map((sftpConfig) => new SFTPProvider(sftpConfig)),
+      );
     }
   }
 }
@@ -120,8 +122,8 @@ export function runNextBuild(options: BuildOptions = {}) {
 
     if (config) {
       const mediaProvider = getMediaProvider(config);
-      if (mediaProvider) {
-        const mediaBaseUrl = mediaProvider.getBaseUrl();
+      if (Option.isSome(mediaProvider)) {
+        const mediaBaseUrl = mediaProvider.value.getBaseUrl();
         env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
       }
     }
