@@ -1,0 +1,16 @@
+{
+  "dialog": {
+    "action": "Créer",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "name": "Nom du projet",
+    "namePlaceholder": "Mon projet",
+    "path": "Chemin du projet",
+    "selectTemplate": "Choisissez un modèle",
+    "template": "Modèle",
+    "title": "Créer un nouveau projet"
+  },
+  "dotWarning": "Les chemins de projets ne peuvent pas contenir des points. Ils fonctionneront durant le développement, mais échoueront lors de la compilation.",
+  "error": "Échec de la création du projet",
+  "newProject": "Créer un nouveau projet"
+}

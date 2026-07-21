@@ -8,7 +8,7 @@ import { getTranslations } from "../../utils/i18n.mts";
 
 import { JobsClient } from "./jobs.client.tsx";
 
-import type T from "./.translations/en.json";
+import type T from "./.translations/en.json" with { type: "json" };
 
 type T = typeof T;
 

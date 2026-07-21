@@ -4,7 +4,6 @@ import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApiClient } from "effect/unstable/httpapi";
 
 import { WebApi } from "./api/contract.mts";
-import { saveRecordingOperation } from "./api/contract-legacy.mts";
 
 const apiRoot = "/api/liqvid";
 
@@ -38,7 +37,7 @@ export async function saveRecording(
 ): Promise<Result<undefined, TypeError>> {
   const { search, body } = opts;
   const queryString = "?" + new URLSearchParams(search);
-  const url = apiRoot + saveRecordingOperation.endpoint + queryString;
+  const url = `${apiRoot}/recordings${queryString}`;
 
   const formData = new FormData();
 

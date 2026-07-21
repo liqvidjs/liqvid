@@ -1,0 +1,15 @@
+{
+  "busy": "En cours...",
+  "dropdownLabel": "Options de publication",
+  "publish": "Publier",
+  "publishContent": "Publier le contenu",
+  "publishMedia": "Publier les médias",
+  "rebuild": "Recompiler les projets",
+  "toast": {
+    "failure": "L'opération a échoué",
+    "publishContentSuccess": "Contenu publié",
+    "publishMediaSuccess": "Médias publiés",
+    "publishSuccess": "Publié",
+    "success": "Compilation réussie"
+  }
+}

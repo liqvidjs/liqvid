@@ -5,9 +5,9 @@ import {
   type ProjectListProps,
 } from "./ProjectList.client.tsx";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 export async function ProjectList(props: Omit<ProjectListProps, "t">) {
   const t: T = await getTranslations(import.meta.url);

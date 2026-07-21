@@ -1,7 +1,7 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas/effect";
+import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas";
 import {
   CopyIcon,
   PencilSimpleIcon,

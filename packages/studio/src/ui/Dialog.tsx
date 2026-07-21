@@ -110,10 +110,10 @@ export function DialogClose({
 
 export function DialogPopup({
   className,
-  size = "medium",
+  size = "auto",
   ...props
 }: React.ComponentProps<typeof Dialog.Popup> & {
-  size?: "small" | "medium" | "large" | "huge";
+  size?: "auto" | "small" | "medium" | "large" | "huge";
 }) {
   const { level } = useDialogApi();
   const { colorScheme } = useColorScheme();

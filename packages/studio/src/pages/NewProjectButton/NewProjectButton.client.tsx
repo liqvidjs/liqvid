@@ -2,8 +2,10 @@
 
 import { Select } from "@base-ui/react/select";
 import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
+import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
+import { Button } from "../../ui/Button.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -12,8 +14,8 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/Dialog.tsx";
-import { IconButton } from "../ui/IconButton.tsx";
+} from "../../ui/Dialog.tsx";
+import { IconButton } from "../../ui/IconButton.tsx";
 import {
   SelectIcon,
   SelectItem,
@@ -21,24 +23,24 @@ import {
   SelectList,
   SelectPopup,
   SelectTrigger,
-} from "../ui/Select.tsx";
-
+} from "../../ui/Select.tsx";
 import {
   createProjectAction,
   loadTemplatesAction,
   type TemplateInfo,
-} from "./root-actions.ts";
+} from "../root-actions.ts";
 
-import styles from "./root.module.css";
+import styles from "../root.module.css";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
-export function NewProjectButton({ t }: { t: T }) {
+/** @package */
+export function NewProjectButtonClient({ t }: { t: T }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [projectPath, setProjectPath] = useState("");
+  const [projectPath, setProjectPath] = useState(RelativeDir(""));
   const [templateId, setTemplateId] = useState("");
   const [templates, setTemplates] = useState<TemplateInfo[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -46,9 +48,7 @@ export function NewProjectButton({ t }: { t: T }) {
 
   // Validation: disallow dots in project path
   const pathHasDot = projectPath.includes(".");
-  const pathError = pathHasDot
-    ? "Project paths cannot contain dots. They will work during development but break during the build step."
-    : null;
+  const pathError = pathHasDot ? t.dotWarning : null;
 
   // Load templates when dialog opens
   useEffect(() => {
@@ -68,7 +68,7 @@ export function NewProjectButton({ t }: { t: T }) {
   const closeDialog = useCallback(() => {
     setOpen(false);
     setName("");
-    setProjectPath("");
+    setProjectPath(RelativeDir(""));
     setTemplateId("");
     setError(null);
   }, []);
@@ -85,23 +85,23 @@ export function NewProjectButton({ t }: { t: T }) {
           projectPath,
           templateId,
         });
+
         if (result.success) {
           closeDialog();
-          // Refresh the page to show the new project
-          window.location.reload();
         } else {
-          setError(result.error ?? "Failed to create project");
+          setError(result.error ?? t.error);
         }
       } finally {
         setIsCreating(false);
       }
     },
-    [name, projectPath, templateId, closeDialog],
+    [name, projectPath, templateId, closeDialog, t.error],
   );
 
   const ids = {
     projectName: useId(),
     projectPath: useId(),
+    projectTemplate: useId(),
   };
 
   return (
@@ -114,16 +114,16 @@ export function NewProjectButton({ t }: { t: T }) {
       <DialogPortal>
         <DialogBackdrop />
         <DialogPopup className={styles.dialog}>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>{t.dialog.title}</DialogTitle>
           <form className={styles.dialogForm} onSubmit={handleSubmit}>
             <div className={styles.formField}>
-              <label htmlFor={ids.projectName}>Project Name</label>
+              <label htmlFor={ids.projectName}>{t.dialog.name}</label>
               <input
                 autoComplete="off"
                 disabled={isCreating}
                 id={ids.projectName}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="My Project"
+                placeholder={t.dialog.namePlaceholder}
                 required
                 type="text"
                 value={name}
@@ -131,12 +131,12 @@ export function NewProjectButton({ t }: { t: T }) {
             </div>
 
             <div className={styles.formField}>
-              <label htmlFor={ids.projectPath}>Project Path</label>
+              <label htmlFor={ids.projectPath}>{t.dialog.path}</label>
               <input
                 autoComplete="off"
                 disabled={isCreating}
                 id={ids.projectPath}
-                onChange={(e) => setProjectPath(e.target.value)}
+                onChange={(e) => setProjectPath(RelativeDir(e.target.value))}
                 placeholder="category/project-slug"
                 required
                 type="text"
@@ -150,14 +150,14 @@ export function NewProjectButton({ t }: { t: T }) {
             </div>
 
             <div className={styles.formField}>
-              <label htmlFor="project-template">Template</label>
+              <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
               <Select.Root
                 disabled={isCreating || templates.length === 0}
                 onValueChange={(value) => value && setTemplateId(value)}
                 value={templateId}
               >
-                <SelectTrigger id="project-template">
-                  <Select.Value placeholder="Select a template" />
+                <SelectTrigger id={ids.projectTemplate}>
+                  <Select.Value placeholder={t.dialog.selectTemplate} />
                   <SelectIcon>
                     <CaretDownIcon />
                   </SelectIcon>
@@ -188,7 +188,7 @@ export function NewProjectButton({ t }: { t: T }) {
                 disabled={isCreating}
                 render={<button type="button" />}
               >
-                Cancel
+                {t.dialog.cancel}
               </DialogClose>
               <button
                 className={styles.submitButton}
@@ -201,7 +201,7 @@ export function NewProjectButton({ t }: { t: T }) {
                 }
                 type="submit"
               >
-                {isCreating ? "Creating..." : "Create Project"}
+                {isCreating ? t.dialog.creating : t.dialog.action}
               </button>
             </div>
           </form>

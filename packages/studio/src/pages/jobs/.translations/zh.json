@@ -1,9 +1,9 @@
 {
   "cancel": "取消",
-  "cancelled": "Cancelled",
-  "completed": "Completed",
-  "delete": "Delete",
-  "failed": "Failed",
-  "running": "Running",
+  "cancelled": "已取消",
+  "completed": "已完成",
+  "delete": "删除",
+  "failed": "已失败",
+  "running": "正在运行",
   "title": "工作"
 }

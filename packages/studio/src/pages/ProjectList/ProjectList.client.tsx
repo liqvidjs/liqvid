@@ -1,8 +1,7 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import type { SerializedProjectMeta } from "@liqvid/schemas";
-import type { ProjectMeta } from "@liqvid/schemas/effect";
+import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr";
 import { omit } from "@liqvid/utils";
 import {
@@ -26,9 +25,9 @@ import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 export type ProjectListProps = {
   basePath: string;
@@ -71,7 +70,7 @@ export function ProjectListClient({
   t,
 }: ProjectListProps) {
   const [projects, setProjects] = useState(
-    (): Record<string, ProjectMeta> =>
+    (): Record<RelativeDir, ProjectMeta> =>
       deserialize(dehydratedProjects, {
         "@liqvid/duration": Duration.fromJSON,
       }),

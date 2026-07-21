@@ -1,3 +1,4 @@
+import type { Brand } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
 
 export const NEXT_APP_DIR = RelativeDir("app");
@@ -22,6 +23,8 @@ export const ASSETS_DIR = RelativeDir(".liqvid");
 export const PROJECT_META_FILE = RelativeFile("project-meta.json");
 
 /* ------------------------------ recording ------------------------------ */
+export const RECORDINGS_DIR = RelativeDir("recordings");
+
 export const RECORDING_META_FILE = RelativeFile("recording-meta.json");
 
 /* ------------------------------ audio ------------------------------ */

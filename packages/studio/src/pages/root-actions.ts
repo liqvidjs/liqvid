@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
+import { publishContent, publishMedia } from "@liqvid/cli/publish";
 import { writeJSON } from "@liqvid/cli/utils";
-import type { AutoGenProjectMeta } from "@liqvid/schemas/effect";
+import type { AutoGenProjectMeta } from "@liqvid/schemas";
 import { serialize } from "@liqvid/ssr";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import {
@@ -31,10 +32,82 @@ import { readDirWithFileTypes } from "../utils/effect.mts";
 import { UP } from "../utils/misc.mts";
 
 export async function rebuildAction() {
+  const { cwd } = getServerState();
   const result = await Effect.runPromiseExit(
-    runNextBuild().pipe(Effect.provide(NodeFileSystem.layer)),
+    runNextBuild({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
   );
+
+  if (Exit.isSuccess(result)) {
+    getServerState().lastBuildTime = Date.now();
+  }
+
   return serialize(result) as typeof result;
+}
+
+export interface PublishActionResult {
+  /** Error message when the operation failed */
+  error?: string;
+
+  /** Whether the operation succeeded */
+  success: boolean;
+}
+
+/**
+ * Publish content files (html/css/js). Equivalent to `liqvid publish --content`.
+ */
+export async function publishContentAction(): Promise<PublishActionResult> {
+  const { cwd } = getServerState();
+
+  try {
+    await publishContent({ cwd });
+    getServerState().lastBuildTime = Date.now();
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to publish content:", e);
+    return {
+      error: e instanceof Error ? e.message : "Unknown error",
+      success: false,
+    };
+  }
+}
+
+/**
+ * Publish media files. Equivalent to `liqvid publish --media`.
+ */
+export async function publishMediaAction(): Promise<PublishActionResult> {
+  const { cwd } = getServerState();
+
+  try {
+    await publishMedia({ cwd });
+    getServerState().lastBuildTime = Date.now();
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to publish media:", e);
+    return {
+      error: e instanceof Error ? e.message : "Unknown error",
+      success: false,
+    };
+  }
+}
+
+/**
+ * Publish both content and media files. Equivalent to `liqvid publish`.
+ */
+export async function publishAction(): Promise<PublishActionResult> {
+  const { cwd } = getServerState();
+
+  try {
+    await publishContent({ cwd });
+    await publishMedia({ cwd });
+    getServerState().lastBuildTime = Date.now();
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to publish:", e);
+    return {
+      error: e instanceof Error ? e.message : "Unknown error",
+      success: false,
+    };
+  }
 }
 
 export interface TemplateInfo {

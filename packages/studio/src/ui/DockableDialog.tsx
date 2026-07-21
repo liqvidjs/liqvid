@@ -6,6 +6,7 @@ import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, onDragReact, useToggle } from "@liqvid/utils";
 import { Portal } from "@radix-ui/react-portal";
 import clsx from "clsx";
+import { Option, Schema } from "effect";
 import {
   Children,
   cloneElement,
@@ -16,7 +17,6 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { z } from "zod";
 
 import styles from "./DockableDialog.module.css";
 
@@ -185,17 +185,19 @@ function Header({
     if (!parent) return;
 
     // get saved value
-    const SavedCoordinates = z
-      .templateLiteral([z.number(), " ", z.number()])
-      .transform(
-        (arg) => arg.split(" ").map((x) => parseFloat(x)) as [number, number],
-      );
+    const SavedCoordinates = Schema.TemplateLiteralParser([
+      Schema.NumberFromString,
+      " ",
+      Schema.NumberFromString,
+    ]);
     const savedRaw = window.sessionStorage.getItem(positionKey + name);
-    const $saved = SavedCoordinates.safeParse(savedRaw);
-    if (!$saved.success) return;
+    if (savedRaw === null) return;
+
+    const $saved = Schema.decodeUnknownOption(SavedCoordinates)(savedRaw);
+    if (Option.isNone($saved)) return;
 
     // restore saved value
-    const [savedX, savedY] = $saved.data;
+    const [savedX, , savedY] = $saved.value;
     Object.assign(parent.style, {
       translate: `${savedX}px ${savedY}px`,
     });

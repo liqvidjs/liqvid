@@ -39,9 +39,9 @@ import rootStyles from "../../root.module.css";
 import shareStyles from "../share.module.css";
 import styles from "./renders.module.css";
 
-import type T from "../.translations/en.json";
+import type TranslationsJson from "../.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */

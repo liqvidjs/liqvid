@@ -8,9 +8,9 @@ import { openInFinderAction } from "../root-actions.ts";
 
 import styles from "./share.module.css";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 export function OpenInFinderButton({
   projectPath,

@@ -1,4 +1,4 @@
-import type { EnvFiles } from "@liqvid/schemas/effect";
+import type { EnvFiles } from "@liqvid/schemas";
 import { type LogLevel, Option } from "effect";
 import { RelativeDir } from "effect-paths";
 

@@ -17,9 +17,9 @@ export const DEFAULT_LOCALE = "en";
  *
  * @example
  * ```tsx
- * import type T from "./.translations/en.json";
+ * import type TranslationsJson from "./.translations/en.json";
  *
- * type T = typeof T;
+ * type T = typeof TranslationsJson;
  *
  * async function ServerComponent() {
  *   const t: T = await getTranslations(import.meta.url);

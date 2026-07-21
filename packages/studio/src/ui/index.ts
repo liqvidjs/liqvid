@@ -1,3 +1,4 @@
+export * from "./ButtonWithDropdown.tsx";
 export * from "./Dialog.tsx";
 export * from "./DockableDialog.tsx";
 export * from "./IconButton.tsx";

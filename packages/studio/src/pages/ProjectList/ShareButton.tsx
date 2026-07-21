@@ -1,7 +1,7 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta } from "@liqvid/schemas/effect";
+import type { ProjectMeta } from "@liqvid/schemas";
 import {
   CameraIcon,
   ClosedCaptioningIcon,
@@ -9,6 +9,7 @@ import {
   ImagesIcon,
   ShareFatIcon,
 } from "@phosphor-icons/react";
+import { RelativeDir } from "effect-paths";
 import { useState } from "react";
 
 import {
@@ -21,6 +22,7 @@ import {
   DialogTrigger,
 } from "../../ui/Dialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
+import { useTranslations } from "../../utils/react.tsx";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
@@ -30,20 +32,16 @@ import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 import rootStyles from "../root.module.css";
 import shareStyles from "./share.module.css";
 
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
 interface ShareButtonProps {
   basePath: string;
   duration: Duration;
   project: Omit<ProjectMeta, "duration">;
   productionServerPort: number;
 }
-
-import { RelativeDir } from "effect-paths";
-
-import { useTranslations } from "../../utils/react.tsx";
-
-import type T from "./.translations/en.json";
-
-type T = typeof T;
 
 export function ShareButton({
   basePath,

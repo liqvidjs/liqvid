@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProjectMeta } from "@liqvid/schemas/effect";
+import type { ProjectMeta } from "@liqvid/schemas";
 import { CodeIcon } from "@phosphor-icons/react";
 import { useEffectEvent } from "react";
 
@@ -8,9 +8,9 @@ import { useTranslations } from "../../utils/react.tsx";
 
 import styles from "./share.module.css";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 interface EmbedButtonProps {
   basePath: string;

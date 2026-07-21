@@ -1,10 +1,6 @@
 import { NodeFileSystem } from "@effect/platform-node";
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
-import {
-  EnvFiles,
-  type LiqvidConfig,
-  type ProjectMeta,
-} from "@liqvid/schemas/effect";
+import { EnvFiles, type LiqvidConfig, type ProjectMeta } from "@liqvid/schemas";
 import { Effect, Option } from "effect";
 import type { Socket } from "effect/unstable/socket";
 import type { AbsoluteDir } from "effect-paths";
@@ -43,6 +39,13 @@ export interface LiqvidServerState {
     watchConfig: null | Promise<void>;
     watchProjectFiles: null | Promise<void>;
   };
+
+  /**
+   * Timestamp (`Date.now()`) of the last build/publish operation, or `null` if
+   * none has occurred since the server started.
+   */
+  lastBuildTime: null | number;
+
   productionServerPort: number;
   projects: Record<string, ProjectMeta>;
 
@@ -120,6 +123,7 @@ export function getServerState(): LiqvidServerState {
         watchConfig: null,
         watchProjectFiles: null,
       },
+      lastBuildTime: null,
       productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
       projects: {},
       started: {

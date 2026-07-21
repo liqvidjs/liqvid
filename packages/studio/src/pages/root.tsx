@@ -5,9 +5,9 @@ import { WebSocketProvider } from "../components/WebSocketProvider.tsx";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
 import { getServerState, initializeServer } from "../initialize.mts";
 
-import { NewProjectButton } from "./NewProjectButton.tsx";
+import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
 import { ProjectList } from "./ProjectList/ProjectList.tsx";
-import { RebuildButton } from "./RebuildButton.tsx";
+import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
 
 import "../palette.css";
 
@@ -15,9 +15,9 @@ import { getTranslations } from "../utils/i18n.mts";
 
 import styles from "./root.module.css";
 
-import type T from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 export async function Homepage() {
   await initializeServer();
@@ -39,7 +39,7 @@ export async function Homepage() {
       <main className={styles.main}>
         <div className={styles.headerRow}>
           <h1 className={styles.header}>{t.title}</h1>
-          <NewProjectButton t={t} />
+          <NewProjectButton />
           <RebuildButton />
         </div>
         <ProjectList

@@ -1,0 +1,15 @@
+{
+  "busy": "处理中...",
+  "dropdownLabel": "发布选项",
+  "publish": "发布",
+  "publishContent": "发布内容",
+  "publishMedia": "发布媒体",
+  "rebuild": "重建项目",
+  "toast": {
+    "failure": "操作失败",
+    "publishContentSuccess": "内容已发布",
+    "publishMediaSuccess": "媒体已发布",
+    "publishSuccess": "已发布",
+    "success": "重建成功"
+  }
+}

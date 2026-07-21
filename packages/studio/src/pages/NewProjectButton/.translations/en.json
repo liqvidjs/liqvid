@@ -1,0 +1,17 @@
+{
+  "dialog": {
+    "action": "Create",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating...",
+    "name": "Project name",
+    "namePlaceholder": "My project",
+    "path": "Project path",
+    "selectTemplate": "Select a template",
+    "template": "Template",
+    "title": "Create a new project"
+  },
+  "dotWarning": "Project paths cannot contain dots. They will work during development but break during the build step.",
+  "error": "Failed to create project",
+  "newProject": "Create a new project"
+}

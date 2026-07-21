@@ -2,7 +2,7 @@ import { Collapsible } from "@base-ui/react/collapsible";
 import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
-import type { RecordingMeta } from "@liqvid/schemas/effect";
+import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { isMac, useToggle } from "@liqvid/utils";
 import clsx from "clsx";

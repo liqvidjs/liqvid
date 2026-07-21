@@ -1,0 +1,15 @@
+{
+  "busy": "Working...",
+  "dropdownLabel": "Publish options",
+  "publish": "Publish",
+  "publishContent": "Publish content",
+  "publishMedia": "Publish media",
+  "rebuild": "Rebuild projects",
+  "toast": {
+    "failure": "Operation failed",
+    "publishContentSuccess": "Content published",
+    "publishMediaSuccess": "Media published",
+    "publishSuccess": "Published",
+    "success": "Build completed"
+  }
+}
