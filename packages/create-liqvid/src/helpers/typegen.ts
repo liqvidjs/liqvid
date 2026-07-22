@@ -1,6 +1,6 @@
 import spawn from "cross-spawn";
 
-import type { PackageManager } from "./get-pkg-manager";
+import type { PackageManager } from "./get-pkg-manager.ts";
 
 /**
  * Runs `next typegen` using the package manager to execute the locally installed Next.js binary.

@@ -1,0 +1,4 @@
+{
+  "$schema": "./node_modules/@liqvid/schemas/json-schemas/liqvid-config.json",
+  "providers": { }
+}

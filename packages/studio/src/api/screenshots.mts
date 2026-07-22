@@ -15,7 +15,6 @@ import {
 
 import {
   ASSETS_DIR,
-  NEXT_APP_DIR,
   SCREENSHOT_FILE_DARK,
   SCREENSHOT_FILE_LIGHT,
   SCREENSHOT_FILE as SCREENSHOT_PNG,
@@ -28,6 +27,7 @@ import {
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
+import { inRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -38,8 +38,7 @@ const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
  * The project path is relative to the app/ directory.
  */
 function getProjectDir(projectPath: RelativeDir) {
-  const { cwd } = getServerState();
-  return path.join(cwd, NEXT_APP_DIR, projectPath);
+  return inRoutesDir(projectPath);
 }
 
 /**

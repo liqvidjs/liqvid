@@ -1,0 +1,182 @@
+.LiveCode {
+  --split: 50%;
+  --v-split: 50%;
+
+  /* https://github.com/fsegurai/codemirror-themes/blob/main/packages/vscode-light/src/index.ts */
+  --light-bg: #ffffff;
+  --light-fg: #383a42;
+  --light-surface: #fafafd;
+  --light-sep: #f0f1f2;
+
+  /* https://github.com/fsegurai/codemirror-themes/blob/main/packages/vscode-dark/src/index.ts */
+  --dark-bg: #1e1e1e;
+  --dark-fg: #d4d4d4;
+  --dark-surface: #191a1b;
+  --dark-sep: #2a2b2c;
+
+  --fg: light-dark(var(--light-fg), var(--dark-fg));
+  --bg: light-dark(var(--light-bg), var(--dark-bg));
+  --surface: light-dark(var(--light-surface), var(--dark-surface));
+
+  --surface-contrast: light-dark(
+    rgb(from var(--light-surface) calc(r - 20) calc(g - 20) calc(b - 20)),
+    hsl(from var(--dark-surface) h s calc(l + 6))
+  );
+
+  --sep: light-dark(var(--light-sep), var(--dark-sep));
+
+  --bg-contrast: hsl(from var(--bg) h s calc(l - 6));
+}
+
+.button {
+  background-color: light-dark(
+    hsl(from var(--bg) h s calc(l - 6)),
+    hsl(from var(--bg) h s calc(l + 1))
+  );
+
+  color: light-dark(
+    hsl(from var(--fg) h s calc(l + 30)),
+    hsl(from var(--fg) h s calc(l - 30))
+  );
+
+  &:hover,
+  &:active {
+    color: var(--fg);
+  }
+
+  &:hover {
+    background-color: light-dark(
+      hsl(from var(--bg) h s calc(l - 8)),
+      hsl(from var(--bg) h s calc(l + 3))
+    );
+  }
+
+  &:active {
+    background-color: light-dark(
+      hsl(from var(--bg) h s calc(l - 10)),
+      hsl(from var(--bg) h s calc(l))
+    );
+  }
+
+  &:disabled {
+    background-color: light-dark(
+      hsl(from var(--bg) h s calc(l - 4)),
+      hsl(from var(--bg) h s calc(l))
+    );
+
+    color: light-dark(
+      hsl(from var(--fg) h s calc(l + 60)),
+      hsl(from var(--fg) h s calc(l - 60))
+    );
+  }
+}
+
+.FileTab {
+  color: light-dark(#8e8e90, #8c8c8c);
+
+  &[aria-selected="true"] {
+    background-color: var(--bg);
+    color: light-dark(#000, #fff);
+    box-shadow:
+      inset 0px 3px var(--lv-accent),
+      0 1px var(--bg);
+  }
+
+  &[class*="lqv-filetype-"]::before {
+    font-family: monospace;
+    font-size: 14px;
+    left: 8px;
+    width: 1em;
+    text-align: center;
+    white-space: nowrap;
+    position: absolute;
+  }
+
+  /* specific filetypes */
+  &[class*="lqv-filetype-html"]::before {
+    content: "<>";
+    color: #f66;
+  }
+
+  &[class*="lqv-filetype-js"]::before {
+    content: "JS";
+    font-size: 10px;
+    color: light-dark(darkgoldenrod, yellow);
+  }
+
+  &[class*="lqv-filetype-css"]::before {
+    content: "#";
+    color: #1a69b5;
+  }
+}
+
+.editor {
+  height: 100%;
+
+  [class~="cm-focused"] {
+    outline: none !important;
+  }
+}
+
+.split {
+  border-radius: 0 0 var(--ifm-pre-border-radius) var(--ifm-pre-border-radius);
+  display: flex;
+  flex: 1;
+  overflow: auto;
+
+  [class~="cm-scroller"] {
+    border-bottom-left-radius: var(--ifm-pre-border-radius);
+    scrollbar-width: thin;
+  }
+}
+
+.iframe {
+  [class~="dragging"] & {
+    pointer-events: none;
+  }
+}
+
+.resize {
+  &[data-dir="ew"] {
+    cursor: ew-resize;
+    translate: -50% 0;
+    height: 100%;
+  }
+
+  &[data-dir="ns"] {
+    cursor: ns-resize;
+    translate: 0 -50%;
+    width: 100%;
+  }
+}
+
+.DropdownMenuContent {
+  background-color: hsl(from var(--bg) h s calc(l - 6));
+  border-radius: 0 0 4px 4px;
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  animation-name: slideUpAndFade;
+}
+
+.DropdownMenuItem {
+  background-color: transparent;
+  cursor: pointer;
+  padding: 4px 16px;
+
+  &[data-highlighted] {
+    background-color: hsl(from var(--bg) h s calc(l - 2));
+    outline: none;
+  }
+}
+
+@keyframes slideUpAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

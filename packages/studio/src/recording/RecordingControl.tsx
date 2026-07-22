@@ -62,7 +62,7 @@ export function RecordingControl({ shortcuts }: RecordingControlProps) {
                 durationMs: manager.duration.inMilliseconds(),
                 plugins: recordingData,
               },
-              search: { url: projectPath },
+              search: { projectPath },
             });
           }
         } else {

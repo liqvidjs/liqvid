@@ -32,14 +32,33 @@ export function watchLiqvidConfig(state: LiqvidServerState) {
     yield* fs.watch(cwd).pipe(
       // Only react to events touching the config file itself.
       Stream.filter((event) => event.path === CONFIG_FILE),
-      Stream.runForEach((event) =>
-        reloadConfig(
-          state,
-          event._tag === "Create"
-            ? `${CONFIG_FILE} detected, loading...`
-            : `${CONFIG_FILE} changed, reloading...`,
-        ),
+      // The OS watcher (and editors' atomic-save shuffles) frequently emit
+      // several events for a single logical file change, which would otherwise
+      // fan out into duplicate reloads. Group events by their path and debounce
+      // each group so a burst collapses into a single dispatch. Idle groups are
+      // torn down after `idleTimeToLive`.
+      Stream.groupBy((event) => Effect.succeed([event.path, event] as const), {
+        idleTimeToLive: "1 seconds",
+      }),
+      Stream.mapEffect(
+        ([, group]) =>
+          group.pipe(
+            Stream.debounce("50 millis"),
+            Stream.runForEach((event) =>
+              reloadConfig(
+                state,
+                event._tag === "Create"
+                  ? `${CONFIG_FILE} detected, loading...`
+                  : `${CONFIG_FILE} changed, reloading...`,
+              ),
+            ),
+          ),
+        { concurrency: "unbounded" },
       ),
+      Stream.runDrain,
     );
-  }).pipe(Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)));
+  }).pipe(
+    Effect.scoped,
+    Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)),
+  );
 }

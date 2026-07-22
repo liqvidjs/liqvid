@@ -40,7 +40,9 @@ export function readDirWithFileTypes(
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    const files = yield* fs.readDirectory(dirname, { recursive });
+    const files = (yield* fs.readDirectory(dirname, {
+      recursive,
+    })) as RelativePath[];
 
     return yield* Effect.all(
       files.map((basename) =>
@@ -50,7 +52,8 @@ export function readDirWithFileTypes(
           );
           return [basename, stats.type] as
             | [RelativeFile, "File"]
-            | [RelativeDir, "Directory"];
+            | [RelativeDir, "Directory"]
+            | [RelativePath, "SymbolicLink"];
         }),
       ),
       { concurrency },

@@ -7,6 +7,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Schema } from "effect";
+import { RelativeDir, RelativeFile } from "effect-paths";
 
 import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 // Import schemas
@@ -17,13 +18,14 @@ import {
   AutoGenProjectMeta,
   ProjectJson,
 } from "../src/project.mts";
-import {
-  RecordingMeta,
-  RecordingMetaFile,
-} from "../src/recording-meta.mts";
+import { RecordingMeta, RecordingMetaFile } from "../src/recording-meta.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = path.join(__dirname, "..", "json-schemas");
+const OUTPUT_DIR = path.join(
+  __dirname,
+  RelativeDir(".."),
+  RelativeDir("json-schemas"),
+);
 
 interface SchemaEntry {
   name: string;
@@ -55,7 +57,7 @@ async function main() {
   console.log(`Generating JSON schemas in ${OUTPUT_DIR}...\n`);
 
   for (const { name, schema } of schemas) {
-    const filename = `${name}.json`;
+    const filename = RelativeFile(`${name}.json`);
 
     console.log(`  ${filename}...`);
 

@@ -1,7 +1,4 @@
-import type { Brand } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
-
-export const NEXT_APP_DIR = RelativeDir("app");
 
 export const ROOT_HIDDEN_DIR = RelativeDir(".liqvid");
 
@@ -10,6 +7,12 @@ export const BUILD_DIR = RelativeDir("out");
 export const PREVIEW_DIR = RelativeDir("preview");
 
 export const TRANSLATIONS_DIR = RelativeDir(".translations");
+
+/* ------------------------------ Next.js ------------------------------ */
+
+export const NEXT_APP_DIR = RelativeDir("app");
+
+export const NEXT_PAGE = RelativeFile("page.tsx");
 
 /* ------------------------------ projects ------------------------------ */
 
@@ -26,6 +29,10 @@ export const PROJECT_META_FILE = RelativeFile("project-meta.json");
 export const RECORDINGS_DIR = RelativeDir("recordings");
 
 export const RECORDING_META_FILE = RelativeFile("recording-meta.json");
+
+export const RECORDING_RAW_BLOB = RelativeFile("data.bin");
+
+export const RECORDING_RAW_FILE = RelativeFile("raw.json");
 
 /* ------------------------------ audio ------------------------------ */
 export const AUDIO_WAV = RelativeFile("audio.wav");

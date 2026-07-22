@@ -1,12 +1,11 @@
 import * as path from "node:path";
 
 import { Effect, FileSystem } from "effect";
-import { RelativeFile } from "effect-paths";
+import type { RelativePath } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { NEXT_APP_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
 import { InvalidError, NotFoundError } from "../utils/errors.mts";
+import { inRoutesDir } from "../utils/misc.mts";
 
 /**
  * MIME type mappings for common file extensions
@@ -48,10 +47,9 @@ function getMimeType(filePath: string): string {
  * Serve static files from the app directory.
  * Example: /api/liqvid/static/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
  */
-export function serveStaticFile(requestedPath: string) {
+export function serveStaticFile(requestedPath: RelativePath) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
-    const { cwd } = getServerState();
 
     // Security: Prevent directory traversal attacks
     const normalizedPath = path.normalize(requestedPath);
@@ -62,8 +60,8 @@ export function serveStaticFile(requestedPath: string) {
     }
 
     // Resolve relative to the app directory
-    const appDir = path.join(cwd, NEXT_APP_DIR);
-    const absolutePath = path.join(appDir, RelativeFile(normalizedPath));
+    const appDir = inRoutesDir();
+    const absolutePath = path.join(appDir, normalizedPath);
 
     // Security: Ensure the resolved path is within the app directory
     if (!absolutePath.startsWith(appDir + path.sep)) {

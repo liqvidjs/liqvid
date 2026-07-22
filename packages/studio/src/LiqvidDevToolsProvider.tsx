@@ -22,16 +22,19 @@ import { clientRuntime, LiqvidStudioApiClient } from "./client.mts";
 import type { ToastPropsWithTime } from "./ui/Toast.tsx";
 import { Toaster } from "./ui/Toaster.tsx";
 import "./palette.css";
+
+import type { RelativeDir } from "effect-paths";
+
 import { WebSocketProvider } from "./components/WebSocketProvider.tsx";
 
 export interface StudioPrivateContextShape {
   instances: Record<string, Set<unknown>>;
-  projectPath: string;
+  projectPath: RelativeDir;
 }
 
 export const StudioPrivateContext = createContext<StudioPrivateContextShape>({
   instances: {},
-  projectPath: "",
+  projectPath: "" as RelativeDir,
 });
 StudioPrivateContext.displayName = "LiqvidStudio";
 
@@ -46,7 +49,7 @@ export function LiqvidDevToolsProvider({
 }: {
   children?: React.ReactNode;
   plugins?: LiqvidStudioPlugin[];
-  projectPath: string;
+  projectPath: RelativeDir;
 }) {
   const [instances] = useState<Record<string, Set<unknown>>>(() => ({}));
   const privateContext = useMemo(
@@ -76,9 +79,7 @@ export function LiqvidDevToolsProvider({
               payload: {
                 durationMs: Duration.inMilliseconds(duration),
               },
-              query: {
-                url: projectPath,
-              },
+              query: { projectPath },
             });
           }),
         );

@@ -16,17 +16,17 @@
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
   "bin": {
-    "create-liqvid": "./dist/index.js"
+    "create-liqvid": "./dist/index.mts"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "ncc build ./src/index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
-    "dev": "ncc build ./src/index.ts -w -o dist/",
+    "build": "ncc build ./src/index.mts -o ./dist/ --minify --no-cache --no-source-map-register",
+    "dev": "ncc build ./src/index.mts -w -o dist/",
     "lint": "biome check --fix",
     "prebuild": "rm -rf dist",
-    "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate",
+    "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate; cp -R presets dist/templates/presets",
     "versions": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/versions.mts versions.json",
     "watch": "tsc --watch"
   },
@@ -44,6 +44,7 @@
     "commander": "14.0.3",
     "conf": "15.1.0",
     "cross-spawn": "7.0.6",
+    "effect-paths": "workspace:^",
     "fast-glob": "3.3.3",
     "picocolors": "1.1.1",
     "prettier-plugin-tailwindcss": "0.7.2",
@@ -55,5 +56,6 @@
   },
   "engines": {
     "node": ">=20.9.0"
-  }
+  },
+  "type": "module"
 }

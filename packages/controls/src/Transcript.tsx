@@ -1,6 +1,6 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { usePlayback, useTime$ } from "@liqvid/playback/react";
-import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas/effect";
+import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas";
 import {
   type Awaitable,
   formatTime,

@@ -1,10 +1,11 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
+import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { ASSETS_DIR, PROJECT_META_FILE } from "../conventions.mts";
+import { inRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -12,13 +13,9 @@ export const projectMetaLive = HttpApiBuilder.group(
   WebApi,
   "projects",
   (handlers) =>
-    handlers.handle("setProjectMeta", ({ payload, query: { url } }) =>
+    handlers.handle("setProjectMeta", ({ payload, query: { projectPath } }) =>
       Effect.gen(function* () {
-        let projectPath = fileURLToPath(url);
-        if (projectPath.endsWith("page.tsx")) {
-          projectPath = path.dirname(projectPath);
-        }
-        const assetsDir = path.join(projectPath, ASSETS_DIR);
+        const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
         const projectMetaFile = path.join(assetsDir, PROJECT_META_FILE);
 
         const fs = yield* FileSystem.FileSystem;
@@ -30,14 +27,9 @@ export const projectMetaLive = HttpApiBuilder.group(
           });
         }
 
-        yield* fs.writeFileString(
-          projectMetaFile,
-          JSON.stringify(
-            { duration: { milliseconds: payload.durationMs } },
-            null,
-            2,
-          ),
-        );
+        yield* writeJSON(projectMetaFile, {
+          duration: { milliseconds: payload.durationMs },
+        });
       }).pipe(
         Effect.annotateLogs({
           operation: "setProjectMeta",

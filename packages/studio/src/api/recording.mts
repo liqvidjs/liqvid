@@ -1,7 +1,6 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { type FileDecodeError, loadJson } from "@liqvid/cli/utils";
+import { type FileDecodeError, loadJson, writeJSON } from "@liqvid/cli/utils";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,
@@ -9,7 +8,7 @@ import {
   packageNameToDirName,
 } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
-import { assertType, compare } from "@liqvid/utils";
+import { compare } from "@liqvid/utils";
 import {
   Cause,
   Effect,
@@ -19,16 +18,19 @@ import {
   Schema,
 } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
-import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
+import { type AbsoluteDir, RelativeDir } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
 import {
   ASSETS_DIR,
   RECORDING_META_FILE,
+  RECORDING_RAW_BLOB,
+  RECORDING_RAW_FILE,
   RECORDINGS_DIR,
 } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
+import { inRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import {
@@ -52,10 +54,10 @@ export function saveRecording(
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    const url = yield* safeGetOption(searchParams, "url").pipe(
+    const projectPath = yield* safeGetOption(searchParams, "projectPath").pipe(
       Option.match({
-        onNone: () => Effect.die({ message: "missing url parameter" }),
-        onSome: (url) => Effect.succeed(url),
+        onNone: () => Effect.die({ message: "missing projectPath parameter" }),
+        onSome: (projectPath) => Effect.succeed(RelativeDir(projectPath)),
       }),
     );
 
@@ -69,13 +71,7 @@ export function saveRecording(
       metadataStr,
     );
 
-    let projectDir = fileURLToPath(url);
-    if (projectDir.endsWith("page.tsx")) {
-      projectDir = path.dirname(projectDir);
-    }
-    assertType<AbsoluteDir>(projectDir);
-
-    const assetsDir = path.join(projectDir, ASSETS_DIR);
+    const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
 
     // Create assets dir if it doesn't exist
     if (!(yield* fs.exists(assetsDir))) {
@@ -122,7 +118,7 @@ export function saveRecording(
       if (pluginInfo.isBlob) {
         // Write blob data with specified filename
         // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
-        const filename = pluginInfo.filename ?? RelativeFile("data.bin");
+        const filename = pluginInfo.filename ?? RECORDING_RAW_BLOB;
         const blobData = data as Blob;
         const buffer = yield* Effect.promise(() =>
           blobData.arrayBuffer().then(Buffer.from),
@@ -130,10 +126,7 @@ export function saveRecording(
         yield* fs.writeFile(path.join(pluginDir, filename), buffer);
       } else if (typeof data === "string") {
         // Write JSON data as raw.json
-        yield* fs.writeFileString(
-          path.join(pluginDir, RelativeFile("raw.json")),
-          data,
-        );
+        yield* writeJSON(path.join(pluginDir, RECORDING_RAW_FILE), data);
       }
     }
 
@@ -202,21 +195,41 @@ function runPostProcessing(
   });
 }
 
+/**
+ * Read a single recording directory into a {@link RecordingMeta}, discovering
+ * its plugins from the immediate subdirectories.
+ */
+export function loadRecordingMeta(recordingDir: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const file = yield* loadJson(
+      RecordingMetaFile,
+      path.join(recordingDir, RECORDING_META_FILE),
+    );
+
+    const children = yield* readDirWithFileTypes(recordingDir);
+
+    return {
+      ...file,
+      name: dirNameToPackageName(path.basename(recordingDir)),
+      plugins: children.reduce((acc, [name, kind]) => {
+        if (kind === "Directory") {
+          acc.push(dirNameToPackageName(name));
+        }
+        return acc;
+      }, [] as string[]),
+    } satisfies RecordingMeta;
+  });
+}
+
 export const recordingsLive = HttpApiBuilder.group(
   WebApi,
   "recordings",
   (handlers) =>
-    handlers.handle("list", ({ query: { url } }) =>
+    handlers.handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
-        let projectDir = fileURLToPath(url);
-        if (projectDir.endsWith("page.tsx")) {
-          projectDir = path.dirname(projectDir);
-        }
-        assertType<AbsoluteDir>(projectDir);
-
         const fs = yield* FileSystem.FileSystem;
 
-        const assetsDir = path.join(projectDir, ASSETS_DIR);
+        const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
 
         // error if assets dir doesn't exist
         if (!(yield* fs.exists(assetsDir))) {
@@ -239,27 +252,7 @@ export const recordingsLive = HttpApiBuilder.group(
               if (kind !== "Directory") return acc;
 
               const dir = path.join(recordingsDir, filename);
-              acc.push(
-                Effect.gen(function* () {
-                  const file = yield* loadJson(
-                    RecordingMetaFile,
-                    path.join(dir, RECORDING_META_FILE),
-                  );
-
-                  const children = yield* readDirWithFileTypes(dir);
-
-                  return {
-                    ...file,
-                    name: dirNameToPackageName(filename),
-                    plugins: children.reduce((acc, [name, kind]) => {
-                      if (kind === "Directory") {
-                        acc.push(dirNameToPackageName(name));
-                      }
-                      return acc;
-                    }, [] as string[]),
-                  };
-                }),
-              );
+              acc.push(loadRecordingMeta(dir));
 
               return acc;
             },

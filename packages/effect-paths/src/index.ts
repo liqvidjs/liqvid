@@ -8,43 +8,62 @@ import "./path.d.ts";
 import "./process.d.ts";
 import "./url.d.ts";
 
+interface ConstBranded<in out B extends Brand.Brand<string>>
+  extends Brand.Constructor<B> {
+  <const S extends string>(unbranded: S): B & S;
+}
+
 /* ------------------------------ absolute ------------------------------ */
 /** Absolute directory path */
-export type AbsoluteDir = string & Brand.Brand<"AbsoluteDir">;
-export const AbsoluteDir = Brand.nominal<AbsoluteDir>();
+export type AbsoluteDir<S extends string = string> = S &
+  Brand.Brand<"AbsoluteDir">;
+export const AbsoluteDir = Brand.nominal() as ConstBranded<AbsoluteDir>;
 
 /** Absolute file path */
-export type AbsoluteFile = string & Brand.Brand<"AbsoluteFile">;
-export const AbsoluteFile = Brand.nominal<AbsoluteFile>();
+export type AbsoluteFile<S extends string = string> = S &
+  Brand.Brand<"AbsoluteFile">;
+export const AbsoluteFile = Brand.nominal() as ConstBranded<AbsoluteFile>;
 
 /** Absolute file or directory path */
-export type AbsolutePath = AbsoluteDir | AbsoluteFile;
+export type AbsolutePath<S extends string = string> =
+  | AbsoluteDir<S>
+  | AbsoluteFile<S>;
 
 /* ------------------------------ relative ------------------------------ */
 /** Relative directory path */
-export type RelativeDir = string & Brand.Brand<"RelativeDir">;
-export const RelativeDir = Brand.nominal<RelativeDir>();
+export type RelativeDir<S extends string = string> = S &
+  Brand.Brand<"RelativeDir">;
+export const RelativeDir = Brand.nominal() as ConstBranded<RelativeDir>;
 
 /** Relative file path */
-export type RelativeFile = string & Brand.Brand<"RelativeFile">;
-export const RelativeFile = Brand.nominal<RelativeFile>();
+export type RelativeFile<S extends string = string> = S &
+  Brand.Brand<"RelativeFile">;
+export const RelativeFile = Brand.nominal() as ConstBranded<RelativeFile>;
 
 /** Relative file or directory path */
-export type RelativePath = RelativeDir | RelativeFile;
+export type RelativePath<S extends string = string> =
+  | RelativeDir<S>
+  | RelativeFile<S>;
 
 /* ------------------------------ any ------------------------------ */
 /** Absolute/relative file/directory path */
-export type AnyPath = AbsolutePath | RelativePath;
+export type AnyPath<S extends string = string> =
+  | AbsolutePath<S>
+  | RelativePath<S>;
 
 /** Absolute/relative file path */
-export type AnyFile = AbsoluteFile | RelativeFile;
+export type AnyFile<S extends string = string> =
+  | AbsoluteFile<S>
+  | RelativeFile<S>;
 
 /** Absolute/relative directory path */
-export type AnyDir = AbsoluteDir | RelativeDir;
+export type AnyDir<S extends string = string> = AbsoluteDir<S> | RelativeDir<S>;
 
 /* ------------------------------ file extensions ------------------------------ */
 /** File extension */
-export type FileExtn = string & Brand.Brand<"FileExtn">;
+export type FileExtn<S extends string = string> = S & Brand.Brand<"FileExtn">;
+
+export const FileExtn = Brand.nominal() as ConstBranded<FileExtn>;
 
 /* ------------------------------ utils ------------------------------ */
 export type AbsoluteToRelative<P extends AbsolutePath> = P extends AbsoluteDir

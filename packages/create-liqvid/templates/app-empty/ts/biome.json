@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -26,8 +26,7 @@
       "correctness": {
         "noPrivateImports": "error"
       },
-      "recommended": true,
-
+      "preset": "recommended",
       "style": {
         "noRestrictedImports": {
           "level": "error",
@@ -43,6 +42,7 @@
       }
     }
   },
+  "root": true,
   "vcs": {
     "clientKind": "git",
     "enabled": true,

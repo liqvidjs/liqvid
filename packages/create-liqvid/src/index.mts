@@ -5,20 +5,50 @@ import { basename, resolve } from "node:path";
 import ciInfo from "ci-info";
 import { Command } from "commander";
 import Conf from "conf";
-import { blue, bold, cyan, green, red, yellow } from "picocolors";
+import pico from "picocolors";
 import type { InitialReturnValue } from "prompts";
 import prompts from "prompts";
 import updateCheck from "update-check";
 
-import { Bundler } from "../templates";
+import { Bundler } from "../templates/index.mts";
 
-import { createApp, DownloadError } from "./create-app";
-import type { PackageManager } from "./helpers/get-pkg-manager";
-import { getPkgManager } from "./helpers/get-pkg-manager";
-import { isFolderEmpty } from "./helpers/is-folder-empty";
-import { validateNpmName } from "./helpers/validate-pkg";
+import { createApp, DownloadError } from "./create-app.ts";
+import type { PackageManager } from "./helpers/get-pkg-manager.ts";
+import { getPkgManager } from "./helpers/get-pkg-manager.ts";
+import { isFolderEmpty } from "./helpers/is-folder-empty.ts";
+import type { TreeCategory } from "./helpers/tree-select.ts";
+import { treeSelect } from "./helpers/tree-select.ts";
+import { validateNpmName } from "./helpers/validate-pkg.ts";
+import { isPresetName, type PresetName } from "./presets.ts";
 
-import packageJson from "../package.json";
+import packageJson from "../package.json" with { type: "json" };
+
+/**
+ * The nested tree of presets offered during project creation. Categories with
+ * `children` can be toggled as a whole or item-by-item; categories without
+ * children behave as a single togglable option. Each `value` must be a valid
+ * preset id from {@link PRESETS}.
+ */
+const PRESET_TREE: TreeCategory[] = [
+  {
+    children: [
+      { title: "vanilla HTML", value: "coding-html" },
+      { title: "TypeScript-React (TSX)", value: "coding-tsx" },
+      { title: "Python", value: "coding-python" },
+      { title: "Shaders", value: "coding-shaders" },
+    ],
+    title: "Coding",
+  },
+  {
+    children: [
+      { title: "equations and handwriting", value: "math-equations" },
+      { title: "2d graphics", value: "math-2d" },
+      { title: "3d graphics", value: "math-3d" },
+      { title: "commutative diagrams", value: "math-diagrams" },
+    ],
+    title: "Math",
+  },
+];
 
 let projectPath: string = "";
 
@@ -53,7 +83,6 @@ const program = new Command(packageJson.name)
   .option("--tailwind", "Initialize with Tailwind CSS config. (default)")
   .option("--react-compiler", "Initialize with React Compiler enabled.")
   .option("--app", "Initialize as an App Router project.")
-  .option("--src-dir", "Initialize inside a 'src/' directory.")
   .option("--rspack", "Enable Rspack as the bundler.")
   .option(
     "--import-alias <prefix/*>",
@@ -109,6 +138,7 @@ const program = new Command(packageJson.name)
     "Include AGENTS.md to guide coding agents to write up-to-date Next.js code. (default)",
   )
   .option("--disable-git", `Skip initializing a git repository.`)
+  .option("--no-presets", "Skip the preset selection prompt.")
   .action((name) => {
     // Commander does not implicitly support negated options. When they are used
     // by the user they will be interpreted as the positional argument (name) in
@@ -181,10 +211,10 @@ async function run(): Promise<void> {
   if (!projectPath) {
     console.log(
       "\nPlease specify the project directory:\n" +
-        `  ${cyan(opts.name())} ${green("<project-directory>")}\n` +
+        `  ${pico.cyan(opts.name())} ${pico.green("<project-directory>")}\n` +
         "For example:\n" +
-        `  ${cyan(opts.name())} ${green("my-next-app")}\n\n` +
-        `Run ${cyan(`${opts.name()} --help`)} to see all options.`,
+        `  ${pico.cyan(opts.name())} ${pico.green("my-next-app")}\n\n` +
+        `Run ${pico.cyan(`${opts.name()} --help`)} to see all options.`,
     );
     process.exit(1);
   }
@@ -195,13 +225,13 @@ async function run(): Promise<void> {
   const validation = validateNpmName(appName);
   if (!validation.valid) {
     console.error(
-      `Could not create a project called ${red(
+      `Could not create a project called ${pico.red(
         `"${appName}"`,
       )} because of npm naming restrictions:`,
     );
 
     validation.problems.forEach((p) => {
-      console.error(`    ${red(bold("*"))} ${p}`);
+      console.error(`    ${pico.red(pico.bold("*"))} ${p}`);
     });
     process.exit(1);
   }
@@ -234,14 +264,10 @@ async function run(): Promise<void> {
     const defaults: typeof preferences = {
       agentsMd: true,
       app: true,
-      customizeImportAlias: false,
       disableGit: false,
       empty: false,
-      eslint: false,
       importAlias: "@/*",
-      linter: "biome",
       reactCompiler: true,
-      srcDir: false,
       tailwind: true,
     };
 
@@ -253,7 +279,6 @@ async function run(): Promise<void> {
     const displayConfig: DisplayConfigItem[] = [
       { key: "reactCompiler", values: { true: "React Compiler" } },
       { key: "tailwind", values: { true: "Tailwind CSS" } },
-      { key: "srcDir", values: { true: "src/ dir" } },
       { key: "agentsMd", values: { true: "AGENTS.md" } },
     ];
 
@@ -361,7 +386,7 @@ async function run(): Promise<void> {
       if (skipPrompt) {
         opts.reactCompiler = getPrefOrDefault("reactCompiler");
       } else {
-        const styledReactCompiler = blue("React Compiler");
+        const styledReactCompiler = pico.blue("React Compiler");
         const { reactCompiler } = await prompts({
           active: "Yes",
           inactive: "No",
@@ -380,7 +405,7 @@ async function run(): Promise<void> {
       if (skipPrompt) {
         opts.tailwind = getPrefOrDefault("tailwind");
       } else {
-        const tw = blue("Tailwind CSS");
+        const tw = pico.blue("Tailwind CSS");
         const { tailwind } = await prompts({
           active: "Yes",
           inactive: "No",
@@ -392,69 +417,6 @@ async function run(): Promise<void> {
         });
         opts.tailwind = Boolean(tailwind);
         preferences.tailwind = Boolean(tailwind);
-      }
-    }
-
-    if (!opts.srcDir && !args.includes("--no-src-dir")) {
-      if (skipPrompt) {
-        opts.srcDir = getPrefOrDefault("srcDir");
-      } else {
-        const styledSrcDir = blue("`src/` directory");
-        const { srcDir } = await prompts({
-          active: "Yes",
-          inactive: "No",
-          initial: getPrefOrDefault("srcDir"),
-          message: `Would you like your code inside a ${styledSrcDir}?`,
-          name: "srcDir",
-          onState: onPromptState,
-          type: "toggle",
-        });
-        opts.srcDir = Boolean(srcDir);
-        preferences.srcDir = Boolean(srcDir);
-      }
-    }
-
-    const importAliasPattern = /^[^*"]+\/\*\s*$/;
-    if (
-      typeof opts.importAlias !== "string" ||
-      !importAliasPattern.test(opts.importAlias)
-    ) {
-      if (skipPrompt) {
-        // We don't use preferences here because the default value is @/* regardless of existing preferences
-        opts.importAlias = defaults.importAlias;
-      } else if (args.includes("--no-import-alias")) {
-        opts.importAlias = defaults.importAlias;
-      } else {
-        const styledImportAlias = blue("import alias");
-
-        const { customizeImportAlias } = await prompts({
-          active: "Yes",
-          inactive: "No",
-          initial: getPrefOrDefault("customizeImportAlias"),
-          message: `Would you like to customize the ${styledImportAlias} (\`${defaults.importAlias}\` by default)?`,
-          name: "customizeImportAlias",
-          onState: onPromptState,
-          type: "toggle",
-        });
-
-        if (!customizeImportAlias) {
-          // We don't use preferences here because the default value is @/* regardless of existing preferences
-          opts.importAlias = defaults.importAlias;
-        } else {
-          const { importAlias } = await prompts({
-            initial: getPrefOrDefault("importAlias"),
-            message: `What ${styledImportAlias} would you like configured?`,
-            name: "importAlias",
-            onState: onPromptState,
-            type: "text",
-            validate: (value) =>
-              importAliasPattern.test(value)
-                ? true
-                : "Import alias must follow the pattern <prefix>/*",
-          });
-          opts.importAlias = importAlias;
-          preferences.importAlias = importAlias;
-        }
       }
     }
 
@@ -487,24 +449,83 @@ async function run(): Promise<void> {
     }
   }
 
+  // Preset selection is a distinct step, run after the settings customization
+  // above. These are organized as a nested tree: categories can be toggled as
+  // a whole, and individual items can be toggled independently. All presets
+  // are selected by default.
+  if (!example) {
+    if (args.includes("--no-presets")) {
+      opts.presets = [];
+    } else {
+      // Default to everything selected. If the user has saved preferences from
+      // a previous run, honor those instead.
+      const savedPresets = preferences.presets;
+      const hasSavedPresets = typeof savedPresets === "string";
+      const savedSet = new Set(
+        hasSavedPresets ? savedPresets.split(",").filter(Boolean) : [],
+      );
+
+      const isSelected = (value: string | undefined) => {
+        if (value === undefined) return false;
+        return hasSavedPresets ? savedSet.has(value) : true;
+      };
+
+      if (skipPrompt) {
+        // Collect the selected values without prompting.
+        const values: string[] = [];
+        for (const cat of PRESET_TREE) {
+          if (cat.children && cat.children.length > 0) {
+            for (const child of cat.children) {
+              if (isSelected(child.value)) values.push(child.value);
+            }
+          } else if (isSelected(cat.value)) {
+            values.push(cat.value!);
+          }
+        }
+        opts.presets = values;
+      } else {
+        const categories = PRESET_TREE.map((cat) => ({
+          ...cat,
+          children: cat.children?.map((child) => ({
+            ...child,
+            selected: isSelected(child.value),
+          })),
+          selected: isSelected(cat.value),
+        }));
+
+        const presets = await treeSelect({
+          categories,
+          message: "Which presets would you like to include?",
+        });
+
+        if (presets === undefined) {
+          console.error("Exiting.");
+          process.exit(1);
+        }
+
+        opts.presets = presets;
+        preferences.presets = presets.join(",");
+      }
+    }
+  }
+
   const bundler: Bundler = opts.rspack ? Bundler.Rspack : Bundler.Turbopack;
 
   try {
     await createApp({
       agentsMd: opts.agentsMd,
       appPath,
-      biome: true,
       bundler,
       disableGit: opts.disableGit,
       empty: opts.empty,
-      eslint: false,
       example: example && example !== "default" ? example : undefined,
       examplePath: opts.examplePath,
-      importAlias: opts.importAlias,
       packageManager,
+      presets: ((opts.presets ?? []) as string[]).filter(
+        isPresetName,
+      ) as PresetName[],
       reactCompiler: opts.reactCompiler,
       skipInstall: opts.skipInstall,
-      srcDir: opts.srcDir,
       tailwind: opts.tailwind,
       typescript: true,
     });
@@ -529,16 +550,12 @@ async function run(): Promise<void> {
     await createApp({
       agentsMd: opts.agentsMd,
       appPath,
-      biome: true,
       bundler,
       disableGit: opts.disableGit,
       empty: opts.empty,
-      eslint: false,
-      importAlias: opts.importAlias,
       packageManager,
       reactCompiler: opts.reactCompiler,
       skipInstall: opts.skipInstall,
-      srcDir: opts.srcDir,
       tailwind: opts.tailwind,
       typescript: true,
     });
@@ -555,6 +572,7 @@ function getDistTag(version: string): string {
   return prereleaseMatch ? prereleaseMatch[1] : "latest";
 }
 
+// @ts-expect-error CJS vs ESM
 const update = updateCheck(packageJson, {
   distTag: getDistTag(packageJson.version),
 }).catch(() => null);
@@ -572,10 +590,12 @@ async function notifyUpdate(): Promise<void> {
       const pkgTag = distTag === "latest" ? "" : `@${distTag}`;
       const updateMessage = `${global[packageManager]} create-liqvid${pkgTag}`;
       console.log(
-        yellow(bold("A new version of `create-liqvid` is available!")) +
+        pico.yellow(
+          pico.bold("A new version of `create-liqvid` is available!"),
+        ) +
           "\n" +
           "You can update by running: " +
-          cyan(updateMessage) +
+          pico.cyan(updateMessage) +
           "\n",
       );
     }
@@ -589,10 +609,10 @@ async function exit(reason: { command?: string }) {
   console.log();
   console.log("Aborting installation.");
   if (reason.command) {
-    console.log(`  ${cyan(reason.command)} has failed.`);
+    console.log(`  ${pico.cyan(reason.command)} has failed.`);
   } else {
     console.log(
-      red("Unexpected error. Please report it as a bug:") + "\n",
+      pico.red("Unexpected error. Please report it as a bug:") + "\n",
       reason,
     );
   }

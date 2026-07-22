@@ -28,11 +28,6 @@ const projectPathQuery = Schema.Struct({
   projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
 });
 
-const urlQuery = Schema.Struct({
-  /** path to the project */
-  url: Schema.String,
-});
-
 /* ------------------------------ audio ------------------------------ */
 const audioGroup = HttpApiGroup.make("audio")
   .add(
@@ -125,7 +120,7 @@ const projectsGroup = HttpApiGroup.make("projects")
       payload: Schema.Struct({
         durationMs: Schema.Number,
       }),
-      query: urlQuery,
+      query: projectPathQuery,
     }).annotate(OpenApi.Summary, "Set project metadata"),
   )
   .annotate(OpenApi.Title, "Projects");
@@ -189,9 +184,7 @@ const rendersGroup = HttpApiGroup.make("renders")
 /* ------------------------------ recordings ------------------------------ */
 const recordingsGroup = HttpApiGroup.make("recordings").add(
   HttpApiEndpoint.get("list", "/recordings", {
-    query: {
-      url: Schema.String,
-    },
+    query: projectPathQuery,
     success: Schema.Array(RecordingMeta),
   }),
 );
@@ -283,6 +276,98 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
   );
 
 /* ------------------------------ settings ------------------------------ */
+
+/** Provider that can host content files (html/css/js). */
+const ContentBackend = Schema.Literals([
+  "copy",
+  "githubPages",
+  "liqvidStudio",
+  "s3",
+  "sftp",
+]);
+
+/** Provider that can host media files (audio, video, thumbnails). */
+const MediaBackend = Schema.Literals(["copy", "liqvidStudio", "s3", "sftp"]);
+
+/** Backend hosting configuration. */
+const BackendConfig = Schema.Struct({
+  content: Schema.optional(ContentBackend),
+  media: Schema.optional(MediaBackend),
+});
+
+/** Media configuration surfaced in the settings UI. */
+const MediaSettings = Schema.Struct({
+  audio: Schema.optional(
+    Schema.Struct({
+      /** Whether to keep multiple audio renderings. */
+      multiple: Schema.optional(Schema.Boolean),
+    }),
+  ),
+});
+
+/** Destination for the copy provider. */
+const CopyDestinationSetting = Schema.Union([
+  Schema.String,
+  Schema.Struct({
+    hosting: Schema.String,
+    media: Schema.String,
+  }),
+]);
+
+/** Copy provider settings. */
+const CopyProviderSettings = Schema.Struct({
+  clean: Schema.optional(Schema.Boolean),
+  destination: CopyDestinationSetting,
+});
+
+/** GitHub Pages provider settings. */
+const GitHubPagesProviderSettings = Schema.Struct({
+  repository: Schema.String,
+  root: Schema.optional(Schema.Boolean),
+  username: Schema.String,
+});
+
+/** Liqvid Studio hosting provider settings. */
+const LiqvidStudioProviderSettings = Schema.Struct({
+  username: Schema.String,
+});
+
+/**
+ * S3 provider settings. Secret credentials are intentionally omitted; those
+ * should be supplied via environment variables in `liqvid.json`.
+ */
+const S3ProviderSettings = Schema.Struct({
+  bucket: Schema.String,
+  domain: Schema.String,
+  prefix: Schema.optional(Schema.String),
+  region: Schema.optional(Schema.String),
+});
+
+/** SFTP provider settings. */
+const SftpProviderSettings = Schema.Struct({
+  host: Schema.String,
+  path: Schema.String,
+});
+
+/** Editable subset of `liqvid.json` provider configuration. */
+const ProvidersConfig = Schema.Struct({
+  copy: Schema.optional(CopyProviderSettings),
+  githubPages: Schema.optional(GitHubPagesProviderSettings),
+  liqvidStudio: Schema.optional(LiqvidStudioProviderSettings),
+  s3: Schema.optional(S3ProviderSettings),
+  sftp: Schema.optional(SftpProviderSettings),
+});
+
+/** Editable subset of `liqvid.json` surfaced in the settings UI. */
+export const SettingsConfig = Schema.Struct({
+  backend: Schema.optional(BackendConfig),
+  basePath: Schema.optional(Schema.String),
+  media: Schema.optional(MediaSettings),
+  providers: Schema.optional(ProvidersConfig),
+});
+
+export type SettingsConfig = (typeof SettingsConfig)["Type"];
+
 const settingsGroup = HttpApiGroup.make("settings")
   .add(
     HttpApiEndpoint.get("getLocale", "/settings/locale", {
@@ -303,6 +388,23 @@ const settingsGroup = HttpApiGroup.make("settings")
         locale: Locale,
       }),
     }).annotate(OpenApi.Summary, "Update the UI locale in liqvid.json"),
+  )
+  .add(
+    HttpApiEndpoint.get("getConfig", "/settings/config", {
+      success: SettingsConfig,
+    }).annotate(
+      OpenApi.Summary,
+      "Get editable liqvid.json settings (backend, basePath, media, providers)",
+    ),
+  )
+  .add(
+    HttpApiEndpoint.post("setConfig", "/settings/config", {
+      payload: SettingsConfig,
+      success: SettingsConfig,
+    }).annotate(
+      OpenApi.Summary,
+      "Update editable liqvid.json settings (backend, basePath, media, providers)",
+    ),
   )
   .annotate(OpenApi.Title, "Settings");
 

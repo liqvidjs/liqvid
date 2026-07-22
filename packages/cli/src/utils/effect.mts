@@ -144,7 +144,7 @@ function parseEnvFile(filePath: AbsolutePath): Record<string, string> {
 }
 
 /** Write JSON data to a file, pretty-printed with 2-space indentation. */
-export function writeJSON<T>(path: string, data: T) {
+export function writeJSON<T>(path: AbsoluteFile, data: T) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const jsonString = JSON.stringify(data, null, 2);

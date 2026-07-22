@@ -2,6 +2,7 @@ import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
 import { Effect, Schema } from "effect";
+import { OpenApi } from "effect/unstable/httpapi";
 import { RelativeDir } from "effect-paths";
 
 export const AspectRatio = Schema.Struct({
@@ -21,6 +22,9 @@ export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Type"];
  * project.json files
  */
 export const ProjectJson = Schema.Struct({
+  $schema: Schema.String.pipe(Schema.optional),
+
+  /** aspect ratio of project */
   aspectRatio: AspectRatioSpecifier.pipe(
     Schema.withDecodingDefaultType(
       Effect.succeed({
@@ -29,21 +33,39 @@ export const ProjectJson = Schema.Struct({
       }),
     ),
   ),
+
+  description: Schema.String.pipe(Schema.optional),
+
+  /** Set this to true to omit the project from the production build. */
+  draft: Schema.Boolean.pipe(
+    Schema.withDecodingDefault(Effect.succeed(false)),
+
+    Schema.annotateEncoded({
+      description:
+        "Set this to true to omit the project from the production build.",
+    }),
+  ),
+
+  /** name of the project */
   name: Schema.String,
 });
+
 export type ProjectJson = (typeof ProjectJson)["Type"];
 
 /**
  * auto-generated project-meta.json files
  */
 export const AutoGenProjectMeta = Schema.Struct({
+  /** duration of project */
   duration: DurationOptions,
 });
 export type AutoGenProjectMeta = (typeof AutoGenProjectMeta)["Type"];
 
 export const ProjectMeta = Schema.Struct({
   aspectRatio: AspectRatio,
+
   duration: DurationOptions.pipe(Schema.decodeTo(Schema.instanceOf(Duration))),
+
   name: Schema.String,
   openGraph: Schema.Boolean,
 

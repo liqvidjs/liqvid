@@ -1,9 +1,12 @@
 {
   "extends": ["../../biome.json"],
+  "files": {
+    "includes": ["scripts", "src", "templates/*.mts", "!templates/app*"]
+  },
   "linter": {
     "rules": {
       "correctness": {
-        "useImportExtensions": "off"
+        "useImportExtensions": "on"
       }
     }
   }

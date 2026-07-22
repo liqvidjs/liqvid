@@ -1,30 +1,30 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 
 import retry from "async-retry";
-import { cyan, green, red } from "picocolors";
+import type { AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
+import pico from "picocolors";
 
-import type { Bundler, TemplateMode, TemplateType } from "../templates";
-import { getTemplateFile, installTemplate } from "../templates";
+import type { Bundler, TemplateType } from "../templates/index.mts";
+import { getTemplateFile, installTemplate } from "../templates/index.mts";
 
-import type { RepoInfo } from "./helpers/examples";
+import type { RepoInfo } from "./helpers/examples.ts";
 import {
   downloadAndExtractExample,
   downloadAndExtractRepo,
   existsInRepo,
   getRepoInfo,
   hasRepo,
-} from "./helpers/examples";
-import { generateAgentFiles } from "./helpers/generate-agent-files";
-import type { PackageManager } from "./helpers/get-pkg-manager";
-import { tryGitInit } from "./helpers/git";
-import { install } from "./helpers/install";
-import { isFolderEmpty } from "./helpers/is-folder-empty";
-import { getOnline } from "./helpers/is-online";
-import { isWriteable } from "./helpers/is-writeable";
-import { runTypegen } from "./helpers/typegen";
+} from "./helpers/examples.ts";
+import { generateAgentFiles } from "./helpers/generate-agent-files.ts";
+import type { PackageManager } from "./helpers/get-pkg-manager.ts";
+import { tryGitInit } from "./helpers/git.ts";
+import { install } from "./helpers/install.ts";
+import { isFolderEmpty } from "./helpers/is-folder-empty.ts";
+import { getOnline } from "./helpers/is-online.ts";
+import { isWriteable } from "./helpers/is-writeable.ts";
+import { runTypegen } from "./helpers/typegen.ts";
+import { type PresetName, presetTitle } from "./presets.ts";
 
 export class DownloadError extends Error {}
 
@@ -33,18 +33,14 @@ export async function createApp({
   packageManager,
   example,
   examplePath,
-  typescript,
   tailwind,
-  eslint,
-  biome,
-  srcDir,
-  importAlias,
   skipInstall,
   empty,
   bundler,
   disableGit,
   reactCompiler,
   agentsMd,
+  presets,
 }: {
   appPath: string;
   packageManager: PackageManager;
@@ -52,20 +48,18 @@ export async function createApp({
   examplePath?: string;
   typescript: boolean;
   tailwind: boolean;
-  eslint: boolean;
-  biome: boolean;
-  srcDir: boolean;
-  importAlias: string;
   skipInstall: boolean;
   empty: boolean;
   bundler: Bundler;
   disableGit?: boolean;
   reactCompiler: boolean;
   agentsMd: boolean;
+  /** The presets that were selected. */
+  presets?: PresetName[];
 }): Promise<void> {
   let repoInfo: RepoInfo | undefined;
-  const mode: TemplateMode = typescript ? "ts" : "js";
-  const template: TemplateType = `app${tailwind ? "-tw" : ""}${empty ? "-empty" : ""}`;
+  const template =
+    `app${tailwind ? "-tw" : ""}${empty ? "-empty" : ""}` as RelativeDir<TemplateType>;
 
   if (example) {
     let repoUrl: URL | undefined;
@@ -84,7 +78,7 @@ export async function createApp({
     if (repoUrl) {
       if (repoUrl.origin !== "https://github.com") {
         console.error(
-          `Invalid URL: ${red(
+          `Invalid URL: ${pico.red(
             `"${example}"`,
           )}. Only GitHub repositories are supported. Please use a GitHub URL and try again.`,
         );
@@ -95,7 +89,7 @@ export async function createApp({
 
       if (!repoInfo) {
         console.error(
-          `Found invalid GitHub URL: ${red(
+          `Found invalid GitHub URL: ${pico.red(
             `"${example}"`,
           )}. Please fix the URL and try again.`,
         );
@@ -106,7 +100,7 @@ export async function createApp({
 
       if (!found) {
         console.error(
-          `Could not locate the repository for ${red(
+          `Could not locate the repository for ${pico.red(
             `"${example}"`,
           )}. Please check that the repository exists and try again.`,
         );
@@ -117,10 +111,10 @@ export async function createApp({
 
       if (!found) {
         console.error(
-          `Could not locate an example named ${red(
+          `Could not locate an example named ${pico.red(
             `"${example}"`,
           )}. It could be due to the following:\n`,
-          `1. Your spelling of example ${red(
+          `1. Your spelling of example ${pico.red(
             `"${example}"`,
           )} might be incorrect.\n`,
           `2. You might not be connected to the internet or you are behind a proxy.`,
@@ -130,7 +124,7 @@ export async function createApp({
     }
   }
 
-  const root = resolve(appPath);
+  const root = resolve(appPath) as AbsoluteDir;
 
   if (!(await isWriteable(dirname(root)))) {
     console.error(
@@ -153,12 +147,12 @@ export async function createApp({
   const isOnline = !useYarn || (await getOnline());
   const originalDirectory = process.cwd();
 
-  console.log(`Creating a new Next.js app in ${green(root)}.`);
+  console.log(`Creating a new Next.js app in ${pico.green(root)}.`);
   console.log();
 
   process.chdir(root);
 
-  const packageJsonPath = join(root, "package.json");
+  const packageJsonPath = join(root, "package.json" as RelativeFile);
   let hasPackageJson = false;
 
   if (example) {
@@ -169,7 +163,7 @@ export async function createApp({
       if (repoInfo) {
         const repoInfo2 = repoInfo;
         console.log(
-          `Downloading files from repo ${cyan(
+          `Downloading files from repo ${pico.cyan(
             example,
           )}. This might take a moment.`,
         );
@@ -179,7 +173,7 @@ export async function createApp({
         });
       } else {
         console.log(
-          `Downloading files for example ${cyan(
+          `Downloading files for example ${pico.cyan(
             example,
           )}. This might take a moment.`,
         );
@@ -201,20 +195,20 @@ export async function createApp({
       );
     }
     // Copy `.gitignore` if the application did not provide one
-    const ignorePath = join(root, ".gitignore");
+    const ignorePath = join(root, ".gitignore" as RelativeFile);
     if (!existsSync(ignorePath)) {
       copyFileSync(
-        getTemplateFile({ file: "gitignore", mode, template }),
+        getTemplateFile({ file: "gitignore" as RelativeFile, template }),
         ignorePath,
       );
     }
 
     // Copy `next-env.d.ts` to any example that is typescript
-    const tsconfigPath = join(root, "tsconfig.json");
+    const tsconfigPath = join(root, "tsconfig.json" as RelativeFile);
     if (existsSync(tsconfigPath)) {
       copyFileSync(
-        getTemplateFile({ file: "next-env.d.ts", mode: "ts", template }),
-        join(root, "next-env.d.ts"),
+        getTemplateFile({ file: "next-env.d.ts" as RelativeFile, template }),
+        join(root, "next-env.d.ts" as RelativeFile),
       );
     }
 
@@ -241,20 +235,25 @@ export async function createApp({
      */
     await installTemplate({
       appName,
-      biome,
       bundler,
-      eslint,
-      importAlias,
       isOnline,
-      mode,
       packageManager,
+      presets,
       reactCompiler,
       root,
       skipInstall,
-      srcDir,
       tailwind,
       template,
     });
+  }
+
+  // Show the presets that were included, after the dependency install output.
+  if (presets && presets.length > 0) {
+    console.log(`Included ${pico.bold("presets")}:`);
+    for (const preset of presets) {
+      console.log(`  ${pico.green("+")} ${presetTitle(preset)}`);
+    }
+    console.log();
   }
 
   if (agentsMd) {
@@ -276,24 +275,26 @@ export async function createApp({
     cdpath = appPath;
   }
 
-  console.log(`${green("Success!")} Created ${appName} at ${appPath}`);
+  console.log(`${pico.green("Success!")} Created ${appName} at ${appPath}`);
 
   if (hasPackageJson) {
     console.log("Inside that directory, you can run several commands:");
     console.log();
-    console.log(cyan(`  ${packageManager} ${useYarn ? "" : "run "}dev`));
+    console.log(pico.cyan(`  ${packageManager} ${useYarn ? "" : "run "}dev`));
     console.log("    Starts the development server.");
     console.log();
-    console.log(cyan(`  ${packageManager} ${useYarn ? "" : "run "}build`));
+    console.log(pico.cyan(`  ${packageManager} ${useYarn ? "" : "run "}build`));
     console.log("    Builds the app for production.");
     console.log();
-    console.log(cyan(`  ${packageManager} start`));
+    console.log(pico.cyan(`  ${packageManager} start`));
     console.log("    Runs the built app in production mode.");
     console.log();
     console.log("We suggest that you begin by typing:");
     console.log();
-    console.log(cyan("  cd"), cdpath);
-    console.log(`  ${cyan(`${packageManager} ${useYarn ? "" : "run "}dev`)}`);
+    console.log(pico.cyan("  cd"), cdpath);
+    console.log(
+      `  ${pico.cyan(`${packageManager} ${useYarn ? "" : "run "}dev`)}`,
+    );
   }
   console.log();
 }

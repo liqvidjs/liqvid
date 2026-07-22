@@ -48,6 +48,30 @@ function MyComponent({ ref, ...props }: { ref?: React.Ref<HTMLDivElement> }) {
 }
 ```
 
+## Paths (`effect-paths`)
+
+The local `effect-paths` package brands path strings so absolute-vs-relative and
+file-vs-directory are tracked at the type level (via Effect `Brand`). Used
+heavily across `studio` and `cli` for filesystem work.
+
+- Brands (type + nominal constructor share the name): `AbsoluteDir`,
+  `AbsoluteFile`, `RelativeDir`, `RelativeFile`. Unions: `AbsolutePath`,
+  `RelativePath`, `AnyFile`, `AnyDir`, `AnyPath`.
+- Construct branded values by calling the constructor: `RelativeFile("project.json")`,
+  `AbsoluteDir(cwd)`. Define shared path constants this way (see
+  `packages/studio/src/conventions.mts`).
+- Importing `effect-paths` **augments `node:path`, `node:fs`, `node:fs/promises`,
+  `node:url`, `process`, and `import.meta`** so their signatures return/accept the
+  brands. `path.join(absDir, relDir, relFile)` yields an `AbsoluteFile`;
+  `path.basename`/`dirname`/`relative`/`resolve`, `process.cwd()`, and `fs.Dirent`
+  are all brand-aware. The augmentation is global — a single `import` in the module
+  (even `import "effect-paths"`) activates it.
+- Some `path.join` overloads are intentionally `@deprecated` to surface invalid
+  combinations (e.g. a file anywhere but the last arg, or mixing branded and
+  unbranded args) as type errors.
+- Use `import type` when you only need the types; import the constructor value when
+  you need to brand a string.
+
 ## Other Conventions
 
 - Errors: plain `throw new Error("message")`, no custom classes.

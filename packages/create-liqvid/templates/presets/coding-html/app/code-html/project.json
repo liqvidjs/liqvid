@@ -1,0 +1,6 @@
+{
+  "$schema": "https://liqvidjs.org/schemas/latest/project-json.json",
+  "aspectRatio": "16:9",
+  "description": "",
+  "name": "Coding: HTML"
+}

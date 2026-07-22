@@ -1,5 +1,6 @@
 "use client";
 
+import { useColorScheme } from "@liqvid/color-scheme/react";
 import { usePlayback, usePlaybackEvent, useTime } from "@liqvid/playback/react";
 import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas";
 import { between, type CleanUpFn } from "@liqvid/utils";
@@ -9,6 +10,7 @@ import {
   KeyboardIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
+import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
@@ -16,14 +18,7 @@ import { useStudioPrivateApi } from "../../LiqvidDevToolsProvider.tsx";
 import type { Transcript } from "../../types/schemas.mts";
 import type { Awaitable } from "../../types.mts";
 import { Button } from "../../ui/Button.tsx";
-import {
-  DialogBackdrop,
-  DialogClose,
-  DialogPopup,
-  DialogPortal,
-  DialogRoot,
-  DialogTrigger,
-} from "../../ui/Dialog.tsx";
+import { DialogClose, DialogRoot, DialogTrigger } from "../../ui/Dialog.tsx";
 import {
   MenuItem,
   MenuPopup,
@@ -63,7 +58,10 @@ export function CaptionsEditor({
     deleteJob: () => {},
   });
 
-  const t = useAsyncTranslations(Translations, "src/components/CaptionsEditor");
+  const t = useAsyncTranslations(
+    Translations,
+    "src/components/CaptionsEditor" as RelativeDir,
+  );
 
   useEffect(() => {
     Promise.resolve(propTranscript).then(
@@ -206,220 +204,218 @@ export function CaptionsEditor({
     return <>{pieces}</>;
   };
 
+  const { colorScheme } = useColorScheme();
+
   if (transcript.length === 0) return;
 
   return (
-    <DialogRoot open>
-      <DialogPortal>
-        <DialogBackdrop />
-        <DialogPopup className={styles.CaptionsEditor}>
-          <div data-affords="click">
-            <div className={styles.actions}>
-              {/* save affordance */}
-              <Button disabled={saving} onClick={save} type="submit">
-                {saving ? (
-                  <SpinnerIcon className={styles.spinner} size={16} />
-                ) : (
-                  <FloppyDiskIcon />
-                )}
-                {t.save}
-              </Button>
+    <>
+      <div className={styles.CaptionsEditor} style={{ colorScheme }}>
+        <div data-affords="click">
+          <div className={styles.actions}>
+            {/* save affordance */}
+            <Button disabled={saving} onClick={save} type="submit">
+              {saving ? (
+                <SpinnerIcon className={styles.spinner} size={16} />
+              ) : (
+                <FloppyDiskIcon />
+              )}
+              {t.save}
+            </Button>
 
-              {/* menu for break actions */}
-              <MenuRoot>
-                <MenuTrigger>
-                  <DotsThreeIcon weight="bold" />
-                  {t.actions}
-                </MenuTrigger>
-                <MenuPortal>
-                  <MenuPositioner sideOffset={4}>
-                    <MenuPopup>
-                      <MenuItem
-                        onClick={() =>
-                          store.setState((state) =>
-                            apply(state, {
-                              action: "set-caption-breaks",
-                              captionBreaks: sentenceBreaks(state.words),
-                            }),
-                          )
-                        }
-                      >
-                        {t.breakAfterEverySentence}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() =>
-                          store.setState((state) =>
-                            apply(state, {
-                              action: "set-caption-breaks",
-                              captionBreaks: [],
-                            }),
-                          )
-                        }
-                      >
-                        {t.clearCaptionBreaks}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() =>
-                          store.setState((state) =>
-                            apply(state, {
-                              action: "set-transcript-breaks",
-                              transcriptBreaks: [],
-                            }),
-                          )
-                        }
-                      >
-                        {t.clearParagraphBreaks}
-                      </MenuItem>
-                    </MenuPopup>
-                  </MenuPositioner>
-                </MenuPortal>
-              </MenuRoot>
-
-              {/* keyboard shortcuts */}
-              <DialogRoot>
-                <DialogTrigger render={<Button />}>
-                  <KeyboardIcon />
-                  {t.keyboardShortcuts}
-                </DialogTrigger>
-                <ShortcutsDialog shortcuts={shortcuts} t={t} />
-              </DialogRoot>
-
-              {/* close button */}
-              <DialogClose style={{ marginLeft: "auto" }} title={t.close} />
-            </div>
-
-            <div className={styles.time}>
-              <TimeDuration
-                format="milliseconds"
-                value={{ ms: transcript[selection.start]![1] }}
-              />
-              {" → "}
-              <TimeDuration
-                format="milliseconds"
-                value={{ ms: transcript[selection.end]![2] }}
-              />
-            </div>
-            {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
-            {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
-            <div
-              className={styles.transcript}
-              onClick={onClick}
-              onMouseLeave={onMouseLeave}
-              onMouseMove={onMouseMove}
-            >
-              <div className={styles.stripes} ref={stripesRef}>
-                {highlight && (
-                  <div
-                    className={styles.hoverWord}
-                    style={{
-                      height: highlight.height,
-                      left: highlight.left,
-                      top: highlight.top,
-                      width: highlight.width,
-                    }}
-                  />
-                )}
-                {editing && (
-                  <input
-                    // biome-ignore lint/a11y/noAutofocus: focus is the point of the inline editor
-                    autoFocus
-                    className={styles.wordInput}
-                    data-affords="keys"
-                    onBlur={cancelEdit}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onFocus={(e) => e.target.select()}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        commitEdit();
-                      } else if (e.key === "Escape") {
-                        e.preventDefault();
-                        cancelEdit();
+            {/* menu for break actions */}
+            <MenuRoot>
+              <MenuTrigger>
+                <DotsThreeIcon weight="bold" />
+                {t.actions}
+              </MenuTrigger>
+              <MenuPortal>
+                <MenuPositioner sideOffset={4}>
+                  <MenuPopup>
+                    <MenuItem
+                      onClick={() =>
+                        store.setState((state) =>
+                          apply(state, {
+                            action: "set-caption-breaks",
+                            captionBreaks: sentenceBreaks(state.words),
+                          }),
+                        )
                       }
-                    }}
-                    style={{
-                      left: editing.rect.left,
-                      top: editing.rect.top,
-                    }}
-                    value={editing.value}
-                  />
-                )}
-                {captionSegments(captionBreaks, transcript.length).map(
-                  (segment) => {
-                    const { startIndex, endIndex, hasCaptionBreak, i } =
-                      segment;
+                    >
+                      {t.breakAfterEverySentence}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() =>
+                        store.setState((state) =>
+                          apply(state, {
+                            action: "set-caption-breaks",
+                            captionBreaks: [],
+                          }),
+                        )
+                      }
+                    >
+                      {t.clearCaptionBreaks}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() =>
+                        store.setState((state) =>
+                          apply(state, {
+                            action: "set-transcript-breaks",
+                            transcriptBreaks: [],
+                          }),
+                        )
+                      }
+                    >
+                      {t.clearParagraphBreaks}
+                    </MenuItem>
+                  </MenuPopup>
+                </MenuPositioner>
+              </MenuPortal>
+            </MenuRoot>
 
-                    const hasSelection =
-                      between(startIndex, selection.start, endIndex) ||
-                      between(startIndex, selection.end, endIndex);
+            {/* keyboard shortcuts */}
+            <DialogRoot>
+              <DialogTrigger render={<Button />}>
+                <KeyboardIcon />
+                {t.keyboardShortcuts}
+              </DialogTrigger>
+              <ShortcutsDialog shortcuts={shortcuts} t={t} />
+            </DialogRoot>
 
-                    const markStart = Math.min(selection.start, endIndex);
-                    const markEnd = Math.min(selection.end, endIndex) + 1;
+            {/* close button */}
+            <DialogClose style={{ marginLeft: "auto" }} title={t.close} />
+          </div>
 
-                    // Attach the scroll target to the segment that contains the
-                    // selection start (the anchor of a possibly multi-segment mark).
-                    const isAnchorSegment = between(
-                      startIndex,
-                      selection.start,
-                      endIndex,
-                    );
-
-                    // The caption break falls after the segment's last word. If
-                    // that word also has a paragraph break, render the caption
-                    // break first and emit the paragraph `<br>` after it, so its
-                    // `<br>` is suppressed inside `renderRange` (via
-                    // `skipBreakAt`) and re-emitted below.
-                    const captionBreakWord = endIndex - 1;
-                    const coincidingParagraphBreak =
-                      hasCaptionBreak &&
-                      transcriptBreaks.includes(captionBreakWord);
-                    const skipBreakAt = coincidingParagraphBreak
-                      ? captionBreakWord
-                      : undefined;
-
-                    const captionBreakMarker = hasCaptionBreak && (
-                      <>
-                        <span className={styles.captionBreak} />{" "}
-                        {coincidingParagraphBreak && <br />}
-                      </>
-                    );
-
-                    if (!hasSelection) {
-                      return (
-                        <Fragment key={`${startIndex}/${i}`}>
-                          {renderRange(startIndex, endIndex, skipBreakAt)}{" "}
-                          {captionBreakMarker}
-                        </Fragment>
-                      );
+          <div className={styles.time}>
+            <TimeDuration
+              format="milliseconds"
+              value={{ ms: transcript[selection.start]![1] }}
+            />
+            {" → "}
+            <TimeDuration
+              format="milliseconds"
+              value={{ ms: transcript[selection.end]![2] }}
+            />
+          </div>
+          {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
+          {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
+          <div
+            className={styles.transcript}
+            onClick={onClick}
+            onMouseLeave={onMouseLeave}
+            onMouseMove={onMouseMove}
+          >
+            <div className={styles.stripes} ref={stripesRef}>
+              {highlight && (
+                <div
+                  className={styles.hoverWord}
+                  style={{
+                    height: highlight.height,
+                    left: highlight.left,
+                    top: highlight.top,
+                    width: highlight.width,
+                  }}
+                />
+              )}
+              {editing && (
+                <input
+                  // biome-ignore lint/a11y/noAutofocus: focus is the point of the inline editor
+                  autoFocus
+                  className={styles.wordInput}
+                  data-affords="keys"
+                  onBlur={cancelEdit}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitEdit();
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      cancelEdit();
                     }
+                  }}
+                  style={{
+                    left: editing.rect.left,
+                    top: editing.rect.top,
+                  }}
+                  value={editing.value}
+                />
+              )}
+              {captionSegments(captionBreaks, transcript.length).map(
+                (segment) => {
+                  const { startIndex, endIndex, hasCaptionBreak, i } = segment;
 
+                  const hasSelection =
+                    between(startIndex, selection.start, endIndex) ||
+                    between(startIndex, selection.end, endIndex);
+
+                  const markStart = Math.min(selection.start, endIndex);
+                  const markEnd = Math.min(selection.end, endIndex) + 1;
+
+                  // Attach the scroll target to the segment that contains the
+                  // selection start (the anchor of a possibly multi-segment mark).
+                  const isAnchorSegment = between(
+                    startIndex,
+                    selection.start,
+                    endIndex,
+                  );
+
+                  // The caption break falls after the segment's last word. If
+                  // that word also has a paragraph break, render the caption
+                  // break first and emit the paragraph `<br>` after it, so its
+                  // `<br>` is suppressed inside `renderRange` (via
+                  // `skipBreakAt`) and re-emitted below.
+                  const captionBreakWord = endIndex - 1;
+                  const coincidingParagraphBreak =
+                    hasCaptionBreak &&
+                    transcriptBreaks.includes(captionBreakWord);
+                  const skipBreakAt = coincidingParagraphBreak
+                    ? captionBreakWord
+                    : undefined;
+
+                  const captionBreakMarker = hasCaptionBreak && (
+                    <>
+                      <span className={styles.captionBreak} />{" "}
+                      {coincidingParagraphBreak && <br />}
+                    </>
+                  );
+
+                  if (!hasSelection) {
                     return (
                       <Fragment key={`${startIndex}/${i}`}>
-                        {renderRange(startIndex, markStart, skipBreakAt)}{" "}
-                        {hasSelection && (
-                          <>
-                            <mark
-                              className={styles.selection}
-                              key={selection.start}
-                              ref={isAnchorSegment ? selectionRef : undefined}
-                            >
-                              {renderRange(markStart, markEnd, skipBreakAt)}
-                            </mark>{" "}
-                          </>
-                        )}
-                        {renderRange(markEnd, endIndex, skipBreakAt)}{" "}
+                        {renderRange(startIndex, endIndex, skipBreakAt)}{" "}
                         {captionBreakMarker}
                       </Fragment>
                     );
-                  },
-                )}
-              </div>
+                  }
+
+                  return (
+                    <Fragment key={`${startIndex}/${i}`}>
+                      {renderRange(startIndex, markStart, skipBreakAt)}{" "}
+                      {hasSelection && (
+                        <>
+                          <mark
+                            className={styles.selection}
+                            key={selection.start}
+                            ref={isAnchorSegment ? selectionRef : undefined}
+                          >
+                            {renderRange(markStart, markEnd, skipBreakAt)}
+                          </mark>{" "}
+                        </>
+                      )}
+                      {renderRange(markEnd, endIndex, skipBreakAt)}{" "}
+                      {captionBreakMarker}
+                    </Fragment>
+                  );
+                },
+              )}
             </div>
           </div>
-        </DialogPopup>
-        <CaptionsPreview store={store} {...displayProps} />
-      </DialogPortal>
-    </DialogRoot>
+        </div>
+      </div>
+      <CaptionsPreview store={store} {...displayProps} />
+    </>
   );
 }
 

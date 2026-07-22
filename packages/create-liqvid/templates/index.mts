@@ -1,21 +1,60 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { Sema } from "async-sema";
-import { async as glob } from "fast-glob";
-import { bold, cyan } from "picocolors";
+import type { RelativeDir, RelativeFile } from "effect-paths";
+import pico from "picocolors";
 
-import { copy } from "../src/helpers/copy";
-import { getPnpmMajorVersion } from "../src/helpers/get-pkg-manager";
-import { install } from "../src/helpers/install";
-import { runTypegen } from "../src/helpers/typegen";
+import { copy } from "../src/helpers/copy.ts";
+import { getPnpmMajorVersion } from "../src/helpers/get-pkg-manager.ts";
+import { install } from "../src/helpers/install.ts";
+import { runTypegen } from "../src/helpers/typegen.ts";
+import { presetDependencies, presetDevDependencies } from "../src/presets.ts";
 
 import {
   Bundler,
   type GetTemplateFileArgs,
   type InstallTemplateArgs,
-} from "./types";
+} from "./types.mts";
+
+import versions from "../versions.json" with { type: "json" };
+import versionsThirdParty from "../versions-third-party.json" with {
+  type: "json",
+};
+
+const liqvidDep = (...packageNames: (keyof typeof versions)[]) =>
+  Object.fromEntries(
+    packageNames.map((pkg) => [`@liqvid/${pkg}`, versions[pkg]]),
+  );
+
+const thirdPartyDep = (...packageNames: (keyof typeof versionsThirdParty)[]) =>
+  Object.fromEntries(packageNames.map((pkg) => [pkg, versionsThirdParty[pkg]]));
+
+/**
+ * Resolve the version range for a preset dependency by name, using the same
+ * version sources as the base template. `@liqvid/*` packages are looked up in
+ * `versions.json`; everything else in `versions-third-party.json`.
+ *
+ * @throws if the package has no pinned version in either file.
+ */
+const resolvePresetVersion = (name: string): string => {
+  if (name.startsWith("@liqvid/")) {
+    const key = name.slice("@liqvid/".length) as keyof typeof versions;
+    if (key in versions) return versions[key];
+  } else if (name in versionsThirdParty) {
+    return versionsThirdParty[name as keyof typeof versionsThirdParty];
+  }
+  throw new Error(
+    `No pinned version found for preset dependency "${name}". ` +
+      `Add it to versions-third-party.json (or versions.json for @liqvid/* packages).`,
+  );
+};
+
+const presetDeps = (names: string[] | undefined): Record<string, string> =>
+  Object.fromEntries(
+    (names ?? []).map((name) => [name, resolvePresetVersion(name)]),
+  );
 
 // interface PackageJson {
 //   dependencies?: Record<string, string>;
@@ -27,13 +66,19 @@ import {
 //   trustedDependencies?: string[];
 //   version: string;
 // }
-type PackageJson = any;
+type PackageJson = {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  ignoreScripts?: string[];
+  name: string;
+  private?: boolean;
+  scripts?: Record<string, string>;
+  trustedDependencies?: string[];
+  version?: string;
+};
 
-import versions from "../versions.json";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Do not rename or format. sync-react script relies on this line.
-// prettier-ignore
-const nextjsReactPeerVersion = "19.2.4";
 function sorted(obj: Record<string, string>) {
   return Object.keys(obj)
     .sort()
@@ -49,15 +94,13 @@ function sorted(obj: Record<string, string>) {
  */
 export const getTemplateFile = ({
   template,
-  mode,
   file,
 }: GetTemplateFileArgs): string => {
-  return path.join(__dirname, template, mode, file);
+  return path.join(__dirname, template, "..ts" as RelativeDir, file);
 };
 
-export const SRC_DIR_NAMES = ["app", "pages", "styles"];
+export const SRC_DIR_NAMES = ["app", "pages", "styles"] as RelativeDir[];
 
-const nextVersion = "16.2.0";
 /**
  * Install a Next.js internal template to a given `root` directory.
  */
@@ -67,25 +110,19 @@ export const installTemplate = async ({
   packageManager,
   isOnline,
   template,
-  mode,
   tailwind,
-  eslint,
-  biome,
-  srcDir,
-  importAlias,
   skipInstall,
   bundler,
   reactCompiler,
+  presets,
 }: InstallTemplateArgs) => {
-  console.log(bold(`Using ${packageManager}.`));
+  console.log(pico.bold(`Using ${packageManager}.`));
 
   /**
    * Copy the template files to the target directory.
    */
-  const templatePath = path.join(__dirname, "templates", template, mode);
-  const copySource = ["**"];
-  if (!eslint) copySource.push("!eslint.config.mjs");
-  if (!biome) copySource.push("!biome.json");
+  const templatePath = path.join(__dirname, template, "ts" as RelativeDir);
+  const copySource = ["**", "**/.browserslistrc"];
   if (!tailwind) copySource.push("!postcss.config.mjs");
 
   await copy(copySource, root, {
@@ -108,11 +145,24 @@ export const installTemplate = async ({
     },
   });
 
-  if (bundler === Bundler.Rspack) {
-    const nextConfigFile = path.join(
-      root,
-      mode === "js" ? "next.config.mjs" : "next.config.ts",
+  /**
+   * Copy each selected preset's content from `presets/{preset-name}` into the
+   * target directory, layered on top of the base template.
+   */
+  for (const preset of presets ?? []) {
+    const presetPath = path.join(
+      __dirname,
+      "presets" as RelativeDir,
+      preset as RelativeDir,
     );
+    await copy("**", root, {
+      cwd: presetPath,
+      parents: true,
+    });
+  }
+
+  if (bundler === Bundler.Rspack) {
+    const nextConfigFile = path.join(root, "next.config.ts" as RelativeFile);
     await fs.writeFile(
       nextConfigFile,
       `import withRspack from "next-rspack";\n\n` +
@@ -124,10 +174,7 @@ export const installTemplate = async ({
   }
 
   if (reactCompiler) {
-    const nextConfigFile = path.join(
-      root,
-      mode === "js" ? "next.config.mjs" : "next.config.ts",
-    );
+    const nextConfigFile = path.join(root, "next.config.ts" as RelativeFile);
     let configContent = await fs.readFile(nextConfigFile, "utf8");
 
     configContent = configContent.replace(
@@ -136,73 +183,6 @@ export const installTemplate = async ({
     );
 
     await fs.writeFile(nextConfigFile, configContent);
-  }
-
-  const tsconfigFile = path.join(
-    root,
-    mode === "js" ? "jsconfig.json" : "tsconfig.json",
-  );
-  await fs.writeFile(
-    tsconfigFile,
-    (await fs.readFile(tsconfigFile, "utf8"))
-      .replace(
-        `"@/*": ["./*"]`,
-        srcDir ? `"@/*": ["./src/*"]` : `"@/*": ["./*"]`,
-      )
-      .replace(`"@/*":`, `"${importAlias}":`),
-  );
-
-  // update import alias in any files if not using the default
-  if (importAlias !== "@/*") {
-    const files = await glob("**/*", {
-      cwd: root,
-      dot: true,
-      // We don't want to modify compiler options in [ts/js]config.json
-      // and none of the files in the .git folder
-      // TODO: Refactor this to be an allowlist, rather than a denylist,
-      // to avoid corrupting files that weren't intended to be replaced
-
-      ignore: [
-        "tsconfig.json",
-        "jsconfig.json",
-        ".git/**/*",
-        "**/fonts/**",
-        "**/favicon.ico",
-      ],
-      stats: false,
-    });
-    const writeSema = new Sema(8, { capacity: files.length });
-    await Promise.all(
-      files.map(async (file) => {
-        await writeSema.acquire();
-        const filePath = path.join(root, file);
-        if ((await fs.stat(filePath)).isFile()) {
-          await fs.writeFile(
-            filePath,
-            (await fs.readFile(filePath, "utf8")).replace(
-              `@/`,
-              `${importAlias.replace(/\*/g, "")}`,
-            ),
-          );
-        }
-        writeSema.release();
-      }),
-    );
-  }
-
-  if (srcDir) {
-    await fs.mkdir(path.join(root, "src"), { recursive: true });
-    await Promise.all(
-      SRC_DIR_NAMES.map(async (file) => {
-        await fs
-          .rename(path.join(root, file), path.join(root, "src", file))
-          .catch((err) => {
-            if (err.code !== "ENOENT") {
-              throw err;
-            }
-          });
-      }),
-    );
   }
 
   /** Copy the version from package.json or override for tests. */
@@ -214,35 +194,51 @@ export const installTemplate = async ({
      * Default dependencies.
      */
     dependencies: {
-      "@base-ui/react": "^1.3.0",
-      "@liqvid/cli": `^${versions.cli}`,
-      "@liqvid/katex": `^${versions.katex}`,
-      "@liqvid/media": `^${versions.media}`,
-      "@liqvid/prompts": `^${versions.prompts}`,
-      "@liqvid/script": `^${versions.script}`,
-      "@liqvid/studio": `^${versions.studio}`,
-      "@liqvid/utils": `^${versions.utils}`,
-      katex: "0.16.39",
-      liqvid: `^${versions.main}`,
-      next: nextVersion,
-      react: nextjsReactPeerVersion,
-      "react-dom": nextjsReactPeerVersion,
+      ...thirdPartyDep(
+        "@base-ui/react",
+        "@phosphor-icons/react",
+        "clsx",
+        "hls.js",
+        "katex",
+        "next",
+        "next-ws",
+        "react",
+        "react-dom",
+        "smart-whisper",
+      ),
+      ...liqvidDep(
+        "cli",
+        "media",
+        "prompts",
+        "recording",
+        "schemas",
+        "script",
+        "studio",
+        "utils",
+      ),
+      liqvid: versions.main,
     },
-    devDependencies: {
-      "no-private-imports": "^0.0.2",
-      "no-restricted-imports": "^0.0.2",
-    },
+    devDependencies: thirdPartyDep(
+      "@biomejs/biome",
+      "@types/node",
+      "@types/react",
+      "@types/react-dom",
+      "effect-paths",
+      "no-private-imports",
+      "no-restricted-imports",
+      "typescript",
+    ),
     name: appName,
     private: true,
     scripts: {
       build: `next build${bundlerFlags}`,
       dev: `next dev${bundlerFlags}`,
+      format: "biome format --write",
+      lint: "biome check",
       "liqvid:build": "liqvid build",
       "liqvid:publish": "liqvid publish",
       postinstall: "npx @liqvid/cli generate-imports",
       start: "next start",
-      ...(eslint && { lint: "eslint" }),
-      ...(biome && { format: "biome format --write", lint: "biome check" }),
     },
     version: "0.1.0",
   };
@@ -253,59 +249,43 @@ export const installTemplate = async ({
       NEXT_PRIVATE_TEST_VERSION &&
       path.isAbsolute(NEXT_PRIVATE_TEST_VERSION)
     ) {
-      packageJson.dependencies["next-rspack"] = path.resolve(
+      packageJson.dependencies!["next-rspack"] = path.resolve(
         path.dirname(NEXT_PRIVATE_TEST_VERSION),
         "../next-rspack/next-rspack-packed.tgz",
       );
     } else {
-      packageJson.dependencies["next-rspack"] = nextVersion;
+      packageJson.dependencies!["next-rspack"] = versionsThirdParty.next;
     }
   }
 
   if (reactCompiler) {
-    packageJson.devDependencies["babel-plugin-react-compiler"] = "1.0.0";
-  }
-
-  /**
-   * TypeScript projects will have type definitions and other devDependencies.
-   */
-  if (mode === "ts") {
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      "@types/node": "^20",
-      "@types/react": "^19",
-      "@types/react-dom": "^19",
-      typescript: "^5",
-    };
+    packageJson.devDependencies!["babel-plugin-react-compiler"] =
+      versionsThirdParty["babel-plugin-react-compiler"];
   }
 
   /* Add Tailwind CSS dependencies. */
   if (tailwind) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      "@tailwindcss/postcss": "^4",
-      tailwindcss: "^4",
+      "@tailwindcss/postcss": versionsThirdParty["@tailwindcss/postcss"],
+      "tailwind-merge": versionsThirdParty["tailwind-merge"],
+      tailwindcss: versionsThirdParty.tailwindcss,
     };
   }
 
-  /* Default ESLint dependencies. */
-  if (eslint) {
+  /* Add dependencies and devDependencies contributed by the selected presets. */
+  for (const preset of presets ?? []) {
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
+      ...presetDeps(presetDependencies(preset)),
+    };
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      eslint: "^9",
-      "eslint-config-next": nextVersion,
+      ...presetDeps(presetDevDependencies(preset)),
     };
   }
 
-  /* Biome dependencies. */
-  if (biome) {
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      "@biomejs/biome": "2.4.8",
-    };
-  }
-
-  const devDeps = Object.keys(packageJson.devDependencies).length;
+  const devDeps = Object.keys(packageJson.devDependencies!).length;
   if (!devDeps) delete packageJson.devDependencies;
 
   // Sort dependencies and devDependencies alphabetically
@@ -325,7 +305,7 @@ export const installTemplate = async ({
     // If we can't determine the version, assume latest (v10+) since we already
     // know pnpm is being used at this point.
     const pnpmMajorVersion = getPnpmMajorVersion();
-    if (pnpmMajorVersion === null || pnpmMajorVersion >= 10) {
+    if (false && (pnpmMajorVersion === null || pnpmMajorVersion >= 10)) {
       const pnpmWorkspaceYaml = [
         "ignoredBuiltDependencies:",
         // Sharp has prebuilt binaries for the platforms next-swc has binaries.
@@ -337,7 +317,7 @@ export const installTemplate = async ({
         "",
       ].join(os.EOL);
       await fs.writeFile(
-        path.join(root, "pnpm-workspace.yaml"),
+        path.join(root, "pnpm-workspace.yaml" as RelativeFile),
         pnpmWorkspaceYaml,
       );
     }
@@ -357,7 +337,7 @@ export const installTemplate = async ({
   }
 
   await fs.writeFile(
-    path.join(root, "package.json"),
+    path.join(root, "package.json" as RelativeFile),
     JSON.stringify(packageJson, null, 2) + os.EOL,
   );
 
@@ -365,12 +345,12 @@ export const installTemplate = async ({
 
   console.log("\nInstalling dependencies:");
   for (const dependency in packageJson.dependencies)
-    console.log(`- ${cyan(dependency)}`);
+    console.log(`- ${pico.cyan(dependency)}`);
 
   if (devDeps) {
     console.log("\nInstalling devDependencies:");
     for (const dependency in packageJson.devDependencies)
-      console.log(`- ${cyan(dependency)}`);
+      console.log(`- ${pico.cyan(dependency)}`);
   }
 
   console.log();
@@ -386,4 +366,4 @@ export const installTemplate = async ({
   }
 };
 
-export * from "./types";
+export * from "./types.mts";

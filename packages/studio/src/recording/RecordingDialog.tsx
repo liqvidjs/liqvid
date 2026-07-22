@@ -4,12 +4,20 @@ import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { isMac, useToggle } from "@liqvid/utils";
+import { compare, isMac, useToggle } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
+import { useChannel } from "../components/WebSocketProvider.tsx";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
@@ -38,6 +46,7 @@ export function RecordingDialog({
   onShortcutChange,
 }: RecordingDialogProps) {
   const { instances, projectPath } = useStudioPrivateApi();
+  console.log({ projectPath });
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
 
@@ -109,13 +118,35 @@ export function RecordingDialog({
         const client = yield* LiqvidStudioApiClient;
 
         const recordings = yield* client.recordings.list({
-          query: { url: projectPath },
+          query: { projectPath },
         });
 
         setRecordings(recordings);
       }),
     );
   }, [projectPath]);
+
+  // Live-update the list as recordings are created/updated/deleted on disk.
+  useChannel(
+    "recordings",
+    useMemo(
+      () => ({
+        deleteRecording: ({ name, url }) => {
+          if (url !== projectPath) return;
+          setRecordings((prev) => prev.filter((r) => r.name !== name));
+        },
+        newRecording: ({ recording, url }) => {
+          if (url !== projectPath) return;
+          setRecordings((prev) => upsertRecording(prev, recording));
+        },
+        updateRecording: ({ recording, url }) => {
+          if (url !== projectPath) return;
+          setRecordings((prev) => upsertRecording(prev, recording));
+        },
+      }),
+      [projectPath],
+    ),
+  );
 
   return (
     <DockableDialog.Dialog
@@ -139,7 +170,7 @@ export function RecordingDialog({
                 Shortcuts
               </TabsTrigger>
             </TabsList>
-            <TabsContent asChild value={tabs.configuration}>
+            <TabsContent asChild keepMounted value={tabs.configuration}>
               <section>
                 <h3>Plugins</h3>
 
@@ -354,6 +385,20 @@ function ShortcutRow({
       </td>
     </tr>
   );
+}
+
+/**
+ * Insert or replace a recording (keyed by `name`), keeping the list sorted by
+ * creation time to match the server's `list` ordering.
+ */
+function upsertRecording(
+  recordings: readonly RecordingMeta[],
+  recording: RecordingMeta,
+): RecordingMeta[] {
+  const next = recordings.filter((r) => r.name !== recording.name);
+  next.push(recording);
+  next.sort((a, b) => compare(a.created, b.created));
+  return next;
 }
 
 /** Format key sequences with special characters on Mac */

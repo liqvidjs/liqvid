@@ -6,13 +6,17 @@ import type { Locale } from "@liqvid/schemas";
 import {
   CaretUpDownIcon,
   CheckIcon,
+  GearIcon,
   SpinnerIcon,
   TranslateIcon,
 } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
+import type { SettingsConfig } from "../../api/contract.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
+
+import { ConfigClient } from "./ConfigClient.tsx";
 
 import styles from "./settings.module.css";
 
@@ -38,9 +42,11 @@ const LOCALES_ITEMS: Record<string, string> = Object.fromEntries(
 );
 
 export function SettingsClient({
+  config,
   locale: initialLocale,
   t,
 }: {
+  config: SettingsConfig;
   locale: Locale;
   t: T;
 }) {
@@ -136,6 +142,16 @@ export function SettingsClient({
             </Select.Positioner>
           </Select.Portal>
         </Select.Root>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>
+          <GearIcon weight="bold" />
+          {t.configuration}
+        </h2>
+        <p className={styles.description}>{t.configurationDescription}</p>
+
+        <ConfigClient config={config} t={t} />
       </section>
     </main>
   );

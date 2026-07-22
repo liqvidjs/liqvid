@@ -1,0 +1,318 @@
+@import "./css/controls.css";
+@import "./css/settings.css";
+@import "./css/scrubber.css";
+@import "./css/volume.css";
+
+/* reset styles */
+* {
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: none;
+}
+:link {
+  color: inherit;
+  text-decoration: none;
+}
+iframe,
+img {
+  border: none;
+}
+
+.lv-player {
+  --lv-accent: #af1866;
+  --lv-aspect-ratio: calc(16 / 9);
+  --lv-controls-height: 44px;
+  --lv-elapsed-color: var(--lv-accent);
+  --lv-scrubber-color: var(--lv-accent);
+  --lv-scrub-height: 6px;
+  --lv-volume-color: var(--lv-accent);
+  --lv-buttons-height: calc(var(--lv-controls-height) - var(--lv-scrub-height));
+  --lv-canvas-height: calc(var(--lv-height) - var(--lv-controls-height));
+  --lv-height: calc(var(--lv-width) / var(--lv-aspect-ratio));
+  position: relative;
+  width: var(--lv-width);
+  height: var(--lv-height);
+  background-color: #000;
+
+  &[data-render-mode]:not([data-render-mode="web"]) {
+    /* MUST include units here because this is used in other calc() expressions */
+    --lv-controls-height: 0px;
+  }
+}
+
+.lv-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.lv-canvas {
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.lv-canvas {
+  width: var(--lv-width);
+  height: var(--lv-height);
+}
+
+@media (min-aspect-ratio: 16 / 9) {
+  :root {
+    font-size: 2vh;
+  }
+  .lv-player {
+    --lv-width: calc(var(--lv-aspect-ratio) * 100vh);
+  }
+  .lv-player > .lv-canvas {
+    margin: 0 auto;
+  }
+}
+
+@media (max-aspect-ratio: 16 / 9) {
+  :root {
+    font-size: 1.25vw;
+  }
+  .lv-player {
+    --lv-width: 100vw;
+  }
+  .lv-player > .lv-canvas {
+    top: calc((100% - 100vw / var(--lv-aspect-ratio)) / 2);
+  }
+}
+
+.lv-controls-scrub {
+  position: relative;
+  z-index: 2;
+  width: 97%;
+  height: var(--lv-scrub-height);
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.lv-dialog-subtitle {
+  display: block;
+  text-align: center;
+  border-bottom: 1px solid #aaa;
+}
+
+.lv-controls-time {
+  display: inline-block;
+  padding: 0 1.5em;
+  font-family: sans-serif;
+  font-size: 11px;
+  line-height: 36px;
+  vertical-align: top;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.lv-time-separator {
+  margin: 0 3px;
+}
+
+@media (min-width: 401px) {
+  .lv-controls {
+    --lv-controls-left: 2;
+    --lv-controls-right: 3;
+  }
+}
+@media (max-width: 800px) {
+  .lv-player {
+    --lv-controls-height: 36px;
+  }
+}
+@media (max-width: 400px) {
+  .lv-player {
+    --lv-controls-height: 30px;
+  }
+  .lv-controls {
+    --lv-controls-left: 2;
+    --lv-controls-right: 2;
+  }
+  .lv-controls-settings {
+    display: none;
+  }
+}
+@media (any-hover: none) {
+  .lv-controls {
+    position: absolute;
+    top: unset;
+    bottom: calc((100% - var(--lv-height)) / 2);
+    left: calc((100% - var(--lv-width)) / 2);
+    z-index: 1000;
+    width: var(--lv-width);
+    height: var(--lv-controls-height);
+    color: #fff;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .lv-controls-mute,
+  .lv-controls-volume-slider {
+    display: none;
+  }
+
+  .lv-controls-time {
+    line-height: unset;
+  }
+
+  .lv-current-time,
+  .lv-total-time {
+    position: absolute;
+    top: 0;
+    width: var(--lv-buttons-height);
+    height: var(--lv-buttons-height);
+    line-height: var(--lv-buttons-height);
+  }
+  .lv-current-time {
+    left: 0;
+    text-align: right;
+  }
+  .lv-total-time {
+    right: calc((var(--lv-controls-right) - 1) * var(--lv-buttons-height));
+    text-align: left;
+  }
+
+  .lv-time-separator {
+    display: none;
+  }
+
+  .lv-controls-scrub-wrap {
+    position: relative;
+  }
+
+  .lv-controls-scrub-wrap::after {
+    position: absolute;
+    top: calc(var(--lv-buttons-height) * (0.075 / 0.55 - 0.5));
+    right: 0;
+    bottom: calc(var(--lv-buttons-height) * (0.075 / 0.55 - 0.5));
+    left: 0;
+    content: "";
+  }
+
+  .lv-controls-scrub {
+    top: calc(50% - 0.5 * (7.5% / 0.55));
+    left: calc(var(--lv-controls-left) * var(--lv-buttons-height));
+    width: calc(
+      100% -
+      (var(--lv-controls-left) + var(--lv-controls-right)) *
+      var(--lv-buttons-height) -
+      7px
+    );
+    height: calc(7.5% / 0.55);
+    margin: unset;
+  }
+
+  .lv-scrubber {
+    top: -50%;
+    height: 216%;
+    pointer-events: all;
+  }
+
+  .lv-controls-playpause {
+    position: absolute;
+    top: 0;
+    left: var(--lv-buttons-height);
+    width: var(--lv-buttons-height);
+    pointer-events: all;
+    cursor: pointer;
+  }
+  .lv-controls-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    float: unset;
+  }
+  .lv-controls-right > * {
+    width: var(--lv-buttons-height);
+  }
+}
+
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) {
+    *[data-from-first],
+    *[data-during] {
+      will-change: opacity;
+    }
+  }
+}
+
+/* alternating lines with dashed separators effect */
+.lv-transcript-lines {
+  --odd: light-dark(#f6f6f6, var(--color-stone-700));
+  --even: light-dark(#f0f0f0, var(--color-stone-800));
+  --sep: light-dark(#1a69b5, var(--color-stone-500));
+
+  --lh: 1.5;
+  --gap: 3px;
+  --dash: 3px;
+
+  line-height: var(--lh);
+
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--lh) * 1em),
+      var(--even) calc(var(--lh) * 1em),
+      var(--even) calc(var(--lh) * 2em - 1px),
+      transparent calc(var(--lh) * 2em - 1px),
+      transparent calc(var(--lh) * 2em)
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent var(--dash),
+      var(--odd) var(--dash),
+      var(--odd) calc(var(--dash) + var(--gap))
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--odd) 0,
+      var(--odd) calc(var(--lh) * 1em - 1px),
+      var(--sep) calc(var(--lh) * 1em - 1px),
+      var(--sep) calc(var(--lh) * 1em)
+    );
+}
+
+.lv-transcript-active-word {
+  &[aria-current] {
+    --pad-x: 4px;
+    --pad-y: 1px;
+
+    position: relative;
+    z-index: 0;
+
+    /** repeat background on the element itself for tokens with spaces */
+    background: light-dark(#acf, #79e);
+
+    /* do this on the ::before to avoid causing reflow
+   * at the end of lines
+   */
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+
+      box-sizing: content-box;
+      width: 100%;
+      height: 100%;
+
+      padding: var(--pad-y) var(--pad-x);
+      margin: calc(-1 * var(--pad-y)) calc(-1 * var(--pad-x));
+
+      content: "";
+      background: light-dark(#acf, #79e);
+      border-radius: 2px;
+    }
+  }
+}

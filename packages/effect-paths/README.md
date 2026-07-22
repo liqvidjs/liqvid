@@ -28,9 +28,12 @@ import {
 // process.cwd() now returns AbsoluteDir
 process.cwd() satisfies AbsoluteDir;
 
+// template literals are supported
+RelativeFile("package.json") satisfies RelativeFile<`${string}.json`>;
+
 /* ------------------------------ path.join examples ------------------------------ */
 // joining absolute dir to relative file/dir gives absolute file/dir
-path.join(process.cwd(), RelativeFile("project.json")) satisfies AbsoluteFile;
+path.join(process.cwd(), RelativeFile("package.json")) satisfies AbsoluteFile;
 path.join(process.cwd(), RelativeDir("config")) satisfies AbsoluteDir;
 
 // AbsolutePath = AbsoluteDir | AbsoluteFile

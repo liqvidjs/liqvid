@@ -82,8 +82,8 @@ function setupPreviewSymlinks(previewDir: AbsoluteDir, basePath: string) {
 
     // Clean up any existing symlinks in preview directory (except 'out' itself)
     const entries = yield* readDirWithFileTypes(previewDir);
-    for (const [name, stats] of entries) {
-      if (stats.type === "SymbolicLink") {
+    for (const [name, kind] of entries) {
+      if (kind === "SymbolicLink") {
         yield* fs.remove(path.join(previewDir, name));
       }
     }

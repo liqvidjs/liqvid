@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { loadJson } from "@liqvid/cli/utils";
@@ -10,6 +11,7 @@ import {
   ProjectJson,
   type ProjectMeta,
 } from "@liqvid/schemas";
+import { dirNameToPackageName } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
 import {
   Cause,
@@ -17,6 +19,7 @@ import {
   FileSystem,
   Layer,
   Logger,
+  Option,
   type PlatformError,
   PubSub,
   References,
@@ -31,23 +34,27 @@ import {
   type RelativePath,
 } from "effect-paths";
 
+import { loadRecordingMeta } from "../api/recording.mts";
 import {
   ASSETS_DIR,
-  NEXT_APP_DIR,
+  NEXT_PAGE,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  RECORDING_META_FILE,
+  RECORDINGS_DIR,
 } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
 import { broadcast } from "../next/websockets.mts";
+import { existenceOptional } from "../utils/effect.mts";
 import { walkDir } from "../utils/fs.mts";
-import { getLogLevel } from "../utils/misc.mts";
+import { getLogLevel, inRoutesDir } from "../utils/misc.mts";
 
-type Projects = Record<string, Schema.Struct.Mutable<ProjectMeta>>;
+type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 
 interface Context {
   basename: RelativeFile;
   dirname: AbsoluteDir;
   filename: AbsoluteFile;
+  relative: RelativeFile;
   projects: Projects;
 }
 
@@ -60,19 +67,20 @@ type WatchEvent =
       basename: RelativeFile;
       dirname: AbsoluteDir;
       filename: AbsoluteFile;
+      relative: RelativeFile;
       kind: "file";
     }
   | {
       basename: RelativeDir;
       dirname: AbsoluteDir;
       filename: AbsoluteDir;
+      relative: RelativeDir;
       kind: "dir";
     };
 
 export async function watchProjectFiles(projects: Projects) {
   console.log(chalk.blue("Watching project files..."));
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
+  const TARGET_DIR = inRoutesDir();
 
   // initial check
   await walkDir(
@@ -81,7 +89,13 @@ export async function watchProjectFiles(projects: Projects) {
       // initialize project metadata
       if (basename === PROJECT_FILE) {
         await Effect.runPromise(
-          createProject({ basename, dirname, filename, projects }).pipe(
+          createProject({
+            basename,
+            dirname,
+            filename,
+            projects,
+            relative: path.relative(TARGET_DIR, filename),
+          }).pipe(
             Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
             Effect.provide(
               Layer.mergeAll(
@@ -187,9 +201,9 @@ function watchFileEvents(
             // OS watcher, so we only reliably see the temp-file event. Map it
             // back onto the real file so downstream handlers still fire.
             const rawRel = event.path as RelativePath;
-            const rel = normalizeEditorTempPath(rawRel);
-            const rewritten = rel !== rawRel;
-            const filename = path.join(targetDir, rel);
+            const relative = normalizeEditorTempPath(rawRel);
+            const rewritten = relative !== rawRel;
+            const filename = path.join(targetDir, relative);
 
             // When the path was rewritten from a temp file, the event's `_tag`
             // describes the temp file, not the real file — so ignore it and
@@ -202,16 +216,18 @@ function watchFileEvents(
 
             return isDir
               ? ({
-                  basename: RelativeDir(path.basename(rel)),
+                  basename: RelativeDir(path.basename(relative)),
                   dirname,
                   filename: AbsoluteDir(filename),
                   kind: "dir",
+                  relative: RelativeDir(relative),
                 } satisfies WatchEvent)
               : ({
-                  basename: RelativeFile(path.basename(rel)),
+                  basename: RelativeFile(path.basename(relative)),
                   dirname,
                   filename: AbsoluteFile(filename),
                   kind: "file",
+                  relative: RelativeFile(relative),
                 } satisfies WatchEvent);
           }),
         ),
@@ -278,37 +294,39 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
  */
 function handleWatchEvent(event: WatchEvent, projects: Projects) {
   return Effect.gen(function* () {
-    if (event.kind !== "file") return;
+    // A recording is a directory under `.liqvid/recordings/`; its removal (as
+    // opposed to a change to its `recording-meta.json`) surfaces as a dir
+    // event, so handle those here before bailing on non-file events.
+    if (event.kind === "dir") {
+      if (path.basename(event.dirname) === RECORDINGS_DIR) {
+        yield* handleRecordingDir(event.filename);
+      }
+      return;
+    }
 
-    const { basename, dirname, filename } = event;
+    const { basename } = event;
 
     yield* Effect.logDebug("watchEvent", event);
 
     switch (basename) {
       case PROJECT_FILE: {
-        yield* handleProjectJson({
-          basename,
-          dirname,
-          filename: AbsoluteFile(filename),
-          projects,
-        });
+        yield* handleProjectJson({ ...event, projects });
         break;
       }
       case PROJECT_META_FILE: {
-        yield* handleProjectMeta({
-          basename,
-          dirname,
-          filename: AbsoluteFile(filename),
-          projects,
-        });
+        yield* handleProjectMeta({ ...event, projects });
+        break;
+      }
+      case RECORDING_META_FILE: {
+        yield* handleRecordingMeta({ ...event, projects });
         break;
       }
       default: {
         // Handle opengraph-image and twitter-image changes
         if (isOpenGraphImage(basename)) {
-          handleOpenGraphImage({ dirname, projects });
+          handleOpenGraphImage({ ...event, projects });
         } else if (isTwitterImage(basename)) {
-          handleTwitterImage({ dirname, projects });
+          handleTwitterImage({ ...event, projects });
         }
       }
     }
@@ -318,16 +336,13 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
 /**
  * Handle new or deleted project.json files
  */
-function handleProjectJson({ dirname, filename, projects }: Context) {
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
-
+function handleProjectJson({ dirname, filename, projects, relative }: Context) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
     yield* Effect.logDebug(`handling project.json change`);
 
-    const entryFile = path.join(dirname, RelativeFile("page.tsx"));
+    const entryFile = path.join(dirname, NEXT_PAGE);
 
     if (!(yield* fs.exists(entryFile))) {
       yield* Effect.log(`no page.tsx found in ${dirname}, skipping`).pipe(
@@ -341,7 +356,7 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
 
     yield* Effect.log(`loaded project.json`, project);
 
-    const projectPath = path.relative(TARGET_DIR, dirname);
+    const projectPath = path.dirname(relative);
 
     const meta: ProjectMeta = {
       ...project,
@@ -376,14 +391,11 @@ function handleProjectJson({ dirname, filename, projects }: Context) {
 /**
  * Handle new or deleted project.json files
  */
-function createProject({ dirname, filename, projects }: Context) {
+function createProject({ dirname, filename, projects, relative }: Context) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    const { cwd } = getServerState();
-    const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
-
-    const entryFile = path.join(dirname, RelativeFile("page.tsx"));
+    const entryFile = path.join(dirname, NEXT_PAGE);
 
     if (!(yield* fs.exists(entryFile))) {
       return;
@@ -393,17 +405,20 @@ function createProject({ dirname, filename, projects }: Context) {
     const project = yield* loadJson(ProjectJson, filename);
 
     // read duration
-    const duration = yield* loadJson(
+    const duration = (yield* loadJson(
       AutoGenProjectMeta,
       path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
-    ).pipe(Effect.map((meta) => new Duration(meta.duration)));
+    ).pipe(
+      Effect.map((meta) => new Duration(meta.duration)),
+      existenceOptional,
+    )).pipe(Option.getOrElse(() => new Duration({ seconds: 1000 })));
 
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
       duration,
       openGraph: hasOpenGraphImage(dirname),
-      path: path.relative(TARGET_DIR, dirname),
+      path: path.dirname(relative),
       twitter: hasTwitterImage(dirname),
     };
 
@@ -420,20 +435,109 @@ function handleProjectMeta({
   dirname: dotLiqvidDir,
   filename,
   projects,
+  relative,
 }: Context) {
   return Effect.gen(function* () {
-    const projectPath = path.dirname(dotLiqvidDir);
+    const projectPath = path.dirname(path.dirname(relative));
 
     const projectMeta = yield* loadJson(AutoGenProjectMeta, filename);
 
     const project = projects[projectPath];
     if (!project) {
-      console.error(`could not find project ${projectPath}`);
-      return;
+      return yield* Effect.logError(`could not find project ${projectPath}`);
     }
 
     project.duration = new Duration(projectMeta.duration);
-  }).pipe(Effect.annotateLogs({ _operation: "handleProjectMeta" }));
+  }).pipe(
+    Effect.annotateLogs({
+      _operation: "handleProjectMeta",
+      dotLiqvidDir,
+      projects: Object.keys(projects),
+    }),
+  );
+}
+
+/**
+ * Handle removal of a recording directory (`.liqvid/recordings/<name>`).
+ *
+ * Creation is handled via the `recording-meta.json` file event once the
+ * metadata is actually written, so this only acts on directories that no
+ * longer exist.
+ */
+function handleRecordingDir(recordingDir: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    if (yield* fs.exists(recordingDir)) return;
+
+    const recordingsDir = AbsoluteDir(path.dirname(recordingDir));
+    const assetsDir = AbsoluteDir(path.dirname(recordingsDir));
+    const projectDir = AbsoluteDir(path.dirname(assetsDir));
+
+    if (path.basename(assetsDir) !== ASSETS_DIR) return;
+
+    const url = pathToFileURL(path.join(projectDir, NEXT_PAGE)).href;
+    const name = dirNameToPackageName(path.basename(recordingDir));
+
+    yield* broadcast("recordings", {
+      data: { name, url },
+      type: "deleteRecording",
+    });
+  }).pipe(
+    Effect.annotateLogs({ _operation: "handleRecordingDir", recordingDir }),
+  );
+}
+
+/**
+ * Handle creation, modification, or deletion of a recording's
+ * `recording-meta.json`.
+ *
+ * A recording lives at `<project>/.liqvid/recordings/<name>/`, so the meta
+ * file's directory is the recording directory, whose grandparent (via the
+ * `recordings` and `.liqvid` dirs) is the project directory. Whether the file
+ * still exists tells create/update from delete.
+ */
+function handleRecordingMeta({ dirname: recordingDir, filename }: Context) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    // Validate the expected `.liqvid/recordings/<name>` structure.
+    const recordingsDir = AbsoluteDir(path.dirname(recordingDir));
+    const assetsDir = AbsoluteDir(path.dirname(recordingsDir));
+    const projectDir = AbsoluteDir(path.dirname(assetsDir));
+
+    if (
+      path.basename(recordingsDir) !== RECORDINGS_DIR ||
+      path.basename(assetsDir) !== ASSETS_DIR
+    ) {
+      return;
+    }
+
+    // The recording dialog is scoped by the `file://` URL of the project's
+    // `page.tsx`, so broadcast that as the discriminator.
+    const url = pathToFileURL(path.join(projectDir, NEXT_PAGE)).href;
+    const name = dirNameToPackageName(path.basename(recordingDir));
+
+    if (!(yield* fs.exists(filename))) {
+      yield* broadcast("recordings", {
+        data: { name, url },
+        type: "deleteRecording",
+      });
+      return;
+    }
+
+    const recording = yield* loadRecordingMeta(recordingDir);
+
+    yield* broadcast("recordings", {
+      data: { recording, url },
+      type: "newRecording",
+    });
+  }).pipe(
+    Effect.catchTag("FileDecodeError", (error) =>
+      Effect.logWarning("failed to read recording-meta.json", error),
+    ),
+    Effect.annotateLogs({ _operation: "handleRecordingMeta", filename }),
+  );
 }
 
 const OPENGRAPH_IMAGE_FILENAMES = [
@@ -441,14 +545,14 @@ const OPENGRAPH_IMAGE_FILENAMES = [
   "opengraph-image.jpeg",
   "opengraph-image.jpg",
   "opengraph-image.png",
-].map(RelativeFile);
+] as RelativeFile[];
 
 const TWITTER_IMAGE_FILENAMES = [
   "twitter-image.gif",
   "twitter-image.jpeg",
   "twitter-image.jpg",
   "twitter-image.png",
-].map(RelativeFile);
+] as RelativeFile[];
 
 /**
  * Whether a filename is an Open Graph image.
@@ -485,17 +589,8 @@ function hasTwitterImage(dirname: AbsoluteDir) {
 /**
  * Handle opengraph-image file creation or deletion.
  */
-function handleOpenGraphImage({
-  dirname,
-  projects,
-}: {
-  dirname: AbsoluteDir;
-  projects: Projects;
-}) {
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
-
-  const projectPath = path.relative(TARGET_DIR, dirname);
+function handleOpenGraphImage({ dirname, projects, relative }: Context) {
+  const projectPath = path.dirname(relative);
   const project = projects[projectPath];
   if (!project) return;
 
@@ -505,17 +600,8 @@ function handleOpenGraphImage({
 /**
  * Handle twitter-image file creation or deletion.
  */
-function handleTwitterImage({
-  dirname,
-  projects,
-}: {
-  dirname: AbsoluteDir;
-  projects: Projects;
-}) {
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
-
-  const projectPath = path.relative(TARGET_DIR, dirname);
+function handleTwitterImage({ dirname, relative, projects }: Context) {
+  const projectPath = path.dirname(relative);
   const project = projects[projectPath];
   if (!project) return;
 

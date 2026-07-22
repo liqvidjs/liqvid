@@ -1,7 +1,7 @@
 import { lstatSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { blue, green } from "picocolors";
+import pico from "picocolors";
 
 export function isFolderEmpty(root: string, name: string): boolean {
   const validFilesOrFolders = [
@@ -40,14 +40,14 @@ export function isFolderEmpty(root: string, name: string): boolean {
 
   if (conflicts.length > 0) {
     console.log(
-      `The directory ${green(name)} contains files that could conflict:`,
+      `The directory ${pico.green(name)} contains files that could conflict:`,
     );
     console.log();
     for (const file of conflicts) {
       try {
         const stats = lstatSync(join(root, file));
         if (stats.isDirectory()) {
-          console.log(`  ${blue(file)}/`);
+          console.log(`  ${pico.blue(file)}/`);
         } else {
           console.log(`  ${file}`);
         }

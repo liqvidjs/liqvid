@@ -3,7 +3,7 @@
 import { copyFile, mkdir } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 
-import { async as glob } from "fast-glob";
+import fastglob from "fast-glob";
 
 interface CopyOption {
   cwd?: string;
@@ -24,7 +24,7 @@ export const copy = async (
     throw new TypeError("`src` and `dest` are required");
   }
 
-  const sourceFiles = await glob(source, {
+  const sourceFiles = await fastglob.async(source, {
     absolute: false,
     cwd,
     dot: true,

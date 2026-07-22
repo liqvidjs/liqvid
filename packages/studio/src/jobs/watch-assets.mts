@@ -1,11 +1,21 @@
-import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { assertType } from "@liqvid/utils";
 import chalk from "chalk";
-import { Option } from "effect";
+import {
+  Cause,
+  Effect,
+  FileSystem,
+  Layer,
+  Logger,
+  Option,
+  PubSub,
+  Result,
+  Stream,
+} from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -19,14 +29,14 @@ import Handlebars from "handlebars";
 
 import {
   ASSETS_DIR,
-  NEXT_APP_DIR,
+  NEXT_PAGE,
   PROJECT_FILE,
   PROJECT_META_FILE,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
-import { debounce, UP } from "../utils/misc.mts";
+import { inRoutesDir, UP } from "../utils/misc.mts";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -71,7 +81,10 @@ function shouldExclude(relativePath: string, basename: string): boolean {
   return false;
 }
 
-function shouldIgnoreEvent(basename: string, filename: string): boolean {
+function shouldIgnoreEvent(
+  basename: RelativePath,
+  filename: AbsolutePath,
+): boolean {
   if (filename.endsWith("~")) return true;
   if (basename === ".DS_Store") return true;
   if (basename === "types.ts") return true;
@@ -98,7 +111,7 @@ async function isProjectDirectory(dir: AbsoluteDir): Promise<boolean> {
         .then(() => true)
         .catch(() => false),
       fsp
-        .access(path.join(dir, RelativeFile("page.tsx")))
+        .access(path.join(dir, NEXT_PAGE))
         .then(() => true)
         .catch(() => false),
     ]);
@@ -117,8 +130,7 @@ async function findProjectDirectory(
 ): Promise<Option.Option<AbsoluteDir>> {
   let dir = path.dirname(filePath);
 
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
+  const TARGET_DIR = inRoutesDir();
 
   while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
     if (await isProjectDirectory(dir)) {
@@ -140,33 +152,107 @@ export async function watchAssets() {
     return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
   });
 
-  const { cwd } = getServerState();
-  const TARGET_DIR = path.join(cwd, NEXT_APP_DIR);
+  const TARGET_DIR = inRoutesDir();
 
-  fs.watch(
-    TARGET_DIR,
-    { recursive: true },
-    async (_eventName, relPath: RelativePath | null) => {
-      if (!relPath) return;
+  // A resolved asset change: the project directory whose types.ts should be
+  // regenerated for this event.
+  type WatchEvent = { projectDir: AbsoluteDir };
 
-      const filename = path.join(TARGET_DIR, relPath);
-      const basename = path.basename(filename);
+  // set up watch: a Pub/Sub fans watch events out to the consumer that
+  // regenerates the affected project's types. The watcher lives for the
+  // lifetime of the process, so we run it in a detached root fiber and return
+  // once it has been started.
+  Effect.runFork(
+    Effect.gen(function* () {
+      const pubsub = yield* PubSub.unbounded<WatchEvent>();
 
-      if (shouldIgnoreEvent(basename, filename)) return;
-
-      // Find the project directory containing this file
-      const $projectDir = await findProjectDirectory(filename);
-      if (Option.isNone($projectDir)) return;
-      const projectDir = $projectDir.value;
-
-      const biomePath = await getBiomePath(projectDir);
-
-      // generate the types.ts file, debounced to avoid multiple rapid calls
-      debounce(
-        () => generateProjectTypes({ biomePath, projectDir }),
-        projectDir,
+      // Consumer: subscribe to the Pub/Sub and regenerate types per project.
+      //
+      // The OS watcher (and editors' atomic-save shuffles) frequently emit
+      // several events for a single logical file change, which would otherwise
+      // fan out into duplicate regenerations. Group events by their project
+      // directory and debounce each group so a burst collapses into a single
+      // dispatch. Idle groups are torn down after `idleTimeToLive`.
+      yield* Stream.fromPubSub(pubsub).pipe(
+        Stream.groupBy(
+          (event) => Effect.succeed([event.projectDir, event] as const),
+          { idleTimeToLive: "1 seconds" },
+        ),
+        Stream.mapEffect(
+          ([projectDir, group]) =>
+            group.pipe(
+              Stream.debounce("50 millis"),
+              Stream.runForEach(() =>
+                Effect.promise(async () => {
+                  const biomePath = await getBiomePath(projectDir);
+                  await generateProjectTypes({ biomePath, projectDir });
+                }).pipe(
+                  Effect.tapCause((cause) =>
+                    Effect.logError(Cause.pretty(cause)),
+                  ),
+                  Effect.ignore,
+                ),
+              ),
+            ),
+          { concurrency: "unbounded" },
+        ),
+        Stream.runDrain,
+        Effect.forkScoped,
       );
-    },
+
+      // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
+      // keeping the scope (and the forked consumer) alive.
+      yield* watchAssetEvents(TARGET_DIR).pipe(
+        Stream.runForEach((event) => PubSub.publish(pubsub, event)),
+        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+      );
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          NodeFileSystem.layer,
+          Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
+        ),
+      ),
+      Effect.scoped,
+    ),
+  );
+}
+
+/**
+ * A stream of asset-relevant change events, backed by the platform's recursive
+ * `FileSystem.watch`. Ignorable events (editor temp files, `.DS_Store`, etc.)
+ * are dropped, and each remaining event is resolved to the project directory
+ * containing it (dropping events that fall outside any project).
+ */
+function watchAssetEvents(
+  targetDir: AbsoluteDir,
+): Stream.Stream<{ projectDir: AbsoluteDir }, never, FileSystem.FileSystem> {
+  return Stream.unwrap(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
+      return fs.watch(targetDir).pipe(
+        Stream.filterMapEffect((event) =>
+          Effect.promise(async () => {
+            const relPath = event.path as RelativePath;
+            const filename = path.join(targetDir, relPath);
+            const basename = path.basename(filename);
+
+            if (shouldIgnoreEvent(basename, filename))
+              return Result.fail(event);
+
+            // Find the project directory containing this file
+            const $projectDir = await findProjectDirectory(filename);
+            if (Option.isNone($projectDir)) return Result.fail(event);
+
+            return Result.succeed({ projectDir: $projectDir.value });
+          }),
+        ),
+        // A PlatformError from the watcher itself becomes a defect so the
+        // detached fiber surfaces it rather than silently completing.
+        Stream.orDie,
+      );
+    }),
   );
 }
 

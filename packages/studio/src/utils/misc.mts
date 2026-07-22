@@ -1,7 +1,12 @@
+import "server-only";
+
+import path from "node:path";
+
 import type { EnvFiles } from "@liqvid/schemas";
 import { type LogLevel, Option } from "effect";
 import { RelativeDir } from "effect-paths";
 
+import { NEXT_APP_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 
 /** Pending debounced calls to generateProjectTypes, keyed by assetsDir */
@@ -94,3 +99,11 @@ export function getLogLevel(): LogLevel.LogLevel {
 }
 
 export const UP = RelativeDir("..");
+
+/**
+ * Get a path relative to the `routes` directory of the Next.js app.
+ */
+export function inRoutesDir(...paths: RelativeDir[]) {
+  const { cwd } = getServerState();
+  return path.join(cwd, NEXT_APP_DIR, ...paths);
+}

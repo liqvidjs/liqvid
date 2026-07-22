@@ -1,0 +1,83 @@
+.lv-scrubber {
+  height: 13px;
+  position: absolute;
+  top: -3px;
+}
+
+.lv-scrubber > circle {
+  fill: var(--lv-scrubber-color);
+}
+
+.lv-controls-scrub {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lv-controls-scrub-wrap {
+  height: 100%;
+  width: 100%;
+}
+
+.lv-controls-scrub-progress {
+  display: block;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.lv-progress-elapsed {
+  fill: var(--lv-elapsed-color);
+}
+
+.lv-progress-remaining {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.controls-progress-buffered {
+  fill: #ffa500;
+}
+
+.lv-thumb-highlight {
+  fill: #fff;
+}
+
+.lv-thumb-highlight.past {
+  fill: #ec76b3;
+}
+
+.lv-controls-thumbnail {
+  background: #333;
+  font-size: 0.85em;
+  padding: 3px;
+  bottom: 13px;
+  text-align: center;
+  position: absolute;
+  margin-left: -83px;
+}
+
+.lv-thumbnail-box {
+  overflow: hidden;
+  height: 100px;
+  width: 160px;
+  margin: 0 auto;
+  position: relative;
+  text-align: center;
+
+  > img {
+    position: absolute;
+  }
+}
+
+.lv-thumbnail-title {
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.lv-thumbnail-time {
+  color: #fff;
+  font-family: sans-serif;
+  position: absolute;
+  bottom: 0.5em;
+  text-align: center;
+  width: 100%;
+  left: 0;
+}

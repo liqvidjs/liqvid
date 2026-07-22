@@ -1,0 +1,14 @@
+# https://github.com/vercel/next.js/issues/82559#issuecomment-3358004998
+# Development: only target latest browsers with light-dark() support
+# This is specifically to avoid the light-dark() polyfill from lightningcss within Next's turbopack
+[development]
+last 1 chrome version
+last 1 firefox version
+safari >= 17.5
+ios_saf >= 17.5
+edge >= 123
+
+# Production: wider coverage since turbopack is currently dev-only
+[production]
+defaults
+

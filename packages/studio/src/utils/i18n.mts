@@ -28,12 +28,12 @@ export const DEFAULT_LOCALE = "en";
  */
 export async function getTranslations<T>(
   /** pass `import.meta.url` here */
-  url: string,
+  importMetaUrl: string,
 
   relative = RelativeDir("."),
 ): Promise<T> {
   const locale = getLocale();
-  const __dirname = path.dirname(fileURLToPath(url));
+  const __dirname = path.dirname(fileURLToPath(importMetaUrl));
 
   const translationsDir = path.join(__dirname, relative, TRANSLATIONS_DIR);
 

@@ -4,332 +4,200 @@ import "./recording.css";
 
 import { MediaRecording } from "@liqvid/media/recording";
 import { PromptsProvider } from "@liqvid/prompts";
+import type { RichTranscript } from "@liqvid/schemas";
 import { MarkerRecording } from "@liqvid/script/recording";
 import {
-	LiqvidDevToolsProvider,
-	type LiqvidStudioPlugin,
-	RecordingControl,
+  LiqvidDevToolsProvider,
+  type LiqvidStudioPlugin,
+  RecordingControl,
 } from "@liqvid/studio";
-import {
-	ArrowsIn,
-	ArrowsOut,
-	Moon,
-	Pause,
-	Play,
-	SpeakerHigh,
-	SpeakerLow,
-	SpeakerNone,
-	SpeakerX,
-	Sun,
-} from "@phosphor-icons/react";
+import type { Awaitable } from "@liqvid/utils";
 import clsx from "clsx";
 import {
-	ColorSchemeProvider,
-	Controls,
-	type HidingStrategy,
-	HydrateElement,
-	HydrateVariants,
-	Player,
-	type Script,
-	ScriptProvider,
-	SegmentProvider,
+  ColorSchemeProvider,
+  Controls,
+  type DurationLike,
+  type HidingStrategy,
+  Playback,
+  PlaybackProvider,
+  Player,
+  type Script,
+  ScriptProvider,
+  SegmentProvider,
 } from "liqvid";
-import {lazy} from "react"
+import { lazy, useState } from "react";
 
+import { SuspenseHook } from "@/components/SuspenseHook";
 import {
-	persistColorScheme,
-	persistMute,
-	persistVolume,
+  persistColorScheme,
+  persistMute,
+  persistVolume,
 } from "@/lib/persistence";
+import { useSeekFromSearch } from "@/lib/seek-from-search";
 
-import { KeyboardShortcuts } from "./controls/KeyboardShortcuts";
-import { shortcuts } from "./shortcuts";
+import { ShowRecordingTime } from "../dev/ShowRecordingTime.tsx";
+
+import { KeyboardShortcuts } from "./controls/KeyboardShortcuts.tsx";
+import {
+  AdditionalSettings,
+  captionsClassName,
+  FullScreen,
+  MuteButton,
+  PlayPause,
+  VolumeSlider,
+} from "./controls.tsx";
+import { LoadingScreen } from "./LoadingScreen.tsx";
+import { shortcuts } from "./shortcuts.ts";
 
 /* development-only controls */
 const isDevelopment = process.env.NODE_ENV === "development";
-const ShowMarkerName = isDevelopment ? lazy(() =>
-	import("@/components/dev/ShowMarkerName").then(
-		(imports) => ({default: imports.ShowMarkerName,
-	}),
-)) : () => null;
+const isProduction = process.env.NODE_ENV === "production";
+
+const ShowMarkerName = isDevelopment
+  ? lazy(() =>
+      import("@/components/dev/ShowMarkerName").then((imports) => ({
+        default: imports.ShowMarkerName,
+      })),
+    )
+  : () => null;
 
 export function LiqvidPlayer<M extends string>({
-	classNames: propClassNames,
-	children,
-	hideWith,
-	plugins,
-	projectPath,
-	script,
-	thumbs,
-	...props
-}: React.ComponentProps<typeof Player.Root> &
-	Pick<React.ComponentProps<typeof Controls.ScrubberBar>, "thumbs"> & {
-		classNames?: {
-			canvas?: string;
-			controls?: string;
-		};
+  duration,
+  hideWith,
+  plugins,
+  script,
+  ...props
+}: React.ComponentProps<typeof PlayerChrome> & {
+  hideWith?: HidingStrategy;
 
-		hideWith?: HidingStrategy;
+  plugins?: LiqvidStudioPlugin[];
+} & (
+    | {
+        duration?: DurationLike;
+        script?: undefined;
+      }
+    | {
+        duration?: undefined;
+        script: Script<M>;
+      }
+  )) {
+  // use playback from provided Script if any, otherwise create one from duration
+  const [playback] = useState(() => {
+    if (script) {
+      return script.playback;
+    }
+    const playback = new Playback();
+    playback.duration$ = duration ?? { minutes: 1 };
+    return playback;
+  });
 
-		plugins?: LiqvidStudioPlugin[];
-
-		/** path to the project on disk */
-		projectPath: string;
-
-		script: Script<M>;
-	}) {
-
-	return (
-		<ColorSchemeProvider persistence={persistColorScheme}>
-			<ScriptProvider script={script} shortcuts={shortcuts.script}>
-				<LiqvidDevToolsProvider
-					plugins={isDevelopment ? [MediaRecording, MarkerRecording, ...(plugins ?? [])] : []}
-					projectPath={projectPath}
-				>
-					<SegmentProvider hideWith={hideWith}>
-						<Player.Root {...props}>
-							<PromptsProvider
-								persistence={{ prefix: `liqvid.prompts[${projectPath}]` }}
-								shortcut={shortcuts.togglePrompts}
-							>
-								<Player.Controls
-									className={propClassNames?.controls}
-									hideAfter={{ seconds: 3 }}
-								>
-									<Controls.ScrubberBar
-										shortcuts={shortcuts.seeking}
-										thumbs={thumbs}
-									/>
-									<KeyboardShortcuts />
-									<Buttons />
-								</Player.Controls>
-								<Player.Canvas
-									className={clsx(
-										"bg-[#eee] text-black",
-										"dark:bg-[#202020] dark:text-white",
-										"transition-colors duration-150",
-										propClassNames?.canvas,
-									)}
-									pauseOnClick={process.env.NODE_ENV === "production"}
-								>
-									{children}
-								</Player.Canvas>
-							</PromptsProvider>
-						</Player.Root>
-					</SegmentProvider>
-				</LiqvidDevToolsProvider>
-			</ScriptProvider>
-		</ColorSchemeProvider>
-	);
+  // providers
+  return (
+    <ColorSchemeProvider persistence={persistColorScheme}>
+      <ScriptProvider script={script} shortcuts={shortcuts.script}>
+        <PlaybackProvider
+          restore={{ muted: persistMute, volume: persistVolume }}
+          value={playback}
+        >
+          <LiqvidDevToolsProvider
+            plugins={
+              isDevelopment
+                ? [
+                    MediaRecording,
+                    ...(script ? [MarkerRecording] : []),
+                    ...(plugins ?? []),
+                  ]
+                : []
+            }
+            projectPath={props.projectPath}
+          >
+            <SegmentProvider hideWith={hideWith}>
+              <PlayerChrome {...props} />
+            </SegmentProvider>
+          </LiqvidDevToolsProvider>
+        </PlaybackProvider>
+      </ScriptProvider>
+    </ColorSchemeProvider>
+  );
 }
 
-const iconClassName = "h-[calc(var(--lv-controls-height)*0.45)] w-auto";
+function PlayerChrome({
+  children,
+  classNames: propClassNames,
+  loadingScreen,
+  projectPath,
+  thumbs,
+  transcript,
+  ...props
+}: React.ComponentProps<typeof Player.Root> & {
+  classNames?: {
+    canvas?: string;
+    controls?: string;
+  };
 
-function Buttons() {
-	return (
-		<div className="lv-controls-buttons h-(--lv-controls-height)">
-			<PlayPause />
+  /** Whether this project needs a loading screen. */
+  loadingScreen?: boolean;
 
-			{/* left controls */}
-			<MuteButton />
-			<VolumeSlider />
-			<Controls.TimeDisplay />
-			<ShowMarkerName />
+  /**
+   * Path to the project on disk, to be passed to the Dev Tools provider.
+   * Only used in development, value is ignored in production.
+   */
+  projectPath: string;
 
-			{/* right controls */}
-			<div className="lv-controls-right h-full">
-				<RecordingControl shortcuts={shortcuts.recording} />
-				<ColorSchemeToggle />
-				<FullScreen />
-			</div>
-		</div>
-	);
-}
+  thumbs?: React.ComponentProps<typeof Controls.ScrubberBar>["thumbs"];
 
-function PlayPause() {
-	return (
-		<Controls.PlayPause
-			render={({ paused, seeking }, { ...props }) => {
-				const label = (paused || seeking ? "Play" : "Pause") + " (k)";
-				return (
-					<button aria-label={label} title={label} {...props}>
-						{paused || seeking ? (
-							<Play className={iconClassName} weight="fill" />
-						) : (
-							<Pause className={iconClassName} weight="fill" />
-						)}
-					</button>
-				);
-			}}
-			shortcuts={shortcuts.playPause}
-		/>
-	);
-}
+  transcript?: Awaitable<RichTranscript>;
+}) {
+  return (
+    <Player.Root {...props}>
+      {/* support automatic seeking from the URL */}
+      <SuspenseHook hook={useSeekFromSearch} />
 
-function VolumeSlider() {
-	return (
-		<Controls.VolumeSlider
-			render={({ volume }, props) => {
-				const label = `${volume}% volume`;
+      {/* loading screen for projects that need it */}
+      {loadingScreen && <LoadingScreen />}
 
-				return (
-					<HydrateElement
-						from={[persistMute, persistVolume]}
-						hydrationFn={(node, muted, volume) => {
-							node.setAttribute("aria-label", `${volume}% volume`);
-							(node as HTMLInputElement).value = String(
-								muted ? 0 : volume * 100,
-							);
-						}}
-					>
-						<input aria-label={label} {...props} />
-					</HydrateElement>
-				);
-			}}
-			shortcuts={shortcuts.volume}
-		/>
-	);
-}
+      <PromptsProvider
+        persistence={{ prefix: `liqvid.prompts[${projectPath}].` }}
+        shortcut={shortcuts.togglePrompts}
+      >
+        <Player.Controls
+          className={propClassNames?.controls}
+          hideAfter={{ seconds: 3 }}
+        >
+          <Controls.ScrubberBar shortcuts={shortcuts.seeking} thumbs={thumbs} />
+          <KeyboardShortcuts />
+          <div className="lv-controls-buttons h-(--lv-controls-height)">
+            <PlayPause />
 
-function MuteButton() {
-	return (
-		<Controls.Mute
-			render={({ muted, volume }, props) => {
-				const strings = {
-					mute: "Mute (m)",
-					unmute: "Unmute (m)",
-				};
+            {/* left controls */}
+            <MuteButton />
+            <VolumeSlider />
+            <Controls.TimeDisplay />
+            <ShowMarkerName />
+            <ShowRecordingTime max={{ minutes: 5 }} />
 
-				return (
-					<HydrateVariants
-						{...persistMute}
-						value={muted}
-						variants={{
-							false: (
-								<button
-									aria-label={strings.mute}
-									title={strings.mute}
-									{...props}
-								>
-									<HydrateVariants
-										{...persistVolume}
-										value={volume}
-										variants={[
-											{
-												children: (
-													<SpeakerHigh
-														className={iconClassName}
-														weight="fill"
-													/>
-												),
-												gte: 0.5,
-											},
-											{
-												children: (
-													<SpeakerLow
-														className={iconClassName}
-														weight="fill"
-													/>
-												),
-												gt: 0,
-												lt: 0.5,
-											},
-											{
-												children: (
-													<SpeakerNone
-														className={iconClassName}
-														weight="fill"
-													/>
-												),
-												eq: 0,
-											},
-										]}
-									/>
-								</button>
-							),
-							true: (
-								<button
-									aria-label={strings.unmute}
-									title={strings.unmute}
-									{...props}
-								>
-									<SpeakerX className={iconClassName} weight="fill" />
-								</button>
-							),
-						}}
-					/>
-				);
-			}}
-			shortcuts={shortcuts.mute}
-		/>
-	);
-}
+            {/* right controls */}
+            <div className="lv-controls-right h-full">
+              <RecordingControl shortcuts={shortcuts.recording} />
+              <AdditionalSettings transcript={transcript} />
+              <FullScreen />
+            </div>
+          </div>
+        </Player.Controls>
+        <Player.Canvas
+          className={clsx(
+            "bg-[#eee] text-black",
+            "dark:bg-[#202020] dark:text-white",
+            "transition-colors duration-150",
+            propClassNames?.canvas,
+          )}
+          pauseOnClick={isProduction}
+        >
+          {children}
 
-function ColorSchemeToggle() {
-	return (
-		<Controls.ColorSchemeToggle
-			render={({ colorScheme }, props) => {
-				const strings = {
-					dark: "Toggle color scheme (currently dark)",
-					light: "Toggle color scheme (currently light)",
-				};
-
-				return (
-					<HydrateVariants
-						{...persistColorScheme}
-						value={colorScheme}
-						variants={[
-							{
-								children: (
-									<button
-										aria-label={strings.dark}
-										title={strings.dark}
-										{...props}
-									>
-										<Moon className={iconClassName} weight="fill" />
-									</button>
-								),
-								eq: "dark",
-							},
-							{
-								children: (
-									<button
-										aria-label={strings.light}
-										title={strings.light}
-										{...props}
-									>
-										<Sun className={iconClassName} weight="fill" />
-									</button>
-								),
-								eq: "light",
-							},
-						]}
-					/>
-				);
-			}}
-			shortcuts={shortcuts.colorScheme}
-		/>
-	);
-}
-
-function FullScreen() {
-	return (
-		<Controls.FullScreen
-			render={({ isFullScreen }, props) => {
-				const label =
-					(isFullScreen ? "Exit full screen" : "Full screen") + " (f)";
-
-				return (
-					<button aria-label={label} title={label} {...props}>
-						{isFullScreen ? (
-							<ArrowsIn className={iconClassName} weight="bold" />
-						) : (
-							<ArrowsOut className={iconClassName} weight="bold" />
-						)}
-					</button>
-				);
-			}}
-			shortcuts={shortcuts.fullscreen}
-		/>
-	);
+          <Controls.Captions.Display className={captionsClassName} />
+        </Player.Canvas>
+      </PromptsProvider>
+    </Player.Root>
+  );
 }

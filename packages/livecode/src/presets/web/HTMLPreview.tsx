@@ -2,7 +2,6 @@
 
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useEventListener } from "@liqvid/event-emitter/react";
-import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useAddMessage, useClearMessages, useOnRun } from "../../hooks.ts";
@@ -17,10 +16,7 @@ import type { WebConsoleMessageUp } from "./magicScripts.ts";
  *
  * CSS-only changes do not cause the preview to reload.
  */
-export function HTMLPreview({
-  className,
-  ...props
-}: React.ComponentProps<"iframe">) {
+export function HTMLPreview(props: React.ComponentProps<"iframe">) {
   const store = useLiveCodeStore();
 
   const { colorScheme } = useColorScheme();
@@ -121,7 +117,6 @@ export function HTMLPreview({
   return (
     <iframe
       allow="fullscreen"
-      className={clsx("lqv-livecode-html-preview", className)}
       ref={iframe}
       sandbox="allow-scripts"
       {...props}

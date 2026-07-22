@@ -1,129 +1,129 @@
 @media (any-hover: none) {
-	#lv-recording {
-		display: none;
-	}
+  #lv-recording {
+    display: none;
+  }
 }
 
 #lv-recording-configuration {
-	border-spacing: 0 1em;
-	width: 100%;
+  width: 100%;
+  border-spacing: 0 1em;
 
-	> tbody > tr {
-		> th,
-		> td {
-			vertical-align: top;
-		}
-		> th {
-			text-align: right;
+  > tbody > tr {
+    > th,
+    > td {
+      vertical-align: top;
+    }
+    > th {
+      text-align: right;
 
-			&[colspan="2"] {
-				color: #1a69b5;
-				text-align: center;
-			}
+      &[colspan="2"] {
+        color: #1a69b5;
+        text-align: center;
+      }
 
-			&:not([colspan="2"]) {
-				font-size: 1em;
-				font-weight: normal;
-				padding-right: 0.2em;
-				text-align: right;
-			}
-		}
+      &:not([colspan="2"]) {
+        padding-right: 0.2em;
+        font-size: 1em;
+        font-weight: normal;
+        text-align: right;
+      }
+    }
 
-		td {
-			padding-left: 1em;
-		}
-	}
+    td {
+      padding-left: 1em;
+    }
+  }
 }
 
 /* configuration */
 .lv-recorder-plugin {
-	display: inline-flex;
-	font-family: sans-serif;
-	font-size: 0.8em;
-	margin: 0 0.25em;
-	text-align: center;
-	flex-direction: column;
+  display: inline-flex;
+  flex-direction: column;
+  margin: 0 0.25em;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  text-align: center;
 }
 
 .lv-recorder-plugin-toggle {
-	background-color: #222;
-	border-radius: 5px;
-	cursor: pointer;
-	height: 36px;
-	width: 36px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  background-color: #222;
+  border-radius: 5px;
 
-	&[aria-checked="true"] {
-		background-color: #f00;
-	}
+  &[aria-checked="true"] {
+    background-color: #f00;
+  }
 
-	&[disabled] {
-		cursor: not-allowed;
-		opacity: 0.3;
-	}
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
 }
 
 .lv-recorder-plugin-icon {
-	display: block;
-	margin: 0 auto;
-	height: 24px;
+  display: block;
+  height: 24px;
+  margin: 0 auto;
 
-	text {
-		user-select: none;
-		-webkit-user-select: none;
-	}
+  text {
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 .lv-recorder-plugin-name {
-	font-size: 10px;
+  font-size: 10px;
 }
 /* saved recordings */
 .recordings {
-	font-size: 1.5em;
-	list-style-position: inside;
+  font-size: 1.5em;
+  list-style-position: inside;
 }
 
 .recording-results {
-	border-collapse: collapse;
-	font-size: 0.6em;
-	width: 100%;
+  width: 100%;
+  font-size: 0.6em;
+  border-collapse: collapse;
 
-	> caption {
-		padding-left: 54px;
-		text-align: left;
-		user-select: text;
-		-webkit-user-select: text;
-	}
+  > caption {
+    padding-left: 54px;
+    text-align: left;
+    -webkit-user-select: text;
+    user-select: text;
+  }
 
-	> tbody > tr {
-		background-color: #333;
+  > tbody > tr {
+    background-color: #333;
 
-		> th {
-			padding: 6px;
-			width: 36px;
-		}
+    > th {
+      width: 36px;
+      padding: 6px;
+    }
 
-		> td {
-			padding: 6px;
-		}
-	}
+    > td {
+      padding: 6px;
+    }
+  }
 
-	textarea {
-		width: 100%;
-	}
+  textarea {
+    width: 100%;
+  }
 
-	:link {
-		background-color: #1a69b5;
-		box-sizing: border-box;
-		color: #fff !important;
-		display: block;
-		padding: 0.5em;
-		text-align: center;
-		text-decoration: none;
-		width: 100%;
-	}
+  :link {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 0.5em;
+    color: #fff !important;
+    text-align: center;
+    text-decoration: none;
+    background-color: #1a69b5;
+  }
 
-	.shortcut {
-		font-family: monospace;
-		font-size: 1em;
-		width: 18ch;
-	}
+  .shortcut {
+    width: 18ch;
+    font-family: monospace;
+    font-size: 1em;
+  }
 }

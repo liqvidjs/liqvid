@@ -198,7 +198,7 @@ export function makeContext<T>({
       const value = useOptional();
       if (!value) {
         throw new Error(
-          `use$name ?? "Context"must be used within a $name ?? "Context"Provider`,
+          `use${name ?? "Context"} must be used within a ${name ?? "Context"}Provider`,
         );
       }
 

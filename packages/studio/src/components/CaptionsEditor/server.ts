@@ -1,20 +1,20 @@
 "use server";
 
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { writeJSON } from "@liqvid/cli/utils";
 import type { RichTranscript } from "@liqvid/schemas";
-import { formatVttTimestamp, wait } from "@liqvid/utils";
+import { formatVttTimestamp } from "@liqvid/utils";
 import chalk from "chalk";
 import { Cause, Effect, Exit, FileSystem } from "effect";
-import { StatusCodes } from "http-status-codes";
+import type { RelativeDir } from "effect-paths";
 
 import {
   ASSETS_DIR,
   AUDIO_DIR,
   CAPTIONS_FILE,
+  NEXT_APP_DIR,
   RICH_TRANSCRIPT,
 } from "../../conventions.mts";
 import { getServerState } from "../../initialize.mts";
@@ -22,21 +22,14 @@ import { getServerState } from "../../initialize.mts";
 import type { Transcript } from "./state.ts";
 
 export async function saveCaptions({
-  projectPath: pageTsxPath,
+  projectPath,
   transcript,
 }: {
-  projectPath: string;
+  projectPath: RelativeDir;
   transcript: RichTranscript;
 }) {
   const { cwd } = getServerState();
-  const projectPath = path.dirname(fileURLToPath(pageTsxPath));
-
-  if (!projectPath.startsWith(cwd)) {
-    return Response.json(
-      { error: "Invalid project path" },
-      { status: StatusCodes.FORBIDDEN },
-    );
-  }
+  const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
 
   const exit = await Effect.runPromiseExit(
     Effect.gen(function* () {
@@ -48,12 +41,12 @@ export async function saveCaptions({
         [
           fs
             .writeFileString(
-              path.join(projectPath, ASSETS_DIR, AUDIO_DIR, CAPTIONS_FILE),
+              path.join(projectDir, ASSETS_DIR, AUDIO_DIR, CAPTIONS_FILE),
               vtt,
             )
             .pipe(Effect.tap(() => Effect.logDebug("saved captions"))),
           writeJSON(
-            path.join(projectPath, ASSETS_DIR, AUDIO_DIR, RICH_TRANSCRIPT),
+            path.join(projectDir, ASSETS_DIR, AUDIO_DIR, RICH_TRANSCRIPT),
             transcript,
           ).pipe(Effect.tap(() => Effect.logDebug("saved rich transcript"))),
         ],

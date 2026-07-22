@@ -21,6 +21,7 @@ import {
 } from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
+import { inRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import type { LoggableJob } from "./schemas.mts";
@@ -165,8 +166,8 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { basePath, cwd, productionServerPort } = getServerState();
-        const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
+        const { basePath, productionServerPort } = getServerState();
+        const projectDir = inRoutesDir(projectPath);
         const rendersBaseDir = path.join(projectDir, ASSETS_DIR, RENDERS_DIR);
 
         // Generate unique render ID

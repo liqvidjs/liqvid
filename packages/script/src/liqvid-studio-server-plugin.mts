@@ -2,10 +2,11 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import type { AbsoluteDir, RelativeFile } from "effect-paths";
 
-const RAW_JSON = "raw.json";
-const TIMINGS_JSON = "timings.json";
-const TIMINGS_DTS = "timings.d.json.ts";
+const RAW_JSON = "raw.json" as RelativeFile;
+const TIMINGS_JSON = "timings.json" as RelativeFile;
+const TIMINGS_DTS = "timings.d.json.ts" as RelativeFile;
 
 /**
  * Generate TypeScript declaration content from timings JSON.
@@ -27,7 +28,7 @@ function generateTimingsDeclaration(timings: Array<[string, string]>): string {
 async function postProcessRecording({
   dirname,
 }: {
-  dirname: string;
+  dirname: AbsoluteDir;
 }): Promise<void> {
   const rawJsonPath = path.join(dirname, RAW_JSON);
   const timingsJsonPath = path.join(dirname, TIMINGS_JSON);

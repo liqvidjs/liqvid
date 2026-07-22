@@ -9,6 +9,7 @@ import { execa } from "execa";
 
 const AUDIO_MP4 = RelativeFile("audio.mp4");
 const AUDIO_WEBM = RelativeFile("audio.webm");
+
 const VIDEO_ORIGINAL = RelativeFile("video-original.webm");
 const VIDEO_WEBM = RelativeFile("video.webm");
 

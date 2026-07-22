@@ -1,7 +1,9 @@
+import { RelativeDir } from "effect-paths";
+
 export function packageNameToDirName(packageName: string) {
-  return packageName.replace(/\//g, "@");
+  return RelativeDir(packageName.replace(/\//g, "@"));
 }
 
-export function dirNameToPackageName(dirname: string) {
+export function dirNameToPackageName(dirname: RelativeDir) {
   return dirname.replace(/(?!^)@/g, "/");
 }

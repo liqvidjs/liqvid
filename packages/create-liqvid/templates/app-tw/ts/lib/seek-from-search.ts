@@ -1,0 +1,1 @@
+../../../app/ts/lib/seek-from-search.ts

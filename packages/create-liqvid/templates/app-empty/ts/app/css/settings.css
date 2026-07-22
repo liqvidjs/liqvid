@@ -1,0 +1,64 @@
+.lv-settings-dialog {
+  background-color: rgba(32, 32, 32, 0.85);
+  border-radius: 3px 3px 0 0;
+  padding: 2px 0;
+  position: absolute;
+  bottom: 42px;
+  right: 0;
+  width: 10em;
+
+  > table {
+    border-collapse: collapse;
+    width: 100%;
+
+    > tbody > tr {
+      cursor: pointer;
+      font-family: sans-serif;
+
+      &:hover {
+        background-color: rgba(72, 72, 72, 0.85);
+      }
+    }
+  }
+}
+
+.lv-settings-dialog > table > tbody > tr > th {
+  padding: 0.25em 0 0.25em 0.5em;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.lv-settings-dialog > table > tbody > tr > td {
+  padding: 0.25em 0.5em 0.25em 0;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.lv-settings-speed-dialog,
+.lv-settings-captions-dialog {
+  background-color: rgba(32, 32, 32, 0.85);
+  padding: 2px 0;
+  position: absolute;
+  bottom: 42px;
+  line-height: 1rem;
+  right: 0;
+  width: 6em;
+}
+
+.lv-settings-speed-dialog > ul,
+.lv-settings-captions-dialog > ul {
+  list-style-type: none;
+}
+.lv-settings-speed-dialog > ul > li,
+.lv-settings-captions-dialog > ul > li {
+  cursor: pointer;
+  padding: 4px 0.5em;
+}
+.lv-settings-speed-dialog > ul > li:hover,
+.lv-settings-captions-dialog > ul > li:hover {
+  background-color: rgba(72, 72, 72, 0.85);
+}
+.lv-settings-speed-dialog > ul > li.selected,
+.lv-settings-captions-dialog > ul > li.selected {
+  color: #af1866;
+}

@@ -10,6 +10,7 @@ import { EnvFiles } from "@liqvid/schemas";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import chalk from "chalk";
 import {
+  Cause,
   Effect,
   Exit,
   type FileSystem,
@@ -183,7 +184,7 @@ async function runEffect<A, E>(
       for (const reason of cause.reasons) {
         // all other errors are 500
         if (reason._tag !== "Fail") {
-          console.error(reason);
+          console.error(Cause.pretty(cause));
           break;
         }
 

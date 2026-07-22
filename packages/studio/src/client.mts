@@ -2,13 +2,14 @@ import { Err, Ok, type Result } from "@liqvid/fp";
 import { ManagedRuntime } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApiClient } from "effect/unstable/httpapi";
+import type { RelativeDir } from "effect-paths";
 
 import { WebApi } from "./api/contract.mts";
 
 const apiRoot = "/api/liqvid";
 
 interface SaveRecordingOpts {
-  search: { url: string };
+  search: { projectPath: RelativeDir };
   body: {
     durationMs: number;
     plugins: Array<{ key: string; data: unknown }>;

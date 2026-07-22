@@ -7,7 +7,7 @@ import {
 import { bind, formatTimeMs } from "@liqvid/utils";
 import { useEffect } from "react";
 
-import { useScript } from "./react/useScript.tsx";
+import { useScriptOptional } from "./react/useScript.tsx";
 import type { MarkerUpdateEvent, Script } from "./script.mts";
 import type { MarkerFormatted, SerializedMarker } from "./types.mts";
 
@@ -127,7 +127,9 @@ export const MarkerRecording = {
     );
   },
   useConfigurePlugin() {
-    const script = useScript();
+    const script = useScriptOptional();
+
+    if (!script) return;
 
     useEffect(() => {
       MarkerRecording.recorder.configure({ script });

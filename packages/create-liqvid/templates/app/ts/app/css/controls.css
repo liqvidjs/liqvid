@@ -1,0 +1,98 @@
+/* control positioning */
+.lv-controls {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  height: var(--lv-controls-height);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
+  width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 2;
+
+  top: calc(50vh + var(--lv-height) / 2 - var(--lv-controls-height));
+  left: calc(50vw - var(--lv-width) / 2);
+  width: var(--lv-width);
+
+  &.lv-controls-hidden {
+    opacity: 0;
+    transition: opacity 0.1s cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+
+.lv-controls-buttons {
+  height: var(--lv-buttons-height);
+  /* line-height: var(--lv-buttons-height); */
+  margin: 0 auto;
+  width: 97%;
+}
+/* .lv-controls-buttons > * { */
+/*   display: inline-block; */
+/*   height: 100%; */
+/*   vertical-align: top; */
+/* } */
+.lv-controls-right {
+  float: right;
+
+  > * {
+    display: inline-block;
+    height: 100%;
+    vertical-align: top;
+  }
+}
+
+.lv-controls-button {
+  /* colors */
+  background: none;
+  border: none;
+  outline: none;
+
+  /* cursor */
+  cursor: pointer;
+
+  /* dimensions */
+  height: 100%;
+  padding: 0;
+  width: 38px;
+
+  /* layout */
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+
+  vertical-align: top;
+
+  /* hover effect */
+  opacity: 0.9;
+  transition: opacity 0.1s cubic-bezier(0.4, 0, 1, 1);
+
+  &:hover {
+    opacity: 1;
+    transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.lv-controls-captions {
+  position: relative;
+
+  > svg > path {
+    fill: #fff;
+  }
+
+  &::after {
+    content: "";
+    background: #af1866;
+    border-radius: 2px;
+    bottom: 3px;
+    display: block;
+    height: 2px;
+    left: 18px;
+    position: absolute;
+    width: 0;
+    transition:
+      left 0.1s cubic-bezier(0.4, 0, 1, 1),
+      width 0.1s cubic-bezier(0.4, 0, 1, 1);
+  }
+}

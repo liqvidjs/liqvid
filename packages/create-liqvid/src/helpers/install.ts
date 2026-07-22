@@ -1,7 +1,7 @@
 import spawn from "cross-spawn";
-import { yellow } from "picocolors";
+import pico from "picocolors";
 
-import type { PackageManager } from "./get-pkg-manager";
+import type { PackageManager } from "./get-pkg-manager.ts";
 
 /**
  * Spawn a package manager installation based on user preference.
@@ -17,7 +17,9 @@ export async function install(
   const args: string[] = ["install"];
   if (!isOnline) {
     console.log(
-      yellow("You appear to be offline.\nFalling back to the local cache."),
+      pico.yellow(
+        "You appear to be offline.\nFalling back to the local cache.",
+      ),
     );
     args.push("--offline");
   }
