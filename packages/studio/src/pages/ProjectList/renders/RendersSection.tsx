@@ -2,6 +2,7 @@
 
 import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { AspectRatio } from "@liqvid/schemas";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import {
   CheckCircleIcon,
   FilmStripIcon,
@@ -47,8 +48,6 @@ interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
   aspectRatio?: AspectRatio;
 
-  projectPath: RelativeDir;
-
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
@@ -82,8 +81,8 @@ function widthFromHeight(height: number, aspectRatio: AspectRatio): number {
 export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
   isOpen,
-  projectPath,
 }: RendersSectionProps) {
+  const projectPath = useProjectPath();
   const t = useTranslations<T>().renders;
   const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);

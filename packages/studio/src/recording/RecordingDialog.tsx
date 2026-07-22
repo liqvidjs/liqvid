@@ -46,7 +46,6 @@ export function RecordingDialog({
   onShortcutChange,
 }: RecordingDialogProps) {
   const { instances, projectPath } = useStudioPrivateApi();
-  console.log({ projectPath });
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
 

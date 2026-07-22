@@ -3,13 +3,14 @@
 import { Duration } from "@liqvid/duration";
 import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr";
+import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
 import {
   CaretDownIcon,
   CaretRightIcon,
   FolderIcon,
 } from "@phosphor-icons/react";
-import { RelativeDir } from "effect-paths";
+import type { RelativeDir } from "effect-paths";
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -280,32 +281,34 @@ function ProjectItem({
     : `/${project.path}`;
 
   return (
-    <li>
-      <a href={project.path}>
-        <Thumbnail {...project} />
-        <div className="flex flex-col">
-          {project.name}
-          <pre className="text-sm">{project.path}</pre>
+    <ProjectPathProvider value={project.path}>
+      <li>
+        <a href={project.path}>
+          <Thumbnail {...project} />
+          <div className="flex flex-col">
+            {project.name}
+            <pre className="text-sm">{project.path}</pre>
+          </div>
+        </a>
+        <div className={styles.actions}>
+          <ShareButton
+            basePath={basePath}
+            duration={project.duration}
+            productionServerPort={productionServerPort}
+            project={omit(project, ["duration"])}
+          />
+          <EmbedButton
+            basePath={basePath}
+            productionServerPort={productionServerPort}
+            project={project}
+          />
+          <OpenInFinderButton />
+          <ProductionLink
+            href={`http://localhost:${productionServerPort}${previewPath}`}
+          />
         </div>
-      </a>
-      <div className={styles.actions}>
-        <ShareButton
-          basePath={basePath}
-          duration={project.duration}
-          productionServerPort={productionServerPort}
-          project={omit(project, ["duration"])}
-        />
-        <EmbedButton
-          basePath={basePath}
-          productionServerPort={productionServerPort}
-          project={project}
-        />
-        <OpenInFinderButton projectPath={RelativeDir(project.path)} />
-        <ProductionLink
-          href={`http://localhost:${productionServerPort}${previewPath}`}
-        />
-      </div>
-    </li>
+      </li>
+    </ProjectPathProvider>
   );
 }
 

@@ -3,6 +3,7 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { usePlayback, usePlaybackEvent, useTime } from "@liqvid/playback/react";
 import type { RichTranscript, TranscriptEntry } from "@liqvid/schemas";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { between, type CleanUpFn } from "@liqvid/utils";
 import {
   DotsThreeIcon,
@@ -52,7 +53,7 @@ export function CaptionsEditor({
   transcript: Awaitable<RichTranscript>;
 }) {
   const [store] = useState(() => makeStore());
-  const { projectPath } = useStudioPrivateApi();
+  const projectPath = useProjectPath();
 
   useChannel("jobs", {
     deleteJob: () => {},

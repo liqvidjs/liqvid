@@ -9,7 +9,6 @@ import {
   ImagesIcon,
   ShareFatIcon,
 } from "@phosphor-icons/react";
-import { RelativeDir } from "effect-paths";
 import { useState } from "react";
 
 import {
@@ -97,23 +96,15 @@ export function ShareButton({
             </TabsContent>
 
             <TabsContent value="thumbnails">
-              <ThumbnailsSection
-                duration={duration}
-                isOpen={open}
-                projectPath={project.path}
-              />
+              <ThumbnailsSection duration={duration} isOpen={open} />
             </TabsContent>
 
             <TabsContent value="renders">
-              <RendersSection
-                aspectRatio={project.aspectRatio}
-                isOpen={open}
-                projectPath={RelativeDir(project.path)}
-              />
+              <RendersSection aspectRatio={project.aspectRatio} isOpen={open} />
             </TabsContent>
 
             <TabsContent value="captions">
-              <CaptionsSection isOpen={open} projectPath={project.path} />
+              <CaptionsSection isOpen={open} />
             </TabsContent>
           </Tabs>
 

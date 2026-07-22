@@ -4,10 +4,9 @@ import { LiqvidPlayer } from "@/components/liqvid/player";
 
 import { script } from "./markers.ts";
 
-
-export function ClientContent({ projectPath }: { projectPath: string }) {
+export function ClientContent() {
   return (
-    <LiqvidPlayer projectPath={projectPath} script={script}>
+    <LiqvidPlayer script={script}>
       {/* content */}
     </LiqvidPlayer>
   );

@@ -3,11 +3,11 @@
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { type RecordingPlugin, useRecordingApi } from "@liqvid/recording";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef, useState } from "react";
 
 import { saveRecording } from "../client.mts";
-import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 
 import { RecordingDialog } from "./RecordingDialog.tsx";
@@ -38,7 +38,7 @@ interface FinalizedData {
  */
 export function RecordingControl({ shortcuts }: RecordingControlProps) {
   const { manager, discard, pauseResume, startStop } = useRecordingApi();
-  const { projectPath } = useStudioPrivateApi();
+  const projectPath = useProjectPath();
 
   const forceUpdate = useForceUpdate();
 

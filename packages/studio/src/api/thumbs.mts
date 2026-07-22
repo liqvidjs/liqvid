@@ -66,7 +66,7 @@ function generateForScheme(
   outputDir: AbsoluteDir,
   colorScheme: "light" | "dark",
   body: GenerateThumbsBody,
-  projectPath: string,
+  projectPath: RelativeDir,
 ) {
   return Effect.gen(function* () {
     const { config: $config } = getServerState();

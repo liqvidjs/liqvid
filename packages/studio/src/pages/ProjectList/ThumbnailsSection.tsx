@@ -1,6 +1,7 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
@@ -19,7 +20,6 @@ type T = typeof TranslationsJson;
 
 interface ThumbnailsSectionProps {
   duration: Duration;
-  projectPath: string;
 
   /** Whether the parent dialog is open */
   isOpen: boolean;
@@ -28,8 +28,8 @@ interface ThumbnailsSectionProps {
 export function ThumbnailsSection({
   duration,
   isOpen,
-  projectPath,
 }: ThumbnailsSectionProps) {
+  const projectPath = useProjectPath();
   const t = useTranslations<T>().thumbs;
   const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);

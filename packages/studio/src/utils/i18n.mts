@@ -30,7 +30,7 @@ export async function getTranslations<T>(
   /** pass `import.meta.url` here */
   importMetaUrl: string,
 
-  relative = RelativeDir("."),
+  relative: RelativeDir = RelativeDir("."),
 ): Promise<T> {
   const locale = getLocale();
   const __dirname = path.dirname(fileURLToPath(importMetaUrl));

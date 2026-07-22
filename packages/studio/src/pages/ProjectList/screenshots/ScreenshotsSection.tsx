@@ -2,6 +2,7 @@
 
 import type { Duration } from "@liqvid/duration";
 import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import {
   CopyIcon,
   PencilSimpleIcon,
@@ -73,7 +74,6 @@ async function copyScreenshot(
 
 interface ScreenshotItemProps {
   screenshot: ScreenshotEntry;
-  projectPath: RelativeDir;
   variant: { label: VariantLabel; path: string };
   /** Whether this is the first variant of the screenshot */
   isPrimary: boolean;
@@ -89,13 +89,14 @@ interface ScreenshotItemProps {
 
 function ScreenshotItem({
   screenshot,
-  projectPath,
   variant,
   isPrimary,
   onConfirmOverwrite,
   onRename,
   onDelete,
 }: ScreenshotItemProps) {
+  const projectPath = useProjectPath();
+
   const handleCopyAs = async (target: CopyTarget) => {
     try {
       const { exists } = await clientRuntime.runPromise(
@@ -336,7 +337,6 @@ export function ScreenshotsSection({
                   }
                   onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
                   onRename={openRenameDialog}
-                  projectPath={projectPath}
                   screenshot={screenshot}
                   variant={variant}
                 />

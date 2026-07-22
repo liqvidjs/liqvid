@@ -1,5 +1,5 @@
 import { Progress } from "@liqvid/cli/utils";
-import { Effect, Logger, type LogLevel, References } from "effect";
+import { Effect, Logger, type LogLevel, References, type Types } from "effect";
 
 import type {
   LoggableJob,
@@ -52,7 +52,7 @@ export function createJob<A, E, R>(
       });
     });
 
-    const job: LoggableJob<A, E> = {
+    const job: Types.Mutable<LoggableJob> = {
       fiber: yield* Effect.forkDetach(
         effect.pipe(
           // logging

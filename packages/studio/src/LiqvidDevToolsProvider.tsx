@@ -7,6 +7,7 @@ import {
   type LiqvidStudioPlugin,
   LiqvidStudioPluginApiProvider,
   type PluginContext,
+  useProjectPath,
 } from "@liqvid/studio-plugin-api";
 import { Effect } from "effect";
 import {
@@ -45,12 +46,11 @@ export function useStudioPrivateApi() {
 export function LiqvidDevToolsProvider({
   children,
   plugins,
-  projectPath,
 }: {
   children?: React.ReactNode;
   plugins?: LiqvidStudioPlugin[];
-  projectPath: RelativeDir;
 }) {
+  const projectPath = useProjectPath();
   const [instances] = useState<Record<string, Set<unknown>>>(() => ({}));
   const privateContext = useMemo(
     () => ({ instances, projectPath }),

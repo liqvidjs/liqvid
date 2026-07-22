@@ -1,3 +1,4 @@
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import {
   CheckCircleIcon,
   ClosedCaptioningIcon,
@@ -7,6 +8,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
+import type { RelativeDir } from "effect-paths";
 import { useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
@@ -57,17 +59,17 @@ function getCaptionsStatusLabel(status: CaptionsStatus) {
 
 export function CaptionRow({
   entry,
-  projectPath,
   multiple,
   onReload,
   onStartRename,
 }: {
   entry: AudioEntry;
-  projectPath: string;
   multiple: boolean;
   onReload: () => Promise<void>;
   onStartRename: (entry: AudioEntry) => void;
 }) {
+  const projectPath = useProjectPath();
+
   /** Whether captions are currently being (re)generated for this entry */
   const [captioning, setCaptioning] = useState(false);
 
@@ -99,6 +101,8 @@ export function CaptionRow({
               return { Die: r.defect };
             case "Interrupt":
               return { Interrupt: r.fiberId };
+            default:
+              return { Unknown: r };
           }
         }),
         { depth: null },

@@ -1,7 +1,7 @@
 "use client";
 
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
-import type { RelativeDir } from "effect-paths";
 
 import { useTranslations } from "../../utils/react.tsx";
 import { openInFinderAction } from "../root-actions.ts";
@@ -12,11 +12,8 @@ import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
 
-export function OpenInFinderButton({
-  projectPath,
-}: {
-  projectPath: RelativeDir;
-}) {
+export function OpenInFinderButton() {
+  const projectPath = useProjectPath();
   const t = useTranslations<T>();
   async function handleClick() {
     await openInFinderAction(projectPath);

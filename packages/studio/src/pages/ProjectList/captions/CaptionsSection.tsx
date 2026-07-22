@@ -1,7 +1,9 @@
 "use client";
 
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { SpinnerIcon, WaveformIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
+import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
@@ -21,12 +23,12 @@ import styles from "../../root.module.css";
 import shareStyles from "../share.module.css";
 
 interface CaptionsSectionProps {
-  projectPath: string;
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
 
-export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
+export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
+  const projectPath = useProjectPath();
   const [audio, setAudio] = useState<readonly AudioEntry[]>([]);
   const [multiple, setMultiple] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -169,7 +171,6 @@ export function CaptionsSection({ isOpen, projectPath }: CaptionsSectionProps) {
                 multiple={multiple}
                 onReload={loadAudio}
                 onStartRename={handleStartRename}
-                projectPath={projectPath}
               />
             ))}
           </ul>

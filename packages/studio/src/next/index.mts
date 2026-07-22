@@ -2,16 +2,16 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { loadJson } from "@liqvid/cli/utils";
 import type { ProjectJson } from "@liqvid/schemas";
-import { Effect } from "effect";
 import { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
-import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
+import { createElement } from "react";
 
 import { NEXT_APP_DIR, PROJECT_FILE } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
+
+import { HelperComponent } from "./react.tsx";
 
 /** Omit page from production bundle by returning a 404 */
 export function omitFromProduction() {
@@ -24,10 +24,7 @@ export function liqvidProject<P>(
   importMetaUrl: string,
   Component: (
     props: P & {
-      /**
-       * Project path. This must be passed to `<LiqvidDevToolsProvider>`.
-       * It is automatically removed in the production build.
-       */
+      /** Project path. This is mainly used by development tools, and is automatically removed in the production build. */
       projectPath: RelativeDir;
     },
   ) => React.ReactNode,
@@ -40,11 +37,17 @@ export function liqvidProject<P>(
     const { cwd } = getServerState();
     const projectPath = path.relative(path.join(cwd, NEXT_APP_DIR), __dirname);
 
-    return (props: P) => Component({ projectPath, ...props });
+    return function LiqvidProject(props: P) {
+      return createElement(HelperComponent<P>, {
+        Component,
+        projectPath,
+        props,
+      });
+    };
   }
 
   // production
-  return async (props: P) => {
+  return async function Page(props: P) {
     const project = JSON.parse(
       await fsp.readFile(path.join(__dirname, PROJECT_FILE), "utf8"),
     ) as ProjectJson;

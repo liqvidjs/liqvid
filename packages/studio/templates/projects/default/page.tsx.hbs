@@ -7,8 +7,8 @@ import {
 
 import { ClientContent } from "./client.tsx";
 
-export default liqvidProject(import.meta.url, function Page({ projectPath }) {
-  return <ClientContent {...{ projectPath }} />;
+export default liqvidProject(import.meta.url, function Page() {
+  return <ClientContent  />;
 });
 
 export const generateMetadata = liqvidGenerateProjectMetadata(import.meta.url);

@@ -45,11 +45,14 @@
     "@liqvid/recording": "workspace:",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "effect": "catalog:dev",
+    "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "effect-paths": "workspace:^",
     "react": "catalog:peer"
   },
   "sideEffects": false

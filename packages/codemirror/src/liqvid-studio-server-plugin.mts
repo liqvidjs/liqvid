@@ -25,6 +25,7 @@ export default data;
 function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
+    yield* Effect.logInfo("codemirror post-processing");
 
     const rawJsonPath = path.join(dirname, RAW_JSON);
     const rawDtsPath = path.join(dirname, RAW_DTS);
@@ -41,12 +42,16 @@ function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
     // copy compressed data
     const data = JSON.parse(yield* fs.readFileString(rawJsonPath, "utf8"));
 
+    yield* Effect.log("Compressing recording data...");
+
     yield* writeTypedJson({
       data: compress(data, 2),
       declaration,
       dirname,
       filename: RelativeFile("recording.json"),
     });
+
+    yield* Effect.log("wrote recording.json for codemirror");
   });
 }
 
