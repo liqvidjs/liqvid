@@ -3,8 +3,13 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
-import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
-import { RelativeDir, RelativeFile } from "effect-paths";
+import { Effect, FileSystem } from "effect";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeDir,
+  RelativeFile,
+} from "effect-paths";
 import { execa } from "execa";
 
 const AUDIO_MP4 = RelativeFile("audio.mp4");
@@ -206,17 +211,24 @@ async function encodeHls(
  * - Fix WebM timing for seeking
  * - Create MP4/AAC version
  */
-async function processAudioOnly(dirname: AbsoluteDir): Promise<void> {
-  const audioWebm = path.join(dirname, AUDIO_WEBM);
-  const audioMp4 = path.join(dirname, AUDIO_MP4);
+function processAudioOnly(dirname: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const audioWebm = path.join(dirname, AUDIO_WEBM);
+    const audioMp4 = path.join(dirname, AUDIO_MP4);
 
-  // Fix WebM timing
-  console.log("Fixing audio.webm timing...");
-  await fixWebmTiming(audioWebm);
+    // Fix WebM timing
+    yield* Effect.logInfo("fixing audio.webm timing...");
+    yield* Effect.promise(() => fixWebmTiming(audioWebm));
 
-  // Encode to MP4
-  console.log("Encoding audio.mp4...");
-  await encodeAudioMp4(audioWebm, audioMp4);
+    // Encode to MP4
+    yield* Effect.logInfo("encoding audio.mp4...");
+    yield* Effect.promise(() => encodeAudioMp4(audioWebm, audioMp4));
+  }).pipe(
+    Effect.annotateLogs({
+      _op: "processAudioOnly",
+      dirname,
+    }),
+  );
 }
 
 /**
@@ -226,75 +238,84 @@ async function processAudioOnly(dirname: AbsoluteDir): Promise<void> {
  * - Encode audio to MP4
  * - Encode video to HLS
  */
-async function processVideo(dirname: AbsoluteDir): Promise<void> {
-  const videoWebm = path.join(dirname, VIDEO_WEBM);
-  const audioWebm = path.join(dirname, AUDIO_WEBM);
-  const audioMp4 = path.join(dirname, AUDIO_MP4);
-  const hlsDir = path.join(dirname, HLS_DIR);
+function processVideo(dirname: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const videoWebm = path.join(dirname, VIDEO_WEBM);
+    const audioWebm = path.join(dirname, AUDIO_WEBM);
+    const audioMp4 = path.join(dirname, AUDIO_MP4);
+    const hlsDir = path.join(dirname, HLS_DIR);
 
-  // We need a temp file for the original video since we'll overwrite video.webm
-  const tempVideo = path.join(dirname, VIDEO_ORIGINAL);
-  await fsp.rename(videoWebm, tempVideo);
+    const fs = yield* FileSystem.FileSystem;
 
-  try {
-    // Extract audio from video
-    console.log("Extracting audio track...");
-    await extractAudio(tempVideo, audioWebm);
+    // We need a temp file for the original video since we'll overwrite video.webm
+    const tempVideo = path.join(dirname, VIDEO_ORIGINAL);
+    yield* fs.rename(videoWebm, tempVideo);
 
-    // Create silent video
-    console.log("Creating silent video.webm...");
-    await stripAudio(tempVideo, videoWebm);
+    try {
+      // Extract audio from video
+      yield* Effect.logInfo("extracting audio track...");
+      yield* Effect.promise(() => extractAudio(tempVideo, audioWebm));
 
-    // Fix WebM timing for both files
-    console.log("Fixing audio.webm timing...");
-    await fixWebmTiming(audioWebm);
+      // Create silent video
+      yield* Effect.logInfo("creating silent video.webm...");
+      yield* Effect.promise(() => stripAudio(tempVideo, videoWebm));
 
-    // console.log("Fixing video.webm timing...");
-    // await fixWebmTiming(videoWebm);
+      // Fix WebM timing for both files
+      yield* Effect.logInfo("fixing audio.webm timing...");
+      yield* Effect.promise(() => fixWebmTiming(audioWebm));
 
-    // Encode audio to MP4
-    console.log("Encoding audio.mp4...");
-    await encodeAudioMp4(audioWebm, audioMp4);
+      // console.log("Fixing video.webm timing...");
+      // await fixWebmTiming(videoWebm);
 
-    // Encode video to HLS
-    console.log("Encoding HLS...");
-    await encodeHls(videoWebm, hlsDir);
-  } finally {
-    // Clean up temp file
-    if (fs.existsSync(tempVideo)) {
-      await fsp.unlink(tempVideo);
+      // Encode audio to MP4
+      yield* Effect.logInfo("encoding audio.mp4...");
+      yield* Effect.promise(() => encodeAudioMp4(audioWebm, audioMp4));
+
+      // Encode video to HLS
+      yield* Effect.logInfo("encoding HLS...");
+      yield* Effect.promise(() => encodeHls(videoWebm, hlsDir));
+
+      yield* Effect.logInfo("video post-processing complete.");
+    } finally {
+      // Clean up temp file
+      if (yield* fs.exists(tempVideo)) {
+        yield* fs.remove(tempVideo);
+      }
     }
-  }
+  }).pipe(
+    Effect.annotateLogs({
+      _op: "processVideo",
+      dirname,
+    }),
+  );
 }
 
 /**
  * Post-process @liqvid/media recording data.
  */
-async function postProcessRecording({
-  dirname,
-}: {
-  dirname: AbsoluteDir;
-}): Promise<void> {
-  // Check if ffmpeg is available
-  if (!(await checkFfmpeg())) {
-    console.warn(
-      "ffmpeg not found. Skipping @liqvid/media post-processing. " +
-        "Install ffmpeg to enable audio/video encoding.",
-    );
-    return;
-  }
+function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
+  return Effect.gen(function* () {
+    // Check if ffmpeg is available
+    if (!(yield* Effect.promise(checkFfmpeg))) {
+      console.warn(
+        "ffmpeg not found. Skipping @liqvid/media post-processing. " +
+          "Install ffmpeg to enable audio/video encoding.",
+      );
+      return;
+    }
 
-  const audioWebm = path.join(dirname, AUDIO_WEBM);
-  const videoWebm = path.join(dirname, VIDEO_WEBM);
+    const audioWebm = path.join(dirname, AUDIO_WEBM);
+    const videoWebm = path.join(dirname, VIDEO_WEBM);
 
-  const hasAudio = fs.existsSync(audioWebm);
-  const hasVideo = fs.existsSync(videoWebm);
+    const hasAudio = fs.existsSync(audioWebm);
+    const hasVideo = fs.existsSync(videoWebm);
 
-  if (hasVideo) {
-    await processVideo(dirname);
-  } else if (hasAudio) {
-    await processAudioOnly(dirname);
-  }
+    if (hasVideo) {
+      yield* processVideo(dirname);
+    } else if (hasAudio) {
+      yield* processAudioOnly(dirname);
+    }
+  });
 }
 
 const plugin: LiqvidStudioServerPlugin = {

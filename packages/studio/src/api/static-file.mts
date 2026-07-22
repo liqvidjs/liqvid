@@ -5,7 +5,7 @@ import type { RelativePath } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
 import { InvalidError, NotFoundError } from "../utils/errors.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 /**
  * MIME type mappings for common file extensions
@@ -60,7 +60,7 @@ export function serveStaticFile(requestedPath: RelativePath) {
     }
 
     // Resolve relative to the app directory
-    const appDir = inRoutesDir();
+    const appDir = getRoutesDir();
     const absolutePath = path.join(appDir, normalizedPath);
 
     // Security: Ensure the resolved path is within the app directory

@@ -12,9 +12,9 @@ import {
 import Handlebars from "handlebars";
 import type { CommandModule } from "yargs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { UP } from "../utils/effect.mts";
 
-const UP = RelativeDir("..");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const TEMPLATES_DIR = path.join(
   __dirname,

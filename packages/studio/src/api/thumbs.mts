@@ -15,13 +15,12 @@ import {
   ASSETS_DIR,
   DARK_DIR,
   LIGHT_DIR,
-  NEXT_APP_DIR,
   THUMBS_DIR,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -118,11 +117,9 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { cwd } = getServerState();
         // read directories
         const thumbsBaseDir = path.join(
-          cwd,
-          NEXT_APP_DIR,
+          getRoutesDir(),
           projectPath,
           ASSETS_DIR,
           THUMBS_DIR,
@@ -161,7 +158,11 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
 
         const { basePath, productionServerPort } = getServerState();
 
-        const thumbsBaseDir = inRoutesDir(projectPath, THUMBS_BASE_DIR);
+        const thumbsBaseDir = path.join(
+          getRoutesDir(),
+          projectPath,
+          THUMBS_BASE_DIR,
+        );
 
         // Build the URL for the video
         const previewPath = `${basePath || ""}/${projectPath}/`;

@@ -8,6 +8,13 @@ export const PREVIEW_DIR = RelativeDir("preview");
 
 export const TRANSLATIONS_DIR = RelativeDir(".translations");
 
+/**
+ * `types.ts` file auto-generated inside `.liqvid` directory
+ * This provides type information about the assets available
+ * in the `.liqvid` directory.
+ */
+export const TYPES_AUTOGEN = RelativeFile("types.ts");
+
 /* ------------------------------ Next.js ------------------------------ */
 
 export const NEXT_APP_DIR = RelativeDir("app");

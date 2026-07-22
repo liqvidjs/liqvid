@@ -3,7 +3,7 @@ import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
-import { usePluginApi } from "@liqvid/studio-plugin-api";
+import { useIsPreview, usePluginApi } from "@liqvid/studio-plugin-api";
 import { compare, isMac, useToggle } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
@@ -48,6 +48,7 @@ export function RecordingDialog({
   const { instances, projectPath } = useStudioPrivateApi();
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
+  const isPreview = useIsPreview();
 
   const [recordings, setRecordings] = useState<readonly RecordingMeta[]>([]);
 
@@ -146,6 +147,8 @@ export function RecordingDialog({
       [projectPath],
     ),
   );
+
+  if (isPreview) return;
 
   return (
     <DockableDialog.Dialog

@@ -4,6 +4,7 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Effect } from "effect";
+import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
@@ -102,13 +103,13 @@ export const publish: CommandModule = {
 
 export interface PublishOptions {
   /** Base directory containing media files (relative to cwd). Defaults to "app". */
-  baseDir?: string;
+  baseDir?: RelativeDir;
 
   /** Path to liqvid.json config file */
-  configPath?: string;
+  configPath?: AbsoluteFile;
 
   /** Working directory. Defaults to `process.cwd()`. */
-  cwd?: string;
+  cwd?: AbsoluteDir;
 
   /** Show what would be uploaded without actually uploading */
   dryRun?: boolean;
@@ -117,7 +118,7 @@ export interface PublishOptions {
 /**
  * Load the parsed Liqvid config for the given cwd/configPath.
  */
-async function loadConfig(cwd: string, configPath: string) {
+async function loadConfig(cwd: AbsoluteDir, configPath: AbsoluteFile) {
   const envFiles = loadEnvFiles(cwd);
 
   return Effect.runPromise(
@@ -154,7 +155,7 @@ export async function publishMedia(
   options: PublishOptions = {},
 ): Promise<void> {
   const cwd = options.cwd ?? process.cwd();
-  const baseDir = options.baseDir ?? "app";
+  const baseDir = options.baseDir ?? RelativeDir("app");
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
   const dryRun = options.dryRun ?? false;
 
@@ -305,7 +306,7 @@ function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
  * Create the appropriate hosting provider based on config
  */
 function createHostingProvider(config: LiqvidConfig): HostingProvider {
-  const contentBackend = config.backend.content;
+  const contentBackend = config.backend?.content;
 
   switch (contentBackend) {
     case "copy": {

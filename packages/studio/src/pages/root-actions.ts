@@ -7,29 +7,29 @@ import { fileURLToPath } from "node:url";
 import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
-import { writeJSON } from "@liqvid/cli/utils";
+import { UP, writeJSON } from "@liqvid/cli/utils";
 import type { AutoGenProjectMeta } from "@liqvid/schemas";
 import { serialize } from "@liqvid/ssr";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import {
   type AbsoluteDir,
+  type AbsoluteFile,
   RelativeDir,
   RelativeFile,
-  type RelativePath,
 } from "effect-paths";
 import { execa } from "execa";
 import Handlebars from "handlebars";
 
 import {
   ASSETS_DIR,
-  NEXT_APP_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
   TEMPLATE_FILE,
+  TYPES_AUTOGEN,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
-import { UP } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 export async function rebuildAction() {
   const { cwd } = getServerState();
@@ -150,15 +150,12 @@ const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, RelativeDir("projects"));
 export async function openInFinderAction(
   projectPath: RelativeDir,
 ): Promise<{ success: boolean }> {
-  const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
-
   try {
     // Validate path to prevent directory traversal
     if (projectPath.includes("..")) {
       return { success: false };
     }
-    const fullPath = path.join(APP_DIR, projectPath);
+    const fullPath = path.join(getRoutesDir(), projectPath);
     await execa("open", [fullPath]);
     return { success: true };
   } catch (e) {
@@ -174,16 +171,13 @@ export async function openRenderInFinderAction(
   projectPath: RelativeDir,
   renderId: string,
 ): Promise<{ success: boolean }> {
-  const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
-
   try {
     // Validate paths to prevent directory traversal
     if (projectPath.includes("..") || renderId.includes("..")) {
       return { success: false };
     }
     const fullPath = path.join(
-      APP_DIR,
+      getRoutesDir(),
       projectPath,
       ASSETS_DIR,
       RelativeDir("renders"),
@@ -203,16 +197,13 @@ export async function openRenderInFinderAction(
 export async function openCaptionsInFinderAction(
   projectPath: RelativeDir,
 ): Promise<{ success: boolean }> {
-  const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
-
   try {
     // Validate path to prevent directory traversal
-    if (projectPath.includes("..")) {
+    if (projectPath.includes(UP)) {
       return { success: false };
     }
     const fullPath = path.join(
-      APP_DIR,
+      getRoutesDir(),
       projectPath,
       ASSETS_DIR,
       RelativeDir("captions"),
@@ -278,8 +269,8 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
  * Compile a Handlebars template and write it to the output path.
  */
 function compileTemplate(
-  templatePath: string,
-  outputPath: string,
+  templatePath: AbsoluteFile,
+  outputPath: AbsoluteFile,
   data: Record<string, unknown>,
 ) {
   return Effect.gen(function* () {
@@ -308,11 +299,7 @@ function copyTemplateDir(
     const entries = yield* readDirWithFileTypes(srcDir);
 
     for (const [basename, kind] of entries) {
-      const srcPath = path.join(srcDir, basename);
-      const destName = basename.endsWith(".hbs")
-        ? (basename.slice(0, -4) as RelativePath)
-        : basename;
-      const destPath = path.join(destDir, destName);
+      if (kind === "SymbolicLink") continue;
 
       if (basename === TEMPLATE_FILE) {
         // Skip template.json
@@ -320,15 +307,23 @@ function copyTemplateDir(
       }
 
       if (kind === "Directory") {
-        yield* copyTemplateDir(
-          srcPath as AbsoluteDir,
-          destPath as AbsoluteDir,
-          data,
-        );
-      } else if (basename.endsWith(".hbs")) {
-        yield* compileTemplate(srcPath, destPath, data);
+        const srcPath = path.join(srcDir, basename);
+        const destPath = path.join(destDir, basename);
+
+        yield* copyTemplateDir(srcPath, destPath, data);
       } else {
-        yield* fs.copyFile(srcPath, destPath);
+        const srcPath = path.join(srcDir, basename);
+        const destName = basename.endsWith(".hbs")
+          ? (basename.slice(0, -4) as RelativeFile)
+          : basename;
+
+        const destPath = path.join(destDir, destName);
+
+        if (basename.endsWith(".hbs")) {
+          yield* compileTemplate(srcPath, destPath, data);
+        } else {
+          yield* fs.copyFile(srcPath, destPath);
+        }
       }
     }
   });
@@ -337,9 +332,6 @@ function copyTemplateDir(
 export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
-  const { cwd } = getServerState();
-  const APP_DIR = path.join(cwd, NEXT_APP_DIR);
-
   const result = await Effect.runPromiseExit(
     Effect.gen(function* () {
       const { name, projectPath, templateId } = input;
@@ -356,7 +348,7 @@ export async function createProjectAction(
         return { error: "Template not found", success: false };
       }
 
-      const fullProjectPath = path.join(APP_DIR, projectPath);
+      const fullProjectPath = path.join(getRoutesDir(), projectPath);
 
       const fs = yield* FileSystem.FileSystem;
 
@@ -397,8 +389,8 @@ export async function createProjectAction(
 
       // Generate .liqvid/types.ts (initial structure)
       yield* compileTemplate(
-        path.join(TEMPLATES_DIR, RelativeFile("types.ts.hbs")),
-        path.join(fullProjectPath, ASSETS_DIR, RelativeFile("types.ts")),
+        path.join(TEMPLATES_DIR, RelativeFile(`${TYPES_AUTOGEN}.hbs`)),
+        path.join(fullProjectPath, ASSETS_DIR, TYPES_AUTOGEN),
         {
           directoryStructure: {
             [PROJECT_META_FILE]: null,

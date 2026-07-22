@@ -32,7 +32,7 @@ import { getLanguageExtension } from "./shared.ts";
 import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
 import ThumbMeta from "../.liqvid/thumbs/thumbnails-job.json";
 
-export function LiveCodeHTMLReplay({ projectPath }: { projectPath: string }) {
+export function LiveCodeHTMLReplay() {
   const projectFiles = useProjectFiles();
   const assets = projectFiles.dir(".liqvid");
   const recordings = assets.dir("recordings");
@@ -41,7 +41,6 @@ export function LiveCodeHTMLReplay({ projectPath }: { projectPath: string }) {
   return (
     <LiqvidPlayer
       duration={meta.duration}
-      projectPath={projectPath}
       thumbs={{
         ...ThumbMeta,
         path: projectFiles.dir(".liqvid/thumbs").pattern("%c/%s.png?v=4"),

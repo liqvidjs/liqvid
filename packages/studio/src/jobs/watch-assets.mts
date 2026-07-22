@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
+import { UP } from "@liqvid/cli/utils";
 import { assertType } from "@liqvid/utils";
 import chalk from "chalk";
 import {
@@ -32,11 +33,12 @@ import {
   NEXT_PAGE,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  TYPES_AUTOGEN,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { getBiomePath } from "../utils/fs.mts";
-import { inRoutesDir, UP } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -64,7 +66,7 @@ function isSpecialInclude(relativePath: string): boolean {
 function shouldExclude(relativePath: string, basename: string): boolean {
   // Always exclude these
   if (basename === ".DS_Store") return true;
-  if (basename === "types.ts") return true;
+  if (basename === TYPES_AUTOGEN) return true;
 
   // Check special includes first (they override exclusions)
   if (isSpecialInclude(relativePath)) return false;
@@ -87,7 +89,7 @@ function shouldIgnoreEvent(
 ): boolean {
   if (filename.endsWith("~")) return true;
   if (basename === ".DS_Store") return true;
-  if (basename === "types.ts") return true;
+  if (basename === TYPES_AUTOGEN) return true;
   if (basename === PROJECT_META_FILE) return true;
   return false;
 }
@@ -130,7 +132,7 @@ async function findProjectDirectory(
 ): Promise<Option.Option<AbsoluteDir>> {
   let dir = path.dirname(filePath);
 
-  const TARGET_DIR = inRoutesDir();
+  const TARGET_DIR = getRoutesDir();
 
   while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
     if (await isProjectDirectory(dir)) {
@@ -152,7 +154,7 @@ export async function watchAssets() {
     return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
   });
 
-  const TARGET_DIR = inRoutesDir();
+  const TARGET_DIR = getRoutesDir();
 
   // A resolved asset change: the project directory whose types.ts should be
   // regenerated for this event.
@@ -277,8 +279,8 @@ async function generateProjectTypes({
     data: {
       directoryStructure,
     },
-    out: path.join(assetsDir, RelativeFile("types.ts")),
-    template: RelativeFile("types.ts.hbs"),
+    out: path.join(assetsDir, TYPES_AUTOGEN),
+    template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
   });
 }
 

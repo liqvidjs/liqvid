@@ -30,7 +30,7 @@ import {
 } from "../conventions.mts";
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import {
@@ -71,7 +71,9 @@ export function saveRecording(
       metadataStr,
     );
 
-    const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
+    yield* Effect.logInfo("plugins", { plugins: metadata.plugins });
+
+    const assetsDir = path.join(getRoutesDir(), projectPath, ASSETS_DIR);
 
     // Create assets dir if it doesn't exist
     if (!(yield* fs.exists(assetsDir))) {
@@ -105,36 +107,49 @@ export function saveRecording(
     });
 
     // Write plugin data
-    for (const pluginInfo of metadata.plugins) {
-      const pluginDir = path.join(
-        recordingDir,
-        packageNameToDirName(pluginInfo.key),
-      );
-      yield* fs.makeDirectory(pluginDir, { recursive: true });
+    yield* Effect.all(
+      metadata.plugins.map((pluginInfo) =>
+        Effect.gen(function* () {
+          const pluginDir = path.join(
+            recordingDir,
+            packageNameToDirName(pluginInfo.key),
+          );
+          yield* fs.makeDirectory(pluginDir, { recursive: true });
 
-      const data = formData.get(pluginInfo.key);
-      if (data === null) continue;
+          const data = formData.get(pluginInfo.key);
+          console.dir({ data, pluginInfo });
+          if (data === null) return;
 
-      if (pluginInfo.isBlob) {
-        // Write blob data with specified filename
-        // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
-        const filename = pluginInfo.filename ?? RECORDING_RAW_BLOB;
-        const blobData = data as Blob;
-        const buffer = yield* Effect.promise(() =>
-          blobData.arrayBuffer().then(Buffer.from),
-        );
-        yield* fs.writeFile(path.join(pluginDir, filename), buffer);
-      } else if (typeof data === "string") {
-        // Write JSON data as raw.json
-        yield* writeJSON(path.join(pluginDir, RECORDING_RAW_FILE), data);
-      }
-    }
+          if (pluginInfo.isBlob) {
+            // Write blob data with specified filename
+            // In Node.js/Next.js, the data comes as a File/Blob-like object with arrayBuffer() method
+            const filename = pluginInfo.filename ?? RECORDING_RAW_BLOB;
+            const blobData = data as Blob;
+            const buffer = yield* Effect.promise(() =>
+              blobData.arrayBuffer().then(Buffer.from),
+            );
+            yield* fs.writeFile(path.join(pluginDir, filename), buffer);
+          } else if (typeof data === "string") {
+            // Write raw JSON data
+            yield* fs.writeFileString(
+              path.join(pluginDir, RECORDING_RAW_FILE),
+              data,
+            );
+          }
+        }).pipe(Effect.annotateLogs({ _plugin: pluginInfo.key })),
+      ),
+      { concurrency: "unbounded" },
+    );
 
     // Run post-processing plugins
     yield* runPostProcessing(recordingDir, metadata.plugins, dynamicImports);
 
     return new Response(null, { status: StatusCodes.CREATED });
-  });
+  }).pipe(
+    Effect.annotateLogs({
+      _op: "saveRecording",
+    }),
+  );
 }
 
 /**
@@ -145,54 +160,70 @@ function runPostProcessing(
   plugins: SaveRecordingMetadata["plugins"],
   dynamicImports: DynamicImports,
 ) {
-  return Effect.gen(function* () {
-    for (const pluginInfo of plugins) {
-      const pluginDir = path.join(
-        recordingDir,
-        packageNameToDirName(pluginInfo.key),
-      );
+  return Effect.all(
+    plugins.map((pluginInfo) =>
+      Effect.gen(function* () {
+        const pluginDir = path.join(
+          recordingDir,
+          packageNameToDirName(pluginInfo.key),
+        );
 
-      const dynamicImporter =
-        dynamicImports[`${pluginInfo.key}/liqvid-studio-server-plugin`];
+        const dynamicImporter =
+          dynamicImports[`${pluginInfo.key}/liqvid-studio-server-plugin`];
 
-      // no server plugin
-      if (!dynamicImporter) {
-        continue;
-      }
+        // no server plugin
+        if (!dynamicImporter) {
+          yield* Effect.logDebug(`no server plugin for ${pluginInfo.key}`);
+          return;
+        }
 
-      const serverPlugin: {
-        default?: LiqvidStudioServerPlugin;
-      } & LiqvidStudioServerPlugin = yield* Effect.tryPromise(
-        dynamicImporter,
-      ).pipe(
-        Effect.tapCause((cause) =>
-          Effect.logError(
-            `error loading server plugin for ${pluginInfo.key}`,
-            Cause.pretty(cause),
-          ),
-        ),
-      );
-
-      const plugin = serverPlugin.default ?? serverPlugin;
-
-      if (!plugin.postProcessRecording) continue;
-
-      const program = plugin.postProcessRecording({ dirname: pluginDir });
-
-      if (program instanceof Promise) {
-        yield* Effect.tryPromise(() => program).pipe(
+        const serverPlugin: {
+          default?: LiqvidStudioServerPlugin;
+        } & LiqvidStudioServerPlugin = yield* Effect.tryPromise(
+          dynamicImporter,
+        ).pipe(
           Effect.tapCause((cause) =>
             Effect.logError(
-              `error running postProcessRecording for ${pluginInfo.key}`,
+              `error loading server plugin for ${pluginInfo.key}`,
               Cause.pretty(cause),
             ),
           ),
         );
-      } else {
-        yield* program;
-      }
-    }
-  });
+
+        const plugin = serverPlugin.default ?? serverPlugin;
+
+        if (!plugin.postProcessRecording) {
+          yield* Effect.logDebug(
+            `no postProcessRecording for ${pluginInfo.key}`,
+          );
+          return;
+        }
+
+        yield* Effect.logDebug(
+          `running postProcessRecording for ${pluginInfo.key}`,
+        );
+        const program = plugin.postProcessRecording({ dirname: pluginDir });
+
+        if (program instanceof Promise) {
+          yield* Effect.tryPromise(() => program).pipe(
+            Effect.tapCause((cause) =>
+              Effect.logError(
+                `error running postProcessRecording for ${pluginInfo.key}`,
+                Cause.pretty(cause),
+              ),
+            ),
+          );
+        } else {
+          yield* program;
+        }
+      }).pipe(Effect.annotateLogs({ _plugin: pluginInfo.key })),
+    ),
+    { concurrency: "unbounded" },
+  ).pipe(
+    Effect.annotateLogs({
+      _op: "runPostProcessing",
+    }),
+  );
 }
 
 /**
@@ -229,7 +260,7 @@ export const recordingsLive = HttpApiBuilder.group(
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
+        const assetsDir = path.join(getRoutesDir(), projectPath, ASSETS_DIR);
 
         // error if assets dir doesn't exist
         if (!(yield* fs.exists(assetsDir))) {

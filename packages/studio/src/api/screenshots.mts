@@ -27,25 +27,17 @@ import {
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
 const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
 
 /**
- * Get the project directory from a project path.
- * The project path is relative to the app/ directory.
- */
-function getProjectDir(projectPath: RelativeDir) {
-  return inRoutesDir(projectPath);
-}
-
-/**
  * Get the screenshots directory for a project
  */
 function getScreenshotsDir(projectPath: RelativeDir) {
-  return path.join(getProjectDir(projectPath), ASSETS_DIR, SCREENSHOTS_DIR);
+  return path.join(getRoutesDir(), projectPath, ASSETS_DIR, SCREENSHOTS_DIR);
 }
 
 /**
@@ -256,7 +248,7 @@ export const screenshotsLive = HttpApiBuilder.group(
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
 
-            const projectDir = getProjectDir(projectPath);
+            const projectDir = path.join(getRoutesDir(), projectPath);
             const screenshotsDir = getScreenshotsDir(projectPath);
             const sourcePath = path.join(
               screenshotsDir,
@@ -350,7 +342,7 @@ export const screenshotsLive = HttpApiBuilder.group(
           assertType<RelativeFile>(filename);
           const fs = yield* FileSystem.FileSystem;
 
-          const filePath = path.join(getProjectDir(projectPath), filename);
+          const filePath = path.join(getRoutesDir(), projectPath, filename);
 
           return {
             exists: yield* fs.exists(filePath),

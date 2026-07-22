@@ -1,7 +1,9 @@
+import "server-only";
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import "server-only";
-import { UP } from "./misc.mts";
+
+import { UP } from "@liqvid/cli/utils";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

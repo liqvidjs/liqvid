@@ -6,6 +6,7 @@ import {
   usePersistentState,
 } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
+import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { createUniqueContext } from "@liqvid/utils";
 import { useContext, useMemo } from "react";
 
@@ -52,6 +53,8 @@ export function PromptsProvider({
   persistence?: PromptsPersistence;
   shortcut?: string;
 }) {
+  const projectPath = useProjectPath();
+
   // Set up persistence for the enabled state
   const enabledPersistenceConfig = useMemo(():
     | BooleanValueConfig
@@ -59,11 +62,11 @@ export function PromptsProvider({
     if (!persistence) return undefined;
     return {
       default: defaultEnabled,
-      name: `${persistence.prefix}enabled`,
+      name: `${persistence.prefix}[${projectPath}].enabled`,
       source: persistence.source ?? "localStorage",
       type: "boolean",
     };
-  }, [persistence, defaultEnabled]);
+  }, [persistence, defaultEnabled, projectPath]);
 
   const [enabled, setEnabled, toggleEnabled] = usePersistentState(
     enabledPersistenceConfig!,

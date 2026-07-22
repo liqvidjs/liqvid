@@ -46,7 +46,7 @@ import {
 import { broadcast } from "../next/websockets.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import { walkDir } from "../utils/fs.mts";
-import { getLogLevel, inRoutesDir } from "../utils/misc.mts";
+import { getLogLevel, getRoutesDir } from "../utils/misc.mts";
 
 type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 
@@ -80,7 +80,7 @@ type WatchEvent =
 
 export async function watchProjectFiles(projects: Projects) {
   console.log(chalk.blue("Watching project files..."));
-  const TARGET_DIR = inRoutesDir();
+  const TARGET_DIR = getRoutesDir();
 
   // initial check
   await walkDir(
@@ -330,7 +330,7 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
         }
       }
     }
-  }).pipe(Effect.annotateLogs({ _operation: "handleWatchEvent" }));
+  }).pipe(Effect.annotateLogs({ _op: "handleWatchEvent" }));
 }
 
 /**
@@ -383,9 +383,7 @@ function handleProjectJson({ dirname, filename, projects, relative }: Context) {
     yield* generateAssetsDir({ dirname });
 
     yield* Effect.logDebug("generated assets dir");
-  }).pipe(
-    Effect.annotateLogs({ _operation: "handleProjectJson", dirname, filename }),
-  );
+  }).pipe(Effect.annotateLogs({ _op: "handleProjectJson", dirname, filename }));
 }
 
 /**
@@ -425,7 +423,7 @@ function createProject({ dirname, filename, projects, relative }: Context) {
     projects[meta.path] = meta;
 
     yield* generateAssetsDir({ dirname });
-  }).pipe(Effect.annotateLogs({ _operation: "createProject" }));
+  }).pipe(Effect.annotateLogs({ _op: "createProject" }));
 }
 
 /**
@@ -450,7 +448,7 @@ function handleProjectMeta({
     project.duration = new Duration(projectMeta.duration);
   }).pipe(
     Effect.annotateLogs({
-      _operation: "handleProjectMeta",
+      _op: "handleProjectMeta",
       dotLiqvidDir,
       projects: Object.keys(projects),
     }),
@@ -483,9 +481,7 @@ function handleRecordingDir(recordingDir: AbsoluteDir) {
       data: { name, url },
       type: "deleteRecording",
     });
-  }).pipe(
-    Effect.annotateLogs({ _operation: "handleRecordingDir", recordingDir }),
-  );
+  }).pipe(Effect.annotateLogs({ _op: "handleRecordingDir", recordingDir }));
 }
 
 /**
@@ -536,7 +532,7 @@ function handleRecordingMeta({ dirname: recordingDir, filename }: Context) {
     Effect.catchTag("FileDecodeError", (error) =>
       Effect.logWarning("failed to read recording-meta.json", error),
     ),
-    Effect.annotateLogs({ _operation: "handleRecordingMeta", filename }),
+    Effect.annotateLogs({ _op: "handleRecordingMeta", filename }),
   );
 }
 

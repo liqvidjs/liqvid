@@ -14,10 +14,9 @@ import {
   ASSETS_DIR,
   AUDIO_DIR,
   CAPTIONS_FILE,
-  NEXT_APP_DIR,
   RICH_TRANSCRIPT,
 } from "../../conventions.mts";
-import { getServerState } from "../../initialize.mts";
+import { getRoutesDir } from "../../utils/misc.mts";
 
 import type { Transcript } from "./state.ts";
 
@@ -28,8 +27,7 @@ export async function saveCaptions({
   projectPath: RelativeDir;
   transcript: RichTranscript;
 }) {
-  const { cwd } = getServerState();
-  const projectDir = path.join(cwd, NEXT_APP_DIR, projectPath);
+  const projectDir = path.join(getRoutesDir(), projectPath);
 
   const exit = await Effect.runPromiseExit(
     Effect.gen(function* () {

@@ -4,7 +4,6 @@ import path from "node:path";
 
 import type { EnvFiles } from "@liqvid/schemas";
 import { type LogLevel, Option } from "effect";
-import { RelativeDir } from "effect-paths";
 
 import { NEXT_APP_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
@@ -98,12 +97,10 @@ export function getLogLevel(): LogLevel.LogLevel {
   }
 }
 
-export const UP = RelativeDir("..");
-
 /**
- * Get a path relative to the `routes` directory of the Next.js app.
+ * Get the absolute path to the routes directory.
  */
-export function inRoutesDir(...paths: RelativeDir[]) {
+export function getRoutesDir() {
   const { cwd } = getServerState();
-  return path.join(cwd, NEXT_APP_DIR, ...paths);
+  return path.join(cwd, NEXT_APP_DIR);
 }

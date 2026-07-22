@@ -7,12 +7,7 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import {
-  ASSETS_DIR,
-  NEXT_APP_DIR,
-  RENDER_META_FILE,
-  RENDERS_DIR,
-} from "../conventions.mts";
+import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import {
   existenceOptional,
@@ -21,7 +16,7 @@ import {
 } from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import type { LoggableJob } from "./schemas.mts";
@@ -64,10 +59,8 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
   handlers
     .handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
-        const { cwd } = getServerState();
         const rendersBaseDir = path.join(
-          cwd,
-          NEXT_APP_DIR,
+          getRoutesDir(),
           projectPath,
           ASSETS_DIR,
           RENDERS_DIR,
@@ -132,8 +125,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const rendersBaseDir = path.join(
-          cwd,
-          NEXT_APP_DIR,
+          getRoutesDir(),
           projectPath,
           ASSETS_DIR,
           RENDERS_DIR,
@@ -167,7 +159,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const { basePath, productionServerPort } = getServerState();
-        const projectDir = inRoutesDir(projectPath);
+        const projectDir = path.join(getRoutesDir(), projectPath);
         const rendersBaseDir = path.join(projectDir, ASSETS_DIR, RENDERS_DIR);
 
         // Generate unique render ID

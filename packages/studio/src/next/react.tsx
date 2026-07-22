@@ -1,20 +1,23 @@
 "use client";
 
-import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
+import {
+  IsPreviewProvider,
+  ProjectPathProvider,
+} from "@liqvid/studio-plugin-api";
 import type { RelativeDir } from "effect-paths";
 
-export function HelperComponent<P>({
-  Component,
+export function ProjectPathHelperComponent({
+  children,
+  isPreview,
   projectPath,
-  props,
 }: {
-  Component: (props: P & { projectPath: RelativeDir }) => React.ReactNode;
+  children?: React.ReactNode;
+  isPreview: boolean;
   projectPath: RelativeDir;
-  props: P;
 }) {
   return (
-    <ProjectPathProvider value={projectPath}>
-      <Component {...props} projectPath={projectPath} />
-    </ProjectPathProvider>
+    <IsPreviewProvider value={isPreview}>
+      <ProjectPathProvider value={projectPath}>{children}</ProjectPathProvider>
+    </IsPreviewProvider>
   );
 }

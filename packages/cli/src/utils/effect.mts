@@ -13,6 +13,7 @@ import {
   type AbsoluteDir,
   type AbsoluteFile,
   type AbsolutePath,
+  RelativeDir,
   RelativeFile,
 } from "effect-paths";
 
@@ -151,3 +152,6 @@ export function writeJSON<T>(path: AbsoluteFile, data: T) {
     yield* fs.writeFileString(path, jsonString);
   });
 }
+
+/** go up one directory */
+export const UP = RelativeDir("..");

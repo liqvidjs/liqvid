@@ -5,7 +5,7 @@ import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 
 import { ASSETS_DIR, PROJECT_META_FILE } from "../conventions.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -15,7 +15,7 @@ export const projectMetaLive = HttpApiBuilder.group(
   (handlers) =>
     handlers.handle("setProjectMeta", ({ payload, query: { projectPath } }) =>
       Effect.gen(function* () {
-        const assetsDir = inRoutesDir(projectPath, ASSETS_DIR);
+        const assetsDir = path.join(getRoutesDir(), projectPath, ASSETS_DIR);
         const projectMetaFile = path.join(assetsDir, PROJECT_META_FILE);
 
         const fs = yield* FileSystem.FileSystem;

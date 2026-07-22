@@ -1,4 +1,5 @@
 import { CaptionsEditor } from "@liqvid/studio";
+import { useIsPreview } from "@liqvid/studio-plugin-api";
 import { CodeRecording } from "@lqv/codemirror/recording";
 import { ChalkboardTeacherIcon, FlaskIcon } from "@phosphor-icons/react";
 import { Audio } from "liqvid";
@@ -31,21 +32,21 @@ import { getLanguageExtension } from "./shared.ts";
 
 import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
 
-export function LiveCodeHTMLRecord({ projectPath }: { projectPath: string }) {
+export function LiveCodeHTMLRecord() {
   const params = useSearchParams();
   const assets = useProjectFiles().dir(".liqvid");
   const recordings = assets.dir("recordings");
   const latest = recordings.dir("2026-06-24T02-02-23-586Z");
+  const isPreview = useIsPreview();
 
-  if (params.has("preview")) {
-    return <LiveCodeHTMLReplay {...{ projectPath }} />;
+  if (isPreview) {
+    return <LiveCodeHTMLReplay />;
   }
 
   return (
     <LiqvidPlayer
       duration={meta.duration}
       plugins={[CodeRecording]}
-      projectPath={projectPath}
       // script={script}
     >
       <Audio src={latest.dir("@liqvid@media").file("audio.webm")}>

@@ -8,10 +8,10 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { createElement } from "react";
 
-import { NEXT_APP_DIR, PROJECT_FILE } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
+import { PROJECT_FILE } from "../conventions.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
-import { HelperComponent } from "./react.tsx";
+import { ProjectPathHelperComponent } from "./react.tsx";
 
 /** Omit page from production bundle by returning a 404 */
 export function omitFromProduction() {
@@ -20,28 +20,34 @@ export function omitFromProduction() {
   }
 }
 
-export function liqvidProject<P>(
+export function liqvidProject<P, SP>(
   importMetaUrl: string,
-  Component: (
-    props: P & {
-      /** Project path. This is mainly used by development tools, and is automatically removed in the production build. */
-      projectPath: RelativeDir;
-    },
-  ) => React.ReactNode,
+  Component: (props: {
+    params: Promise<P>;
+
+    searchParams: Promise<SP>;
+
+    /** Project path. This is mainly used by development tools, and is automatically removed in the production build. */
+    projectPath: RelativeDir;
+  }) => React.ReactNode,
 ) {
   const __filename = fileURLToPath(importMetaUrl);
   const __dirname = path.dirname(__filename);
 
   // development
   if (process.env.NODE_ENV === "development") {
-    const { cwd } = getServerState();
-    const projectPath = path.relative(path.join(cwd, NEXT_APP_DIR), __dirname);
+    const projectPath = path.relative(getRoutesDir(), __dirname);
 
-    return function LiqvidProject(props: P) {
-      return createElement(HelperComponent<P>, {
-        Component,
+    return async function LiqvidProject(props: {
+      params: Promise<P>;
+      searchParams: Promise<SP & { preview?: string | string[] | undefined }>;
+    }) {
+      const searchParams = await props.searchParams;
+
+      return createElement(ProjectPathHelperComponent, {
+        children: createElement(Component, { projectPath, ...props }),
+        isPreview: searchParams.preview !== undefined,
         projectPath,
-        props,
       });
     };
   }

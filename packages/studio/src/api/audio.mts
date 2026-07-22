@@ -13,7 +13,6 @@ import {
   AUDIO_WAV,
   CAPTIONS_FILE,
   CAPTIONS_META,
-  NEXT_APP_DIR,
   RICH_TRANSCRIPT,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
@@ -25,7 +24,7 @@ import {
   NotFoundError,
 } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { inRoutesDir } from "../utils/misc.mts";
+import { getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
@@ -37,7 +36,7 @@ export const SINGLE_AUDIO_ID = RelativeDir("default");
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
 function getAudioBaseDir(projectPath: RelativeDir) {
-  return inRoutesDir(projectPath, ASSETS_DIR, AUDIO_DIR);
+  return path.join(getRoutesDir(), projectPath, ASSETS_DIR, AUDIO_DIR);
 }
 
 /**

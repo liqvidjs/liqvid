@@ -109,7 +109,6 @@ export function LiqvidPlayer<M extends string>({
                   ]
                 : []
             }
-            projectPath={props.projectPath}
           >
             <SegmentProvider hideWith={hideWith}>
               <PlayerChrome {...props} />
@@ -138,11 +137,6 @@ function PlayerChrome({
   /** Whether this project needs a loading screen. */
   loadingScreen?: boolean;
 
-  /**
-   * Path to the project on disk, to be passed to the Dev Tools provider.
-   * Only used in development, value is ignored in production.
-   */
-  projectPath: string;
 
   thumbs?: React.ComponentProps<typeof Controls.ScrubberBar>["thumbs"];
 
@@ -157,7 +151,7 @@ function PlayerChrome({
       {loadingScreen && <LoadingScreen />}
 
       <PromptsProvider
-        persistence={{ prefix: `liqvid.prompts[${projectPath}].` }}
+        persistence={{ prefix: "liqvid.prompts" }}
         shortcut={shortcuts.togglePrompts}
       >
         <Player.Controls
