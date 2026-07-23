@@ -49,6 +49,9 @@ const nextConfig: NextConfig = {
   // in case you are deploying your site to a subdirectory
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
 
+  // needed for captioning
+  serverExternalPackages: ["smart-whisper"],
+
   turbopack: {
     // enable importing these as plaintext
     rules: {
@@ -74,9 +77,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  ...(isDevelopment ? developmentConfig : productionConfig),
-
   /* config options here */
+
+  ...(isDevelopment ? developmentConfig : productionConfig),
 };
 
 export default nextConfig;

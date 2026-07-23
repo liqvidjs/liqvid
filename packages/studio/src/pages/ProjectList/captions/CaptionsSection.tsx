@@ -3,11 +3,11 @@
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { SpinnerIcon, WaveformIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
-import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -28,6 +28,7 @@ interface CaptionsSectionProps {
 }
 
 export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
+  const { hasCaptioningConfigured } = useDerivedConfig();
   const projectPath = useProjectPath();
   const [audio, setAudio] = useState<readonly AudioEntry[]>([]);
   const [multiple, setMultiple] = useState(false);

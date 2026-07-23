@@ -43,7 +43,7 @@ export function LiveCodeHTMLReplay() {
       duration={meta.duration}
       thumbs={{
         ...ThumbMeta,
-        path: projectFiles.dir(".liqvid/thumbs").pattern("%c/%s.png?v=4"),
+        path: projectFiles.dir(".liqvid/thumbs").pattern("%c/%s.png"),
       }}
       transcript={assets.fetch("audio/transcript.json")}
     >

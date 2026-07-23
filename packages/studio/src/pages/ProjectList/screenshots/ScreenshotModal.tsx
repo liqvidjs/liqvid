@@ -15,6 +15,7 @@ import { Effect } from "effect";
 import { useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -42,6 +43,7 @@ export function ScreenshotModal({
   onCaptured,
   project,
 }: ScreenshotModalProps) {
+  const { renderSource } = useDerivedConfig();
   const [previewTime, setPreviewTime] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorSchemeOption>("light");
@@ -54,7 +56,10 @@ export function ScreenshotModal({
     ? `${basePath}/${projectPath}/`
     : `/${projectPath}/`;
 
-  const previewUrl = `http://localhost:${productionServerPort}${previewPath}`;
+  const previewUrl =
+    renderSource.screenshots === "preview"
+      ? `/${projectPath}?preview`
+      : `http://localhost:${productionServerPort}${previewPath}`;
 
   const { api, ref: iframeRef } = useIframeApi(playerApiDeclaration);
 

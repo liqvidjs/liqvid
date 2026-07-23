@@ -408,7 +408,7 @@
   border-radius: 4px;
   transition: background-color 0.15s;
 
-  &:hover {
+  &:not(:disabled):hover {
     background: light-dark(#e0e0e0, #444);
   }
 }

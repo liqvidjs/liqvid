@@ -11,6 +11,12 @@ import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
 
 import "../palette.css";
 
+import { Option } from "effect";
+
+import {
+  type DerivedConfig,
+  DerivedConfigProvider,
+} from "../components/DerivedConfig.tsx";
 import { getTranslations } from "../utils/i18n.mts";
 
 import styles from "./root.module.css";
@@ -21,7 +27,24 @@ type T = typeof TranslationsJson;
 
 export async function Homepage() {
   await initializeServer();
-  const { basePath, productionServerPort, projects } = getServerState();
+  const {
+    basePath,
+    config: $config,
+    productionServerPort,
+    projects,
+  } = getServerState();
+
+  if (Option.isNone($config)) {
+    throw new Error("config is not initialized");
+  }
+  const config = $config.value;
+
+  const derivedConfig = {
+    hasCaptioningConfigured: Boolean(config.media?.captioning),
+    renderSource: {
+      screenshots: config.media?.screenshots?.source ?? "preview",
+    },
+  } satisfies DerivedConfig;
 
   const t: T = await getTranslations<T>(import.meta.url);
 
@@ -35,21 +58,23 @@ export async function Homepage() {
     : [];
 
   return (
-    <WebSocketProvider>
-      <main className={styles.main}>
-        <div className={styles.headerRow}>
-          <h1 className={styles.header}>{t.title}</h1>
-          <NewProjectButton />
-          <RebuildButton />
-        </div>
-        <ProjectList
-          basePath={basePath}
-          initialCollapsedFolders={initialCollapsedFolders}
-          initialFolderView={initialFolderView}
-          productionServerPort={productionServerPort}
-          projects={serialize(projects)}
-        />
-      </main>
-    </WebSocketProvider>
+    <DerivedConfigProvider value={derivedConfig}>
+      <WebSocketProvider>
+        <main className={styles.main}>
+          <div className={styles.headerRow}>
+            <h1 className={styles.header}>{t.title}</h1>
+            <NewProjectButton />
+            <RebuildButton />
+          </div>
+          <ProjectList
+            basePath={basePath}
+            initialCollapsedFolders={initialCollapsedFolders}
+            initialFolderView={initialFolderView}
+            productionServerPort={productionServerPort}
+            projects={serialize(projects)}
+          />
+        </main>
+      </WebSocketProvider>
+    </DerivedConfigProvider>
   );
 }

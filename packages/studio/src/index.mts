@@ -5,9 +5,13 @@ export * from "./ui/Tabs.tsx";
 
 import { Fragment, lazy } from "react";
 
-export type {
-  LiqvidStudioPlugin,
-  LiqvidStudioRecordingPlugin,
+export {
+  type LiqvidStudioPlugin,
+  type LiqvidStudioRecordingPlugin,
+  useIsPreview,
+  useIsPreviewOptional,
+  useProjectPath,
+  useProjectPathOptional,
 } from "@liqvid/studio-plugin-api";
 
 export * from "./assets.mts";

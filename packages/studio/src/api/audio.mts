@@ -24,7 +24,12 @@ import {
   NotFoundError,
 } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import {
+  getConfig,
+  getOrigin,
+  getRenderUrl,
+  getRoutesDir,
+} from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
@@ -54,18 +59,8 @@ export function getAudioDir(
   return multiple ? path.join(base, id) : base;
 }
 
-/** Read the resolved LiqvidConfig from server state, or die if not loaded. */
-function getConfig() {
-  return getServerState().config.pipe(
-    Option.match({
-      onNone: () => Effect.die({ message: "config not loaded" }),
-      onSome: (value: LiqvidConfig) => Effect.succeed(value),
-    }),
-  );
-}
-
 /** Whether the project is configured for multiple audio renderings. */
-function isMultiple(config: LiqvidConfig): boolean {
+function shouldGenerateMultipleAudio(config: LiqvidConfig): boolean {
   return config.media?.audio?.multiple ?? false;
 }
 
@@ -108,7 +103,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     .handle("list", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
         const config = yield* getConfig();
-        const multiple = isMultiple(config);
+        const multiple = shouldGenerateMultipleAudio(config);
 
         const baseDir = getAudioBaseDir(projectPath);
 
@@ -171,9 +166,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     .handle("generate", ({ query: { projectPath } }) =>
       Effect.gen(function* () {
         const config = yield* getConfig();
-        const multiple = isMultiple(config);
-
-        const { basePath, productionServerPort } = getServerState();
+        const multiple = shouldGenerateMultipleAudio(config);
 
         const id = multiple ? generateAudioId() : SINGLE_AUDIO_ID;
         const audioDir = getAudioDir(projectPath, id, multiple);
@@ -184,9 +177,9 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
         const output = path.join(audioDir, AUDIO_WAV);
         const metaOutput = path.join(audioDir, AUDIO_META_FILE);
 
-        // Build the URL for the video
-        const previewPath = `${basePath || ""}/${projectPath}/`;
-        const url = `http://localhost:${productionServerPort}${previewPath}`;
+        const renderSource = config.media?.audio?.source ?? "preview";
+
+        const url = yield* getRenderUrl(renderSource, projectPath);
 
         const meta: AudioMeta = {
           createdAt: new Date().toISOString(),
@@ -218,7 +211,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
       Effect.gen(function* () {
         const config = yield* getConfig();
 
-        if (!isMultiple(config)) {
+        if (!shouldGenerateMultipleAudio(config)) {
           return yield* new InvalidError({
             message: "Cannot rename audio unless media.audio.multiple is set",
           });
@@ -256,7 +249,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
     .handle("delete", ({ payload: { id }, query: { projectPath } }) =>
       Effect.gen(function* () {
         const config = yield* getConfig();
-        const multiple = isMultiple(config);
+        const multiple = shouldGenerateMultipleAudio(config);
 
         const fs = yield* FileSystem.FileSystem;
         const audioDir = getAudioDir(projectPath, RelativeDir(id), multiple);

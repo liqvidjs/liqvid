@@ -289,7 +289,7 @@ export function FaceToggle({ className }: { className?: string }) {
   const { value: enabled, toggle } = useToggle(true);
   const { domElement } = usePlayer();
 
-  useKeyboardShortcut(shortcuts.yuri, toggle);
+  useKeyboardShortcut(shortcuts.toggleFace, toggle);
 
   useEffect(() => {
     domElement?.classList.toggle("no-face", !enabled);
@@ -300,11 +300,11 @@ export function FaceToggle({ className }: { className?: string }) {
       aria-pressed={enabled}
       className={className}
       onClick={toggle}
-      title={`Toggle Yuri (${shortcuts.yuri})`}
+      title={`Toggle face (${shortcuts.toggleFace})`}
       type="button"
     >
       {enabled ? <SmileyIcon weight="fill" /> : <SmileyXEyesIcon />}
-      {enabled ? "Yuri" : <s>Yuri</s>}
+      Face
     </button>
   );
 }

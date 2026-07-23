@@ -2,9 +2,12 @@ import "server-only";
 
 import path from "node:path";
 
-import type { EnvFiles } from "@liqvid/schemas";
-import { type LogLevel, Option } from "effect";
+import type { EnvFiles, LiqvidConfig } from "@liqvid/schemas";
+import { Effect, type LogLevel, Option } from "effect";
+import type { RelativeDir } from "effect-paths";
+import { headers } from "next/headers";
 
+import type { RenderSource } from "../../../schemas/src/shared.mts";
 import { NEXT_APP_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 
@@ -103,4 +106,47 @@ export function getLogLevel(): LogLevel.LogLevel {
 export function getRoutesDir() {
   const { cwd } = getServerState();
   return path.join(cwd, NEXT_APP_DIR);
+}
+
+/** Read the resolved LiqvidConfig from server state, or die if not loaded. */
+export function getConfig() {
+  return getServerState().config.pipe(
+    Option.match({
+      onNone: () => Effect.die({ message: "config not loaded" }),
+      onSome: (value: LiqvidConfig) => Effect.succeed(value),
+    }),
+  );
+}
+
+export function getOrigin() {
+  return Effect.gen(function* () {
+    const headersList = yield* Effect.promise(headers);
+
+    const origin = headersList.get("origin");
+    if (!origin) {
+      return yield* Effect.die({
+        message: "Origin header is missing",
+      });
+    }
+
+    return origin;
+  });
+}
+
+export function getRenderUrl(
+  renderSource: RenderSource,
+  projectPath: RelativeDir,
+) {
+  return Effect.gen(function* () {
+    const origin = yield* getOrigin();
+
+    const { basePath, productionServerPort } = getServerState();
+
+    if (renderSource === "preview") {
+      return `${origin}/${projectPath}?preview`;
+    } else {
+      const previewPath = `${basePath || ""}/${projectPath}/`;
+      return `http://localhost:${productionServerPort}${previewPath}`;
+    }
+  });
 }

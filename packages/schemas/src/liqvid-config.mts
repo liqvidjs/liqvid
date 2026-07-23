@@ -7,7 +7,7 @@ import { ProviderConfigGitHubPages } from "./providers/hosting/github-pages.mts"
 import { ProviderConfigLiqvidStudio } from "./providers/hosting/liqvid-studio.mts";
 import { ProviderConfigS3 } from "./providers/hosting/s3.mts";
 import { ProviderConfigSFTP } from "./providers/hosting/sftp.mts";
-import { LogLevel, StringWithEnvVars } from "./shared.mts";
+import { LogLevel, RenderSource, StringWithEnvVars } from "./shared.mts";
 
 /** Supported locales. */
 export const Locale = Schema.Literals(["en", "fr", "es", "de", "zh"] as const);
@@ -66,8 +66,18 @@ export const LiqvidConfig = Schema.Struct({
       multiple: Schema.Boolean.pipe(
         Schema.withDecodingDefaultType(Effect.succeed(false)),
       ),
+
+      /**
+       * whether to render from the development preview or the production build
+       * @default "preview"
+       */
+      source: RenderSource.pipe(
+        Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+      ),
     }).pipe(
-      Schema.withDecodingDefaultType(Effect.succeed({ multiple: false })),
+      Schema.withDecodingDefaultType(
+        Effect.succeed({ multiple: false, source: "preview" }),
+      ),
     ),
 
     /** Captioning configuration */
@@ -75,9 +85,43 @@ export const LiqvidConfig = Schema.Struct({
       smartWhisperOptions: WhisperConfig.pipe(Schema.optional),
     }).pipe(Schema.optional),
 
+    /** static rendering configuration */
+    renders: Schema.Struct({
+      /**
+       * whether to render from the development preview or the production build
+       * @default "preview"
+       */
+      source: RenderSource.pipe(
+        Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+      ),
+    }).pipe(
+      Schema.withDecodingDefaultType(Effect.succeed({ source: "preview" })),
+    ),
+
+    /** screenshots configuration */
+    screenshots: Schema.Struct({
+      /**
+       * whether to render from the development preview or the production build
+       * @default "preview"
+       */
+      source: RenderSource.pipe(
+        Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+      ),
+    }).pipe(
+      Schema.withDecodingDefaultType(Effect.succeed({ source: "preview" })),
+    ),
+
     /** Thumbnail generation configuration */
     thumbnails: Schema.Struct({
       defaults: ThumbnailOptions,
+
+      /**
+       * whether to render from the development preview or the production build
+       * @default "preview"
+       */
+      source: RenderSource.pipe(
+        Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+      ),
     }).pipe(Schema.optional),
   }).pipe(Schema.optional),
 

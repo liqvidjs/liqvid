@@ -20,7 +20,7 @@ import {
 import { getServerState } from "../initialize.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -156,7 +156,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { basePath, productionServerPort } = getServerState();
+        const config = yield* getConfig();
 
         const thumbsBaseDir = path.join(
           getRoutesDir(),
@@ -164,9 +164,9 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           THUMBS_BASE_DIR,
         );
 
-        // Build the URL for the video
-        const previewPath = `${basePath || ""}/${projectPath}/`;
-        const url = `http://localhost:${productionServerPort}${previewPath}`;
+        const renderSource = config.media?.thumbnails?.source ?? "preview";
+
+        const url = yield* getRenderUrl(renderSource, projectPath);
 
         const colorScheme = payload.colorScheme ?? "both";
 
@@ -174,13 +174,8 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         yield* fs.makeDirectory(thumbsBaseDir, { recursive: true });
 
         // Resolve options with defaults
-        const { config: $config } = getServerState();
-        const defaults = $config.pipe(
-          Option.flatMapNullishOr(
-            (config) => config.media?.thumbnails?.defaults,
-          ),
-          Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
-        );
+        const defaults: Partial<ThumbnailOptions> =
+          config.media?.thumbnails?.defaults ?? {};
 
         const imageFormat = payload.imageFormat ?? defaults.imageFormat;
 

@@ -2598,6 +2598,9 @@ importers:
       '@liqvid/script':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../script
+      '@liqvid/studio-plugin-api':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../studio-plugin-api
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils

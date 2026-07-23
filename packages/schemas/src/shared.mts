@@ -79,3 +79,8 @@ export type RichTranscript = (typeof RichTranscript)["Type"];
 export const LogLevel = Schema.Literals(["debug", "info"]);
 
 export type LogLevel = (typeof LogLevel)["Type"];
+
+/** whether to render from development preview or production build */
+export const RenderSource = Schema.Literals(["preview", "production"]);
+
+export type RenderSource = (typeof RenderSource)["Type"];

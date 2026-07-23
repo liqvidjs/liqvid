@@ -27,7 +27,7 @@ import {
   InvalidError,
   NotFoundError,
 } from "../utils/errors.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -116,7 +116,7 @@ export const screenshotsLive = HttpApiBuilder.group(
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
 
-          const { basePath, productionServerPort } = getServerState();
+          const config = yield* getConfig();
 
           const screenshotsDir = getScreenshotsDir(projectPath);
           const folderId = generateFolderName();
@@ -125,8 +125,9 @@ export const screenshotsLive = HttpApiBuilder.group(
           // Create the folder
           yield* fs.makeDirectory(folderPath, { recursive: true });
 
-          const previewPath = `${basePath || ""}/${projectPath}/`;
-          const url = `http://localhost:${productionServerPort}${previewPath}`;
+          const renderSource = config.media?.screenshots?.source ?? "preview";
+
+          const url = yield* getRenderUrl(renderSource, projectPath);
 
           const colorScheme = payload.colorScheme ?? "light";
 

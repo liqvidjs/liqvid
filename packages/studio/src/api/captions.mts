@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { transcribe } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option } from "effect";
+import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir } from "effect-paths";
 
@@ -16,6 +16,7 @@ import { getServerState } from "../initialize.mts";
 import type { CaptionsMeta } from "../types/schemas.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
+import { getConfig } from "../utils/misc.mts";
 
 import { getAudioDir } from "./audio.mts";
 import { WebApi } from "./contract.mts";
@@ -47,12 +48,10 @@ export const captionsLive = HttpApiBuilder.group(
       // generate captions for a specific audio rendering
       .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          const { config: $config, jobs } = getServerState();
+          const fs = yield* FileSystem.FileSystem;
 
-          const config = yield* Option.match($config, {
-            onNone: () => Effect.die({ message: "config not loaded" }),
-            onSome: (c) => Effect.succeed(c),
-          });
+          const { jobs } = getServerState();
+          const config = yield* getConfig();
 
           const multiple = config.media?.audio?.multiple ?? false;
           const audioDir = getAudioDir(
@@ -60,8 +59,6 @@ export const captionsLive = HttpApiBuilder.group(
             RelativeDir(audioId),
             multiple,
           );
-
-          const fs = yield* FileSystem.FileSystem;
 
           // The audio must have been rendered first.
           const audioFile = path.join(audioDir, AUDIO_WAV);
@@ -127,12 +124,7 @@ export const captionsLive = HttpApiBuilder.group(
       // delete captions for an audio rendering (preserving the audio itself)
       .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
         Effect.gen(function* () {
-          const { config: $config } = getServerState();
-
-          const config = yield* Option.match($config, {
-            onNone: () => Effect.die({ message: "config not loaded" }),
-            onSome: (c) => Effect.succeed(c),
-          });
+          const config = yield* getConfig();
 
           const multiple = config.media?.audio?.multiple ?? false;
           const audioDir = getAudioDir(

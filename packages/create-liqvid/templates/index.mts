@@ -179,7 +179,7 @@ export const installTemplate = async ({
 
     configContent = configContent.replace(
       "/* config options here */\n",
-      "/* config options here */\n  reactCompiler: true,\n",
+      "reactCompiler: true,\n/* config options here */\n",
     );
 
     await fs.writeFile(nextConfigFile, configContent);

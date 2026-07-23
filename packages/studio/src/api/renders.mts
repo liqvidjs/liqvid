@@ -2,13 +2,13 @@ import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
 import { loadJson, Progress, writeJSON } from "@liqvid/cli/utils";
-import { Effect, FileSystem, Option } from "effect";
+import chalk from "chalk";
+import { Cause, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
 import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
 import {
   existenceOptional,
   jobProgressLayer,
@@ -16,7 +16,7 @@ import {
 } from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import type { LoggableJob } from "./schemas.mts";
@@ -101,7 +101,8 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
     )
     .handle("rename", ({ query: { projectPath }, payload }) =>
       Effect.gen(function* () {
-        const { cwd } = getServerState();
+        const fs = yield* FileSystem.FileSystem;
+
         const { renderId, newName } = payload;
 
         // Validate inputs
@@ -121,8 +122,6 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
             status: StatusCodes.BAD_REQUEST,
           });
         }
-
-        const fs = yield* FileSystem.FileSystem;
 
         const rendersBaseDir = path.join(
           getRoutesDir(),
@@ -158,7 +157,8 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const { basePath, productionServerPort } = getServerState();
+        const config = yield* getConfig();
+
         const projectDir = path.join(getRoutesDir(), projectPath);
         const rendersBaseDir = path.join(projectDir, ASSETS_DIR, RENDERS_DIR);
 
@@ -169,11 +169,9 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         // Ensure render directory exists
         yield* fs.makeDirectory(renderDir, { recursive: true });
 
-        // Build the URL for the video
-        const previewPath = basePath
-          ? `${basePath}/${projectPath}`
-          : `/${projectPath}`;
-        const url = `http://localhost:${productionServerPort}${previewPath}`;
+        const renderSource = config?.media?.renders?.source ?? "preview";
+
+        const url = yield* getRenderUrl(renderSource, projectPath);
 
         // Apply defaults
         const colorScheme = payload.colorScheme ?? "light";
@@ -229,14 +227,12 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         );
 
         // Start render in background (don't await)
-        const job: LoggableJob = yield* createJob("render", fiber).pipe(
-          Effect.provideServiceEffect(
-            Progress,
-            Effect.suspend(() => Effect.succeed(jobProgressLayer(job))),
-          ),
-        );
+        yield* createJob("render", fiber);
 
         return { id: renderId };
-      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+      }).pipe(
+        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+        Effect.catchTag("PlatformError", Effect.die),
+      ),
     ),
 );

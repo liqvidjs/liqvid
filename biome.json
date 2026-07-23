@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -113,6 +113,16 @@
       "preset": "recommended",
       "style": {
         "noNonNullAssertion": "off",
+        "noRestrictedGlobals": {
+          "level": "error",
+          "options": {
+            "deniedGlobals": {
+              "FileSystem": "import FileSystem from effect",
+              "Option": "import Option from effect",
+              "origin": "use window.location.origin or getOrigin()"
+            }
+          }
+        },
         "useTemplate": "off"
       },
       "suspicious": {

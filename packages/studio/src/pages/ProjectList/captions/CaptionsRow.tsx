@@ -8,12 +8,13 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
-import type { RelativeDir } from "effect-paths";
 import { useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
 import { AUDIO_WAV } from "../../../conventions.mts";
+import { Button } from "../../../ui/Button.tsx";
 import { Time, TimeDuration } from "../../../ui/Time.tsx";
 
 import shareStyles from "../share.module.css";
@@ -69,11 +70,12 @@ export function CaptionRow({
   onStartRename: (entry: AudioEntry) => void;
 }) {
   const projectPath = useProjectPath();
+  const { hasCaptioningConfigured } = useDerivedConfig();
 
   /** Whether captions are currently being (re)generated for this entry */
   const [captioning, setCaptioning] = useState(false);
 
-  const isActive =
+  const isGenerating =
     entry.captions?.status === "pending" ||
     entry.captions?.status === "generating" ||
     captioning;
@@ -167,19 +169,24 @@ export function CaptionRow({
         </div>
       </div>
       <div className={shareStyles.renderActions}>
-        <button
-          className={shareStyles.renderActionButton}
-          disabled={isActive}
+        <Button
+          disabled={!hasCaptioningConfigured || isGenerating}
           onClick={handleGenerateCaptions}
-          title={entry.captions ? "Regenerate captions" : "Generate captions"}
+          title={
+            hasCaptioningConfigured
+              ? entry.captions
+                ? "Regenerate captions"
+                : "Generate captions"
+              : "Captioning is not configured"
+          }
           type="button"
         >
-          {isActive ? (
+          {isGenerating ? (
             <SpinnerIcon className={shareStyles.spinner} size={16} />
           ) : (
             <ClosedCaptioningIcon size={16} />
           )}
-        </button>
+        </Button>
         {entry.captions && (
           <button
             className={shareStyles.deleteButton}

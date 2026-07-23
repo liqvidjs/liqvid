@@ -66,11 +66,21 @@ export const ThumbnailOptions = Schema.Struct({
   /** Path to browser executable (optional, will auto-detect) */
   browserExecutable: Schema.String.pipe(Schema.optional),
 
-  /** Height of screenshot before resizing */
-  browserHeight: Schema.Number.pipe(Schema.optional),
+  /**
+   * Height of screenshot before resizing
+   * @default 450
+   */
+  browserHeight: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(450)),
+  ),
 
-  /** Width of screenshot before resizing */
-  browserWidth: Schema.Number.pipe(Schema.optional),
+  /**
+   * Width of screenshot before resizing
+   * @default 800
+   */
+  browserWidth: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(800)),
+  ),
 
   /**
    * Color scheme

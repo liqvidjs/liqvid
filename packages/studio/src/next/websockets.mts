@@ -103,7 +103,7 @@ const handleConnection = (client: WebSocket) =>
         ),
       ),
     );
-  }).pipe(Effect.scoped);
+  }).pipe(Effect.annotateLogs({ url: client.url }), Effect.scoped);
 
 /**
  * Liqvid server UPGRADE handler
