@@ -2,51 +2,50 @@
   "name": "@liqvid/diff",
   "version": "1.1.0",
   "description": "Object-diffing utility",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
-    }
-  },
-  "files": [
-    "dist/*"
-  ],
-  "scripts": {
-    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc --outDir dist/esm --module esnext; tsc --outDir dist/cjs --module commonjs; node ../../build.mjs",
-    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "docs:gen": "typedoc",
-    "docs:watch": "typedoc --watch",
-    "lint": "eslint --ext ts,tsx --fix src && eslint --ext ts,tsx --fix tests",
-    "lint:package": "../../format-package-json.sh",
-    "test": "eslint src --ext ts,tsx && jest --coverage"
-  },
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/diff#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/diff#readme",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
+    "lint:package": "../../format-package-json.sh",
+    "test": "eslint src --ext ts,tsx && jest --coverage"
+  },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@types/jest": "catalog:dev",
+    "jest": "catalog:dev",
+    "ts-jest": "catalog:dev",
     "typedoc": "catalog:dev",
-    "typedoc-plugin-markdown": "catalog:dev"
+    "typedoc-plugin-markdown": "catalog:dev",
+    "typescript": "catalog:dev"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "type": "module"
 }
