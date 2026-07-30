@@ -1,32 +1,45 @@
-import { creationDiff, deletionDiff } from "@liqvid/diff";
+import {
+  applyDiff,
+  creationDiff,
+  deletePlaceholder,
+  deletionDiff,
+  invertDiff,
+  matchRunes,
+  mergeDiffs,
+  type ObjectDiff,
+  objectDiff,
+  objectKeys,
+} from "@liqvid/diff";
 import { assertType } from "@liqvid/utils";
-import type {
-  Editor,
-  TLDrawShape,
-  TLShape,
-  TLShapeId,
-  TLStoreSnapshot,
-} from "tldraw";
+import type { Editor, TLDrawShape, TLShapeId, TLStoreSnapshot } from "tldraw";
 
 import { defaultShape } from "./defaults.ts";
-import { updateObjectDiff } from "./diff/builders.ts";
-import { applyDiff, mergeDiffs } from "./diff/index.ts";
-import { invertDiff, matchRunes, objectKeys } from "./diff/utils.ts";
 import { makeReplayPlugin } from "./plugin-utils.ts";
 import { isDrawShape, isPointer, isShape } from "./record-types.ts";
 import type {
+  DecodedTLShape,
   Point3,
   ReplayState,
   ShapeKey,
   TldrawAction,
   TldrawEvent,
 } from "./types.ts";
-import { type CursorName, isSingleton } from "./utils.ts";
+import {
+  type CursorName,
+  decodeDiffPaths,
+  decodeStore,
+  encodeShape,
+  encodeStore,
+  isSingleton,
+} from "./utils.ts";
 import { segmentAppend } from "./zsa.ts";
 
-// type TLPointer = Extract<TLRecord, {typeName: "pointer"}>;
-
-const deletePlaceholder = 0;
+export type {
+  ReplayState,
+  TldrawAction,
+  TldrawData,
+  TldrawEvent,
+} from "./types.ts";
 
 export type PointerHandler = (args: {
   kind?: CursorName;
@@ -46,7 +59,7 @@ type TldrawProps = {
 };
 
 type TldrawHistory = {
-  shapes?: Map<string, TLShape>;
+  shapes?: Map<string, DecodedTLShape>;
 };
 
 export const tldrawReplay = makeReplayPlugin<
@@ -57,14 +70,20 @@ export const tldrawReplay = makeReplayPlugin<
   TldrawHistory
 >({
   apply: (state, action) => {
-    // TODO make this a deep clone
-    const clone = { ...state };
+    const clone = structuredClone(state);
     if (action.pointer) {
       clone.pointer = action.pointer;
     }
 
     if (action.diff) {
-      clone.snapshot.store = applyDiff(clone.snapshot.store, action.diff);
+      // The in-memory store keeps vectors decoded, so diffs (which are also
+      // decoded) can be applied directly.
+      clone.snapshot.store = applyDiff(
+        clone.snapshot.store,
+        // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
+        action.diff as any,
+        // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
+      ) as any;
     }
 
     return clone;
@@ -87,10 +106,11 @@ export const tldrawReplay = makeReplayPlugin<
         const runedKeys = objectKeys(action.diff ?? {});
         for (const runedKey of runedKeys) {
           matchRunes(action.diff, runedKey, {
-            add(key, value) {
+            create(key, value) {
               if (isShape(key)) {
-                assertType<TLShape>(value);
-                editor.createShape({ ...value, isLocked: true });
+                assertType<DecodedTLShape>(value);
+                // tldraw expects base64-encoded vectors
+                editor.createShape({ ...encodeShape(value), isLocked: true });
               }
             },
             delete(key) {
@@ -117,7 +137,19 @@ export const tldrawReplay = makeReplayPlugin<
                   return;
                 }
 
-                editor.updateShape<TLDrawShape>(applyDiff(shape, update));
+                // apply the diff to the decoded shape, then re-encode the
+                // vectors before handing the result to tldraw
+                const decoded = decodeStore({ [key]: shape })[
+                  key
+                ] as DecodedTLShape;
+                const next = applyDiff(
+                  decoded,
+                  // biome-ignore lint/suspicious/noExplicitAny: decoded shape diff
+                  update as any,
+                ) as DecodedTLShape;
+                editor.updateShape<TLDrawShape>(
+                  encodeShape(next) as TLDrawShape,
+                );
               }
             },
           });
@@ -159,20 +191,24 @@ export const tldrawReplay = makeReplayPlugin<
 
         if (typeof update[0] === "number") {
           assertType<Point3>(update);
-          return { diff: updateObjectDiff(key, segmentAppend([update])) };
+          return { diff: objectDiff(key, segmentAppend([update])) };
         } else {
           assertType<Point3[]>(update);
-          return { diff: updateObjectDiff(key, segmentAppend(update)) };
+          return { diff: objectDiff(key, segmentAppend(update)) };
         }
       }
+      // shape create / update. Decode any base64 vectors so the diff can be
+      // merged and applied in memory.
+      const decodedUpdate = decodeDiffPaths(update) as ObjectDiff<unknown>;
+
       // shape create
       if (!history.shapes.has(key)) {
-        const shape = applyDiff(defaultShape, update);
+        const shape = applyDiff(defaultShape, decodedUpdate) as DecodedTLShape;
         history.shapes.set(key, shape);
         return { diff: creationDiff(key, shape) };
       }
       // shape update
-      return { diff: updateObjectDiff(key, update) };
+      return { diff: objectDiff(key, decodedUpdate) };
     }
 
     return {};
@@ -180,7 +216,23 @@ export const tldrawReplay = makeReplayPlugin<
 
   // initialize
   initialize(state, props) {
-    props.editor.store.loadStoreSnapshot(state.snapshot);
+    // Decode the stored (base64) snapshot for in-memory use, but load the
+    // re-encoded snapshot into tldraw, which expects base64 vectors.
+    const decodedStore = decodeStore(state.snapshot.store);
+    const decodedState: ReplayState = {
+      ...state,
+      snapshot: {
+        ...state.snapshot,
+        store: decodedStore,
+      } as unknown as TLStoreSnapshot,
+    };
+
+    props.editor.store.loadStoreSnapshot({
+      ...state.snapshot,
+      store: encodeStore(decodedStore),
+    });
+
+    return decodedState;
   },
 
   // invert

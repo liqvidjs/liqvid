@@ -1,17 +1,13 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { RecordingData } from "@liqvid/recording";
-import { assertType } from "@liqvid/utils";
+import { assertType, type ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
-export function dbg(x: unknown) {
-  console.log(x);
-  return x;
-}
 export type Unsubscribe = () => void;
 
 export type ReplayPluginProps<Datum, State, Props> = Props & {
   /** Data to replay */
-  recording: RecordingData<Datum[], State>;
+  recording: RecordingData<ReplayData<Datum>, State>;
 
   /** {@link MediaElement} to sync with. */
   playback: Seekable;
@@ -47,8 +43,13 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
   /** Decompress an action. */
   decompress: (data: Datum, history: History) => Action;
 
-  /** Do something with the initial state. */
-  initialize?: (state: State, props: Props) => void;
+  /**
+   * Do something with the initial state, e.g. loading it into the target.
+   * May optionally return a (possibly transformed) state to use in place of
+   * the given one; this is useful when the stored initial state needs to be
+   * normalized before actions can be applied to it.
+   */
+  initialize?: (state: State, props: Props) => State | undefined;
 
   /** Invert an action with respect to a state. */
   invert: (state: State, action: Action) => Action;
@@ -78,7 +79,7 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
     });
 
     let state = initial ?? blankState();
-    initialize?.(state, props);
+    state = initialize?.(state, props) ?? state;
 
     /** Array of inverse operations */
     const inverses: Action[] = [];
@@ -113,12 +114,10 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
           actionsToApply.push(inverses[i]!);
         }
         index = i + 1;
-        console.debug("inverting", actionsToApply);
       }
 
       if (actionsToApply.length > 0) {
         const action = merge(...actionsToApply);
-        // console.debug("applying", action);
         state = apply(state, action);
         commit(action, props);
       }

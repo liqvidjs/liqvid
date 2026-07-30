@@ -1,4 +1,5 @@
-export const defaultShape = {
+// biome-ignore lint/suspicious/noExplicitAny: template used as a diff base
+export const defaultShape: Record<string, any> = {
   isLocked: false,
   meta: {},
   opacity: 1,

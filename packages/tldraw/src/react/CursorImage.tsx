@@ -1,11 +1,5 @@
 import { useEditor } from "@tldraw/editor";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
+import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { PointerHandler } from "../index.ts";
 import { getCursorSvgs } from "../utils.ts";
@@ -13,16 +7,15 @@ import { getCursorSvgs } from "../utils.ts";
 /**
  * Image of a cursor type.
  */
-export const CursorImage = forwardRef<
-  { handlePointer: PointerHandler },
-  React.JSX.IntrinsicElements["div"]
->(function CursorImage(_, ref) {
+export function CursorImage({
+  ref,
+}: {
+  ref?: React.Ref<{ handlePointer: PointerHandler }>;
+}): React.ReactNode {
   const editor = useEditor();
 
   /** Cursors map */
   const cursors = useMemo(getCursorSvgs, []);
-
-  console.log(Object.fromEntries(cursors.entries()));
 
   /** Ref for the <div> element */
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -31,7 +24,6 @@ export const CursorImage = forwardRef<
   const handlePointer: PointerHandler = useCallback(
     (opts) => {
       const cursor = cursorRef.current;
-      console.log(cursor);
       if (!cursor) return;
 
       // update image
@@ -71,4 +63,4 @@ export const CursorImage = forwardRef<
   );
 
   return <div id="tl-cursor" ref={cursorRef} style={style} />;
-});
+}

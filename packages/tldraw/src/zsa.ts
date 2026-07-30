@@ -1,40 +1,52 @@
+import {
+  arrayDiff,
+  type ItemDiff,
+  matchItemDiff,
+  matchRunes,
+  type ObjectDiff,
+  objectDiff,
+  objectItemDiff,
+  objectKeys,
+  type RunedKey,
+  type RuneName,
+} from "@liqvid/diff";
 import { assertType } from "@liqvid/utils";
 import type { VecModel } from "tldraw";
 
-import {
-  type DiffRecord,
-  matchRunes,
-  objectItemDiff,
-  updateArrayDiff,
-  updateObjectDiff,
-} from "./diff/index.ts";
-import type { ItemDiff, Key, RuneName } from "./diff/types.ts";
-import { matchItemDiff, objectKeys } from "./diff/utils.ts";
 import type { Point3 } from "./types.ts";
 import { isSingleton } from "./utils.ts";
 
-/** Zeroth-segment append */
-export type ZSA = DiffRecord & {
-  [_ in Key<"object", "props">]: {
-    [_ in Key<"array", "segments">]: [
+/**
+ * Zeroth-segment append.
+ *
+ * A draw shape stores its stroke as segments, each with a `path` of vectors.
+ * The overwhelmingly common edit while drawing is appending points to the end
+ * of the first (last) segment's decoded `path` array, so we detect and encode
+ * that case compactly.
+ */
+export type ZSA = ObjectDiff<unknown> & {
+  [_ in RunedKey<"object", "props">]: {
+    [_ in RunedKey<"array", "segments">]: [
       0,
       [
         [
-          Key<"object">,
-          { [_ in Key<"array", "points">]: [number, [], ...VecModel[]] },
+          RunedKey<"object">,
+          {
+            [_ in RunedKey<"array", "path">]: [number, [], ...VecModel[]];
+          },
         ],
       ],
     ];
   };
 };
 
-export function extractSegmentAppend(zsa: ZSA) {
-  const [, , ...points] = zsa["@props"]["#segments"][1][0][1]["#points"];
+export function extractSegmentAppend(zsa: ZSA): VecModel[] {
+  const [, , ...points] = zsa["@props"]["#segments"][1][0][1]["#path"];
   return points;
 }
 
-export function isSegmentAppend(diff: DiffRecord): diff is ZSA {
-  let keys: Key<RuneName>[];
+export function isSegmentAppend(diff: ObjectDiff<unknown>): diff is ZSA {
+  let keys: RunedKey<RuneName>[];
 
   // @props
   keys = objectKeys(diff);
@@ -44,7 +56,7 @@ export function isSegmentAppend(diff: DiffRecord): diff is ZSA {
   });
   if (!_props) return false;
 
-  // []segments
+  // #segments
   keys = objectKeys(_props);
   if (!isSingleton(keys)) return false;
   const _segments = matchRunes(_props, keys[0], {
@@ -54,7 +66,7 @@ export function isSegmentAppend(diff: DiffRecord): diff is ZSA {
 
   // array update
   if (_segments.length !== 2 || _segments[0] !== 0) return false;
-  assertType<[0, ItemDiff[]]>(_segments);
+  assertType<[0, ItemDiff<unknown>[]]>(_segments);
   const segmentDiffs = _segments[1];
 
   // zeroth segment
@@ -64,32 +76,33 @@ export function isSegmentAppend(diff: DiffRecord): diff is ZSA {
   });
   if (!segmentDiff) return false;
 
-  // updating points
+  // appending to the path
   keys = objectKeys(segmentDiff);
   if (!isSingleton(keys)) return false;
-  const _points = matchRunes(segmentDiff, keys[0], {
-    array: (key, props) => key === "points" && props,
+  const _path = matchRunes(segmentDiff, keys[0], {
+    array: (key, props) => key === "path" && props,
   });
-  if (!_points) return false;
+  if (!_path) return false;
 
-  return (_points[1] ?? []).length === 0;
+  return (_path[1] ?? []).length === 0;
 }
 
 export function segmentAppend(points: Point3[]): ZSA {
-  return updateObjectDiff(
+  return objectDiff(
     "props" as const,
-    updateArrayDiff("segments" as const, [
+    arrayDiff("segments" as const, [
       0 as const,
       [
         objectItemDiff(
           1,
-          updateArrayDiff("points" as const, [
+          arrayDiff("path" as const, [
             points.length,
             [] as const,
-            ...points.map((p) => ({ x: p[0], y: p[1], z: p[2] ?? 0 })),
+            // z defaults to tldraw's constant pressure value (0.5)
+            ...points.map((p) => ({ x: p[0], y: p[1], z: p[2] ?? 0.5 })),
           ]),
         ),
       ] as const,
     ]),
-  );
+  ) as ZSA;
 }

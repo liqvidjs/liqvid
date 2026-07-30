@@ -21,7 +21,9 @@ export function CanvasLayer({ children }: { children: React.ReactNode }) {
         for (const key of Object.keys(
           changes.updated,
         ) as (keyof typeof changes.updated)[]) {
-          const record = changes.updated[key][1];
+          const entry = changes.updated[key];
+          if (!entry) continue;
+          const record = entry[1];
           if (!isCamera(record)) continue;
 
           // update transform

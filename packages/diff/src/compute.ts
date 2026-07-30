@@ -36,7 +36,7 @@ export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
         itemB === null ||
         Array.isArray(itemA) !== Array.isArray(itemB)
       ) {
-        itemDiffs.push([offset, itemB]);
+        itemDiffs.push([offset, itemB as T]);
         continue;
       }
 

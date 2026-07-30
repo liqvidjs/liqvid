@@ -92,7 +92,8 @@ export function matchRunes<T, R>(
     const rune = runes[name];
     if (key.startsWith(rune)) {
       const fn = fns[name];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!fn) continue;
+      // biome-ignore lint/suspicious/noExplicitAny: runed key/value are dynamically typed
       return fn(key.slice(rune.length) as any, diff[key] as any);
     }
   }

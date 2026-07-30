@@ -1,75 +1,75 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {applyDiff, diffObjects} from "../src";
+import { applyDiff, diffObjects } from "../src";
 
 describe("diffObjects and applyDiff", () => {
   test("property deletion", () => {
-    const a = {x: 1};
+    const a = { x: 1 };
     const b = {};
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"-x": 0});
+    expect(diff).toEqual({ "-x": 0 });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("property additions", () => {
     const a = {};
-    const b = {x: 1};
+    const b = { x: 1 };
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"+x": 1});
+    expect(diff).toEqual({ "+x": 1 });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("property changes", () => {
-    const a = {x: 1};
-    const b = {x: 2};
+    const a = { x: 1 };
+    const b = { x: 2 };
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"=x": 2});
+    expect(diff).toEqual({ "=x": 2 });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("array appends", () => {
-    const a = {x: [0, 1, 2]};
-    const b = {x: [0, 1, 2, 3, 4]};
+    const a = { x: [0, 1, 2] };
+    const b = { x: [0, 1, 2, 3, 4] };
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"#x": [2, [], 3, 4]});
+    expect(diff).toEqual({ "#x": [2, [], 3, 4] });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("array deletions", () => {
-    const a = {x: [0, 1, 2]};
-    const b = {x: [0]};
+    const a = { x: [0, 1, 2] };
+    const b = { x: [0] };
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"#x": [-2]});
+    expect(diff).toEqual({ "#x": [-2] });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("array changes", () => {
-    const a = {x: [0, 1, 2]};
-    const b = {x: [0, 3]};
+    const a = { x: [0, 1, 2] };
+    const b = { x: [0, 3] };
 
     const diff = diffObjects(a, b);
 
-    expect(diff).toEqual({"#x": [-1, [[2, 3]]]});
+    expect(diff).toEqual({ "#x": [-1, [[2, 3]]] });
     expect(applyDiff(a, diff)).toEqual(b);
   });
 
   test("nested objects", () => {
-    const a = {x: {fruit: "apple", color: "red"}};
-    const b = {x: {fruit: "potato", kind: "mashed"}};
+    const a = { x: { color: "red", fruit: "apple" } };
+    const b = { x: { fruit: "potato", kind: "mashed" } };
 
     const diff = diffObjects<any>(a, b);
 
     expect(diff).toEqual({
-      "@x": {"=fruit": "potato", "+kind": "mashed", "-color": 0},
+      "@x": { "-color": 0, "+kind": "mashed", "=fruit": "potato" },
     });
     expect(applyDiff(a, diff)).toEqual(b);
   });
@@ -78,14 +78,14 @@ describe("diffObjects and applyDiff", () => {
     const a = {
       shapes: {
         square: {
-          segments: [{type: "free", points: [0, 1]}],
+          segments: [{ points: [0, 1], type: "free" }],
         },
       },
     };
     const b = {
       shapes: {
         square: {
-          segments: [{type: "free", points: [0, 1, 2, 3]}],
+          segments: [{ points: [0, 1, 2, 3], type: "free" }],
         },
       },
     };
@@ -113,26 +113,29 @@ describe("diffObjects and applyDiff", () => {
 
   test("kitchen sink", () => {
     const a = {
+      arr: [1, 2, 3],
+      obj: { color: "red", fruit: "apple" },
       x: 1,
       y: 2,
       z: 3,
-      arr: [1, 2, 3],
-      obj: {fruit: "apple", color: "red"},
     };
     const b = {
+      arr: [1, 5, 4, "x", "y"],
+      obj: { fruit: "potato", kind: "mashed" },
+      w: 4,
       x: 3,
       z: 3,
-      w: 4,
-      arr: [1, 5, 4, "x", "y"],
-      obj: {fruit: "potato", kind: "mashed"},
     };
 
     const diff = diffObjects<any>(a, b);
 
     expect(diff).toEqual({
-      "=x": 3,
       "-y": 0,
-      "+w": 4,
+      "@obj": {
+        "-color": 0,
+        "+kind": "mashed",
+        "=fruit": "potato",
+      },
       "#arr": [
         2,
         [
@@ -142,11 +145,8 @@ describe("diffObjects and applyDiff", () => {
         "x",
         "y",
       ],
-      "@obj": {
-        "=fruit": "potato",
-        "+kind": "mashed",
-        "-color": 0,
-      },
+      "+w": 4,
+      "=x": 3,
     });
     expect(applyDiff(a, diff)).toEqual(b);
   });

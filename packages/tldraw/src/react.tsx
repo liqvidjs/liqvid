@@ -3,7 +3,7 @@ import { useSeekable } from "@lqv/playback/react";
 import { useEffect, useRef, useState } from "react";
 import { type Editor, Tldraw, useEditor } from "tldraw";
 
-import { tldrawReplay } from "./index.ts";
+import { type PointerHandler, tldrawReplay } from "./index.ts";
 import { CanvasLayer } from "./react/CanvasLayer.tsx";
 import { CursorImage } from "./react/CursorImage.tsx";
 import type { TldrawData } from "./types.ts";
@@ -27,7 +27,7 @@ export function TldrawReplay({
   const playback = useSeekable();
   const [editor, setEditor] = useState<Editor | null>(null);
 
-  const cursorRef = useRef<React.ComponentRef<typeof CursorImage>>(null);
+  const cursorRef = useRef<{ handlePointer: PointerHandler }>(null);
 
   /** Whether to follow the author's camera. */
   const isFollowing = useRef(true);
@@ -35,7 +35,6 @@ export function TldrawReplay({
   // subscribe to replay
   useEffect(() => {
     const subscribe = (recording: TldrawData) => {
-      console.log("subscribe", editor);
       if (!editor) return () => {};
 
       return tldrawReplay({

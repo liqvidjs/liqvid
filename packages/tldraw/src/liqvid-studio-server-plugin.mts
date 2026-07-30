@@ -12,14 +12,14 @@ const RAW_DTS = RelativeFile("raw.d.json.ts");
 
 /** TypeScript declaration for JSON files */
 const declaration = `import type { RecordingData } from "@liqvid/recording";
-import type { Action, CMState } from "@lqv/tldraw";
+import type { ReplayState, TldrawEvent } from "@lqv/tldraw";
 
-declare const data: RecordingData<Action, CMState>;
+declare const data: RecordingData<TldrawEvent, ReplayState>;
 export default data;
 `;
 
 /**
- * Post-process @lqv/codemirror recording data.
+ * Post-process @lqv/tldraw recording data.
  * Creates raw.d.json.ts declaration file.
  */
 function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {

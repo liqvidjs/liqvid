@@ -1,31 +1,21 @@
+import { diffObjects } from "@liqvid/diff";
 import { type RecordingPlugin, ReplayDataRecorder } from "@liqvid/recording";
-import { compress } from "@liqvid/recording/utils";
 import type { ReplayData } from "@liqvid/utils";
 import { assertType, bind } from "@liqvid/utils";
 import type {
   Editor,
   HistoryEntry,
   RecordsDiff,
-  TLDrawShapeSegment,
-  TLIndexedShapes,
   TLRecord,
   TLShape,
   TLStoreSnapshot,
   UnknownRecord,
-  VecModel,
 } from "tldraw";
 
 import { defaultShape } from "./defaults.ts";
-import { objDiff } from "./diff/index.ts";
 import { isShape } from "./record-types.ts";
-import type {
-  DecodedTLShape,
-  Point3,
-  ReplayState,
-  TldrawData,
-  TldrawEvent,
-} from "./types.ts";
-import { assertSameType, decodeShape, isSingleton } from "./utils.ts";
+import type { DecodedTLShape, Point3, TldrawEvent } from "./types.ts";
+import { decodeShape, encodeDiffPaths, isSingleton } from "./utils.ts";
 import { extractSegmentAppend, isSegmentAppend } from "./zsa.ts";
 
 type TldrawState = {
@@ -40,7 +30,6 @@ export class TldrawRecorder extends ReplayDataRecorder<
   #editor: Editor | undefined;
   #unlisten: (() => void) | undefined;
   #shapeCache: Map<string, DecodedTLShape> = new Map();
-  #initialState: ReplayState | undefined;
 
   readonly package = "@lqv/tldraw";
   readonly version = "1.0.0";
@@ -72,7 +61,6 @@ export class TldrawRecorder extends ReplayDataRecorder<
   }
 
   provideEditor(editor: Editor) {
-    console.log("receiving editor", editor);
     this.#editor = editor;
   }
 
@@ -97,9 +85,13 @@ export class TldrawRecorder extends ReplayDataRecorder<
         case isShape(key): {
           assertType<TLShape>(created);
 
-          console.debug("CREATED SHAPE", created);
-          events.push({ [key]: objDiff(defaultShape, created) });
-          this.#shapeCache.set(created.id, decodeShape(created));
+          const decoded = decodeShape(created);
+          // diff the decoded shape, then re-encode the vectors so the stored
+          // diff stays compact (base64)
+          events.push({
+            [key]: encodeDiffPaths(diffObjects(defaultShape, decoded)),
+          });
+          this.#shapeCache.set(created.id, decoded);
           break;
         }
       }
@@ -107,35 +99,22 @@ export class TldrawRecorder extends ReplayDataRecorder<
 
     // updated records
     for (const [key, update] of Object.entries(changes.updated)) {
-      const [from, to] = update as [TLRecord, TLRecord];
+      const [, to] = update as [TLRecord, TLRecord];
 
       switch (true) {
-        // instance
-        case to.typeName === "instance": {
-          break;
-          assertSameType(from, to);
-          const diff = objDiff(from, to);
-          if (Object.keys(diff).length === 0) {
-            break;
-          }
-          // events.push(["instance", diff]);
-          break;
-        }
         // pointer
         case to.typeName === "pointer":
-          console.debug("POINTER", to);
           events.push([to.x, to.y]);
           break;
         // shape
         case isShape(key): {
-          assertType<TLShape>(from);
           assertType<TLShape>(to);
 
           const decodedTo = decodeShape(to);
 
           const shape = this.#shapeCache.get(to.id);
           if (shape) {
-            const diff = objDiff(shape, decodedTo);
+            const diff = diffObjects(shape, decodedTo);
 
             // appending to a shape is a common event so we compress it
             if (isSegmentAppend(diff)) {
@@ -154,12 +133,15 @@ export class TldrawRecorder extends ReplayDataRecorder<
                 });
               }
             } else {
-              events.push({ [key]: diff });
+              // re-encode vectors as base64 to keep the recording compact
+              events.push({ [key]: encodeDiffPaths(diff) });
             }
           } else {
             // TODO: is this necessary? what happens if the shape exists before recording,
             // we need to initialize the shape cache better
-            events.push({ [key]: objDiff(defaultShape, to) });
+            events.push({
+              [key]: encodeDiffPaths(diffObjects(defaultShape, decodedTo)),
+            });
           }
           this.#shapeCache.set(to.id, decodedTo);
           break;

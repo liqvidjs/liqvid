@@ -1,17 +1,13 @@
+import type { ObjectDiff } from "@liqvid/diff";
 import type { ReplayData } from "@liqvid/utils";
 import type {
   SerializedSchema,
-  TLArrowShape,
-  TLBookmarkShape,
   TLDrawShape,
   TLDrawShapeSegment,
-  TLEmbedShape,
+  TLShape,
   TLStoreSnapshot,
-  UnknownRecord,
   VecModel,
 } from "@tldraw/editor";
-
-import type { DiffRecord } from "./diff/index.ts";
 
 export type Point3 = [x: number, y: number, z?: number];
 
@@ -20,7 +16,7 @@ export type PointerCoords = [number, number];
 
 // shapes
 export type ShapeKey = `shape:${string}`;
-export type ShapeUpdate = { [key: ShapeKey]: DiffRecord };
+export type ShapeUpdate = { [key: ShapeKey]: ObjectDiff<unknown> };
 export type ShapeAppend = {
   [key: ShapeKey]: Point3 | Point3[];
 };
@@ -40,12 +36,18 @@ export type TldrawData = {
 // state
 export type ReplayState = {
   pointer: [number, number];
+
+  /**
+   * The store snapshot. In memory during replay, the vectors in this snapshot
+   * are decoded (see {@link decodeStore}); tldraw's own snapshots keep them
+   * base64-encoded.
+   */
   snapshot: TLStoreSnapshot;
 };
 
 // actions
 export type TldrawAction = {
-  diff?: DiffRecord;
+  diff?: ObjectDiff<unknown>;
   pointer?: [number, number];
 };
 
@@ -61,11 +63,7 @@ export type DecodedTLDrawShape = Omit<TLDrawShape, "props"> & {
   };
 };
 
-export type DecodedTLShape =
-  | DecodedTLDrawShape
-  | TLArrowShape
-  | TLBookmarkShape
-  | TLEmbedShape;
+export type DecodedTLShape = DecodedTLDrawShape | Exclude<TLShape, TLDrawShape>;
 
 export type DecodedTLSerializedStore = {
   [key: `shape:${string}`]: DecodedTLShape;
@@ -78,13 +76,3 @@ export type DecodedStoreSnapshot = {
   /** The serialized schema information */
   schema: SerializedSchema;
 };
-
-// export type TldrawPointerEvent = [number, number];
-// export type TldrawShapeEvent = [`shape:${string}`, TLShape | null];
-// export type TldrawInstanceEvent = ["instance", object];
-
-// export type TldrawEvent =
-//   | TldrawInstanceEvent
-//   | TldrawPointerEvent
-//   | TldrawShapeEvent
-//   | StoreSnapshot<TLRecord>;
