@@ -1,0 +1,92 @@
+{
+  "name": "@lqv/tldraw",
+  "version": "1.0.0-alpha.0",
+  "description": "tldraw integration for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/tldraw#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./liqvid-studio-server-plugin": {
+      "default": "./src/liqvid-studio-server-plugin.mts",
+      "types": "./dist/types/recording.d.ts",
+      "import": "./dist/esm/recording.js"
+    },
+    "./react": {
+      "default": "./src/react.tsx",
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/esm/react.js"
+    },
+    "./recording": {
+      "default": "./src/recording.tsx",
+      "types": "./dist/types/recording.d.ts",
+      "import": "./dist/esm/recording.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
+    "build:clean": "rm -rf dist",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "docs:gen": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "lint": "biome check --fix",
+    "lint:package": "../../format-package-json.sh",
+    "test": "jest --coverage",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@liqvid/diff": "workspace:^",
+    "@liqvid/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:dev",
+    "@tldraw/editor": "catalog:peer",
+    "@tldraw/store": "catalog:peer",
+    "@tldraw/tlschema": "catalog:peer",
+    "@types/jest": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "jest": "catalog:dev",
+    "tldraw": "catalog:peer",
+    "ts-jest": "catalog:dev",
+    "typedoc": "catalog:dev",
+    "typedoc-plugin-markdown": "catalog:dev",
+    "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "@liqvid/duration": "workspace:^1.4.0",
+    "@liqvid/recording": "workspace:^1.0.0-alpha.1",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "@tldraw/editor": "catalog:peer",
+    "@tldraw/store": "catalog:peer",
+    "@tldraw/tlschema": "catalog:peer",
+    "@types/react": "catalog:peer",
+    "effect": "catalog:dev",
+    "effect-paths": "workspace:^",
+    "react": "catalog:peer",
+    "tldraw": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "dist/types/index.d.ts"
+}
