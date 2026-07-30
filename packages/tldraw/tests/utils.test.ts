@@ -2,10 +2,17 @@ import { applyDiff, diffObjects } from "@liqvid/diff";
 import { b64Vecs } from "tldraw";
 
 import { defaultShape } from "../src/defaults.ts";
+import { isPointer } from "../src/record-types.ts";
+import type { Point3 } from "../src/types.ts";
 import {
   decodeDiffPaths,
+  decodePointer,
+  decodePoints,
   decodeShape,
+  encodeAppend,
   encodeDiffPaths,
+  encodePointer,
+  encodePoints,
   encodeShape,
 } from "../src/utils.ts";
 import {
@@ -170,8 +177,11 @@ describe("record → replay round trip", () => {
   function compress(prev: any, next: any): any {
     const diff = diffObjects(prev, next);
     if (isSegmentAppend(diff)) {
-      const points = extractSegmentAppend(diff);
-      return points.map((p) => [p.x, p.y, p.z]);
+      const points = extractSegmentAppend(diff).map(
+        (p): Point3 => [p.x, p.y, p.z ?? 0.5],
+      );
+      // pick the smaller of raw / base64, exactly like the recorder
+      return encodeAppend(points);
     }
     return encodeDiffPaths(diff);
   }
@@ -182,7 +192,11 @@ describe("record → replay round trip", () => {
    */
   // biome-ignore lint/suspicious/noExplicitAny: test helper
   function decompressAndApply(store: any, compressed: any): any {
-    // segment append
+    // base64-encoded segment append
+    if (typeof compressed === "string") {
+      return applyDiff(store, segmentAppend(decodePoints(compressed)));
+    }
+    // raw segment append
     if (Array.isArray(compressed)) {
       const points = (
         typeof compressed[0] === "number" ? [compressed] : compressed
@@ -270,5 +284,76 @@ describe("record → replay round trip", () => {
     expect(b64Vecs.decodePoints2D(encoded.props.segments[0].path)).toHaveLength(
       3,
     );
+  });
+});
+
+describe("pointer base64 encode/decode", () => {
+  test("encodePointer produces a base64 string", () => {
+    const encoded = encodePointer([120, 340]);
+    expect(typeof encoded).toBe("string");
+  });
+
+  test("decodePointer is the inverse of encodePointer", () => {
+    const [x, y] = decodePointer(encodePointer([120, 340]));
+    expect(x).toBeCloseTo(120);
+    expect(y).toBeCloseTo(340);
+  });
+
+  test("round-trips negative and fractional coordinates", () => {
+    const [x, y] = decodePointer(encodePointer([-42.5, 7.25]));
+    expect(x).toBeCloseTo(-42.5);
+    expect(y).toBeCloseTo(7.25);
+  });
+
+  test("isPointer recognizes an encoded pointer but not shape events", () => {
+    expect(isPointer(encodePointer([1, 2]))).toBe(true);
+    // shape events are objects, appends are arrays — neither is a string
+    expect(isPointer({ "shape:a": { "=x": 1 } })).toBe(false);
+    expect(isPointer([1, 2, 0.5])).toBe(false);
+    expect(isPointer(0)).toBe(false);
+  });
+});
+
+describe("append point encode/decode", () => {
+  test("decodePoints is the inverse of encodePoints", () => {
+    const points: Point3[] = [
+      [1, 2, 0.5],
+      [3, 4, 0.5],
+      [5, 6, 0.5],
+    ];
+    const decoded = decodePoints(encodePoints(points));
+    expect(decoded).toHaveLength(3);
+    for (let i = 0; i < points.length; i++) {
+      expect(decoded[i]![0]).toBeCloseTo(points[i]![0]);
+      expect(decoded[i]![1]).toBeCloseTo(points[i]![1]);
+    }
+  });
+
+  test("encodeAppend keeps the raw point for a single point (smaller)", () => {
+    const result = encodeAppend([[1, 2, 0.5]]);
+    // a lone point is cheaper as JSON than as base64
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toEqual([1, 2, 0.5]);
+  });
+
+  test("encodeAppend uses base64 for a long run of points (smaller)", () => {
+    const points: Point3[] = Array.from(
+      { length: 20 },
+      (_, i): Point3 => [i, i * 2, 0.5],
+    );
+    const result = encodeAppend(points);
+    expect(typeof result).toBe("string");
+  });
+
+  test("encodeAppend chooses whichever representation is smaller", () => {
+    const points: Point3[] = Array.from(
+      { length: 30 },
+      (_, i): Point3 => [i, i, 0.5],
+    );
+    const result = encodeAppend(points);
+    const rawSize = JSON.stringify(points).length;
+    const b64Size = JSON.stringify(encodePoints(points)).length;
+    const chosenSize = JSON.stringify(result).length;
+    expect(chosenSize).toBe(Math.min(rawSize, b64Size));
   });
 });

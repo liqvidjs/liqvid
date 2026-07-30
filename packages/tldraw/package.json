@@ -45,6 +45,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -69,6 +70,7 @@
   },
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.4.0",
+    "@liqvid/keymap": "workspace:^2.0.0-alpha.2",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",

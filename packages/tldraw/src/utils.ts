@@ -11,6 +11,8 @@ import type {
   DecodedTLDrawShapeSegment,
   DecodedTLSerializedStore,
   DecodedTLShape,
+  Point3,
+  Pointer,
 } from "./types.ts";
 
 const CURSOR_NAMES = ["cross"] as const;
@@ -149,6 +151,61 @@ export function encodeStore(
       return [key, record];
     }),
   ) as TLSerializedStore;
+}
+
+/**
+ * Encode a pointer position (in tldraw canvas coordinates) as a compact
+ * base64 string, reusing tldraw's vector encoding to save recording space.
+ */
+export function encodePointer([x, y]: Pointer): string {
+  return b64Vecs.encodePoints2D([{ x, y, z: 0.5 }]);
+}
+
+/**
+ * Decode a base64-encoded pointer position back into canvas coordinates.
+ * Inverse of {@link encodePointer}.
+ */
+export function decodePointer(encoded: string): Pointer {
+  const [point] = b64Vecs.decodePoints2D(encoded);
+  return [point?.x ?? 0, point?.y ?? 0];
+}
+
+/**
+ * Encode a run of appended points as a compact base64 string.
+ * The `z` (pressure) coordinate is dropped: draw appends always use the
+ * constant `0.5`, which {@link decodePoints2D} restores.
+ */
+export function encodePoints(points: Point3[]): string {
+  return b64Vecs.encodePoints2D(points.map(([x, y]) => ({ x, y, z: 0.5 })));
+}
+
+/**
+ * Decode a base64 string produced by {@link encodePoints} back into
+ * {@link Point3} tuples.
+ */
+export function decodePoints(encoded: string): Point3[] {
+  return b64Vecs
+    .decodePoints2D(encoded)
+    .map(({ x, y, z }): Point3 => [x, y, z ?? 0.5]);
+}
+
+/**
+ * Choose the smaller of the raw ({@link Point3}/{@link Point3}[]) and the
+ * base64 representations of a run of appended points. The size is measured by
+ * serialized JSON length, since that is what ends up in the recording file.
+ *
+ * @returns Either the raw point form or a base64 string, whichever is fewer
+ *   bytes on disk.
+ */
+export function encodeAppend(points: Point3[]): Point3 | Point3[] | string {
+  const raw: Point3 | Point3[] =
+    points.length === 1 ? (points[0] as Point3) : points;
+  const encoded = encodePoints(points);
+
+  // compare the on-disk (JSON) sizes and keep the smaller one
+  return JSON.stringify(encoded).length < JSON.stringify(raw).length
+    ? encoded
+    : raw;
 }
 
 /**

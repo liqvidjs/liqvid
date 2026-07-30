@@ -6,6 +6,8 @@ import type {
   Editor,
   HistoryEntry,
   RecordsDiff,
+  TLPage,
+  TLPageId,
   TLRecord,
   TLShape,
   TLStoreSnapshot,
@@ -13,13 +15,25 @@ import type {
 } from "tldraw";
 
 import { defaultShape } from "./defaults.ts";
-import { isShape } from "./record-types.ts";
-import type { DecodedTLShape, Point3, TldrawEvent } from "./types.ts";
-import { decodeShape, encodeDiffPaths, isSingleton } from "./utils.ts";
+import { isCamera, isPage, isShape } from "./record-types.ts";
+import type {
+  DecodedTLShape,
+  Point3,
+  Pointer,
+  TldrawEvent,
+  Viewport,
+} from "./types.ts";
+import {
+  decodeShape,
+  encodeAppend,
+  encodeDiffPaths,
+  encodePointer,
+} from "./utils.ts";
 import { extractSegmentAppend, isSegmentAppend } from "./zsa.ts";
 
 type TldrawState = {
-  pointer: [x: number, y: number];
+  pointer: Pointer;
+  viewport: Viewport;
   snapshot: TLStoreSnapshot;
 };
 
@@ -29,14 +43,30 @@ export class TldrawRecorder extends ReplayDataRecorder<
 > {
   #editor: Editor | undefined;
   #unlisten: (() => void) | undefined;
+  #unlistenPointer: (() => void) | undefined;
   #shapeCache: Map<string, DecodedTLShape> = new Map();
+  #pageCache: Map<string, TLPage> = new Map();
+
+  /**
+   * The author's last-recorded viewport, so that changes can be diffed and
+   * only the changed parts emitted.
+   */
+  #viewport: Viewport | undefined;
+
+  /**
+   * Most recent pointer position in canvas coordinates. Tracked continuously
+   * (not just during recording) so that we know where the cursor is when
+   * recording begins — which is typically triggered by a keydown, not a
+   * pointer event.
+   */
+  #pointer: Pointer = [0, 0];
 
   readonly package = "@lqv/tldraw";
   readonly version = "1.0.0";
 
   constructor() {
     super();
-    bind(this, ["captureEvent"]);
+    bind(this, ["captureEvent", "trackPointer"]);
   }
 
   override beginRecording(): void {
@@ -47,10 +77,20 @@ export class TldrawRecorder extends ReplayDataRecorder<
       throw new Error("TldrawRecorder: editor not provided");
     }
 
+    // seed the page cache from the current store so page updates can be diffed
+    this.#pageCache.clear();
+    for (const page of this.#editor.getPages()) {
+      this.#pageCache.set(page.id, page);
+    }
+
+    this.#viewport = this.#readViewport();
+
     this.initial = {
-      // TODO: set correct initial pointer position
-      pointer: [0, 0],
+      // most recent pointer position, in canvas coordinates
+      pointer: this.#pointer,
       snapshot: this.#editor.store.getStoreSnapshot("all"),
+      // the author's viewport (current page + camera)
+      viewport: this.#viewport,
     };
     this.#unlisten = this.#editor.store.listen(this.captureEvent);
   }
@@ -58,27 +98,74 @@ export class TldrawRecorder extends ReplayDataRecorder<
   override endRecording(): void {
     this.#unlisten?.();
     this.#shapeCache.clear();
+    this.#pageCache.clear();
+    this.#viewport = undefined;
+  }
+
+  /** Read the author's current viewport (current page + camera). */
+  #readViewport(): Viewport {
+    const editor = this.#editor!;
+    const { x, y, z } = editor.getCamera();
+    return { camera: [x, y, z], page: editor.getCurrentPageId() };
   }
 
   provideEditor(editor: Editor) {
+    // stop tracking the previous editor, if any
+    this.#unlistenPointer?.();
+
     this.#editor = editor;
+
+    // Track the pointer position continuously so the initial pointer is known
+    // at the moment recording begins.
+    const container = editor.getContainer();
+    container.addEventListener("pointermove", this.trackPointer);
+    this.#unlistenPointer = () =>
+      container.removeEventListener("pointermove", this.trackPointer);
+  }
+
+  /**
+   * Remember the latest pointer position in canvas coordinates, and — while
+   * recording — capture it as an event.
+   *
+   * tldraw 5.x keeps the live pointer in `editor.inputs` rather than writing
+   * it to the `pointer:pointer` store record on every move, so listening to
+   * the store does not surface pointer motion. We track it from the DOM
+   * `pointermove` instead.
+   */
+  trackPointer(event: globalThis.PointerEvent): void {
+    if (!this.#editor) return;
+    const { x, y } = this.#editor.screenToPage({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    this.#pointer = [x, y];
+
+    if (this.active && !this.paused) {
+      this.capture(undefined, encodePointer(this.#pointer));
+    }
   }
 
   captureEvent({ changes }: HistoryEntry): void {
     if (!this.#editor) return;
 
-    // console.info(changes);
-    // if (Object.keys(changes.removed).length > 0) {
-    // console.log(changes.updated);
-    // }
-
-    for (const compressed of this.#compressChanges(changes)) {
+    for (const compressed of this.#compressChanges(this.#editor, changes)) {
       this.capture(undefined, compressed);
     }
   }
 
-  #compressChanges(changes: RecordsDiff<UnknownRecord>): TldrawEvent[] {
+  #compressChanges(
+    editor: Editor,
+    changes: RecordsDiff<UnknownRecord>,
+  ): TldrawEvent[] {
     const events: TldrawEvent[] = [];
+
+    /**
+     * The viewport change accumulated across this batch. tldraw often writes
+     * the camera and `currentPageId` in the same transaction, so we coalesce
+     * them into a single viewport event.
+     */
+    const viewport: Partial<Viewport> = {};
+
     // new records
     for (const [key, created] of Object.entries(changes.added)) {
       switch (true) {
@@ -94,6 +181,13 @@ export class TldrawRecorder extends ReplayDataRecorder<
           this.#shapeCache.set(created.id, decoded);
           break;
         }
+        // a new page
+        case isPage(key): {
+          assertType<TLPage>(created);
+          events.push({ [key]: diffObjects({} as Partial<TLPage>, created) });
+          this.#pageCache.set(created.id, created);
+          break;
+        }
       }
     }
 
@@ -102,9 +196,9 @@ export class TldrawRecorder extends ReplayDataRecorder<
       const [, to] = update as [TLRecord, TLRecord];
 
       switch (true) {
-        // pointer
+        // pointer motion is captured from the DOM (see `trackPointer`), not
+        // the store, so there is nothing to do here for pointer records.
         case to.typeName === "pointer":
-          events.push([to.x, to.y]);
           break;
         // shape
         case isShape(key): {
@@ -118,20 +212,11 @@ export class TldrawRecorder extends ReplayDataRecorder<
 
             // appending to a shape is a common event so we compress it
             if (isSegmentAppend(diff)) {
-              const points = extractSegmentAppend(diff);
-              if (isSingleton(points)) {
-                const p = points[0];
-                events.push({
-                  [key]: typeof p.z === "number" ? [p.x, p.y, p.z] : [p.x, p.y],
-                });
-              } else {
-                events.push({
-                  [key]: points.map(
-                    (p): Point3 =>
-                      typeof p.z === "number" ? [p.x, p.y, p.z] : [p.x, p.y],
-                  ),
-                });
-              }
+              const points = extractSegmentAppend(diff).map(
+                (p): Point3 => [p.x, p.y, p.z ?? 0.5],
+              );
+              // store whichever of the raw / base64 forms is smaller
+              events.push({ [key]: encodeAppend(points) });
             } else {
               // re-encode vectors as base64 to keep the recording compact
               events.push({ [key]: encodeDiffPaths(diff) });
@@ -146,6 +231,38 @@ export class TldrawRecorder extends ReplayDataRecorder<
           this.#shapeCache.set(to.id, decodedTo);
           break;
         }
+        // a page rename (or other page-record change)
+        case isPage(key): {
+          assertType<TLPage>(to);
+          const prev = this.#pageCache.get(to.id);
+          const diff = diffObjects(prev ?? {}, to);
+          if (Object.keys(diff).length > 0) {
+            events.push({ [key]: diff });
+          }
+          this.#pageCache.set(to.id, to);
+          break;
+        }
+        // the current page's camera moved. Each page has its own camera
+        // record (`camera:<pageId>`); only follow the current page's camera.
+        case isCamera(to): {
+          if (to.id === `camera:${editor.getCurrentPageId()}`) {
+            const { x, y, z } = to;
+            viewport.camera = [x, y, z];
+          }
+          break;
+        }
+        // the author switched pages
+        case to.typeName === "instance": {
+          const from = update[0] as TLRecord & { currentPageId?: TLPageId };
+          const next = to as TLRecord & { currentPageId?: TLPageId };
+          if (
+            next.currentPageId !== undefined &&
+            next.currentPageId !== from.currentPageId
+          ) {
+            viewport.page = next.currentPageId;
+          }
+          break;
+        }
       }
     }
 
@@ -156,10 +273,28 @@ export class TldrawRecorder extends ReplayDataRecorder<
           events.push({ [key]: 0 });
           this.#shapeCache.delete(removed.id);
           break;
+        // a deleted page
+        case isPage(key):
+          events.push({ [key]: 0 });
+          this.#pageCache.delete(removed.id);
+          break;
       }
     }
 
+    // emit a single coalesced viewport event, if anything changed
+    if (viewport.camera || viewport.page) {
+      this.#applyViewportDelta(viewport);
+      events.push({ v: viewport });
+    }
+
     return events;
+  }
+
+  /** Update the tracked viewport with a (partial) delta. */
+  #applyViewportDelta(delta: Partial<Viewport>): void {
+    if (!this.#viewport) return;
+    if (delta.camera) this.#viewport.camera = delta.camera;
+    if (delta.page) this.#viewport.page = delta.page;
   }
 }
 

@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useEditor } from "tldraw";
+import { useMemo, useRef } from "react";
+import { useEditor, useQuickReactor } from "tldraw";
 
 import { layerCanvas } from "../layers.ts";
-import { isCamera } from "../record-types.ts";
 
 /**
  * Manage the viewport transform of the assets layer.
@@ -11,29 +10,18 @@ export function CanvasLayer({ children }: { children: React.ReactNode }) {
   const editor = useEditor();
   const layerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(
-    () =>
-      editor.store.listen(({ changes }) => {
-        const layer = layerRef.current;
-        if (!layer) return;
+  // Keep the layer's transform in sync with the camera. Using `useQuickReactor`
+  // (rather than a raw store listener) means this runs in the same reactive
+  // flush as other camera-driven updates — notably the cursor in
+  // `CursorImage` — so they never momentarily disagree on the camera during a
+  // zoom or pan (which previously made the cursor appear to jump).
+  useQuickReactor("sync canvas layer to camera", () => {
+    const layer = layerRef.current;
+    if (!layer) return;
 
-        // look for camera records
-        for (const key of Object.keys(
-          changes.updated,
-        ) as (keyof typeof changes.updated)[]) {
-          const entry = changes.updated[key];
-          if (!entry) continue;
-          const record = entry[1];
-          if (!isCamera(record)) continue;
-
-          // update transform
-          const { x, y } = record;
-          const zoom = editor.getZoomLevel();
-          layer.style.transform = `translate(${x * zoom}px, ${y * zoom}px)`;
-        }
-      }),
-    [editor, editor.store],
-  );
+    const { x, y, z } = editor.getCamera();
+    layer.style.transform = `translate(${x * z}px, ${y * z}px)`;
+  }, [editor]);
 
   // render
   const style = useMemo(
