@@ -41,7 +41,7 @@ type VariantConfig =
  * Render one of many possible variants depending on a client value
  */
 export function HydrateVariants(props: VariantConfig) {
-  const id = useId();
+  const id = `:${Math.random()}`;
 
   const variantNodes = (() => {
     switch (props.type) {

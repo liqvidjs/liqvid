@@ -80,7 +80,8 @@ export function PatchIds({ children }: { children: React.ReactElement }) {
 
     // support Strict Mode
     w[SYM_STABLE] ??= {};
-    w[SYM_STABLE][key] ??= w.雨![w.日++]!;
+    // TODO: figure out why this can be null, it should never be
+    w[SYM_STABLE][key] ??= w.雨?.[w.日++];
 
     return <Slot id={w[SYM_STABLE][key]}>{children}</Slot>;
   }
