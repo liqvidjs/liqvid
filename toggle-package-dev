@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODE="${1:-}"
+
+if [ "$MODE" != "development" ] && [ "$MODE" != "production" ]; then
+  echo "Usage: $0 <development|production>" >&2
+  exit 1
+fi
+
+if [ "$MODE" = "development" ]; then
+  FROM="@liqvid/dev"
+  TO="default"
+else
+  FROM="default"
+  TO="@liqvid/dev"
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+FILTER='
+if (.exports | type) == "object" then
+  .exports |= with_entries(
+    .value |=
+      if type == "object" then
+        # rename $FROM -> $TO, then hoist $TO to be the first key
+        (with_entries(if .key == $FROM then .key = $TO else . end)) as $renamed
+        | ({($TO): $renamed[$TO]} + $renamed)
+        | with_entries(select(.value != null))
+      else . end
+  )
+else . end
+'
+
+for pkg in "$SCRIPT_DIR"/packages/*/package.json; do
+  [ -f "$pkg" ] || continue
+
+  tmp="$(dirname "$pkg")/package-toggle.json"
+  jq --arg FROM "$FROM" --arg TO "$TO" "$FILTER" "$pkg" >"$tmp"
+
+  if [ -s "$tmp" ]; then
+    mv "$tmp" "$pkg"
+  else
+    echo "Error: produced empty output for $pkg. Aborting." >&2
+    rm -f "$tmp"
+    exit 1
+  fi
+done
+
+echo "Toggled all packages to $MODE mode."
