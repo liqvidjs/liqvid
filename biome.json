@@ -46,6 +46,7 @@
     "includes": [
       "**",
       "!build",
+      "!coverage",
       "!opencode.json",
       "!**/dist",
       "!**/package.json",
