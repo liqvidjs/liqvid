@@ -150,4 +150,50 @@ describe("diffObjects and applyDiff", () => {
     });
     expect(applyDiff(a, diff)).toEqual(b);
   });
+
+  describe("in-place application does not alias the diff", () => {
+    test("create then in-place array append leaves the create diff intact", () => {
+      const store: Record<string, unknown> = {};
+
+      // creation diff whose value is a nested object with an array
+      const createDiff = { "+shape": { path: [{ x: 0 }] } };
+
+      // apply create in place: store["shape"] must NOT be the same object as
+      // the diff's value, otherwise later mutations corrupt the diff
+      applyDiff(store, createDiff, true);
+
+      // append to store["shape"].path in place
+      applyDiff(store, { "@shape": { "#path": [1, [], { x: 1 }] } }, true);
+
+      // store received the appended point...
+      expect((store.shape as { path: unknown[] }).path).toEqual([
+        { x: 0 },
+        { x: 1 },
+      ]);
+
+      // ...but the original create diff is untouched
+      expect(createDiff).toEqual({ "+shape": { path: [{ x: 0 }] } });
+    });
+
+    test("array append value is cloned, not aliased", () => {
+      const arr: Record<string, unknown>[] = [];
+      const appended = { n: 0 };
+
+      applyDiff({ arr }, { "#arr": [1, [], appended] }, true);
+
+      // mutating the target must not mutate the source diff value
+      (arr[0] as { n: number }).n = 99;
+      expect(appended).toEqual({ n: 0 });
+    });
+
+    test("set value is cloned, not aliased", () => {
+      const arr = [{ n: 1 }];
+      const replacement = { n: 2 };
+
+      applyDiff({ arr }, { "#arr": [0, [[0, replacement]]] }, true);
+
+      (arr[0] as { n: number }).n = 99;
+      expect(replacement).toEqual({ n: 2 });
+    });
+  });
 });

@@ -1,7 +1,15 @@
 import { assertType } from "@liqvid/utils";
 
-import { applyDiff } from "./apply.ts";
-import { diffObjects } from "./compute.ts";
+import {
+  arrayDiff,
+  arrayItemDiff,
+  changeDiff,
+  changeItemDiff,
+  creationDiff,
+  deletionDiff,
+  objectDiff,
+  objectItemDiff,
+} from "./builders.ts";
 import { runes } from "./runes.ts";
 import type {
   ArrayDiff,
@@ -165,8 +173,122 @@ export function addToOffset<O extends ItemDiff<unknown>[0]>(
 
 /**
  * Invert a diff with respect to an object.
- * Note that it is not possible to invert a lone diff.
+ *
+ * Given `state` (= A) and a diff describing A → B, produce the diff describing
+ * B → A. Applying the returned diff to `applyDiff(state, diff)` reproduces
+ * `state`.
+ *
+ * Note that it is not possible to invert a lone diff: the original `state` is
+ * required to recover values that were changed or deleted.
  */
 export function invertDiff<T>(state: T, diff: ObjectDiff<T>): ObjectDiff<T> {
-  return diffObjects(applyDiff(state, diff), state);
+  assertType<Record<string, unknown>>(state);
+
+  const ret: ObjectDiff<T> = {};
+
+  for (const rkey of objectKeys(diff)) {
+    matchRunes(diff, rkey, {
+      // nested array → recursively invert against the old array
+      array(key, valueB) {
+        const target = state[key];
+        if (!Array.isArray(target)) {
+          throw new TypeError("Expected array");
+        }
+        Object.assign(ret, arrayDiff(key, invertArrayDiff(target, valueB)));
+      },
+      // primitive / type change → change back to the old value
+      change(key) {
+        Object.assign(ret, changeDiff(key, state[key]));
+      },
+      // key created by the diff (didn't exist in A) → delete it to invert
+      create(key) {
+        Object.assign(ret, deletionDiff(key));
+      },
+      // key deleted by the diff (existed in A) → recreate it with old value
+      delete(key) {
+        Object.assign(ret, creationDiff(key, state[key]));
+      },
+      // nested object → recursively invert against the old object
+      object(key, valueB) {
+        const target = state[key];
+        if (typeof target !== "object" || target === null) {
+          throw new TypeError("Expected object");
+        }
+        Object.assign(ret, objectDiff(key, invertDiff(target, valueB)));
+      },
+    });
+  }
+
+  return ret;
+}
+
+/**
+ * Invert an array diff with respect to an array.
+ *
+ * Given `state` (= A) and a diff describing A → B, produce the diff describing
+ * B → A.
+ */
+export function invertArrayDiff<T>(
+  state: T[],
+  diff: ArrayDiff<T>,
+): ArrayDiff<T> {
+  const [delta, itemDiffs = []] = diff;
+
+  // The inverse restores the original length change.
+  const invDelta = -delta;
+
+  // Offsets are relative to the end of the array. Item diffs only touch the
+  // common prefix (indices 0..min(a,b)-1), which is present in both A and B at
+  // the same index. An offset relative to A of `offsetA = a.length - i` becomes
+  // `offsetB = b.length - i = offsetA + delta` relative to B.
+  const invItemDiffs: ItemDiff<T>[] = [];
+
+  for (const item of itemDiffs) {
+    matchItemDiff(item, {
+      // nested array item: recursively invert against the original sub-array.
+      array(offset, valueB) {
+        const index = state.length - offset;
+        const target = state[index];
+        if (!Array.isArray(target)) {
+          throw new TypeError("Expected array");
+        }
+        invItemDiffs.push(
+          arrayItemDiff<T>(offset + delta, invertArrayDiff(target, valueB)),
+        );
+      },
+      // nested object item: recursively invert against the original sub-object.
+      object(offset, valueB) {
+        const index = state.length - offset;
+        const target = state[index];
+        if (typeof target !== "object" || target === null) {
+          throw new TypeError("Expected object");
+        }
+        invItemDiffs.push(
+          objectItemDiff(offset + delta, invertDiff(target, valueB)),
+        );
+      },
+      // set: the diff replaced `state[i]` with a new value; to invert, set it
+      // back to the original `state[i]`.
+      set(offset) {
+        const index = state.length - offset;
+        invItemDiffs.push(changeItemDiff(offset + delta, state[index] as T));
+      },
+    });
+  }
+
+  // If the forward diff appended items (delta > 0), the inverse must delete
+  // them (invDelta < 0). If the forward diff deleted items (delta < 0), the
+  // inverse must re-append the original tail that was removed.
+  if (invDelta <= 0) {
+    // Pure deletion: matches the shape produced by `diffArrays` when there is
+    // nothing to append. Only elide item diffs to keep the compact form.
+    if (invItemDiffs.length === 0) {
+      return [invDelta];
+    }
+    return [invDelta, invItemDiffs];
+  }
+
+  // Re-append the original trailing elements that the forward diff removed.
+  const appends = state.slice(state.length + delta);
+  return [invDelta, invItemDiffs, ...appends];
 }

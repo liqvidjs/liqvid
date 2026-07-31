@@ -14,6 +14,7 @@ import {
 } from "./builders.ts";
 import type { ArrayDiff, ItemDiff, ObjectDiff } from "./types.ts";
 import {
+  addToOffset,
   consume,
   getOffset,
   matchItemDiff,
@@ -46,15 +47,13 @@ export function mergeArrayDiffs<T>(
 
     const newOffsetB = offsetB - deltaA;
 
-    if (offsetA > newOffsetB) {
-      assertDefined(itemA);
+    if (itemA && (!itemB || offsetA > newOffsetB)) {
       // skip if deleted by b
       if (offsetA > -deltaB) {
         itemDiffs.push(itemA);
       }
       iterA++;
-    } else if (newOffsetB > offsetA) {
-      assertDefined(itemB);
+    } else if (itemB && (!itemA || newOffsetB > offsetA)) {
       if (deltaA >= 0) {
         // adjust the tail of A
         if (offsetB <= tailA.length) {
@@ -62,7 +61,9 @@ export function mergeArrayDiffs<T>(
           const valueA = tailA[tailOffset];
 
           matchItemDiff(itemB, {
-            // array
+            // array. Merge into a fresh copy (not in place) so `a`'s tail —
+            // which may be shared with the caller's original diff — is not
+            // mutated.
             array(_, valueB) {
               assertType<unknown[]>(valueA);
               tailA[tailOffset] = applyArrayDiff(valueA, valueB);
@@ -77,10 +78,18 @@ export function mergeArrayDiffs<T>(
             },
           });
         } else {
-          itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff<T>);
+          // preserve itemB's rune (array/object/set) while shifting its offset
+          itemDiffs.push([
+            addToOffset(itemB[0], -deltaA),
+            itemB[1],
+          ] as ItemDiff<T>);
         }
       } else {
-        itemDiffs.push([newOffsetB, itemB[1]] as ItemDiff<T>);
+        // preserve itemB's rune (array/object/set) while shifting its offset
+        itemDiffs.push([
+          addToOffset(itemB[0], -deltaA),
+          itemB[1],
+        ] as ItemDiff<T>);
       }
 
       iterB++;
@@ -161,6 +170,14 @@ export function mergeDiffs<T>(
   b: ObjectDiff<T>,
 ): ObjectDiff<T> {
   const ret: ObjectDiff<T> = {};
+
+  // `consume` deletes keys from `a` as it walks it, so operate on a shallow
+  // copy — otherwise merging would destructively empty the caller's diff.
+  // Nested structures are handled by the recursive `mergeDiffs` /
+  // `mergeArrayDiffs` calls, which each copy their own level; and `applyDiff`
+  // clones values on insertion, so the references carried over from `a`/`b`
+  // stay immutable once the merged diff is later applied.
+  a = { ...a };
 
   for (const rKeyB of objectKeys(b)) {
     matchRunes(b, rKeyB, {

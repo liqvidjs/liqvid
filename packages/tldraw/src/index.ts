@@ -103,13 +103,7 @@ export const tldrawReplay = makeReplayPlugin<
     if (action.diff) {
       // The in-memory store keeps vectors decoded, so diffs (which are also
       // decoded) can be applied directly.
-      applyDiff(
-        clone.snapshot.store,
-        // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
-        action.diff as any,
-        true,
-        // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
-      ) as any;
+      applyDiff(clone.snapshot.store, action.diff, true);
     }
 
     return clone;

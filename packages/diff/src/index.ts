@@ -29,6 +29,7 @@ export {
   cmp,
   consume,
   getOffset,
+  invertArrayDiff,
   invertDiff,
   isRune,
   matchItemDiff,
