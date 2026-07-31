@@ -1,5 +1,4 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: this is fine */
-import cliProgress from "cli-progress";
 import { Cause, Effect } from "effect";
 import type * as Puppeteer from "puppeteer-core";
 

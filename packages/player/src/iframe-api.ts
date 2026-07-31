@@ -1,43 +1,54 @@
 "use client";
 
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
-import { z } from "zod";
 
-import { RenderMode } from "./render-mode.ts";
+import type { RenderMode } from "./render-mode.ts";
+
+/**
+ * Type-level carrier for a value of type `T`. The runtime never reads this
+ * value; it exists only so the declaration can describe argument and return
+ * types without any validation library.
+ */
+function type<T>(): T {
+  return undefined as T;
+}
 
 /**
  * API declaration for Liqvid player iframe communication.
+ *
+ * The `arguments`/`return` fields are type-level carriers only; the runtime
+ * reads method names, not their values.
  */
 export const playerApiDeclaration = {
   methods: {
     /** Get the duration of the video in seconds */
     getDuration: {
-      arguments: z.tuple([]),
-      return: z.number(),
+      arguments: type<[]>(),
+      return: type<number>(),
     },
 
     /** Seek to a specific time in seconds */
     seekTo: {
-      arguments: z.tuple([z.number()]),
-      return: z.void(),
+      arguments: type<[time: number]>(),
+      return: type<void>(),
     },
 
     /** Set the color scheme */
     setColorScheme: {
-      arguments: z.tuple([z.enum(["light", "dark"])]),
-      return: z.void(),
+      arguments: type<[colorScheme: "light" | "dark"]>(),
+      return: type<void>(),
     },
 
     /** Set the render mode */
     setRenderMode: {
-      arguments: z.tuple([RenderMode]),
-      return: z.void(),
+      arguments: type<[renderMode: RenderMode]>(),
+      return: type<void>(),
     },
 
     /** Toggle the controls */
     toggleControls: {
-      arguments: z.tuple([z.boolean().optional()]),
-      return: z.void(),
+      arguments: type<[show?: boolean]>(),
+      return: type<void>(),
     },
   },
   namespace: "@liqvid/player",

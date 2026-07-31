@@ -17,31 +17,37 @@
   ],
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "default": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
-    "./recording": {
-      "types": "./dist/types/recording.d.mts",
-      "default": "./src/recording.mts",
-      "import": "./dist/esm/recording.mjs"
+    "./greenscreen": {
+      "@liqvid/dev": "./src/greenscreen.ts",
+      "types": "./dist/types/greenscreen.d.ts",
+      "import": "./dist/esm/greenscreen.js"
     },
     "./liqvid-studio-server-plugin": {
+      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
       "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
-      "default": "./src/liqvid-studio-server-plugin.mts",
       "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
+    },
+    "./recording": {
+      "@liqvid/dev": "./src/recording.mts",
+      "types": "./dist/types/recording.d.mts",
+      "import": "./dist/esm/recording.mjs"
     }
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
-    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
     "build:clean": "rm -rf dist",
+    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
     "build:js": "pnpm build:js:esm",
     "build:js:esm": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
@@ -53,6 +59,8 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "effect": "catalog:dev",
+    "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
@@ -65,6 +73,7 @@
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "execa": "catalog:",
     "react": "catalog:peer"

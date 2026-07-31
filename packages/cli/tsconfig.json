@@ -5,7 +5,8 @@
     "moduleResolution": "nodenext",
     "outDir": "./dist/esm",
     "rootDir": "./src",
-    "target": "esnext"
+    "target": "esnext",
+    "types": ["effect-paths", "node"]
   },
   "extends": "../../tsconfig.json",
   "include": ["./src"]

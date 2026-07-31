@@ -2,10 +2,16 @@
   "name": "@liqvid/gsap",
   "version": "1.0.1",
   "description": "GSAP bindings for Liqvid",
-  "keywords": ["animation", "GSAP", "Liqvid"],
+  "keywords": [
+    "animation",
+    "GSAP",
+    "Liqvid"
+  ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",

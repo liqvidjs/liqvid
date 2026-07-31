@@ -1,16 +1,18 @@
-import type { z } from "zod";
-
 /**
- * Declaration of a single API method with argument and return type schemas.
+ * Declaration of a single API method with argument and return types.
+ *
+ * These fields are purely type-level carriers: the runtime never reads their
+ * values, only the method names. Declare them with a type assertion, e.g.
+ * `arguments: [] as [duration: number]`.
  */
 export interface IFrameAPIMethodDeclaration<
-  Args extends z.ZodTuple = z.ZodTuple,
-  Return extends z.ZodType = z.ZodType,
+  Args extends readonly unknown[] = readonly unknown[],
+  Return = unknown,
 > {
-  /** Zod schema for the method arguments as a tuple */
+  /** The method's argument types, as a tuple */
   arguments: Args;
 
-  /** Zod schema for the return type */
+  /** The method's return type */
   return: Return;
 }
 
@@ -30,10 +32,8 @@ export type IFrameAPIDeclaration = {
  */
 export type IFrameAPIImplementation<D extends IFrameAPIDeclaration> = {
   [K in keyof D["methods"]]: (
-    ...args: z.infer<D["methods"][K]["arguments"]>
-  ) =>
-    | z.infer<D["methods"][K]["return"]>
-    | Promise<z.infer<D["methods"][K]["return"]>>;
+    ...args: D["methods"][K]["arguments"]
+  ) => D["methods"][K]["return"] | Promise<D["methods"][K]["return"]>;
 };
 
 /**
@@ -42,8 +42,8 @@ export type IFrameAPIImplementation<D extends IFrameAPIDeclaration> = {
  */
 export type IFrameAPIClient<D extends IFrameAPIDeclaration> = {
   [K in keyof D["methods"]]: (
-    ...args: z.infer<D["methods"][K]["arguments"]>
-  ) => Promise<z.infer<D["methods"][K]["return"]>>;
+    ...args: D["methods"][K]["arguments"]
+  ) => Promise<D["methods"][K]["return"]>;
 } & {
   destroy(): void;
 };

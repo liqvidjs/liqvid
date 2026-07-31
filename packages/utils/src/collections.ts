@@ -1,24 +1,45 @@
+/**
+ * Filter a record by a predicate function.
+ */
 export function filterRecord<
   T extends Record<string, unknown>,
   F extends (value: T[keyof T], key: keyof T) => boolean,
->(record: T, fn: F): T {
-  return Object.fromEntries(
-    (Object.keys(record) as (keyof T)[])
-      .filter((key) => fn(record[key], key))
-      .map((key) => [key, record[key]]),
-  ) as T;
+>(
+  /** The record to filter. */
+  record: T,
+
+  /** The predicate function to filter by. */
+  fn: F,
+): T {
+  return (Object.keys(record) as (keyof T)[]).reduce((acc, key) => {
+    if (fn(record[key], key)) {
+      acc[key] = record[key];
+    }
+
+    return acc;
+  }, {} as T);
 }
 
+/**
+ * Map a record by a mapping function.
+ */
 export function mapRecord<
   T extends Record<string, unknown>,
   F extends (value: T[keyof T], key: keyof T) => unknown,
->(record: T, fn: F): { [K in keyof T]: ReturnType<F> } {
-  return Object.fromEntries(
-    (Object.keys(record) as (keyof T)[]).map((key) => [
-      key,
-      fn(record[key], key),
-    ]),
-  ) as { [K in keyof T]: ReturnType<F> };
+>(
+  /** The record to map. */
+  record: T,
+
+  /** The mapping function to map by. */
+  fn: F,
+): { [K in keyof T]: ReturnType<F> } {
+  return (Object.keys(record) as (keyof T)[]).reduce(
+    (acc, key) => {
+      acc[key] = fn(record[key], key) as ReturnType<F>;
+      return acc;
+    },
+    {} as { [K in keyof T]: ReturnType<F> },
+  );
 }
 
 /**
@@ -53,4 +74,23 @@ export function pick<T extends object, K extends keyof T>(
       .filter((key) => (keys as (keyof T)[]).includes(key))
       .map((key) => [key, obj[key]]),
   ) as Pick<T, K>;
+}
+
+/**
+ * Polyfill for upcoming `Promise.allKeyed`
+ */
+export async function promiseAllKeyed<
+  T extends Record<string, Promise<unknown>>,
+>(obj: T): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
+  const values = await Promise.all(Object.values(obj));
+  const keys = Object.keys(obj) as (keyof T)[];
+  return keys.reduce(
+    (acc, key, index) => {
+      acc[key] = values[index] as Awaited<T[typeof key]>;
+      return acc;
+    },
+    {} as {
+      [K in keyof T]: Awaited<T[K]>;
+    },
+  );
 }

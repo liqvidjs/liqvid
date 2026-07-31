@@ -1,7 +1,6 @@
 import { NodeSocket } from "@effect/platform-node";
 import { serialize } from "@liqvid/ssr";
 import {
-  Cause,
   Effect,
   Fiber,
   Logger,
@@ -103,7 +102,7 @@ const handleConnection = (client: WebSocket) =>
         ),
       ),
     );
-  }).pipe(Effect.annotateLogs({ url: client.url }), Effect.scoped);
+  }).pipe(Effect.scoped);
 
 /**
  * Liqvid server UPGRADE handler

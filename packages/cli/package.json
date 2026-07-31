@@ -20,9 +20,14 @@
       "import": "./dist/esm/tasks/compress.mjs"
     },
     "./debug": {
-      "default": "./src/tasks/debug.mts",
+      "@liqvid/dev": "./src/tasks/debug.mts",
       "types": "./dist/types/tasks/debug.d.mts",
       "import": "./dist/esm/tasks/debug.mjs"
+    },
+    "./publish": {
+      "@liqvid/dev": "./src/tasks/publish.mts",
+      "types": "./dist/types/tasks/publish.d.mts",
+      "import": "./dist/esm/tasks/publish.mjs"
     },
     "./render": {
       "@liqvid/dev": "./src/tasks/render.mts",
@@ -30,7 +35,7 @@
       "import": "./dist/esm/tasks/render.mjs"
     },
     "./render-audio": {
-      "default": "./src/tasks/render-audio.mts",
+      "@liqvid/dev": "./src/tasks/render-audio.mts",
       "types": "./dist/types/tasks/render-audio.d.mts",
       "import": "./dist/esm/tasks/render-audio.mjs"
     },
@@ -45,12 +50,12 @@
       "import": "./dist/esm/tasks/screenshot.mjs"
     },
     "./transcribe": {
-      "default": "./src/tasks/transcribe.mts",
+      "@liqvid/dev": "./src/tasks/transcribe.mts",
       "types": "./dist/types/tasks/transcribe.d.mts",
       "import": "./dist/esm/tasks/transcribe.mjs"
     },
     "./utils": {
-      "default": "./src/utils.mts",
+      "@liqvid/dev": "./src/utils.mts",
       "types": "./dist/types/utils.d.mts",
       "import": "./dist/esm/utils.mjs"
     }
@@ -85,43 +90,38 @@
     "@aws-sdk/client-s3": "catalog:",
     "@aws-sdk/credential-providers": "catalog:",
     "@aws-sdk/lib-storage": "catalog:",
+    "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",
     "@liqvid/schemas": "workspace:^",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@types/node": "catalog:dev",
     "chalk": "catalog:",
     "cli-progress": "catalog:",
     "effect": "catalog:",
+    "effect-paths": "workspace:^",
     "execa": "catalog:",
     "fast-glob": "catalog:",
     "handlebars": "catalog:",
-    "nodejs-whisper": "catalog:peer",
     "pluralize": "catalog:",
     "sharp": "catalog:",
     "yargs": "catalog:",
-    "yargs-parser": "catalog:",
-    "zod": "catalog:"
+    "yargs-parser": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@effect/language-service": "catalog:dev",
+    "@effect/tsgo": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
     "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
-    "nodejs-whisper": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "nodejs-whisper": "catalog:peer"
-  },
-  "peerDependenciesMeta": {
-    "nodejs-whisper": {
-      "optional": true
-    }
+    "smart-whisper": "catalog:peer"
   }
 }

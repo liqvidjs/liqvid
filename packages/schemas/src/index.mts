@@ -43,6 +43,7 @@ export {
   ImageFormat,
   JpegQuality,
   LogLevel,
+  RenderSource,
   RichTranscript,
   StringWithEnvVars,
   TranscriptEntry,

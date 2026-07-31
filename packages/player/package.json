@@ -18,13 +18,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./iframe-api": {
-      "types": "./dist/types/iframe-api.d.ts",
       "@liqvid/dev": "./src/iframe-api.ts",
+      "types": "./dist/types/iframe-api.d.ts",
       "import": "./dist/esm/iframe-api.js"
     }
   },
@@ -40,8 +40,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "clsx": "catalog:",
-    "zod": "catalog:"
+    "clsx": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",

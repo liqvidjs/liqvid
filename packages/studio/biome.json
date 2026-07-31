@@ -2,8 +2,19 @@
   "extends": ["../../biome.json"],
   "linter": {
     "rules": {
+      "correctness": {
+        "noRestrictedElements": {
+          "level": "on",
+          "options": {
+            "elements": {
+              "button": "use the styled version from ui/Button.tsx"
+            }
+          }
+        }
+      },
       "style": {
         "noJsxLiterals": "error",
+
         "noRestrictedImports": {
           "level": "error",
           "options": {

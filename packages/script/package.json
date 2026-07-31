@@ -17,23 +17,23 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./react": {
-      "types": "./dist/types/react.d.mts",
       "@liqvid/dev": "./src/react.mts",
+      "types": "./dist/types/react.d.mts",
       "import": "./dist/esm/react.mjs"
     },
     "./recording": {
-      "types": "./dist/types/recording.d.ts",
       "@liqvid/dev": "./src/recording.tsx",
+      "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js"
     },
     "./liqvid-studio-server-plugin": {
-      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
     }
   },
@@ -57,6 +57,8 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "effect": "catalog:dev",
+    "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

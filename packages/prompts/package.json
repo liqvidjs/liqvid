@@ -17,8 +17,8 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     }
   },
@@ -45,6 +45,7 @@
     "@liqvid/hydration": "workspace:^1.0.0-alpha.4",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"
   },
   "sideEffects": false,

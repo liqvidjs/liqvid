@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { type FileDecodeError, loadJson, writeJSON } from "@liqvid/cli/utils";
+import { type FileDecodeError, loadJson } from "@liqvid/cli/utils";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,

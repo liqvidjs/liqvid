@@ -1,7 +1,7 @@
 {
   "name": "@liqvid/schemas",
   "version": "1.0.0-alpha.0",
-  "description": "Zod schemas and JSON Schema files for Liqvid",
+  "description": "Effect schemas and JSON Schema files for Liqvid",
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
@@ -18,34 +18,9 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
-    },
-    "./liqvid-config": {
-      "types": "./dist/types/liqvid-config.d.mts",
-      "@liqvid/dev": "./src/liqvid-config.mts",
-      "import": "./dist/esm/liqvid-config.mjs"
-    },
-    "./project": {
-      "types": "./dist/types/project.d.mts",
-      "@liqvid/dev": "./src/project.mts",
-      "import": "./dist/esm/project.mjs"
-    },
-    "./recording-meta": {
-      "types": "./dist/types/recording-meta.d.mts",
-      "@liqvid/dev": "./src/recording-meta.mts",
-      "import": "./dist/esm/recording-meta.mjs"
-    },
-    "./screenshot-meta": {
-      "types": "./dist/types/screenshot-meta.d.mts",
-      "@liqvid/dev": "./src/screenshot-meta.mts",
-      "import": "./dist/esm/screenshot-meta.mjs"
-    },
-    "./providers": {
-      "types": "./dist/types/providers/index.d.mts",
-      "@liqvid/dev": "./src/providers/index.mts",
-      "import": "./dist/esm/providers/index.mjs"
     }
   },
   "scripts": {
@@ -53,34 +28,31 @@
     "build:clean": "rm -rf dist",
     "build:js": "tsc",
     "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
-    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts",
+    "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts && biome check --fix json-schemas",
     "lint": "biome check --fix",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "zod": "catalog:"
+    "effect-paths": "workspace:^"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
+    "effect": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.4.0",
-    "effect": "catalog:peer",
-    "zod": "catalog:peer"
+    "effect": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@liqvid/duration": {
       "optional": true
     },
     "effect": {
-      "optional": true
-    },
-    "zod": {
       "optional": true
     }
   },

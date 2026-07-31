@@ -1,35 +1,34 @@
 {
   "name": "@liqvid/event-emitter",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Typed event emitter and helpers",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./react": {
-      "@liqvid/dev": "./src/react.ts",
-      "import": "./dist/esm/react.js",
-      "require": "./dist/cjs/react.js",
-      "types": "./dist/types/react.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*"
-      ]
-    }
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./react": {
+      "@liqvid/dev": "./src/react.ts",
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js"
+    }
+  },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -40,16 +39,11 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
+    "lint:package": "../../format-package-json.sh",
     "test": "jest",
     "watch": "tsc --watch"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
-  "sideEffects": false,
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/react": "catalog:dev",
@@ -66,5 +60,13 @@
       "optional": true
     }
   },
-  "type": "module"
+  "sideEffects": false,
+  "type": "module",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  }
 }

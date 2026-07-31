@@ -1,25 +1,19 @@
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { loadJson, Progress, writeJSON } from "@liqvid/cli/utils";
-import chalk from "chalk";
+import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import { Cause, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
 import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "../conventions.mts";
-import {
-  existenceOptional,
-  jobProgressLayer,
-  readDirWithFileTypes,
-} from "../utils/effect.mts";
+import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
 import { ConflictError, NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
-import type { LoggableJob } from "./schemas.mts";
 import { RenderMeta } from "./schemas.mts";
 
 /**

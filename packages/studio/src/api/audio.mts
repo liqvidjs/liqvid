@@ -15,7 +15,6 @@ import {
   CAPTIONS_META,
   RICH_TRANSCRIPT,
 } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
 import { CaptionsMeta } from "../types/schemas.mts";
 import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
 import {
@@ -24,12 +23,7 @@ import {
   NotFoundError,
 } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
-import {
-  getConfig,
-  getOrigin,
-  getRenderUrl,
-  getRoutesDir,
-} from "../utils/misc.mts";
+import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";

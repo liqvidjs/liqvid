@@ -17,31 +17,31 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./extensions": {
-      "types": "./dist/types/extensions.d.ts",
       "@liqvid/dev": "./src/extensions.ts",
+      "types": "./dist/types/extensions.d.ts",
       "import": "./dist/esm/extensions.js",
       "require": "./dist/cjs/extensions.js"
     },
     "./fake-selection": {
-      "types": "./dist/types/fake-selection.d.ts",
       "@liqvid/dev": "./src/fake-selection.ts",
+      "types": "./dist/types/fake-selection.d.ts",
       "import": "./dist/esm/fake-selection.js",
       "require": "./dist/cjs/fake-selection.js"
     },
     "./liqvid-studio-server-plugin": {
-      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
     },
     "./recording": {
-      "types": "./dist/types/recording.d.ts",
       "@liqvid/dev": "./src/recording.tsx",
+      "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js",
       "require": "./dist/cjs/recording.js"
     }
@@ -59,12 +59,17 @@
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
+  "dependencies": {
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3"
+  },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@codemirror/state": "catalog:dev",
     "@codemirror/view": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "effect": "catalog:dev",
+    "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
@@ -75,7 +80,6 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
     "react": "catalog:peer"
   },

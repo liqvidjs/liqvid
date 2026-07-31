@@ -15,7 +15,6 @@ import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
-import { useStudioPrivateApi } from "../../LiqvidDevToolsProvider.tsx";
 import type { Transcript } from "../../types/schemas.mts";
 import type { Awaitable } from "../../types.mts";
 import { Button } from "../../ui/Button.tsx";

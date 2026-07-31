@@ -2,6 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { ProviderConfigCopy } from "@liqvid/schemas";
+import { promiseAllKeyed } from "@liqvid/utils";
 
 import { expandTilde } from "../../utils/paths.mts";
 import type {
@@ -121,10 +122,10 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     key: string,
   ): Promise<FileUploadStatus> {
     try {
-      const [srcStats, destStats] = await Promise.all([
-        fsp.stat(srcPath),
-        fsp.stat(destPath),
-      ]);
+      const { srcStats, destStats } = await promiseAllKeyed({
+        destStats: fsp.stat(destPath),
+        srcStats: fsp.stat(srcPath),
+      });
 
       // Copy if source is newer than destination
       if (srcStats.mtime > destStats.mtime) {

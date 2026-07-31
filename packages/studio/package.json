@@ -14,27 +14,33 @@
     "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "src/*"
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
+    "./next": {
+      "@liqvid/dev": "./src/next/index.mts",
+      "types": "./dist/types/next/index.d.mts",
+      "import": "./dist/esm/next/index.mjs"
+    },
     "./next/api": {
-      "types": "./dist/types/next/api.d.mts",
       "@liqvid/dev": "./src/next/api.mts",
+      "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
     },
     "./next/page": {
-      "types": "./dist/types/next/page.d.ts",
       "@liqvid/dev": "./src/next/page.tsx",
+      "types": "./dist/types/next/page.d.ts",
       "import": "./dist/esm/next/page.js"
     },
     "./ui": {
+      "@liqvid/dev": "./src/ui/index.ts",
       "types": "./dist/types/ui/index.d.ts",
-      "default": "./src/ui/index.ts",
       "import": "./dist/esm/ui/index.js"
     }
   },
@@ -48,6 +54,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
@@ -65,14 +72,12 @@
     "chalk": "catalog:",
     "clsx": "catalog:",
     "effect": "catalog:",
-    "effect-paths": "workspace:^",
     "execa": "catalog:",
     "handlebars": "catalog:",
     "http-status-codes": "catalog:",
     "lodash.debounce": "catalog:",
     "ts-morph": "catalog:",
     "universal-cookie": "catalog:",
-    "zod": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
@@ -109,8 +114,9 @@
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
     "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
-    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.1",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
+    "effect-paths": "workspace:^",
     "next-ws": "catalog:peer",
     "react": "catalog:peer",
     "serve-handler": "^6.1.7",

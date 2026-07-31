@@ -17,22 +17,22 @@
   ],
   "exports": {
     ".": {
-      "default": "./src/index.ts",
+      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./liqvid-studio-server-plugin": {
-      "default": "./src/liqvid-studio-server-plugin.mts",
+      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
       "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js"
     },
     "./react": {
-      "default": "./src/react.tsx",
+      "@liqvid/dev": "./src/react.tsx",
       "types": "./dist/types/react.d.ts",
       "import": "./dist/esm/react.js"
     },
     "./recording": {
-      "default": "./src/recording.tsx",
+      "@liqvid/dev": "./src/recording.tsx",
       "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js"
     }

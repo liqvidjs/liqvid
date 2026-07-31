@@ -20,7 +20,6 @@ import {
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
 } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import {
   ConflictError,
