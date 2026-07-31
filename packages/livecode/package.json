@@ -18,20 +18,20 @@
   ],
   "exports": {
     ".": {
+      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "default": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./interpreters/*": {
+      "@liqvid/dev": "./src/interpreters/*.ts",
       "types": "./dist/types/interpreters/*.d.ts",
-      "default": "./src/interpreters/*.ts",
       "import": "./dist/esm/interpreters/*.js"
     },
     "./style.css": "./dist/css/style.css",
     "./web": {
+      "@liqvid/dev": "./src/presets/web/index.ts",
       "types": "./dist/types/presets/web/index.d.ts",
-      "default": "./src/presets/web/index.ts",
       "import": "./dist/esm/presets/web/index.js",
       "require": "./dist/cjs/presets/web/index.js"
     }
@@ -70,8 +70,10 @@
     "@lqv/codemirror": "workspace:^",
     "@types/babel__standalone": "catalog:dev",
     "@types/react": "catalog:dev",
+    "glslx": "catalog:dev",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",
+    "prettier-plugin-glsl": "catalog:peer",
     "skulpt": "catalog:dev",
     "type-fest": "catalog:dev",
     "typedoc": "catalog:dev",
@@ -99,13 +101,15 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.2",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@lqv/codemirror": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
     "@replit/codemirror-vim": "catalog:peer",
     "effect": "catalog:peer",
+    "glslx": "catalog:peer",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",
+    "prettier-plugin-glsl": "catalog:peer",
     "react": "catalog:peer",
     "skulpt": "catalog:peer"
   },
@@ -128,10 +132,16 @@
     "@codemirror/lang-sql": {
       "optional": true
     },
+    "glslx": {
+      "optional": true
+    },
     "jszip": {
       "optional": true
     },
     "prettier": {
+      "optional": true
+    },
+    "prettier-plugin-glsl": {
       "optional": true
     },
     "skulpt": {

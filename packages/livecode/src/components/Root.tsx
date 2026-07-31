@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { type JSX, useEffect, useState } from "react";
 import { useStore } from "zustand";
 
-import { shortcuts } from "../extensions.ts";
+import { shortcutsCompartment } from "../extensions.ts";
 import {
   LiveCodeContext,
   type LiveCodeStore,
@@ -83,7 +83,7 @@ export function KeyboardShortcuts(): null {
       for (const group of Object.values(state.groups)) {
         for (const { view } of group.files) {
           view.dispatch({
-            effects: shortcuts.reconfigure([
+            effects: shortcutsCompartment.reconfigure([
               keymap.of(Object.values(state.shortcuts)),
             ]),
           });

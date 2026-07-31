@@ -17,7 +17,7 @@ import {
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
-import { getReadViewPlugin, lightDarkCompartment } from "./extensions.ts";
+import { colorSchemeCompartment, getReadViewPlugin } from "./extensions.ts";
 import { selectActiveFile } from "./selectors.ts";
 import { useLiveCodeStore } from "./store.ts";
 import { viewContents } from "./utils.ts";
@@ -94,12 +94,12 @@ export function useLightDarkExtensions(extensions: {
 
   useEffect(() => {
     view?.dispatch({
-      effects: lightDarkCompartment.reconfigure([relevantExtensions]),
+      effects: colorSchemeCompartment.reconfigure([relevantExtensions]),
     });
   }, [view, relevantExtensions]);
 
   return useMemo(
-    () => [readViewPlugin, lightDarkCompartment.of(relevantExtensions)],
+    () => [readViewPlugin, colorSchemeCompartment.of(relevantExtensions)],
     [readViewPlugin, relevantExtensions],
   );
 }

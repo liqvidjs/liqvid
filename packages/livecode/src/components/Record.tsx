@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
 
-import { recording } from "../extensions.ts";
+import { recordingCompartment } from "../extensions.ts";
 import { selectActiveFile } from "../selectors.ts";
 import { type LiveCodeState, useLiveCodeStore } from "../store.ts";
 
@@ -78,14 +78,16 @@ export function Record({
     const { view } = file;
 
     view.dispatch({
-      effects: recording.reconfigure([recorder.extension(captureKeys)]),
+      effects: recordingCompartment.reconfigure([
+        recorder.extension(captureKeys),
+      ]),
     });
 
     includeFilenameInRecording(store.getState());
 
     return () => {
       view.dispatch({
-        effects: recording.reconfigure([]),
+        effects: recordingCompartment.reconfigure([]),
       });
     };
   }, [captureKeys, groups, filename, recorder, store, groupId]);
@@ -113,7 +115,7 @@ function includeFilenameInRecording(state: LiveCodeState) {
 
   outer: for (const group of Object.values(state.groups)) {
     for (const { view } of group.files) {
-      const extnState = recording.get(view.state);
+      const extnState = recordingCompartment.get(view.state);
       if (Array.isArray(extnState) && extnState.length > 0) {
         recordingExtensions++;
         if (recordingExtensions > 1) break outer;

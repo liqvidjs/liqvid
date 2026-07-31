@@ -1,5 +1,6 @@
 import { EditorSelection, type SelectionRange } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
+import type { Awaitable } from "@liqvid/utils";
 import type * as prettier from "prettier";
 import { useCallback } from "react";
 import type { SetOptional } from "type-fest";
@@ -137,14 +138,17 @@ async function formatViewWithCursor(
     applyFormatting(
       view,
       anchorResult.formatted,
-      EditorSelection.single(anchorResult.cursorOffset, headResult.cursorOffset),
+      EditorSelection.single(
+        anchorResult.cursorOffset,
+        headResult.cursorOffset,
+      ),
     );
   } catch (e) {
     console.error(e);
   }
 }
 
-type Formatter = (code: string) => Promise<string>;
+type Formatter = (code: string) => Awaitable<string>;
 
 /** Format then guess the new cursor position (for plugins lacking the API). */
 async function formatViewGuessCursor(view: EditorView, formatter: Formatter) {

@@ -69,9 +69,9 @@ export const basicSetup: Extension = [
   ]),
 ];
 
-export const lightDarkCompartment = new Compartment();
-export const recording = new Compartment();
-export const shortcuts = new Compartment();
+export const colorSchemeCompartment = new Compartment();
+export const recordingCompartment = new Compartment();
+export const shortcutsCompartment = new Compartment();
 export const vimCompartment = new Compartment();
 
 /** get a plugin to read the view */

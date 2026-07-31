@@ -3,7 +3,11 @@ import { EditorView } from "@codemirror/view";
 import { useInitial } from "@liqvid/utils";
 import { useEffect, useRef, useState } from "react";
 
-import { recording, shortcuts, vimCompartment } from "../extensions.ts";
+import {
+  recordingCompartment,
+  shortcutsCompartment,
+  vimCompartment,
+} from "../extensions.ts";
 import { useLiveCodeStore } from "../store.ts";
 
 import { useFilenameOptional, useGroup } from "./context.tsx";
@@ -79,8 +83,8 @@ export function Editor({
       state: EditorState.create({
         doc: content,
         extensions: [
-          recording.of([]),
-          shortcuts.of([]),
+          recordingCompartment.of([]),
+          shortcutsCompartment.of([]),
 
           // vim
           vimCompartment.of([]),

@@ -130,8 +130,12 @@ export function serializeDocument(doc: Document) {
 }
 
 /* ------------------------------ utils ------------------------------ */
-function isDocumentTypeNode(node: Node): node is DocumentType {
+export function isDocumentTypeNode(node: Node): node is DocumentType {
   return node.nodeType === node.DOCUMENT_TYPE_NODE;
+}
+
+export function isTextNode(node: Node): node is Text {
+  return node.nodeType === Node.TEXT_NODE;
 }
 
 export function isElement(node: Node): node is Element {

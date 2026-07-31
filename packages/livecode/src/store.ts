@@ -61,7 +61,6 @@ export interface LiveCodeState {
   shortcuts: Record<string, KeyBinding>;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const makeStore = (state: Partial<LiveCodeState> = {}) =>
   createStore<LiveCodeState>()(
     subscribeWithSelector(
