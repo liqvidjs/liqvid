@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 
-import { AbsoluteDir, type RelativePath } from "../src";
+import { AbsoluteDir, type RelativePath } from "../src/index.ts";
 
 const absoluteDir = AbsoluteDir("");
 

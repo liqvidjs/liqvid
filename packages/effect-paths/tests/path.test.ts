@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/correctness/noUnusedVariables: testing types */
 import path from "node:path";
 
 import {
@@ -12,7 +11,7 @@ import {
   RelativeDir,
   RelativeFile,
   type RelativePath,
-} from "../src";
+} from "../src/index.ts";
 
 const absoluteDir = AbsoluteDir("");
 

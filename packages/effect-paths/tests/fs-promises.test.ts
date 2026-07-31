@@ -1,6 +1,6 @@
 import fsp from "node:fs/promises";
 
-import { AbsoluteDir, RelativeDir, type RelativePath } from "../src";
+import { AbsoluteDir, RelativeDir, type RelativePath } from "../src/index.ts";
 
 const absoluteDir = AbsoluteDir("");
 const relativeDir = RelativeDir("");

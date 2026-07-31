@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "noEmit": true,
-    "rootDir": "./tests",
-    "target": "esnext"
-  },
-  "extends": "../../tsconfig.json",
-  "include": ["./src", "./tests"]
-}
