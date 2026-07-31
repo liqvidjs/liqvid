@@ -1,5 +1,5 @@
 // biome-ignore lint/suspicious/noExplicitAny: template used as a diff base
-export const defaultShape: Record<string, any> = {
+export const getDefaultShape = (): Record<string, any> => ({
   isLocked: false,
   meta: {},
   opacity: 1,
@@ -17,4 +17,4 @@ export const defaultShape: Record<string, any> = {
   rotation: 0,
   type: "draw",
   typeName: "shape",
-};
+});

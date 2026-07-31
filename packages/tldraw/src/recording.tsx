@@ -14,7 +14,7 @@ import type {
   UnknownRecord,
 } from "tldraw";
 
-import { defaultShape } from "./defaults.ts";
+import { getDefaultShape } from "./defaults.ts";
 import { isCamera, isPage, isShape } from "./record-types.ts";
 import type {
   DecodedTLShape,
@@ -176,7 +176,7 @@ export class TldrawRecorder extends ReplayDataRecorder<
           // diff the decoded shape, then re-encode the vectors so the stored
           // diff stays compact (base64)
           events.push({
-            [key]: encodeDiffPaths(diffObjects(defaultShape, decoded)),
+            [key]: encodeDiffPaths(diffObjects(getDefaultShape(), decoded)),
           });
           this.#shapeCache.set(created.id, decoded);
           break;
@@ -225,7 +225,7 @@ export class TldrawRecorder extends ReplayDataRecorder<
             // TODO: is this necessary? what happens if the shape exists before recording,
             // we need to initialize the shape cache better
             events.push({
-              [key]: encodeDiffPaths(diffObjects(defaultShape, decodedTo)),
+              [key]: encodeDiffPaths(diffObjects(getDefaultShape(), decodedTo)),
             });
           }
           this.#shapeCache.set(to.id, decodedTo);

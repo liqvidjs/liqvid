@@ -29,7 +29,7 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
   merge,
 }: {
   /** Apply an action to a state. */
-  apply: (state: State, action: Action) => State;
+  apply: (state: State, action: Action, inPlace?: boolean) => State;
 
   /**
    * Get a default state. This is not the _initial_ state:
@@ -73,10 +73,9 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
 
     /** Uncompressed actions */
     const history = {} as History;
-    const actions: Action[] = data.map(([_, event]) => {
-      const duck = decompress(event, history);
-      return duck;
-    });
+    const actions: Action[] = data.map(([_, event]) =>
+      decompress(event, history),
+    );
 
     let state = initial ?? blankState();
     state = initialize?.(state, props) ?? state;
@@ -85,7 +84,7 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
     const inverses: Action[] = [];
     for (const action of actions) {
       inverses.push(invert(state, action));
-      state = apply(state, action);
+      apply(state, action, true);
     }
 
     /* main logic */
@@ -118,7 +117,7 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
 
       if (actionsToApply.length > 0) {
         const action = merge(...actionsToApply);
-        state = apply(state, action);
+        apply(state, action, true);
         commit(action, props);
       }
 

@@ -1,7 +1,7 @@
 import { applyDiff, diffObjects } from "@liqvid/diff";
 import { b64Vecs } from "tldraw";
 
-import { defaultShape } from "../src/defaults.ts";
+import { getDefaultShape } from "../src/defaults.ts";
 import { isPointer } from "../src/record-types.ts";
 import type { Point3 } from "../src/types.ts";
 import {
@@ -37,7 +37,11 @@ function makeDrawShape(points: { x: number; y: number; z?: number }[]) {
       isClosed: false,
       isComplete: false,
       isPen: false,
-      segments: [{ path: b64Vecs.encodePoints2D(points), type: "free" }],
+      // `encodePoints2D` drops z, so the segment must declare `dim: 2` to
+      // match; an absent `dim` would mean the legacy 3D (x, y, z) encoding.
+      segments: [
+        { dim: 2, path: b64Vecs.encodePoints2D(points), type: "free" },
+      ],
       size: "m",
     },
     rotation: 0,
@@ -211,11 +215,11 @@ describe("record → replay round trip", () => {
     // The author draws a shape with one point, then appends two more.
     const decodedStates = [
       {
-        ...structuredClone(defaultShape),
+        ...structuredClone(getDefaultShape()),
         id: "shape:a",
         props: {
-          ...structuredClone(defaultShape.props),
-          segments: [{ path: [{ x: 0, y: 0, z: 0.5 }], type: "free" }],
+          ...structuredClone(getDefaultShape().props),
+          segments: [{ dim: 2, path: [{ x: 0, y: 0, z: 0.5 }], type: "free" }],
         },
       },
     ];
@@ -225,6 +229,7 @@ describe("record → replay round trip", () => {
         ...structuredClone(decodedStates[0].props),
         segments: [
           {
+            dim: 2,
             path: [
               { x: 0, y: 0, z: 0.5 },
               { x: 10, y: 20, z: 0.5 },
@@ -240,6 +245,7 @@ describe("record → replay round trip", () => {
         ...structuredClone(decodedStates[1].props),
         segments: [
           {
+            dim: 2,
             path: [
               { x: 0, y: 0, z: 0.5 },
               { x: 10, y: 20, z: 0.5 },
@@ -253,7 +259,7 @@ describe("record → replay round trip", () => {
 
     // Record: compress each transition.
     const compressed = [
-      compress(defaultShape, decodedStates[0]),
+      compress(getDefaultShape(), decodedStates[0]),
       compress(decodedStates[0], decodedStates[1]),
       compress(decodedStates[1], decodedStates[2]),
     ];
@@ -264,7 +270,7 @@ describe("record → replay round trip", () => {
     expect(Array.isArray(compressed[2])).toBe(true);
 
     // Replay: rebuild the decoded shape by applying each event in order.
-    let store = structuredClone(defaultShape);
+    let store = structuredClone(getDefaultShape());
     for (const event of compressed) {
       store = decompressAndApply(store, event);
     }

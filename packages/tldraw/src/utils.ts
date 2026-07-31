@@ -87,7 +87,15 @@ export function decodeShape(shape: TLShape): DecodedTLShape {
           segments: shape.props.segments.map(
             (segment): DecodedTLDrawShapeSegment => ({
               ...segment,
-              path: b64Vecs.decodePoints2D(segment.path),
+              // Honor the segment's own encoding dimension. tldraw stores an
+              // optional `dim` (2 | 3) describing how `path` was encoded:
+              // `2` => `encodePoints2D` (8-byte first point, 4-byte deltas),
+              // `3` => `encodePoints`   (12-byte first point, 6-byte deltas).
+              // `dim` is `2` only when pressure was omitted (constant 0.5);
+              // when absent it is the legacy default of `3`. Hardcoding 2
+              // mis-strides 3D paths (pen/pressure input) and reads past the
+              // DataView ("offset is outside the bounds").
+              path: b64Vecs.decodePoints(segment.path, segment.dim ?? 3),
             }),
           ),
         },
@@ -127,7 +135,14 @@ export function encodeShape(shape: DecodedTLShape): TLShape {
           ...shape.props,
           segments: shape.props.segments.map((segment) => ({
             ...segment,
-            path: b64Vecs.encodePoints2D(segment.path as VecModel[]),
+            // Re-encode with the segment's own dimension so the encoding stays
+            // consistent with `dim` (see decodeShape). Encoding a 3D segment as
+            // 2D would drop z and desync `path` from `dim`, re-triggering the
+            // out-of-bounds read on the next decode.
+            path: b64Vecs.encodePoints(
+              segment.path as VecModel[],
+              segment.dim ?? 3,
+            ),
           })),
         },
       } as TLShape;
@@ -290,4 +305,11 @@ export function encodeDiffPaths<T>(diff: T): T {
  */
 export function decodeDiffPaths<T>(diff: T): T {
   return transformPaths(diff, "decode");
+}
+
+/**
+ * Faster than `structuredClone()`
+ */
+export function fastClone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }

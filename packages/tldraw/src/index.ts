@@ -20,7 +20,7 @@ import type {
   TLStoreSnapshot,
 } from "tldraw";
 
-import { defaultShape } from "./defaults.ts";
+import { getDefaultShape } from "./defaults.ts";
 import type { FollowController } from "./follow.ts";
 import { makeReplayPlugin } from "./plugin-utils.ts";
 import { isPage, isPointer, isShape, isViewportEvent } from "./record-types.ts";
@@ -35,15 +35,19 @@ import type {
 } from "./types.ts";
 import {
   type CursorName,
+  clone,
   decodeDiffPaths,
   decodePointer,
   decodePoints,
   decodeStore,
   encodeShape,
   encodeStore,
+  fastClone,
   isSingleton,
 } from "./utils.ts";
 import { segmentAppend } from "./zsa.ts";
+
+const newShapeCount = 0;
 
 export { FollowController } from "./follow.ts";
 export type {
@@ -82,8 +86,9 @@ export const tldrawReplay = makeReplayPlugin<
   TldrawProps,
   TldrawHistory
 >({
-  apply: (state, action) => {
-    const clone = structuredClone(state);
+  apply: (state, action, inPlace = false) => {
+    const clone = inPlace ? state : fastClone(state);
+
     if (action.pointer) {
       clone.pointer = action.pointer;
     }
@@ -98,10 +103,11 @@ export const tldrawReplay = makeReplayPlugin<
     if (action.diff) {
       // The in-memory store keeps vectors decoded, so diffs (which are also
       // decoded) can be applied directly.
-      clone.snapshot.store = applyDiff(
+      applyDiff(
         clone.snapshot.store,
         // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
         action.diff as any,
+        true,
         // biome-ignore lint/suspicious/noExplicitAny: store is a decoded snapshot
       ) as any;
     }
@@ -178,10 +184,12 @@ export const tldrawReplay = makeReplayPlugin<
                     const decoded = decodeStore({ [key]: shape })[
                       key
                     ] as DecodedTLShape;
+
                     const next = applyDiff(
                       decoded,
                       // biome-ignore lint/suspicious/noExplicitAny: decoded shape diff
                       update as any,
+                      true,
                     ) as DecodedTLShape;
                     editor.updateShape<TLDrawShape>(
                       encodeShape(next) as TLDrawShape,
@@ -279,7 +287,11 @@ export const tldrawReplay = makeReplayPlugin<
 
       // shape create
       if (!history.shapes.has(key)) {
-        const shape = applyDiff(defaultShape, decodedUpdate) as DecodedTLShape;
+        const shape = applyDiff(
+          getDefaultShape(),
+          decodedUpdate,
+          true,
+        ) as DecodedTLShape;
         history.shapes.set(key, shape);
         return { diff: creationDiff(key, shape) };
       }

@@ -118,21 +118,27 @@ export function TldrawReplay({
 
     const unlisten = editor.store.listen(
       ({ changes }) => {
-        // A viewport change is only the viewer's if it closely follows genuine
+        // A camera change is only the viewer's if it closely follows genuine
         // viewer input (pointer / wheel / pinch / keyboard). This excludes
         // tldraw's own mount/resize camera adjustments, which happen with no
-        // interaction and would otherwise suspend following on load.
-        if (!follow.isViewerInteracting()) return;
+        // interaction and would otherwise suspend following on load. Page
+        // changes are unambiguous (they only come from a real page switch or a
+        // self/replayed change, filtered by `isSelfPage`), so they suspend
+        // regardless of the interaction gate — a page switch is triggered from
+        // the page menu, which is not a canvas input event.
+        const interacting = follow.isViewerInteracting();
 
         // A new camera record means the viewer panned/zoomed on a fresh page —
         // unless it matches what the controller itself just drove us to.
-        for (const record of Object.values(changes.added)) {
-          if (
-            record.typeName === "camera" &&
-            !follow.isSelfCamera(record.x, record.y, record.z)
-          ) {
-            follow.suspend();
-            return;
+        if (interacting) {
+          for (const record of Object.values(changes.added)) {
+            if (
+              record.typeName === "camera" &&
+              !follow.isSelfCamera(record.x, record.y, record.z)
+            ) {
+              follow.suspend();
+              return;
+            }
           }
         }
 
@@ -147,6 +153,7 @@ export function TldrawReplay({
         // matching the value the controller last drove us to.
         for (const [from, to] of Object.values(changes.updated)) {
           if (
+            interacting &&
             to.typeName === "camera" &&
             (to.x !== (from as typeof to).x ||
               to.y !== (from as typeof to).y ||
