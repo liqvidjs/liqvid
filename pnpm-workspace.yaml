@@ -196,8 +196,8 @@ catalogs:
     js-yaml: ^4.1.1
     next: 16.2.11
     nib: ^1.2.0
-    no-private-imports: ^0.0.1
-    no-restricted-imports: ^0.0.1
+    no-private-imports: ^0.0.4
+    no-restricted-imports: ^0.0.3
     portless: ^0.12.0
     prettier-plugin-glsl: ^0.3.0
     raw-loader: ^4.0.2
@@ -209,7 +209,7 @@ catalogs:
     type-fest: ^5.6.0
     typedoc: ^0.28.19
     typedoc-plugin-markdown: ^4.11.0
-    typescript: ^5.9
+    typescript: ^6
   peer:
     "@babel/standalone": ">=7"
     "@codemirror/autocomplete": ">=6"
@@ -228,6 +228,10 @@ catalogs:
     "@react-three/drei": ">=10"
     "@react-three/fiber": ">=9"
     "@replit/codemirror-vim": ^6.3
+    "@tldraw/editor": ^5.2.5
+    "@tldraw/store": ^5.2.5
+    "@tldraw/tldraw": ^5.2.5
+    "@tldraw/tlschema": ^5.2.5
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
     effect: ">=4.0.0-beta.0"
@@ -246,6 +250,7 @@ catalogs:
     skulpt: ^1.2
     smart-whisper: ">=0.8.1"
     three: ">=0.183"
+    tldraw: ^5.2.5
     ws: ^8.21.0
     zod: ">=4"
 
@@ -273,3 +278,4 @@ minimumReleaseAgeExclude:
   - "@biomejs/cli-win32-arm64@2.5.5"
   - "@biomejs/cli-win32-x64@2.5.5"
   - prettier@3.9.6
+  - no-private-imports@0.0.4
