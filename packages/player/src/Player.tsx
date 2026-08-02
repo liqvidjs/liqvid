@@ -100,6 +100,13 @@ export function Root({
       setRenderMode(renderMode: RenderMode) {
         setRenderMode(renderMode);
       },
+      toggleCaptions(visible?: boolean) {
+        const captions = ref.current?.querySelector(".lv-captions");
+        captions?.toggleAttribute(
+          "hidden",
+          typeof visible === "boolean" ? !visible : undefined,
+        );
+      },
       toggleControls(visible?: boolean) {
         const controls = ref.current?.querySelector(".lv-controls");
         controls?.toggleAttribute(

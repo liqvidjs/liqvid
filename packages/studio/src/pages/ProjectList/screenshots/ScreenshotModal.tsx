@@ -78,6 +78,7 @@ export function ScreenshotModal({
   // Hide controls
   useEffect(() => {
     api?.setRenderMode("screenshot").catch(console.error);
+    api?.toggleCaptions(false);
     api?.toggleControls(false);
   }, [api]);
 

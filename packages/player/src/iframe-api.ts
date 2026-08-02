@@ -45,6 +45,12 @@ export const playerApiDeclaration = {
       return: type<void>(),
     },
 
+    /** Toggle the captions */
+    toggleCaptions: {
+      arguments: type<[show?: boolean]>(),
+      return: type<void>(),
+    },
+
     /** Toggle the controls */
     toggleControls: {
       arguments: type<[show?: boolean]>(),
