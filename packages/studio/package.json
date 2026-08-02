@@ -15,12 +15,8 @@
   },
   "files": [
     "dist/*",
-    "liqvid-validate-translations.mjs",
-    "src/*"
+    "liqvid-validate-translations.mjs"
   ],
-  "bin": {
-    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
-  },
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",
@@ -60,6 +56,7 @@
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
+    "lint:tsc": "tsc --noEmit",
     "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "validate-translations": "node liqvid-validate-translations.mjs",
@@ -95,6 +92,7 @@
     "@types/react-dom": "catalog:dev",
     "@types/serve-handler": "catalog:dev",
     "@types/ws": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "concurrently": "catalog:dev",
     "jest": "catalog:dev",
     "next": "catalog:",
@@ -129,5 +127,8 @@
     "ws": "catalog:peer"
   },
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "bin": {
+    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
+  }
 }

@@ -25,6 +25,7 @@
     "build": "ncc build ./src/index.mts -o ./dist/ --minify --no-cache --no-source-map-register",
     "dev": "ncc build ./src/index.mts -w -o dist/",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "prebuild": "rm -rf dist",
     "prepublishOnly": "cp -R templates dist; rm dist/templates/replicate; cp -R presets dist/templates/presets",
     "versions": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/versions.mts versions.json",
