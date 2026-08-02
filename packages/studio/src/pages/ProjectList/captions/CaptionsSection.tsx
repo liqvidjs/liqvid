@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { AudioEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
 import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
+import { Button } from "../../../ui/Button.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -16,11 +17,19 @@ import {
   DialogRoot,
   DialogTitle,
 } from "../../../ui/Dialog.tsx";
+import {
+  useCommonTranslations,
+  useTranslations,
+} from "../../../utils/react.tsx";
 
 import { CaptionRow } from "./CaptionsRow.tsx";
 
 import styles from "../../root.module.css";
 import shareStyles from "../share.module.css";
+
+import type TranslationsJson from "../.translations/en.json";
+
+type T = typeof TranslationsJson;
 
 interface CaptionsSectionProps {
   /** Whether the parent dialog is open */
@@ -29,6 +38,8 @@ interface CaptionsSectionProps {
 
 export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
   const { hasCaptioningConfigured } = useDerivedConfig();
+  const t = useTranslations<T>().captions;
+  const c = useCommonTranslations();
   const projectPath = useProjectPath();
   const [audio, setAudio] = useState<readonly AudioEntry[]>([]);
   const [multiple, setMultiple] = useState(false);
@@ -135,7 +146,7 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
     <>
       <div className={shareStyles.section}>
         <div className={shareStyles.sectionActions}>
-          <button
+          <Button
             className={shareStyles.addButton}
             disabled={isGeneratingAudio}
             onClick={handleGenerateAudio}
@@ -144,14 +155,14 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
             {isGeneratingAudio ? (
               <>
                 <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                Rendering audio...
+                {t.inProgress}
               </>
             ) : (
               <>
-                <WaveformIcon size={16} /> Render audio
+                <WaveformIcon size={16} /> {t.generate}
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {isLoading && audio.length === 0 ? (
@@ -159,10 +170,7 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
             <SpinnerIcon className={shareStyles.spinner} size={24} />
           </div>
         ) : audio.length === 0 ? (
-          <p className={shareStyles.emptyMessage}>
-            No audio yet. Click "Render audio" to capture the audio track, then
-            generate captions from it.
-          </p>
+          <p className={shareStyles.emptyMessage}>{t.empty}</p>
         ) : (
           <ul className={shareStyles.renderList}>
             {audio.map((entry) => (
@@ -187,10 +195,10 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
           <DialogBackdrop className={styles.dialogOverlay} />
           <DialogPopup className={styles.dialog}>
             <DialogTitle className={styles.dialogTitle}>
-              Rename Audio
+              {t.rename.title}
             </DialogTitle>
             <div className={styles.formField}>
-              <label htmlFor="audio-name">Name</label>
+              <label htmlFor="audio-name">{t.rename.name}</label>
               <input
                 className={shareStyles.textInput}
                 id="audio-name"
@@ -205,8 +213,8 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
               />
             </div>
             <div className={styles.dialogActions}>
-              <DialogClose>Cancel</DialogClose>
-              <button
+              <DialogClose>{c.cancel}</DialogClose>
+              <Button
                 className={styles.submitButton}
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
@@ -215,12 +223,12 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
                 {isRenaming ? (
                   <>
                     <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                    Renaming...
+                    {t.rename.inProgress}
                   </>
                 ) : (
-                  "Rename"
+                  t.rename.action
                 )}
-              </button>
+              </Button>
             </div>
           </DialogPopup>
         </DialogPortal>

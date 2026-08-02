@@ -188,33 +188,33 @@ export function CaptionRow({
           )}
         </Button>
         {entry.captions && (
-          <button
+          <Button
             className={shareStyles.deleteButton}
             onClick={handleDeleteCaptions}
             title="Delete captions"
             type="button"
           >
             <ClosedCaptioningIcon size={16} weight="fill" />
-          </button>
+          </Button>
         )}
         {multiple && (
-          <button
+          <Button
             className={shareStyles.renderActionButton}
             onClick={() => onStartRename(entry)}
             title="Rename audio"
             type="button"
           >
             <PencilSimpleIcon size={16} />
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           className={shareStyles.deleteButton}
           onClick={handleDeleteAudio}
           title="Delete audio (and captions)"
           type="button"
         >
           <TrashIcon size={16} />
-        </button>
+        </Button>
       </div>
     </li>
   );

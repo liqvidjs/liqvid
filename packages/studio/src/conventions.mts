@@ -9,6 +9,12 @@ export const PREVIEW_DIR = RelativeDir("preview");
 export const TRANSLATIONS_DIR = RelativeDir(".translations");
 
 /**
+ * Directory (relative to `src`) holding translations for commonly-used words
+ * like "close", "cancel", etc., shared across the studio UI.
+ */
+export const COMMON_TRANSLATIONS_DIR = RelativeDir("src");
+
+/**
  * `types.ts` file auto-generated inside `.liqvid` directory
  * This provides type information about the assets available
  * in the `.liqvid` directory.

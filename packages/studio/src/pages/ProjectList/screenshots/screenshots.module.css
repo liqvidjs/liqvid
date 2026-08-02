@@ -15,6 +15,26 @@
   border-radius: 4px;
 }
 
+.screenshotThumbnailButton {
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 4px;
+}
+
+.screenshotThumbnailButton:focus-visible {
+  outline: 2px solid var(--accent, #4f8cff);
+  outline-offset: 2px;
+}
+
+.screenshotPreviewImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
 .screenshotInfo {
   display: flex;
   flex: 1;

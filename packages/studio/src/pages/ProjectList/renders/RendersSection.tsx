@@ -18,11 +18,11 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
-import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import type { RenderEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { Button } from "../../../ui/Button.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -33,7 +33,10 @@ import {
   DialogTrigger,
 } from "../../../ui/Dialog.tsx";
 import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
-import { useTranslations } from "../../../utils/react.tsx";
+import {
+  useCommonTranslations,
+  useTranslations,
+} from "../../../utils/react.tsx";
 import { openRenderInFinderAction } from "../../root-actions.ts";
 
 import rootStyles from "../../root.module.css";
@@ -82,8 +85,9 @@ export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
   isOpen,
 }: RendersSectionProps) {
-  const projectPath = useProjectPath();
   const t = useTranslations<T>().renders;
+  const projectPath = useProjectPath();
+
   const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -92,11 +96,9 @@ export function RendersSection({
     null,
   );
   const [renameValue, setRenameValue] = useState("");
-  const [isRenaming, setIsRenaming] = useState(false);
 
   // Render config state
   const [configOpen, setConfigOpen] = useState(false);
-  const [lockAspectRatio, setLockAspectRatio] = useState(true);
   const [config, setConfig] = useState<RenderConfig>(() => ({
     colorScheme: "light",
     height: heightFromWidth(1280, aspectRatio),
@@ -142,33 +144,6 @@ export function RendersSection({
     return () => clearInterval(interval);
   }, [isOpen, renders, loadRenders]);
 
-  const handleStartRender = async () => {
-    setIsStarting(true);
-    setConfigOpen(false);
-
-    const result = await clientRuntime.runPromiseExit(
-      Effect.gen(function* () {
-        const client = yield* LiqvidStudioApiClient;
-        return yield* client.renders.start({
-          payload: {
-            colorScheme: config.colorScheme,
-            height: config.height,
-            width: config.width,
-          },
-          query: { projectPath },
-        });
-      }),
-    );
-
-    if (Exit.isSuccess(result)) {
-      await loadRenders();
-    } else {
-      console.error("Failed to start render:", result.cause);
-    }
-
-    setIsStarting(false);
-  };
-
   const handleOpenInFinder = async (renderId: string) => {
     await openRenderInFinderAction(projectPath, renderId);
   };
@@ -176,72 +151,6 @@ export function RendersSection({
   const handleStartRename = (render: RenderEntry) => {
     setRenamingRender(render);
     setRenameValue(render.id);
-  };
-
-  const handleRename = async () => {
-    if (!renamingRender || !renameValue.trim()) return;
-
-    setIsRenaming(true);
-
-    const result = await clientRuntime.runPromiseExit(
-      Effect.gen(function* () {
-        const client = yield* LiqvidStudioApiClient;
-        return yield* client.renders.rename({
-          payload: {
-            newName: renameValue.trim(),
-            renderId: renamingRender.id,
-          },
-          query: { projectPath },
-        });
-      }),
-    );
-
-    if (Exit.isSuccess(result)) {
-      setRenamingRender(null);
-      await loadRenders();
-    } else {
-      console.error("Failed to rename render:", result.cause);
-    }
-
-    setIsRenaming(false);
-  };
-
-  const handleWidthPreset = (width: number) => {
-    setConfig((c) => ({
-      ...c,
-      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
-      width,
-    }));
-  };
-
-  const handleWidthChange = (width: number) => {
-    setConfig((c) => ({
-      ...c,
-      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
-      width,
-    }));
-  };
-
-  const handleHeightChange = (height: number) => {
-    setConfig((c) => ({
-      ...c,
-      height,
-      width: lockAspectRatio ? widthFromHeight(height, aspectRatio) : c.width,
-    }));
-  };
-
-  const handleToggleLock = () => {
-    setLockAspectRatio((locked) => {
-      const next = !locked;
-      // When re-locking, snap the height to match the aspect ratio
-      if (next) {
-        setConfig((c) => ({
-          ...c,
-          height: heightFromWidth(c.width, aspectRatio),
-        }));
-      }
-      return next;
-    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -285,10 +194,6 @@ export function RendersSection({
     }
   };
 
-  const getVideoUrl = (render: RenderEntry) => {
-    return `/api/liqvid/static/${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
-  };
-
   return (
     <>
       <div className={shareStyles.section}>
@@ -302,7 +207,7 @@ export function RendersSection({
               {isStarting ? (
                 <>
                   <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                  Starting...
+                  {t.inProgress}
                 </>
               ) : (
                 <>
@@ -310,97 +215,16 @@ export function RendersSection({
                 </>
               )}
             </DialogTrigger>
-            <DialogPortal>
-              <DialogBackdrop />
-              <DialogPopup>
-                <DialogTitle>Render Settings</DialogTitle>
-
-                <div className={rootStyles.formField}>
-                  <span id="render-color-scheme-label">Color Scheme</span>
-                  <RadioTabs<ColorScheme>
-                    aria-labelledby="render-color-scheme-label"
-                    onValueChange={(v) =>
-                      setConfig((c) => ({ ...c, colorScheme: v }))
-                    }
-                    value={config.colorScheme}
-                  >
-                    <RadioTabsItem icon={SunIcon} title="Light" value="light" />
-                    <RadioTabsItem icon={MoonIcon} title="Dark" value="dark" />
-                  </RadioTabs>
-                </div>
-
-                <div className={rootStyles.formField}>
-                  <span>Resolution</span>
-                  <div className={shareStyles.resolutionPresets}>
-                    {WIDTH_PRESETS.map((width) => (
-                      <button
-                        className={shareStyles.presetButton}
-                        data-active={config.width === width}
-                        key={width}
-                        onClick={() => handleWidthPreset(width)}
-                        type="button"
-                      >
-                        {width}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.dimensionInputs}>
-                    <input
-                      className={styles.dimensionInput}
-                      min={1}
-                      onChange={(e) =>
-                        handleWidthChange(
-                          Number(e.target.value) || config.width,
-                        )
-                      }
-                      type="number"
-                      value={config.width}
-                    />
-                    <span className={styles.dimensionSeparator}>×</span>
-                    <input
-                      className={styles.dimensionInput}
-                      min={1}
-                      onChange={(e) =>
-                        handleHeightChange(
-                          Number(e.target.value) || config.height,
-                        )
-                      }
-                      type="number"
-                      value={config.height}
-                    />
-                    <button
-                      aria-pressed={lockAspectRatio}
-                      className={styles.lockButton}
-                      data-active={lockAspectRatio}
-                      onClick={handleToggleLock}
-                      title={
-                        lockAspectRatio
-                          ? `Unlock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
-                          : `Lock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
-                      }
-                      type="button"
-                    >
-                      {lockAspectRatio ? (
-                        <LockSimpleIcon size={16} weight="fill" />
-                      ) : (
-                        <LockSimpleOpenIcon size={16} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className={rootStyles.dialogActions}>
-                  <DialogClose>Cancel</DialogClose>
-                  <button
-                    className={rootStyles.submitButton}
-                    onClick={handleStartRender}
-                    type="button"
-                  >
-                    <FilmStripIcon size={16} /> Start Render
-                  </button>
-                </div>
-              </DialogPopup>
-            </DialogPortal>
+            <ConfigDialog
+              {...{
+                aspectRatio,
+                config,
+                loadRenders,
+                setConfig,
+                setConfigOpen,
+                setIsStarting,
+              }}
+            />
           </DialogRoot>
         </div>
 
@@ -409,9 +233,7 @@ export function RendersSection({
             <SpinnerIcon className={shareStyles.spinner} size={24} />
           </div>
         ) : renders.length === 0 ? (
-          <p className={shareStyles.emptyMessage}>
-            No renders yet. Click "Render" to create a video.
-          </p>
+          <p className={shareStyles.emptyMessage}>{t.empty}</p>
         ) : (
           <ul className={shareStyles.renderList}>
             {renders.map((render) => (
@@ -427,41 +249,43 @@ export function RendersSection({
                   <div className={shareStyles.renderDetails}>
                     <span>{formatDate(render.meta.createdAt)}</span>
                     <span>
-                      {render.meta.width}x{render.meta.height}
+                      {render.meta.width}
+                      {"x"}
+                      {render.meta.height}
                     </span>
-                    <span>{render.meta.fps} fps</span>
+                    <span>
+                      {render.meta.fps}
+                      {" fps"}
+                    </span>
                     <span>{render.meta.colorScheme}</span>
                   </div>
                 </div>
                 <div className={shareStyles.renderActions}>
                   {render.meta.status === "completed" && (
                     <>
-                      <button
+                      <Button
                         className={shareStyles.renderActionButton}
                         onClick={() => setPlayingRender(render)}
-                        title="Play video"
-                        type="button"
+                        title={t.play}
                       >
                         <PlayIcon size={16} weight="fill" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         className={shareStyles.renderActionButton}
                         onClick={() => handleOpenInFinder(render.id)}
-                        title="Open in Finder"
-                        type="button"
+                        title={t.openInFinder}
                       >
                         <FolderOpenIcon size={16} />
-                      </button>
+                      </Button>
                     </>
                   )}
-                  <button
+                  <Button
                     className={shareStyles.renderActionButton}
                     onClick={() => handleStartRename(render)}
-                    title="Rename"
-                    type="button"
+                    title={t.rename.trigger}
                   >
                     <PencilSimpleIcon size={16} />
-                  </button>
+                  </Button>
                 </div>
               </li>
             ))}
@@ -474,29 +298,7 @@ export function RendersSection({
         onOpenChange={(open) => !open && setPlayingRender(null)}
         open={!!playingRender}
       >
-        <DialogPortal>
-          <DialogBackdrop />
-          <DialogPopup className={`${rootStyles.dialog} ${styles.videoDialog}`}>
-            <div className={styles.videoHeader}>
-              <DialogTitle className={rootStyles.dialogTitle}>
-                {playingRender?.id}
-              </DialogTitle>
-              <DialogClose className={shareStyles.closeButton}>
-                <XIcon size={20} />
-              </DialogClose>
-            </div>
-            {playingRender && (
-              <video
-                autoPlay
-                className={styles.videoPlayer}
-                controls
-                src={getVideoUrl(playingRender)}
-              >
-                <track kind="captions" />
-              </video>
-            )}
-          </DialogPopup>
-        </DialogPortal>
+        <VideoPlayerDialog {...{ playingRender }} />
       </DialogRoot>
 
       {/* Rename Dialog */}
@@ -506,47 +308,319 @@ export function RendersSection({
       >
         <DialogPortal>
           <DialogBackdrop />
-          <DialogPopup className={rootStyles.dialog}>
-            <DialogTitle className={rootStyles.dialogTitle}>
-              Rename Render
-            </DialogTitle>
-            <div className={rootStyles.formField}>
-              <label htmlFor="render-name">Name</label>
-              <input
-                // autoFocus
-                className={shareStyles.textInput}
-                id="render-name"
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !isRenaming) {
-                    handleRename();
-                  }
-                }}
-                type="text"
-                value={renameValue}
-              />
-            </div>
-            <div className={rootStyles.dialogActions}>
-              <DialogClose>Cancel</DialogClose>
-              <button
-                className={rootStyles.submitButton}
-                disabled={isRenaming || !renameValue.trim()}
-                onClick={handleRename}
-                type="button"
-              >
-                {isRenaming ? (
-                  <>
-                    <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                    Renaming...
-                  </>
-                ) : (
-                  "Rename"
-                )}
-              </button>
-            </div>
-          </DialogPopup>
+          <RenameDialog
+            {...{
+              loadRenders,
+              renameValue,
+              renamingRender,
+              setRenameValue,
+              setRenamingRender,
+            }}
+          />
         </DialogPortal>
       </DialogRoot>
     </>
+  );
+}
+
+function ConfigDialog({
+  aspectRatio,
+  config,
+  loadRenders,
+  setConfig,
+  setConfigOpen,
+  setIsStarting,
+}: {
+  aspectRatio: AspectRatio;
+  config: RenderConfig;
+  loadRenders: () => Promise<void>;
+  setConfig: React.Dispatch<React.SetStateAction<RenderConfig>>;
+  setConfigOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsStarting: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const t = useTranslations<T>().renders;
+  const c = useCommonTranslations();
+  const projectPath = useProjectPath();
+
+  const [lockAspectRatio, setLockAspectRatio] = useState(true);
+
+  const handleStartRender = async () => {
+    setIsStarting(true);
+    setConfigOpen(false);
+
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.renders.start({
+          payload: {
+            colorScheme: config.colorScheme,
+            height: config.height,
+            width: config.width,
+          },
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      await loadRenders();
+    } else {
+      console.error("Failed to start render:", result.cause);
+    }
+
+    setIsStarting(false);
+  };
+
+  const handleWidthPreset = (width: number) => {
+    setConfig((c) => ({
+      ...c,
+      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+      width,
+    }));
+  };
+
+  const handleWidthChange = (width: number) => {
+    setConfig((c) => ({
+      ...c,
+      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+      width,
+    }));
+  };
+
+  const handleHeightChange = (height: number) => {
+    setConfig((c) => ({
+      ...c,
+      height,
+      width: lockAspectRatio ? widthFromHeight(height, aspectRatio) : c.width,
+    }));
+  };
+
+  const handleToggleLock = () => {
+    setLockAspectRatio((locked) => {
+      const next = !locked;
+      // When re-locking, snap the height to match the aspect ratio
+      if (next) {
+        setConfig((c) => ({
+          ...c,
+          height: heightFromWidth(c.width, aspectRatio),
+        }));
+      }
+      return next;
+    });
+  };
+
+  return (
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogPopup>
+        <DialogTitle>{t.dialog.title}</DialogTitle>
+
+        <div className={rootStyles.formField}>
+          <span id="render-color-scheme-label">{t.dialog.colorScheme}</span>
+          <RadioTabs<ColorScheme>
+            aria-labelledby="render-color-scheme-label"
+            onValueChange={(v) => setConfig((c) => ({ ...c, colorScheme: v }))}
+            value={config.colorScheme}
+          >
+            <RadioTabsItem icon={SunIcon} title="Light" value="light" />
+            <RadioTabsItem icon={MoonIcon} title="Dark" value="dark" />
+          </RadioTabs>
+        </div>
+
+        <div className={rootStyles.formField}>
+          <span>{t.dialog.resolution}</span>
+          <div className={shareStyles.resolutionPresets}>
+            {WIDTH_PRESETS.map((width) => (
+              <Button
+                className={shareStyles.presetButton}
+                data-active={config.width === width}
+                key={width}
+                onClick={() => handleWidthPreset(width)}
+                type="button"
+              >
+                {width}
+              </Button>
+            ))}
+          </div>
+          <div className={styles.dimensionInputs}>
+            <input
+              className={styles.dimensionInput}
+              min={1}
+              onChange={(e) =>
+                handleWidthChange(Number(e.target.value) || config.width)
+              }
+              type="number"
+              value={config.width}
+            />
+            <span className={styles.dimensionSeparator}>{"×"}</span>
+            <input
+              className={styles.dimensionInput}
+              min={1}
+              onChange={(e) =>
+                handleHeightChange(Number(e.target.value) || config.height)
+              }
+              type="number"
+              value={config.height}
+            />
+            <Button
+              aria-pressed={lockAspectRatio}
+              className={styles.lockButton}
+              data-active={lockAspectRatio}
+              onClick={handleToggleLock}
+              title={
+                lockAspectRatio
+                  ? `Unlock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
+                  : `Lock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
+              }
+              type="button"
+            >
+              {lockAspectRatio ? (
+                <LockSimpleIcon size={16} weight="fill" />
+              ) : (
+                <LockSimpleOpenIcon size={16} />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className={rootStyles.dialogActions}>
+          <DialogClose>{c.cancel}</DialogClose>
+          <Button
+            className={rootStyles.submitButton}
+            onClick={handleStartRender}
+            type="button"
+          >
+            <FilmStripIcon size={16} /> {t.dialog.action}
+          </Button>
+        </div>
+      </DialogPopup>
+    </DialogPortal>
+  );
+}
+
+function RenameDialog({
+  loadRenders,
+  renameValue,
+  renamingRender,
+  setRenamingRender,
+  setRenameValue,
+}: {
+  loadRenders: () => Promise<void>;
+  renameValue: string;
+  renamingRender: RenderEntry | null;
+  setRenameValue: React.Dispatch<React.SetStateAction<string>>;
+  setRenamingRender: React.Dispatch<React.SetStateAction<RenderEntry | null>>;
+}) {
+  const t = useTranslations<T>().renders.rename;
+  const c = useCommonTranslations();
+
+  const projectPath = useProjectPath();
+
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const handleRename = async () => {
+    if (!renamingRender || !renameValue.trim()) return;
+
+    setIsRenaming(true);
+
+    const result = await clientRuntime.runPromiseExit(
+      Effect.gen(function* () {
+        const client = yield* LiqvidStudioApiClient;
+        return yield* client.renders.rename({
+          payload: {
+            newName: renameValue.trim(),
+            renderId: renamingRender.id,
+          },
+          query: { projectPath },
+        });
+      }),
+    );
+
+    if (Exit.isSuccess(result)) {
+      setRenamingRender(null);
+      await loadRenders();
+    } else {
+      console.error("Failed to rename render:", result.cause);
+    }
+
+    setIsRenaming(false);
+  };
+
+  return (
+    <DialogPopup className={rootStyles.dialog}>
+      <DialogTitle className={rootStyles.dialogTitle}>{t.title}</DialogTitle>
+      <div className={rootStyles.formField}>
+        <label htmlFor="render-name">{t.name}</label>
+        <input
+          // autoFocus
+          className={shareStyles.textInput}
+          id="render-name"
+          onChange={(e) => setRenameValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isRenaming) {
+              handleRename();
+            }
+          }}
+          type="text"
+          value={renameValue}
+        />
+      </div>
+      <div className={rootStyles.dialogActions}>
+        <DialogClose>{c.cancel}</DialogClose>
+        <Button
+          className={rootStyles.submitButton}
+          disabled={isRenaming || !renameValue.trim()}
+          onClick={handleRename}
+          type="button"
+        >
+          {isRenaming ? (
+            <>
+              <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+              {t.inProgress}
+            </>
+          ) : (
+            t.trigger
+          )}
+        </Button>
+      </div>
+    </DialogPopup>
+  );
+}
+
+function VideoPlayerDialog({
+  playingRender,
+}: {
+  playingRender: RenderEntry | null;
+}) {
+  const projectPath = useProjectPath();
+
+  const getVideoUrl = (render: RenderEntry) => {
+    return `/api/liqvid/static/${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
+  };
+
+  return (
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogPopup className={`${rootStyles.dialog} ${styles.videoDialog}`}>
+        <div className={styles.videoHeader}>
+          <DialogTitle className={rootStyles.dialogTitle}>
+            {playingRender?.id}
+          </DialogTitle>
+          <DialogClose className={shareStyles.closeButton}>
+            <XIcon size={20} />
+          </DialogClose>
+        </div>
+        {playingRender && (
+          <video
+            autoPlay
+            className={styles.videoPlayer}
+            controls
+            src={getVideoUrl(playingRender)}
+          >
+            <track kind="captions" />
+          </video>
+        )}
+      </DialogPopup>
+    </DialogPortal>
   );
 }

@@ -8,9 +8,9 @@ import { getTranslations } from "../../utils/i18n.mts";
 
 import { JobsClient } from "./jobs.client.tsx";
 
-import type T from "./.translations/en.json" with { type: "json" };
+import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof T;
+type T = typeof TranslationsJson;
 
 async function cancelJob(formData: FormData) {
   "use server";

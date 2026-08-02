@@ -1,0 +1,18 @@
+{
+  "tabs": {
+    "configuration": {
+      "subtitle": "Plugins",
+      "title": "Configuration"
+    },
+    "saved": {
+      "subtitle": "Saved",
+      "title": "Recordings"
+    },
+    "shortcuts": {
+      "command": "Command",
+      "shortcut": "Shortcut",
+      "title": "Shortcuts"
+    }
+  },
+  "title": "Recording"
+}

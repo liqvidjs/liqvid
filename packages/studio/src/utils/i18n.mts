@@ -1,5 +1,3 @@
-import "server-only";
-
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,7 +8,15 @@ import { RelativeDir, RelativeFile } from "effect-paths";
 import { TRANSLATIONS_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 
+import type CommonTranslationsJson from "../.translations/en.json";
+
 export const DEFAULT_LOCALE = "en";
+
+/**
+ * Translations for commonly-used words like "close", "cancel", etc., shared
+ * across the studio UI.
+ */
+export type CommonTranslations = typeof CommonTranslationsJson;
 
 /**
  * Get translations for the current module.
@@ -61,6 +67,25 @@ export async function getTranslations<T>(
 
   // TODO: deep-merge
   return deepMerge(fallback, translations) as T;
+}
+
+/**
+ * Get translations for commonly-used words like "close", "cancel", etc.,
+ * shared across the studio UI. For use in server components.
+ *
+ * @example
+ * ```tsx
+ * async function ServerComponent() {
+ *   const common = await getCommonTranslations();
+ *   return <button>{common.close}</button>;
+ * }
+ * ```
+ */
+export function getCommonTranslations(): Promise<CommonTranslations> {
+  return getTranslations<CommonTranslations>(
+    import.meta.url,
+    RelativeDir(".."),
+  );
 }
 
 export function getLocale() {

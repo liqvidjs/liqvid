@@ -2,10 +2,10 @@
 
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import { type RecordingPlugin, useRecordingApi } from "@liqvid/recording";
+import { useRecordingApi } from "@liqvid/recording";
 import { useIsPreview, useProjectPath } from "@liqvid/studio-plugin-api";
 import { useForceUpdate } from "@liqvid/utils";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import { saveRecording } from "../client.mts";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
@@ -93,13 +93,13 @@ export function RecordingControl({ shortcuts }: RecordingControlProps) {
   }
 
   // plugins dictionary
-  const [pluginsByKey] = useState(() => {
-    const dict: Record<string, RecordingPlugin<unknown, unknown>> = {};
-    // for (const plugin of plugins) {
-    //   dict[plugin.package] = plugin;
-    // }
-    return dict;
-  });
+  // const [pluginsByKey] = useState(() => {
+  //   const dict: Record<string, RecordingPlugin<unknown, unknown>> = {};
+  //   // for (const plugin of plugins) {
+  //   //   dict[plugin.package] = plugin;
+  //   // }
+  //   return dict;
+  // });
 
   /* keyboard controls */
   useKeyboardShortcut(shortcuts?.discard, discard);

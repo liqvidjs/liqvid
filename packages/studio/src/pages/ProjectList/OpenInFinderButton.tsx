@@ -3,6 +3,7 @@
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
 
+import { Button } from "../../ui/Button.tsx";
 import { useTranslations } from "../../utils/react.tsx";
 import { openInFinderAction } from "../root-actions.ts";
 
@@ -20,13 +21,12 @@ export function OpenInFinderButton() {
   }
 
   return (
-    <button
+    <Button
       className={styles.productionLink}
       onClick={handleClick}
       title={t.openInFinder}
-      type="button"
     >
       <FolderOpenIcon size={24} />
-    </button>
+    </Button>
   );
 }

@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
 import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
+import { Button } from "../../../ui/Button.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -24,9 +25,17 @@ import {
   DialogTitle,
 } from "../../../ui/Dialog.tsx";
 import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
+import {
+  useCommonTranslations,
+  useTranslations,
+} from "../../../utils/react.tsx";
 
 import styles from "../../root.module.css";
 import shareStyles from "../share.module.css";
+
+import type TranslationsJson from "../.translations/en.json";
+
+type T = typeof TranslationsJson;
 
 interface ScreenshotModalProps {
   basePath: string;
@@ -43,6 +52,9 @@ export function ScreenshotModal({
   onCaptured,
   project,
 }: ScreenshotModalProps) {
+  const t = useTranslations<T>().screenshots;
+  const c = useCommonTranslations();
+
   const { renderSource } = useDerivedConfig();
   const [previewTime, setPreviewTime] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -118,7 +130,7 @@ export function ScreenshotModal({
         size="huge"
       >
         <div className={shareStyles.previewHeader}>
-          <DialogTitle>Capture Screenshot</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
           <DialogClose className={shareStyles.closeButton}>
             <XIcon size={20} />
           </DialogClose>
@@ -157,7 +169,7 @@ export function ScreenshotModal({
         </div>
 
         <div className={styles.formField}>
-          <span id="color-scheme-label">Color Scheme</span>
+          <span id="color-scheme-label">{t.colorScheme}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby="color-scheme-label"
             onValueChange={setColorScheme}
@@ -170,8 +182,8 @@ export function ScreenshotModal({
         </div>
 
         <div className={styles.dialogActions}>
-          <DialogClose>Cancel</DialogClose>
-          <button
+          <DialogClose>{c.cancel}</DialogClose>
+          <Button
             className={styles.submitButton}
             disabled={isCapturing}
             onClick={handleCapture}
@@ -180,14 +192,14 @@ export function ScreenshotModal({
             {isCapturing ? (
               <>
                 <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-                Capturing...
+                {t.inProgress}
               </>
             ) : (
               <>
-                <CameraIcon size={16} /> Capture
+                <CameraIcon size={16} /> {t.action}
               </>
             )}
-          </button>
+          </Button>
         </div>
       </DialogPopup>
     </DialogPortal>

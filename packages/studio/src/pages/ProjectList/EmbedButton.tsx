@@ -4,6 +4,7 @@ import type { ProjectMeta } from "@liqvid/schemas";
 import { CodeIcon } from "@phosphor-icons/react";
 import { useEffectEvent } from "react";
 
+import { Button } from "../../ui/Button.tsx";
 import { useTranslations } from "../../utils/react.tsx";
 
 import styles from "./share.module.css";
@@ -35,13 +36,12 @@ export function EmbedButton({
   });
 
   return (
-    <button
+    <Button
       className={styles.productionLink}
       onClick={handleClick}
       title={t.copyEmbedCode}
-      type="button"
     >
       <CodeIcon size={24} />
-    </button>
+    </Button>
   );
 }

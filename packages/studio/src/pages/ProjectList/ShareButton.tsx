@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "../../ui/Dialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
-import { useTranslations } from "../../utils/react.tsx";
+import { useCommonTranslations, useTranslations } from "../../utils/react.tsx";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
@@ -48,14 +48,15 @@ export function ShareButton({
   project,
   productionServerPort,
 }: ShareButtonProps) {
-  const t = useTranslations<T>();
+  const t = useTranslations<T>().share;
+  const c = useCommonTranslations();
   const [open, setOpen] = useState(false);
 
   return (
     <DialogRoot onOpenChange={setOpen} open={open}>
       <DialogTrigger
         className={rootStyles.rebuildButton}
-        title="Share options"
+        title={t.trigger}
         type="button"
       >
         <ShareFatIcon size={16} weight="fill" />
@@ -67,7 +68,9 @@ export function ShareButton({
           className={`${rootStyles.dialog} ${shareStyles.shareDialog}`}
           size="large"
         >
-          <DialogTitle className={rootStyles.dialogTitle}>Share</DialogTitle>
+          <DialogTitle className={rootStyles.dialogTitle}>
+            {t.title}
+          </DialogTitle>
 
           <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
             <TabsList style={{ fontSize: "18px" }}>
@@ -109,7 +112,7 @@ export function ShareButton({
           </Tabs>
 
           <div className={rootStyles.dialogActions}>
-            <DialogClose>{t.dialogClose}</DialogClose>
+            <DialogClose>{c.close}</DialogClose>
           </div>
         </DialogPopup>
       </DialogPortal>

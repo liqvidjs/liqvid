@@ -15,8 +15,12 @@
   },
   "files": [
     "dist/*",
+    "liqvid-validate-translations.mjs",
     "src/*"
   ],
+  "bin": {
+    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
+  },
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",
@@ -58,6 +62,7 @@
     "lint:package": "../../format-package-json.sh",
     "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
+    "validate-translations": "node liqvid-validate-translations.mjs",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
     "watch:css": "watch -n1 pnpm build:css",
     "watch:hbs": "watch -n1 pnpm build:hbs",

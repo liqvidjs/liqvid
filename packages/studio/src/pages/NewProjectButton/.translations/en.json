@@ -13,5 +13,6 @@
   },
   "dotWarning": "Project paths cannot contain dots. They will work during development but break during the build step.",
   "error": "Failed to create project",
-  "newProject": "Create a new project"
+  "newProject": "Create a new project",
+  "path": "Path under app/"
 }

@@ -17,22 +17,6 @@
   }
 }
 
-.RecordingRow {
-  &:first-child {
-    &,
-    & > .RecordingRowTrigger {
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-  }
-
-  &:last-child {
-    &,
-    & > .RecordingRowTrigger {
-      border-radius: 0 0 var(--radius) var(--radius);
-    }
-  }
-}
-
 .RecordingRowTrigger {
   display: flex;
   align-items: center;
@@ -46,6 +30,22 @@
 
   &[data-panel-open] {
     background-color: var(--gray-active);
+  }
+}
+
+.RecordingRow {
+  &:first-child {
+    &,
+    & > .RecordingRowTrigger {
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+  }
+
+  &:last-child {
+    &,
+    & > .RecordingRowTrigger {
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
   }
 }
 

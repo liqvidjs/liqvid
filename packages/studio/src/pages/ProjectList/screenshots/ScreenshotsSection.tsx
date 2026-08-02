@@ -12,9 +12,10 @@ import {
 } from "@phosphor-icons/react";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
+import { Button } from "../../../ui/Button.tsx";
 import {
   DialogBackdrop,
   DialogClose,
@@ -25,12 +26,20 @@ import {
   DialogTrigger,
 } from "../../../ui/Dialog.tsx";
 import { Time } from "../../../ui/Time.tsx";
+import {
+  useCommonTranslations,
+  useTranslations,
+} from "../../../utils/react.tsx";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
 import rootStyles from "../../root.module.css";
 import shareStyles from "../share.module.css";
 import styles from "./screenshots.module.css";
+
+import type TranslationsJson from "../.translations/en.json";
+
+type T = typeof TranslationsJson;
 
 interface ScreenshotsSectionProps {
   basePath: string;
@@ -40,6 +49,12 @@ interface ScreenshotsSectionProps {
   /** Whether the parent dialog is open */
   isOpen: boolean;
 }
+
+type ConfirmState = {
+  screenshotId: string;
+  target: CopyTarget;
+  variant?: VariantLabel;
+};
 
 type CopyTarget = "opengraph-image.png" | "twitter-image.png";
 type VariantLabel = "Light" | "Dark" | null;
@@ -85,6 +100,8 @@ interface ScreenshotItemProps {
   ) => void;
   onRename: (screenshotId: string) => void;
   onDelete: (screenshotId: string) => void;
+  /** Open a full-size preview of the given image src */
+  onPreview: (src: string, alt: string) => void;
 }
 
 function ScreenshotItem({
@@ -94,6 +111,7 @@ function ScreenshotItem({
   onConfirmOverwrite,
   onRename,
   onDelete,
+  onPreview,
 }: ScreenshotItemProps) {
   const projectPath = useProjectPath();
 
@@ -120,13 +138,19 @@ function ScreenshotItem({
     await copyScreenshot(projectPath, screenshot.id, target, variant.label);
   };
 
+  const alt = `Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`;
+  const src = `/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`;
+
   return (
     <li className={styles.screenshotItem}>
-      <img
-        alt={`Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`}
-        className={styles.screenshotThumbnail}
-        src={`/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`}
-      />
+      <Button
+        className={styles.screenshotThumbnailButton}
+        onClick={() => onPreview(src, alt)}
+        title="View full size"
+        type="button"
+      >
+        <img alt={alt} className={styles.screenshotThumbnail} src={src} />
+      </Button>
       <div className={styles.screenshotInfo}>
         <span className={styles.screenshotTitle}>
           {screenshot.id ||
@@ -137,44 +161,47 @@ function ScreenshotItem({
           <Time format="long" value={screenshot.meta.createdAt} />
         </span>
         <span className={styles.screenshotDimensions}>
-          {screenshot.meta.width} x {screenshot.meta.height}
+          {screenshot.meta.width}
+          {" x "}
+          {screenshot.meta.height}
         </span>
       </div>
       <div className={styles.screenshotActions}>
-        <button
+        <Button
           className={shareStyles.copyButton}
           onClick={() => handleCopyAs("opengraph-image.png")}
           title="Use as OpenGraph image"
           type="button"
         >
-          <CopyIcon size={14} /> OG
-        </button>
-        <button
+          <CopyIcon size={14} />
+          {" OG"}
+        </Button>
+        <Button
           className={shareStyles.copyButton}
           onClick={() => handleCopyAs("twitter-image.png")}
           title="Use as Twitter image"
           type="button"
         >
-          <CopyIcon size={14} /> Twitter
-        </button>
+          <CopyIcon size={14} />
+          {" Twitter"}
+        </Button>
         {isPrimary && (
           <>
-            <button
+            <Button
               className={shareStyles.iconButton}
               onClick={() => onRename(screenshot.id)}
               title="Rename screenshot"
               type="button"
             >
               <PencilSimpleIcon size={14} />
-            </button>
-            <button
+            </Button>
+            <Button
               className={shareStyles.deleteButton}
               onClick={() => onDelete(screenshot.id)}
               title="Delete screenshot"
-              type="button"
             >
               <TrashIcon size={14} />
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -189,15 +216,13 @@ export function ScreenshotsSection({
   productionServerPort,
   project,
 }: ScreenshotsSectionProps) {
+  const t = useTranslations<T>().screenshots;
+
   const [screenshots, setScreenshots] = useState<readonly ScreenshotEntry[]>(
     [],
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<{
-    screenshotId: string;
-    target: CopyTarget;
-    variant?: VariantLabel;
-  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmState | null>(null);
   const [renameDialog, setRenameDialog] = useState<{
     screenshotId: string;
   } | null>(null);
@@ -205,6 +230,10 @@ export function ScreenshotsSection({
   const [renameError, setRenameError] = useState<string | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{
     screenshotId: string;
+  } | null>(null);
+  const [previewDialog, setPreviewDialog] = useState<{
+    src: string;
+    alt: string;
   } | null>(null);
 
   const projectPath = project.path;
@@ -239,6 +268,189 @@ export function ScreenshotsSection({
     setRenameDialog({ screenshotId });
   };
 
+  return (
+    <>
+      <div className={shareStyles.section}>
+        <DialogRoot>
+          <div className={shareStyles.sectionActions}>
+            <DialogTrigger className={shareStyles.addButton}>
+              <PlusIcon size={16} /> {t.trigger}
+            </DialogTrigger>
+          </div>
+          <ScreenshotModal
+            basePath={basePath}
+            duration={duration}
+            onCaptured={loadScreenshots}
+            productionServerPort={productionServerPort}
+            project={project}
+          />
+        </DialogRoot>
+
+        {isLoading ? (
+          <div className={shareStyles.loading}>
+            <SpinnerIcon className={shareStyles.spinner} size={24} />
+          </div>
+        ) : screenshots.length === 0 ? (
+          <p className={shareStyles.emptyMessage}>{t.empty}</p>
+        ) : (
+          <ul className={styles.screenshotList}>
+            {screenshots.map((screenshot) => {
+              const { imagePath } = screenshot;
+              const variants =
+                typeof imagePath === "object"
+                  ? ([
+                      { label: "Light", path: imagePath.light },
+                      { label: "Dark", path: imagePath.dark },
+                    ] as const)
+                  : ([{ label: null, path: imagePath }] as const);
+
+              return variants.map((variant, variantIndex) => (
+                <ScreenshotItem
+                  isPrimary={variantIndex === 0}
+                  key={`${screenshot.id}-${variant.label ?? "single"}`}
+                  onConfirmOverwrite={(screenshotId, target, label) =>
+                    setConfirmDialog({ screenshotId, target, variant: label })
+                  }
+                  onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
+                  onPreview={(src, alt) => setPreviewDialog({ alt, src })}
+                  onRename={openRenameDialog}
+                  screenshot={screenshot}
+                  variant={variant}
+                />
+              ));
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* Confirmation Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setConfirmDialog(null)}
+        open={!!confirmDialog}
+      >
+        <ConfirmationDialog {...{ confirmDialog, setConfirmDialog }} />
+      </DialogRoot>
+
+      {/* Rename Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setRenameDialog(null)}
+        open={!!renameDialog}
+      >
+        <DialogPortal>
+          <DialogBackdrop />
+          <RenameDialog
+            {...{
+              loadScreenshots,
+              renameDialog,
+              renameError,
+              renameValue,
+              setRenameDialog,
+              setRenameError,
+              setRenameValue,
+            }}
+          />
+        </DialogPortal>
+      </DialogRoot>
+
+      {/* Delete Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        open={!!deleteDialog}
+      >
+        <DeleteDialog {...{ deleteDialog, loadScreenshots, setDeleteDialog }} />
+      </DialogRoot>
+
+      {/* Preview Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setPreviewDialog(null)}
+        open={!!previewDialog}
+      >
+        <DialogPortal>
+          <DialogBackdrop />
+          <DialogPopup style={{ maxWidth: "90vw", width: "90vw" }}>
+            <DialogClose />
+            {previewDialog && (
+              <img
+                alt={previewDialog.alt}
+                className={styles.screenshotPreviewImage}
+                src={previewDialog.src}
+              />
+            )}
+          </DialogPopup>
+        </DialogPortal>
+      </DialogRoot>
+    </>
+  );
+}
+
+function ConfirmationDialog({
+  confirmDialog,
+  setConfirmDialog,
+}: {
+  confirmDialog: ConfirmState | null;
+  setConfirmDialog: React.Dispatch<React.SetStateAction<ConfirmState | null>>;
+}) {
+  const t = useTranslations<T>().screenshots.confirmDialog;
+  const c = useCommonTranslations();
+  const projectPath = useProjectPath();
+
+  return (
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogPopup>
+        <DialogTitle>{t.title}</DialogTitle>
+        <p className={shareStyles.confirmMessage}>
+          The file{" "}
+          <code className={shareStyles.filename}>{confirmDialog?.target}</code>{" "}
+          already exists. Do you want to replace it?
+        </p>
+        <div className={rootStyles.dialogActions}>
+          <DialogClose>{c.cancel}</DialogClose>
+          <Button
+            className={rootStyles.submitButton}
+            onClick={() => {
+              if (confirmDialog) {
+                copyScreenshot(
+                  projectPath,
+                  confirmDialog.screenshotId,
+                  confirmDialog.target,
+                  confirmDialog.variant,
+                );
+                setConfirmDialog(null);
+              }
+            }}
+          >
+            {t.action}
+          </Button>
+        </div>
+      </DialogPopup>
+    </DialogPortal>
+  );
+}
+
+function RenameDialog({
+  loadScreenshots,
+  renameDialog,
+  renameError,
+  renameValue,
+  setRenameDialog,
+  setRenameError,
+  setRenameValue,
+}: {
+  loadScreenshots: () => Promise<void>;
+  renameDialog: { screenshotId: string } | null;
+  renameError: string | null;
+  renameValue: string;
+  setRenameDialog: React.Dispatch<
+    React.SetStateAction<{ screenshotId: string } | null>
+  >;
+  setRenameError: React.Dispatch<React.SetStateAction<string | null>>;
+  setRenameValue: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const t = useTranslations<T>().screenshots.renameDialog;
+  const c = useCommonTranslations();
+  const projectPath = useProjectPath();
+
   const performRename = async () => {
     if (!renameDialog) return;
 
@@ -268,6 +480,58 @@ export function ScreenshotsSection({
     }
   };
 
+  const id = useId();
+
+  return (
+    <DialogPopup>
+      <DialogTitle>{t.title}</DialogTitle>
+      <div className={rootStyles.formField}>
+        <label htmlFor={id}>{t.newName}</label>
+        <input
+          id={id}
+          onChange={(e) => {
+            setRenameValue(e.target.value);
+            setRenameError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              performRename();
+            }
+          }}
+          value={renameValue}
+        />
+        {renameError && (
+          <span className={rootStyles.fieldError}>{renameError}</span>
+        )}
+      </div>
+      <div className={rootStyles.dialogActions}>
+        <DialogClose>{c.cancel}</DialogClose>
+        <Button
+          className={rootStyles.submitButton}
+          onClick={() => performRename()}
+        >
+          {t.action}
+        </Button>
+      </div>
+    </DialogPopup>
+  );
+}
+
+function DeleteDialog({
+  deleteDialog,
+  loadScreenshots,
+  setDeleteDialog,
+}: {
+  deleteDialog: { screenshotId: string } | null;
+  loadScreenshots: () => Promise<void>;
+  setDeleteDialog: React.Dispatch<
+    React.SetStateAction<{ screenshotId: string } | null>
+  >;
+}) {
+  const t = useTranslations<T>().screenshots.deleteDialog;
+  const c = useCommonTranslations();
+  const projectPath = useProjectPath();
+
   const performDelete = async () => {
     if (!deleteDialog) return;
 
@@ -291,169 +555,21 @@ export function ScreenshotsSection({
   };
 
   return (
-    <>
-      <div className={shareStyles.section}>
-        <DialogRoot>
-          <div className={shareStyles.sectionActions}>
-            <DialogTrigger className={shareStyles.addButton}>
-              <PlusIcon size={16} /> Add
-            </DialogTrigger>
-          </div>
-          <ScreenshotModal
-            basePath={basePath}
-            duration={duration}
-            onCaptured={loadScreenshots}
-            productionServerPort={productionServerPort}
-            project={project}
-          />
-        </DialogRoot>
-
-        {isLoading ? (
-          <div className={shareStyles.loading}>
-            <SpinnerIcon className={shareStyles.spinner} size={24} />
-          </div>
-        ) : screenshots.length === 0 ? (
-          <p className={shareStyles.emptyMessage}>
-            No screenshots yet. Click "Add" to capture one.
-          </p>
-        ) : (
-          <ul className={styles.screenshotList}>
-            {screenshots.map((screenshot) => {
-              const { imagePath } = screenshot;
-              const variants =
-                typeof imagePath === "object"
-                  ? ([
-                      { label: "Light", path: imagePath.light },
-                      { label: "Dark", path: imagePath.dark },
-                    ] as const)
-                  : ([{ label: null, path: imagePath }] as const);
-
-              return variants.map((variant, variantIndex) => (
-                <ScreenshotItem
-                  isPrimary={variantIndex === 0}
-                  key={`${screenshot.id}-${variant.label ?? "single"}`}
-                  onConfirmOverwrite={(screenshotId, target, label) =>
-                    setConfirmDialog({ screenshotId, target, variant: label })
-                  }
-                  onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
-                  onRename={openRenameDialog}
-                  screenshot={screenshot}
-                  variant={variant}
-                />
-              ));
-            })}
-          </ul>
-        )}
-      </div>
-
-      {/* Confirmation Dialog */}
-      <DialogRoot
-        onOpenChange={(open) => !open && setConfirmDialog(null)}
-        open={!!confirmDialog}
-      >
-        <DialogPortal>
-          <DialogBackdrop />
-          <DialogPopup>
-            <DialogTitle>Confirm Overwrite</DialogTitle>
-            <p className={shareStyles.confirmMessage}>
-              The file{" "}
-              <code className={shareStyles.filename}>
-                {confirmDialog?.target}
-              </code>{" "}
-              already exists. Do you want to replace it?
-            </p>
-            <div className={rootStyles.dialogActions}>
-              <DialogClose>Cancel</DialogClose>
-              <button
-                className={rootStyles.submitButton}
-                onClick={() => {
-                  if (confirmDialog) {
-                    copyScreenshot(
-                      projectPath,
-                      confirmDialog.screenshotId,
-                      confirmDialog.target,
-                      confirmDialog.variant,
-                    );
-                    setConfirmDialog(null);
-                  }
-                }}
-                type="button"
-              >
-                Replace
-              </button>
-            </div>
-          </DialogPopup>
-        </DialogPortal>
-      </DialogRoot>
-
-      {/* Rename Dialog */}
-      <DialogRoot
-        onOpenChange={(open) => !open && setRenameDialog(null)}
-        open={!!renameDialog}
-      >
-        <DialogPortal>
-          <DialogBackdrop />
-          <DialogPopup>
-            <DialogTitle>Rename Screenshot</DialogTitle>
-            <div className={rootStyles.formField}>
-              <label htmlFor="screenshot-rename-input">New name</label>
-              <input
-                id="screenshot-rename-input"
-                onChange={(e) => {
-                  setRenameValue(e.target.value);
-                  setRenameError(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    performRename();
-                  }
-                }}
-                value={renameValue}
-              />
-              {renameError && (
-                <span className={rootStyles.fieldError}>{renameError}</span>
-              )}
-            </div>
-            <div className={rootStyles.dialogActions}>
-              <DialogClose>Cancel</DialogClose>
-              <button
-                className={rootStyles.submitButton}
-                onClick={() => performRename()}
-                type="button"
-              >
-                Rename
-              </button>
-            </div>
-          </DialogPopup>
-        </DialogPortal>
-      </DialogRoot>
-
-      {/* Delete Dialog */}
-      <DialogRoot
-        onOpenChange={(open) => !open && setDeleteDialog(null)}
-        open={!!deleteDialog}
-      >
-        <DialogPortal>
-          <DialogBackdrop />
-          <DialogPopup>
-            <DialogTitle>Delete Screenshot</DialogTitle>
-            <p className={shareStyles.confirmMessage}>
-              Are you sure you want to delete this screenshot? This action
-              cannot be undone.
-            </p>
-            <div className={rootStyles.dialogActions}>
-              <DialogClose>Cancel</DialogClose>
-              <button
-                className={shareStyles.deleteConfirmButton}
-                onClick={() => performDelete()}
-                type="button"
-              >
-                Delete
-              </button>
-            </div>
-          </DialogPopup>
-        </DialogPortal>
-      </DialogRoot>
-    </>
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogPopup>
+        <DialogTitle>{t.title}</DialogTitle>
+        <p className={shareStyles.confirmMessage}>{t.confirm}</p>
+        <div className={rootStyles.dialogActions}>
+          <DialogClose>{c.cancel}</DialogClose>
+          <Button
+            className={shareStyles.deleteConfirmButton}
+            onClick={() => performDelete()}
+          >
+            {t.action}
+          </Button>
+        </div>
+      </DialogPopup>
+    </DialogPortal>
   );
 }

@@ -11,7 +11,7 @@ import {
   FolderIcon,
 } from "@phosphor-icons/react";
 import type { RelativeDir } from "effect-paths";
-import { useState } from "react";
+import { useId, useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "../../components/WebSocketProvider.tsx";
@@ -132,6 +132,7 @@ export function ProjectListClient({
       <div className={styles.viewToggle}>
         <label className={styles.toggleLabel}>
           <span>{t.folderView}</span>
+          {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
           <button
             aria-checked={folderView}
             className={styles.toggleSwitch}
@@ -217,9 +218,14 @@ function FolderItem({
     ([a], [b]) => a.localeCompare(b),
   );
 
+  const id = useId();
+
   return (
     <div className={styles.folder}>
+      {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
       <button
+        aria-controls={id}
+        aria-expanded={expanded}
         className={styles.folderHeader}
         onClick={() => onToggle(folderPath, !expanded)}
         type="button"
@@ -233,35 +239,34 @@ function FolderItem({
         <span className={styles.folderName}>{folderPath}</span>
         <span className={styles.folderCount}>{totalCount}</span>
       </button>
-      {expanded && (
-        <>
-          {/* Render subfolders first */}
-          {sortedSubfolders.map(([subfolderName, subfolder]) => (
-            <FolderItem
-              basePath={basePath}
-              collapsedFolders={collapsedFolders}
-              folder={subfolder}
-              folderPath={`${folderPath}/${subfolderName}`}
-              key={subfolderName}
-              onToggle={onToggle}
-              productionServerPort={productionServerPort}
-            />
-          ))}
-          {/* Then render projects in this folder */}
-          {folder.projects.length > 0 && (
-            <ul className={styles.projectList}>
-              {folder.projects.map(([key, project]) => (
-                <ProjectItem
-                  basePath={basePath}
-                  key={key}
-                  productionServerPort={productionServerPort}
-                  project={project}
-                />
-              ))}
-            </ul>
-          )}
-        </>
-      )}
+
+      <div hidden={!expanded} id={id}>
+        {/* Render subfolders first */}
+        {sortedSubfolders.map(([subfolderName, subfolder]) => (
+          <FolderItem
+            basePath={basePath}
+            collapsedFolders={collapsedFolders}
+            folder={subfolder}
+            folderPath={`${folderPath}/${subfolderName}`}
+            key={subfolderName}
+            onToggle={onToggle}
+            productionServerPort={productionServerPort}
+          />
+        ))}
+        {/* Then render projects in this folder */}
+        {folder.projects.length > 0 && (
+          <ul className={styles.projectList}>
+            {folder.projects.map(([key, project]) => (
+              <ProjectItem
+                basePath={basePath}
+                key={key}
+                productionServerPort={productionServerPort}
+                project={project}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

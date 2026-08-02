@@ -9,8 +9,9 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import type { ThumbsData } from "../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
 import { ASSETS_DIR, THUMBS_DIR } from "../../conventions.mts";
+import { Button } from "../../ui/Button.tsx";
 import { TimeDuration } from "../../ui/Time.tsx";
-import { useTranslations } from "../../utils/react.tsx";
+import { useCommonTranslations, useTranslations } from "../../utils/react.tsx";
 
 import shareStyles from "./share.module.css";
 
@@ -31,6 +32,7 @@ export function ThumbnailsSection({
 }: ThumbnailsSectionProps) {
   const projectPath = useProjectPath();
   const t = useTranslations<T>().thumbs;
+  const c = useCommonTranslations();
   const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -143,7 +145,7 @@ export function ThumbnailsSection({
   return (
     <div className={shareStyles.section}>
       <div className={shareStyles.sectionActions}>
-        <button
+        <Button
           className={shareStyles.addButton}
           disabled={isGenerating}
           onClick={handleGenerate}
@@ -152,14 +154,14 @@ export function ThumbnailsSection({
           {isGenerating ? (
             <>
               <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
-              Generating...
+              {t.inProgress}
             </>
           ) : (
             <>
               <ImagesIcon size={16} /> {t.generate}
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (
@@ -167,16 +169,14 @@ export function ThumbnailsSection({
           <SpinnerIcon className={shareStyles.spinner} size={24} />
         </div>
       ) : hasNoThumbs ? (
-        <p className={shareStyles.emptyMessage}>
-          No thumbnails yet. Click "Generate" to create thumbnail sheets.
-        </p>
+        <p className={shareStyles.emptyMessage}>{t.empty}</p>
       ) : thumbInfo ? (
         <div className={shareStyles.thumbsPreview}>
           <div className={shareStyles.thumbsPreviewRow}>
             {/* Light thumbnail */}
             {thumbsData.light.length > 0 && (
               <div className={shareStyles.thumbsPreviewItem}>
-                <span className={shareStyles.thumbsSchemeLabel}>Light</span>
+                <span className={shareStyles.thumbsSchemeLabel}>{c.light}</span>
                 <div
                   className={shareStyles.thumbsPreviewBox}
                   style={{
@@ -200,7 +200,7 @@ export function ThumbnailsSection({
             {/* Dark thumbnail */}
             {thumbsData.dark.length > 0 && (
               <div className={shareStyles.thumbsPreviewItem}>
-                <span className={shareStyles.thumbsSchemeLabel}>Dark</span>
+                <span className={shareStyles.thumbsSchemeLabel}>{c.dark}</span>
                 <div
                   className={shareStyles.thumbsPreviewBox}
                   style={{

@@ -1,7 +1,5 @@
 "use client";
 
-// biome-ignore lint/style/noRestrictedImports: no styled wrapper exists yet
-import { Select } from "@base-ui/react/select";
 import {
   CaretUpDownIcon,
   CheckIcon,
@@ -13,6 +11,19 @@ import { useState } from "react";
 
 import type { SettingsConfig } from "../../api/contract.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
+import { Button } from "../../ui/Button.tsx";
+import {
+  SelectIcon,
+  SelectItem,
+  SelectItemIndicator,
+  SelectItemText,
+  SelectPopup,
+  SelectPortal,
+  SelectPositioner,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/Select.tsx";
 
 import styles from "./settings.module.css";
 
@@ -233,14 +244,14 @@ function ConfigForm({
         <p className={styles.error}>{`${t.saveError}: ${saveError}`}</p>
       )}
 
-      <button className={styles.saveButton} disabled={saving} type="submit">
+      <Button className={styles.saveButton} disabled={saving} type="submit">
         {saving ? (
           <SpinnerIcon className={styles.spinner} weight="bold" />
         ) : (
           <FloppyDiskIcon weight="bold" />
         )}
         {t.save}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -264,39 +275,37 @@ function ProviderSelect({
   };
 
   return (
-    <Select.Root
+    <SelectRoot
       items={items}
       onValueChange={(v) => onValueChange(v as string)}
       value={value}
     >
-      <Select.Trigger className={styles.trigger}>
-        <Select.Value>{(v: string) => items[v] ?? emptyLabel}</Select.Value>
-        <Select.Icon>
+      <SelectTrigger className={styles.trigger}>
+        <SelectValue>{(v: string) => items[v] ?? emptyLabel}</SelectValue>
+        <SelectIcon>
           <CaretUpDownIcon />
-        </Select.Icon>
-      </Select.Trigger>
+        </SelectIcon>
+      </SelectTrigger>
 
-      <Select.Portal>
-        <Select.Positioner
+      <SelectPortal>
+        <SelectPositioner
           alignItemWithTrigger={false}
           className={styles.positioner}
           sideOffset={4}
         >
-          <Select.Popup className={styles.popup}>
+          <SelectPopup className={styles.popup}>
             {Object.entries(items).map(([code, label]) => (
-              <Select.Item className={styles.item} key={code} value={code}>
-                <Select.ItemText className={styles.name}>
-                  {label}
-                </Select.ItemText>
-                <Select.ItemIndicator className={styles.check}>
+              <SelectItem className={styles.item} key={code} value={code}>
+                <SelectItemText className={styles.name}>{label}</SelectItemText>
+                <SelectItemIndicator className={styles.check}>
                   <CheckIcon weight="bold" />
-                </Select.ItemIndicator>
-              </Select.Item>
+                </SelectItemIndicator>
+              </SelectItem>
             ))}
-          </Select.Popup>
-        </Select.Positioner>
-      </Select.Portal>
-    </Select.Root>
+          </SelectPopup>
+        </SelectPositioner>
+      </SelectPortal>
+    </SelectRoot>
   );
 }
 

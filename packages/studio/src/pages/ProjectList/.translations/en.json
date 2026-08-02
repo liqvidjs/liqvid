@@ -1,19 +1,75 @@
 {
+  "captions": {
+    "empty": "No audio yet. Click \"Render audio\" to capture the audio track, then generate captions from it.",
+    "generate": "Render audio",
+    "inProgress": "Rendering audio...",
+    "rename": {
+      "action": "Rename",
+      "inProgress": "Renaming...",
+      "name": "Name",
+      "title": "Rename Audio"
+    }
+  },
   "copyEmbedCode": "Copy embed code",
   "dialogClose": "Close",
   "folderView": "Folder view",
   "openInFinder": "Open in Finder",
   "preview": "Preview",
   "renders": {
+    "dialog": {
+      "action": "Start Render",
+      "colorScheme": "Color Scheme",
+      "fps": "fps",
+      "resolution": "Resolution",
+      "title": "Render Settings"
+    },
+    "empty": "No renders yet. Click \"Render\" to create a video.",
+    "inProgress": "Starting...",
+    "openInFinder": "Open in Finder",
+    "play": "Play video",
+    "rename": {
+      "inProgress": "Renaming...",
+      "name": "Name",
+      "title": "Rename Render",
+      "trigger": "Rename"
+    },
     "render": "Render"
   },
-  "tabs": {
-    "captions": "Sous-titres",
-    "renders": "Renders",
-    "screenshots": "Screenshots",
-    "thumbnails": "Thumbnails"
+  "screenshots": {
+    "action": "Capture",
+    "colorScheme": "Color Scheme",
+    "confirmDialog": {
+      "action": "Replace",
+      "title": "Confirm Overwrite"
+    },
+    "deleteDialog": {
+      "action": "Delete",
+      "confirm": "Are you sure you want to delete this screenshot? This action cannot be undone.",
+      "title": "Delete Screenshot"
+    },
+    "empty": "No screenshots yet. Click \"Add\" to capture one.",
+    "inProgress": "Capturing...",
+    "renameDialog": {
+      "action": "Rename",
+      "newName": "New name",
+      "title": "Rename Screenshot"
+    },
+    "title": "Capture Screenshot",
+    "trigger": "Add"
+  },
+  "share": {
+    "tabs": {
+      "captions": "Sous-titres",
+      "renders": "Renders",
+      "screenshots": "Screenshots",
+      "thumbnails": "Thumbnails"
+    },
+    "title": "Share",
+    "trigger": "Share options"
   },
   "thumbs": {
-    "generate": "Generate"
+    "empty": "No thumbnails yet. Click \"Generate\" to create thumbnail sheets.",
+    "generate": "Generate",
+    "inProgress": "Generating..."
   }
 }

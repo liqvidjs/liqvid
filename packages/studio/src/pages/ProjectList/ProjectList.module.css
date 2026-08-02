@@ -95,6 +95,24 @@
   gap: 1rem;
 }
 
+.folderHeader {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  background: light-dark(#f9fafb, #1f2937);
+  border: none;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: light-dark(#f3f4f6, #374151);
+  }
+}
+
 .folder {
   overflow: hidden;
   border: 1px solid light-dark(#e5e7eb, #374151);
@@ -114,24 +132,6 @@
     .folderHeader:hover {
       background: light-dark(#f9fafb, #1f2937);
     }
-  }
-}
-
-.folderHeader {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  background: light-dark(#f9fafb, #1f2937);
-  border: none;
-  transition: background-color 0.15s;
-
-  &:hover {
-    background: light-dark(#f3f4f6, #374151);
   }
 }
 

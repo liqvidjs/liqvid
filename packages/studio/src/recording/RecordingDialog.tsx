@@ -7,6 +7,7 @@ import { useIsPreview, usePluginApi } from "@liqvid/studio-plugin-api";
 import { compare, isMac, useToggle } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
+import type { RelativeDir } from "effect-paths";
 import {
   Fragment,
   useCallback,
@@ -22,10 +23,15 @@ import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 import { TimeDuration } from "../ui/Time.tsx";
+import { useAsyncTranslations } from "../utils/react.tsx";
 
 import type { RecordingControlProps } from "./RecordingControl.tsx";
 
 import styles from "./RecordingDialog.module.css";
+
+import Translations from "./.translations/en.json";
+
+type T = typeof Translations;
 
 export interface RecordingDialogProps {
   shortcuts?: RecordingControlProps["shortcuts"];
@@ -45,6 +51,11 @@ export function RecordingDialog({
   shortcuts,
   onShortcutChange,
 }: RecordingDialogProps) {
+  const t = useAsyncTranslations(
+    Translations,
+    "src/recording/RecordingDialog" as RelativeDir,
+  );
+
   const { instances, projectPath } = useStudioPrivateApi();
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
@@ -154,7 +165,7 @@ export function RecordingDialog({
     <DockableDialog.Dialog
       className={clsx("lv-recording-dialog", styles.RecordingDialog)}
     >
-      <DockableDialog.Header>Recording</DockableDialog.Header>
+      <DockableDialog.Header>{t.title}</DockableDialog.Header>
       <DockableDialog.Content>
         <div>
           <Tabs onValueChange={setActiveTab} value={activeTab}>
@@ -163,18 +174,18 @@ export function RecordingDialog({
                 className="lv-recording-tabs"
                 value={tabs.configuration}
               >
-                Configuration
+                {t.tabs.configuration.title}
               </TabsTrigger>
               <TabsTrigger className="lv-recording-tabs" value={tabs.saved}>
-                Recordings
+                {t.tabs.saved.title}
               </TabsTrigger>
               <TabsTrigger className="lv-recording-tabs" value={tabs.shortcuts}>
-                Shortcuts
+                {t.tabs.shortcuts.title}
               </TabsTrigger>
             </TabsList>
             <TabsContent asChild keepMounted value={tabs.configuration}>
               <section>
-                <h3>Plugins</h3>
+                <h3>{t.tabs.configuration.subtitle}</h3>
 
                 <div className={styles.togglePlugins}>
                   {Object.values(plugins).map((plugin) => {
@@ -184,6 +195,7 @@ export function RecordingDialog({
                     if (!studioPlugin) return null;
 
                     return (
+                      // biome-ignore lint/correctness/noRestrictedElements: this is ok
                       <button
                         aria-checked={enabledPlugins[plugin.package]}
                         className={styles.recordingToggle}
@@ -227,7 +239,7 @@ export function RecordingDialog({
             </TabsContent>
             <TabsContent asChild value={tabs.saved}>
               <section>
-                <h3>Saved</h3>
+                <h3>{t.tabs.saved.subtitle}</h3>
                 <div className={styles.Recordings}>
                   {recordings.map((r) => (
                     <RecordingRow key={r.name} recording={r} />
@@ -237,10 +249,11 @@ export function RecordingDialog({
             </TabsContent>
             <TabsContent asChild value={tabs.shortcuts}>
               <section>
-                <h3>Shortcuts</h3>
+                <h3>{t.tabs.shortcuts.title}</h3>
                 <ShortcutsTable
                   onShortcutChange={onShortcutChange}
                   shortcuts={shortcuts}
+                  t={t.tabs.shortcuts}
                 />
               </section>
             </TabsContent>
@@ -305,16 +318,18 @@ const shortcutCommands: [string, ShortcutKey][] = [
 function ShortcutsTable({
   shortcuts,
   onShortcutChange,
+  t,
 }: {
   shortcuts?: RecordingControlProps["shortcuts"];
   onShortcutChange?: (key: ShortcutKey, value: string) => void;
+  t: T["tabs"]["shortcuts"];
 }) {
   return (
     <table className={styles.shortcutsTable}>
       <thead>
         <tr>
-          <th>Command</th>
-          <th>Shortcut</th>
+          <th>{t.command}</th>
+          <th>{t.shortcut}</th>
         </tr>
       </thead>
       <tbody>

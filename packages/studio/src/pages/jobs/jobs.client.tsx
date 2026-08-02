@@ -14,9 +14,9 @@ import { Time } from "../../ui/Time.tsx";
 
 import styles from "./jobs.module.css";
 
-import type Translations from "./.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type Translations = typeof Translations;
+type T = typeof TranslationsJson;
 
 type Job = Pick<LoggableJob, "id" | "logs" | "name" | "path" | "state">;
 
@@ -30,19 +30,20 @@ export function JobsClient({
   cancelJob: (formData: FormData) => Promise<void>;
   deleteJob: (formData: FormData) => Promise<void>;
   jobs: Record<string, Job>;
-  t: Translations;
+  t: T;
 }) {
+  // TODO: websockets
   useChannel("jobs", {
     deleteJob: ({ id }) => {
-      console.log("deleteJob", id);
+      id;
     },
 
     newJob: ({ job }) => {
-      console.log("newJob", job);
+      job;
     },
 
     updateJob: ({ job }) => {
-      console.log("updateJob", job);
+      job;
     },
   });
   return (
@@ -121,7 +122,7 @@ export function JobsClient({
                         return (
                           <div className={styles.progress}>
                             <progress max={msg.total} value={msg.value} />
-                            {msg.formattedValue} / {msg.formattedTotal}
+                            {`${msg.formattedValue} / ${msg.formattedTotal}`}
                           </div>
                         );
                       }

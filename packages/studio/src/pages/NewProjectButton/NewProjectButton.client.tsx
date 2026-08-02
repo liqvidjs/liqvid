@@ -1,6 +1,5 @@
 "use client";
 
-import { Select } from "@base-ui/react/select";
 import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
@@ -20,9 +19,14 @@ import {
   SelectIcon,
   SelectItem,
   SelectItemIndicator,
+  SelectItemText,
   SelectList,
   SelectPopup,
+  SelectPortal,
+  SelectPositioner,
+  SelectRoot,
   SelectTrigger,
+  SelectValue,
 } from "../../ui/Select.tsx";
 import {
   createProjectAction,
@@ -40,7 +44,7 @@ type T = typeof TranslationsJson;
 export function NewProjectButtonClient({ t }: { t: T }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [projectPath, setProjectPath] = useState(RelativeDir(""));
+  const [projectPath, setProjectPath] = useState<RelativeDir>(RelativeDir(""));
   const [templateId, setTemplateId] = useState("");
   const [templates, setTemplates] = useState<TemplateInfo[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -145,30 +149,30 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               {pathError ? (
                 <span className={styles.fieldError}>{pathError}</span>
               ) : (
-                <span className={styles.fieldHint}>Path under app/</span>
+                <span className={styles.fieldHint}>{t.path}</span>
               )}
             </div>
 
             <div className={styles.formField}>
               <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
-              <Select.Root
+              <SelectRoot
                 disabled={isCreating || templates.length === 0}
                 onValueChange={(value) => value && setTemplateId(value)}
                 value={templateId}
               >
                 <SelectTrigger id={ids.projectTemplate}>
-                  <Select.Value placeholder={t.dialog.selectTemplate} />
+                  <SelectValue placeholder={t.dialog.selectTemplate} />
                   <SelectIcon>
                     <CaretDownIcon />
                   </SelectIcon>
                 </SelectTrigger>
-                <Select.Portal>
-                  <Select.Positioner sideOffset={4}>
+                <SelectPortal>
+                  <SelectPositioner sideOffset={4}>
                     <SelectPopup>
                       <SelectList>
                         {templates.map((template) => (
                           <SelectItem key={template.id} value={template.id}>
-                            <Select.ItemText>{template.name}</Select.ItemText>
+                            <SelectItemText>{template.name}</SelectItemText>
                             <SelectItemIndicator>
                               <CheckIcon />
                             </SelectItemIndicator>
@@ -176,9 +180,9 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                         ))}
                       </SelectList>
                     </SelectPopup>
-                  </Select.Positioner>
-                </Select.Portal>
-              </Select.Root>
+                  </SelectPositioner>
+                </SelectPortal>
+              </SelectRoot>
             </div>
 
             {error && <div className={styles.error}>{error}</div>}
@@ -186,11 +190,12 @@ export function NewProjectButtonClient({ t }: { t: T }) {
             <div className={styles.dialogActions}>
               <DialogClose
                 disabled={isCreating}
+                // biome-ignore lint/correctness/noRestrictedElements: this is different
                 render={<button type="button" />}
               >
                 {t.dialog.cancel}
               </DialogClose>
-              <button
+              <Button
                 className={styles.submitButton}
                 disabled={
                   isCreating ||
@@ -202,7 +207,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 type="submit"
               >
                 {isCreating ? t.dialog.creating : t.dialog.action}
-              </button>
+              </Button>
             </div>
           </form>
         </DialogPopup>
