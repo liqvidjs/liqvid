@@ -39,6 +39,7 @@ export async function createApp({
   bundler,
   disableGit,
   reactCompiler,
+  portless,
   agentsMd,
   presets,
 }: {
@@ -53,6 +54,7 @@ export async function createApp({
   bundler: Bundler;
   disableGit?: boolean;
   reactCompiler: boolean;
+  portless: boolean;
   agentsMd: boolean;
   /** The presets that were selected. */
   presets?: PresetName[];
@@ -238,6 +240,7 @@ export async function createApp({
       bundler,
       isOnline,
       packageManager,
+      portless,
       presets,
       reactCompiler,
       root,

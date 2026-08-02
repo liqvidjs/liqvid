@@ -82,6 +82,10 @@ const program = new Command(packageJson.name)
   .helpOption("-h, --help", "Display this help message.")
   .option("--tailwind", "Initialize with Tailwind CSS config. (default)")
   .option("--react-compiler", "Initialize with React Compiler enabled.")
+  .option(
+    "--portless",
+    "Set up the project to use Portless for local development. (default)",
+  )
   .option("--app", "Initialize as an App Router project.")
   .option("--rspack", "Enable Rspack as the bundler.")
   .option(
@@ -267,6 +271,7 @@ async function run(): Promise<void> {
       disableGit: false,
       empty: false,
       importAlias: "@/*",
+      portless: true,
       reactCompiler: true,
       tailwind: true,
     };
@@ -278,7 +283,8 @@ async function run(): Promise<void> {
 
     const displayConfig: DisplayConfigItem[] = [
       { key: "reactCompiler", values: { true: "React Compiler" } },
-      { key: "tailwind", values: { true: "Tailwind CSS" } },
+      // { key: "tailwind", values: { true: "Tailwind CSS" } },
+      { key: "portless", values: { true: "Portless" } },
       { key: "agentsMd", values: { true: "AGENTS.md" } },
     ];
 
@@ -398,6 +404,25 @@ async function run(): Promise<void> {
         });
         opts.reactCompiler = Boolean(reactCompiler);
         preferences.reactCompiler = Boolean(reactCompiler);
+      }
+    }
+
+    if (!opts.portless && !args.includes("--no-portless")) {
+      if (skipPrompt) {
+        opts.portless = getPrefOrDefault("portless");
+      } else {
+        const styledPortless = pico.blue("Portless");
+        const { portless } = await prompts({
+          active: "Yes",
+          inactive: "No",
+          initial: getPrefOrDefault("portless"),
+          message: `Would you like to use ${styledPortless}?`,
+          name: "portless",
+          onState: onPromptState,
+          type: "toggle",
+        });
+        opts.portless = Boolean(portless);
+        preferences.portless = Boolean(portless);
       }
     }
 
@@ -521,6 +546,7 @@ async function run(): Promise<void> {
       example: example && example !== "default" ? example : undefined,
       examplePath: opts.examplePath,
       packageManager,
+      portless: opts.portless,
       presets: ((opts.presets ?? []) as string[]).filter(
         isPresetName,
       ) as PresetName[],
@@ -554,6 +580,7 @@ async function run(): Promise<void> {
       disableGit: opts.disableGit,
       empty: opts.empty,
       packageManager,
+      portless: opts.portless,
       reactCompiler: opts.reactCompiler,
       skipInstall: opts.skipInstall,
       tailwind: opts.tailwind,

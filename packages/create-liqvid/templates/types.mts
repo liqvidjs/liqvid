@@ -28,6 +28,8 @@ export interface InstallTemplateArgs {
   skipInstall: boolean;
   bundler: Bundler;
   reactCompiler: boolean;
+  /** Whether to set up the project to use Portless for local development. */
+  portless: boolean;
   /** Presets selected by the user, whose deps + content will be included. */
   presets?: PresetName[];
 }

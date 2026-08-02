@@ -71,11 +71,33 @@ type PackageJson = {
   devDependencies?: Record<string, string>;
   ignoreScripts?: string[];
   name: string;
+  portless?: {
+    name: string;
+    script: string;
+    appPort: number;
+  };
   private?: boolean;
   scripts?: Record<string, string>;
   trustedDependencies?: string[];
   version?: string;
 };
+
+/**
+ * Sanitize a project name into a valid Portless app name (lowercase
+ * alphanumeric words joined by hyphens).
+ */
+function sanitizePortlessName(name: string): string {
+  const sanitized = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return sanitized || "app";
+}
+
+/** Generate a random port in the 3xxx range (3000–3999). */
+function randomPort(): number {
+  return 3000 + Math.floor(Math.random() * 1000);
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -114,6 +136,7 @@ export const installTemplate = async ({
   skipInstall,
   bundler,
   reactCompiler,
+  portless,
   presets,
 }: InstallTemplateArgs) => {
   console.log(pico.bold(`Using ${packageManager}.`));
@@ -261,6 +284,20 @@ export const installTemplate = async ({
   if (reactCompiler) {
     packageJson.devDependencies!["babel-plugin-react-compiler"] =
       versionsThirdParty["babel-plugin-react-compiler"];
+  }
+
+  /* Set up Portless for local development. */
+  if (portless) {
+    packageJson.portless = {
+      appPort: randomPort(),
+      name: sanitizePortlessName(appName),
+      script: "dev:app",
+    };
+    packageJson.scripts = {
+      ...packageJson.scripts,
+      dev: "portless",
+      "dev:app": `next dev${bundlerFlags}`,
+    };
   }
 
   /* Add Tailwind CSS dependencies. */
