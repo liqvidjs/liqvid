@@ -10,14 +10,18 @@ export function Reset({
   ...attrs
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const store = useLiveCodeStore();
-  const contents = useRef<Record<string, Record<string, string>>>({});
+  const contents = useRef<{
+    [groupName: string]: {
+      [filename: string]: string;
+    };
+  }>({});
 
   /* get contents */
   useEffect(() => {
     const state = store.getState();
-    for (const key in state.groups) {
+    for (const [key, group] of Object.entries(state.groups)) {
       contents.current[key] = {};
-      for (const file of state.groups[key].files) {
+      for (const file of group.files) {
         contents.current[key][file.filename] = file.view.state.doc.toString();
       }
     }
@@ -27,13 +31,13 @@ export function Reset({
   const reset = useCallback(() => {
     const state = store.getState();
     for (const groupName in contents.current) {
-      for (const file of state.groups[groupName].files) {
-        if (file.filename in contents.current[groupName]) {
+      for (const file of state.groups[groupName]!.files) {
+        if (file.filename in contents.current[groupName]!) {
           file.view.dispatch(
             file.view.state.update({
               changes: {
                 from: 0,
-                insert: contents.current[groupName][file.filename],
+                insert: contents.current[groupName]![file.filename],
                 to: file.view.state.doc.length,
               },
             }),

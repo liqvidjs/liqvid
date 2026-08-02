@@ -1,34 +1,44 @@
+import type { AbsoluteDir, AbsoluteFile, RelativeFile } from "effect-paths";
+
 export interface HostingProvider {
   publishContent(localDir: string): Promise<void>;
 }
 
 export interface FileUploadStatus {
   /** Absolute path to the local file */
-  filePath: string;
+  filePath: AbsoluteFile;
+
   /** Remote key/path */
-  key: string;
+  key: RelativeFile;
+
   /** Whether the file needs to be uploaded */
   needsUpload: boolean;
+
   /** Reason for the upload status */
   reason: "new" | "modified" | "unchanged";
 }
 
 export interface RemoteFileInfo {
   /** Remote key/path (relative to prefix) */
-  key: string;
+  key: RelativeFile;
+
   /** Size in bytes */
   size: number;
+
   /** Last modified date */
   lastModified: Date;
 }
 
 export interface FileDownloadStatus {
   /** Remote key/path */
-  key: string;
+  key: RelativeFile;
+
   /** Absolute path where the file will be saved locally */
-  localPath: string;
+  localPath: AbsoluteFile;
+
   /** Whether the file needs to be downloaded */
   needsDownload: boolean;
+
   /** Reason for the download status */
   reason: "new" | "modified" | "unchanged";
 }
@@ -40,7 +50,10 @@ export interface MediaHostingProvider {
    * @param rootDir - The root directory (for computing relative paths)
    * @returns Upload status for each file
    */
-  checkFiles(files: string[], rootDir: string): Promise<FileUploadStatus[]>;
+  checkFiles(
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
+  ): Promise<FileUploadStatus[]>;
 
   /**
    * Check which remote files need to be downloaded.
@@ -74,5 +87,5 @@ export interface MediaHostingProvider {
    * @param files - Absolute paths to the media files
    * @param rootDir - The root directory (for computing relative paths)
    */
-  publishMedia(files: string[], rootDir: string): Promise<void>;
+  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir): Promise<void>;
 }

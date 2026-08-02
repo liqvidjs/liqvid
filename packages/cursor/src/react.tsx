@@ -1,7 +1,7 @@
 import { useSeekable } from "@lqv/playback/react";
 import { useEffect, useRef } from "react";
 
-import { cursorReplay } from ".";
+import { cursorReplay } from "./index.ts";
 
 type CursorData = Parameters<typeof cursorReplay>[0]["data"];
 

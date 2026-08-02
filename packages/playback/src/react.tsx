@@ -200,6 +200,7 @@ export function usePlaybackEvent<
   /** Event callback to register */
   callback: (event: PlaybackEventsMap<P>[E]) => unknown,
 ) {
+  // @ts-expect-error TODO: fix this
   useEventListener(usePlaybackOptional(), eventName, callback);
 }
 

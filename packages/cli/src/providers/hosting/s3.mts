@@ -12,6 +12,11 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { ProviderConfigS3 } from "@liqvid/schemas";
 import { Redacted } from "effect";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeFile,
+} from "effect-paths";
 
 import { parallelMap } from "../../utils/parallel.mts";
 import type {
@@ -111,8 +116,8 @@ export class S3Provider implements MediaHostingProvider {
   }
 
   async checkFiles(
-    files: string[],
-    rootDir: string,
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
   ): Promise<FileUploadStatus[]> {
     return parallelMap(
       files,
@@ -129,7 +134,10 @@ export class S3Provider implements MediaHostingProvider {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
 
-  async publishMedia(files: string[], rootDir: string): Promise<void> {
+  async publishMedia(
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
+  ): Promise<void> {
     if (files.length === 0) {
       console.log("No media files to upload.");
       return;
@@ -175,9 +183,11 @@ export class S3Provider implements MediaHostingProvider {
         for (const obj of response.Contents) {
           if (obj.Key && obj.Size !== undefined && obj.LastModified) {
             // Remove prefix from key to get relative path
-            let relativeKey = obj.Key;
+            let relativeKey = RelativeFile(obj.Key);
             if (this.prefix && relativeKey.startsWith(`${this.prefix}/`)) {
-              relativeKey = relativeKey.slice(this.prefix.length + 1);
+              relativeKey = relativeKey.slice(
+                this.prefix.length + 1,
+              ) as RelativeFile;
             }
 
             results.push({
@@ -197,7 +207,7 @@ export class S3Provider implements MediaHostingProvider {
 
   async checkRemoteFiles(
     remoteFiles: RemoteFileInfo[],
-    rootDir: string,
+    rootDir: AbsoluteDir,
   ): Promise<FileDownloadStatus[]> {
     return parallelMap(
       remoteFiles,
@@ -235,7 +245,7 @@ export class S3Provider implements MediaHostingProvider {
    */
   private async getDownloadStatus(
     remoteFile: RemoteFileInfo,
-    localPath: string,
+    localPath: AbsoluteFile,
   ): Promise<FileDownloadStatus> {
     try {
       // Get local file modification time
@@ -276,7 +286,10 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Download a single file from S3
    */
-  private async downloadFile(key: string, localPath: string): Promise<void> {
+  private async downloadFile(
+    key: RelativeFile,
+    localPath: AbsoluteFile,
+  ): Promise<void> {
     const fullKey = this.buildKey(key);
 
     const response = await this.client.send(
@@ -310,8 +323,8 @@ export class S3Provider implements MediaHostingProvider {
    * Get the upload status for a single file.
    */
   private async getUploadStatus(
-    filePath: string,
-    key: string,
+    filePath: AbsoluteFile,
+    key: RelativeFile,
   ): Promise<FileUploadStatus> {
     try {
       // Get remote file metadata
@@ -351,7 +364,7 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Build the S3 key for a file
    */
-  private buildKey(relativePath: string): string {
+  private buildKey(relativePath: RelativeFile): RelativeFile {
     const parts: string[] = [];
 
     if (this.prefix) {
@@ -361,7 +374,7 @@ export class S3Provider implements MediaHostingProvider {
     parts.push(relativePath);
 
     // Normalize path separators to forward slashes for S3
-    return parts.join("/").replace(/\\/g, "/");
+    return RelativeFile(parts.join("/").replace(/\\/g, "/"));
   }
 
   /**

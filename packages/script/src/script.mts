@@ -72,10 +72,10 @@ export class Script<M extends string = string> extends EventEmitter<
 
     this.markers.has = this.__map.has.bind(this.__map) as (
       name: string,
-    ) => boolean;
+    ) => name is M;
 
     for (let index = 0; index < markers.length; ++index) {
-      const [name, stringDuration] = markers[index];
+      const [name, stringDuration] = markers[index]!;
 
       const dur = new Duration({
         milliseconds: parseTime(stringDuration as string),
@@ -105,7 +105,7 @@ export class Script<M extends string = string> extends EventEmitter<
       this.playback.duration$ = time;
     }
 
-    this.playback.addEventListener("seek", this.__updateMarker);
+    this.playback.addEventListener("seeked", this.__updateMarker);
     this.playback.addEventListener("timeupdate", this.__updateMarker);
   }
 
@@ -113,18 +113,18 @@ export class Script<M extends string = string> extends EventEmitter<
 
   /** The currently active marker. */
   get active(): Marker<M> {
-    return this.markers[this.__index];
+    return this.markers[this.__index]!;
   }
 
   /** Seek playback to the previous marker. */
   back(): void {
     const clampedPrevIndex = Math.max(0, this.__index - 1);
-    const prevMarker = this.markers[clampedPrevIndex];
+    const prevMarker = this.markers[clampedPrevIndex]!;
     this.playback.currentTime$ = prevMarker.start;
   }
 
   destroy() {
-    this.playback.removeEventListener("seek", this.__updateMarker);
+    this.playback.removeEventListener("seeked", this.__updateMarker);
     this.playback.removeEventListener("timeupdate", this.__updateMarker);
 
     this.clearEventListeners();
@@ -141,7 +141,7 @@ export class Script<M extends string = string> extends EventEmitter<
       this.markers.length - 1,
       this.__index + 1,
     );
-    const nextMarker = this.markers[clampedNextIndex];
+    const nextMarker = this.markers[clampedNextIndex]!;
     this.playback.currentTime$ = nextMarker.start;
   }
 

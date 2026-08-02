@@ -25,27 +25,27 @@
   position: absolute;
   top: 0;
   left: 0;
-  opacity: inherit;
   width: auto;
   height: 100%;
+  opacity: inherit;
   transition: all var(--ifm-transition-fast) ease;
 }
 
 .copyButtonSuccessIcon {
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.33);
-  opacity: 0;
   color: #00d600;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.33);
 }
 
 .copyButtonCopied .copyButtonIcon {
-  transform: scale(0.33);
   opacity: 0;
+  transform: scale(0.33);
 }
 
 .copyButtonCopied .copyButtonSuccessIcon {
-  transform: translate(-50%, -50%) scale(1);
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
   transition-delay: 0.075s;
 }

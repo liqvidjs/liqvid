@@ -1,6 +1,6 @@
 import type fs from "node:fs";
 
-import { Brand } from "effect";
+import { Brand, Schema } from "effect";
 
 import "./fs.d.ts";
 import "./fs-promises.d.ts";
@@ -52,9 +52,21 @@ export type AnyPath<S extends string = string> =
   | RelativePath<S>;
 
 /** Absolute/relative file path */
+export const SchemaAnyFile = Schema.Union([
+  Schema.String.pipe(Schema.fromBrand("AbsoluteFile", AbsoluteFile)),
+  Schema.String.pipe(Schema.fromBrand("RelativeFile", RelativeFile)),
+]);
+
+/** Absolute/relative file path */
 export type AnyFile<S extends string = string> =
   | AbsoluteFile<S>
   | RelativeFile<S>;
+
+/** Absolute/relative directory path */
+export const SchemaAnyDir = Schema.Union([
+  Schema.String.pipe(Schema.fromBrand("AbsoluteDir", AbsoluteDir)),
+  Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+]);
 
 /** Absolute/relative directory path */
 export type AnyDir<S extends string = string> = AbsoluteDir<S> | RelativeDir<S>;

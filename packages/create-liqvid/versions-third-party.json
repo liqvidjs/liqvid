@@ -42,10 +42,10 @@
   "mathjax": "^3",
   "next": "^16.2.11",
   "next-ws": "^2.2.8",
-  "no-private-imports": "^0.0.3",
+  "no-private-imports": "^0.0.4",
   "no-restricted-imports": "^0.0.3",
   "prettier": "^3.9.6",
-  "prettier-plugin-glsl": "^0.3.0",
+  "prettier-plugin-glsl": "^0.3.1",
   "react": "19.2.7",
   "react-dom": "19.2.7",
   "shader-sandbox": "^0.2.1",
@@ -55,6 +55,7 @@
   "tailwindcss": "^4",
   "three": "^0.185.1",
   "three-stdlib": "^2.36.1",
+  "type-fest": "^5.6",
   "typescript": "^6",
   "zustand": "^5"
 }

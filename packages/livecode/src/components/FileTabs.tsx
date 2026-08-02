@@ -47,7 +47,7 @@ export function FileTabs({
         groups: {
           ...state.groups,
           [activeGroup]: {
-            ...state.groups[activeGroup],
+            ...state.groups[activeGroup]!,
             activeFile: filename,
           },
         },
@@ -85,11 +85,11 @@ export function FileTabs({
         run: () => {
           const state = store.getState();
           if (!state.activeGroup) return false;
-          const group = state.groups[state.activeGroup];
+          const group = state.groups[state.activeGroup]!;
 
           if (group.files.length < i) return false;
 
-          select(group.files[i - 1].filename);
+          select(group.files[i - 1]!.filename);
 
           return true;
         },

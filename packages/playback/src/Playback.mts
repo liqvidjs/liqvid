@@ -28,6 +28,14 @@ export type ReadyStateItem = {
   readyState: number;
 };
 
+type KeyframeEffectOptionsWithDurations = Omit<
+  KeyframeEffectOptions,
+  "delay" | "duration"
+> & {
+  delay?: DurationLike;
+  duration: DurationLike;
+};
+
 /** Extended {@link CorePlayback Playback} supporting rich durations and the Web Animation API */
 export class Playback extends CorePlayback {
   private __animations: Animation[] = [];
@@ -118,9 +126,7 @@ export class Playback extends CorePlayback {
    */
   newAnimation<T extends Element>(
     keyframes: Keyframe[] | PropertyIndexedKeyframes,
-    options?:
-      | DurationLike
-      | (KeyframeEffectOptions & { duration: DurationLike }),
+    options?: DurationLike | KeyframeEffectOptionsWithDurations,
   ): (target: T | null) => Animation | undefined {
     let anim: Animation | undefined;
 
@@ -136,9 +142,21 @@ export class Playback extends CorePlayback {
         );
       }
 
-      anim = this.__adoptAnimation(target, keyframes, options);
+      anim = this.__adoptAnimation(
+        target,
+        keyframes,
+        transformOptions(options),
+      );
       return anim;
     };
+  }
+
+  /** Returns a unsigned short (enumeration) indicating the readiness state of the media. */
+  get readyState(): number {
+    return Array.from(this.__readyStateItems).reduce(
+      (acc, curr) => Math.min(acc, curr.readyState),
+      CorePlayback.HAVE_ENOUGH_DATA,
+    );
   }
 
   protected override __emit(eventName: PlaybackEvent | "readystatechange") {
@@ -154,30 +172,11 @@ export class Playback extends CorePlayback {
   private __adoptAnimation(
     target: Element,
     keyframes: Keyframe[] | PropertyIndexedKeyframes,
-    options?:
-      | DurationLike
-      | (KeyframeEffectOptions & {
-          delay?: DurationLike;
-          duration: DurationLike;
-        }),
+    options?: number | KeyframeEffectOptions,
   ): Animation | undefined {
-    let transformedOptions: number | undefined | KeyframeEffectOptions;
-
-    if (options) {
-      if ("duration" in options) {
-        transformedOptions = {
-          ...options,
-          delay: Duration.inMilliseconds(options.delay),
-          duration: Duration.inMilliseconds(options.duration),
-        };
-      } else {
-        transformedOptions = Duration.inMilliseconds(options);
-      }
-    }
-
     // create animation
     const anim = new Animation(
-      new KeyframeEffect(target, keyframes, transformedOptions),
+      new KeyframeEffect(target, keyframes, options),
       this.timeline,
     );
 
@@ -305,4 +304,30 @@ export class Playback extends CorePlayback {
       }
     });
   }
+}
+
+function transformOptions(options: DurationLike): number;
+function transformOptions(
+  options: KeyframeEffectOptionsWithDurations,
+): KeyframeEffectOptions;
+function transformOptions(options: undefined): undefined;
+
+function transformOptions(
+  options: DurationLike | KeyframeEffectOptionsWithDurations | undefined,
+): number | KeyframeEffectOptions | undefined;
+
+function transformOptions(
+  options: DurationLike | KeyframeEffectOptionsWithDurations | undefined,
+): number | KeyframeEffectOptions | undefined {
+  if (!options) return options;
+
+  if ("duration" in options) {
+    return {
+      ...options,
+      delay: options.delay ? Duration.inMilliseconds(options.delay) : 0,
+      duration: Duration.inMilliseconds(options.duration),
+    };
+  }
+
+  return Duration.inMilliseconds(options);
 }

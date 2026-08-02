@@ -214,7 +214,7 @@ export function invertDiff<T>(state: T, diff: ObjectDiff<T>): ObjectDiff<T> {
         if (typeof target !== "object" || target === null) {
           throw new TypeError("Expected object");
         }
-        Object.assign(ret, objectDiff(key, invertDiff(target, valueB)));
+        Object.assign(ret, objectDiff(key, invertDiff(target as T, valueB)));
       },
     });
   }
@@ -264,7 +264,10 @@ export function invertArrayDiff<T>(
           throw new TypeError("Expected object");
         }
         invItemDiffs.push(
-          objectItemDiff(offset + delta, invertDiff(target, valueB)),
+          objectItemDiff(
+            offset + delta,
+            invertDiff(target as T[string & keyof T], valueB),
+          ),
         );
       },
       // set: the diff replaced `state[i]` with a new value; to invert, set it

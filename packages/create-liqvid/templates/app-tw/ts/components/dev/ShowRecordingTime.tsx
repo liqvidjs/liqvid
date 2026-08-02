@@ -10,13 +10,18 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 
+// for tree-shaking to work, this constant cannot be extracted to
+// a separate file until the below PR is merged
+// https://github.com/vercel/next.js/pull/90300
+const IS_PROD = process.env.NODE_ENV === "production";
+
 /**
  * Displays how long you've been recording for. You can specify a maximum length to target,
  * e.g. you want your videos to come in under 5 minutes, and it will warn you when you approach
  * or exceed this maximum length.
  */
 export const ShowRecordingTime = dynamic(async () => {
-  if (process.env.NODE_ENV === "production") {
+  if (IS_PROD) {
     return {
       default: () => null,
     };

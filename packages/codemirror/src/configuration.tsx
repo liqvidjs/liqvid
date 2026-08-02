@@ -13,7 +13,7 @@ export function ConfigurationComponent({
 
   // TODO: support multiple targets
   useEffect(() => {
-    const instance = Array.from(instances)[0];
+    const instance = Array.from(instances)[0]!;
     instance.provideRecorder(CodeRecording.recorder);
 
     return () => {

@@ -1,10 +1,7 @@
-import {
-  compress,
-  type RecorderPlugin,
-  ReplayDataRecorder,
-} from "@liqvid/recording";
-import { bind } from "@liqvid/utils/misc";
-import type { ReplayData } from "@liqvid/utils/replay-data";
+import { type RecordingPlugin, ReplayDataRecorder } from "@liqvid/recording";
+import { compress } from "@liqvid/recording/utils";
+import type { ReplayData } from "@liqvid/utils";
+import { bind } from "@liqvid/utils";
 
 export class CursorRecorder extends ReplayDataRecorder<[number, number]> {
   /** Container element for recording. */
@@ -66,7 +63,7 @@ const icon = (
   </g>
 );
 
-export const CursorRecording: RecorderPlugin<
+export const CursorRecording: RecordingPlugin<
   [number, [number, number]],
   ReplayData<[number, number]>,
   CursorRecorder

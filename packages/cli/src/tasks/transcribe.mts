@@ -508,7 +508,7 @@ export const transcribeCommand: CommandModule = {
         whisperConfig: {
           gpu: argv.gpu as boolean,
           modelName: argv.model as WhisperModelName,
-          modelPath: argv["model-path"] as string | undefined,
+          modelPath: argv["model-path"] as AnyFile | undefined,
           translateToEnglish: argv.translate as boolean,
         },
       }).pipe(

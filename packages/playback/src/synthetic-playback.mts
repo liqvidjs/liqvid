@@ -200,14 +200,6 @@ export class CorePlayback extends EventEmitter<
     this.__emit("ratechange");
   }
 
-  /** Returns a unsigned short (enumeration) indicating the readiness state of the media. */
-  get readyState(): number {
-    return Array.from(this.__readyStateItems).reduce(
-      (acc, curr) => Math.min(acc, curr.readyState),
-      CorePlayback.HAVE_ENOUGH_DATA,
-    );
-  }
-
   /** Gets or sets a flag that indicates whether the playback is currently moving to a new position. */
   get seeking(): boolean {
     return this.__seeking;

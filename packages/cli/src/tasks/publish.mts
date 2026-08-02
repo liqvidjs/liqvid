@@ -223,8 +223,8 @@ function publishContentFiles(
  */
 function publishMediaFiles(
   config: LiqvidConfig,
-  searchDir: string,
-  baseDir: string,
+  searchDir: AbsoluteDir,
+  baseDir: RelativeDir,
   dryRun: boolean,
 ) {
   return Effect.gen(function* () {
@@ -233,13 +233,14 @@ function publishMediaFiles(
       config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
 
     // Find media files matching the glob patterns
-    const mediaFiles = yield* Effect.promise(() =>
-      fg(patterns as string[], {
-        absolute: true,
-        cwd: searchDir,
-        dot: true, // Include files in .liqvid directories
-        onlyFiles: true,
-      }),
+    const mediaFiles = yield* Effect.promise(
+      () =>
+        fg(patterns as string[], {
+          absolute: true,
+          cwd: searchDir,
+          dot: true, // Include files in .liqvid directories
+          onlyFiles: true,
+        }) as Promise<AbsoluteFile[]>,
     );
 
     if (mediaFiles.length === 0) {
@@ -371,8 +372,8 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
  */
 function showDryRunInfo(
   provider: MediaHostingProvider,
-  mediaFiles: string[],
-  rootDir: string,
+  mediaFiles: AbsoluteFile[],
+  rootDir: AbsoluteDir,
   _config: LiqvidConfig,
 ) {
   return Effect.gen(function* () {

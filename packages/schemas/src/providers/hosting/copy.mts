@@ -1,14 +1,15 @@
 import { Effect, Schema } from "effect";
+import { SchemaAnyDir } from "effect-paths";
 
 /**
  * Destination for the copy provider.
  * Can be a single directory path, or separate paths for hosting vs media mode.
  */
 export const CopyDestination = Schema.Union([
-  Schema.String,
+  SchemaAnyDir,
   Schema.Struct({
-    hosting: Schema.String,
-    media: Schema.String,
+    hosting: SchemaAnyDir,
+    media: SchemaAnyDir,
   }),
 ]);
 export type CopyDestination = (typeof CopyDestination)["Type"];

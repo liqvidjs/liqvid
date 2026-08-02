@@ -29,14 +29,13 @@
 }
 
 .button {
-  background-color: light-dark(
-    hsl(from var(--bg) h s calc(l - 6)),
-    hsl(from var(--bg) h s calc(l + 1))
-  );
-
   color: light-dark(
     hsl(from var(--fg) h s calc(l + 30)),
     hsl(from var(--fg) h s calc(l - 30))
+  );
+  background-color: light-dark(
+    hsl(from var(--bg) h s calc(l - 6)),
+    hsl(from var(--bg) h s calc(l + 1))
   );
 
   &:hover,
@@ -59,14 +58,13 @@
   }
 
   &:disabled {
-    background-color: light-dark(
-      hsl(from var(--bg) h s calc(l - 4)),
-      hsl(from var(--bg) h s calc(l))
-    );
-
     color: light-dark(
       hsl(from var(--fg) h s calc(l + 60)),
       hsl(from var(--fg) h s calc(l - 60))
+    );
+    background-color: light-dark(
+      hsl(from var(--bg) h s calc(l - 4)),
+      hsl(from var(--bg) h s calc(l))
     );
   }
 }
@@ -75,38 +73,38 @@
   color: light-dark(#8e8e90, #8c8c8c);
 
   &[aria-selected="true"] {
-    background-color: var(--bg);
     color: light-dark(#000, #fff);
+    background-color: var(--bg);
     box-shadow:
       inset 0px 3px var(--lv-accent),
       0 1px var(--bg);
   }
 
   &[class*="lqv-filetype-"]::before {
-    font-family: monospace;
-    font-size: 14px;
+    position: absolute;
     left: 8px;
     width: 1em;
+    font-family: monospace;
+    font-size: 14px;
     text-align: center;
     white-space: nowrap;
-    position: absolute;
   }
 
   /* specific filetypes */
   &[class*="lqv-filetype-html"]::before {
-    content: "<>";
     color: #f66;
+    content: "<>";
   }
 
   &[class*="lqv-filetype-js"]::before {
-    content: "JS";
     font-size: 10px;
     color: light-dark(darkgoldenrod, yellow);
+    content: "JS";
   }
 
   &[class*="lqv-filetype-css"]::before {
-    content: "#";
     color: #1a69b5;
+    content: "#";
   }
 }
 
@@ -119,14 +117,14 @@
 }
 
 .split {
-  border-radius: 0 0 var(--ifm-pre-border-radius) var(--ifm-pre-border-radius);
   display: flex;
   flex: 1;
   overflow: auto;
+  border-radius: 0 0 var(--ifm-pre-border-radius) var(--ifm-pre-border-radius);
 
   [class~="cm-scroller"] {
-    border-bottom-left-radius: var(--ifm-pre-border-radius);
     scrollbar-width: thin;
+    border-bottom-left-radius: var(--ifm-pre-border-radius);
   }
 }
 
@@ -138,35 +136,35 @@
 
 .resize {
   &[data-dir="ew"] {
+    height: 100%;
     cursor: ew-resize;
     translate: -50% 0;
-    height: 100%;
   }
 
   &[data-dir="ns"] {
+    width: 100%;
     cursor: ns-resize;
     translate: 0 -50%;
-    width: 100%;
   }
 }
 
 .DropdownMenuContent {
   background-color: hsl(from var(--bg) h s calc(l - 6));
   border-radius: 0 0 4px 4px;
+  animation-name: slideUpAndFade;
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
-  animation-name: slideUpAndFade;
 }
 
 .DropdownMenuItem {
-  background-color: transparent;
-  cursor: pointer;
   padding: 4px 16px;
+  cursor: pointer;
+  background-color: transparent;
 
   &[data-highlighted] {
-    background-color: hsl(from var(--bg) h s calc(l - 2));
     outline: none;
+    background-color: hsl(from var(--bg) h s calc(l - 2));
   }
 }
 

@@ -69,7 +69,7 @@ export function mergeArrayDiffs<T>(
               tailA[tailOffset] = applyArrayDiff(valueA, valueB);
             },
             object(_, valueB) {
-              assertType<Record<string, unknown>>(valueA);
+              assertType<T[string & keyof T]>(valueA);
               tailA[tailOffset] = applyDiff(valueA, valueB);
             },
             // set
@@ -139,7 +139,7 @@ export function mergeArrayDiffs<T>(
             object(_, valueB) {
               assertType<object>(valueA);
               itemDiffs.push(
-                changeItemDiff<any>(offsetA, applyDiff(valueA, valueB)),
+                changeItemDiff(offsetA, applyDiff<any>(valueA, valueB)),
               );
             },
             // change(a) * change(b) = change(b)
@@ -257,12 +257,12 @@ export function mergeDiffs<T>(
         consume(a, key, {
           // set(a) * object(b) = set(a*b)
           change(valueA) {
-            assertType<object>(valueA);
+            assertType<T>(valueA);
             Object.assign(ret, changeDiff(key, applyDiff(valueA, valueB)));
           },
           // create(a) * object(b) = object(a*b)
           create(valueA) {
-            assertType<object>(valueA);
+            assertType<T>(valueA);
             Object.assign(ret, creationDiff(key, applyDiff(valueA, valueB)));
           },
           else(name) {

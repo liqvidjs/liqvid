@@ -1,4 +1,4 @@
-// import type { ProviderConfigLiqvidStudio } from "@liqvid/schemas";
+import type { ProviderConfigLiqvidStudio } from "@liqvid/schemas";
 
 import type {
   FileDownloadStatus,
@@ -8,7 +8,8 @@ import type {
 } from "../types.mts";
 
 export class LiqvidStudioProvider implements MediaHostingProvider {
-  // constructor(_options: ProviderConfigLiqvidStudio) {}
+  // biome-ignore lint/complexity/noUselessConstructor: will implement later
+  constructor(_options: ProviderConfigLiqvidStudio) {}
 
   async checkFiles(
     _files: string[],

@@ -1,6 +1,6 @@
-import { replay } from "@liqvid/utils/animation";
-import { length, type ReplayData } from "@liqvid/utils/replay-data";
-import type { MediaElement } from "@lqv/playback";
+import { replay } from "@liqvid/animation";
+import { length, type ReplayData } from "@liqvid/utils";
+import type { Seekable } from "@lqv/playback";
 
 /** Alignment string shortcut */
 export type AlignmentString =
@@ -31,8 +31,8 @@ export function cursorReplay(opts: {
   /** Cursor data to replay. */
   data: ReplayData<[number, number]>;
 
-  /** {@link MediaElement} to sync with. */
-  playback: MediaElement;
+  /** {@link Seekable} to sync with. */
+  playback: Seekable;
 
   /**
    * When the cursor should first appear.
@@ -171,11 +171,11 @@ function parseAlignment(align: AlignmentString): [number, number] {
 
 /**
  * Synchronize with playback.
- * @param playback {@link MediaElement} to synchronize with.
+ * @param playback {@link Seekable} to synchronize with.
  * @param update Callback function.
  */
 function subscribe(
-  playback: MediaElement,
+  playback: Seekable,
   update: (t: number) => void,
 ): () => void {
   const callback = (): void => update(playback.currentTime);

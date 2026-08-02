@@ -1,6 +1,6 @@
 import type { PathLike } from "node:fs";
 
-declare module "node:fs/promises" {
+export declare module "node:fs/promises" {
   import type { AbsoluteDir, RelativePath } from "effect-paths";
 
   /**

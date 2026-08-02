@@ -1,4 +1,5 @@
 import { Effect, Schema } from "effect";
+import { SchemaAnyFile } from "effect-paths";
 
 /**
  * Available Whisper model names.
@@ -99,7 +100,7 @@ export const WhisperConfig = Schema.Struct({
    * Explicit path to a ggml Whisper model file. When set, this takes
    * precedence over {@link WhisperConfig.modelName} and no download occurs.
    */
-  modelPath: Schema.String.pipe(Schema.optional),
+  modelPath: SchemaAnyFile.pipe(Schema.optional),
 
   /**
    * Whether to translate to English.

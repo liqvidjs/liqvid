@@ -90,7 +90,11 @@ export function applyArrayDiff<T>(
         ) as T;
       },
       object(offset, item) {
-        applyDiff(copy[copy.length - offset], item, true) as T;
+        applyDiff(
+          copy[copy.length - offset] as T[string & keyof T],
+          item,
+          true,
+        ) as T;
       },
       set(offset, item) {
         copy[copy.length - offset] = cloneValue(item) as T;

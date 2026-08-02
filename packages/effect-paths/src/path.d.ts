@@ -1,4 +1,4 @@
-declare module "node:path" {
+export declare module "node:path" {
   import type {
     AbsoluteDir,
     AbsoluteFile,
@@ -51,6 +51,11 @@ declare module "node:path" {
 
   /* ------------------------------ join ------------------------------ */
   function join<P extends AnyPath>(singleton: P): P;
+
+  function join(
+    head: import("effect-paths").AbsoluteDir,
+    tail: import("effect-paths").RelativeFile,
+  ): AbsoluteFile;
 
   function join<T extends RelativePath>(
     head: AbsoluteDir,

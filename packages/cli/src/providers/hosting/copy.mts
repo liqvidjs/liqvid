@@ -3,6 +3,12 @@ import * as path from "node:path";
 
 import type { ProviderConfigCopy } from "@liqvid/schemas";
 import { promiseAllKeyed } from "@liqvid/utils";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeDir,
+  type RelativeFile,
+} from "effect-paths";
 
 import { expandTilde } from "../../utils/paths.mts";
 import type {
@@ -27,11 +33,17 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
   /**
    * Get the destination directory for a given mode.
    */
-  #getDestination(mode: "hosting" | "media"): string {
+  #getDestination(mode: "hosting" | "media") {
     const { destination } = this.#config;
-    const dest =
+    let dest =
       typeof destination === "string" ? destination : destination[mode];
-    return expandTilde(dest);
+
+    dest = expandTilde(dest);
+
+    if (!path.isAbsolute(dest)) {
+      dest = path.resolve(process.cwd(), dest);
+    }
+    return dest;
   }
 
   /**
@@ -96,8 +108,8 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
   // MediaHostingProvider implementation
 
   async checkFiles(
-    files: string[],
-    rootDir: string,
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
   ): Promise<FileUploadStatus[]> {
     const destination = this.#getDestination("media");
     const results: FileUploadStatus[] = [];
@@ -117,9 +129,9 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
   }
 
   async #getUploadStatus(
-    srcPath: string,
-    destPath: string,
-    key: string,
+    srcPath: AbsoluteFile,
+    destPath: AbsoluteFile,
+    key: RelativeFile,
   ): Promise<FileUploadStatus> {
     try {
       const { srcStats, destStats } = await promiseAllKeyed({
@@ -154,7 +166,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
   async checkRemoteFiles(
     remoteFiles: RemoteFileInfo[],
-    rootDir: string,
+    rootDir: AbsoluteDir,
   ): Promise<FileDownloadStatus[]> {
     const destination = this.#getDestination("media");
     const results: FileDownloadStatus[] = [];
@@ -175,8 +187,8 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
   async #getDownloadStatus(
     remoteFile: RemoteFileInfo,
-    localPath: string,
-    remotePath: string,
+    localPath: AbsoluteFile,
+    remotePath: AbsoluteFile,
   ): Promise<FileDownloadStatus> {
     try {
       const localStats = await fsp.stat(localPath);
@@ -245,14 +257,14 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     const destination = this.#getDestination("media");
     const results: RemoteFileInfo[] = [];
 
-    await this.#listFilesRecursive(destination, "", results);
+    await this.#listFilesRecursive(destination, RelativeDir(""), results);
 
     return results;
   }
 
   async #listFilesRecursive(
-    baseDir: string,
-    relativePath: string,
+    baseDir: AbsoluteDir,
+    relativePath: RelativeDir,
     results: RemoteFileInfo[],
   ): Promise<void> {
     const currentDir = path.join(baseDir, relativePath);
@@ -261,13 +273,13 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
       const entries = await fsp.readdir(currentDir, { withFileTypes: true });
 
       for (const entry of entries) {
-        const entryRelativePath = path.join(relativePath, entry.name);
-
         if (entry.isDirectory()) {
+          const entryRelativePath = path.join(relativePath, entry.name);
           await this.#listFilesRecursive(baseDir, entryRelativePath, results);
-        } else {
+        } else if (entry.isFile()) {
           const fullPath = path.join(currentDir, entry.name);
           const stats = await fsp.stat(fullPath);
+          const entryRelativePath = path.join(relativePath, entry.name);
 
           results.push({
             key: entryRelativePath,
@@ -284,7 +296,10 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     }
   }
 
-  async publishMedia(files: string[], rootDir: string): Promise<void> {
+  async publishMedia(
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
+  ): Promise<void> {
     const destination = this.#getDestination("media");
 
     if (files.length === 0) {
