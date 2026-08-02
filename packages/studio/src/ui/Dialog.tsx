@@ -115,14 +115,13 @@ export function DialogPopup({
 }: React.ComponentProps<typeof Dialog.Popup> & {
   size?: "auto" | "small" | "medium" | "large" | "huge";
 }) {
-  const { level } = useDialogApi();
   const { colorScheme } = useColorScheme();
 
   return (
     <Dialog.Popup
       className={clsx(styles.Content, styles[size], className)}
       data-color-scheme={colorScheme}
-      style={{ colorScheme, zIndex: 20 * level }}
+      style={{ colorScheme }}
       {...props}
     />
   );

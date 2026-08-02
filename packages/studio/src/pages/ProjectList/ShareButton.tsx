@@ -72,6 +72,8 @@ export function ShareButton({
             {t.title}
           </DialogTitle>
 
+          <DialogClose />
+
           <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
             <TabsList style={{ fontSize: "18px" }}>
               <TabsTrigger value="screenshots">
@@ -110,10 +112,6 @@ export function ShareButton({
               <CaptionsSection isOpen={open} />
             </TabsContent>
           </Tabs>
-
-          <div className={rootStyles.dialogActions}>
-            <DialogClose>{c.close}</DialogClose>
-          </div>
         </DialogPopup>
       </DialogPortal>
     </DialogRoot>

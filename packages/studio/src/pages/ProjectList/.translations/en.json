@@ -53,6 +53,13 @@
     },
     "empty": "No screenshots yet. Click \"Add\" to capture one.",
     "inProgress": "Capturing...",
+    "item": {
+      "delete": "Delete screenshot",
+      "rename": "Rename screenshot",
+      "useOpenGraph": "Use as OpenGraph image",
+      "useTwitter": "Use as Twitter image",
+      "viewFullSize": "View full size"
+    },
     "renameDialog": {
       "action": "Rename",
       "newName": "New name",

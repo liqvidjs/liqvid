@@ -118,7 +118,7 @@ function makeInterpolator<T extends TranslationJson>(
           interpolations: Record<string, React.ReactNode>,
         ) => {
           return (value.__template as string)
-            .split(/$\{([^}]+)\}/g)
+            .split(/\$\{([^}]+)\}/g)
             .map((s, i) => (
               <Fragment key={i}>{i % 2 === 0 ? s : interpolations[s]}</Fragment>
             ));

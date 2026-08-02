@@ -113,6 +113,7 @@ function ScreenshotItem({
   onDelete,
   onPreview,
 }: ScreenshotItemProps) {
+  const t = useTranslations<T>().screenshots.item;
   const projectPath = useProjectPath();
 
   const handleCopyAs = async (target: CopyTarget) => {
@@ -146,7 +147,7 @@ function ScreenshotItem({
       <Button
         className={styles.screenshotThumbnailButton}
         onClick={() => onPreview(src, alt)}
-        title="View full size"
+        title={t.viewFullSize}
         type="button"
       >
         <img alt={alt} className={styles.screenshotThumbnail} src={src} />
@@ -170,8 +171,7 @@ function ScreenshotItem({
         <Button
           className={shareStyles.copyButton}
           onClick={() => handleCopyAs("opengraph-image.png")}
-          title="Use as OpenGraph image"
-          type="button"
+          title={t.useOpenGraph}
         >
           <CopyIcon size={14} />
           {" OG"}
@@ -179,8 +179,7 @@ function ScreenshotItem({
         <Button
           className={shareStyles.copyButton}
           onClick={() => handleCopyAs("twitter-image.png")}
-          title="Use as Twitter image"
-          type="button"
+          title={t.useTwitter}
         >
           <CopyIcon size={14} />
           {" Twitter"}
@@ -190,15 +189,14 @@ function ScreenshotItem({
             <Button
               className={shareStyles.iconButton}
               onClick={() => onRename(screenshot.id)}
-              title="Rename screenshot"
-              type="button"
+              title={t.rename}
             >
               <PencilSimpleIcon size={14} />
             </Button>
             <Button
               className={shareStyles.deleteButton}
               onClick={() => onDelete(screenshot.id)}
-              title="Delete screenshot"
+              title={t.delete}
             >
               <TrashIcon size={14} />
             </Button>
