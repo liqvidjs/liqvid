@@ -57,6 +57,7 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "effect": "catalog:dev",
     "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",

@@ -2,24 +2,25 @@
   "name": "@liqvid/helpers",
   "version": "1.0.0-alpha.3",
   "description": "Convenience components for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/helpers#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     }
-  },
-  "files": [
-    "dist/*"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:postclean",
@@ -33,7 +34,6 @@
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/helpers#readme",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "clsx": "catalog:"
@@ -43,6 +43,7 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "csstype": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

@@ -43,6 +43,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

@@ -2,7 +2,21 @@
   "name": "@liqvid/cli",
   "version": "2.0.0-alpha.3",
   "description": "Liqvid command line utility",
-  "main": "src/index.mts",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*",
+    "liqvid-cli.mjs",
+    "templates/*"
+  ],
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",
@@ -60,25 +74,6 @@
       "import": "./dist/esm/utils.mjs"
     }
   },
-  "bin": {
-    "liqvid": "liqvid-cli.mjs"
-  },
-  "files": [
-    "dist/*",
-    "liqvid-cli.mjs",
-    "templates/*"
-  ],
-  "sideEffects": false,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid#readme",
   "scripts": {
     "build": "tsc --build",
     "lint": "biome check --fix",
@@ -117,6 +112,7 @@
     "@types/cli-progress": "catalog:dev",
     "@types/pluralize": "catalog:",
     "@types/yargs": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
@@ -124,5 +120,10 @@
   "peerDependencies": {
     "effect-paths": "workspace:^",
     "smart-whisper": "catalog:peer"
+  },
+  "sideEffects": false,
+  "main": "dist/esm/index.mjs",
+  "bin": {
+    "liqvid": "liqvid-cli.mjs"
   }
 }

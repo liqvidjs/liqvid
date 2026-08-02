@@ -61,6 +61,7 @@
     "@tldraw/tlschema": "catalog:peer",
     "@types/jest": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "tldraw": "catalog:peer",
     "ts-jest": "catalog:dev",

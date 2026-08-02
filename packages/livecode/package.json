@@ -67,6 +67,7 @@
     "@lqv/codemirror": "workspace:^",
     "@types/babel__standalone": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "glslx": "catalog:dev",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",

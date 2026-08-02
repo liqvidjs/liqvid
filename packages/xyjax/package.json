@@ -41,14 +41,15 @@
     "@biomejs/biome": "catalog:dev",
     "@liqvid/mathjax": "workspace:^",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "liqvid": "workspace:^",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/mathjax": "workspace:^1.0.0-alpha.0",
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
   },
   "keywords": [

@@ -2,24 +2,25 @@
   "name": "@liqvid/controls",
   "version": "1.0.0-alpha.2",
   "description": "Controls for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/controls#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     }
-  },
-  "files": [
-    "dist/*"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
   },
   "scripts": {
     "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:postclean",
@@ -33,7 +34,6 @@
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/controls#readme",
   "dependencies": {
     "clsx": "catalog:"
   },
@@ -44,6 +44,7 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "ts-jest": "catalog:dev",
     "typedoc": "catalog:dev",

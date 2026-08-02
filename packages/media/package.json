@@ -59,6 +59,7 @@
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "effect": "catalog:dev",
     "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",
@@ -71,9 +72,9 @@
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
-    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "execa": "catalog:",
     "react": "catalog:peer"

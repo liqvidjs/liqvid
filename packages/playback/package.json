@@ -47,6 +47,7 @@
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "babel-jest": "catalog:",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

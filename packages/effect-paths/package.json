@@ -41,6 +41,7 @@
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",
     "@types/node": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "effect": "catalog:dev",
     "typescript": "catalog:dev"
   },

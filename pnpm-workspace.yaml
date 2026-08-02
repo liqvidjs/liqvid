@@ -173,7 +173,7 @@ catalogs:
     "@effect/tsgo": ^0.16.3
     "@jest/globals": ^30.3.0
     "@lezer/highlight": 1.2.3
-    '@testing-library/react': ^16.3.2
+    "@testing-library/react": ^16.3.2
     "@types/babel__standalone": ^7.1.9
     "@types/cli-progress": ^3.11.6
     "@types/jest": ^30.0.0
@@ -189,6 +189,7 @@ catalogs:
     "@types/ws": ^8.18.1
     "@types/yargs": ^17.0.35
     "@types/yargs-parser": ^21.0.3
+    "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.1
     csstype: ^3.2.3
     effect: 4.0.0-beta.98
@@ -210,7 +211,7 @@ catalogs:
     type-fest: ^5.6.0
     typedoc: ^0.28.19
     typedoc-plugin-markdown: ^4.11.0
-    typescript: ^6
+    typescript: ^7
   peer:
     "@babel/standalone": ">=7"
     "@codemirror/autocomplete": ">=6"

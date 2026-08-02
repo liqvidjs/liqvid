@@ -2,6 +2,20 @@
   "name": "@liqvid/animation",
   "version": "1.0.0-alpha.0",
   "description": "Animation utilities for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/animation#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid",
+    "directory": "packages/animation"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.ts",
@@ -9,10 +23,6 @@
       "import": "./dist/esm/index.js"
     }
   },
-  "types": "./dist/types/index.d.ts",
-  "files": [
-    "dist/*"
-  ],
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -26,23 +36,13 @@
     "test": "jest --coverage",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid",
-    "directory": "packages/animation"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/animation#readme",
   "dependencies": {
     "bezier-easing": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/jest": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "ts-jest": "catalog:dev",
     "typedoc": "catalog:dev",
@@ -54,5 +54,6 @@
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"
   },
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "types": "./dist/types/index.d.ts"
 }

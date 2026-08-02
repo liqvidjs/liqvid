@@ -2,6 +2,16 @@
   "name": "@liqvid/katex",
   "version": "1.0.0-alpha.1",
   "description": "KaTeX integration for Liqvid",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "files": [
     "dist/*"
   ],
@@ -12,11 +22,6 @@
       "import": "./dist/esm/index.js"
     }
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "keywords": [
-    "liqvid",
-    "katex"
-  ],
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
@@ -29,18 +34,9 @@
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/katex",
-  "license": "MIT",
   "dependencies": {
-    "@radix-ui/react-slot": "catalog:",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.3"
+    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
+    "@radix-ui/react-slot": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
@@ -48,14 +44,15 @@
     "@types/jest": "catalog:dev",
     "@types/katex": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "katex": "catalog:peer",
     "@liqvid/player": "workspace:^1.0.0-alpha.0",
+    "katex": "catalog:peer",
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
@@ -64,5 +61,9 @@
     }
   },
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "keywords": [
+    "liqvid",
+    "katex"
+  ]
 }

@@ -46,6 +46,7 @@
     "@liqvid/recording": "workspace:",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "effect": "catalog:dev",
     "effect-paths": "workspace:^",
     "typedoc": "catalog:dev",

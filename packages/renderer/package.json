@@ -83,6 +83,7 @@
     "@effect/tsgo": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
     "@types/yargs-parser": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

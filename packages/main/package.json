@@ -48,6 +48,7 @@
     "@biomejs/biome": "catalog:dev",
     "@types/jest": "catalog:dev",
     "@types/react": "catalog:dev",
+    "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "nib": "catalog:dev",
     "stylus": "catalog:dev",
