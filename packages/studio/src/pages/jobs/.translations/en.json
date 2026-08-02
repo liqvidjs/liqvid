@@ -4,6 +4,11 @@
   "completed": "Completed",
   "delete": "Delete",
   "failed": "Failed",
+  "levelDebug": "Debug",
+  "levelError": "Errors",
+  "levelInfo": "Info",
+  "levelLog": "Logs",
+  "levelWarn": "Warnings",
   "running": "Running",
   "title": "Jobs"
 }

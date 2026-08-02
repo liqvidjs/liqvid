@@ -40,6 +40,10 @@
     "colorScheme": "Color Scheme",
     "confirmDialog": {
       "action": "Replace",
+      "message": {
+        "__template": "The file ${filename} already exists. Do you want to replace it?",
+        "filename": ""
+      },
       "title": "Confirm Overwrite"
     },
     "deleteDialog": {
