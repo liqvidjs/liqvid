@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:all": "pnpm --filter '!create-liqvid' --filter '!docs' run --recursive build",
-    "lint:all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' run --recursive lint",
+    "build:all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' run --no-bail --recursive build",
+    "lint:all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' run --no-bail --recursive lint",
+    "typecheck:all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' run --no-bail --recursive lint:tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
