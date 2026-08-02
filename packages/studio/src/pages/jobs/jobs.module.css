@@ -131,3 +131,44 @@
 .message {
   white-space: pre-wrap;
 }
+
+.filter {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin: 1em 0;
+}
+
+.filterButton {
+  padding: 0.25rem 0.6rem;
+  font-size: var(--lvs-text-base);
+  color: var(--gray-normal);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    background: var(--gray-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-focus);
+    outline-offset: 1px;
+  }
+}
+
+.filterActive {
+  color: var(--accent-solid);
+  background: var(--accent-ui);
+  border-bottom-color: var(--accent-solid);
+
+  &:hover {
+    background: var(--accent-ui);
+  }
+}

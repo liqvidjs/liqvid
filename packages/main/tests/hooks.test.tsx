@@ -1,11 +1,10 @@
 import { render } from "@testing-library/react";
-import * as React from "react";
 
 import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
 
 import {
-  type KeyMap,
+  type Keymap,
   Playback,
   Player,
   type Script,
@@ -13,7 +12,7 @@ import {
   usePlayback,
   usePlayer,
   useScript,
-} from "..";
+} from "../src/index.ts";
 
 function Test<T>(props: {
   hook: () => T;
@@ -29,7 +28,7 @@ describe("Hooks", () => {
   const playback = new Playback({ duration: 60000 });
 
   test("useKeyMap", () => {
-    const o = { value: null as KeyMap };
+    const o = { value: null as Keymap };
     let player: Player;
     render(
       <Player playback={playback} ref={(ref) => (player = ref)}>

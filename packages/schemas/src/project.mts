@@ -80,9 +80,6 @@ export type ProjectMeta = (typeof ProjectMeta)["Type"];
  * `@liqvid/duration` serialization marker so it can be revived with
  * `deserialize` on the client.
  */
-export type SerializedProjectMeta = Omit<
-  (typeof ProjectMeta)["Encoded"],
-  "duration"
-> & {
+export type SerializedProjectMeta = Omit<ProjectMeta, "duration"> & {
   duration: SerializedDuration;
 };

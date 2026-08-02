@@ -8,12 +8,14 @@ export class PythonInterpreter {
   }
 
   read(filename: string): string {
-    if (
-      Sk.builtinFiles === undefined ||
-      Sk.builtinFiles.files[filename] === undefined
-    )
-      throw `File not found: '${filename}'`;
-    return Sk.builtinFiles.files[filename];
+    const file = Sk.builtinFiles?.files[filename];
+    if (!file) throw new Error(`File not found: '${filename}'`);
+
+    if (typeof file !== "string") {
+      throw new Error(`Cannot read synchronously: '${filename}'`);
+    }
+
+    return file;
   }
 
   async run(code: string): Promise<string[]> {

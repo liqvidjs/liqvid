@@ -40,6 +40,11 @@ type SerializationResult<T> = T extends { toJSON(): infer S }
   ? S
   : T extends ReadonlyArray<any> & { [extra: string | symbol]: any }
     ? { [key in keyof T]: SerializationResult<T[key]> }
-    : T extends Record<string, any>
-      ? { [k in keyof T]: SerializationResult<T[k]> }
-      : T;
+    : // put this here first to handle branded strings
+      T extends bigint | boolean | number | string | null
+      ? T
+      : T extends Record<string, any>
+        ? {
+            [k in keyof T]: SerializationResult<T[k]>;
+          }
+        : T;

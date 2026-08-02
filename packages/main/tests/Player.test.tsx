@@ -1,18 +1,22 @@
 import { fireEvent, render } from "@testing-library/react";
-import * as React from "react";
 
-import "./matchMedia.mock";
 import "./DocumentTimeline.mock";
+import "./matchMedia.mock";
 
-import { Playback, Player } from "..";
+import { Playback, Player } from "../src/index.ts";
 
 describe("Player", () => {
-  let player: Player;
+  let player: React.ComponentRef<typeof Player.Root>;
 
   const playback = new Playback({ duration: 60000 });
 
   beforeEach(() => {
-    render(<Player playback={playback} ref={(ref) => (player = ref)}></Player>);
+    render(
+      <Player.Root
+        playback={playback}
+        ref={(ref) => (player = ref)}
+      ></Player.Root>,
+    );
   });
 
   test("canvas", () => {
@@ -22,6 +26,7 @@ describe("Player", () => {
   test("canvasClick", () => {
     fireEvent.mouseUp(player.canvas);
     expect(playback.paused).toBe(false);
+
     fireEvent.mouseUp(player.canvas);
     expect(playback.paused).toBe(true);
   });

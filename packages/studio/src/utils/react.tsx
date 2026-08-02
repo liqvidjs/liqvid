@@ -1,5 +1,11 @@
 import type { RelativeDir } from "effect-paths";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  Fragment,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { COMMON_TRANSLATIONS_DIR } from "../conventions.mts";
 import { getTranslationsFromServer } from "../server-actions.ts";
@@ -8,15 +14,35 @@ import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
 
 import CommonTranslations from "../.translations/en.json";
 
+type TranslationJson = {
+  [key: string]: string | TranslationJson;
+};
+
 /* ------------------------------ translations ------------------------------ */
-const translationContext = createContext<unknown>({});
+
+const translationContext = createContext<TranslationJson>({});
 translationContext.displayName = "Translation";
 
-export function useTranslations<T>() {
-  return useContext(translationContext) as T;
+type TranslationInterpolation<T> = {
+  [K in keyof T]: T[K] extends string
+    ? T[K]
+    : T[K] extends { readonly __template: string }
+      ? (
+          interpolations: Record<
+            Exclude<keyof T[K], "__template">,
+            React.ReactNode
+          >,
+        ) => React.ReactNode
+      : TranslationInterpolation<T[K]>;
+};
+
+export function useTranslations<
+  T extends TranslationJson,
+>(): TranslationInterpolation<T> {
+  return makeInterpolator(useContext(translationContext) as T);
 }
 
-export function TranslationProvider<T>({
+export function TranslationProvider<T extends TranslationJson>({
   children,
   t,
 }: {
@@ -73,4 +99,35 @@ export function useCommonTranslations(): CommonTranslationsType {
     CommonTranslations as CommonTranslationsType,
     COMMON_TRANSLATIONS_DIR,
   );
+}
+
+function makeInterpolator<T extends TranslationJson>(
+  translations: T,
+): TranslationInterpolation<T> {
+  // biome-ignore lint/suspicious/noExplicitAny: this is ok
+  const interpolated: any = {};
+
+  for (const key in translations) {
+    const value = translations[key];
+
+    if (typeof value === "string") {
+      interpolated[key] = value;
+    } else if (typeof value === "object") {
+      if ("__template" in value && typeof value.__template === "string") {
+        interpolated[key] = (
+          interpolations: Record<string, React.ReactNode>,
+        ) => {
+          return (value.__template as string)
+            .split(/$\{([^}]+)\}/g)
+            .map((s, i) => (
+              <Fragment key={i}>{i % 2 === 0 ? s : interpolations[s]}</Fragment>
+            ));
+        };
+      } else {
+        interpolated[key] = makeInterpolator(value);
+      }
+    }
+  }
+
+  return interpolated;
 }

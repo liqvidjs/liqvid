@@ -6,11 +6,14 @@ import {
   WarningCircleIcon,
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import clsx from "clsx";
+import { useState } from "react";
 
-import type { LoggableJob } from "../../api/schemas.mts";
+import type { LoggableJob, StructuredLogType } from "../../api/schemas.mts";
 import { useChannel } from "../../components/WebSocketProvider.tsx";
 import { Button } from "../../ui/Button.tsx";
 import { Time } from "../../ui/Time.tsx";
+import { ToggleButton } from "../../ui/ToggleButton.tsx";
 
 import styles from "./jobs.module.css";
 
@@ -19,6 +22,10 @@ import type TranslationsJson from "./.translations/en.json";
 type T = typeof TranslationsJson;
 
 type Job = Pick<LoggableJob, "id" | "logs" | "name" | "path" | "state">;
+
+const LOG_LEVELS = ["error", "warn", "info", "log", "debug"] as const;
+
+type LogLevel = StructuredLogType;
 
 /** @package */
 export function JobsClient({
@@ -32,6 +39,22 @@ export function JobsClient({
   jobs: Record<string, Job>;
   t: T;
 }) {
+  const [levels, setLevels] = useState<ReadonlySet<LogLevel>>(
+    () => new Set(LOG_LEVELS),
+  );
+
+  const toggleLevel = (level: LogLevel) => {
+    setLevels((prev) => {
+      const next = new Set(prev);
+      if (next.has(level)) {
+        next.delete(level);
+      } else {
+        next.add(level);
+      }
+      return next;
+    });
+  };
+
   // TODO: websockets
   useChannel("jobs", {
     deleteJob: ({ id }) => {
@@ -49,6 +72,8 @@ export function JobsClient({
   return (
     <main className={styles.main}>
       <h1>{t.title}</h1>
+
+      <LogLevelFilter levels={levels} onToggle={toggleLevel} t={t} />
 
       <ul>
         {Object.values(jobs).map((job) => (
@@ -75,7 +100,7 @@ export function JobsClient({
                 </WarningCircleIcon>
               )}
               <pre>{job.path}</pre>
-              &gt;
+              {">"}
               <span>{job.name}</span>
               <form action={cancelJob}>
                 <input name="id" type="hidden" value={job.id} />
@@ -94,6 +119,10 @@ export function JobsClient({
 
             <ol className={styles.logGroup}>
               {job.logs.map((log, i) => {
+                if (!levels.has(log.type)) {
+                  return null;
+                }
+
                 const msg =
                   log.message.length === 1 ? log.message[0] : log.message;
 
@@ -143,6 +172,42 @@ export function JobsClient({
 
       {/* <pre>{JSON.stringify(Array.from(jobs.captioning), null, 2)}</pre> */}
     </main>
+  );
+}
+
+function LogLevelFilter({
+  levels,
+  onToggle,
+  t,
+}: {
+  levels: ReadonlySet<LogLevel>;
+  onToggle: (level: LogLevel) => void;
+  t: T;
+}) {
+  const labels: Record<LogLevel, string> = {
+    debug: t.levelDebug,
+    error: t.levelError,
+    info: t.levelInfo,
+    log: t.levelLog,
+    warn: t.levelWarn,
+  };
+
+  return (
+    <div className={styles.filter}>
+      {LOG_LEVELS.map((level) => {
+        const active = levels.has(level);
+        return (
+          <ToggleButton
+            aria-pressed={active}
+            className={clsx(styles.filterButton, active && styles.filterActive)}
+            key={level}
+            onClick={() => onToggle(level)}
+          >
+            {labels[level]}
+          </ToggleButton>
+        );
+      })}
+    </div>
   );
 }
 

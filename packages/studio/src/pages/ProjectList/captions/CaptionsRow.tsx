@@ -94,21 +94,7 @@ export function CaptionRow({
     );
 
     if (Exit.isFailure(result)) {
-      console.dir(
-        result.cause.reasons.map((r) => {
-          switch (r._tag) {
-            case "Fail":
-              return { Fail: r.error };
-            case "Die":
-              return { Die: r.defect };
-            case "Interrupt":
-              return { Interrupt: r.fiberId };
-            default:
-              return { Unknown: r };
-          }
-        }),
-        { depth: null },
-      );
+      // TODO: display error to user
     }
 
     setCaptioning(false);
@@ -154,7 +140,7 @@ export function CaptionRow({
       <div className={shareStyles.renderInfo}>
         <div className={shareStyles.renderHeader}>
           <span className={shareStyles.renderName}>
-            {multiple ? entry.meta.name : AUDIO_WAV}
+            {multiple ? entry.id : AUDIO_WAV}
           </span>
           {entry.captions && (
             <span className={shareStyles.renderStatus}>
@@ -165,7 +151,9 @@ export function CaptionRow({
         </div>
         <div className={shareStyles.renderDetails}>
           <Time format="date-and-time" value={entry.meta.createdAt} />
-          <TimeDuration value={{ seconds: entry.meta.duration }} />
+          {entry.meta.state === "completed" && (
+            <TimeDuration value={{ seconds: entry.meta.duration }} />
+          )}
         </div>
       </div>
       <div className={shareStyles.renderActions}>

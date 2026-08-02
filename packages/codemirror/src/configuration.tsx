@@ -22,11 +22,7 @@ export function ConfigurationComponent({
   }, [instances]);
 
   return (
-    <select
-      onChange={(x) => {
-        console.log(x);
-      }}
-    >
+    <select>
       {Array.from(instances).map((instance, i) => (
         <option key={instance.name ?? i}>
           {instance.name ?? `Instance #${i}`}

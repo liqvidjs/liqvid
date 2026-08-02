@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@testing-library/react": "catalog:dev",
     "@types/jest": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",

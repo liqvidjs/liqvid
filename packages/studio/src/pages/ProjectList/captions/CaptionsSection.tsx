@@ -7,7 +7,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { AudioEntry } from "../../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
 import { Button } from "../../../ui/Button.tsx";
 import {
   DialogBackdrop,
@@ -37,7 +36,7 @@ interface CaptionsSectionProps {
 }
 
 export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
-  const { hasCaptioningConfigured } = useDerivedConfig();
+  // const { hasCaptioningConfigured } = useDerivedConfig();
   const t = useTranslations<T>().captions;
   const c = useCommonTranslations();
   const projectPath = useProjectPath();

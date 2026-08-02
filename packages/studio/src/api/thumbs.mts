@@ -135,7 +135,15 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           [
             readThumbSheets(path.join(thumbsBaseDir, RelativeDir("light"))),
             readThumbSheets(path.join(thumbsBaseDir, RelativeDir("dark"))),
-            readThumbsJob(thumbsBaseDir),
+            readThumbsJob(thumbsBaseDir).pipe(
+              Effect.catchReason("PlatformError", "NotFound", () =>
+                Effect.fail(
+                  new NotFoundError({
+                    message: "missing thumbnails job file",
+                  }),
+                ),
+              ),
+            ),
           ],
           { concurrency: "unbounded" },
         );

@@ -56,7 +56,6 @@ export function Toast({
   return (
     <aside
       className={clsx(styles.Toast, className)}
-      onClick={(e) => e.stopPropagation()}
       ref={combineRefs(ref, elt)}
     >
       <div className={styles.icon}>{icon}</div>

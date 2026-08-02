@@ -400,9 +400,13 @@ function ConfirmationDialog({
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
         <p className={shareStyles.confirmMessage}>
-          The file{" "}
-          <code className={shareStyles.filename}>{confirmDialog?.target}</code>{" "}
-          already exists. Do you want to replace it?
+          {t.message({
+            filename: (
+              <code className={shareStyles.filename}>
+                {confirmDialog?.target}
+              </code>
+            ),
+          })}
         </p>
         <div className={rootStyles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>

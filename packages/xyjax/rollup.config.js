@@ -16,18 +16,18 @@ export default [
 
     output: [
       // ESM
-      {file: "./dist/index.mjs", format: "esm"},
+      { file: "./dist/index.mjs", format: "esm" },
       // CJS
-      {file: "./dist/index.cjs", format: "cjs"},
+      { file: "./dist/index.cjs", format: "cjs" },
     ],
   },
   // types
   {
     input: "dist/types/index.d.ts",
-    plugins: [dts()],
     output: {
       file: "dist/index.d.ts",
       format: "es",
     },
+    plugins: [dts()],
   },
 ];

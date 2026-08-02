@@ -141,7 +141,16 @@ export function usePersistentState<C extends LocalValueConfig>(
 export function usePersistentState<C extends LocalValueConfig>(
   storage: C | undefined,
   opts: PersistentConfig<ArgType<C>> = {},
-) {
+): C extends BooleanValueConfig
+  ? [
+      value: ArgType<C>,
+      setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
+      toggle: () => void,
+    ]
+  : [
+      value: ArgType<C>,
+      setValue: React.Dispatch<React.SetStateAction<ArgType<C>>>,
+    ] {
   // biome-ignore lint/suspicious/noExplicitAny: complex types
   const [get, set] = usePersist(storage, opts as any);
   const [state, setState] = useState<ArgType<C>>(() => {
@@ -175,7 +184,8 @@ export function usePersistentState<C extends LocalValueConfig>(
   );
 
   if (storage?.type === "boolean") {
-    return [state, setPersistedValue, toggle];
+    // biome-ignore lint/suspicious/noExplicitAny: overloads
+    return [state, setPersistedValue, toggle] as any;
   }
 
   useEffect(() => {
@@ -198,5 +208,6 @@ export function usePersistentState<C extends LocalValueConfig>(
     (storage as SearchThenMessagesConfig<ArgType<C>> | undefined)?.options,
   ]);
 
-  return [state, setPersistedValue];
+  // biome-ignore lint/suspicious/noExplicitAny: overloads
+  return [state, setPersistedValue] as any;
 }

@@ -115,8 +115,7 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
 
   // events to attach on the wrapper
   const wrapEvents = useMemo(() => {
-    const props = {} as React.HTMLAttributes<HTMLDivElement> &
-      React.RefAttributes<HTMLDivElement>;
+    const props = {} as React.ComponentProps<"div">;
 
     if (anyHover) {
       Object.assign(props, {
@@ -162,7 +161,7 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
       },
     );
 
-    props.onTouchStart = listener;
+    props.onTouchStart = (e) => listener(e.nativeEvent);
 
     return props;
   }, [playback]);
@@ -170,6 +169,8 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   // events to be attached to the scrubber
   const scrubberEvents = useMemo(() => {
     // if (anyHover) return {};
+    //
+    const props = {} as React.ComponentProps<"svg">;
 
     const listener = onDrag(
       // move
@@ -201,9 +202,9 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
       },
     );
 
-    return {
-      onTouchStart: listener,
-    };
+    props.onTouchStart = (e) => listener(e.nativeEvent);
+
+    return props;
   }, [playback]);
 
   // TODO: optimize this

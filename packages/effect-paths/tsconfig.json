@@ -5,7 +5,6 @@
     "composite": true,
     "declaration": true,
     "declarationDir": "./dist/types",
-    "esModuleInterop": true,
     "incremental": true,
     "isolatedModules": true,
     "jsx": "react-jsx",

@@ -2,6 +2,8 @@ import os from "node:os";
 import path from "node:path";
 
 import { CONFIG_FILE } from "./conventions.mts";
+// biome-ignore lint/suspicious/noTsIgnore: TypeScript 7 issue
+// @ts-ignore TypeScript 7 issue
 import loadSync from "./load-sync.cts";
 
 export const DEFAULT_LIST = [CONFIG_FILE];

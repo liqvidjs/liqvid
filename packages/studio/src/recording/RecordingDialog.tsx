@@ -63,13 +63,16 @@ export function RecordingDialog({
 
   const [recordings, setRecordings] = useState<readonly RecordingMeta[]>([]);
 
-  const [activeTab, setActiveTab] = usePersistentState({
-    default: tabs.configuration,
-    enum: Object.values(tabs),
-    name: `liqvid:recordingDialog:activeTab:${projectPath}`,
-    source: "localStorage",
-    type: "string",
-  });
+  const [activeTab, setActiveTab] = usePersistentState(
+    {
+      default: tabs.configuration,
+      enum: Object.values(tabs),
+      name: `liqvid:recordingDialog:activeTab:${projectPath}`,
+      source: "localStorage",
+      type: "string" as const,
+    },
+    { default: tabs.configuration, disabled: false },
+  );
 
   // Persist enabled plugins to localStorage, partitioned by projectPath
   const [getPersistedPlugins, setPersistedPlugins] = usePersist({

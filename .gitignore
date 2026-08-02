@@ -1,5 +1,6 @@
 packages/**/LICENSE
 packages/epiplexis
+packages/test
 
 # Node
 node_modules

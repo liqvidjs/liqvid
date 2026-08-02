@@ -5,9 +5,9 @@ import { omit, useFirstRender } from "@liqvid/utils";
 import { Slot } from "@radix-ui/react-slot";
 
 export function Animate<M extends string>({
-  at = 0,
+  at = Duration.zero,
   children,
-  delay = 0,
+  delay = Duration.zero,
   duration,
   easing,
   fill,
@@ -15,9 +15,9 @@ export function Animate<M extends string>({
   style,
   ...props
 }: {
-  at?: M | DurationLike | number;
+  at?: M | DurationLike;
   children?: React.ReactNode;
-  delay?: DurationLike | number;
+  delay?: DurationLike;
   easing?: string | undefined;
   duration: DurationLike;
   keyframes: Keyframe[] | PropertyIndexedKeyframes;
@@ -40,12 +40,6 @@ export function Animate<M extends string>({
     at = marker.start;
   }
 
-  if (typeof at === "object") {
-    at = Duration.inMilliseconds(at);
-  }
-
-  delay = typeof delay === "number" ? delay : Duration.inMilliseconds(delay);
-
   const isFirstRender = useFirstRender();
 
   const initialStyles = isFirstRender ? getInitialStyles(keyframes) : {};
@@ -56,11 +50,8 @@ export function Animate<M extends string>({
       {...props}
       ref={
         playback.newAnimation(keyframes, {
-          delay: at + delay,
-          duration:
-            typeof duration === "number"
-              ? duration
-              : Duration.inMilliseconds(duration),
+          delay: Duration.from(at).plus(delay),
+          duration,
           easing,
           fill,
           // biome-ignore lint/suspicious/noExplicitAny: Radix types don't accept SVG
@@ -79,7 +70,7 @@ function getInitialStyles(
   keyframes: Keyframe[] | PropertyIndexedKeyframes,
 ): React.CSSProperties {
   if (Array.isArray(keyframes)) {
-    return omit(keyframes[0], ["composite", "easing", "offset"]);
+    return omit(keyframes[0] ?? {}, ["composite", "easing", "offset"]);
   }
 
   const styles: Record<string, string | number> = {};

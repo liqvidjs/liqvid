@@ -53,7 +53,10 @@ export function liqvidProject<P, SP>(
   }
 
   // production
-  return async function Page(props: P) {
+  return async function LiqvidProject(props: {
+    params: Promise<P>;
+    searchParams: Promise<SP & { preview?: string | string[] | undefined }>;
+  }) {
     const project = JSON.parse(
       await fsp.readFile(path.join(__dirname, PROJECT_FILE), "utf8"),
     ) as ProjectJson;

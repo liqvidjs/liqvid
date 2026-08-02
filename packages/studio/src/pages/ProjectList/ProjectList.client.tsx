@@ -21,7 +21,7 @@ import { TranslationProvider } from "../../utils/react.tsx";
 
 import { EmbedButton } from "./EmbedButton.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
-import { ProductionLink } from "./ProductionLink.tsx";
+import { PreviewButton } from "./ProductionLink.tsx";
 import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
@@ -308,7 +308,7 @@ function ProjectItem({
             project={project}
           />
           <OpenInFinderButton />
-          <ProductionLink
+          <PreviewButton
             href={`http://localhost:${productionServerPort}${previewPath}`}
           />
         </div>

@@ -10,8 +10,9 @@ import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
 
-export function ProductionLink({ href }: { href: string }) {
+export function PreviewButton({ href }: { href: string }) {
   const t = useTranslations<T>();
+
   return (
     <a
       className={styles.productionLink}

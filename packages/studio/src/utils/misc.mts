@@ -2,12 +2,11 @@ import "server-only";
 
 import path from "node:path";
 
-import type { EnvFiles, LiqvidConfig } from "@liqvid/schemas";
+import type { EnvFiles, LiqvidConfig, RenderSource } from "@liqvid/schemas";
 import { Effect, type LogLevel, Option } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { headers } from "next/headers";
 
-import type { RenderSource } from "../../../schemas/src/shared.mts";
 import { NEXT_APP_DIR } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 
