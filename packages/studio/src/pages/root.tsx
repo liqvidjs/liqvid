@@ -8,6 +8,7 @@ import { getServerState, initializeServer } from "../initialize.mts";
 import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
 import { ProjectList } from "./ProjectList/ProjectList.tsx";
 import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
+import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
 import "../palette.css";
 
@@ -61,6 +62,7 @@ export async function Homepage() {
     <DerivedConfigProvider value={derivedConfig}>
       <WebSocketProvider>
         <main className={styles.main}>
+          <UpdateBanner />
           <div className={styles.headerRow}>
             <h1 className={styles.header}>{t.title}</h1>
             <NewProjectButton />

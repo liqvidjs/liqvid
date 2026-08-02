@@ -6,6 +6,7 @@ import type { Socket } from "effect/unstable/socket";
 import type { AbsoluteDir } from "effect-paths";
 
 import type { LoggableJob } from "./api/schemas.mts";
+import { type UpdateInfo, watchForUpdates } from "./jobs/check-updates.mts";
 import {
   DEFAULT_PRODUCTION_SERVER_PORT,
   startProductionServer,
@@ -33,6 +34,7 @@ export interface LiqvidServerState {
    */
   config: Option.Option<LiqvidConfig>;
   jobs: {
+    checkUpdates: null | Promise<void>;
     productionServer: null | Promise<void>;
     new: Map<string, LoggableJob>;
     watchAssets: null | Promise<void>;
@@ -52,6 +54,12 @@ export interface LiqvidServerState {
   started: {
     productionServer: boolean;
   };
+
+  /**
+   * Latest npm update check for the tracked Liqvid packages, or `null` if a
+   * check has not completed yet.
+   */
+  updateInfo: null | UpdateInfo;
 
   /**
    * Connections currently subscribed to each channel, keyed by channel name.
@@ -86,6 +94,8 @@ export async function initializeServer() {
     state.config = Option.some(config);
   }
 
+  jobs.checkUpdates ??= watchForUpdates();
+
   jobs.watchAssets ??= watchAssets();
 
   jobs.watchConfig ??= Effect.runPromise(
@@ -117,6 +127,7 @@ export function getServerState(): LiqvidServerState {
       config: Option.none(),
       cwd: process.cwd(),
       jobs: {
+        checkUpdates: null,
         new: new Map(),
         productionServer: null,
         watchAssets: null,
@@ -129,6 +140,7 @@ export function getServerState(): LiqvidServerState {
       started: {
         productionServer: false,
       },
+      updateInfo: null,
       wsConnections: new Set(),
     };
   }

@@ -1,0 +1,11 @@
+{
+  "dismiss": "Dismiss",
+  "message": "An update is available.",
+  "toast": {
+    "failureTitle": "Update failed",
+    "successMessage": "Updated {name}. Run your package manager's install to apply.",
+    "successTitle": "package.json updated"
+  },
+  "update": "Click to update",
+  "updating": "Updating…"
+}

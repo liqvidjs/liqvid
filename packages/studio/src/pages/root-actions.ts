@@ -329,6 +329,70 @@ function copyTemplateDir(
   });
 }
 
+interface UpdatePackageResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Bump a tracked package's version range in the user's `package.json` to the
+ * latest available version, preserving the existing range operator (e.g.
+ * `^1.0.0` -> `^1.1.0`). Only packages declared with a semver range are
+ * eligible; `workspace:` and other protocol specifiers are rejected.
+ */
+export async function updatePackageAction(
+  name: string,
+): Promise<UpdatePackageResult> {
+  const { cwd, updateInfo } = getServerState();
+
+  const update = updateInfo?.updates.find((u) => u.name === name);
+  if (!update) {
+    return { error: "No update available for this package", success: false };
+  }
+  if (update.range === null || update.field === null) {
+    return {
+      error: "This dependency cannot be updated automatically",
+      success: false,
+    };
+  }
+
+  // Preserve the leading range operator (^, ~, >=, etc.) from the existing
+  // specifier, defaulting to a caret range.
+  const operatorMatch = /^[\^~>=<\s]*/.exec(update.range);
+  const operator = (operatorMatch?.[0] ?? "").replace(/\s+/g, "") || "^";
+  const nextRange = `${operator}${update.latest}`;
+
+  try {
+    const packageJsonPath = path.join(cwd, RelativeFile("package.json"));
+    const contents = await fsp.readFile(packageJsonPath, "utf8");
+    const pkg = JSON.parse(contents) as Record<
+      string,
+      Record<string, string> | unknown
+    >;
+
+    const field = pkg[update.field];
+    if (typeof field !== "object" || field === null) {
+      return { error: "Dependency field not found", success: false };
+    }
+    (field as Record<string, string>)[name] = nextRange;
+
+    // Preserve trailing newline if present.
+    const trailingNewline = contents.endsWith("\n") ? "\n" : "";
+    await fsp.writeFile(
+      packageJsonPath,
+      `${JSON.stringify(pkg, null, 2)}${trailingNewline}`,
+    );
+
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to update package.json:", e);
+    return {
+      error: e instanceof Error ? e.message : "Unknown error",
+      success: false,
+    };
+  }
+}
+
 export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
