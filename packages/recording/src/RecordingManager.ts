@@ -66,7 +66,7 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
   constructor() {
     super();
 
-    this.captureData = {};
+    // this.captureData = {};
 
     {
       const [d, setter] = Duration.withSetter();
@@ -98,14 +98,14 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
 
     // initialize
     this.plugins = plugins;
-    this.captureData = {};
+    // this.captureData = {};
     this.#setPauseTime.setToZero();
 
     // call this as close as possible to beginRecording() to minimize "lag"
     this.baseTime = performance.now();
 
-    for (const key in this.plugins) {
-      this.plugins[key].beginRecording?.(this.baseTime);
+    for (const plugin of Object.values(this.plugins)) {
+      plugin.beginRecording?.(this.baseTime);
     }
 
     this.paused = false;
@@ -123,12 +123,12 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
     if (!this.active) return;
 
     // stop all recorders
-    for (const key in this.plugins) {
-      this.plugins[key].endRecording?.();
+    for (const plugin of Object.values(this.plugins)) {
+      plugin.endRecording?.();
     }
 
     // clear captured data
-    this.captureData = {};
+    // this.captureData = {};
 
     this.active = false;
     this.paused = false;
@@ -143,12 +143,12 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
    * @emits finalize
    */
   async endRecording(): Promise<Record<string, unknown>> {
-    const endTime = this.getTime();
+    const endTime = this.getTimeMs();
     this.#setDuration.setMilliseconds(endTime);
 
     // stop all recorders
-    for (const key in this.plugins) {
-      this.plugins[key].endRecording?.();
+    for (const plugin of Object.values(this.plugins)) {
+      plugin.endRecording?.();
     }
 
     const recording = Object.fromEntries(
@@ -170,8 +170,25 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
     return recording;
   }
 
-  /** Get current recording time in milliseconds. */
+  /**
+   * Get current recording time in milliseconds.
+   * @deprecated Use getTimeMs() instead.
+   */
   getTime(): number {
+    return performance.now() - this.baseTime - this.pauseTime.inMilliseconds();
+  }
+
+  /**
+   * Get current recording time as a Duration.
+   */
+  getTime$(): Duration {
+    // TODO: this is a hack
+    this.#setDuration.setMilliseconds(this.getTimeMs());
+    return this.duration;
+  }
+
+  /** Get current recording time in milliseconds. */
+  getTimeMs(): number {
     return performance.now() - this.baseTime - this.pauseTime.inMilliseconds();
   }
 
@@ -183,8 +200,8 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
   pauseRecording(): void {
     this.lastPauseTime = performance.now();
 
-    for (const key in this.plugins) {
-      this.plugins[key].pauseRecording?.(this.lastPauseTime);
+    for (const plugin of Object.values(this.plugins)) {
+      plugin.pauseRecording?.(this.lastPauseTime);
     }
 
     this.paused = true;
@@ -201,8 +218,8 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
       milliseconds: performance.now() - this.lastPauseTime,
     });
 
-    for (const key in this.plugins) {
-      this.plugins[key].resumeRecording?.();
+    for (const plugin of Object.values(this.plugins)) {
+      plugin.resumeRecording?.();
     }
 
     this.paused = false;

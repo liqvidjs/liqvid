@@ -1,5 +1,6 @@
 "use client";
 
+import type { DurationLike } from "@liqvid/duration";
 import { useMarker, useScript } from "@liqvid/script/react";
 import { omit } from "@liqvid/utils";
 import * as Slot from "@radix-ui/react-slot";
@@ -8,11 +9,13 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useInvisibleClassName } from "./Segment.tsx";
 
 interface AnimationConfig {
-  duration: number;
+  delay?: DurationLike;
+  duration: DurationLike;
+  easing?: string;
   keyframes: Keyframe[];
 }
 
-type SelectorConfig =
+export type SelectorConfig =
   | {
       class: string;
       id?: undefined;
@@ -34,7 +37,7 @@ export type TargetConfig<M extends string = string> = SelectorConfig & {
   from?: M;
   to?: M;
 
-  animate?: AnimationConfig;
+  animate?: AnimationConfig | ((node: Element) => AnimationConfig);
 };
 
 type IndexedTransform = SelectorConfig & {

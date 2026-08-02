@@ -17,26 +17,25 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./utils": {
-      "types": "./dist/types/utils.d.ts",
       "@liqvid/dev": "./src/utils.ts",
+      "types": "./dist/types/utils.d.ts",
       "import": "./dist/esm/utils.js"
     }
   },
   "scripts": {
-    "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
-    "build:css": "cp src/style.css dist/esm",
+    "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },

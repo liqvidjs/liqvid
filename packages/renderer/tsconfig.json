@@ -1,12 +1,6 @@
 {
   "compilerOptions": {
-    "declarationDir": "./dist/types",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "outDir": "./dist/esm",
-    "rootDir": "./src",
-    "target": "esnext"
+    "plugins": [{ "name": "@effect/language-service" }]
   },
-  "extends": "../../tsconfig.json",
-  "include": ["./src"]
+  "extends": "../../tsconfig.json"
 }

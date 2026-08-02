@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: variance */
 import type { SerializedValue } from "@liqvid/ssr";
 
 import { type Maybe, None, Some } from "./maybe.mts";
@@ -174,14 +175,12 @@ function isResult<T, E>(obj: unknown): obj is Result<T, E> {
   );
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: variance
 export function Ok<T>(value: T): Result<T, any> {
   const obj = new internalResult(true, value, undefined);
   Object.freeze(obj);
   return obj as unknown as Result<T, never>;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: variance
 export function Err<E>(error: E): Result<any, E> {
   const obj = new internalResult(false, undefined, error);
   Object.freeze(obj);

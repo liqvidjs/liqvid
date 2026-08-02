@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationDir": "./dist/types",
-    "lib": ["es2022", "dom", "dom.iterable"],
-    "outDir": "./dist/esm",
     "plugins": [{ "name": "@effect/language-service" }],
-    "resolveJsonModule": true,
-    "rootDir": "./src"
+    "resolveJsonModule": true
   },
   "extends": "../../tsconfig.json",
   "include": ["./src", "./src/**/.translations/*.json"]

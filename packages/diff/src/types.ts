@@ -40,8 +40,7 @@ export type DeletePlaceholder = typeof deletePlaceholder;
  * A record describing how to make changes to an object.
  */
 export type ObjectDiff<T> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: RunedKey<"array">]: ArrayDiff<any>;
+  [key: RunedKey<"array">]: ArrayDiff<unknown>;
   [key: RunedKey<"change">]: unknown;
   [key: RunedKey<"create">]: unknown;
   [key: RunedKey<"delete">]: DeletePlaceholder;

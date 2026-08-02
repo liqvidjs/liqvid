@@ -1,7 +1,7 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { IS_CLIENT } from "@liqvid/ssr";
 
-import { CorePlayback } from "./synthetic-playback.mts";
+import { CorePlayback, type PlaybackEvent } from "./synthetic-playback.mts";
 
 declare global {
   interface Animation {
@@ -24,11 +24,17 @@ interface CommittedAnimation {
   target: Element;
 }
 
+export type ReadyStateItem = {
+  readyState: number;
+};
+
 /** Extended {@link CorePlayback Playback} supporting rich durations and the Web Animation API */
 export class Playback extends CorePlayback {
   private __animations: Animation[] = [];
   private __committed: CommittedAnimation[] = [];
   private __delays = new WeakMap<AnimationEffect, number>();
+
+  private __readyStateItems: Set<ReadyStateItem> = new Set();
 
   private __$currentTime: Duration;
   private __$duration: Duration;
@@ -77,6 +83,33 @@ export class Playback extends CorePlayback {
     this.duration = Duration.inSeconds(d);
   }
 
+  registerReadyStateItem(item: ReadyStateItem): void {
+    const readyState = this.readyState;
+    this.__readyStateItems.add(item);
+
+    if (item.readyState < readyState) {
+      this.__emit("readystatechange");
+    }
+  }
+
+  updateReadyStateItem(item: ReadyStateItem, newReadyState: number): void {
+    const prevReadyState = this.readyState;
+    item.readyState = newReadyState;
+
+    if (this.readyState !== prevReadyState) {
+      this.__emit("readystatechange");
+    }
+  }
+
+  unregisterReadyStateItem(item: ReadyStateItem): void {
+    const prev = this.readyState;
+    this.__readyStateItems.delete(item);
+
+    if (this.readyState !== prev) {
+      this.__emit("readystatechange");
+    }
+  }
+
   /**
    * Create an {@link Animation} (factory) synced to this playback
    * @param keyframes A [keyframes object](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats) or `null`
@@ -106,6 +139,11 @@ export class Playback extends CorePlayback {
       anim = this.__adoptAnimation(target, keyframes, options);
       return anim;
     };
+  }
+
+  protected override __emit(eventName: PlaybackEvent | "readystatechange") {
+    // @ts-expect-error TODO: fix the types to allow "readystatechange" or work around it
+    this.emit(eventName, { target: this, type: eventName });
   }
 
   /* ------------------------------ private methods ------------------------------ */

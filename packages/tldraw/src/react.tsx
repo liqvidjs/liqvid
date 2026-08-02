@@ -1,6 +1,7 @@
+import { useColorScheme } from "@liqvid/color-scheme/react";
 import { useKeymap } from "@liqvid/keymap/react";
 import { useIsPreviewOrProduction } from "@liqvid/studio-plugin-api";
-import { type Awaitable, createUniqueContext } from "@liqvid/utils";
+import { type Awaitable, assertType, createUniqueContext } from "@liqvid/utils";
 import { useSeekable } from "@lqv/playback/react";
 import {
   useCallback,
@@ -76,8 +77,9 @@ export function TldrawRecord({
   children,
   ...props
 }: React.ComponentPropsWithoutRef<typeof Tldraw>) {
+  const { colorScheme } = useColorScheme();
   return (
-    <Tldraw {...props}>
+    <Tldraw colorScheme={colorScheme} {...props}>
       <BubbleKeyboardEvents />
       <AttachEditor />
       <SetDataAffords />
@@ -152,25 +154,29 @@ export function TldrawReplay({
         // as `user`-source changes here; we recognize and ignore them by
         // matching the value the controller last drove us to.
         for (const [from, to] of Object.values(changes.updated)) {
-          if (
-            interacting &&
-            to.typeName === "camera" &&
-            (to.x !== (from as typeof to).x ||
-              to.y !== (from as typeof to).y ||
-              to.z !== (from as typeof to).z) &&
-            !follow.isSelfCamera(to.x, to.y, to.z)
-          ) {
-            follow.suspend();
-            return;
+          if (to.typeName === "camera") {
+            assertType<typeof to>(from);
+
+            if (
+              interacting &&
+              (to.x !== from.x || to.y !== from.y || to.z !== from.z) &&
+              !follow.isSelfCamera(to.x, to.y, to.z)
+            ) {
+              follow.suspend();
+              return;
+            }
           }
 
-          if (
-            to.typeName === "instance" &&
-            to.currentPageId !== (from as typeof to).currentPageId &&
-            !follow.isSelfPage(to.currentPageId)
-          ) {
-            follow.suspend();
-            return;
+          if (to.typeName === "instance") {
+            assertType<typeof to>(from);
+
+            if (
+              to.currentPageId !== from.currentPageId &&
+              !follow.isSelfPage(to.currentPageId)
+            ) {
+              follow.suspend();
+              return;
+            }
           }
         }
       },
@@ -213,9 +219,11 @@ export function TldrawReplay({
     }
   }, [replay, editor, playback, start, follow]);
 
+  const { colorScheme } = useColorScheme();
+
   return (
     <FollowContext.Provider value={follow}>
-      <Tldraw {...props}>
+      <Tldraw colorScheme={colorScheme} {...props}>
         {/*
          * React explodes if we call `loadSnapshot()`, which is part of
          * initialize(), inside <Tldraw>. So we have to do this awkward

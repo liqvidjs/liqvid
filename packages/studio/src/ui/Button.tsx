@@ -7,6 +7,7 @@ export function Button({
   ...props
 }: React.ComponentProps<"button">) {
   return (
+    // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined
     <button
       className={clsx(styles.button, className)}
       type="button"

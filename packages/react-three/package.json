@@ -19,6 +19,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc --watch"
   },

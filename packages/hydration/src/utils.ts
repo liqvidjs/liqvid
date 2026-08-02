@@ -1,5 +1,5 @@
-import { IS_CLIENT, IS_SERVER } from "@liqvid/ssr";
-import { useEffect, useState } from "react";
+import { IS_CLIENT } from "@liqvid/ssr";
+import { useEffect } from "react";
 
 import { golf } from "./golf.ts";
 import type { ComparisonVariant, StringVariant } from "./types.ts";

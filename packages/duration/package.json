@@ -17,37 +17,36 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
     },
     "./effect": {
-      "types": "./dist/types/effect.d.ts",
       "@liqvid/dev": "./src/effect.ts",
+      "types": "./dist/types/effect.d.ts",
       "import": "./dist/esm/effect.js"
     },
     "./zod": {
-      "types": "./dist/types/zod.d.ts",
       "@liqvid/dev": "./src/zod.ts",
+      "types": "./dist/types/zod.d.ts",
       "import": "./dist/esm/zod.js"
     }
   },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --project tsconfig.cjs.json",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "effect": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

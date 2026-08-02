@@ -61,8 +61,8 @@ const CursorSaveComponent: React.FC<{ data: ReplayData<[number, number]> }> = (
 
 const icon = (
   <g>
-    <line x1="0" x2="100" y1="50" y2="50" stroke="#FFF" />
-    <line x1="50" x2="50" y1="0" y2="100" stroke="#FFF" />
+    <line stroke="#FFF" x1="0" x2="100" y1="50" y2="50" />
+    <line stroke="#FFF" x1="50" x2="50" y1="0" y2="100" />
   </g>
 );
 

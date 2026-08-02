@@ -5,6 +5,7 @@
     "composite": true,
     "customConditions": ["@liqvid/dev"],
     "declaration": true,
+    "declarationDir": "${configDir}/dist/types",
     "esModuleInterop": true,
     "incremental": true,
     "isolatedModules": true,
@@ -15,13 +16,15 @@
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
-    "plugins": [{ "name": "@effect/language-service" }],
+    "outDir": "${configDir}/dist/esm",
     "pretty": true,
     "removeComments": false,
     "rewriteRelativeImportExtensions": true,
+    "rootDir": "${configDir}/src",
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2022",
+    "target": "esnext",
     "verbatimModuleSyntax": true
-  }
+  },
+  "include": ["${configDir}/src"]
 }

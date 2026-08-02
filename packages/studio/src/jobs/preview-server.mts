@@ -64,6 +64,7 @@ export function startProductionServer(state: LiqvidServerState) {
     });
 
     server.listen(port, () => {
+      // biome-ignore lint/suspicious/noConsole: this is ok
       console.log(`Production server running on port ${port}...`);
     });
   });

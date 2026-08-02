@@ -1,11 +1,3 @@
 {
-  "compilerOptions": {
-    "composite": true,
-    "declarationDir": "./dist/types",
-    "lib": ["es2022", "dom.iterable"],
-    "outDir": "./dist/esm",
-    "rootDir": "./src"
-  },
-  "extends": "../../tsconfig.json",
-  "include": ["./src"]
+  "extends": "../../tsconfig.json"
 }

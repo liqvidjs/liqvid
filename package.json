@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build:all": "pnpm --filter '!create-liqvid' --filter '!docs' run --recursive build",
+    "lint:all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' run --recursive lint",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "license": "MIT",
-  "packageManager": "pnpm@11.15.1+sha512.81350b07e53c9538a02f1f2303b4290fa2d7be04e56e2a970c4cc4b417dc761de196edabd49d55c7dc9580db81007c44143e4e3d7e462b3000d23c255122d065",
+  "packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c",
   "devDependencies": {
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",

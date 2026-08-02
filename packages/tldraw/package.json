@@ -69,6 +69,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@liqvid/color-scheme": "workspace:^1.0.0-alpha.4",
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.2",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",

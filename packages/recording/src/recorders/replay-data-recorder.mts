@@ -18,7 +18,7 @@ export abstract class ReplayDataRecorder<
   abstract readonly package: string;
   abstract readonly version: string;
   abstract readonly $schema?: string;
-  abstract initial: Initial;
+  protected abstract initial: Initial;
 
   override beginRecording(timestamp = performance.now()): void {
     super.beginRecording(timestamp);

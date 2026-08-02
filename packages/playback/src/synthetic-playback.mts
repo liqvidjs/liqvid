@@ -15,7 +15,6 @@ export type PlaybackEvent =
   | "pause"
   | "play"
   | "ratechange"
-  | "readystatechange"
   | "seeked"
   | "seeking"
   | "stop"
@@ -40,10 +39,6 @@ export interface AudioSourceRegistration {
   /** Start time in seconds (when the audio begins in the timeline) */
   startTime: number;
 }
-
-export type ReadyStateItem = {
-  readyState: number;
-};
 
 declare let webkitAudioContext: typeof AudioContext;
 
@@ -95,7 +90,6 @@ export class CorePlayback extends EventEmitter<
 
   /* private fields */
   private __playingFromMs = 0;
-  private __readyStateItems: Set<ReadyStateItem> = new Set();
   private __startTimeMs = performance.now();
 
   /* private fields exposed by getters */
@@ -334,24 +328,6 @@ export class CorePlayback extends EventEmitter<
     this.audioSources.add(registration);
   }
 
-  registerReadyStateItem(item: ReadyStateItem): void {
-    const readyState = this.readyState;
-    this.__readyStateItems.add(item);
-
-    if (item.readyState < readyState) {
-      this.__emit("readystatechange");
-    }
-  }
-
-  updateReadyStateItem(item: ReadyStateItem, newReadyState: number): void {
-    const prevReadyState = this.readyState;
-    item.readyState = newReadyState;
-
-    if (this.readyState !== prevReadyState) {
-      this.__emit("readystatechange");
-    }
-  }
-
   /**
    * Unregister an audio source from offline rendering.
    *
@@ -359,15 +335,6 @@ export class CorePlayback extends EventEmitter<
    */
   unregisterAudioSource(registration: AudioSourceRegistration): void {
     this.audioSources.delete(registration);
-  }
-
-  unregisterReadyStateItem(item: ReadyStateItem): void {
-    const prev = this.readyState;
-    this.__readyStateItems.delete(item);
-
-    if (this.readyState !== prev) {
-      this.__emit("readystatechange");
-    }
   }
 
   /* ------------------------------ private methods ------------------------------ */
@@ -456,7 +423,7 @@ export class CorePlayback extends EventEmitter<
     window.addEventListener("touchstart", requestAudioContext);
   }
 
-  private __emit(eventName: PlaybackEvent) {
+  protected __emit(eventName: PlaybackEvent) {
     this.emit(eventName, { target: this, type: eventName });
   }
 }

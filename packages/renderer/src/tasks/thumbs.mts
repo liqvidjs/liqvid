@@ -2,7 +2,6 @@ import path from "node:path";
 
 import { Effect, FileSystem } from "effect";
 import jimp from "jimp";
-import type * as puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
@@ -98,11 +97,11 @@ export function thumbs({
       });
 
       const pool = new Pool(pages);
-      for (const page of pages) {
-        (page as any).client = yield* Effect.promise(() =>
-          page.target().createCDPSession(),
-        );
-      }
+      // for (const page of pages) {
+      //   (page as any).client = yield* Effect.promise(() =>
+      //     page.createCDPSession(),
+      //   );
+      // }
 
       // calculate how many thumbs
       const durationSeconds = yield* Effect.promise(() =>

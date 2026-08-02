@@ -22,7 +22,7 @@ export async function rsyncRemoteDirectory(
     username,
     password,
     port,
-    recursive = true,
+    // recursive = true,
   } = options;
 
   // Build SSH command with port if specified
@@ -60,7 +60,7 @@ export async function rsyncRemoteDirectory(
     return new Promise<void>((resolve, reject) => {
       child_process.exec(
         sshCommand,
-        (error: any, stdout: string, stderr: string) => {
+        (error: unknown, _stdout: string, _stderr: string) => {
           if (error) {
             console.error("Error executing rsync command:", error);
             reject(error);
@@ -75,7 +75,7 @@ export async function rsyncRemoteDirectory(
       const command = rsyncCommand.join(" ");
       child_process.exec(
         command,
-        (error: any, stdout: string, stderr: string) => {
+        (error: unknown, _stdout: string, _stderr: string) => {
           if (error) {
             console.error("Error executing rsync command:", error);
             reject(error);

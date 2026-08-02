@@ -26,6 +26,7 @@ export function IconButton({
   ...props
 }: IconButtonProps) {
   return (
+    // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined
     <button
       className={`${styles.iconButton} ${styles[size]} ${styles[variant]} ${className ?? ""}`}
       ref={ref}

@@ -62,6 +62,7 @@ export function ButtonWithDropdown({
 }: ButtonWithDropdownProps) {
   return (
     <div className={clsx(styles.group, styles[variant])}>
+      {/** biome-ignore lint/correctness/noRestrictedElements: this is a component */}
       <button
         className={styles.mainButton}
         disabled={disabled}

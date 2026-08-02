@@ -1,12 +1,10 @@
 import { fireEvent, render } from "@testing-library/react";
-import * as React from "react";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
+import { Player, Script } from "liqvid";
 import { act } from "react-dom/test-utils";
-
-import { Player, Script } from "../..";
 
 describe("Scrubber bar", () => {
   const script = new Script([

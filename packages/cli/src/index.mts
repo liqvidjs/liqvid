@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { thumbs as captureThumbs, solidify } from "@liqvid/renderer";
+import { RelativeFile } from "effect-paths";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -17,13 +18,17 @@ import { render } from "./tasks/render.mts";
 import { renderAudioCommand } from "./tasks/render-audio.mts";
 import { thumbs } from "./tasks/thumbs.mts";
 import { transcribeCommand } from "./tasks/transcribe.mts";
+import { UP } from "./utils/effect.mts";
 
 // entry
 export async function main() {
   // version
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const { version } = JSON.parse(
-    await readFile(path.join(__dirname, "..", "..", "package.json"), "utf8"),
+    await readFile(
+      path.join(__dirname, UP, UP, RelativeFile("package.json")),
+      "utf8",
+    ),
   );
 
   return yargs(hideBin(process.argv))

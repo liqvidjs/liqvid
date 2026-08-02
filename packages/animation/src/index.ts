@@ -46,13 +46,13 @@ export function animate(
     return (t: number): number => {
       let i = 0;
       for (; i < fns.length; ++i) {
-        if (options[i].startTime > t) {
-          if (i === 0) return options[0].startValue ?? 0;
+        if (options[i]!.startTime > t) {
+          if (i === 0) return options[0]!.startValue ?? 0;
 
-          return fns[i - 1](t);
+          return fns[i - 1]!(t);
         }
       }
-      return fns[options.length - 1](t);
+      return fns[options.length - 1]!(t);
     };
   }
 
@@ -92,13 +92,13 @@ export function animate$(
       assertType<AnimateOptions<Duration>[]>(options);
       let i = 0;
       for (; i < fns.length; ++i) {
-        if (options[i].startTime.greaterThan(t)) {
-          if (i === 0) return options[0].startValue ?? 0;
+        if (options[i]!.startTime.greaterThan(t)) {
+          if (i === 0) return options[0]!.startValue ?? 0;
 
-          return fns[i - 1](t);
+          return fns[i - 1]!(t);
         }
       }
-      return fns[options.length - 1](t);
+      return fns[options.length - 1]!(t);
     };
   }
 
@@ -205,11 +205,11 @@ export function replay<K>({
   const times = data.map(compressed ? (d) => d[0] / units : (d) => d[0]);
   if (compressed) {
     for (let i = 1; i < times.length; ++i) {
-      times[i] += times[i - 1];
+      times[i]! += times[i - 1]!;
     }
   }
 
-  if (typeof end === "undefined") end = start + times[times.length - 1];
+  if (typeof end === "undefined") end = start + times[times.length - 1]!;
 
   let lastTime = 0,
     i = 0,
@@ -232,11 +232,11 @@ export function replay<K>({
     let maxI = Math.min(i, times.length - 1);
 
     for (; i < times.length; i++) {
-      if (start! + times[i] < t) maxI = i;
+      if (start! + times[i]! < t) maxI = i;
       else break;
     }
 
-    const [, current] = data[maxI];
+    const [, current] = data[maxI]!;
 
     active(current, maxI);
   }

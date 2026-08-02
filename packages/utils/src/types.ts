@@ -14,4 +14,7 @@ export function assertType<K>(a: unknown): asserts a is K {}
  */
 export type CleanUpFn = () => void;
 
+/**
+ * Either a value of type `T` or a promise that resolves to a value of type `T`.
+ */
 export type Awaitable<T> = T | Promise<T>;

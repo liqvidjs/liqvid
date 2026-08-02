@@ -87,7 +87,7 @@ function reducer(prev: EnabledPlugins, action: Action): EnabledPlugins {
       return copy;
     }
     case "toggle": {
-      const [prevEnabled, plugin] = prev[action.pluginId];
+      const [prevEnabled, plugin] = prev[action.pluginId]!;
       const newEnabled =
         typeof action.enabled === "undefined" ? !prevEnabled : action.enabled;
       return {

@@ -173,6 +173,7 @@ catalogs:
     "@effect/tsgo": ^0.16.3
     "@jest/globals": ^30.3.0
     "@lezer/highlight": 1.2.3
+    '@testing-library/react': ^16.3.2
     "@types/babel__standalone": ^7.1.9
     "@types/cli-progress": ^3.11.6
     "@types/jest": ^30.0.0

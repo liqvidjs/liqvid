@@ -1,6 +1,7 @@
 import * as path from "node:path";
 
 import { Effect, FileSystem } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 import type * as Puppeteer from "puppeteer-core";
 
 import type { ImageFormat } from "../types.mts";
@@ -26,7 +27,7 @@ export type ScreenshotOptions = {
   imageFormat?: ImageFormat;
 
   /** Output path for the screenshot */
-  output: string;
+  output: AbsoluteFile;
 
   /**
    * Image quality (for JPEG)
@@ -108,7 +109,7 @@ export function screenshot(options: ScreenshotOptions) {
     });
 
     // Create CDP session for capture utility
-    (page as any).client = yield* Effect.promise(() => page.createCDPSession());
+    // (page as any).client = yield* Effect.promise(() => page.createCDPSession());
 
     const fs = yield* FileSystem.FileSystem;
 

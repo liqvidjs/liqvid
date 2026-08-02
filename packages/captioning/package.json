@@ -21,9 +21,11 @@
     "docs:watch": "typedoc --watch"
   },
   "devDependencies": {
+    "@types/node": "catalog:dev",
     "ibm-watson": "^6.2.1",
     "typedoc": "catalog:dev",
-    "typedoc-plugin-markdown": "catalog:dev"
+    "typedoc-plugin-markdown": "catalog:dev",
+    "typescript": "catalog:dev"
   },
   "peerDependencies": {
     "ibm-watson": "^6.2.1"

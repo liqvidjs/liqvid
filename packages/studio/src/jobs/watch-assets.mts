@@ -53,23 +53,14 @@ const EXCLUDE_PATTERNS = [
   /^twitter-image\./,
 ];
 
-/**
- * Special include patterns that override exclusions.
- * Files in .liqvid/*.ts should be included.
- */
-function isSpecialInclude(relativePath: string): boolean {
-  // Include .ts files inside .liqvid directory
-  return relativePath.startsWith(".liqvid/") && relativePath.endsWith(".ts");
-}
-
 /** Check if a file should be excluded based on patterns */
-function shouldExclude(relativePath: string, basename: string): boolean {
+function shouldExclude(
+  relativePath: RelativePath,
+  basename: RelativePath,
+): boolean {
   // Always exclude these
   if (basename === ".DS_Store") return true;
   if (basename === TYPES_AUTOGEN) return true;
-
-  // Check special includes first (they override exclusions)
-  if (isSpecialInclude(relativePath)) return false;
 
   // Check exclusion patterns
   for (const pattern of EXCLUDE_PATTERNS) {
@@ -105,48 +96,43 @@ const TEMPLATES_DIR = path.join(
  * Check if a directory is a project directory.
  * A project directory contains both project.json and page.tsx.
  */
-async function isProjectDirectory(dir: AbsoluteDir): Promise<boolean> {
-  try {
-    const [hasProjectJson, hasPageTsx] = await Promise.all([
-      fsp
-        .access(path.join(dir, PROJECT_FILE))
-        .then(() => true)
-        .catch(() => false),
-      fsp
-        .access(path.join(dir, NEXT_PAGE))
-        .then(() => true)
-        .catch(() => false),
-    ]);
+function isProjectDirectory(dir: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    const { hasPageTsx, hasProjectJson } = yield* Effect.all({
+      hasPageTsx: fs.exists(path.join(dir, NEXT_PAGE)),
+      hasProjectJson: fs.exists(path.join(dir, PROJECT_FILE)),
+    });
+
     return hasProjectJson && hasPageTsx;
-  } catch {
-    return false;
-  }
+  });
 }
 
 /**
  * Find the project directory that contains the given file path.
  * Walks up the directory tree until it finds a project directory or reaches TARGET_DIR.
  */
-async function findProjectDirectory(
-  filePath: AbsolutePath,
-): Promise<Option.Option<AbsoluteDir>> {
-  let dir = path.dirname(filePath);
+function findProjectDirectory(filePath: AbsolutePath) {
+  return Effect.gen(function* () {
+    let dir = path.dirname(filePath);
 
-  const TARGET_DIR = getRoutesDir();
+    const TARGET_DIR = getRoutesDir();
 
-  while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
-    if (await isProjectDirectory(dir)) {
+    while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
+      if (yield* isProjectDirectory(dir)) {
+        return Option.some(dir);
+      }
+      dir = path.dirname(dir);
+    }
+
+    // Check if TARGET_DIR itself is a project directory
+    if (dir === TARGET_DIR && (yield* isProjectDirectory(dir))) {
       return Option.some(dir);
     }
-    dir = path.dirname(dir);
-  }
 
-  // Check if TARGET_DIR itself is a project directory
-  if (dir === TARGET_DIR && (await isProjectDirectory(dir))) {
-    return Option.some(dir);
-  }
-
-  return Option.none();
+    return Option.none();
+  });
 }
 
 export async function watchAssets() {
@@ -235,7 +221,7 @@ function watchAssetEvents(
 
       return fs.watch(targetDir).pipe(
         Stream.filterMapEffect((event) =>
-          Effect.promise(async () => {
+          Effect.gen(function* () {
             const relPath = event.path as RelativePath;
             const filename = path.join(targetDir, relPath);
             const basename = path.basename(filename);
@@ -244,7 +230,7 @@ function watchAssetEvents(
               return Result.fail(event);
 
             // Find the project directory containing this file
-            const $projectDir = await findProjectDirectory(filename);
+            const $projectDir = yield* findProjectDirectory(filename);
             if (Option.isNone($projectDir)) return Result.fail(event);
 
             return Result.succeed({ projectDir: $projectDir.value });

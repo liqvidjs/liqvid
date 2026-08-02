@@ -1,4 +1,4 @@
-import os from "os";
+import os from "node:os";
 
 /**
 Restrict concurrency to allowable values and avoid warnings.

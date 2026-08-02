@@ -7,6 +7,14 @@
   border-radius: 6px;
 }
 
+.iconRegular {
+  display: block;
+}
+
+.iconFill {
+  display: none;
+}
+
 .RadioTabsItem {
   display: flex;
   align-items: center;
@@ -43,12 +51,4 @@
     outline: 2px solid var(--accent-focus);
     outline-offset: 1px;
   }
-}
-
-.iconRegular {
-  display: block;
-}
-
-.iconFill {
-  display: none;
 }

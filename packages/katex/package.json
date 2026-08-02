@@ -9,15 +9,7 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
+      "import": "./dist/esm/index.js"
     }
   },
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
@@ -28,13 +20,12 @@
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:esm": "tsc",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },

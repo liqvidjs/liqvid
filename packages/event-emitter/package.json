@@ -19,22 +19,18 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": "./dist/esm/index.js"
     },
     "./react": {
       "@liqvid/dev": "./src/react.ts",
       "types": "./dist/types/react.d.ts",
-      "import": "./dist/esm/react.js",
-      "require": "./dist/cjs/react.js"
+      "import": "./dist/esm/react.js"
     }
   },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",

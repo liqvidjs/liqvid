@@ -1,4 +1,5 @@
 import type { PluginContext } from "@liqvid/studio-plugin-api";
+import { combineRefs } from "@liqvid/utils";
 import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
@@ -56,7 +57,7 @@ export function Toast({
     <aside
       className={clsx(styles.Toast, className)}
       onClick={(e) => e.stopPropagation()}
-      ref={elt}
+      ref={combineRefs(ref, elt)}
     >
       <div className={styles.icon}>{icon}</div>
       <header>{title}</header>

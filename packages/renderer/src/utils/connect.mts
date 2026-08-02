@@ -171,15 +171,15 @@ export function getPages({
     yield* Effect.logDebug("connected to all pages");
 
     // TODO: legacy, may not be needed anymore
-    yield* Effect.all(
-      pages.map((page) =>
-        Effect.promise(async () => {
-          (page as any).client = await page.target().createCDPSession();
-        }),
-      ),
-    );
+    // yield* Effect.all(
+    //   pages.map((page) =>
+    //     Effect.promise(async () => {
+    //       (page as any).client = await page.createCDPSession();
+    //     }),
+    //   ),
+    // );
 
-    yield* Effect.logDebug("created CDP sessions");
+    // yield* Effect.logDebug("created CDP sessions");
 
     return pages;
   }).pipe(

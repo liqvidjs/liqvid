@@ -1,21 +1,20 @@
+import { Playback } from "@liqvid/playback";
+import { Player } from "@liqvid/player";
 import { fireEvent, render } from "@testing-library/react";
-import * as React from "react";
+import { act } from "react";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
-
-import { act } from "react-dom/test-utils";
-
-import { Playback, Player } from "../..";
 
 describe("Volume button", () => {
   let button: HTMLButtonElement;
   let slider: HTMLInputElement;
 
-  const playback = new Playback({ duration: 60000 });
+  const playback = new Playback();
+  playback.duration$ = { minutes: 1 };
 
   beforeEach(() => {
-    render(<Player playback={playback}></Player>);
+    render(<Player.Root playback={playback}></Player.Root>);
     act(() => {
       playback.muted = false;
       playback.volume = 1;

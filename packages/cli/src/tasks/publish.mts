@@ -1,9 +1,8 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Effect } from "effect";
+import { Cause, Effect, FileSystem } from "effect";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";
@@ -21,8 +20,26 @@ import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
 
 import { CONFIG_FILE, DEFAULT_MEDIA_PATTERNS } from "./conventions.mts";
 
+export type PublishOptions = {
+  /** Base directory containing media files (relative to cwd). Defaults to "app". */
+  baseDir?: RelativeDir;
+
+  /** Path to liqvid.json config file */
+  configPath?: AbsoluteFile;
+
+  /** Working directory. Defaults to `process.cwd()`. */
+  cwd?: AbsoluteDir;
+
+  /** Show what would be uploaded without actually uploading */
+  dryRun?: boolean;
+};
+
 /** Publish content and/or media files to configured hosting providers. */
-export const publish: CommandModule = {
+export const publish: CommandModule<
+  Record<string, never>,
+  Required<Omit<PublishOptions, "configPath">> & { config?: AbsoluteFile }
+> = {
+  // @ts-expect-error TODO: figure this out
   builder: (yargs) =>
     yargs
       .example([
@@ -39,12 +56,14 @@ export const publish: CommandModule = {
       )
       .option("cwd", {
         alias: "C",
+        coerce: path.resolve,
         default: process.cwd(),
         desc: "Working directory containing liqvid.json and media files",
         normalize: true,
       })
       .option("config", {
         alias: "c",
+        coerce: path.resolve,
         desc: `Path to config file (default: ${CONFIG_FILE} in cwd)`,
         normalize: true,
       })
@@ -75,12 +94,12 @@ export const publish: CommandModule = {
   describe:
     "Publish content and/or media files to configured hosting providers",
   handler: async (argv) => {
-    const cwd = argv.cwd as string;
-    const baseDir = argv["base-dir"] as string;
-    const dryRun = argv["dry-run"] as boolean;
-    const contentFlag = argv.content as boolean;
-    const mediaFlag = argv.media as boolean;
-    const configPath = (argv.config as string) ?? path.join(cwd, CONFIG_FILE);
+    const cwd = argv.cwd;
+    const baseDir = argv.baseDir;
+    const dryRun = argv.dryRun;
+    const contentFlag = argv.content;
+    const mediaFlag = argv.media;
+    const configPath = argv.config ?? path.join(cwd, CONFIG_FILE);
 
     // If neither --content nor --media is specified, publish both
     const shouldPublishContent = contentFlag || (!contentFlag && !mediaFlag);
@@ -100,20 +119,6 @@ export const publish: CommandModule = {
     process.exit(0);
   },
 };
-
-export interface PublishOptions {
-  /** Base directory containing media files (relative to cwd). Defaults to "app". */
-  baseDir?: RelativeDir;
-
-  /** Path to liqvid.json config file */
-  configPath?: AbsoluteFile;
-
-  /** Working directory. Defaults to `process.cwd()`. */
-  cwd?: AbsoluteDir;
-
-  /** Show what would be uploaded without actually uploading */
-  dryRun?: boolean;
-}
 
 /**
  * Load the parsed Liqvid config for the given cwd/configPath.
@@ -143,7 +148,11 @@ export async function publishContent(
 
   const config = await loadConfig(cwd, configPath);
 
-  await publishContentFiles(config, cwd, dryRun);
+  await Effect.runPromise(
+    publishContentFiles(config, cwd, dryRun).pipe(
+      Effect.provide(NodeFileSystem.layer),
+    ),
+  );
 }
 
 /**
@@ -151,9 +160,7 @@ export async function publishContent(
  *
  * Equivalent to `liqvid publish --media`.
  */
-export async function publishMedia(
-  options: PublishOptions = {},
-): Promise<void> {
+export async function publishMedia(options: PublishOptions = {}) {
   const cwd = options.cwd ?? process.cwd();
   const baseDir = options.baseDir ?? RelativeDir("app");
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
@@ -165,88 +172,103 @@ export async function publishMedia(
 
   const config = await loadConfig(cwd, configPath);
 
-  await publishMediaFiles(config, searchDir, baseDir, dryRun);
+  await Effect.runPromise(
+    publishMediaFiles(config, searchDir, baseDir, dryRun).pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+      Effect.catch(Effect.die),
+    ),
+  );
 }
 
 /**
  * Publish content files (html/css/js) to the hosting provider.
  */
-async function publishContentFiles(
+function publishContentFiles(
   config: LiqvidConfig,
-  cwd: string,
+  cwd: AbsoluteDir,
   dryRun: boolean,
-): Promise<void> {
-  // Next.js builds to the 'out' directory by default for static export
-  const outDir = path.join(cwd, "out");
+) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // Check if the out directory exists
-  try {
-    await fsp.access(outDir);
-  } catch {
-    console.log(
-      "No 'out' directory found. Run 'next build' with static export first.",
-    );
-    return;
-  }
+    // Next.js builds to the 'out' directory by default for static export
+    const outDir = path.join(cwd, RelativeDir("out"));
 
-  console.log("Publishing content files...");
+    // Check if the out directory exists
+    if (!(yield* fs.exists(outDir))) {
+      return yield* Effect.die(
+        new Error(
+          "No 'out' directory found. Run 'next build' with static export first.",
+        ),
+      );
+    }
 
-  const hostingProvider = createHostingProvider(config);
+    yield* Effect.log("Publishing content files...");
 
-  if (dryRun) {
-    console.log(`Dry run: would publish content from ${outDir}`);
-    return;
-  }
+    const hostingProvider = createHostingProvider(config);
 
-  await hostingProvider.publishContent(outDir);
-  console.log("Content publishing complete.");
+    if (dryRun) {
+      console.log(`Dry run: would publish content from ${outDir}`);
+      return;
+    }
+
+    yield* Effect.promise(() => hostingProvider.publishContent(outDir));
+    yield* Effect.log("Content publishing complete.");
+  });
 }
 
 /**
  * Publish media files to the media hosting provider.
  */
-async function publishMediaFiles(
+function publishMediaFiles(
   config: LiqvidConfig,
   searchDir: string,
   baseDir: string,
   dryRun: boolean,
-): Promise<void> {
-  // Get glob patterns from config, with sensible defaults
-  const patterns = config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
+) {
+  return Effect.gen(function* () {
+    // Get glob patterns from config, with sensible defaults
+    const patterns =
+      config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
 
-  // Find media files matching the glob patterns
-  const mediaFiles = await fg(patterns, {
-    absolute: true,
-    cwd: searchDir,
-    dot: true, // Include files in .liqvid directories
-    onlyFiles: true,
+    // Find media files matching the glob patterns
+    const mediaFiles = yield* Effect.promise(() =>
+      fg(patterns as string[], {
+        absolute: true,
+        cwd: searchDir,
+        dot: true, // Include files in .liqvid directories
+        onlyFiles: true,
+      }),
+    );
+
+    if (mediaFiles.length === 0) {
+      yield* Effect.log(
+        `No media files found in ${baseDir}/. Nothing to publish.`,
+      );
+      return;
+    }
+
+    // Sort for consistent output
+    mediaFiles.sort();
+
+    yield* Effect.log(
+      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/\n`,
+    );
+
+    // Create provider based on config
+    const provider = createMediaProvider(config);
+
+    if (dryRun) {
+      yield* Effect.log("Dry run mode - checking remote state...\n");
+      yield* showDryRunInfo(provider, mediaFiles, searchDir, config);
+      return;
+    }
+
+    // Publish all media files (paths relative to searchDir)
+    yield* Effect.promise(() => provider.publishMedia(mediaFiles, searchDir));
+    yield* Effect.log("Media publishing complete.");
   });
-
-  if (mediaFiles.length === 0) {
-    console.log(`No media files found in ${baseDir}/. Nothing to publish.`);
-    return;
-  }
-
-  // Sort for consistent output
-  mediaFiles.sort();
-
-  console.log(
-    `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/`,
-  );
-  console.log();
-
-  // Create provider based on config
-  const provider = createMediaProvider(config);
-
-  if (dryRun) {
-    console.log("Dry run mode - checking remote state...\n");
-    await showDryRunInfo(provider, mediaFiles, searchDir, config);
-    return;
-  }
-
-  // Publish all media files (paths relative to searchDir)
-  await provider.publishMedia(mediaFiles, searchDir);
-  console.log("Media publishing complete.");
 }
 
 /**
@@ -347,49 +369,56 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
 /**
  * Show what would be uploaded in dry-run mode
  */
-async function showDryRunInfo(
+function showDryRunInfo(
   provider: MediaHostingProvider,
   mediaFiles: string[],
   rootDir: string,
   _config: LiqvidConfig,
-): Promise<void> {
-  // Check which files need to be uploaded
-  const statuses = await provider.checkFiles(mediaFiles, rootDir);
+) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  const toUpload = statuses.filter((s) => s.needsUpload);
-  const unchanged = statuses.filter((s) => !s.needsUpload);
+    // Check which files need to be uploaded
+    const statuses = yield* Effect.promise(() =>
+      provider.checkFiles(mediaFiles, rootDir),
+    );
 
-  if (toUpload.length > 0) {
-    console.log("Files that would be uploaded:\n");
-    for (const { filePath, key, reason } of toUpload) {
-      const stats = await fsp.stat(filePath);
-      const sizeStr = formatFileSize(stats.size);
-      const reasonStr = reason === "new" ? "(new)" : "(modified)";
-      console.log(
-        `  ${path.relative(rootDir, filePath)} → ${key} (${sizeStr}) ${reasonStr}`,
+    const toUpload = statuses.filter((s) => s.needsUpload);
+    const unchanged = statuses.filter((s) => !s.needsUpload);
+
+    if (toUpload.length > 0) {
+      yield* Effect.log("Files that would be uploaded:\n");
+      for (const { filePath, key, reason } of toUpload) {
+        const stats = yield* fs.stat(filePath);
+        const sizeStr = formatFileSize(stats.size);
+        const reasonStr = reason === "new" ? "(new)" : "(modified)";
+        yield* Effect.log(
+          `  ${path.relative(rootDir, filePath)} → ${key} (${sizeStr}) ${reasonStr}`,
+        );
+      }
+      yield* Effect.log();
+    }
+
+    if (unchanged.length > 0) {
+      yield* Effect.log(
+        `Unchanged: ${unchanged.length} ${pluralize("file", unchanged.length)}`,
       );
     }
-    console.log();
-  }
 
-  if (unchanged.length > 0) {
-    console.log(
-      `Unchanged: ${unchanged.length} ${pluralize("file", unchanged.length)}`,
+    yield* Effect.log(
+      `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
     );
-  }
-
-  console.log(
-    `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
-  );
+  });
 }
 
 /**
  * Format file size in human-readable format
  */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024)
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+function formatFileSize(bytes: bigint): string {
+  const kibi = 1024n;
+
+  if (bytes < kibi) return `${bytes} B`;
+  if (bytes < kibi * kibi) return `${bytes / kibi} KB`;
+  if (bytes < kibi * kibi * kibi) return `${bytes / (kibi * kibi)} MB`;
+  return `${bytes / (kibi * kibi * kibi)} GB`;
 }

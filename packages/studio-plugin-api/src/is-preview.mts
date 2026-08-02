@@ -5,10 +5,6 @@ import { createContext, useContext } from "react";
 const isPreviewContext = createContext<boolean | null>(null);
 isPreviewContext.displayName = "IsPreview";
 
-export function useIsPreviewOptional() {
-  return useContext(isPreviewContext);
-}
-
 export function useIsPreview() {
   const value = useIsPreviewOptional();
   if (value === null) {
@@ -17,6 +13,14 @@ export function useIsPreview() {
     );
   }
   return value;
+}
+
+export function useIsPreviewOptional() {
+  return useContext(isPreviewContext);
+}
+
+export function useIsPreviewOrProduction() {
+  return useIsPreviewOptional() ?? true;
 }
 
 export const IsPreviewProvider = isPreviewContext.Provider;

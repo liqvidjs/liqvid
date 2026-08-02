@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { applyDiff, diffObjects } from "../src";
+/** biome-ignore-all lint/suspicious/noExplicitAny: don't need exact types */
+import { applyDiff, diffObjects } from "../src/index.ts";
 
 describe("diffObjects and applyDiff", () => {
   test("property deletion", () => {

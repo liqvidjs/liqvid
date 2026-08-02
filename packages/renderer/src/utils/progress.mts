@@ -9,6 +9,8 @@ export interface SingleBarOptions {
    * Defaults to the value's own string representation.
    */
   formatValue?: (value: number) => string;
+
+  etaBuffer?: number;
 }
 
 // Declaring a tag for a service that generates random numbers

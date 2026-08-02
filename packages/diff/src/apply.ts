@@ -42,12 +42,7 @@ export function applyDiff<T>(a: T, b: ObjectDiff<T>, inPlace = false): T {
         applyArrayDiff(target, item, true);
       },
       change(key, item) {
-        try {
-          copy[key] = cloneValue(item) as any;
-        } catch (e) {
-          console.log({ a, b, copy, inPlace });
-          debugger;
-        }
+        copy[key] = cloneValue(item) as any;
       },
       create(key, item) {
         copy[key] = cloneValue(item) as any;

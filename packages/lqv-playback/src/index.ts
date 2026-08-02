@@ -6,7 +6,6 @@ export type SeekableElementEventMap = Pick<
   | "play"
   | "playing"
   | "ratechange"
-  | "readystatechange"
   | "seeked"
   | "seeking"
   | "timeupdate"

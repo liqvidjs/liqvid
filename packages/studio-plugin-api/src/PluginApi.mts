@@ -48,8 +48,8 @@ export function LiqvidStudioPluginApiProvider({
   plugins?: LiqvidStudioPlugin[];
   value?: Partial<PluginContext>;
 }) {
-  const [plugins, setPlugins] = useState<Record<string, LiqvidStudioPlugin>>(
-    () => Object.fromEntries((propPlugins ?? []).map((p) => [p.package, p])),
+  const [plugins] = useState<Record<string, LiqvidStudioPlugin>>(() =>
+    Object.fromEntries((propPlugins ?? []).map((p) => [p.package, p])),
   );
 
   const context = useMemo(

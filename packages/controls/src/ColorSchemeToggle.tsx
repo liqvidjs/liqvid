@@ -1,7 +1,6 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact } from "@liqvid/utils";
-import clsx from "clsx";
 import { useMemo } from "react";
 
 import { convertShortcuts } from "./utils.ts";

@@ -20,8 +20,7 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": "./dist/esm/index.js"
     },
     "./interpreters/*": {
       "@liqvid/dev": "./src/interpreters/*.ts",
@@ -32,21 +31,19 @@
     "./web": {
       "@liqvid/dev": "./src/presets/web/index.ts",
       "types": "./dist/types/presets/web/index.d.ts",
-      "import": "./dist/esm/presets/web/index.js",
-      "require": "./dist/cjs/presets/web/index.js"
+      "import": "./dist/esm/presets/web/index.js"
     }
   },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:css; pnpm lint; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -fr dist && mkdir dist",
     "build:css": "cp -R css dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "watch": "tsc --watch"
   },

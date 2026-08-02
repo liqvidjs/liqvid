@@ -5,10 +5,9 @@ import {
   NodeHttpPlatform,
   NodeServices,
 } from "@effect/platform-node";
-import { FileDecodeError, loadEnvFiles } from "@liqvid/cli/utils";
+import { loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
-import chalk from "chalk";
 import {
   Cause,
   Effect,
@@ -21,6 +20,7 @@ import {
 import { Etag } from "effect/unstable/http";
 import { toWebHandler } from "effect/unstable/http/HttpRouter";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
+import { RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
 import { audioLive } from "../api/audio.mts";
@@ -88,7 +88,7 @@ export function getHandler(_dynamicImports: DynamicImports) {
     }
 
     if (route.startsWith("/static")) {
-      const url = route.slice("/static".length);
+      const url = RelativeFile(route.slice("/static".length));
       program = serveStaticFile(url);
     }
 
@@ -176,38 +176,16 @@ async function runEffect<A, E>(
       ),
       Effect.provideService(References.MinimumLogLevel, getLogLevel()),
       Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     ),
   );
 
   return Exit.match(result, {
-    onFailure: (cause) => {
-      for (const reason of cause.reasons) {
-        // all other errors are 500
-        if (reason._tag !== "Fail") {
-          console.error(Cause.pretty(cause));
-          break;
-        }
-
-        const { error } = reason;
-
-        // HTTP errors, expected
-        if (error instanceof FileDecodeError) {
-          console.error(
-            chalk.red(`FileDecodeError in ${error.filename}: ${error.cause}`),
-          );
-        } else {
-          console.error(error);
-        }
-
-        break;
-      }
-
-      // other error, 500
-      return Response.json(
+    onFailure: () =>
+      Response.json(
         { error: "Internal Server Error" },
         { status: StatusCodes.INTERNAL_SERVER_ERROR },
-      );
-    },
+      ),
     onSuccess: (v) => {
       if (v instanceof Response) {
         return v;

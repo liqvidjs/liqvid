@@ -19,20 +19,17 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": "./dist/esm/index.js"
     },
     "./extensions": {
       "@liqvid/dev": "./src/extensions.ts",
       "types": "./dist/types/extensions.d.ts",
-      "import": "./dist/esm/extensions.js",
-      "require": "./dist/cjs/extensions.js"
+      "import": "./dist/esm/extensions.js"
     },
     "./fake-selection": {
       "@liqvid/dev": "./src/fake-selection.ts",
       "types": "./dist/types/fake-selection.d.ts",
-      "import": "./dist/esm/fake-selection.js",
-      "require": "./dist/cjs/fake-selection.js"
+      "import": "./dist/esm/fake-selection.js"
     },
     "./liqvid-studio-server-plugin": {
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
@@ -49,9 +46,7 @@
   "scripts": {
     "build": "pnpm build:clean; pnpm lint; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution nodenext --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",

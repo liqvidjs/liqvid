@@ -18,19 +18,21 @@
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
     }
   },
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
+    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "tsc; node ../../build.mjs; rollup -c",
-    "build:postclean": "rm -rf dist/esm dist/types dist/tsconfig.tsbuildinfo",
+    "build:js": "tsc",
+    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
-    "lint:package": "../../format-package-json.sh"
+    "lint:agent": "biome check --fix --reporter=concise",
+    "lint:package": "../../format-package-json.sh",
+    "watch": "tsc --watch"
   },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
@@ -53,12 +55,5 @@
     "liqvid",
     "mathjax",
     "xyjax"
-  ],
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*"
-      ]
-    }
-  }
+  ]
 }

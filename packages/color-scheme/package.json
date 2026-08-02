@@ -18,28 +18,25 @@
   ],
   "exports": {
     "./docusaurus": {
-      "types": "./dist/types/docusaurus.d.ts",
       "@liqvid/dev": "./src/docusaurus.tsx",
-      "import": "./dist/esm/docusaurus.js",
-      "require": "./dist/cjs/docusaurus.js"
+      "types": "./dist/types/docusaurus.d.ts",
+      "import": "./dist/esm/docusaurus.js"
     },
     "./react": {
-      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.tsx",
-      "import": "./dist/esm/react.js",
-      "require": "./dist/cjs/react.js"
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/esm/react.js"
     }
   },
   "scripts": {
     "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:js:esm; pnpm build:js:cjs",
-    "build:js:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --customConditions null --verbatimModuleSyntax false",
-    "build:js:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "test": "jest",
     "watch": "tsc --watch"
@@ -56,7 +53,7 @@
     "@docusaurus/theme-common": "catalog:dev",
     "@liqvid/hydration": "workspace:^1.0.0-alpha.4",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
-    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@types/react": "catalog:peer",
     "react": "catalog:peer"
   },

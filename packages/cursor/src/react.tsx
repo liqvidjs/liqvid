@@ -1,5 +1,6 @@
-import { useME } from "@lqv/playback/react";
+import { useSeekable } from "@lqv/playback/react";
 import { useEffect, useRef } from "react";
+
 import { cursorReplay } from ".";
 
 type CursorData = Parameters<typeof cursorReplay>[0]["data"];
@@ -7,44 +8,57 @@ type CursorData = Parameters<typeof cursorReplay>[0]["data"];
 /**
  * Move an image along a recorder cursor path. React version of {@link cursorReplay}.
  */
-export function Cursor(
-  props: Omit<
-    Parameters<typeof cursorReplay>[0],
-    "data" | "playback" | "target"
-  > & {
-    /** Cursor data to replay. */
-    data: CursorData | Promise<CursorData>;
+export function Cursor({
+  align,
+  data,
+  start,
+  end,
+  ...props
+}: Omit<Parameters<typeof cursorReplay>[0], "data" | "playback" | "target"> & {
+  /** Cursor data to replay. */
+  data: CursorData | Promise<CursorData>;
 
-    /** Src of cursor image. */
-    src: string;
-  },
-): JSX.Element {
-  const playback = useME();
+  /** Src of cursor image. */
+  src: string;
+} & React.ComponentProps<"img">) {
+  const playback = useSeekable();
   const ref = useRef<HTMLImageElement>(null);
 
   // subscribe
   useEffect(() => {
-    if (props.data instanceof Promise) {
+    if (data instanceof Promise) {
       let unsub: () => void;
-      props.data.then((data) => {
+
+      data.then((data) => {
+        if (!ref.current) return;
+
         unsub = cursorReplay({
-          playback,
-          target: ref.current,
-          ...props,
+          align,
           data,
+          end,
+          playback,
+          start,
+          target: ref.current,
         });
       });
+
       return () => {
         unsub?.();
       };
     }
-    return cursorReplay({
-      playback,
-      target: ref.current,
-      ...props,
-      data: props.data,
-    });
-  }, [props.align, ref.current]);
 
-  return <img className="lv-cursor" ref={ref} src={props.src} />;
+    if (!ref.current) return;
+
+    return cursorReplay({
+      align,
+      data,
+      end,
+      playback,
+      start,
+      target: ref.current,
+    });
+  }, [align, data, playback, end, start]);
+
+  // biome-ignore lint/a11y/useAltText: provided by consumer
+  return <img ref={ref} {...props} />;
 }

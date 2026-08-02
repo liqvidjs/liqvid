@@ -62,6 +62,7 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -85,6 +86,9 @@
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
+  },
+  "peerDependencies": {
+    "effect-paths": "workspace:^"
   },
   "sideEffects": false,
   "type": "module"

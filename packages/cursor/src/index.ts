@@ -104,20 +104,20 @@ export function cursorReplay(opts: {
   });
 
   const update = replay({
-    data,
-    start,
-    end,
     active: ([x, y]) => {
       Object.assign(target.style, {
-        opacity: 1,
         left: `calc(${x}% - ${width * alignX}px)`,
+        opacity: 1,
         top: `calc(${y}% - ${height * alignY}px)`,
       });
     },
+    compressed: true,
+    data,
+    end,
     inactive: () => {
       target.style.opacity = "0";
     },
-    compressed: true,
+    start,
     units: 1000,
   });
 

@@ -9,7 +9,7 @@ import {
 import { lv2cm } from "@lqv/codemirror/extensions";
 import { vim } from "@replit/codemirror-vim";
 import clsx from "clsx";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { vimCompartment } from "../extensions.ts";
 import { useActiveFile, useLiveCodeShortcut } from "../hooks.ts";

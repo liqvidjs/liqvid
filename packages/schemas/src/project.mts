@@ -2,7 +2,6 @@ import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
 import { Effect, Schema } from "effect";
-import { OpenApi } from "effect/unstable/httpapi";
 import { RelativeDir } from "effect-paths";
 
 export const AspectRatio = Schema.Struct({

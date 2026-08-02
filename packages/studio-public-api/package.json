@@ -22,6 +22,7 @@
     "docs:watch": "typedoc --watch",
     "generate:openapi": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-openapi.mts",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "watch": "tsc --watch"
   },
   "repository": {

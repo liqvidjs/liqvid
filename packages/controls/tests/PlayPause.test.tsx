@@ -1,17 +1,17 @@
 import { fireEvent, render } from "@testing-library/react";
-import * as React from "react";
 
 import "../matchMedia.mock";
 import "../DocumentTimeline.mock";
 
-import { act } from "react-dom/test-utils";
-
-import { Playback, Player } from "../..";
+import { Playback } from "@liqvid/playback";
+import { Player } from "@liqvid/player";
+import { act } from "react";
 
 describe("Play/pause button", () => {
   let button: HTMLButtonElement;
 
-  const playback = new Playback({ duration: 60000 });
+  const playback = new Playback();
+  playback.duration = 60;
 
   beforeEach(() => {
     render(<Player playback={playback}></Player>);

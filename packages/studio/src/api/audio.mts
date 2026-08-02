@@ -126,8 +126,6 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
             Effect.map(Option.getOrElse(() => [])),
           );
 
-          console.log({ entries });
-
           const maybeItems = yield* Effect.all(
             entries
               .filter((entry) => entry[1] === "Directory")

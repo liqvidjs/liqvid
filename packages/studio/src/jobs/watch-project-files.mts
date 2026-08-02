@@ -12,7 +12,6 @@ import {
   type ProjectMeta,
 } from "@liqvid/schemas";
 import { dirNameToPackageName } from "@liqvid/studio-plugin-api";
-import chalk from "chalk";
 import {
   Cause,
   Effect,
@@ -79,7 +78,6 @@ type WatchEvent =
     };
 
 export async function watchProjectFiles(projects: Projects) {
-  console.log(chalk.blue("Watching project files..."));
   const TARGET_DIR = getRoutesDir();
 
   // initial check

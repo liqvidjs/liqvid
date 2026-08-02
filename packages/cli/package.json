@@ -2,7 +2,7 @@
   "name": "@liqvid/cli",
   "version": "2.0.0-alpha.3",
   "description": "Liqvid command line utility",
-  "main": "dist/esm/index.mjs",
+  "main": "src/index.mts",
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",
@@ -82,6 +82,7 @@
   "scripts": {
     "build": "tsc --build",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",
     "test": "jest --coverage",
     "watch": "tsc --watch"
@@ -101,7 +102,6 @@
     "chalk": "catalog:",
     "cli-progress": "catalog:",
     "effect": "catalog:",
-    "effect-paths": "workspace:^",
     "execa": "catalog:",
     "fast-glob": "catalog:",
     "handlebars": "catalog:",
@@ -122,6 +122,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "effect-paths": "workspace:^",
     "smart-whisper": "catalog:peer"
   }
 }

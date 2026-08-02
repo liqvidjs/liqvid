@@ -6,6 +6,14 @@ import clsx from "clsx";
 
 import styles from "./Select.module.css";
 
+export const SelectRoot = Select.Root;
+
+export const SelectValue = Select.Value;
+
+export const SelectPositioner = Select.Positioner;
+
+export const SelectItemText = Select.ItemText;
+
 export function SelectBackdrop({
   className,
   ...props

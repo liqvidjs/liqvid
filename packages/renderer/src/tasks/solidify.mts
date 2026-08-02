@@ -1,7 +1,6 @@
 import path from "node:path";
 
 import { formatTime, parseTime } from "@liqvid/utils";
-import cliProgress from "cli-progress";
 import { Effect, FileSystem } from "effect";
 
 import { Progress } from "../index.mts";
@@ -55,23 +54,21 @@ export function solidify({
 
     // check that ffmpeg exists
     if (!sequence && !(yield* Effect.promise(ffmpegExists))) {
-      console.error(
+      yield* Effect.logError(
         "ffmpeg must be installed and in your PATH. Download it from",
       );
-      console.error("https://ffmpeg.org/download.html");
-      process.exit(1);
+      yield* Effect.logError("https://ffmpeg.org/download.html");
+      return yield* Effect.die("ffmpeg not found");
     }
 
     // check that audio file exists
     if (o.audioFile && !(yield* fs.exists(o.audioFile))) {
-      console.error(`Audio file ${o.audioFile} not found`);
-      process.exit(1);
+      return yield* Effect.die(`audio file ${o.audioFile} not found`);
     }
 
     // validate start/end time
     if (end <= start) {
-      console.error("End time cannot be before start time");
-      process.exit(1);
+      return yield* Effect.die("end time cannot be before start time");
     }
 
     // bound concurrency
@@ -103,12 +100,12 @@ export function solidify({
       }),
       (pages) =>
         Effect.gen(function* () {
-          console.log(`acquired ${pages.length} players`);
-          for (const page of pages) {
-            (page as any).client = yield* Effect.promise(() =>
-              page.target().createCDPSession(),
-            );
-          }
+          yield* Effect.log(`acquired ${pages.length} players`);
+          // for (const page of pages) {
+          //   (page as any).client = yield* Effect.promise(() =>
+          //     page.createCDPSession(),
+          //   );
+          // }
           const pool = new Pool(pages);
 
           // get duration
@@ -119,8 +116,7 @@ export function solidify({
           );
 
           if (start >= totalDuration) {
-            yield* Effect.logError("Start cannot be after video endtime");
-            process.exit(1);
+            return yield* Effect.die("start cannot be after video endtime");
           }
 
           const realDuration = (() => {
@@ -202,17 +198,7 @@ function assembleVideo({
     const progress = yield* Progress;
     const stitchingBar = new progress.SingleBar({
       etaBuffer: 50,
-      formatValue: (
-        v: number,
-        // biome-ignore lint/suspicious/noExplicitAny: don't want to include cli-progress package here
-        options: any,
-        type: "percentage" | "total" | "value" | "eta" | "duration",
-      ) => {
-        if (type === "value" || type === "total") {
-          return formatTime(v);
-        }
-        return cliProgress.Format.ValueFormat(v, options, type);
-      },
+      formatValue: formatTime,
     });
 
     stitchingBar.start(o.duration, 0);

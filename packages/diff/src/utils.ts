@@ -132,7 +132,7 @@ export function consume<T>(
 
     const fn = fns[name];
     if (fn) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: complex types
       return fn(valueA as any);
     }
 

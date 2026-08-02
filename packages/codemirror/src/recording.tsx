@@ -25,8 +25,8 @@ export type CodeMirrorInstance = {
 
 // the actual thingy that gets exported
 export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
-  package = "@lqv/codemirror";
-  version = "1.0.0";
+  readonly package = "@lqv/codemirror";
+  readonly version = "1.0.0";
   $schema = undefined;
   initial: CMState | undefined = undefined;
 

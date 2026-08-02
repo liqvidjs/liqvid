@@ -19,28 +19,24 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": "./dist/esm/index.js"
     },
     "./react": {
       "types": "./dist/types/react.d.ts",
-      "import": "./dist/esm/react.js",
-      "require": "./dist/cjs/react.js"
+      "import": "./dist/esm/react.js"
     },
     "./recording": {
       "types": "./dist/types/recording.d.ts",
-      "import": "./dist/esm/recording.js",
-      "require": "./dist/cjs/recording.js"
+      "import": "./dist/esm/recording.js"
     }
   },
   "scripts": {
     "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
     "build:clean": "rm -rf dist",
-    "build:js": "pnpm build:cjs; pnpm build:esm; node ../../build.mjs",
-    "build:cjs": "tsc --outDir dist/cjs --module commonjs",
-    "build:esm": "tsc",
+    "build:js": "tsc",
     "build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh"
   },
   "dependencies": {

@@ -117,7 +117,7 @@ export function saveRecording(
           yield* fs.makeDirectory(pluginDir, { recursive: true });
 
           const data = formData.get(pluginInfo.key);
-          console.dir({ data, pluginInfo });
+
           if (data === null) return;
 
           if (pluginInfo.isBlob) {

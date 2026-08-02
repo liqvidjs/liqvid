@@ -32,6 +32,7 @@
     "build:js": "tsc",
     "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "biome check --fix",
+    "lint:agent": "biome check --fix --reporter=concise",
     "test": "tsc --noEmit --project tsconfig.test.json",
     "watch": "tsc --watch"
   },

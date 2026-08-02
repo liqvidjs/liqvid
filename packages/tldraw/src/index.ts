@@ -35,7 +35,6 @@ import type {
 } from "./types.ts";
 import {
   type CursorName,
-  clone,
   decodeDiffPaths,
   decodePointer,
   decodePoints,
@@ -46,8 +45,6 @@ import {
   isSingleton,
 } from "./utils.ts";
 import { segmentAppend } from "./zsa.ts";
-
-const newShapeCount = 0;
 
 export { FollowController } from "./follow.ts";
 export type {
