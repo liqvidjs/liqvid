@@ -6,7 +6,10 @@ import {
   usePersistentState,
 } from "@liqvid/hydration";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import { useProjectPath } from "@liqvid/studio-plugin-api";
+import {
+  useIsPreviewOrProduction,
+  useProjectPath,
+} from "@liqvid/studio-plugin-api";
 import { createUniqueContext } from "@liqvid/utils";
 import { useContext, useMemo } from "react";
 
@@ -55,6 +58,8 @@ export function PromptsProvider({
 }) {
   const projectPath = useProjectPath();
 
+  const isPreviewOrProduction = useIsPreviewOrProduction();
+
   // Set up persistence for the enabled state
   const enabledPersistenceConfig = useMemo(():
     | BooleanValueConfig
@@ -86,6 +91,8 @@ export function PromptsProvider({
     }),
     [enabled, persistence, toggleEnabled, setEnabled],
   );
+
+  if (isPreviewOrProduction) return children;
 
   return (
     <promptsContext.Provider value={context}>

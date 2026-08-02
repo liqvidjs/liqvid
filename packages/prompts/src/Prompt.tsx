@@ -3,6 +3,7 @@ import {
   type StringValueConfig,
   usePersist,
 } from "@liqvid/hydration";
+import { useIsPreviewOrProduction } from "@liqvid/studio-plugin-api";
 import { onDragReact } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -33,6 +34,7 @@ export function Prompt({
   name?: string;
 }) {
   const { enabled, persistence } = usePromptsApi();
+  const isPreviewOrProduction = useIsPreviewOrProduction();
   const [ref, setRef] = useState<HTMLDListElement | null>(null);
 
   // Set up persistence for this prompt's position
@@ -131,6 +133,8 @@ export function Prompt({
   // avoid hydration errors
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
+
+  if (isPreviewOrProduction) return null;
 
   if (!isMounted) return null;
 
