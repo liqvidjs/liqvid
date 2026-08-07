@@ -37,7 +37,6 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
     "watch": "tsc --watch"
   },

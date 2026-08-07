@@ -38,7 +38,6 @@
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "pnpm biome check --fix",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
     "test": "jest",
     "watch": "tsc --watch"

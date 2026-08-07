@@ -38,7 +38,6 @@
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",

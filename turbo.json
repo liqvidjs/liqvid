@@ -10,9 +10,6 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "lint:package": {
-      "dependsOn": ["^lint:package"]
-    },
     "watch": {
       "cache": false,
       "persistent": true

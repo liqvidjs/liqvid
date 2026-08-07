@@ -2,26 +2,31 @@
   "name": "@liqvid/xyjax",
   "version": "0.0.2",
   "description": "XyJax animation helpers for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "keywords": [
+    "liqvid",
+    "mathjax",
+    "xyjax"
+  ],
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/xyjax",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -31,7 +36,6 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
     "watch": "tsc --watch"
   },
@@ -52,10 +56,5 @@
     "@liqvid/mathjax": "workspace:^1.0.0-alpha.0",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
-  },
-  "keywords": [
-    "liqvid",
-    "mathjax",
-    "xyjax"
-  ]
+  }
 }

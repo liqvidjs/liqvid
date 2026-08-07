@@ -64,9 +64,7 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
-    "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "validate-translations": "node liqvid-validate-translations.mjs",
     "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tsc\""

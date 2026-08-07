@@ -33,7 +33,6 @@
     "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts && biome check --fix json-schemas",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
-    "lint:package": "../../format-package-json.sh",
     "lint:tsc": "tsc --noEmit",
     "watch": "tsc --watch"
   },
