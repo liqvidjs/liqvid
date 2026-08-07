@@ -7,32 +7,26 @@ export interface UseResizableOptions {
   /** Whether to maintain aspect ratio when resizing */
   aspectRatio?: boolean;
 
-  /** Initial width in pixels */
-  initialWidth?: number;
-
   /** Initial height in pixels */
   initialHeight?: number;
 
-  /** Minimum width in pixels */
-  minWidth?: number;
+  /** Initial width in pixels */
+  initialWidth?: number;
 
-  /** Minimum height in pixels */
-  minHeight?: number;
+  /** Maximum height in pixels */
+  maxHeight?: number;
 
   /** Maximum width in pixels */
   maxWidth?: number;
 
-  /** Maximum height in pixels */
-  maxHeight?: number;
+  /** Minimum height in pixels */
+  minHeight?: number;
+
+  /** Minimum width in pixels */
+  minWidth?: number;
 }
 
 export interface UseResizableResult {
-  /** Current width */
-  width: number;
-
-  /** Current height */
-  height: number;
-
   /** Props to spread on corner resize handles */
   getHandleProps: (corner: ResizeCorner) => {
     "data-affords": "click";
@@ -41,6 +35,11 @@ export interface UseResizableResult {
     onTouchStart: React.TouchEventHandler;
     style: React.CSSProperties;
   };
+
+  /** Current height */
+  height: number;
+  /** Current width */
+  width: number;
 }
 
 const HANDLE_SIZE = 12;

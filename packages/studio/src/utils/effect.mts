@@ -90,10 +90,10 @@ function isPlatformError(error: unknown): error is PlatformError.PlatformError {
 
 interface ProgressMessage {
   __kind: "progress";
-  total: number;
-  value: number;
   formattedTotal: string;
   formattedValue: string;
+  total: number;
+  value: number;
 }
 
 /**

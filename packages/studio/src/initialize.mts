@@ -25,14 +25,14 @@ export interface LiqvidServerState {
   basePath: string;
 
   /**
-   * Current working directory, captured at initialization time.
-   */
-  cwd: AbsoluteDir;
-
-  /**
    * The full parsed liqvid.config.json
    */
   config: Option.Option<LiqvidConfig>;
+
+  /**
+   * Current working directory, captured at initialization time.
+   */
+  cwd: AbsoluteDir;
   jobs: {
     checkUpdates: null | Promise<void>;
     productionServer: null | Promise<void>;

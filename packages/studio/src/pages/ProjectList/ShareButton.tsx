@@ -38,8 +38,8 @@ type T = typeof TranslationsJson;
 interface ShareButtonProps {
   basePath: string;
   duration: Duration;
-  project: Omit<ProjectMeta, "duration">;
   productionServerPort: number;
+  project: Omit<ProjectMeta, "duration">;
 }
 
 export function ShareButton({

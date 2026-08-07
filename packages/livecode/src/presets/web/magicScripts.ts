@@ -1,12 +1,12 @@
 interface TextPosition {
-  line: number;
   col: number;
+  line: number;
 }
 
 export interface ScriptOffset {
+  end: TextPosition;
   node: HTMLScriptElement;
   start: TextPosition;
-  end: TextPosition;
 }
 
 export type WebConsoleMessageUp =

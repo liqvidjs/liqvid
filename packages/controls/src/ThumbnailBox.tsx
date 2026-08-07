@@ -12,6 +12,27 @@ export interface ThumbData {
   cols?: number;
 
   /**
+   * How many seconds between thumbnails.
+   * @default 4
+   */
+  frequency?: number;
+
+  /**
+   * Height of individual thumbnails.
+   * @default 100
+   */
+  height?: number;
+
+  /** Points of interest in the video to highlight. */
+  highlights?: VideoHighlight[];
+
+  /**
+   * URL pattern for thumbnails. Must include "%s" for the index of the image.
+   * Can also include "%c" for the color scheme.
+   */
+  path: string;
+
+  /**
    * Number of rows per thumbnail sheet.
    * @default 5
    */
@@ -22,27 +43,6 @@ export interface ThumbData {
    * @default 160
    */
   width?: number;
-
-  /**
-   * Height of individual thumbnails.
-   * @default 100
-   */
-  height?: number;
-
-  /**
-   * How many seconds between thumbnails.
-   * @default 4
-   */
-  frequency?: number;
-
-  /**
-   * URL pattern for thumbnails. Must include "%s" for the index of the image.
-   * Can also include "%c" for the color scheme.
-   */
-  path: string;
-
-  /** Points of interest in the video to highlight. */
-  highlights?: VideoHighlight[];
 }
 
 export interface ThumbnailBoxProps extends Omit<ThumbData, "highlights"> {

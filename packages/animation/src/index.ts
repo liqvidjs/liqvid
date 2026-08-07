@@ -3,11 +3,11 @@ import { assertType, clamp, lerp, type ReplayData } from "@liqvid/utils";
 import { default as BezierEasing } from "bezier-easing";
 
 interface AnimateOptions<T extends DurationLike | number = number> {
-  /**
-   * Start value for animation.
-   * @default 0
-   */
-  startValue?: number;
+  /** Duration of animation. */
+  duration: T;
+
+  /** Easing function. Defaults to the identity function, i.e. linear easing. */
+  easing?: (x: number) => number;
 
   /**
    * End value for animation.
@@ -17,12 +17,11 @@ interface AnimateOptions<T extends DurationLike | number = number> {
 
   /** Start time for animation. */
   startTime: T;
-
-  /** Duration of animation. */
-  duration: T;
-
-  /** Easing function. Defaults to the identity function, i.e. linear easing. */
-  easing?: (x: number) => number;
+  /**
+   * Start value for animation.
+   * @default 0
+   */
+  startValue?: number;
 }
 
 /**

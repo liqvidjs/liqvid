@@ -25,11 +25,11 @@ export interface TrackProps {
   /** A human-readable label for the track. */
   label?: string;
 
-  /** The BCP 47 language tag for the track (e.g., "en", "es", "fr"). */
-  srcLang?: string;
-
   /** URL to a WebVTT (.vtt) file containing the track cues. */
   src?: string;
+
+  /** The BCP 47 language tag for the track (e.g., "en", "es", "fr"). */
+  srcLang?: string;
 }
 
 /**

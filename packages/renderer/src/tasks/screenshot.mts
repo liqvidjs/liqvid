@@ -53,14 +53,13 @@ export type ScreenshotOptions = {
 };
 
 export interface ScreenshotResult {
+  /** Height of the screenshot */
+  height: number;
   /** Path to the saved screenshot */
   path: string;
 
   /** Width of the screenshot */
   width: number;
-
-  /** Height of the screenshot */
-  height: number;
 }
 
 /**

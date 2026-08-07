@@ -29,8 +29,8 @@ export interface RecordingControlProps {
 }
 
 interface FinalizedData {
-  key: string;
   data: unknown;
+  key: string;
 }
 
 /**

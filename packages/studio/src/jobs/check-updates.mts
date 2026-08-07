@@ -23,14 +23,19 @@ type DependencyField = "dependencies" | "devDependencies";
  * Update information for a single tracked package.
  */
 export interface PackageUpdate {
-  /** Package name (e.g. `liqvid` or `@liqvid/studio`). */
-  name: string;
-
   /** Currently installed version (resolved from `node_modules`). */
   current: string;
 
+  /**
+   * Which `package.json` field the dependency lives in, so an update can be
+   * written back to the correct place. `null` when {@link range} is `null`.
+   */
+  field: DependencyField | null;
+
   /** Latest version published to npm. */
   latest: string;
+  /** Package name (e.g. `liqvid` or `@liqvid/studio`). */
+  name: string;
 
   /**
    * The raw version range declared in `package.json` (e.g. `^1.2.3`), or
@@ -39,12 +44,6 @@ export interface PackageUpdate {
    * When `null`, the "click to update" CTA is not offered.
    */
   range: string | null;
-
-  /**
-   * Which `package.json` field the dependency lives in, so an update can be
-   * written back to the correct place. `null` when {@link range} is `null`.
-   */
-  field: DependencyField | null;
 }
 
 /** Aggregate update state exposed to the UI. */

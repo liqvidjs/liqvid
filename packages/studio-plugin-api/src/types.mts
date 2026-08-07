@@ -34,9 +34,9 @@ export interface LiqvidStudioRecordingPlugin<
     props: ConfigurationComponentProps<Instance>,
   ) => React.ReactNode;
 
-  recordingComponent?: (props: RecordingComponentProps) => React.ReactNode;
-
   recorder: Recorder<Datum, FinalData, Config>;
+
+  recordingComponent?: (props: RecordingComponentProps) => React.ReactNode;
 
   useConfigurePlugin?: () => void;
 }

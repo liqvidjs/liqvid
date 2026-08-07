@@ -34,11 +34,11 @@ import Translations from "./.translations/en.json";
 type T = typeof Translations;
 
 export interface RecordingDialogProps {
-  shortcuts?: RecordingControlProps["shortcuts"];
   onShortcutChange?: (
     key: keyof NonNullable<RecordingControlProps["shortcuts"]>,
     value: string,
   ) => void;
+  shortcuts?: RecordingControlProps["shortcuts"];
 }
 
 const tabs = {

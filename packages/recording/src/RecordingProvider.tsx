@@ -6,13 +6,24 @@ import type { Recorder } from "./recorder.ts";
 import type { RecordingPlugin } from "./types.ts";
 
 export interface RecordingContext {
-  manager: RecordingManager;
+  /** Discard the current recording without saving it */
+  discard: () => void;
 
   enabledPlugins: Record<string, boolean>;
+  manager: RecordingManager;
+
+  /** Pause recording if currently active, or resume recording if currently paused. */
+  pauseResume: () => void;
 
   plugins: Record<string, RecordingPlugin<unknown>>;
 
   recordings: unknown[];
+
+  /** Register a recording plugin */
+  registerPlugin: (plugin: RecordingPlugin) => () => void;
+
+  /** Start recording if currently idle, or stop and save recording if currently active */
+  startStop: () => void;
 
   /** Enable or disable a recording plugin. */
   togglePlugin: (
@@ -24,18 +35,6 @@ export interface RecordingContext {
      */
     enabled?: boolean,
   ) => void;
-
-  /** Register a recording plugin */
-  registerPlugin: (plugin: RecordingPlugin) => () => void;
-
-  /** Discard the current recording without saving it */
-  discard: () => void;
-
-  /** Pause recording if currently active, or resume recording if currently paused. */
-  pauseResume: () => void;
-
-  /** Start recording if currently idle, or stop and save recording if currently active */
-  startStop: () => void;
 }
 
 export const RecordingContext = createUniqueContext<RecordingContext>(

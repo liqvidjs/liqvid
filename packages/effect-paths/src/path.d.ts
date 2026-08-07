@@ -26,11 +26,11 @@ export declare module "node:path" {
 
   /* ------------------------------ format ------------------------------ */
   interface FormatInputPathObject {
-    dir?: AnyDir;
-    root?: AnyDir;
     base?: RelativePath;
-    name?: string;
+    dir?: AnyDir;
     ext?: FileExtn;
+    name?: string;
+    root?: AnyDir;
   }
 
   function format(

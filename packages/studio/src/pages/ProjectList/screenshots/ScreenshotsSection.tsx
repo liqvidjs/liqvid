@@ -5,6 +5,7 @@ import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import {
   CopyIcon,
+  FolderOpenIcon,
   PencilSimpleIcon,
   PlusIcon,
   SpinnerIcon,
@@ -30,6 +31,7 @@ import {
   useCommonTranslations,
   useTranslations,
 } from "../../../utils/react.tsx";
+import { openScreenshotInFinderAction } from "../../root-actions.ts";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
@@ -44,10 +46,10 @@ type T = typeof TranslationsJson;
 interface ScreenshotsSectionProps {
   basePath: string;
   duration: Duration;
-  project: Omit<ProjectMeta, "duration">;
-  productionServerPort: number;
   /** Whether the parent dialog is open */
   isOpen: boolean;
+  productionServerPort: number;
+  project: Omit<ProjectMeta, "duration">;
 }
 
 type ConfirmState = {
@@ -88,8 +90,6 @@ async function copyScreenshot(
 }
 
 interface ScreenshotItemProps {
-  screenshot: ScreenshotEntry;
-  variant: { label: VariantLabel; path: string };
   /** Whether this is the first variant of the screenshot */
   isPrimary: boolean;
   /** Ask the parent to confirm overwriting an existing target file */
@@ -98,10 +98,12 @@ interface ScreenshotItemProps {
     target: CopyTarget,
     variant?: VariantLabel,
   ) => void;
-  onRename: (screenshotId: string) => void;
   onDelete: (screenshotId: string) => void;
   /** Open a full-size preview of the given image src */
   onPreview: (src: string, alt: string) => void;
+  onRename: (screenshotId: string) => void;
+  screenshot: ScreenshotEntry;
+  variant: { label: VariantLabel; path: string };
 }
 
 function ScreenshotItem({
@@ -137,6 +139,10 @@ function ScreenshotItem({
     }
 
     await copyScreenshot(projectPath, screenshot.id, target, variant.label);
+  };
+
+  const handleOpenInFinder = async () => {
+    await openScreenshotInFinderAction(projectPath, screenshot.id);
   };
 
   const alt = `Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`;
@@ -186,6 +192,13 @@ function ScreenshotItem({
         </Button>
         {isPrimary && (
           <>
+            <Button
+              className={shareStyles.iconButton}
+              onClick={handleOpenInFinder}
+              title={t.openInFinder}
+            >
+              <FolderOpenIcon size={14} />
+            </Button>
             <Button
               className={shareStyles.iconButton}
               onClick={() => onRename(screenshot.id)}

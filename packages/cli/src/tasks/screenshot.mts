@@ -12,14 +12,13 @@ import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
  * Result of screenshot capture.
  */
 export interface ScreenshotResult {
+  /** Height of the screenshot */
+  height: number;
   /** Path to the saved screenshot */
   path: AbsoluteFile;
 
   /** Width of the screenshot */
   width: number;
-
-  /** Height of the screenshot */
-  height: number;
 }
 
 /**

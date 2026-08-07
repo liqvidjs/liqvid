@@ -37,6 +37,8 @@ export type LiveCodeGroup = {
 
 /** LiveCode store state. */
 export interface LiveCodeState {
+  /** Used to broadcast run events. */
+  __run: number;
   /**
    * Name of active editor group.
    */
@@ -53,9 +55,6 @@ export interface LiveCodeState {
 
   /** Code recorder. */
   recorder?: CodeRecorder;
-
-  /** Used to broadcast run events. */
-  __run: number;
 
   /** Keyboard shortcuts. */
   shortcuts: Record<string, KeyBinding>;

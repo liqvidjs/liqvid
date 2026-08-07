@@ -12,8 +12,8 @@ type Updater<T> = T | ((prev: T) => T);
 export interface ColorSchemeContext {
   colorScheme: ColorScheme;
   persistence?: StringValueConfig<ColorScheme>;
-  toggleColorScheme: () => void;
   setColorScheme: (update: Updater<ColorScheme>) => void;
+  toggleColorScheme: () => void;
 }
 
 const colorSchemeContext = makeContext<ColorSchemeContext>({

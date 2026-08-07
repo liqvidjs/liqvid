@@ -50,11 +50,11 @@ export type SerializedDuration = DurationOptions &
 
 export interface DurationSetter {
   add(other: DurationOptions): void;
-  subtract(other: DurationOptions): void;
   set(options: DurationOptions): void;
   setMilliseconds(ms: number): void;
   setSeconds(s: number): void;
   setToZero(): void;
+  subtract(other: DurationOptions): void;
 }
 
 /**

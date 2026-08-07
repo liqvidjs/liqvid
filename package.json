@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' --filter '!xyjax' --filter '!my-app' run --no-bail --recursive",
+    "all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' --filter '!xyjax' --filter '!my-app' --filter '!site' run --no-bail --recursive",
     "build:all": "pnpm --workspace-root all build",
     "lint:all": "pnpm --workspace-root all lint",
-    "tsc:all": "pnpm --workspace-root all lint:tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "tsc:all": "pnpm --workspace-root all lint:tsc"
   },
   "keywords": [],
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",

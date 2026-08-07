@@ -5,19 +5,19 @@ export interface BooleanVariant {
 }
 
 export interface ComparisonVariant<T> {
+  children: React.ReactElement;
   eq?: T;
   gt?: T;
   gte?: T;
   lt?: T;
   lte?: T;
-  children: React.ReactElement;
 }
 
 export type NumericVariant = ComparisonVariant<number>;
 
 export interface StringVariant extends ComparisonVariant<string> {
-  contains?: string;
   children: React.ReactElement;
+  contains?: string;
 }
 
 export interface VariantsMap {

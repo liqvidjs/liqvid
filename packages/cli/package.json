@@ -76,6 +76,7 @@
   },
   "scripts": {
     "build": "tsc --build",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",

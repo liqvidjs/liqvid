@@ -9,13 +9,12 @@ import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
 
 export interface AdjustVolumeShortcut {
-  /** Keyboard sequence */
-  seq: string;
-
   /**
    * A value of 5 will increase the volume by 5%; a value of -10 will decrease the volume by 10%.
    */
   delta: number;
+  /** Keyboard sequence */
+  seq: string;
 }
 
 export interface SetVolumeShortcut {

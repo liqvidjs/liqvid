@@ -46,8 +46,8 @@ function Slot({
 interface DockableDialogContextShape {
   name?: string;
   open: boolean;
-  toggle: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toggle: () => void;
 }
 
 const dockableDialogContext = createContext<DockableDialogContextShape>({

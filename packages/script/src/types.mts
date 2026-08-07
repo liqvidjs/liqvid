@@ -6,9 +6,9 @@ export interface AbstractMarker<M extends string = string> {
 }
 
 export interface Marker<M extends string = string> extends AbstractMarker<M> {
-  get start(): Duration;
   get end(): Duration;
   get index(): number;
+  get start(): Duration;
 }
 
 export type SerializedMarker<M extends string = string> = readonly [

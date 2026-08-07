@@ -31,10 +31,10 @@ const DYNAMIC_IMPORTS_TEMPLATE = RelativeFile("dynamic-imports.ts.hbs");
 const OUTPUT_FILENAME = RelativeFile(".dynamic-imports.ts");
 
 interface PackageJson {
-  name?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   exports?: Record<string, unknown>;
+  name?: string;
 }
 
 /**
@@ -93,11 +93,13 @@ async function findPlugins(cwd: AbsoluteDir): Promise<string[]> {
 
   const plugins: string[] = [];
 
-  for (const dep of allDependencies) {
-    if (await hasServerPlugin(dep, nodeModulesDir)) {
-      plugins.push(dep);
-    }
-  }
+  await Promise.all(
+    allDependencies.map(async (dep) => {
+      if (await hasServerPlugin(dep, nodeModulesDir)) {
+        plugins.push(dep);
+      }
+    }),
+  );
 
   return plugins.sort();
 }

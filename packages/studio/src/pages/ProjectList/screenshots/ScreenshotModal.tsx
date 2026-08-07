@@ -40,9 +40,9 @@ type T = typeof TranslationsJson;
 interface ScreenshotModalProps {
   basePath: string;
   duration: DurationLike;
-  project: Omit<ProjectMeta, "duration">;
-  productionServerPort: number;
   onCaptured: () => void;
+  productionServerPort: number;
+  project: Omit<ProjectMeta, "duration">;
 }
 
 export function ScreenshotModal({

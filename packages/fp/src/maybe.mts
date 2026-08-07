@@ -4,12 +4,12 @@ interface MaybeMethods<T> {
   filter(predicate: (value: T) => boolean): Maybe<T>;
   inspect(f: (value: T) => void): Maybe<T>;
   isSomeAnd(f: (value: T) => boolean): this is Maybe.Some<T>;
+
+  json(): SerializedMaybe<T>;
   map<S>(f: (value: T) => S): Maybe<S>;
   or<S>(optb: Maybe<S>): Maybe<S | T>;
   unwrapOr<S>(altValue: S): S | T;
   unwrapOrElse<S>(getAltValue: () => S): S | T;
-
-  json(): SerializedMaybe<T>;
 }
 
 export namespace Maybe {

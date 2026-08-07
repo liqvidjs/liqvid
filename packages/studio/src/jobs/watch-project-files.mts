@@ -53,8 +53,8 @@ interface Context {
   basename: RelativeFile;
   dirname: AbsoluteDir;
   filename: AbsoluteFile;
-  relative: RelativeFile;
   projects: Projects;
+  relative: RelativeFile;
 }
 
 /**

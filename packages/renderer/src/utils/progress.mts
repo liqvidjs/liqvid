@@ -4,13 +4,12 @@ import { Context } from "effect";
  * Options for constructing a {@link Progress} `SingleBar`.
  */
 export interface SingleBarOptions {
+  etaBuffer?: number;
   /**
    * Format a raw progress value (e.g. `value` or `total`) for display.
    * Defaults to the value's own string representation.
    */
   formatValue?: (value: number) => string;
-
-  etaBuffer?: number;
 }
 
 // Declaring a tag for a service that generates random numbers

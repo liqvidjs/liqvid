@@ -11,23 +11,23 @@ export interface RenderAudioOptions {
   /** Path to Chrome/ium executable */
   browserExecutable?: string;
 
-  /** Output path for the WAV file */
-  output: string;
-
-  /** URL of the Liqvid player */
-  url: string;
-
   /**
    * Number of channels to use
    * @default 1
    */
   channels?: number;
 
+  /** Output path for the WAV file */
+  output: string;
+
   /**
    * Sample rate
    * @default 16000
    */
   sampleRate?: number;
+
+  /** URL of the Liqvid player */
+  url: string;
 }
 
 export interface RenderAudioResult {

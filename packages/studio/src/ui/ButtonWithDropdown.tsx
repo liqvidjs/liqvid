@@ -32,17 +32,17 @@ export interface ButtonWithDropdownProps {
   /** Contents of the main action button */
   children: React.ReactNode;
 
-  /** Accessible label for the dropdown toggle */
-  dropdownLabel: string;
-
   /** Whether both the main button and dropdown toggle are disabled */
   disabled?: boolean;
 
-  /** Options shown in the attached dropdown menu */
-  options: DropdownOption[];
+  /** Accessible label for the dropdown toggle */
+  dropdownLabel: string;
 
   /** Invoked when the main action button is clicked */
   onClick: () => void;
+
+  /** Options shown in the attached dropdown menu */
+  options: DropdownOption[];
 
   /** Visual variant of the main button. Defaults to "default". */
   variant?: "default" | "primary";

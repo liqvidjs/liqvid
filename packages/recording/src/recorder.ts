@@ -6,16 +6,9 @@ export interface Recorder<
   FinalData = Datum[],
   Config = unknown,
 > {
-  configure?(configuration: Config): void;
-
   /** Begin recording. */
   beginRecording?(timestamp?: number): void;
-
-  /** Pause recording. */
-  pauseRecording?(timestamp?: number): void;
-
-  /** Resume recording from paused. */
-  resumeRecording?(): void;
+  configure?(configuration: Config): void;
 
   /** End recording. */
   endRecording?(): void;
@@ -25,4 +18,10 @@ export interface Recorder<
    * Can be async for recorders that need to wait for data (e.g., MediaRecorder).
    */
   finalizeRecording(): FinalData | Promise<FinalData>;
+
+  /** Pause recording. */
+  pauseRecording?(timestamp?: number): void;
+
+  /** Resume recording from paused. */
+  resumeRecording?(): void;
 }

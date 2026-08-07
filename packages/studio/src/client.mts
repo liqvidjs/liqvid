@@ -9,11 +9,11 @@ import { WebApi } from "./api/contract.mts";
 const apiRoot = "/api/liqvid";
 
 interface SaveRecordingOpts {
-  search: { projectPath: RelativeDir };
   body: {
     durationMs: number;
     plugins: Array<{ key: string; data: unknown }>;
   };
+  search: { projectPath: RelativeDir };
 }
 
 /**

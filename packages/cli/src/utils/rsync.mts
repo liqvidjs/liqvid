@@ -3,13 +3,13 @@ import * as child_process from "node:child_process";
 import chalk from "chalk";
 
 export interface RsyncOptions {
-  localDir: string;
-  remoteDir: string;
   host: string;
-  username?: string; // Optional: SSH username
+  localDir: string;
   password?: string; // Optional: SSH password (not recommended)
   port?: number; // Optional: SSH Port
   recursive?: boolean; // Optional:  Recursive synchronization.  Default is true.
+  remoteDir: string;
+  username?: string; // Optional: SSH username
 }
 
 export async function rsyncRemoteDirectory(

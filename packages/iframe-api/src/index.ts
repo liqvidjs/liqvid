@@ -52,11 +52,11 @@ export type IFrameAPIClient<D extends IFrameAPIDeclaration> = {
  * Message sent from parent to child to call a method.
  */
 export interface CallMessage {
-  type: "call";
+  arguments: unknown[];
   method: string;
   namespace: string;
-  arguments: unknown[];
   requestId: number;
+  type: "call";
 }
 
 /**
@@ -64,8 +64,8 @@ export interface CallMessage {
  */
 export interface ReceivedMessage {
   namespace: string;
-  type: "received";
   requestId: number;
+  type: "received";
 }
 
 /**
@@ -73,19 +73,19 @@ export interface ReceivedMessage {
  */
 export interface ReturnMessage {
   namespace: string;
+  requestId: number;
   type: "return";
   value: unknown;
-  requestId: number;
 }
 
 /**
  * Message sent from child to parent when an error occurs.
  */
 export interface ErrorMessage {
-  namespace: string;
-  type: "error";
   error: string;
+  namespace: string;
   requestId: number;
+  type: "error";
 }
 
 /**

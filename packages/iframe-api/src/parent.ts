@@ -10,12 +10,12 @@ import type {
 const DEFAULT_RETRY_INTERVAL = 100;
 
 interface PendingRequest {
-  resolve: (value: unknown) => void;
-  reject: (error: Error) => void;
-  received: boolean;
-  retryTimer: ReturnType<typeof setInterval> | null;
-  method: string;
   arguments: unknown[];
+  method: string;
+  received: boolean;
+  reject: (error: Error) => void;
+  resolve: (value: unknown) => void;
+  retryTimer: ReturnType<typeof setInterval> | null;
 }
 
 /**

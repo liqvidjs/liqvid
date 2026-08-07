@@ -22,11 +22,11 @@ export interface RemoteFileInfo {
   /** Remote key/path (relative to prefix) */
   key: RelativeFile;
 
-  /** Size in bytes */
-  size: number;
-
   /** Last modified date */
   lastModified: Date;
+
+  /** Size in bytes */
+  size: number;
 }
 
 export interface FileDownloadStatus {
