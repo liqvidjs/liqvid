@@ -2,26 +2,29 @@
   "name": "@liqvid/utils",
   "version": "2.0.0-alpha.4",
   "description": "Utility functions for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     }
   },
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -59,8 +62,5 @@
     "react": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "dist/types/index.d.ts"
+  }
 }

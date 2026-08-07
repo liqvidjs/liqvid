@@ -149,8 +149,8 @@ catalogs:
       version: 5.0.14
   dev:
     '@biomejs/biome':
-      specifier: 2.5.6
-      version: 2.5.6
+      specifier: 2.5.7
+      version: 2.5.7
     '@codemirror/autocomplete':
       specifier: 6.20.2
       version: 6.20.2
@@ -395,7 +395,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/jest':
         specifier: catalog:dev
         version: 30.0.0
@@ -510,7 +510,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@effect/language-service':
         specifier: catalog:dev
         version: 0.86.6
@@ -562,7 +562,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@codemirror/state':
         specifier: 6.6.0
         version: 6.6.0
@@ -614,7 +614,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@docusaurus/types':
         specifier: 3.10.1
         version: 3.10.1(@swc/core@1.15.43)(@swc/html@1.15.43)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(html-minifier-terser@7.2.0)(lightningcss@1.32.0)(postcss@8.5.23)(react-dom@19.2.8(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(uglify-js@3.19.3)(webpack-cli@4.10.0)
@@ -675,7 +675,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@testing-library/react':
         specifier: catalog:dev
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.7))(react@19.2.7)
@@ -714,7 +714,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/async-retry':
         specifier: 1.4.9
         version: 1.4.9
@@ -802,7 +802,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/react':
         specifier: catalog:dev
         version: 19.2.17
@@ -827,7 +827,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/jest':
         specifier: catalog:dev
         version: 30.0.0
@@ -970,7 +970,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@typescript/typescript6':
         specifier: catalog:dev
         version: 6.0.2
@@ -991,7 +991,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@effect/language-service':
         specifier: catalog:dev
         version: 0.86.6
@@ -1150,7 +1150,7 @@ importers:
         version: 17.4.2
       effect:
         specifier: beta
-        version: 4.0.0-beta.103
+        version: 4.0.0-beta.104
       hastscript:
         specifier: ^9.0.1
         version: 9.0.1
@@ -1961,7 +1961,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/react':
         specifier: catalog:dev
         version: 19.2.17
@@ -1989,7 +1989,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@typescript/typescript6':
         specifier: catalog:dev
         version: 6.0.2
@@ -2039,7 +2039,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2091,7 +2091,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/react':
         specifier: catalog:dev
         version: 19.2.17
@@ -2122,7 +2122,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/react':
         specifier: catalog:dev
         version: 19.2.17
@@ -2153,7 +2153,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@liqvid/player':
         specifier: workspace:^
         version: link:../player
@@ -2193,7 +2193,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/jest':
         specifier: catalog:dev
         version: 30.0.0
@@ -2272,7 +2272,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@codemirror/autocomplete':
         specifier: catalog:dev
         version: 6.20.2
@@ -2350,7 +2350,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@testing-library/react':
         specifier: catalog:dev
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.7)
@@ -2432,7 +2432,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@testing-library/react':
         specifier: catalog:dev
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2481,7 +2481,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@liqvid/player':
         specifier: workspace:^
         version: link:../player
@@ -2554,7 +2554,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2612,7 +2612,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2673,7 +2673,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2732,7 +2732,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2797,7 +2797,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/react':
         specifier: catalog:dev
         version: 19.2.17
@@ -2837,7 +2837,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2892,7 +2892,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@effect/language-service':
         specifier: catalog:dev
         version: 0.86.6
@@ -2929,7 +2929,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/node':
         specifier: catalog:dev
         version: 25.9.5
@@ -2981,7 +2981,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@liqvid/keymap':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../keymap
@@ -3014,7 +3014,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@typescript/typescript6':
         specifier: catalog:dev
         version: 6.0.2
@@ -3135,7 +3135,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@effect/language-service':
         specifier: catalog:dev
         version: 0.86.6
@@ -3199,7 +3199,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@liqvid/duration':
         specifier: 'workspace:'
         version: link:../duration
@@ -3242,7 +3242,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/js-yaml':
         specifier: catalog:dev
         version: 4.0.9
@@ -3386,8 +3386,8 @@ importers:
         version: 5.0.14(@types/react@19.2.17)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
     devDependencies:
       '@biomejs/biome':
-        specifier: 2.5.6
-        version: 2.5.6
+        specifier: 2.5.7
+        version: 2.5.7
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -3466,7 +3466,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@tldraw/editor':
         specifier: catalog:peer
         version: 5.2.5(@floating-ui/dom@1.8.0)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.7))(react@19.2.7)
@@ -3518,7 +3518,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@types/jest':
         specifier: catalog:dev
         version: 30.0.0
@@ -3558,7 +3558,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
-        version: 2.5.6
+        version: 2.5.7
       '@liqvid/mathjax':
         specifier: workspace:^
         version: link:../mathjax
@@ -4484,8 +4484,8 @@ packages:
     engines: {node: '>=14.21.3'}
     hasBin: true
 
-  '@biomejs/biome@2.5.6':
-    resolution: {integrity: sha512-lxVNjv7UF6KfhMJfL9gaUHbWdJdHbsAj6OSmwSYNdhRuG67NxNQ4Xdvh3TUxsSK9sBzJBQhEJj3AopmmNJ5pSA==}
+  '@biomejs/biome@2.5.7':
+    resolution: {integrity: sha512-zr8K/DcY5tYsQOQwqMJ0AWElo6QgmgNI7idXgXLhevVszlt8RGVpesEJPqx3ThazLaOwjJ5Y8fz3BtH5fGZNsw==}
     engines: {node: '>=14.21.3'}
     hasBin: true
 
@@ -4501,8 +4501,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-arm64@2.5.6':
-    resolution: {integrity: sha512-zMOLZP4oMrjh6m1zcSj1ud2awUPgTuMVbmQhYYWL7J8HwCnbHHBvTm7VBTRuY7epT5bez76IpKYQ11ZAqHFlnw==}
+  '@biomejs/cli-darwin-arm64@2.5.7':
+    resolution: {integrity: sha512-vxo/Ls3/PYdQWyLhYYcgMOCzQypAjcY+iihS8M0wW03l16TCLW4zqZzGo75gm1VdCMj38hTVZ31KBWrZ4G9dJw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [darwin]
@@ -4519,8 +4519,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-x64@2.5.6':
-    resolution: {integrity: sha512-JAC1VqzvO7Th5ZplU0G2uGfkZbxEe9uDDektPAhF0JLusoz1w+T4okp2bkykI0bbaO2vslKiRfj4gU43JaGreA==}
+  '@biomejs/cli-darwin-x64@2.5.7':
+    resolution: {integrity: sha512-Cd3Ga61amT/Yl/0x8elP5hhGYaFy4bw6WuysTgf7oo8TA5tJ5A1k+DkVoJ2BHbTVil51gTX9VPzArnrlLJ3Kyg==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [darwin]
@@ -4539,8 +4539,8 @@ packages:
     os: [linux]
     libc: [musl]
 
-  '@biomejs/cli-linux-arm64-musl@2.5.6':
-    resolution: {integrity: sha512-eUa3jeeYvfMt19LBeh6E5PUZpxnTC4JqNWo+EDjTtQjAr2xLGnWaxACtVU1DQqmHYbvThlJzLX+ZsYgrqh2qVw==}
+  '@biomejs/cli-linux-arm64-musl@2.5.7':
+    resolution: {integrity: sha512-xPI5yB6XlpDbNkS+bm1t42olw5c4l3UrlOmLg7KtLJvjvkNF/1V4tnUgfkylGIeb3u/T+BzMGYqgQhzjAoJzuQ==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
@@ -4560,8 +4560,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-linux-arm64@2.5.6':
-    resolution: {integrity: sha512-6XsYwCFkp5sMxl85ffhgeGpGgs6A7dRYFnkceZ7WVxvycuTnGdD5xa534Z3xfrBQ0JCMK/mujT6ZNPJoghedwg==}
+  '@biomejs/cli-linux-arm64@2.5.7':
+    resolution: {integrity: sha512-rR2QE0yF2GYSuYuKIa7pKvODGJqnOH+2eDREAM8wV+mWKSkMQKdAp4zXEZfTaxY8PMoNONnpgSWcBCyLDPDOKg==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
@@ -4581,8 +4581,8 @@ packages:
     os: [linux]
     libc: [musl]
 
-  '@biomejs/cli-linux-x64-musl@2.5.6':
-    resolution: {integrity: sha512-2Vp13QdKysH3HIWLaYLhUUwbK+jbZonJD1K+Lr0d0RO4wH7mkYd43vJixEDm8cUWrowoRz4UUHF1nm9Ae7ym8A==}
+  '@biomejs/cli-linux-x64-musl@2.5.7':
+    resolution: {integrity: sha512-rE5VZi+qtmPgQH+l7jVxYoZ18b/TiHEhulhMpjmCZH1PltSbjRcxNWywC3HZ9tYottG7ORkeTtoscBilKSBm0g==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
@@ -4602,8 +4602,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-linux-x64@2.5.6':
-    resolution: {integrity: sha512-Pop9VXCFUhFTMfFefZ39S+u2rOPyNp5iHlxbZRwXGACHLy2r0jjiRgJHmaEKJzL3SyxlVeGShXhvvElvWowonA==}
+  '@biomejs/cli-linux-x64@2.5.7':
+    resolution: {integrity: sha512-FQgqJhscrqJUFptGaRSUJWlXAExwWcDwLuK49dvKfkQ1bB5SEEyFssnsxQY83Xm6jR0EbbX3+8+D5bfvYqUG2Q==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
@@ -4621,8 +4621,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@biomejs/cli-win32-arm64@2.5.6':
-    resolution: {integrity: sha512-tDGshcm6BdkZOCGnTDX0Y8/U4IfBSlnUU7T56nNDuPEfed+aHg+u8G36NB43fJVl0Os6+QURXIE1yuD7AaEofA==}
+  '@biomejs/cli-win32-arm64@2.5.7':
+    resolution: {integrity: sha512-Oq4x0CCwP4jirrcTywXs5kOGZ4v5vuEP+gWrbtjApOA2CL9F3F9GlIdQIci8AKSCa/zURanMRpX/4wQ7Am6hHg==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [win32]
@@ -4639,8 +4639,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@biomejs/cli-win32-x64@2.5.6':
-    resolution: {integrity: sha512-WN05KwXnTO/2J45RQPvzZMXf7tZUIofHoR35xIPfCo7pQ2RFidxI8sfb5mGsaTxdMmEOzHzOPRCdA5/fCpc7xQ==}
+  '@biomejs/cli-win32-x64@2.5.7':
+    resolution: {integrity: sha512-V+0wu/nrj2S+MhP4EQ0uHNolP0IALEsz45pg0WoKkHfDeh0+ItHwP/p7bX5RPoMOl9NkpHYWdYPhIcy2mACHvQ==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
@@ -10811,8 +10811,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effect@4.0.0-beta.103:
-    resolution: {integrity: sha512-pE8TxF4m2tQzVI+77dIlm3s+81TACV1AiX1JEkvY+zVuxgQQ8aGSkqXNJF6b/ST+coCSk5cUdbULpQ7sm4oHyw==}
+  effect@4.0.0-beta.104:
+    resolution: {integrity: sha512-YSSaaMc8gBoHnabYXlgHpKVctsj4ezTSoojdd8SA3NWHoZ7LMPiUDhCnP1ZSOfQ7ly6P6XLhAw216NfLEHfg2A==}
 
   effect@4.0.0-beta.97:
     resolution: {integrity: sha512-pK03HpQVxGZOWdwDAy/iwvV8u3KYcUf2mOWyWqaut2zau8V2u6ejWP7b4BELjyUIiZWW1fl/s/VJpgZUcTjThg==}
@@ -17063,16 +17063,16 @@ snapshots:
       '@biomejs/cli-win32-arm64': 2.5.5
       '@biomejs/cli-win32-x64': 2.5.5
 
-  '@biomejs/biome@2.5.6':
+  '@biomejs/biome@2.5.7':
     optionalDependencies:
-      '@biomejs/cli-darwin-arm64': 2.5.6
-      '@biomejs/cli-darwin-x64': 2.5.6
-      '@biomejs/cli-linux-arm64': 2.5.6
-      '@biomejs/cli-linux-arm64-musl': 2.5.6
-      '@biomejs/cli-linux-x64': 2.5.6
-      '@biomejs/cli-linux-x64-musl': 2.5.6
-      '@biomejs/cli-win32-arm64': 2.5.6
-      '@biomejs/cli-win32-x64': 2.5.6
+      '@biomejs/cli-darwin-arm64': 2.5.7
+      '@biomejs/cli-darwin-x64': 2.5.7
+      '@biomejs/cli-linux-arm64': 2.5.7
+      '@biomejs/cli-linux-arm64-musl': 2.5.7
+      '@biomejs/cli-linux-x64': 2.5.7
+      '@biomejs/cli-linux-x64-musl': 2.5.7
+      '@biomejs/cli-win32-arm64': 2.5.7
+      '@biomejs/cli-win32-x64': 2.5.7
 
   '@biomejs/cli-darwin-arm64@2.5.3':
     optional: true
@@ -17080,7 +17080,7 @@ snapshots:
   '@biomejs/cli-darwin-arm64@2.5.5':
     optional: true
 
-  '@biomejs/cli-darwin-arm64@2.5.6':
+  '@biomejs/cli-darwin-arm64@2.5.7':
     optional: true
 
   '@biomejs/cli-darwin-x64@2.5.3':
@@ -17089,7 +17089,7 @@ snapshots:
   '@biomejs/cli-darwin-x64@2.5.5':
     optional: true
 
-  '@biomejs/cli-darwin-x64@2.5.6':
+  '@biomejs/cli-darwin-x64@2.5.7':
     optional: true
 
   '@biomejs/cli-linux-arm64-musl@2.5.3':
@@ -17098,7 +17098,7 @@ snapshots:
   '@biomejs/cli-linux-arm64-musl@2.5.5':
     optional: true
 
-  '@biomejs/cli-linux-arm64-musl@2.5.6':
+  '@biomejs/cli-linux-arm64-musl@2.5.7':
     optional: true
 
   '@biomejs/cli-linux-arm64@2.5.3':
@@ -17107,7 +17107,7 @@ snapshots:
   '@biomejs/cli-linux-arm64@2.5.5':
     optional: true
 
-  '@biomejs/cli-linux-arm64@2.5.6':
+  '@biomejs/cli-linux-arm64@2.5.7':
     optional: true
 
   '@biomejs/cli-linux-x64-musl@2.5.3':
@@ -17116,7 +17116,7 @@ snapshots:
   '@biomejs/cli-linux-x64-musl@2.5.5':
     optional: true
 
-  '@biomejs/cli-linux-x64-musl@2.5.6':
+  '@biomejs/cli-linux-x64-musl@2.5.7':
     optional: true
 
   '@biomejs/cli-linux-x64@2.5.3':
@@ -17125,7 +17125,7 @@ snapshots:
   '@biomejs/cli-linux-x64@2.5.5':
     optional: true
 
-  '@biomejs/cli-linux-x64@2.5.6':
+  '@biomejs/cli-linux-x64@2.5.7':
     optional: true
 
   '@biomejs/cli-win32-arm64@2.5.3':
@@ -17134,7 +17134,7 @@ snapshots:
   '@biomejs/cli-win32-arm64@2.5.5':
     optional: true
 
-  '@biomejs/cli-win32-arm64@2.5.6':
+  '@biomejs/cli-win32-arm64@2.5.7':
     optional: true
 
   '@biomejs/cli-win32-x64@2.5.3':
@@ -17143,7 +17143,7 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.5':
     optional: true
 
-  '@biomejs/cli-win32-x64@2.5.6':
+  '@biomejs/cli-win32-x64@2.5.7':
     optional: true
 
   '@chevrotain/cst-dts-gen@12.0.0':
@@ -27365,18 +27365,13 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effect@4.0.0-beta.103:
+  effect@4.0.0-beta.104:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 4.9.0
-      find-my-way-ts: 0.1.6
-      ini: 7.0.0
       kubernetes-types: 1.30.0
       msgpackr: 2.0.4
-      multipasta: 0.2.8
-      toml: 4.1.2
       uuid: 14.0.1
-      yaml: 2.9.0
 
   effect@4.0.0-beta.97:
     dependencies:

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -33,6 +33,7 @@
         "useSortedAttributes": "on",
         "useSortedInterfaceMembers": "on",
         "useSortedKeys": "on",
+        "useSortedPackageJson": "on",
         "useSortedProperties": "on"
       }
     }
@@ -50,7 +51,6 @@
       "!coverage",
       "!opencode.json",
       "!**/dist",
-      "!**/package.json",
       "!**/package-lock.json",
       "!**/node_modules",
       "!**/public/vendor/mathjax/*",
@@ -143,6 +143,16 @@
         }
       },
       "includes": ["**/.liqvid/**/*.json"]
+    },
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/package.json"]
     }
   ],
   "vcs": {

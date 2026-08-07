@@ -145,7 +145,7 @@ catalog:
 
 catalogs:
   dev:
-    "@biomejs/biome": 2.5.6
+    "@biomejs/biome": 2.5.7
     "@codemirror/autocomplete": 6.20.2
     "@codemirror/collab": 6.1.1
     "@codemirror/commands": 6.10.3
@@ -270,15 +270,15 @@ overrides:
   "@lezer/highlight": 1.2.3
 
 minimumReleaseAgeExclude:
-  - "@biomejs/biome@2.5.5"
-  - "@biomejs/cli-darwin-arm64@2.5.5"
-  - "@biomejs/cli-darwin-x64@2.5.5"
-  - "@biomejs/cli-linux-arm64-musl@2.5.5"
-  - "@biomejs/cli-linux-arm64@2.5.5"
-  - "@biomejs/cli-linux-x64-musl@2.5.5"
-  - "@biomejs/cli-linux-x64@2.5.5"
-  - "@biomejs/cli-win32-arm64@2.5.5"
-  - "@biomejs/cli-win32-x64@2.5.5"
+  - "@biomejs/biome@2.5.7"
+  - "@biomejs/cli-darwin-arm64@2.5.7"
+  - "@biomejs/cli-darwin-x64@2.5.7"
+  - "@biomejs/cli-linux-arm64-musl@2.5.7"
+  - "@biomejs/cli-linux-arm64@2.5.7"
+  - "@biomejs/cli-linux-x64-musl@2.5.7"
+  - "@biomejs/cli-linux-x64@2.5.7"
+  - "@biomejs/cli-win32-arm64@2.5.7"
+  - "@biomejs/cli-win32-x64@2.5.7"
   - prettier@3.9.6
   - no-private-imports@0.0.4
   - "@next/env@16.3.0"

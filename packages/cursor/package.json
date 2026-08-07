@@ -2,20 +2,20 @@
   "name": "@lqv/cursor",
   "version": "0.2.1",
   "description": "Cursor recording and replaying for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "keywords": [
+    "liqvid"
+  ],
   "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/cursor",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/plugins.git",
     "directory": "packages/cursor"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/plugins/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -30,6 +30,16 @@
       "import": "./dist/esm/recording.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -60,24 +70,14 @@
     "react": "catalog:peer"
   },
   "peerDependenciesMeta": {
-    "liqvid": {
+    "@types/react": {
       "optional": true
     },
-    "@types/react": {
+    "liqvid": {
       "optional": true
     },
     "react": {
       "optional": true
     }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*.d.ts"
-      ]
-    }
-  },
-  "keywords": [
-    "liqvid"
-  ]
+  }
 }

@@ -2,41 +2,44 @@
   "name": "@lqv/tldraw",
   "version": "1.0.0-alpha.0",
   "description": "tldraw integration for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/tldraw#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/plugins.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/plugins/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
     "./liqvid-studio-server-plugin": {
-      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
       "types": "./dist/types/recording.d.ts",
+      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
       "import": "./dist/esm/recording.js"
     },
     "./react": {
-      "@liqvid/dev": "./src/react.tsx",
       "types": "./dist/types/react.d.ts",
+      "@liqvid/dev": "./src/react.tsx",
       "import": "./dist/esm/react.js"
     },
     "./recording": {
-      "@liqvid/dev": "./src/recording.tsx",
       "types": "./dist/types/recording.d.ts",
+      "@liqvid/dev": "./src/recording.tsx",
       "import": "./dist/esm/recording.js"
     }
   },
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -91,8 +94,5 @@
     "react": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "dist/types/index.d.ts"
+  }
 }

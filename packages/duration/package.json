@@ -2,36 +2,39 @@
   "name": "@liqvid/duration",
   "version": "1.4.0",
   "description": "Class for unitless time intervals",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
     "./effect": {
-      "@liqvid/dev": "./src/effect.ts",
       "types": "./dist/types/effect.d.ts",
+      "@liqvid/dev": "./src/effect.ts",
       "import": "./dist/esm/effect.js"
     },
     "./zod": {
-      "@liqvid/dev": "./src/zod.ts",
       "types": "./dist/types/zod.d.ts",
+      "@liqvid/dev": "./src/zod.ts",
       "import": "./dist/esm/zod.js"
     }
   },
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -65,8 +68,5 @@
     "zod": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "dist/types/index.d.ts"
+  }
 }

@@ -2,27 +2,30 @@
   "name": "@liqvid/animation",
   "version": "1.0.0-alpha.0",
   "description": "Animation utilities for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/animation#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid",
     "directory": "packages/animation"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     }
   },
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -53,8 +56,5 @@
   "peerDependencies": {
     "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "./dist/types/index.d.ts"
+  }
 }

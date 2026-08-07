@@ -2,26 +2,28 @@
   "name": "@liqvid/prompts",
   "version": "1.0.0-alpha.1",
   "description": "prompts",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/prompts#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    }
-  },
   "scripts": {
     "build": "tsc",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
@@ -51,7 +53,5 @@
     "@liqvid/script": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0"
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

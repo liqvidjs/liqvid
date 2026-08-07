@@ -2,23 +2,22 @@
   "name": "liqvid",
   "version": "3.0.0-alpha.5",
   "description": "Framework for interactive videos in React",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/main#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
     "./dist/liqvid.css": "./dist/liqvid.css",
@@ -26,6 +25,9 @@
     "./liqvid.css": "./dist/liqvid.css",
     "./liqvid.min.css": "./dist/liqvid.min.css"
   },
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     "build": "pnpm build:css && pnpm build:js",
@@ -77,7 +79,5 @@
     "@types/react-dom": "catalog:peer",
     "react": "catalog:peer",
     "react-dom": "catalog:peer"
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

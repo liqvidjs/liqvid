@@ -2,21 +2,33 @@
   "name": "@liqvid/react-three",
   "version": "3.0.0-alpha.0",
   "description": "@react-three integration for Liqvid",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/react-three",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.tsx",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/index.js"
     }
   },
   "files": [
     "dist/*"
   ],
   "scripts": {
-    "build": "tsc",
     ".build:clean": "rm -rf dist",
-    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
@@ -24,16 +36,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/react-three",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/react": "catalog:dev",
@@ -46,7 +48,5 @@
     "@juggle/resize-observer": "catalog:peer",
     "@react-three/fiber": "catalog:peer",
     "react": "catalog:peer"
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

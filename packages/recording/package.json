@@ -2,31 +2,33 @@
   "name": "@liqvid/recording",
   "version": "1.0.0-alpha.1",
   "description": "Recording functionality for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/recording#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./utils": {
+      "types": "./dist/types/utils.d.ts",
+      "@liqvid/dev": "./src/utils.ts",
+      "import": "./dist/esm/utils.js"
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    },
-    "./utils": {
-      "@liqvid/dev": "./src/utils.ts",
-      "types": "./dist/types/utils.d.ts",
-      "import": "./dist/esm/utils.js"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -62,7 +64,5 @@
     "react": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

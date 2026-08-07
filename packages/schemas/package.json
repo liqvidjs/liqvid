@@ -2,27 +2,29 @@
   "name": "@liqvid/schemas",
   "version": "1.0.0-alpha.0",
   "description": "Effect schemas and JSON Schema files for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    }
   },
   "files": [
     "dist/*",
     "json-schemas/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "types": "./dist/types/index.d.mts",
-      "import": "./dist/esm/index.mjs"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -58,7 +60,5 @@
     "effect": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

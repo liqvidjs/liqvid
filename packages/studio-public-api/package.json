@@ -2,11 +2,23 @@
   "name": "@liqvid/studio-public-api",
   "version": "1.0.0-alpha.0",
   "description": "Schemas for Liqvid Studio API",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liqvidjs/liqvid.git"
+  },
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
-      "import": "./dist/esm/index.mjs",
-      "types": "./dist/types/index.d.mts"
+      "import": "./dist/esm/index.mjs"
     }
   },
   "files": [
@@ -14,10 +26,10 @@
     "json-schemas/*"
   ],
   "scripts": {
-    "build": "tsc",
     ".build:clean": "rm -rf dist",
-    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "generate:openapi": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-openapi.mts",
@@ -25,16 +37,6 @@
     "lint:agent": "biome check --fix --reporter=concise",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liqvidjs/liqvid.git"
-  },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/schemas#readme",
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/js-yaml": "catalog:dev",
@@ -51,7 +53,5 @@
     "@liqvid/duration": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

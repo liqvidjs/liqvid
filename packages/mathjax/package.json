@@ -2,31 +2,37 @@
   "name": "@liqvid/mathjax",
   "version": "1.0.0-alpha.0",
   "description": "MathJax integration for Liqvid",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "keywords": [
+    "liqvid",
+    "mathjax"
+  ],
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/mathjax",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./plain": {
+      "types": "./dist/types/plain.d.ts",
+      "@liqvid/dev": "./src/plain.tsx",
+      "import": "./dist/esm/plain.js"
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    },
-    "./plain": {
-      "@liqvid/dev": "./src/plain.tsx",
-      "types": "./dist/types/plain.d.ts",
-      "import": "./dist/esm/plain.js"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -69,11 +75,5 @@
     "mathjax": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module",
-  "keywords": [
-    "liqvid",
-    "mathjax"
-  ]
+  }
 }

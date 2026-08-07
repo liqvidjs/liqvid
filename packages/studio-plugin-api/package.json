@@ -2,32 +2,33 @@
   "name": "@liqvid/studio-plugin-api",
   "version": "1.0.0-alpha.1",
   "description": "API for Liqvid Studio plugins",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio-plugin-api#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git",
     "directory": "packages/studio-plugin-api"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./server": {
+      "types": "./dist/types/server.d.mts",
+      "@liqvid/dev": "./src/server.mts",
+      "import": "./dist/esm/server.mjs"
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "types": "./dist/types/index.d.mts",
-      "import": "./dist/esm/index.mjs"
-    },
-    "./server": {
-      "@liqvid/dev": "./src/server.mts",
-      "types": "./dist/types/server.d.mts",
-      "import": "./dist/esm/server.mjs"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
@@ -57,6 +58,5 @@
   "peerDependencies": {
     "effect-paths": "workspace:^",
     "react": "catalog:peer"
-  },
-  "sideEffects": false
+  }
 }

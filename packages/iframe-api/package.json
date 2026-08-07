@@ -2,39 +2,47 @@
   "name": "@liqvid/iframe-api",
   "version": "1.0.0-alpha.1",
   "description": "Cross-iframe communication API",
+  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/iframe-api#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts"
     },
     "./child": {
+      "types": "./dist/types/child.d.ts",
       "@liqvid/dev": "./src/child.ts",
-      "import": "./dist/esm/child.js",
-      "types": "./dist/types/child.d.ts"
+      "import": "./dist/esm/child.js"
     },
     "./parent": {
+      "types": "./dist/types/parent.d.ts",
       "@liqvid/dev": "./src/parent.ts",
-      "import": "./dist/esm/parent.js",
-      "types": "./dist/types/parent.d.ts"
+      "import": "./dist/esm/parent.js"
     },
     "./parent/react": {
+      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.ts",
-      "import": "./dist/esm/react.js",
-      "types": "./dist/types/react.d.ts"
+      "import": "./dist/esm/react.js"
     }
   },
   "files": [
     "dist/*"
   ],
   "scripts": {
-    "build": "tsc",
     ".build:clean": "rm -rf dist",
-    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
@@ -42,12 +50,6 @@
     "test": "jest",
     "watch": "tsc --watch"
   },
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/iframe-api#readme",
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
@@ -71,7 +73,5 @@
     "react": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

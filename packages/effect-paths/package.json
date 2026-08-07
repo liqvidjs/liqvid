@@ -2,36 +2,39 @@
   "name": "effect-paths",
   "version": "0.0.1",
   "description": "Effect helpers adding type safety for dealing with absolute vs relative and file vs directory",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/v3/packages/effect-paths#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git",
     "directory": "packages/effect-paths"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     }
   },
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
-    "build": "pnpm build:js && pnpm build:dts",
     ".build:clean": "rm -rf dist",
+    ".build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "build": "pnpm build:js && pnpm build:dts",
     "build:dts": "pnpm build:dts:copy && pnpm build:dts:rm",
     "build:dts:copy": "cp src/*.d.ts dist/types",
     "build:dts:rm": "sed -i '' -E '/import .*\\.d\\.ts.*;$/d' dist/esm/index.js",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "build:js": "tsc",
-    ".build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "test": "tsc --noEmit --project tsconfig.test.json",
@@ -48,8 +51,5 @@
   },
   "peerDependencies": {
     "effect": "catalog:peer"
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "dist/types/index.d.ts"
+  }
 }

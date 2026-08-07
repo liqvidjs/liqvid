@@ -2,27 +2,29 @@
   "name": "@lqv/playback",
   "version": "1.0.0-alpha.0",
   "description": "Playback interface for Liqvid-compatible plugins",
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts"
     },
     "./react": {
+      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.ts",
-      "import": "./dist/esm/react.js",
-      "types": "./dist/types/react.d.ts"
+      "import": "./dist/esm/react.js"
     }
   },
   "files": [
     "dist/*"
   ],
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "license": "MIT",
   "scripts": {
-    "build": "tsc",
     ".build:clean": "rm -rf dist",
-    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
@@ -40,7 +42,5 @@
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

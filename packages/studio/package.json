@@ -2,55 +2,64 @@
   "name": "@liqvid/studio",
   "version": "1.0.0-alpha.6",
   "description": "Production suite for Liqvid videos",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/studio#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git",
     "directory": "packages/studio"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.mts",
+      "@liqvid/dev": "./src/index.mts",
+      "import": "./dist/esm/index.mjs"
+    },
+    "./next": {
+      "types": "./dist/types/next/index.d.mts",
+      "@liqvid/dev": "./src/next/index.mts",
+      "import": "./dist/esm/next/index.mjs"
+    },
+    "./next/api": {
+      "types": "./dist/types/next/api.d.mts",
+      "@liqvid/dev": "./src/next/api.mts",
+      "import": "./dist/esm/next/api.mjs"
+    },
+    "./next/page": {
+      "types": "./dist/types/next/page.d.ts",
+      "@liqvid/dev": "./src/next/page.tsx",
+      "import": "./dist/esm/next/page.js"
+    },
+    "./ui": {
+      "types": "./dist/types/ui/index.d.ts",
+      "@liqvid/dev": "./src/ui/index.ts",
+      "import": "./dist/esm/ui/index.js"
+    }
+  },
+  "bin": {
+    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
   },
   "files": [
     "dist/*",
     "liqvid-validate-translations.mjs"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "types": "./dist/types/index.d.mts",
-      "import": "./dist/esm/index.mjs"
-    },
-    "./next": {
-      "@liqvid/dev": "./src/next/index.mts",
-      "types": "./dist/types/next/index.d.mts",
-      "import": "./dist/esm/next/index.mjs"
-    },
-    "./next/api": {
-      "@liqvid/dev": "./src/next/api.mts",
-      "types": "./dist/types/next/api.d.mts",
-      "import": "./dist/esm/next/api.mjs"
-    },
-    "./next/page": {
-      "@liqvid/dev": "./src/next/page.tsx",
-      "types": "./dist/types/next/page.d.ts",
-      "import": "./dist/esm/next/page.js"
-    },
-    "./ui": {
-      "@liqvid/dev": "./src/ui/index.ts",
-      "types": "./dist/types/ui/index.d.ts",
-      "import": "./dist/esm/ui/index.js"
-    }
-  },
   "scripts": {
-    "build": "pnpm build:clean ; pnpm build:js ; pnpm build:hbs ; pnpm build:css ; pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
-    "build:hbs": "cp -R templates dist",
+    "..build:clean": "rm -rf dist",
+    ".build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
+    ".build:hbs": "cp -R templates dist",
+    ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    ".watch:css": "watch -n1 pnpm build:css",
+    ".watch:hbs": "watch -n1 pnpm build:hbs",
+    ".watch:tsc": "tsc --watch",
+    "build": "pnpm build:js ; pnpm .build:hbs ; pnpm .build:css",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "build:js": "tsc",
-    "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
@@ -60,10 +69,7 @@
     "prepublishOnly": "pnpm lint:package",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "validate-translations": "node liqvid-validate-translations.mjs",
-    "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:hbs\" \"pnpm watch:tsc\"",
-    "watch:css": "watch -n1 pnpm build:css",
-    "watch:hbs": "watch -n1 pnpm build:hbs",
-    "watch:tsc": "tsc --watch"
+    "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tsc\""
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
@@ -125,10 +131,5 @@
     "serve-handler": "^6.1.7",
     "smart-whisper": "catalog:peer",
     "ws": "catalog:peer"
-  },
-  "sideEffects": false,
-  "type": "module",
-  "bin": {
-    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
   }
 }

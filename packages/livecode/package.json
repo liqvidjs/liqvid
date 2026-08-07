@@ -2,38 +2,40 @@
   "name": "@lqv/livecode",
   "version": "1.0.0-alpha.0",
   "description": "GUI for interactive coding tutorials with CodeMirror",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/plugins/tree/main/packages/livecode",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/plugins/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/plugins.git",
     "directory": "packages/livecode"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/plugins/issues"
-  },
-  "files": [
-    "dist/*"
-  ],
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
       "import": "./dist/esm/index.js"
     },
     "./interpreters/*": {
-      "@liqvid/dev": "./src/interpreters/*.ts",
       "types": "./dist/types/interpreters/*.d.ts",
+      "@liqvid/dev": "./src/interpreters/*.ts",
       "import": "./dist/esm/interpreters/*.js"
     },
     "./style.css": "./dist/css/style.css",
     "./web": {
-      "@liqvid/dev": "./src/presets/web/index.ts",
       "types": "./dist/types/presets/web/index.d.ts",
+      "@liqvid/dev": "./src/presets/web/index.ts",
       "import": "./dist/esm/presets/web/index.js"
     }
   },
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -145,7 +147,5 @@
     "skulpt": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

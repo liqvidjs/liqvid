@@ -2,31 +2,40 @@
   "name": "@liqvid/event-emitter",
   "version": "1.0.0-alpha.1",
   "description": "Typed event emitter and helpers",
-  "license": "MIT",
-  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/event-emitter#readme",
+  "bugs": {
+    "url": "https://github.com/liqvidjs/liqvid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liqvidjs/liqvid.git"
   },
-  "bugs": {
-    "url": "https://github.com/liqvidjs/liqvid/issues"
+  "license": "MIT",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "@liqvid/dev": "./src/index.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "@liqvid/dev": "./src/react.ts",
+      "import": "./dist/esm/react.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
   },
   "files": [
     "dist/*"
   ],
-  "exports": {
-    ".": {
-      "@liqvid/dev": "./src/index.ts",
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    },
-    "./react": {
-      "@liqvid/dev": "./src/react.ts",
-      "types": "./dist/types/react.d.ts",
-      "import": "./dist/esm/react.js"
-    }
-  },
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
@@ -56,15 +65,6 @@
   "peerDependenciesMeta": {
     "react": {
       "optional": true
-    }
-  },
-  "sideEffects": false,
-  "type": "module",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/types/*"
-      ]
     }
   }
 }
