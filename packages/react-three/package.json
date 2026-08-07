@@ -13,9 +13,10 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:js",
-    "build:clean": "rm -fr dist",
-    "build:js": "tsc",
+    "build": "tsc",
+    ".build:clean": "rm -rf dist",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

@@ -58,7 +58,10 @@
     }
   },
   "scripts": {
-    "build": "tsc --build",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

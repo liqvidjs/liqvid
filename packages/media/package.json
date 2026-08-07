@@ -38,12 +38,12 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean && mkdir dist && pnpm build:js && pnpm build:css && pnpm build:postclean",
-    "build:clean": "rm -rf dist",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "pnpm build:js && pnpm build:css",
     "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
-    "build:js": "pnpm build:js:esm",
-    "build:js:esm": "tsc",
-    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
+    "build:js": "tsc",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

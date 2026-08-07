@@ -24,13 +24,14 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:js && pnpm build:dts && pnpm build:postclean",
-    "build:clean": "rm -rf dist",
+    "build": "pnpm build:js && pnpm build:dts",
+    ".build:clean": "rm -rf dist",
     "build:dts": "pnpm build:dts:copy && pnpm build:dts:rm",
     "build:dts:copy": "cp src/*.d.ts dist/types",
     "build:dts:rm": "sed -i '' -E '/import .*\\.d\\.ts.*;$/d' dist/esm/index.js",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "build:js": "tsc",
-    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    ".build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "test": "tsc --noEmit --project tsconfig.test.json",

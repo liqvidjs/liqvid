@@ -31,10 +31,10 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc",
-    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "build": "tsc",
+    ".build:clean": "rm -rf dist",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

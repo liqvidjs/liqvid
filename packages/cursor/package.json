@@ -31,10 +31,10 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc",
-    "build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:package": "../../format-package-json.sh",

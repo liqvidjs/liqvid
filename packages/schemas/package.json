@@ -24,10 +24,10 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean; pnpm build:js; pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc",
-    "build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts && biome check --fix json-schemas",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",

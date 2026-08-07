@@ -24,6 +24,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

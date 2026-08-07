@@ -35,11 +35,10 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean; pnpm build:css; pnpm lint; pnpm build:js; pnpm build:postclean",
-    "build:clean": "rm -fr dist && mkdir dist",
-    "build:css": "cp -R css dist",
-    "build:js": "tsc",
-    "build:postclean": "rm -fr dist/tsconfig.tsbuildinfo",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

@@ -24,10 +24,10 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:js && pnpm build:postclean",
-    "build:clean": "rm -rf dist",
-    "build:js": "tsc",
-    "build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    ".build:clean": "rm -rf dist",
+    ".build:postclean": "find ./dist -name tsconfig.tsbuildinfo -delete",
+    "build": "tsc",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",

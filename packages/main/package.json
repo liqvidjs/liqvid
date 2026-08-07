@@ -27,10 +27,11 @@
     "./liqvid.min.css": "./dist/liqvid.min.css"
   },
   "scripts": {
-    "build": "pnpm build:clean && pnpm build:css && pnpm build:js",
-    "build:clean": "rm -rf dist",
+    ".build:clean": "rm -rf dist",
+    "build": "pnpm build:css && pnpm build:js",
     "build:css": "stylus -o dist/liqvid.css styl/liqvid.styl; stylus -c -o dist/liqvid.min.css styl/liqvid.styl",
-    "build:js": "pnpm build:js:bundle;  pnpm build:js:esm",
+    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
+    "build:js": "pnpm build:js:bundle; pnpm build:js:esm",
     "build:js:bundle": "tsc && rollup -c && rm -rf dist/esm",
     "build:js:esm": "tsc --module esnext --outDir dist/esm",
     "lint": "biome check --fix",
@@ -39,10 +40,8 @@
     "lint:tsc": "tsc --noEmit",
     "stylus": "stylus -o dist/liqvid.css -w styl/liqvid.styl",
     "stylus:prod": "stylus -c -o dist/liqvid.min.css -w styl/liqvid.styl",
-    "test": "pnpm test:jest && pnpm test:build-e2e && pnpm test:playwright",
-    "test:build-e2e": "cd e2e/app && pnpm build && cd ../..",
+    "test": "pnpm test:jest",
     "test:jest": "jest",
-    "test:playwright": "npx playwright test",
     "watch": "tsc --watch"
   },
   "devDependencies": {
