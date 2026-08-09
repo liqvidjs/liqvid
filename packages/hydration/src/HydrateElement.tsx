@@ -1,8 +1,7 @@
-import { IS_CLIENT } from "@liqvid/ssr";
-import { Root as Slot } from "@radix-ui/react-slot";
 import { useId } from "react";
 
 import { HydrateOnClient } from "./HydrateOnClient.tsx";
+import { Slot } from "./Slot.tsx";
 import type { ArgType, LocalValueConfig } from "./types.ts";
 
 export function HydrateElement<
@@ -37,8 +36,6 @@ export function HydrateElement<
   ) => unknown;
 }) {
   const id = useId();
-
-  if (IS_CLIENT) return children;
 
   return (
     <HydrateOnClient

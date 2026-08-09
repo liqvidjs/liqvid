@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/hydration",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Use client-only values in React without encountering hydration errors. Especially useful for statically generated sites.",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/hydration#readme",
   "bugs": {
@@ -39,7 +39,6 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "catalog:",
     "universal-cookie": "catalog:"
   },
   "devDependencies": {

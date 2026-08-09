@@ -40,7 +40,19 @@ export function HydrateOnClient<
         }
       ) => unknown);
 }) {
-  if (IS_CLIENT) return <>{children}</>;
+  if (IS_CLIENT)
+    return (
+      <>
+        {children}
+        {
+          /*
+           * we need this null in place of the `<SneakyScript>` below in order
+           * to preserve the tree structure for `useId()`
+           */
+          null
+        }
+      </>
+    );
 
   let hasCookies = false;
   let hasLocalStorage = false;

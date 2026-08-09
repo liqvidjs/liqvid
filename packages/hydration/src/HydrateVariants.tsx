@@ -1,8 +1,8 @@
 import { IS_CLIENT } from "@liqvid/ssr";
-import * as Slot from "@radix-ui/react-slot";
 
 import { golf } from "./golf.ts";
 import { HydrateOnClient } from "./HydrateOnClient.tsx";
+import { Slot } from "./Slot.tsx";
 import type {
   BooleanValueConfig,
   ComparisonVariant,
@@ -49,9 +49,9 @@ export function HydrateVariants(props: VariantConfig) {
           return props.variants[`${props.value}`];
         }
         return [false, true].map((variant) => (
-          <Slot.Root id={`${id}-${variant}`} key={String(variant)}>
+          <Slot id={`${id}-${variant}`} key={String(variant)}>
             {props.variants[`${variant}`]}
-          </Slot.Root>
+          </Slot>
         ));
       }
       case "number":
@@ -67,9 +67,9 @@ export function HydrateVariants(props: VariantConfig) {
           return <>{selected.children}</>;
         } else {
           return props.variants.map((variant, i) => (
-            <Slot.Root id={`${id}-${i}`} key={i}>
+            <Slot id={`${id}-${i}`} key={i}>
               {variant.children}
-            </Slot.Root>
+            </Slot>
           ));
         }
     }
