@@ -16,13 +16,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./react": {
-      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.ts",
+      "types": "./dist/types/react.d.ts",
       "import": "./dist/esm/react.js"
     }
   },

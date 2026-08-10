@@ -33,7 +33,7 @@
         "useSortedAttributes": "on",
         "useSortedInterfaceMembers": "on",
         "useSortedKeys": "on",
-        "useSortedPackageJson": "on",
+        "useSortedPackageJson": "off",
         "useSortedProperties": "on"
       }
     }
@@ -94,6 +94,7 @@
       },
       "correctness": {
         "noPrivateImports": "off",
+        "noReactPropAssignments": "on",
         "useExhaustiveDependencies": {
           "level": "on",
           "options": {

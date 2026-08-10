@@ -16,18 +16,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./effect": {
-      "types": "./dist/types/effect.d.ts",
       "@liqvid/dev": "./src/effect.ts",
+      "types": "./dist/types/effect.d.ts",
       "import": "./dist/esm/effect.js"
     },
     "./zod": {
-      "types": "./dist/types/zod.d.ts",
       "@liqvid/dev": "./src/zod.ts",
+      "types": "./dist/types/zod.d.ts",
       "import": "./dist/esm/zod.js"
     }
   },

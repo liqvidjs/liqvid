@@ -17,13 +17,13 @@
   "type": "module",
   "exports": {
     "./docusaurus": {
-      "types": "./dist/types/docusaurus.d.ts",
       "@liqvid/dev": "./src/docusaurus.tsx",
+      "types": "./dist/types/docusaurus.d.ts",
       "import": "./dist/esm/docusaurus.js"
     },
     "./react": {
-      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.tsx",
+      "types": "./dist/types/react.d.ts",
       "import": "./dist/esm/react.js"
     }
   },

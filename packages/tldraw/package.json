@@ -16,23 +16,23 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./liqvid-studio-server-plugin": {
-      "types": "./dist/types/recording.d.ts",
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js"
     },
     "./react": {
-      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.tsx",
+      "types": "./dist/types/react.d.ts",
       "import": "./dist/esm/react.js"
     },
     "./recording": {
-      "types": "./dist/types/recording.d.ts",
       "@liqvid/dev": "./src/recording.tsx",
+      "types": "./dist/types/recording.d.ts",
       "import": "./dist/esm/recording.js"
     }
   },

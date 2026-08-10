@@ -7,13 +7,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./zod": {
-      "types": "./dist/types/integrations/zod.d.mts",
       "@liqvid/dev": "./src/integrations/zod.mts",
+      "types": "./dist/types/integrations/zod.d.mts",
       "import": "./dist/esm/integrations/zod.mjs"
     }
   },

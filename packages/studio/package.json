@@ -17,28 +17,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./next": {
-      "types": "./dist/types/next/index.d.mts",
       "@liqvid/dev": "./src/next/index.mts",
+      "types": "./dist/types/next/index.d.mts",
       "import": "./dist/esm/next/index.mjs"
     },
     "./next/api": {
-      "types": "./dist/types/next/api.d.mts",
       "@liqvid/dev": "./src/next/api.mts",
+      "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
     },
     "./next/page": {
-      "types": "./dist/types/next/page.d.ts",
       "@liqvid/dev": "./src/next/page.tsx",
+      "types": "./dist/types/next/page.d.ts",
       "import": "./dist/esm/next/page.js"
     },
     "./ui": {
-      "types": "./dist/types/ui/index.d.ts",
       "@liqvid/dev": "./src/ui/index.ts",
+      "types": "./dist/types/ui/index.d.ts",
       "import": "./dist/esm/ui/index.js"
     }
   },
@@ -56,6 +56,7 @@
     ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
     ".watch:css": "watch -n1 pnpm build:css",
     ".watch:hbs": "watch -n1 pnpm build:hbs",
+    ".watch:tcm": "tcm src --watch",
     ".watch:tsc": "tsc --watch",
     "build": "pnpm build:js ; pnpm .build:hbs ; pnpm .build:css",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
@@ -67,7 +68,7 @@
     "lint:tsc": "tsc --noEmit",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "validate-translations": "node liqvid-validate-translations.mjs",
-    "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tsc\""
+    "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tcm\" \"pnpm run .watch:tsc\""
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
@@ -102,9 +103,11 @@
     "next": "catalog:",
     "next-ws": "catalog:peer",
     "ts-jest": "catalog:dev",
+    "typed-css-modules": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev",
+    "typescript-plugin-css-modules": "catalog:dev",
     "ws": "catalog:peer"
   },
   "peerDependencies": {

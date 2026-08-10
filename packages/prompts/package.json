@@ -16,8 +16,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     }
   },

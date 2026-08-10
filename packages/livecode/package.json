@@ -17,19 +17,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./interpreters/*": {
-      "types": "./dist/types/interpreters/*.d.ts",
       "@liqvid/dev": "./src/interpreters/*.ts",
+      "types": "./dist/types/interpreters/*.d.ts",
       "import": "./dist/esm/interpreters/*.js"
     },
     "./style.css": "./dist/css/style.css",
     "./web": {
-      "types": "./dist/types/presets/web/index.d.ts",
       "@liqvid/dev": "./src/presets/web/index.ts",
+      "types": "./dist/types/presets/web/index.d.ts",
       "import": "./dist/esm/presets/web/index.js"
     }
   },

@@ -16,8 +16,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     }
   },

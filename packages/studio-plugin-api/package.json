@@ -16,13 +16,13 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./server": {
-      "types": "./dist/types/server.d.mts",
       "@liqvid/dev": "./src/server.mts",
+      "types": "./dist/types/server.d.mts",
       "import": "./dist/esm/server.mjs"
     }
   },

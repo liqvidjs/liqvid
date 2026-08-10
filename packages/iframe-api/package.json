@@ -16,22 +16,22 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "@liqvid/dev": "./src/index.ts"
+      "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts"
     },
     "./child": {
-      "types": "./dist/types/child.d.ts",
       "@liqvid/dev": "./src/child.ts",
+      "types": "./dist/types/child.d.ts",
       "import": "./dist/esm/child.js"
     },
     "./parent": {
-      "types": "./dist/types/parent.d.ts",
       "@liqvid/dev": "./src/parent.ts",
+      "types": "./dist/types/parent.d.ts",
       "import": "./dist/esm/parent.js"
     },
     "./parent/react": {
-      "types": "./dist/types/react.d.ts",
       "@liqvid/dev": "./src/react.ts",
+      "types": "./dist/types/react.d.ts",
       "import": "./dist/esm/react.js"
     }
   },

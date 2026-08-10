@@ -16,13 +16,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./utils": {
-      "types": "./dist/types/utils.d.ts",
       "@liqvid/dev": "./src/utils.ts",
+      "types": "./dist/types/utils.d.ts",
       "import": "./dist/esm/utils.js"
     }
   },

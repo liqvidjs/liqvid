@@ -16,23 +16,23 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./greenscreen": {
-      "types": "./dist/types/greenscreen.d.ts",
       "@liqvid/dev": "./src/greenscreen.ts",
+      "types": "./dist/types/greenscreen.d.ts",
       "import": "./dist/esm/greenscreen.js"
     },
     "./liqvid-studio-server-plugin": {
-      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
       "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
     },
     "./recording": {
-      "types": "./dist/types/recording.d.mts",
       "@liqvid/dev": "./src/recording.mts",
+      "types": "./dist/types/recording.d.mts",
       "import": "./dist/esm/recording.mjs"
     }
   },
