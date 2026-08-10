@@ -1,5 +1,4 @@
 import * as fs from "node:fs";
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
@@ -11,6 +10,8 @@ import {
   RelativeFile,
 } from "effect-paths";
 import { execa } from "execa";
+
+import { GROUP_OF_PICTURE, INPUT, OVERWRITE } from "./ffmpeg-flags.ts";
 
 const AUDIO_MP4 = RelativeFile("audio.mp4");
 const AUDIO_WEBM = RelativeFile("audio.webm");
@@ -35,175 +36,155 @@ async function checkFfmpeg(): Promise<boolean> {
 /**
  * Re-encode WebM file to fix timing/seeking issues from browser recording.
  */
-async function fixWebmTiming(inputPath: AbsoluteFile): Promise<void> {
-  const dir = path.dirname(inputPath);
-  const ext = path.extname(inputPath);
-  const base = path.basename(inputPath, ext);
-  const tempPath = path.join(dir, RelativeFile(`${base}-fixed${ext}`));
+function fixWebmTiming(inputPath: AbsoluteFile) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  await execa("ffmpeg", ["-y", "-i", inputPath, "-c", "copy", tempPath]);
+    const dir = path.dirname(inputPath);
+    const ext = path.extname(inputPath);
+    const base = path.basename(inputPath, ext);
+    const tempPath = path.join(dir, RelativeFile(`${base}-fixed${ext}`));
 
-  await fsp.rename(tempPath, inputPath);
+    yield* ffmpeg(OVERWRITE, INPUT, inputPath, "-c", "copy", tempPath);
+
+    yield* fs.rename(tempPath, inputPath);
+  });
 }
 
 /**
  * Encode audio to MP4/AAC format.
  */
-async function encodeAudioMp4(
-  inputPath: string,
-  outputPath: string,
-): Promise<void> {
-  await execa("ffmpeg", [
-    "-y",
-    "-i",
+function encodeAudioMp4(inputPath: AbsoluteFile, outputPath: AbsoluteFile) {
+  return ffmpeg(
+    OVERWRITE,
+    INPUT,
     inputPath,
     "-c:a",
     "aac",
     "-b:a",
     "192k",
     outputPath,
-  ]);
+  );
 }
 
 /**
  * Extract audio from video file.
  */
-async function extractAudio(
-  inputPath: string,
-  outputPath: string,
-): Promise<void> {
-  await execa("ffmpeg", [
-    "-y",
-    "-i",
-    inputPath,
-    "-vn",
-    "-c:a",
-    "copy",
-    outputPath,
-  ]);
+function extractAudio(inputPath: string, outputPath: string) {
+  return ffmpeg(OVERWRITE, INPUT, inputPath, "-vn", "-c:a", "copy", outputPath);
 }
 
 /**
  * Remove audio from video file, keeping only video.
  */
-async function stripAudio(
-  inputPath: string,
-  outputPath: string,
-): Promise<void> {
-  await execa("ffmpeg", [
-    "-y",
-    "-i",
-    inputPath,
-    "-an",
-    "-c:v",
-    "copy",
-    outputPath,
-  ]);
+function stripAudio(inputPath: AbsoluteFile, outputPath: AbsoluteFile) {
+  return ffmpeg(OVERWRITE, INPUT, inputPath, "-an", "-c:v", "copy", outputPath);
 }
 
 /**
  * Encode video to HLS format for adaptive streaming.
  * Creates two quality levels: 360p (lo-fi) and original (hi-fi).
  */
-async function encodeHls(
-  inputPath: AbsoluteFile,
-  outputDir: AbsoluteDir,
-): Promise<void> {
-  await fsp.mkdir(outputDir, { recursive: true });
+function encodeHls(inputPath: AbsoluteFile, outputDir: AbsoluteDir) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // Create subdirectories for each quality level
-  const v0Dir = path.join(outputDir, RelativeDir("v0"));
-  const v1Dir = path.join(outputDir, RelativeDir("v1"));
-  await fsp.mkdir(v0Dir, { recursive: true });
-  await fsp.mkdir(v1Dir, { recursive: true });
+    yield* fs.makeDirectory(outputDir);
 
-  // Filter complex: split video into two streams
-  // v0 = 360p (lo-fi), v1 = original (hi-fi)
-  const filterComplex = [
-    "[0:v]split=2[v0][v1]",
-    "[v0]scale=w=-2:h=360[v0out]",
-    "[v1]copy[v1out]",
-  ].join(";");
+    // Create subdirectories for each quality level
+    const v0Dir = path.join(outputDir, RelativeDir("v0"));
+    const v1Dir = path.join(outputDir, RelativeDir("v1"));
+    yield* fs.makeDirectory(v0Dir, { recursive: true });
+    yield* fs.makeDirectory(v1Dir, { recursive: true });
 
-  // Common encoding options for consistent HLS streaming
-  const commonOpts = (streamIndex: number, bitrate: string) => [
-    `-c:v:${streamIndex}`,
-    "libx264",
-    "-x264-params",
-    "nal-hrd=cbr:force-cfr=1",
-    `-b:v:${streamIndex}`,
-    bitrate,
-    `-maxrate:v:${streamIndex}`,
-    bitrate,
-    `-minrate:v:${streamIndex}`,
-    bitrate,
-    `-bufsize:v:${streamIndex}`,
-    bitrate,
-    "-preset",
-    "fast",
-    "-g",
-    "48",
-    "-sc_threshold",
-    "0",
-    "-keyint_min",
-    "48",
-  ];
+    // Filter complex: split video into two streams
+    // v0 = 360p (lo-fi), v1 = original (hi-fi)
+    const filterComplex = [
+      "[0:v]split=2[v0][v1]",
+      "[v0]scale=w=-2:h=360[v0out]",
+      "[v1]copy[v1out]",
+    ].join(";");
 
-  await execa("ffmpeg", [
-    "-y",
-    "-i",
-    inputPath,
-    "-filter_complex",
-    filterComplex,
-    // Map streams
-    "-map",
-    "[v0out]",
-    "-map",
-    "[v1out]",
-    // Lo-fi stream (360p @ 1Mbps)
-    ...commonOpts(0, "1M"),
-    // Hi-fi stream (original @ 3Mbps)
-    ...commonOpts(1, "3M"),
-    // HLS options
-    "-f",
-    "hls",
-    "-hls_time",
-    "2",
-    "-hls_playlist_type",
-    "vod",
-    "-hls_flags",
-    "independent_segments",
-    "-hls_segment_type",
-    "mpegts",
-    "-hls_segment_filename",
-    path.join(outputDir, RelativeFile("v%v/data%02d.ts")),
-    "-master_pl_name",
-    "stream.m3u8",
-    "-var_stream_map",
-    "v:0 v:1",
-    path.join(outputDir, RelativeFile("v%v.m3u8")),
-  ]);
+    // Common encoding options for consistent HLS streaming
+    const commonOpts = (streamIndex: number, bitrate: string) => [
+      `-c:v:${streamIndex}`,
+      "libx264",
+      "-x264-params",
+      "nal-hrd=cbr:force-cfr=1",
+      `-b:v:${streamIndex}`,
+      bitrate,
+      `-maxrate:v:${streamIndex}`,
+      bitrate,
+      `-minrate:v:${streamIndex}`,
+      bitrate,
+      `-bufsize:v:${streamIndex}`,
+      bitrate,
+      "-preset",
+      "fast",
+      GROUP_OF_PICTURE,
+      "48",
+      "-sc_threshold",
+      "0",
+      "-keyint_min",
+      "48",
+    ];
 
-  // Move playlist files into their respective directories
-  for (const i of [0, 1]) {
-    const srcPlaylist = path.join(outputDir, RelativeFile(`v${i}.m3u8`));
-    const dstPlaylist = path.join(
-      outputDir,
-      RelativeDir(`v${i}`),
-      RelativeFile(`v${i}.m3u8`),
+    yield* ffmpeg(
+      OVERWRITE,
+      INPUT,
+      inputPath,
+      "-filter_complex",
+      filterComplex,
+      // Map streams
+      "-map",
+      "[v0out]",
+      "-map",
+      "[v1out]",
+      // Lo-fi stream (360p @ 1Mbps)
+      ...commonOpts(0, "1M"),
+      // Hi-fi stream (original @ 3Mbps)
+      ...commonOpts(1, "3M"),
+      // HLS options
+      "-f",
+      "hls",
+      "-hls_time",
+      "2",
+      "-hls_playlist_type",
+      "vod",
+      "-hls_flags",
+      "independent_segments",
+      "-hls_segment_type",
+      "mpegts",
+      "-hls_segment_filename",
+      path.join(outputDir, RelativeFile("v%v/data%02d.ts")),
+      "-master_pl_name",
+      "stream.m3u8",
+      "-var_stream_map",
+      "v:0 v:1",
+      path.join(outputDir, RelativeFile("v%v.m3u8")),
     );
-    if (fs.existsSync(srcPlaylist)) {
-      await fsp.rename(srcPlaylist, dstPlaylist);
-    }
-  }
 
-  // Fix the master playlist to reference the correct paths
-  const masterPlaylist = path.join(outputDir, RelativeFile("stream.m3u8"));
-  if (fs.existsSync(masterPlaylist)) {
-    let content = await fsp.readFile(masterPlaylist, "utf-8");
-    content = content.replace(/^v(\d+)\.m3u8$/gm, "v$1/v$1.m3u8");
-    await fsp.writeFile(masterPlaylist, content);
-  }
+    // Move playlist files into their respective directories
+    for (const i of [0, 1]) {
+      const srcPlaylist = path.join(outputDir, RelativeFile(`v${i}.m3u8`));
+      const dstPlaylist = path.join(
+        outputDir,
+        RelativeDir(`v${i}`),
+        RelativeFile(`v${i}.m3u8`),
+      );
+      if (yield* fs.exists(srcPlaylist)) {
+        yield* fs.rename(srcPlaylist, dstPlaylist);
+      }
+    }
+
+    // Fix the master playlist to reference the correct paths
+    const masterPlaylist = path.join(outputDir, RelativeFile("stream.m3u8"));
+    if (yield* fs.exists(masterPlaylist)) {
+      let content = yield* fs.readFileString(masterPlaylist, "utf8");
+      content = content.replace(/^v(\d+)\.m3u8$/gm, "v$1/v$1.m3u8");
+      yield* fs.writeFileString(masterPlaylist, content);
+    }
+  });
 }
 
 /**
@@ -218,11 +199,11 @@ function processAudioOnly(dirname: AbsoluteDir) {
 
     // Fix WebM timing
     yield* Effect.logInfo("fixing audio.webm timing...");
-    yield* Effect.promise(() => fixWebmTiming(audioWebm));
+    yield* fixWebmTiming(audioWebm);
 
     // Encode to MP4
     yield* Effect.logInfo("encoding audio.mp4...");
-    yield* Effect.promise(() => encodeAudioMp4(audioWebm, audioMp4));
+    yield* encodeAudioMp4(audioWebm, audioMp4);
   }).pipe(
     Effect.annotateLogs({
       _op: "processAudioOnly",
@@ -254,26 +235,26 @@ function processVideo(dirname: AbsoluteDir) {
     try {
       // Extract audio from video
       yield* Effect.logInfo("extracting audio track...");
-      yield* Effect.promise(() => extractAudio(tempVideo, audioWebm));
+      yield* extractAudio(tempVideo, audioWebm);
 
       // Create silent video
       yield* Effect.logInfo("creating silent video.webm...");
-      yield* Effect.promise(() => stripAudio(tempVideo, videoWebm));
+      yield* stripAudio(tempVideo, videoWebm);
 
       // Fix WebM timing for both files
       yield* Effect.logInfo("fixing audio.webm timing...");
-      yield* Effect.promise(() => fixWebmTiming(audioWebm));
+      yield* fixWebmTiming(audioWebm);
 
       // console.log("Fixing video.webm timing...");
       // await fixWebmTiming(videoWebm);
 
       // Encode audio to MP4
       yield* Effect.logInfo("encoding audio.mp4...");
-      yield* Effect.promise(() => encodeAudioMp4(audioWebm, audioMp4));
+      yield* encodeAudioMp4(audioWebm, audioMp4);
 
       // Encode video to HLS
       yield* Effect.logInfo("encoding HLS...");
-      yield* Effect.promise(() => encodeHls(videoWebm, hlsDir));
+      yield* encodeHls(videoWebm, hlsDir);
 
       yield* Effect.logInfo("video post-processing complete.");
     } finally {
@@ -316,6 +297,10 @@ function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
       yield* processAudioOnly(dirname);
     }
   });
+}
+
+function ffmpeg(...args: string[]) {
+  return Effect.promise(() => execa("ffmpeg", args));
 }
 
 const plugin: LiqvidStudioServerPlugin = {
