@@ -26,7 +26,6 @@ import {
   Controls,
   HydrateElement,
   HydrateVariants,
-  PatchIds,
   useKeyboardShortcut,
   usePlayer,
 } from "liqvid";
@@ -38,7 +37,7 @@ import {
   persistColorScheme,
   persistMute,
   persistVolume,
-} from "@/lib/persistence";
+} from "#lib/persistence";
 
 import { PlaybackSpeed } from "./controls/PlaybackSpeed.tsx";
 import { Transcript } from "./controls/Transcript.tsx";
@@ -344,11 +343,9 @@ export function AdditionalSettings({
           player.domElement?.classList.toggle("settings-open", isOpen);
         }}
       >
-        <PatchIds>
-          <Menu.Trigger className="lv-controls-button">
-            <GearIcon weight="fill" />
-          </Menu.Trigger>
-        </PatchIds>
+        <Menu.Trigger className="lv-controls-button">
+          <GearIcon weight="fill" />
+        </Menu.Trigger>
         {/* keepMounted is needed for keyboard shortcuts to work */}
         <Menu.Portal keepMounted>
           <Menu.Positioner

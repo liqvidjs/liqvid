@@ -1,12 +1,10 @@
-import { CaptionsEditor } from "@liqvid/studio";
-import { useIsPreview } from "@liqvid/studio-plugin-api";
+import { CaptionsEditor, useIsPreview } from "@liqvid/studio";
 import { CodeRecording } from "@lqv/codemirror/recording";
 import { ChalkboardTeacherIcon, FlaskIcon } from "@phosphor-icons/react";
 import { Audio } from "liqvid";
-import { useSearchParams } from "next/navigation";
 
-import { LiqvidPlayer } from "@/components/liqvid/player.tsx";
-import { DownloadButton } from "@/components/livecode/buttons/DownloadButton.tsx";
+import { LiqvidPlayer } from "#components/liqvid/player.tsx";
+import { DownloadButton } from "#components/livecode/buttons/DownloadButton.tsx";
 import {
   Actions,
   ClearButton,
@@ -23,17 +21,16 @@ import {
   Tab,
   TabList,
   VimToggleButton,
-} from "@/components/livecode/theme";
+} from "#components/livecode/theme.tsx";
 
 import { files } from "./files.ts";
 import { useProjectFiles } from "./helpers.ts";
 import { LiveCodeHTMLReplay } from "./production.tsx";
 import { getLanguageExtension } from "./shared.ts";
 
-import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
+// import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
 
 export function LiveCodeHTMLRecord() {
-  const params = useSearchParams();
   const assets = useProjectFiles().dir(".liqvid");
   const recordings = assets.dir("recordings");
   const latest = recordings.dir("2026-06-24T02-02-23-586Z");
@@ -45,7 +42,7 @@ export function LiveCodeHTMLRecord() {
 
   return (
     <LiqvidPlayer
-      duration={meta.duration}
+      // duration={meta.duration}
       plugins={[CodeRecording]}
       // script={script}
     >
@@ -116,7 +113,13 @@ export function LiveCodeHTMLRecord() {
 
         <Resize dir="ew" variable="--split" />
 
-        <HTMLPreview className="flex-1 bg-white" />
+        <div className="flex flex-1 flex-col">
+          <HTMLPreview className="flex-1 bg-white" />
+          <Resize dir="sn" variable="--v-split" />
+          <ConsoleRoot className="data-[expanded=true]:h-(--v-split)">
+            <WebConsole />
+          </ConsoleRoot>
+        </div>
       </LiveCode>
       {/* <CodePrompt /> */}
     </LiqvidPlayer>

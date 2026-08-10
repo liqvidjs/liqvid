@@ -1,9 +1,40 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "noDuplicateClasses": "on",
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+
+              ":ALIAS:",
+              ":BLANK_LINE:",
+
+              ["../**", "!**/*.css", "!**/*.json"],
+              ":BLANK_LINE:",
+
+              ["./**", "!**/*.css", "!**/*.json"],
+              ":BLANK_LINE:",
+
+              ["**/*.css"],
+              ":BLANK_LINE:",
+
+              "**/*.json"
+            ]
+          }
+        },
+        "useSortedAttributes": "on",
+        "useSortedInterfaceMembers": "on",
+        "useSortedKeys": "on",
+        "useSortedPackageJson": "on",
+        "useSortedProperties": "on"
       }
     }
   },
@@ -26,6 +57,15 @@
       "correctness": {
         "noPrivateImports": "error"
       },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "info",
+          "options": {
+            "functions": ["clsx", "cva", "tw", "classNames"]
+          }
+        }
+      },
       "preset": "recommended",
       "style": {
         "noRestrictedImports": {
@@ -42,6 +82,28 @@
       }
     }
   },
+  "overrides": [
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/.liqvid/**/*.json"]
+    },
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/package.json"]
+    }
+  ],
   "root": true,
   "vcs": {
     "clientKind": "git",

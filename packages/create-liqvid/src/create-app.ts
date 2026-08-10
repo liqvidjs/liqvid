@@ -8,6 +8,7 @@ import pico from "picocolors";
 import type { Bundler, TemplateType } from "../templates/index.mts";
 import { getTemplateFile, installTemplate } from "../templates/index.mts";
 
+import { runBiome } from "./helpers/biome.ts";
 import type { RepoInfo } from "./helpers/examples.ts";
 import {
   downloadAndExtractExample,
@@ -221,6 +222,14 @@ export async function createApp({
 
       await install(packageManager, isOnline);
       console.log();
+      try {
+        console.log();
+        await runBiome(packageManager);
+        console.log();
+      } catch (err) {
+        // Best effort: do not fail app creation if Biome fails
+        console.error("Error running Biome:", err);
+      }
       try {
         console.log();
         await runTypegen(packageManager);

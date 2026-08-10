@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import type { RelativeDir, RelativeFile } from "effect-paths";
 import pico from "picocolors";
 
+import { runBiome } from "../src/helpers/biome.ts";
 import { copy } from "../src/helpers/copy.ts";
 import { getPnpmMajorVersion } from "../src/helpers/get-pkg-manager.ts";
 import { install } from "../src/helpers/install.ts";
@@ -56,21 +57,12 @@ const presetDeps = (names: string[] | undefined): Record<string, string> =>
     (names ?? []).map((name) => [name, resolvePresetVersion(name)]),
   );
 
-// interface PackageJson {
-//   dependencies?: Record<string, string>;
-//   devDependencies?: Record<string, string>;
-//   ignoreScripts?: string[];
-//   name: string;
-//   private: boolean;
-//   scripts: Record<string, string>;
-//   trustedDependencies?: string[];
-//   version: string;
-// }
 type PackageJson = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   ignoreScripts?: string[];
   name: string;
+  imports?: Record<string, string>;
   portless?: {
     name: string;
     script: string;
@@ -184,35 +176,54 @@ export const installTemplate = async ({
     });
   }
 
+  const nextConfigFile = path.join(root, "next.config.ts" as RelativeFile);
+  let configContent = await fs.readFile(nextConfigFile, "utf8");
+  let configChanged = false;
+
   if (bundler === Bundler.Rspack) {
-    const nextConfigFile = path.join(root, "next.config.ts" as RelativeFile);
-    await fs.writeFile(
-      nextConfigFile,
+    configContent =
       `import withRspack from "next-rspack";\n\n` +
-        (await fs.readFile(nextConfigFile, "utf8")).replace(
-          "export default nextConfig;",
-          "export default withRspack(nextConfig);",
-        ),
-    );
+      configContent.replace(
+        "export default nextConfig;",
+        "export default withRspack(nextConfig);",
+      );
+
+    configChanged = true;
   }
 
   if (reactCompiler) {
-    const nextConfigFile = path.join(root, "next.config.ts" as RelativeFile);
-    let configContent = await fs.readFile(nextConfigFile, "utf8");
-
     configContent = configContent.replace(
       "/* config options here */\n",
       "reactCompiler: true,\n/* config options here */\n",
     );
-
-    await fs.writeFile(nextConfigFile, configContent);
+    configChanged = true;
   }
 
   /** Copy the version from package.json or override for tests. */
   const bundlerFlags = bundler === Bundler.Webpack ? " --webpack" : "";
 
   /** Create a package.json for the new project and write it to disk. */
+  // biome-ignore assist/source/useSortedKeys: we have preferred order for package.json
   const packageJson: PackageJson = {
+    name: appName,
+    private: true,
+    portless: undefined,
+    imports: {
+      "#/*": "./*",
+      "#components/*": "./components/*",
+      "#lib/*": "./lib/*",
+    },
+    scripts: {
+      build: `next build${bundlerFlags}`,
+      dev: `next dev${bundlerFlags}`,
+      format: "biome format --write",
+      lint: "biome check",
+      "liqvid:build": "liqvid build",
+      "liqvid:publish": "liqvid publish",
+      postinstall: "npx @liqvid/cli generate-imports",
+      start: "next start",
+    },
+
     /**
      * Default dependencies.
      */
@@ -251,19 +262,6 @@ export const installTemplate = async ({
       "no-restricted-imports",
       "typescript",
     ),
-    name: appName,
-    private: true,
-    scripts: {
-      build: `next build${bundlerFlags}`,
-      dev: `next dev${bundlerFlags}`,
-      format: "biome format --write",
-      lint: "biome check",
-      "liqvid:build": "liqvid build",
-      "liqvid:publish": "liqvid publish",
-      postinstall: "npx @liqvid/cli generate-imports",
-      start: "next start",
-    },
-    version: "0.1.0",
   };
 
   if (bundler === Bundler.Rspack) {
@@ -298,16 +296,43 @@ export const installTemplate = async ({
       dev: "portless",
       "dev:app": `next dev${bundlerFlags}`,
     };
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      ...thirdPartyDep("portless"),
+    };
+
+    configContent =
+      `import packageJson from "./package.json" with { type: "json" };\n` +
+      configContent.replace(
+        "const developmentConfig: NextConfig = {",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: this is intended
+        "const developmentConfig: NextConfig = {\nallowedDevOrigins: [`${packageJson.portless.name}.localhost`],",
+      );
+
+    configChanged = true;
+  }
+
+  if (configChanged) {
+    await fs.writeFile(nextConfigFile, configContent);
   }
 
   /* Add Tailwind CSS dependencies. */
   if (tailwind) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
-      "@tailwindcss/postcss": versionsThirdParty["@tailwindcss/postcss"],
-      "tailwind-merge": versionsThirdParty["tailwind-merge"],
-      tailwindcss: versionsThirdParty.tailwindcss,
+      ...thirdPartyDep("@tailwindcss/postcss", "tailwind-merge", "tailwindcss"),
     };
+
+    /* Enable the Tailwind linter domain in biome.json. */
+    const biomeConfigFile = path.join(root, "biome.json" as RelativeFile);
+    const biomeConfig = JSON.parse(await fs.readFile(biomeConfigFile, "utf8"));
+    biomeConfig.linter ??= {};
+    biomeConfig.linter.domains ??= {};
+    biomeConfig.linter.domains.tailwind = "recommended";
+    await fs.writeFile(
+      biomeConfigFile,
+      JSON.stringify(biomeConfig, null, 2) + os.EOL,
+    );
   }
 
   /* Add dependencies and devDependencies contributed by the selected presets. */
@@ -393,6 +418,14 @@ export const installTemplate = async ({
   console.log();
 
   await install(packageManager, isOnline);
+  try {
+    console.log();
+    await runBiome(packageManager);
+    console.log();
+  } catch (err) {
+    console.error("Error running Biome:", err);
+    // Best effort: do not fail app creation if Biome fails
+  }
   try {
     console.log();
     await runTypegen(packageManager);

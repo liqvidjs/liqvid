@@ -27,15 +27,14 @@ import {
 } from "liqvid";
 import { lazy, useState } from "react";
 
-import { SuspenseHook } from "@/components/SuspenseHook";
+import { ShowRecordingTime } from "#components/dev/ShowRecordingTime";
+import { SuspenseHook } from "#components/SuspenseHook";
 import {
   persistColorScheme,
   persistMute,
   persistVolume,
-} from "@/lib/persistence";
-import { useSeekFromSearch } from "@/lib/seek-from-search";
-
-import { ShowRecordingTime } from "../dev/ShowRecordingTime.tsx";
+} from "#lib/persistence";
+import { useSeekFromSearch } from "#lib/seek-from-search";
 
 import { KeyboardShortcuts } from "./controls/KeyboardShortcuts.tsx";
 import {
@@ -55,7 +54,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const ShowMarkerName = isDevelopment
   ? lazy(() =>
-      import("@/components/dev/ShowMarkerName").then((imports) => ({
+      import("#components/dev/ShowMarkerName").then((imports) => ({
         default: imports.ShowMarkerName,
       })),
     )
@@ -124,7 +123,6 @@ function PlayerChrome({
   children,
   classNames: propClassNames,
   loadingScreen,
-  projectPath,
   thumbs,
   transcript,
   ...props
@@ -136,7 +134,6 @@ function PlayerChrome({
 
   /** Whether this project needs a loading screen. */
   loadingScreen?: boolean;
-
 
   thumbs?: React.ComponentProps<typeof Controls.ScrubberBar>["thumbs"];
 

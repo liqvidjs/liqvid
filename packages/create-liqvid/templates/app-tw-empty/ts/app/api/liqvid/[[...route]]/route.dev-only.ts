@@ -9,7 +9,7 @@ import {
   putHandler,
 } from "@liqvid/studio/next/api";
 
-import dynamicImports from "@/.dynamic-imports";
+import dynamicImports from "#/.dynamic-imports";
 
 export const DELETE = deleteHandler(dynamicImports);
 export const GET = getHandler(dynamicImports);

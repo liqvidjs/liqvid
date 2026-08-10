@@ -8,7 +8,8 @@
     "rewriteRelativeImportExtensions": true,
     "skipLibCheck": false,
     "strict": true,
-    "target": "es2019"
+    "target": "es2019",
+    "types": ["node"]
   },
   "exclude": ["templates", "dist"],
   "include": ["src/*"]

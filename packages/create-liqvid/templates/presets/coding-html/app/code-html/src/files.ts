@@ -1,7 +1,6 @@
-// import indexHtml from "./files/index.html";
-import plainHtml from "./files/plain.html";
+import indexHtml from "./files/index.html";
 
 export const files = {
-  "index.html": plainHtml,
+  "index.html": indexHtml,
   "style.css": ``,
 };

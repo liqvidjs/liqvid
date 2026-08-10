@@ -1,4 +1,4 @@
-import { Cue as GenericCue, Prompt } from "@/components/liqvid/prompts.tsx";
+import { Cue as GenericCue, Prompt } from "#components/liqvid/prompts.tsx";
 
 import type { M } from "./markers.ts";
 

@@ -2,9 +2,9 @@ import { ReplayMultiple } from "@lqv/livecode";
 import { ChalkboardTeacherIcon, FlaskIcon } from "@phosphor-icons/react";
 import { Audio, Track } from "liqvid";
 
-import { HlsVideo } from "@/components/liqvid/HlsVideo";
-import { LiqvidPlayer } from "@/components/liqvid/player";
-import { DownloadButton } from "@/components/livecode/buttons/DownloadButton";
+import { HlsVideo } from "#components/liqvid/HlsVideo.tsx";
+import { LiqvidPlayer } from "#components/liqvid/player.tsx";
+import { DownloadButton } from "#components/livecode/buttons/DownloadButton.tsx";
 import {
   Actions,
   ClearButton,
@@ -23,14 +23,15 @@ import {
   Tab,
   TabList,
   VimToggleButton,
-} from "@/components/livecode/theme";
+} from "#components/livecode/theme.tsx";
 
 import { files } from "./files.ts";
 import { useProjectFiles } from "./helpers.ts";
 import { getLanguageExtension } from "./shared.ts";
 
-import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
-import ThumbMeta from "../.liqvid/thumbs/thumbnails-job.json";
+// uncomment these once you have a recording/thumbnails to use
+// import meta from "../.liqvid/recordings/2026-06-24T02-02-23-586Z/recording-meta.json";
+// import ThumbMeta from "../.liqvid/thumbs/thumbnails-job.json";
 
 export function LiveCodeHTMLReplay() {
   const projectFiles = useProjectFiles();
@@ -40,11 +41,11 @@ export function LiveCodeHTMLReplay() {
 
   return (
     <LiqvidPlayer
-      duration={meta.duration}
-      thumbs={{
-        ...ThumbMeta,
-        path: projectFiles.dir(".liqvid/thumbs").pattern("%c/%s.png"),
-      }}
+      // duration={meta.duration}
+      //thumbs={{
+      //  ...ThumbMeta,
+      //  path: projectFiles.dir(".liqvid/thumbs").pattern("%c/%s.png"),
+      //}}
       transcript={assets.fetch("audio/transcript.json")}
     >
       <Track
@@ -117,7 +118,13 @@ export function LiveCodeHTMLReplay() {
 
         <Resize dir="ew" variable="--split" />
 
-        <HTMLPreview className="flex-1 bg-white" />
+        <div className="flex flex-1 flex-col">
+          <HTMLPreview className="flex-1 bg-white" />
+          <Resize dir="sn" variable="--v-split" />
+          <ConsoleRoot className="data-[expanded=true]:h-(--v-split)">
+            <WebConsole />
+          </ConsoleRoot>
+        </div>
       </LiveCode>
     </LiqvidPlayer>
   );

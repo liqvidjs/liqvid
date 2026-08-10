@@ -1,5 +1,6 @@
 /* biome-ignore-all lint/style/noRestrictedImports: this is where they're defined */
 import { vsCodeDark, vsCodeLight } from "@fsegurai/codemirror-theme-bundle";
+import { useToggle } from "@liqvid/utils";
 import {
   basicSetup,
   Clear as UnstyledClearButton,
@@ -30,7 +31,7 @@ import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { SetOptional } from "type-fest";
 
-import { brand } from "../liqvid/utils.ts";
+import { brand } from "#lib/utils.ts";
 
 import { buttonStyles } from "./buttons/styles.tsx";
 import VimSvg from "./vim.svg";
@@ -62,11 +63,12 @@ export const LiveCode = brand("LiveCode", UnstyledLiveCode, {
 
 export const FileTabs = brand("FileTabs", UnstyledFileTabs, {
   classNames: {
-    container: "bg-(--surface) border-b border-(--sep)",
+    container:
+      "bg-(--surface) border-b border-(--sep) whitespace-nowrap scrollbar-none overflow-x-auto",
     tab: clsx(
       "relative inline-flex cursor-pointer items-center justify-center",
-      "border-0 border-r border-r-(--sep) border-solid",
-      "py-2 pr-4 pl-7 aria-selected:bg-(--bg)",
+      "border-0 border-r border-r-[#aaa] border-solid",
+      "py-2 pr-4 pl-7",
       styles.FileTab,
     ),
   },
@@ -249,10 +251,16 @@ export function VimToggleButton() {
 export function ConsoleRoot({
   className,
   children,
+  defaultExpanded = false,
 }: {
   className?: string;
   children?: React.ReactNode;
+  defaultExpanded?: boolean;
 }) {
+  const { toggle, value: isExpanded } = useToggle(defaultExpanded);
+
+  const id = useId();
+
   return (
     <section
       className={clsx(
@@ -260,9 +268,23 @@ export function ConsoleRoot({
         "dark:border-gray-800 dark:bg-slate-800",
         className,
       )}
+      data-expanded={isExpanded}
+      id={id}
     >
-      <header className="bg-slate-700 px-1! text-white">Console</header>
-      {children}
+      <header className="flex items-center bg-slate-700 px-1! text-white">
+        Console
+        <button
+          aria-controls={id}
+          aria-expanded={isExpanded}
+          className="ml-auto inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-sm hover:bg-slate-600"
+          onClick={toggle}
+          title={isExpanded ? "Collapse console" : "Expand console"}
+          type="button"
+        >
+          {isExpanded ? <CaretDownIcon /> : <CaretUpIcon />}
+        </button>
+      </header>
+      {isExpanded && children}
     </section>
   );
 }

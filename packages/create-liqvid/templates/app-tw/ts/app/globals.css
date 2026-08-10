@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-@import "./liqvid.css";
-@import "./liqvid-tailwind.css";
+@import "./_css/liqvid-tailwind.css";
 
 :root {
   --background: #ffffff;

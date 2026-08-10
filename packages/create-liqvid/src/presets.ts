@@ -39,6 +39,7 @@ export const PRESETS = {
       "@codemirror/lang-css",
       "@codemirror/lang-html",
       "@codemirror/lang-javascript",
+      "react-inspector",
     ],
     devDependencies: [...CODEMIRROR_BASE_DEV],
     title: "Coding › vanilla HTML",

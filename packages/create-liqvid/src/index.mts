@@ -39,15 +39,24 @@ const PRESET_TREE: TreeCategory[] = [
     ],
     title: "Coding",
   },
-  {
-    children: [
-      { title: "equations and handwriting", value: "math-equations" },
-      { title: "2d graphics", value: "math-2d" },
-      { title: "3d graphics", value: "math-3d" },
-      { title: "commutative diagrams", value: "math-diagrams" },
-    ],
-    title: "Math",
-  },
+  // {
+  //   title: "Handwriting (tldraw)",
+  //   value: "tldraw",
+  // },
+  // {
+  //   title: "Slideshow",
+  //   value: "slides",
+  // },
+  // {
+  //   children: [
+  //     { title: "equations", value: "math-equations" },
+  //     { title: "2d graphics", value: "math-2d" },
+  //     { title: "3d graphics", value: "math-3d" },
+  //     { title: "Desmos", value: "math-desmos" },
+  //     { title: "commutative diagrams", value: "math-diagrams" },
+  //   ],
+  //   title: "Math",
+  // },
 ];
 
 let projectPath: string = "";

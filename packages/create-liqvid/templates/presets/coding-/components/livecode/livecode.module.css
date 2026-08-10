@@ -135,16 +135,32 @@
 }
 
 .resize {
-  &[data-dir="ew"] {
+  &[data-dir="ew"],
+  &[data-dir="we"] {
     height: 100%;
     cursor: ew-resize;
+  }
+
+  &[data-dir="ew"] {
     translate: -50% 0;
   }
 
-  &[data-dir="ns"] {
+  &[data-dir="we"] {
+    translate: 50% 0;
+  }
+
+  &[data-dir="ns"],
+  &[data-dir="sn"] {
     width: 100%;
     cursor: ns-resize;
+  }
+
+  &[data-dir="ns"] {
     translate: 0 -50%;
+  }
+
+  &[data-dir="sn"] {
+    translate: 0 50%;
   }
 }
 

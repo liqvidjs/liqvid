@@ -36,6 +36,9 @@ const developmentConfig: NextConfig = {
   pageExtensions: isDevelopment
     ? [...basePageExtensions, "dev-only.ts", "dev-only.tsx"]
     : basePageExtensions,
+
+  // needed for captioning
+  serverExternalPackages: ["smart-whisper"],
 };
 
 const productionConfig: NextConfig = {
@@ -49,13 +52,10 @@ const nextConfig: NextConfig = {
   // in case you are deploying your site to a subdirectory
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
 
-  // needed for captioning
-  serverExternalPackages: ["smart-whisper"],
-
   turbopack: {
     // enable importing these as plaintext
     rules: {
-      "*.{css,js}": {
+      "*.{css,js,mjs,mts,ts,tsx}": {
         as: "*.js",
         condition: {
           query: /[?&]raw(?=&|$)/,
