@@ -272,19 +272,3 @@
   --lvs-text-2xl: 4rem;
   --lvs-text-3xl: 5rem;
 }
-
-.lv-studio-button {
-  padding: 4px 8px;
-  font-size: 14px;
-  cursor: pointer;
-  background-color: var(--accent-ui);
-  border-radius: 3px;
-
-  &:hover {
-    background-color: var(--accent-hover);
-  }
-
-  &:active {
-    background-color: var(--accent-active);
-  }
-}

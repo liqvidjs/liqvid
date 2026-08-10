@@ -117,7 +117,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
       </DialogTrigger>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogPopup className={styles.dialog}>
+        <DialogPopup>
           <DialogTitle>{t.dialog.title}</DialogTitle>
           <form className={styles.dialogForm} onSubmit={handleSubmit}>
             <div className={styles.formField}>

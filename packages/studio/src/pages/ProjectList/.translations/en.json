@@ -1,8 +1,8 @@
 {
   "captions": {
-    "empty": "No audio yet. Click \"Render audio\" to capture the audio track, then generate captions from it.",
-    "generate": "Render audio",
-    "inProgress": "Rendering audio...",
+    "empty": "No audio yet. Click \"Capture audio\" to capture the audio track, then generate captions from it.",
+    "generate": "Capture audio",
+    "inProgress": "Capturing audio...",
     "rename": {
       "action": "Rename",
       "inProgress": "Renaming...",
@@ -13,6 +13,16 @@
   "copyEmbedCode": "Copy embed code",
   "dialogClose": "Close",
   "folderView": "Folder view",
+  "media": {
+    "tabs": {
+      "captions": "Captions",
+      "renders": "Renders",
+      "screenshots": "Screenshots",
+      "thumbnails": "Thumbnails"
+    },
+    "title": "Media",
+    "trigger": "Static media (screenshots, thumbnails, renders, captions)"
+  },
   "openInFinder": "Open in Finder",
   "preview": "Preview",
   "renders": {
@@ -55,6 +65,7 @@
     "inProgress": "Capturing...",
     "item": {
       "delete": "Delete screenshot",
+      "openInFinder": "Open in Finder",
       "rename": "Rename screenshot",
       "useOpenGraph": "Use as OpenGraph image",
       "useTwitter": "Use as Twitter image",
@@ -67,16 +78,6 @@
     },
     "title": "Capture Screenshot",
     "trigger": "Add"
-  },
-  "share": {
-    "tabs": {
-      "captions": "Sous-titres",
-      "renders": "Renders",
-      "screenshots": "Screenshots",
-      "thumbnails": "Thumbnails"
-    },
-    "title": "Share",
-    "trigger": "Share options"
   },
   "thumbs": {
     "empty": "No thumbnails yet. Click \"Generate\" to create thumbnail sheets.",

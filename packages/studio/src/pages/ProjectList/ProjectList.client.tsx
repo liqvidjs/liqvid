@@ -20,9 +20,9 @@ import { TimeDuration } from "../../ui/Time.tsx";
 import { TranslationProvider } from "../../utils/react.tsx";
 
 import { EmbedButton } from "./EmbedButton.tsx";
+import { MediaButton } from "./MediaDialog.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
-import { ShareButton } from "./ShareButton.tsx";
 
 import styles from "./ProjectList.module.css";
 
@@ -296,7 +296,7 @@ function ProjectItem({
           </div>
         </a>
         <div className={styles.actions}>
-          <ShareButton
+          <MediaButton
             basePath={basePath}
             duration={project.duration}
             productionServerPort={productionServerPort}

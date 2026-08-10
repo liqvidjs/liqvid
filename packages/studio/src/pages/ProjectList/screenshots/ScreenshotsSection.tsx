@@ -25,6 +25,7 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
+  useDialogApi,
 } from "../../../ui/Dialog.tsx";
 import { Time } from "../../../ui/Time.tsx";
 import {
@@ -46,8 +47,6 @@ type T = typeof TranslationsJson;
 interface ScreenshotsSectionProps {
   basePath: string;
   duration: Duration;
-  /** Whether the parent dialog is open */
-  isOpen: boolean;
   productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
 }
@@ -223,11 +222,11 @@ function ScreenshotItem({
 export function ScreenshotsSection({
   basePath,
   duration,
-  isOpen,
   productionServerPort,
   project,
 }: ScreenshotsSectionProps) {
   const t = useTranslations<T>().screenshots;
+  const { isOpen } = useDialogApi();
 
   const [screenshots, setScreenshots] = useState<readonly ScreenshotEntry[]>(
     [],

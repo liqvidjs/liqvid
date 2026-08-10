@@ -205,30 +205,28 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
         yield* writeJSON(jobFilePath, resolvedOptions);
 
-        let lightSheets: string[] = [];
-        let darkSheets: string[] = [];
-
-        if (colorScheme === "light" || colorScheme === "both") {
-          const lightDir = path.join(thumbsBaseDir, LIGHT_DIR);
-          lightSheets = yield* generateForScheme(
-            url,
-            lightDir,
-            "light",
-            payload,
-            projectPath,
-          );
-        }
-
-        if (colorScheme === "dark" || colorScheme === "both") {
-          const darkDir = path.join(thumbsBaseDir, DARK_DIR);
-          darkSheets = yield* generateForScheme(
-            url,
-            darkDir,
-            "dark",
-            payload,
-            projectPath,
-          );
-        }
+        const { darkSheets, lightSheets } = yield* Effect.all({
+          darkSheets:
+            colorScheme === "dark" || colorScheme === "both"
+              ? generateForScheme(
+                  url,
+                  path.join(thumbsBaseDir, DARK_DIR),
+                  "dark",
+                  payload,
+                  projectPath,
+                )
+              : Effect.sync(() => []),
+          lightSheets:
+            colorScheme === "light" || colorScheme === "both"
+              ? generateForScheme(
+                  url,
+                  path.join(thumbsBaseDir, LIGHT_DIR),
+                  "light",
+                  payload,
+                  projectPath,
+                )
+              : Effect.sync(() => []),
+        });
 
         const numSheets = Math.max(lightSheets.length, darkSheets.length);
 

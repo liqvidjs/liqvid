@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { StatusCodes } from "http-status-codes";
 
-export class ConflictError extends Schema.TaggedErrorClass<ConflictError>()(
+export class ConflictError extends Schema.TaggedError<ConflictError>()(
   "Conflict",
   {
     message: Schema.String,
@@ -9,7 +9,7 @@ export class ConflictError extends Schema.TaggedErrorClass<ConflictError>()(
   { httpApiStatus: StatusCodes.CONFLICT },
 ) {}
 
-export class InvalidError extends Schema.TaggedErrorClass<InvalidError>()(
+export class InvalidError extends Schema.TaggedError<InvalidError>()(
   "Invalid",
   {
     message: Schema.String,
@@ -17,7 +17,7 @@ export class InvalidError extends Schema.TaggedErrorClass<InvalidError>()(
   { httpApiStatus: StatusCodes.BAD_REQUEST },
 ) {}
 
-export class NotFoundError extends Schema.TaggedErrorClass<NotFoundError>()(
+export class NotFoundError extends Schema.TaggedError<NotFoundError>()(
   "NotFound",
   {
     message: Schema.String,

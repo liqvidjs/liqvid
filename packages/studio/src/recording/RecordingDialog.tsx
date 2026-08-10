@@ -51,10 +51,7 @@ export function RecordingDialog({
   shortcuts,
   onShortcutChange,
 }: RecordingDialogProps) {
-  const t = useAsyncTranslations(
-    Translations,
-    "src/recording/RecordingDialog" as RelativeDir,
-  );
+  const t = useAsyncTranslations(Translations, "src/recording" as RelativeDir);
 
   const { instances, projectPath } = useStudioPrivateApi();
   const { enabledPlugins, togglePlugin } = useRecordingApi();

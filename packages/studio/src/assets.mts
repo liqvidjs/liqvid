@@ -1,8 +1,6 @@
 import { IS_SERVER } from "@liqvid/ssr";
 
-export interface Directory {
-  [key: string]: Directory | null;
-}
+import type { Directory } from "./types/assets.mts";
 
 export interface ProjectFile {
   filename: string;
@@ -110,5 +108,52 @@ export class DirectoryHelper<
   /** when you need to reference a pattern, e.g. "thumbs/%s.png", instead of a single file */
   pattern(pattern: string): string {
     return `${this.dirname}/${pattern}`;
+  }
+}
+
+export class ServerDirectoryHelper<D extends Directory> extends DirectoryHelper<
+  FileNames<D>
+> {
+  #files: D;
+
+  constructor(files: D) {
+    super();
+
+    this.#files = files;
+  }
+
+  has(filename: Files<FileNames<D>> | (string & {})) {
+    const parts = filename.split("/");
+
+    const match = (current: Directory, index: number): boolean => {
+      if (index === parts.length) {
+        return true;
+      }
+
+      const part = parts[index]!;
+
+      if (part === "*") {
+        for (const key of Object.keys(current)) {
+          const child = current[key];
+          if (
+            typeof child === "object" &&
+            child !== null &&
+            match(child as Directory, index + 1)
+          ) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      const child = current[part];
+      if (child === undefined) {
+        return false;
+      }
+
+      return match(child as Directory, index + 1);
+    };
+
+    return match(this.#files, 0);
   }
 }

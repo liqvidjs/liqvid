@@ -6,22 +6,13 @@ import clsx from "clsx";
 
 import styles from "./Select.module.css";
 
-export const SelectRoot = Select.Root;
-
-export const SelectValue = Select.Value;
-
-export const SelectPositioner = Select.Positioner;
-
+export const SelectBackdrop = Select.Backdrop;
 export const SelectItemText = Select.ItemText;
-
-export function SelectBackdrop({
-  className,
-  ...props
-}: React.ComponentProps<typeof Select.Backdrop>) {
-  return (
-    <Select.Backdrop className={clsx(styles.Backdrop, className)} {...props} />
-  );
-}
+export const SelectPopup = Select.Popup;
+export const SelectPortal = Select.Portal;
+export const SelectPositioner = Select.Positioner;
+export const SelectRoot = Select.Root;
+export const SelectValue = Select.Value;
 
 export function SelectIcon({
   className,
@@ -54,19 +45,6 @@ export function SelectList({
   ...props
 }: React.ComponentProps<typeof Select.List>) {
   return <Select.List className={clsx(styles.List, className)} {...props} />;
-}
-
-export function SelectPopup({
-  className,
-  ...props
-}: React.ComponentProps<typeof Select.Popup>) {
-  return <Select.Popup className={clsx(styles.Popup, className)} {...props} />;
-}
-
-export function SelectPortal(
-  props: React.ComponentProps<typeof Select.Portal>,
-) {
-  return <Select.Portal {...props} />;
 }
 
 export function SelectTrigger({

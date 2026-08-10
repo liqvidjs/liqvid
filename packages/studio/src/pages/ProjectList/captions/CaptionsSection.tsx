@@ -15,6 +15,7 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTitle,
+  useDialogApi,
 } from "../../../ui/Dialog.tsx";
 import {
   useCommonTranslations,
@@ -30,16 +31,15 @@ import type TranslationsJson from "../.translations/en.json";
 
 type T = typeof TranslationsJson;
 
-interface CaptionsSectionProps {
-  /** Whether the parent dialog is open */
-  isOpen: boolean;
-}
-
-export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
+export function CaptionsSection() {
   // const { hasCaptioningConfigured } = useDerivedConfig();
   const t = useTranslations<T>().captions;
   const c = useCommonTranslations();
+
   const projectPath = useProjectPath();
+
+  const { isOpen } = useDialogApi();
+
   const [audio, setAudio] = useState<readonly AudioEntry[]>([]);
   const [multiple, setMultiple] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,11 +191,9 @@ export function CaptionsSection({ isOpen }: CaptionsSectionProps) {
         open={!!renaming}
       >
         <DialogPortal>
-          <DialogBackdrop className={styles.dialogOverlay} />
-          <DialogPopup className={styles.dialog}>
-            <DialogTitle className={styles.dialogTitle}>
-              {t.rename.title}
-            </DialogTitle>
+          <DialogBackdrop />
+          <DialogPopup>
+            <DialogTitle>{t.rename.title}</DialogTitle>
             <div className={styles.formField}>
               <label htmlFor="audio-name">{t.rename.name}</label>
               <input

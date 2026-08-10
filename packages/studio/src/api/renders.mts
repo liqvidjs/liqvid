@@ -137,7 +137,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         // Check if destination already exists
         if (yield* fs.exists(newPath)) {
           return yield* new ConflictError({
-            message: "A render with this name already exists",
+            message: "a render with this name already exists",
           });
         }
 
@@ -205,7 +205,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
           };
 
           yield* writeRenderMeta(renderDir, updatedMeta);
-          yield* Effect.log(`Render ${renderId} completed`);
+          yield* Effect.log(`render ${renderId} completed`);
         }).pipe(
           Effect.catch((error) =>
             Effect.gen(function* () {
@@ -215,7 +215,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
                 status: "failed",
               };
               yield* writeRenderMeta(renderDir, updatedMeta);
-              yield* Effect.logError(`Render ${renderId} failed:`, error);
+              yield* Effect.logError(`render ${renderId} failed:`, error);
             }),
           ),
         );
@@ -225,6 +225,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
 
         return { id: renderId };
       }).pipe(
+        Effect.annotateLogs({ payload, projectPath }),
         Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
         Effect.catchTag("PlatformError", Effect.die),
       ),

@@ -81,6 +81,7 @@ function shouldIgnoreEvent(
   if (filename.endsWith("~")) return true;
   if (basename === DS_STORE) return true;
   if (basename === TYPES_AUTOGEN) return true;
+  if (basename === PROJECT_FILES_AUTOGEN) return true;
   if (basename === PROJECT_META_FILE) return true;
   return false;
 }

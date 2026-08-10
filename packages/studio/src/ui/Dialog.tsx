@@ -149,11 +149,4 @@ export function DialogTitle({
   return <Dialog.Title className={clsx(styles.Title, className)} {...props} />;
 }
 
-export function DialogTrigger({
-  className,
-  ...props
-}: React.ComponentProps<typeof Dialog.Trigger>) {
-  return (
-    <Dialog.Trigger className={clsx(styles.Trigger, className)} {...props} />
-  );
-}
+export const DialogTrigger = Dialog.Trigger;

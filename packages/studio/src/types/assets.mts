@@ -1,3 +1,3 @@
-export interface Directory {
+export type Directory = {
   [key: string]: Directory | null;
-}
+};

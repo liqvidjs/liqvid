@@ -1,5 +1,7 @@
 import { RelativeDir, RelativeFile } from "effect-paths";
 
+export const DS_STORE = RelativeFile(".DS_Store");
+
 export const ROOT_HIDDEN_DIR = RelativeDir(".liqvid");
 
 export const BUILD_DIR = RelativeDir("out");
@@ -13,6 +15,13 @@ export const TRANSLATIONS_DIR = RelativeDir(".translations");
  * like "close", "cancel", etc., shared across the studio UI.
  */
 export const COMMON_TRANSLATIONS_DIR = RelativeDir("src");
+
+/**
+ * `types.ts` file auto-generated inside `.liqvid` directory
+ * This provides type information about the assets available
+ * in the `.liqvid` directory.
+ */
+export const PROJECT_FILES_AUTOGEN = RelativeFile("project-files.json");
 
 /**
  * `types.ts` file auto-generated inside `.liqvid` directory

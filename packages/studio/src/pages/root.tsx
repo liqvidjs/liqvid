@@ -10,6 +10,7 @@ import { ProjectList } from "./ProjectList/ProjectList.tsx";
 import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
+import "../studio.css";
 import "../palette.css";
 
 import { Option } from "effect";

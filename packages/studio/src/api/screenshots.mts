@@ -140,31 +140,27 @@ export const screenshotsLive = HttpApiBuilder.group(
             );
             const darkOutputPath = path.join(folderPath, SCREENSHOT_FILE_DARK);
 
-            yield* Effect.promise(() =>
+            payload;
+
+            yield* Effect.all([
               screenshot({
+                ...payload,
                 colorScheme: "light",
-                height: payload.height,
                 output: lightOutputPath,
-                time: payload.time,
                 url,
-                width: payload.width,
-              }),
-            );
+              }).pipe(
+                Effect.andThen(Effect.logDebug("light screenshot succeeded")),
+              ),
 
-            yield* Effect.logDebug("light screenshot succeeded");
-
-            yield* Effect.promise(() =>
               screenshot({
+                ...payload,
                 colorScheme: "dark",
-                height: payload.height,
                 output: darkOutputPath,
-                time: payload.time,
                 url,
-                width: payload.width,
-              }),
-            );
-
-            yield* Effect.logDebug("dark screenshot succeeded");
+              }).pipe(
+                Effect.andThen(Effect.logDebug("dark screenshot succeeded")),
+              ),
+            ]);
 
             imagePath = {
               dark:
@@ -191,16 +187,12 @@ export const screenshotsLive = HttpApiBuilder.group(
               RelativeFile("screenshot.png"),
             );
 
-            yield* Effect.promise(() =>
-              screenshot({
-                colorScheme,
-                height: payload.height,
-                output: outputPath,
-                time: payload.time,
-                url,
-                width: payload.width,
-              }),
-            );
+            yield* screenshot({
+              ...payload,
+              colorScheme,
+              output: outputPath,
+              url,
+            });
 
             imagePath =
               "/" +

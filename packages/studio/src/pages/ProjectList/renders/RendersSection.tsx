@@ -31,6 +31,7 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
+  useDialogApi,
 } from "../../../ui/Dialog.tsx";
 import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
 import {
@@ -50,9 +51,6 @@ type T = typeof TranslationsJson;
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
   aspectRatio?: AspectRatio;
-
-  /** Whether the parent dialog is open */
-  isOpen: boolean;
 }
 
 interface RenderConfig {
@@ -83,10 +81,11 @@ function widthFromHeight(height: number, aspectRatio: AspectRatio): number {
 
 export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
-  isOpen,
 }: RendersSectionProps) {
   const t = useTranslations<T>().renders;
   const projectPath = useProjectPath();
+
+  const { isOpen } = useDialogApi();
 
   const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -547,8 +546,8 @@ function RenameDialog({
   };
 
   return (
-    <DialogPopup className={rootStyles.dialog}>
-      <DialogTitle className={rootStyles.dialogTitle}>{t.title}</DialogTitle>
+    <DialogPopup>
+      <DialogTitle>{t.title}</DialogTitle>
       <div className={rootStyles.formField}>
         <label htmlFor="render-name">{t.name}</label>
         <input
@@ -601,11 +600,9 @@ function VideoPlayerDialog({
   return (
     <DialogPortal>
       <DialogBackdrop />
-      <DialogPopup className={`${rootStyles.dialog} ${styles.videoDialog}`}>
+      <DialogPopup className={styles.videoDialog}>
         <div className={styles.videoHeader}>
-          <DialogTitle className={rootStyles.dialogTitle}>
-            {playingRender?.id}
-          </DialogTitle>
+          <DialogTitle>{playingRender?.id}</DialogTitle>
           <DialogClose className={shareStyles.closeButton}>
             <XIcon size={20} />
           </DialogClose>

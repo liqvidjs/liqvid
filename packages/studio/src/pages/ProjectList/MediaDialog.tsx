@@ -1,15 +1,12 @@
-"use client";
-
 import type { Duration } from "@liqvid/duration";
 import type { ProjectMeta } from "@liqvid/schemas";
 import {
   CameraIcon,
   ClosedCaptioningIcon,
+  FilmSlateIcon,
   FilmStripIcon,
   ImagesIcon,
-  ShareFatIcon,
 } from "@phosphor-icons/react";
-import { useState } from "react";
 
 import {
   DialogBackdrop,
@@ -21,7 +18,7 @@ import {
   DialogTrigger,
 } from "../../ui/Dialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
-import { useCommonTranslations, useTranslations } from "../../utils/react.tsx";
+import { useTranslations } from "../../utils/react.tsx";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
@@ -42,35 +39,31 @@ interface ShareButtonProps {
   project: Omit<ProjectMeta, "duration">;
 }
 
-export function ShareButton({
+export function MediaButton({
   basePath,
   duration,
   project,
   productionServerPort,
 }: ShareButtonProps) {
-  const t = useTranslations<T>().share;
-  const c = useCommonTranslations();
-  const [open, setOpen] = useState(false);
+  const t = useTranslations<T>().media;
 
   return (
-    <DialogRoot onOpenChange={setOpen} open={open}>
+    <DialogRoot>
       <DialogTrigger
         className={rootStyles.rebuildButton}
         title={t.trigger}
         type="button"
       >
-        <ShareFatIcon size={16} weight="fill" />
+        <FilmSlateIcon size={16} />
       </DialogTrigger>
       <DialogPortal>
         <DialogBackdrop />
         <DialogPopup
           aria-describedby={undefined}
-          className={`${rootStyles.dialog} ${shareStyles.shareDialog}`}
+          className={shareStyles.shareDialog}
           size="large"
         >
-          <DialogTitle className={rootStyles.dialogTitle}>
-            {t.title}
-          </DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
 
           <DialogClose />
 
@@ -94,22 +87,21 @@ export function ShareButton({
               <ScreenshotsSection
                 basePath={basePath}
                 duration={duration}
-                isOpen={open}
                 productionServerPort={productionServerPort}
                 project={project}
               />
             </TabsContent>
 
             <TabsContent value="thumbnails">
-              <ThumbnailsSection duration={duration} isOpen={open} />
+              <ThumbnailsSection duration={duration} />
             </TabsContent>
 
             <TabsContent value="renders">
-              <RendersSection aspectRatio={project.aspectRatio} isOpen={open} />
+              <RendersSection aspectRatio={project.aspectRatio} />
             </TabsContent>
 
             <TabsContent value="captions">
-              <CaptionsSection isOpen={open} />
+              <CaptionsSection />
             </TabsContent>
           </Tabs>
         </DialogPopup>

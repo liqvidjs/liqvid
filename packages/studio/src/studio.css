@@ -1,0 +1,19 @@
+:root {
+  font-size: 20px;
+}
+
+.lv-studio-button {
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: var(--accent-ui);
+  border-radius: 3px;
+
+  &:hover {
+    background-color: var(--accent-hover);
+  }
+
+  &:active {
+    background-color: var(--accent-active);
+  }
+}

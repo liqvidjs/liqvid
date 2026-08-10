@@ -10,6 +10,7 @@ import type { ThumbsData } from "../../api/schemas.mts";
 import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
 import { ASSETS_DIR, THUMBS_DIR } from "../../conventions.mts";
 import { Button } from "../../ui/Button.tsx";
+import { useDialogApi } from "../../ui/Dialog.tsx";
 import { TimeDuration } from "../../ui/Time.tsx";
 import { useCommonTranslations, useTranslations } from "../../utils/react.tsx";
 
@@ -21,15 +22,9 @@ type T = typeof TranslationsJson;
 
 interface ThumbnailsSectionProps {
   duration: Duration;
-
-  /** Whether the parent dialog is open */
-  isOpen: boolean;
 }
 
-export function ThumbnailsSection({
-  duration,
-  isOpen,
-}: ThumbnailsSectionProps) {
+export function ThumbnailsSection({ duration }: ThumbnailsSectionProps) {
   const projectPath = useProjectPath();
   const t = useTranslations<T>().thumbs;
   const c = useCommonTranslations();
@@ -37,6 +32,7 @@ export function ThumbnailsSection({
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
+  const { isOpen } = useDialogApi();
 
   const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
