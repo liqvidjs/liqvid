@@ -1,7 +1,7 @@
 import { promises as fsp } from "node:fs";
 import * as path from "node:path";
 
-import { Effect } from "effect";
+import { Effect, FileSystem } from "effect";
 
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { connect } from "../utils/connect.mts";
@@ -53,6 +53,8 @@ export function renderAudio({
   url,
 }: RenderAudioOptions) {
   return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
     // Find browser executable
     const executablePath = yield* Effect.promise(() =>
       getEnsureChrome(browserExecutable ?? ""),
@@ -77,42 +79,60 @@ export function renderAudio({
       width: 0,
     });
 
-    yield* Effect.promise(async () => {
-      // send Escape key to page --- can't load audioContext without user input
-      await page.keyboard.press("Escape");
+    // send Escape key to page --- can't load audioContext without user input
+    yield* Effect.promise(() => page.keyboard.press("Escape"));
+    yield* Effect.logDebug("sent Escape key to access audioContext");
 
+    yield* Effect.tryPromise(async (signal) => {
       await page.waitForFunction(
         () =>
           player.playback.audioContext && player.playback.audioSources.size > 0,
+        {
+          signal,
+          timeout: 1_000,
+        },
       );
-    });
-
+    }).pipe(
+      Effect.tapError((e) => {
+        console.error(e);
+        return Effect.logError("timed out waiting for audio sources", {
+          error: e,
+        });
+      }),
+    );
     yield* Effect.logDebug("got audio sources");
 
-    const { duration } = yield* Effect.promise(async () => {
-      // Render the audio inside the page
-      const { base64, duration } = await page.evaluate(renderOfflineInPage, {
+    // Render the audio inside the page
+    const { base64, duration } = yield* Effect.tryPromise(() =>
+      page.evaluate(renderOfflineInPage, {
         channels,
         sampleRate,
-      });
+      }),
+    );
 
-      // Ensure output directory exists
-      await fsp.mkdir(path.dirname(output), { recursive: true });
+    yield* Effect.logDebug("rendered audio", { duration });
 
-      // Save the WAV file
-      await fsp.writeFile(output, base64, "base64");
+    // Ensure output directory exists
+    yield* fs.makeDirectory(path.dirname(output), { recursive: true });
 
-      return { duration };
-    });
+    yield* Effect.logDebug("rendered audio", { duration });
 
-    yield* Effect.logDebug("done!");
+    // Save the WAV file
+    yield* Effect.promise(() => fsp.writeFile(output, base64, "base64"));
+
+    yield* Effect.logDebug("done!", { duration });
 
     return {
       duration,
       path: output,
     };
   }).pipe(
-    Effect.annotateLogs({ channels, output, sampleRate, url }),
+    Effect.annotateLogs({
+      channels,
+      output,
+      sampleRate,
+      url,
+    }),
     Effect.scoped,
   );
 }

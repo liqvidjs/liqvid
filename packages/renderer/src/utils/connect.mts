@@ -1,4 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: this is fine */
+
+import { range } from "@liqvid/utils";
 import { Cause, Effect } from "effect";
 import type * as Puppeteer from "puppeteer-core";
 
@@ -29,8 +31,6 @@ export function connect({
   renderMode: RenderMode;
 }) {
   return Effect.gen(function* () {
-    yield* Effect.logDebug("got new page");
-
     // init page
     const page = yield* Effect.acquireRelease(
       Effect.promise(() => browser.newPage()),
@@ -39,23 +39,32 @@ export function connect({
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       Effect.orDie,
     );
-    page.setViewport({ height, width });
+
     page.on("error", console.error);
     page.on("pageerror", console.error);
 
-    yield* Effect.promise(() => page.goto(url, { timeout: 0 }));
+    yield* Effect.logDebug("got new page");
 
-    yield* Effect.logDebug(`connected to url`);
+    yield* Effect.promise(() => page.setViewport({ height, width }));
+
+    yield* Effect.logDebug("set page viewport");
+
+    yield* Effect.promise((signal) =>
+      page.goto(url, { signal, timeout: 5_000 }),
+    );
+
+    yield* Effect.logDebug("connected to url, waiting for player api");
 
     // connect to player API
-    yield* Effect.promise(() =>
+    yield* Effect.promise((signal) =>
       page.waitForFunction(
         () =>
           (window.player = (document.querySelector(".lv-player") as any)?.[
             Symbol.for("@liqvid/player/api")
           ]),
         {
-          timeout: 30_000,
+          signal,
+          timeout: 3_000,
         },
       ),
     );
@@ -63,7 +72,7 @@ export function connect({
     yield* Effect.logDebug("found liqvid player api");
 
     // set various things
-    yield* Effect.promise(() =>
+    yield* Effect.tryPromise(() =>
       page.evaluate(
         async (colorScheme, renderMode) => {
           player.setColorScheme(colorScheme);
@@ -80,7 +89,7 @@ export function connect({
     yield* Effect.logDebug("called the player api for setup");
 
     // set color scheme for whole page also
-    yield* Effect.promise(() =>
+    yield* Effect.tryPromise(() =>
       page.emulateMediaFeatures([
         {
           name: "prefers-color-scheme",
@@ -126,8 +135,6 @@ export function getPages({
     });
     playerBar.start(concurrency, 0);
 
-    yield* Effect.logDebug("acquiring browser");
-
     // get local browser
     const browser = yield* acquireBrowser({
       acceptInsecureCerts: true,
@@ -138,48 +145,32 @@ export function getPages({
       executablePath,
       headless: process.env.HEADLESS !== "false",
       timeout: 0,
-    });
-
-    yield* Effect.logDebug("acquired browser");
+    } satisfies Puppeteer.LaunchOptions);
 
     // array of Page objects
     const pages = yield* Effect.all(
-      new Array(concurrency).fill(null).map((_, i) => {
-        return Effect.gen(function* () {
-          yield* Effect.logDebug(`effect number ${i}`);
-          return yield* connect({
-            browser,
-            colorScheme,
-            height,
-            renderMode,
-            url,
-            width,
-          }).pipe(
-            Effect.tap(() =>
-              Effect.sync(() => {
-                playerBar.increment();
-              }),
-            ),
-          );
-        });
-      }),
+      range(concurrency).map(() =>
+        connect({
+          browser,
+          colorScheme,
+          height,
+          renderMode,
+          url,
+          width,
+        }).pipe(
+          Effect.tap(() =>
+            Effect.sync(() => {
+              playerBar.increment();
+            }),
+          ),
+        ),
+      ),
       { concurrency: "unbounded" },
     );
 
     playerBar.stop();
 
     yield* Effect.logDebug("connected to all pages");
-
-    // TODO: legacy, may not be needed anymore
-    // yield* Effect.all(
-    //   pages.map((page) =>
-    //     Effect.promise(async () => {
-    //       (page as any).client = await page.createCDPSession();
-    //     }),
-    //   ),
-    // );
-
-    // yield* Effect.logDebug("created CDP sessions");
 
     return pages;
   }).pipe(

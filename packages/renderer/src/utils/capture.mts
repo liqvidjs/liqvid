@@ -21,7 +21,6 @@ export async function capture({
     playback.currentTime = time;
 
     // wait for video seeking etc to settle
-    console.log({ readyState: playback.readyState });
 
     // return new Promise<void>((resolve) => {
     //   setTimeout(() => {
@@ -33,7 +32,6 @@ export async function capture({
 
     return new Promise<void>((resolve) => {
       const listener = () => {
-        console.log({ readyState: playback.readyState });
         if (playback.readyState !== 4) return;
         playback.removeEventListener("readystatechange", listener);
         resolve();
