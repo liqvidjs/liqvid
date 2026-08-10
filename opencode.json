@@ -38,6 +38,7 @@
       "pnpm info *": "allow",
       "pnpm install *": "allow",
       "pnpm lint *": "allow",
+      "pnpm lint:agent": "allow",
       "rm *": "deny",
       "rtk find *": "allow",
       "rtk git diff *": "allow",

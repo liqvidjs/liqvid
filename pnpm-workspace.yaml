@@ -1,4 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': set this to true or false
   "@swc/core": true
   bufferutil: set this to true or false
   core-js: set this to true or false
@@ -47,8 +48,8 @@ catalog:
   "@docusaurus/preset-classic": 3.10.2
   "@docusaurus/tsconfig": 3.10.2
   "@docusaurus/types": 3.10.2
-  "@effect/platform-bun": 4.0.0-beta.98
-  "@effect/platform-node": 4.0.0-beta.98
+  "@effect/platform-bun": 4.0.0-beta.106
+  "@effect/platform-node": 4.0.0-beta.106
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
@@ -95,7 +96,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-beta.98
+  effect: 4.0.0-beta.106
   execa: ^9.6.1
   fast-glob: 3.3.3
   handlebars: ^4.7.8
@@ -120,9 +121,9 @@ catalog:
   puppeteer-core: ^25.3.0
   radix-ui: ^1.4.3
   rangetouch: ^2.0.1
-  react: ^19.2.7
+  react: ^19.2.8
   react-cookie: ^8.0.1
-  react-dom: ^19.2.7
+  react-dom: ^19.2.8
   react-router: ^7.9.6
   remix-utils: ^9.0
   serve: ^14.2.6
@@ -169,8 +170,8 @@ catalogs:
     "@docusaurus/preset-classic": 3.10.1
     "@docusaurus/theme-common": 3.10.1
     "@docusaurus/types": 3.10.1
-    "@effect/language-service": ^0.86.2
-    "@effect/tsgo": ^0.16.3
+    "@effect/language-service": ^0.87.2
+    "@effect/tsgo": ^0.36.0
     "@jest/globals": ^30.3.0
     "@lezer/highlight": 1.2.3
     "@testing-library/react": ^16.3.2
@@ -192,7 +193,7 @@ catalogs:
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.1
     csstype: ^3.2.3
-    effect: 4.0.0-beta.98
+    effect: 4.0.0-beta.106
     glslx: ^0.3.1
     jest: ^30.2.0
     js-yaml: ^4.1.1
@@ -209,9 +210,11 @@ catalogs:
     tailwindcss: ^4.3.3
     ts-jest: ^29.4.6
     type-fest: ^5.6.0
+    typed-css-modules: ^0.9.1
     typedoc: ^0.28.19
     typedoc-plugin-markdown: ^4.11.0
     typescript: ^7
+    typescript-plugin-css-modules: ^5.2.0
   peer:
     "@babel/standalone": ">=7"
     "@codemirror/autocomplete": ">=6"
@@ -246,8 +249,8 @@ catalogs:
     next-ws: ^2.2.10
     prettier: ^3.8.1
     prettier-plugin-glsl: ^0.3.1
-    react: ">=19"
-    react-dom: ">=19"
+    react: ">=19.2.8"
+    react-dom: ">=19.2.8"
     react-inspector: ^9.0.0
     skulpt: ^1.2
     smart-whisper: ">=0.8.1"
@@ -291,3 +294,15 @@ minimumReleaseAgeExclude:
   - "@next/swc-win32-arm64-msvc@16.3.0"
   - "@next/swc-win32-x64-msvc@16.3.0"
   - next@16.3.0
+  - '@effect/platform-bun@4.0.0-beta.106'
+  - '@effect/platform-node-shared@4.0.0-beta.106'
+  - '@effect/platform-node@4.0.0-beta.106'
+  - '@effect/tsgo-darwin-arm64@0.36.0'
+  - '@effect/tsgo-darwin-x64@0.36.0'
+  - '@effect/tsgo-linux-arm64@0.36.0'
+  - '@effect/tsgo-linux-arm@0.36.0'
+  - '@effect/tsgo-linux-x64@0.36.0'
+  - '@effect/tsgo-win32-arm64@0.36.0'
+  - '@effect/tsgo-win32-x64@0.36.0'
+  - '@effect/tsgo@0.36.0'
+  - effect@4.0.0-beta.106
