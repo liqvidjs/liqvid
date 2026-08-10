@@ -17,6 +17,9 @@ export function ProjectPathHelperComponent({
 }) {
   return (
     <IsPreviewProvider value={isPreview}>
+      {isPreview && (
+        <style>{`[data-nextjs-dev-overlay="true"] {display: none !important;}`}</style>
+      )}
       <ProjectPathProvider value={projectPath}>{children}</ProjectPathProvider>
     </IsPreviewProvider>
   );
