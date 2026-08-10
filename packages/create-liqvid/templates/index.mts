@@ -221,6 +221,7 @@ export const installTemplate = async ({
       "liqvid:build": "liqvid build",
       "liqvid:publish": "liqvid publish",
       postinstall: "npx @liqvid/cli generate-imports",
+      prepare: "next-ws patch --yes",
       start: "next start",
     },
 
