@@ -83,22 +83,23 @@ export function renderAudio({
     yield* Effect.promise(() => page.keyboard.press("Escape"));
     yield* Effect.logDebug("sent Escape key to access audioContext");
 
+    const timeout = 15_000;
+
     yield* Effect.tryPromise(async (signal) => {
       await page.waitForFunction(
         () =>
           player.playback.audioContext && player.playback.audioSources.size > 0,
         {
           signal,
-          timeout: 1_000,
+          timeout,
         },
       );
     }).pipe(
-      Effect.tapError((e) => {
-        console.error(e);
-        return Effect.logError("timed out waiting for audio sources", {
+      Effect.tapError((e) =>
+        Effect.logError("timed out waiting for audio sources", {
           error: e,
-        });
-      }),
+        }).pipe(Effect.annotateLogs({ timeout })),
+      ),
     );
     yield* Effect.logDebug("got audio sources");
 
@@ -110,23 +111,26 @@ export function renderAudio({
       }),
     );
 
-    yield* Effect.logDebug("rendered audio", { duration });
+    yield* Effect.annotateLogsScoped({ duration });
+
+    yield* Effect.logDebug("rendered audio");
 
     // Ensure output directory exists
     yield* fs.makeDirectory(path.dirname(output), { recursive: true });
 
-    yield* Effect.logDebug("rendered audio", { duration });
+    yield* Effect.logDebug("created output directory");
 
     // Save the WAV file
     yield* Effect.promise(() => fsp.writeFile(output, base64, "base64"));
 
-    yield* Effect.logDebug("done!", { duration });
+    yield* Effect.logDebug("done!");
 
     return {
       duration,
       path: output,
     };
   }).pipe(
+    Effect.withLogSpan("render-audio"),
     Effect.annotateLogs({
       channels,
       output,

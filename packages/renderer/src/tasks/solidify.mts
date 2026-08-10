@@ -189,7 +189,7 @@ Assemble frames into a video.
 function assembleVideo({
   padLen,
   ...o // passthrough parameters
-}: Omit<Parameters<typeof stitch>[0], "pattern"> & {
+}: Omit<Parameters<typeof stitch>[0], "pattern" | "signal"> & {
   imageFormat: ImageFormat;
   padLen: number;
 }) {
@@ -203,21 +203,24 @@ function assembleVideo({
 
     stitchingBar.start(o.duration, 0);
 
-    // ffmpeg stitch job
-    const job = stitch({
-      pattern: `%0${padLen}d.${o.imageFormat}`,
-      ...o,
-    });
+    yield* Effect.promise((signal) => {
+      // ffmpeg stitch job
+      const job = stitch({
+        pattern: `%0${padLen}d.${o.imageFormat}`,
+        signal,
+        ...o,
+      });
 
-    // parse ffmpeg progress
-    job.stderr.on("data", (msg: Buffer) => {
-      const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
-      if ($_) {
-        stitchingBar.update(parseTime($_[1]!));
-      }
-    });
+      // parse ffmpeg progress
+      job.stderr.on("data", (msg: Buffer) => {
+        const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
+        if ($_) {
+          stitchingBar.update(parseTime($_[1]!));
+        }
+      });
 
-    yield* Effect.promise(() => job);
+      return job;
+    });
 
     stitchingBar.stop();
   });

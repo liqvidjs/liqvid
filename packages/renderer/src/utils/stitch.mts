@@ -16,6 +16,7 @@ export function stitch({
   pattern,
   output,
   pixelFormat,
+  signal,
   start = 0,
   videoArgs,
 }: {
@@ -27,6 +28,7 @@ export function stitch({
   pattern: string;
   output: string;
   pixelFormat: string;
+  signal: AbortSignal;
   start?: number;
   videoArgs: string;
 }) {
@@ -75,7 +77,11 @@ export function stitch({
 
     output,
   );
-  return execa("ffmpeg", args.filter(Boolean));
+
+  return execa({ cancelSignal: signal, gracefulCancel: true })(
+    "ffmpeg",
+    args.filter(Boolean),
+  );
 }
 
 function splitArgs(combined: string) {

@@ -55,8 +55,10 @@ export function connect({
 
     yield* Effect.logDebug("connected to url, waiting for player api");
 
+    const timeout = 5_000;
+
     // connect to player API
-    yield* Effect.promise((signal) =>
+    yield* Effect.tryPromise((signal) =>
       page.waitForFunction(
         () =>
           (window.player = (document.querySelector(".lv-player") as any)?.[
@@ -64,8 +66,14 @@ export function connect({
           ]),
         {
           signal,
-          timeout: 3_000,
+          timeout,
         },
+      ),
+    ).pipe(
+      Effect.tapError((e) =>
+        Effect.logError("timed out waiting for player api", {
+          error: e,
+        }).pipe(Effect.annotateLogs({ timeout })),
       ),
     );
 
@@ -103,8 +111,11 @@ export function connect({
     yield* Effect.logDebug("page ready");
 
     return page;
+  }).pipe(
+    Effect.withLogSpan("player-api"),
     // biome-ignore assist/source/useSortedKeys: meaningful order (url is most important)
-  }).pipe(Effect.annotateLogs({ url, colorScheme, height, width }));
+    Effect.annotateLogs({ url, colorScheme, height, width }),
+  );
 }
 
 /**

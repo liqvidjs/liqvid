@@ -299,8 +299,13 @@ function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
   });
 }
 
+/**
+ * Invoke FFmpeg as an Effect.
+ */
 function ffmpeg(...args: string[]) {
-  return Effect.promise(() => execa("ffmpeg", args));
+  return Effect.tryPromise((cancelSignal) =>
+    execa({ cancelSignal })("ffmpeg", args),
+  );
 }
 
 const plugin: LiqvidStudioServerPlugin = {
