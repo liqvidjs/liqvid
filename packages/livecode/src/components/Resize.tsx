@@ -22,7 +22,7 @@ export function Resize({
    * Resize direction, east-west or north-south.
    * @default "ew"
    */
-  dir?: "ew" | "ns";
+  dir?: "ew" | "ns" | "sn" | "we";
 
   /**
    * Maximum value.
@@ -54,13 +54,23 @@ export function Resize({
 
         const rect = container.getBoundingClientRect();
 
-        if (dir === "ew") {
-          const split = clamp(min, (x - rect.left) / rect.width, max) * 100;
-          container.style.setProperty(variable, `${split}%`);
-        } else if (dir === "ns") {
-          const split = clamp(min, (y - rect.top) / rect.height, max) * 100;
-          container.style.setProperty(variable, `${split}%`);
+        let split: number;
+        switch (dir) {
+          case "ew":
+            split = clamp(min, (x - rect.left) / rect.width, max) * 100;
+            break;
+          case "we":
+            split = clamp(min, (rect.left - x) / rect.width, max) * 100;
+            break;
+          case "ns":
+            split = clamp(min, (y - rect.top) / rect.height, max) * 100;
+            break;
+          case "sn":
+            split = clamp(min, (rect.bottom - y) / rect.height, max) * 100;
+            break;
         }
+
+        container.style.setProperty(variable, `${split}%`);
       },
       () => {
         container = ref.current?.closest(".lqv-livecode") ?? null;
@@ -80,18 +90,36 @@ export function Resize({
   const style: React.CSSProperties = {
     position: "absolute",
   };
-  if (dir === "ew") {
-    Object.assign(style, {
-      left: `var(${variable})`,
-      width: size,
-    });
+
+  switch (dir) {
+    case "ew":
+      Object.assign(style, {
+        left: `var(${variable})`,
+        width: size,
+      });
+      break;
+
+    case "we":
+      Object.assign(style, {
+        right: `var(${variable})`,
+        width: size,
+      });
+      break;
+    case "ns":
+      Object.assign(style, {
+        height: size,
+        top: `var(${variable})`,
+      });
+      break;
+
+    case "sn":
+      Object.assign(style, {
+        bottom: `var(${variable})`,
+        height: size,
+      });
+      break;
   }
-  if (dir === "ns") {
-    Object.assign(style, {
-      height: size,
-      top: `var(${variable})`,
-    });
-  }
+
   Object.assign(style, propsStyle);
 
   return (

@@ -56,8 +56,16 @@ export function render({
     doc.querySelectorAll("script[src]"),
   ) as HTMLScriptElement[]) {
     const src = scriptTag.getAttribute("src")!;
+    const scriptType = scriptTag.getAttribute("type");
     const normalized = normalizePath(src);
-    const script = js[normalized];
+
+    let script: string | undefined;
+    if (scriptType === "module") {
+      script = esm[normalized];
+    } else {
+      script = js[normalized];
+    }
+
     if (!script) continue;
 
     scriptTag.dataset.filename = normalized;

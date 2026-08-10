@@ -1,5 +1,6 @@
 "use client";
 
+import * as Babel from "@babel/standalone";
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -8,6 +9,7 @@ import { useAddMessage, useClearMessages, useOnRun } from "../../hooks.ts";
 import { useLiveCodeStore } from "../../store.ts";
 import { viewContents } from "../../utils.ts";
 
+import { useTranspile } from "./hooks.ts";
 import { render, type WebConsoleMessage } from "./html-utils.ts";
 import type { WebConsoleMessageUp } from "./magicScripts.ts";
 
@@ -22,6 +24,8 @@ export function HTMLPreview(props: React.ComponentProps<"iframe">) {
   const { colorScheme } = useColorScheme();
 
   const iframe = useRef<HTMLIFrameElement>(null);
+
+  const transpile = useTranspile(Babel);
 
   /** synchronize iframe color scheme with parent context */
   const syncColorScheme = useCallback((scheme: ColorScheme) => {
@@ -55,15 +59,33 @@ export function HTMLPreview(props: React.ComponentProps<"iframe">) {
           case "css":
             acc.css[filename] = viewContents(view);
             break;
-          case "js":
-            /*if (meta?.[filename]?.type === "module") {
-              acc.esm[filename] = viewContents(view);
-            }/ else {*/
-            acc.js[filename] = viewContents(view);
-            //}
-            break;
           case "html":
             acc.html = viewContents(view);
+            break;
+          /* ------------------------------ JS variants ------------------------------ */
+          case "js":
+            acc.js[filename] = viewContents(view);
+            break;
+          case "jsx":
+            acc.js[transpiledExtension(filename)] = transpile(
+              filename,
+              viewContents(view),
+            );
+            break;
+          case "mjs":
+            acc.esm[filename] = viewContents(view);
+            break;
+          case "mts":
+            acc.esm[transpiledExtension(filename)] = transpile(
+              filename,
+              viewContents(view),
+            );
+            break;
+          case "ts":
+            acc.js[transpiledExtension(filename)] = transpile(
+              filename,
+              viewContents(view),
+            );
             break;
         }
         return acc;
@@ -78,7 +100,7 @@ export function HTMLPreview(props: React.ComponentProps<"iframe">) {
     }
 
     return true;
-  }, [store]);
+  }, [store, transpile]);
 
   // initial render
   useOnRun(refresh);
@@ -131,4 +153,12 @@ function isWebConsoleMessageUp(msg: unknown): msg is WebConsoleMessageUp {
     typeof (msg as WebConsoleMessageUp).type === "string" &&
     (msg as WebConsoleMessageUp).type.startsWith("console.")
   );
+}
+
+function transpiledExtension(path: string) {
+  return path.replace(/\.([jt]sx|m?ts)$/g, (_, ext) => {
+    if (ext === ".jsx" || ext === "ts" || ext === "tsx") return ".js";
+    if (ext === "mts") return ".mjs";
+    return `.${ext}`;
+  });
 }

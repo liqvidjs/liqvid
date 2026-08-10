@@ -20,7 +20,7 @@ export function useTranspile(
     (filename: string, code: string) => {
       const extn = getFileType(filename) as JavaScriptishExtension;
 
-      if (extn === "js") return code;
+      if (extn === "js" || extn === "mjs") return code;
 
       // plugins and presets for different filetypes
       const globals = {};
@@ -29,7 +29,7 @@ export function useTranspile(
         "react-dom": "ReactDOM",
       };
 
-      const presets = ["env"];
+      const presets: babel.PluginItem[] = [["env", { modules: false }]];
 
       switch (extn) {
         case "jsx":
@@ -37,6 +37,7 @@ export function useTranspile(
           Object.assign(globals, reactGlobals);
           break;
         case "ts":
+        case "mts":
           presets.push("typescript");
           break;
         case "tsx":
@@ -47,10 +48,11 @@ export function useTranspile(
 
       // babel transform
       const opts: babel.TransformOptions = {
-        filename: "index.tsx",
-        plugins: [["transform-modules-umd", { globals }]],
+        filename,
+        // plugins: [["transform-modules-umd", { globals }]],
         presets,
       };
+
       try {
         const transformed = Babel.transform(code, opts).code;
         if (typeof transformed === "string") return transformed;
