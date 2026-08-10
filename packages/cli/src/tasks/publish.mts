@@ -209,13 +209,13 @@ function publishContentFiles(
     const hostingProvider = createHostingProvider(config);
 
     if (dryRun) {
-      console.log(`Dry run: would publish content from ${outDir}`);
+      yield* Effect.log(`Dry run: would publish content from ${outDir}`);
       return;
     }
 
     yield* Effect.promise(() => hostingProvider.publishContent(outDir));
     yield* Effect.log("Content publishing complete.");
-  });
+  }).pipe(Effect.annotateLogs({ cwd, dryRun }));
 }
 
 /**

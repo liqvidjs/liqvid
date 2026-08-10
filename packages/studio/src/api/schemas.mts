@@ -176,3 +176,43 @@ export const LoggableJob = LoggableJobClient.pipe(
 );
 
 export type LoggableJob = (typeof LoggableJob)["Type"];
+
+/**
+ * The lifecycle state of a long-running service. Unlike jobs, services are not
+ * expected to complete: they run for the lifetime of the process, unless they
+ * fail or are stopped.
+ */
+export const ServiceState = Schema.Literals(["running", "stopped", "failed"]);
+
+export type ServiceState = (typeof ServiceState)["Type"];
+
+/**
+ * The client-facing snapshot of a long-running service, broadcast over
+ * WebSockets. Like {@link LoggableJobClient}, but without a fiber and with a
+ * service-specific lifecycle {@link ServiceState}.
+ */
+export const ServiceClient = Schema.Struct({
+  id: Schema.String,
+
+  logs: Schema.Array(StructuredLog).pipe(Schema.mutable),
+
+  name: Schema.String,
+
+  startTime: Schema.Date,
+
+  state: ServiceState,
+});
+
+export type ServiceClient = (typeof ServiceClient)["Type"];
+
+/**
+ * A long-running service as tracked on the server: the client snapshot plus the
+ * (non-serializable) fiber running it.
+ */
+export const Service = ServiceClient.pipe(
+  Schema.fieldsAssign({
+    fiber: Schema.Unknown as Schema.Schema<Fiber.Fiber<unknown, unknown>>,
+  }),
+);
+
+export type Service = (typeof Service)["Type"];

@@ -130,18 +130,68 @@ export function runNextBuild(options: BuildOptions = {}) {
 
     yield* Effect.log("Running 'next build'...");
 
-    const result = yield* Effect.promise(() =>
-      execa("npx", ["next", "build"], {
-        cwd,
-        env,
-        reject: false,
-        stderr: "pipe",
-        stdout: "inherit",
-      }),
+    // Capture the current context (which carries the active logger) so that
+    // output lines forwarded from the subprocess are logged through the same
+    // logger as the surrounding effect (e.g. the studio job's log collector).
+    const context = yield* Effect.context<never>();
+    const runFork = Effect.runForkWith(context);
+
+    // Run the build, capturing stdout/stderr so that callers (e.g. the studio
+    // jobs UI) can surface the output. Each line is forwarded to the logger as
+    // it is produced so logs stream in real time, and the full stderr is
+    // retained for error parsing.
+    const result = yield* Effect.callback<Awaited<ReturnType<typeof execa>>>(
+      (resume, signal) => {
+        const subprocess = execa("npx", ["next", "build"], {
+          cwd,
+          env,
+          reject: false,
+          stderr: "pipe",
+          stdout: "pipe",
+        });
+
+        // Kill the subprocess if the effect is interrupted (e.g. job cancel).
+        signal.addEventListener("abort", () => subprocess.kill());
+
+        const forward = (
+          stream: NodeJS.ReadableStream | null,
+          log: (line: string) => Effect.Effect<void>,
+        ) => {
+          if (!stream) return;
+          let buffer = "";
+          stream.setEncoding("utf8");
+          stream.on("data", (chunk: string) => {
+            buffer += chunk;
+            let index = buffer.indexOf("\n");
+            while (index !== -1) {
+              const line = buffer.slice(0, index);
+              buffer = buffer.slice(index + 1);
+              runFork(log(line));
+              index = buffer.indexOf("\n");
+            }
+          });
+          stream.on("end", () => {
+            if (buffer.length > 0) {
+              runFork(log(buffer));
+            }
+          });
+        };
+
+        forward(subprocess.stdout, (line) => Effect.log(line));
+        forward(subprocess.stderr, (line) => Effect.logError(line));
+
+        subprocess.then(
+          (value) => resume(Effect.succeed(value)),
+          // execa is configured with `reject: false`, so it should not reject;
+          // surface any unexpected rejection as a defect.
+          (error) => resume(Effect.die(error)),
+        );
+      },
     );
 
     if (result.exitCode !== 0) {
-      const stderrOutput = result.stderr || "";
+      const stderrOutput =
+        typeof result.stderr === "string" ? result.stderr : "";
       const messages = parseNextBuildErrors(stderrOutput);
       return yield* Effect.fail({ messages });
     }

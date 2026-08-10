@@ -10,5 +10,8 @@
   "levelLog": "Logs",
   "levelWarn": "Warnings",
   "running": "Running",
+  "stopped": "Stopped",
+  "tabJobs": "Jobs",
+  "tabServices": "Services",
   "title": "Jobs"
 }

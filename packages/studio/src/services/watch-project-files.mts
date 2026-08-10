@@ -16,8 +16,6 @@ import {
   Cause,
   Effect,
   FileSystem,
-  Layer,
-  Logger,
   Option,
   type PlatformError,
   PubSub,
@@ -77,100 +75,94 @@ type WatchEvent =
       kind: "dir";
     };
 
-export async function watchProjectFiles(projects: Projects) {
+/**
+ * Perform the initial scan of the project tree, populating `projects` with
+ * metadata for every `project.json` found. This runs once, before the watchers
+ * are started, so the server has a complete picture of the project layout.
+ */
+export function initProjectFiles(projects: Projects) {
   const TARGET_DIR = getRoutesDir();
 
-  // initial check
-  await walkDir(
-    TARGET_DIR,
-    async ({ basename, dirname, filename }) => {
-      // initialize project metadata
-      if (basename === PROJECT_FILE) {
-        await Effect.runPromise(
-          createProject({
-            basename,
-            dirname,
-            filename,
-            projects,
-            relative: path.relative(TARGET_DIR, filename),
-          }).pipe(
-            Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-            Effect.provide(
-              Layer.mergeAll(
-                NodeFileSystem.layer,
-                Logger.layer([
-                  Logger.consolePretty({
-                    colors: true,
-                    mode: "tty",
-                  }),
-                ]),
+  return Effect.promise(() =>
+    walkDir(
+      TARGET_DIR,
+      async ({ basename, dirname, filename }) => {
+        // initialize project metadata
+        if (basename === PROJECT_FILE) {
+          await Effect.runPromise(
+            createProject({
+              basename,
+              dirname,
+              filename,
+              projects,
+              relative: path.relative(TARGET_DIR, filename),
+            }).pipe(
+              Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+              Effect.provide(NodeFileSystem.layer),
+            ),
+          );
+        }
+      },
+      ({ basename }) => {
+        if (basename === ASSETS_DIR) return false;
+        return true;
+      },
+    ),
+  ).pipe(Effect.provideService(References.MinimumLogLevel, getLogLevel()));
+}
+
+export function watchProjectFiles(projects: Projects) {
+  const TARGET_DIR = getRoutesDir();
+
+  return Effect.gen(function* () {
+    // set up watch: a Pub/Sub fans watch events out to the consumer that
+    // dispatches them to the appropriate handler. The watcher lives for the
+    // lifetime of the process.
+    const pubsub = yield* PubSub.unbounded<WatchEvent>();
+
+    // Consumer: subscribe to the Pub/Sub and dispatch each event.
+    //
+    // The OS watcher (and editors' atomic-save shuffles) frequently emit
+    // several events for a single logical file change, which would otherwise
+    // fan out into duplicate broadcasts. Group events by their resolved
+    // filename and debounce each group so a burst collapses into a single
+    // dispatch. Idle groups are torn down after `idleTimeToLive`.
+    yield* Stream.fromPubSub(pubsub).pipe(
+      Stream.groupBy(
+        (event) => Effect.succeed([event.filename, event] as const),
+        {
+          idleTimeToLive: "1 seconds",
+        },
+      ),
+      Stream.mapEffect(
+        ([, group]) =>
+          group.pipe(
+            Stream.debounce("50 millis"),
+            Stream.runForEach((event) =>
+              handleWatchEvent(event, projects).pipe(
+                Effect.tapCause((cause) =>
+                  Effect.logError(Cause.pretty(cause)),
+                ),
+                Effect.ignore,
               ),
             ),
           ),
-        );
-      }
-    },
-    ({ basename }) => {
-      if (basename === ASSETS_DIR) return false;
-      return true;
-    },
-  );
-
-  // set up watch: a Pub/Sub fans watch events out to the consumer that
-  // dispatches them to the appropriate handler. The watcher lives for the
-  // lifetime of the process, so we run it in a detached root fiber and return
-  // once it has been started.
-  Effect.runFork(
-    Effect.gen(function* () {
-      const pubsub = yield* PubSub.unbounded<WatchEvent>();
-
-      // Consumer: subscribe to the Pub/Sub and dispatch each event.
-      //
-      // The OS watcher (and editors' atomic-save shuffles) frequently emit
-      // several events for a single logical file change, which would otherwise
-      // fan out into duplicate broadcasts. Group events by their resolved
-      // filename and debounce each group so a burst collapses into a single
-      // dispatch. Idle groups are torn down after `idleTimeToLive`.
-      yield* Stream.fromPubSub(pubsub).pipe(
-        Stream.groupBy(
-          (event) => Effect.succeed([event.filename, event] as const),
-          { idleTimeToLive: "1 seconds" },
-        ),
-        Stream.mapEffect(
-          ([, group]) =>
-            group.pipe(
-              Stream.debounce("50 millis"),
-              Stream.runForEach((event) =>
-                handleWatchEvent(event, projects).pipe(
-                  Effect.tapCause((cause) =>
-                    Effect.logError(Cause.pretty(cause)),
-                  ),
-                  Effect.ignore,
-                ),
-              ),
-            ),
-          { concurrency: "unbounded" },
-        ),
-        Stream.runDrain,
-        Effect.forkScoped,
-      );
-
-      // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
-      // keeping the scope (and the forked consumer) alive.
-      yield* watchFileEvents(TARGET_DIR).pipe(
-        Stream.runForEach((event) => PubSub.publish(pubsub, event)),
-        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-      );
-    }).pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          NodeFileSystem.layer,
-          Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
-        ),
+        { concurrency: "unbounded" },
       ),
-      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
-      Effect.scoped,
-    ),
+      Stream.runDrain,
+      Effect.forkScoped,
+    );
+
+    // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
+    // keeping the scope (and the forked consumer) alive.
+    yield* watchFileEvents(TARGET_DIR).pipe(
+      Stream.runForEach((event) => PubSub.publish(pubsub, event)),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+    );
+  }).pipe(
+    Effect.provide(NodeFileSystem.layer),
+    Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+    Effect.scoped,
   );
 }
 
@@ -190,7 +182,7 @@ function watchFileEvents(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
 
-      return fs.watch(targetDir).pipe(
+      return fs.watch(targetDir, { recursive: true }).pipe(
         Stream.mapEffect((event) =>
           Effect.gen(function* () {
             // Editors like Vim save atomically: they write a backup/temp file
@@ -230,7 +222,7 @@ function watchFileEvents(
           }),
         ),
       );
-    }),
+    }).pipe(Effect.annotateLogs({ _op: "watchFileEvents", targetDir })),
   );
 }
 
@@ -292,6 +284,8 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
  */
 function handleWatchEvent(event: WatchEvent, projects: Projects) {
   return Effect.gen(function* () {
+    yield* Effect.logDebug("watchEvent", event);
+
     // A recording is a directory under `.liqvid/recordings/`; its removal (as
     // opposed to a change to its `recording-meta.json`) surfaces as a dir
     // event, so handle those here before bailing on non-file events.
@@ -303,8 +297,6 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
     }
 
     const { basename } = event;
-
-    yield* Effect.logDebug("watchEvent", event);
 
     switch (basename) {
       case PROJECT_FILE: {
@@ -393,6 +385,8 @@ function createProject({ dirname, filename, projects, relative }: Context) {
 
     const entryFile = path.join(dirname, NEXT_PAGE);
 
+    yield* Effect.logDebug("checking for entry file", { entryFile });
+
     if (!(yield* fs.exists(entryFile))) {
       return;
     }
@@ -421,7 +415,9 @@ function createProject({ dirname, filename, projects, relative }: Context) {
     projects[meta.path] = meta;
 
     yield* generateAssetsDir({ dirname });
-  }).pipe(Effect.annotateLogs({ _op: "createProject" }));
+  }).pipe(
+    Effect.annotateLogs({ _op: "createProject", dirname, filename, relative }),
+  );
 }
 
 /**

@@ -37,18 +37,16 @@ export interface ScreenshotResult {
  * });
  * ```
  */
-export async function screenshot(
-  options: ScreenshotOptions,
-): Promise<ScreenshotResult> {
-  const { screenshot: renderScreenshot } = await import(
-    "@liqvid/renderer/screenshot"
-  );
+export function screenshot(options: ScreenshotOptions) {
+  return Effect.gen(function* () {
+    const { screenshot: renderScreenshot } = yield* Effect.promise(
+      () => import("@liqvid/renderer/screenshot"),
+    );
 
-  // TODO: load screenshot configuration from config file here
+    // TODO: load screenshot configuration from config file here
 
-  return Effect.runPromise(
-    renderScreenshot(options).pipe(Effect.provide(NodeFileSystem.layer)),
-  );
+    return yield* renderScreenshot(options);
+  });
 }
 
 /** Capture a screenshot. */

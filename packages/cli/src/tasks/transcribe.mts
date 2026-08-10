@@ -321,17 +321,17 @@ export function transcribe({
   outputDir,
   whisperConfig = {},
 }: TranscribeOptions) {
+  const absoluteAudioFile = path.resolve(audioFile);
+  const absoluteOutputDir = path.resolve(outputDir);
+
+  const targetVttPath = path.join(absoluteOutputDir, CAPTIONS_FILE);
+  const targetJsonPath = path.join(absoluteOutputDir, RICH_TRANSCRIPT);
+
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
     // Ensure output directory exists
     yield* fs.makeDirectory(outputDir, { recursive: true });
-
-    const absoluteAudioFile = path.resolve(audioFile);
-    const absoluteOutputDir = path.resolve(outputDir);
-
-    const targetVttPath = path.join(absoluteOutputDir, CAPTIONS_FILE);
-    const targetJsonPath = path.join(absoluteOutputDir, RICH_TRANSCRIPT);
 
     // Load the model (downloading it on demand if referenced by name).
     yield* Effect.logDebug("finding model");
@@ -410,11 +410,11 @@ export function transcribe({
         }),
     ).pipe(
       Effect.tapError((error) =>
-        Effect.logError("Transcription failed:", error),
+        Effect.logError("transcription failed:", error),
       ),
     );
 
-    yield* Effect.logDebug(`Transcribed ${segments.length} segments`);
+    yield* Effect.logDebug(`transcribed ${segments.length} segments`);
 
     // Write captions and transcript.
     const vtt = buildVtt(segments);
@@ -432,15 +432,20 @@ export function transcribe({
       captionsPath: targetVttPath,
       transcriptPath: targetJsonPath,
     };
-  });
+  }).pipe(
+    Effect.annotateLogs({
+      absoluteAudioFile,
+      absoluteOutputDir,
+      targetJsonPath,
+      targetVttPath,
+    }),
+  );
 }
 
 /**
  * Transform nodeWhisperOptions from config file to CLI option names.
  */
-function transformNodeWhisperOptions(
-  config: NodeWhisperOptions,
-): Record<string, unknown> {
+function transformNodeWhisperOptions(config: NodeWhisperOptions) {
   return {
     gpu: config.gpu,
     model: config.modelName,

@@ -1,12 +1,14 @@
 import { pick } from "@liqvid/utils";
 import { Effect, Fiber } from "effect";
+import { cookies } from "next/headers";
 
 import { WebSocketProvider } from "../../components/WebSocketProvider.tsx";
-import { getServerState } from "../../initialize.mts";
+import { LOG_LEVELS_COOKIE } from "../../cookies.ts";
+import { getServerState, initializeServer } from "../../initialize.mts";
 import { broadcast } from "../../next/websockets.mts";
 import { getTranslations } from "../../utils/i18n.mts";
 
-import { JobsClient } from "./jobs.client.tsx";
+import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -41,11 +43,19 @@ async function deleteJob(formData: FormData) {
 }
 
 export async function Jobs() {
+  await initializeServer();
   const t = await getTranslations<T>(import.meta.url);
 
-  const { jobs: serverJobs } = getServerState();
+  const { jobs: serverJobs, services: serverServices } = getServerState();
+
+  const cookieStore = await cookies();
+  const logLevelsCookie = cookieStore.get(LOG_LEVELS_COOKIE);
+  const initialLogLevels: string[] = logLevelsCookie?.value
+    ? JSON.parse(logLevelsCookie.value)
+    : DEFAULT_LOG_LEVELS;
 
   type Job = React.ComponentProps<typeof JobsClient>["jobs"][string];
+  type Service = React.ComponentProps<typeof JobsClient>["services"][string];
 
   const jobs = Object.fromEntries(
     Array.from(serverJobs.new.entries()).map(
@@ -57,9 +67,21 @@ export async function Jobs() {
     ),
   );
 
+  const services = Object.fromEntries(
+    Array.from(serverServices.entries()).map(
+      ([id, service]) =>
+        [id, pick(service, ["id", "logs", "name", "state"])] as [
+          string,
+          Service,
+        ],
+    ),
+  );
+
   return (
     <WebSocketProvider>
-      <JobsClient {...{ cancelJob, deleteJob, jobs, t }} />
+      <JobsClient
+        {...{ cancelJob, deleteJob, initialLogLevels, jobs, services, t }}
+      />
     </WebSocketProvider>
   );
 }

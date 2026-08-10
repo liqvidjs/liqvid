@@ -3,9 +3,15 @@ import { Schema } from "effect";
 import { JobMessage } from "./channels/jobs";
 import { ProjectMessage } from "./channels/projects";
 import { RecordingMessage } from "./channels/recordings";
+import { ServiceMessage } from "./channels/services";
 
 /* ------------------------------ channel names ------------------------------ */
-export const ChannelName = Schema.Literals(["jobs", "projects", "recordings"]);
+export const ChannelName = Schema.Literals([
+  "jobs",
+  "projects",
+  "recordings",
+  "services",
+]);
 
 export type ChannelName = (typeof ChannelName)["Type"];
 
@@ -25,6 +31,7 @@ export const ChannelMessages = {
   jobs: JobMessage,
   projects: ProjectMessage,
   recordings: RecordingMessage,
+  services: ServiceMessage,
 } as const satisfies Record<ChannelName, Schema.Top>;
 
 /**

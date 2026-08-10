@@ -1,19 +1,17 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { UP } from "@liqvid/cli/utils";
-import { assertType } from "@liqvid/utils";
-import chalk from "chalk";
 import {
   Cause,
   Effect,
   FileSystem,
-  Layer,
   Logger,
   Option,
+  type PlatformError,
   PubSub,
+  References,
   Result,
   Stream,
 } from "effect";
@@ -30,22 +28,28 @@ import Handlebars from "handlebars";
 
 import {
   ASSETS_DIR,
+  DS_STORE,
   NEXT_PAGE,
   PROJECT_FILE,
+  PROJECT_FILES_AUTOGEN,
   PROJECT_META_FILE,
   TYPES_AUTOGEN,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
+import { readDirWithFileTypes } from "../utils/effect.mts";
 import { getBiomePath } from "../utils/fs.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import { getLogLevel, getRoutesDir } from "../utils/misc.mts";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
  * Code files, config files, and generated images are excluded.
  */
 const EXCLUDE_PATTERNS = [
-  "project.json",
+  DS_STORE,
+  PROJECT_FILE,
+  PROJECT_FILES_AUTOGEN,
+  TYPES_AUTOGEN,
   /\.(css|js|jsx|ts|tsx)$/,
   /hls\/.*data\d+\.ts$/,
   /\.d.json.ts$/,
@@ -58,10 +62,6 @@ function shouldExclude(
   relativePath: RelativePath,
   basename: RelativePath,
 ): boolean {
-  // Always exclude these
-  if (basename === ".DS_Store") return true;
-  if (basename === TYPES_AUTOGEN) return true;
-
   // Check exclusion patterns
   for (const pattern of EXCLUDE_PATTERNS) {
     if (typeof pattern === "string") {
@@ -79,7 +79,7 @@ function shouldIgnoreEvent(
   filename: AbsolutePath,
 ): boolean {
   if (filename.endsWith("~")) return true;
-  if (basename === ".DS_Store") return true;
+  if (basename === DS_STORE) return true;
   if (basename === TYPES_AUTOGEN) return true;
   if (basename === PROJECT_META_FILE) return true;
   return false;
@@ -135,7 +135,7 @@ function findProjectDirectory(filePath: AbsolutePath) {
   });
 }
 
-export async function watchAssets() {
+export function watchAssets() {
   Handlebars.registerHelper("json", (obj) => {
     return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
   });
@@ -148,62 +148,53 @@ export async function watchAssets() {
 
   // set up watch: a Pub/Sub fans watch events out to the consumer that
   // regenerates the affected project's types. The watcher lives for the
-  // lifetime of the process, so we run it in a detached root fiber and return
-  // once it has been started.
-  Effect.runFork(
-    Effect.gen(function* () {
-      const pubsub = yield* PubSub.unbounded<WatchEvent>();
+  // lifetime of the process.
+  return Effect.gen(function* () {
+    const pubsub = yield* PubSub.unbounded<WatchEvent>();
 
-      // Consumer: subscribe to the Pub/Sub and regenerate types per project.
-      //
-      // The OS watcher (and editors' atomic-save shuffles) frequently emit
-      // several events for a single logical file change, which would otherwise
-      // fan out into duplicate regenerations. Group events by their project
-      // directory and debounce each group so a burst collapses into a single
-      // dispatch. Idle groups are torn down after `idleTimeToLive`.
-      yield* Stream.fromPubSub(pubsub).pipe(
-        Stream.groupBy(
-          (event) => Effect.succeed([event.projectDir, event] as const),
-          { idleTimeToLive: "1 seconds" },
-        ),
-        Stream.mapEffect(
-          ([projectDir, group]) =>
-            group.pipe(
-              Stream.debounce("50 millis"),
-              Stream.runForEach(() =>
-                Effect.promise(async () => {
-                  const biomePath = await getBiomePath(projectDir);
-                  await generateProjectTypes({ biomePath, projectDir });
-                }).pipe(
-                  Effect.tapCause((cause) =>
-                    Effect.logError(Cause.pretty(cause)),
-                  ),
-                  Effect.ignore,
+    // Consumer: subscribe to the Pub/Sub and regenerate types per project.
+    //
+    // The OS watcher (and editors' atomic-save shuffles) frequently emit
+    // several events for a single logical file change, which would otherwise
+    // fan out into duplicate regenerations. Group events by their project
+    // directory and debounce each group so a burst collapses into a single
+    // dispatch. Idle groups are torn down after `idleTimeToLive`.
+    yield* Stream.fromPubSub(pubsub).pipe(
+      Stream.groupBy(
+        (event) => Effect.succeed([event.projectDir, event] as const),
+        { idleTimeToLive: "1 seconds" },
+      ),
+      Stream.mapEffect(
+        ([projectDir, group]) =>
+          group.pipe(
+            Stream.debounce("50 millis"),
+            Stream.runForEach(() =>
+              Effect.gen(function* () {
+                const biomePath = yield* Effect.promise(() =>
+                  getBiomePath(projectDir),
+                );
+                yield* generateProjectTypes({ biomePath, projectDir });
+              }).pipe(
+                Effect.tapCause((cause) =>
+                  Effect.logError(Cause.pretty(cause)),
                 ),
+                Effect.ignore,
               ),
             ),
-          { concurrency: "unbounded" },
-        ),
-        Stream.runDrain,
-        Effect.forkScoped,
-      );
-
-      // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
-      // keeping the scope (and the forked consumer) alive.
-      yield* watchAssetEvents(TARGET_DIR).pipe(
-        Stream.runForEach((event) => PubSub.publish(pubsub, event)),
-        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-      );
-    }).pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          NodeFileSystem.layer,
-          Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
-        ),
+          ),
+        { concurrency: "unbounded" },
       ),
-      Effect.scoped,
-    ),
-  );
+      Stream.runDrain,
+      Effect.forkScoped,
+    );
+
+    // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
+    // keeping the scope (and the forked consumer) alive.
+    yield* watchAssetEvents(TARGET_DIR).pipe(
+      Stream.runForEach((event) => PubSub.publish(pubsub, event)),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+    );
+  }).pipe(Effect.provide(NodeFileSystem.layer), Effect.scoped);
 }
 
 /**
@@ -219,7 +210,7 @@ function watchAssetEvents(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
 
-      return fs.watch(targetDir).pipe(
+      return fs.watch(targetDir, { recursive: true }).pipe(
         Stream.filterMapEffect((event) =>
           Effect.gen(function* () {
             const relPath = event.path as RelativePath;
@@ -247,33 +238,49 @@ function watchAssetEvents(
 /**
  * Generate the types.ts file inside the .liqvid directory.
  */
-async function generateProjectTypes({
+function generateProjectTypes({
   biomePath,
   projectDir,
 }: {
   biomePath: Option.Option<AbsoluteFile>;
   projectDir: AbsoluteDir;
 }) {
-  const directoryStructure = await listProjectDir(projectDir);
-  const assetsDir = path.join(projectDir, ASSETS_DIR);
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  // Ensure .liqvid directory exists
-  await fsp.mkdir(assetsDir, { recursive: true });
+    yield* Effect.logDebug(`generating types.ts for projectDir: ${projectDir}`);
 
-  runTemplate({
-    biomePath,
-    data: {
-      directoryStructure,
-    },
-    out: path.join(assetsDir, TYPES_AUTOGEN),
-    template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
-  });
+    const directoryStructure = yield* listProjectDir(projectDir);
+    const assetsDir = path.join(projectDir, ASSETS_DIR);
+
+    // Ensure .liqvid directory exists
+    yield* fs.makeDirectory(assetsDir, { recursive: true });
+
+    yield* Effect.forkDetach(
+      Effect.all([
+        fs.writeFileString(
+          path.join(assetsDir, PROJECT_FILES_AUTOGEN),
+          JSON.stringify(directoryStructure, null, 2),
+        ),
+        runTemplate({
+          biomePath,
+          data: {},
+          out: path.join(assetsDir, TYPES_AUTOGEN),
+          template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
+        }),
+      ]).pipe(
+        Effect.provide(NodeFileSystem.layer),
+        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+        Effect.provide(Logger.layer([Logger.consolePretty()])),
+      ),
+    );
+  }).pipe(Effect.annotateLogs({ projectDir }));
 }
 
 /**
  * Generate a file from a Handlebars template, and format the result with Biome (if available).
  */
-export async function runTemplate({
+export function runTemplate({
   biomePath,
   data,
   out,
@@ -291,27 +298,31 @@ export async function runTemplate({
   /** Path to the template file */
   template: RelativeFile;
 }) {
-  const { cwd } = getServerState();
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  const templateHbs = await fsp.readFile(
-    path.join(TEMPLATES_DIR, template),
-    "utf8",
-  );
+    const { cwd } = getServerState();
 
-  try {
-    const template = Handlebars.compile(templateHbs);
-    const result = template(data);
+    const templateHbs = yield* fs.readFileString(
+      path.join(TEMPLATES_DIR, template),
+      "utf8",
+    );
 
-    await fsp.writeFile(out, result);
+    const templateFn = yield* Effect.try(() => Handlebars.compile(templateHbs));
+    const result = templateFn(data);
+
+    yield* fs.writeFileString(out, result);
 
     // invoke biome
     if (Option.isSome(biomePath)) {
-      await execa(biomePath.value, ["check", "--fix", out], { cwd });
+      yield* Effect.promise(() =>
+        execa(biomePath.value, ["check", "--fix", out], { cwd }),
+      );
     }
-  } catch (e) {
-    console.error(chalk.red(JSON.stringify({ cwd })));
-    console.error(e);
-  }
+  }).pipe(
+    Effect.annotateLogs({ data, out, template }),
+    Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+  );
 }
 
 /**
@@ -320,45 +331,72 @@ export async function runTemplate({
  * @param currentDir - The current directory being listed (defaults to projectDir)
  * @param relativePath - The path relative to projectDir (defaults to "")
  */
-async function listProjectDir(
+function listProjectDir(
   projectDir: AbsoluteDir,
   currentDir: AbsoluteDir = projectDir,
   relativePath: RelativeDir = RelativeDir(""),
-): Promise<Directory> {
-  const entries = await fsp.readdir(currentDir);
+): Effect.Effect<
+  Directory,
+  PlatformError.PlatformError,
+  FileSystem.FileSystem
+> {
+  return Effect.gen(function* () {
+    const entries = yield* readDirWithFileTypes(currentDir);
 
-  const results = await Promise.all(
-    entries.map(async (basename) => {
-      const fullPath = path.join(currentDir, basename);
-      const relPath = relativePath
-        ? path.join(relativePath, basename)
-        : basename;
+    const results = yield* Effect.all(
+      entries.map(([basename, kind]) => {
+        return Effect.gen(function* () {
+          switch (kind) {
+            case "Directory": {
+              const fullPath = path.join(currentDir, basename);
+              const relPath = relativePath
+                ? path.join(relativePath, basename)
+                : basename;
 
-      // Check if this entry should be excluded
-      if (shouldExclude(relPath, basename)) {
-        return null;
-      }
+              // Check if this entry should be excluded
+              if (shouldExclude(relPath, basename)) {
+                return null;
+              }
 
-      const stats = await fsp.stat(fullPath);
-      if (stats.isDirectory()) {
-        assertType<AbsoluteDir>(fullPath);
-        assertType<RelativeDir>(relPath);
+              const subDir = yield* listProjectDir(
+                projectDir,
+                fullPath,
+                relPath,
+              );
 
-        const subDir = await listProjectDir(projectDir, fullPath, relPath);
-        // Only include non-empty directories
-        if (Object.keys(subDir).length > 0) {
-          return [basename, subDir] as const;
-        }
-        return null;
-      } else {
-        return [basename, null] as const;
-      }
-    }),
-  );
+              // Only include non-empty directories
+              if (Object.keys(subDir).length > 0) {
+                return [basename, subDir] as const;
+              }
+              return null;
+            }
+            case "File": {
+              const relPath = relativePath
+                ? path.join(relativePath, basename)
+                : basename;
 
-  return Object.fromEntries(
-    results.filter(
-      (entry): entry is [RelativePath, Directory | null] => entry !== null,
-    ),
-  );
+              // Check if this entry should be excluded
+              if (shouldExclude(relPath, basename)) {
+                return null;
+              }
+
+              return [basename, null] as const;
+            }
+            default:
+              return null;
+          }
+        });
+      }),
+    );
+
+    return results.reduce((acc, entry) => {
+      if (!entry) return acc;
+
+      const [basename, value] = entry;
+
+      acc[basename] = value;
+
+      return acc;
+    }, {} as Directory);
+  });
 }

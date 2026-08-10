@@ -117,14 +117,29 @@
 
 .annotations {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: 0.5em;
-  color: #666;
-  opacity: 0;
+  right: 1em;
+  bottom: 1em;
+  padding: 0.4em;
+  font-size: 0.7em;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #ddd;
 
-  :hover > & {
-    opacity: 1;
+  tr:nth-of-type(odd) {
+    background: #f0f0f0;
+  }
+
+  tr:nth-of-type(even) {
+    background: #fafafa;
+  }
+
+  th {
+    padding: 0.2em 0.4em;
+    font-family: monospace;
+    text-align: right;
+  }
+
+  td {
+    padding: 0.2em 0.4em;
   }
 }
 

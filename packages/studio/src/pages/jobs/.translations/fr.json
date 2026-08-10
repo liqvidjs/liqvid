@@ -5,5 +5,8 @@
   "delete": "Supprimer",
   "failed": "Échoué",
   "running": "En cours",
+  "stopped": "Arrêté",
+  "tabJobs": "Tâches",
+  "tabServices": "Services",
   "title": "Tâches"
 }

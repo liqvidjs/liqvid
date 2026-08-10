@@ -1,15 +1,26 @@
 import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
-import { Effect, FileSystem, Stream } from "effect";
+import { Effect, FileSystem, Option, Stream } from "effect";
 
 import { getServerState, type LiqvidServerState } from "../initialize.mts";
 
 /**
  * Reload the config into `state.config`, logging the reason.
+ *
+ * Whether this is a first-time detection or a change is derived from whether a
+ * config was already loaded, rather than from the watch event's tag. Editors
+ * that save atomically (e.g. Vim) replace the file via a rename shuffle, so the
+ * OS reports a `Create` even when the file already existed — the event tag is
+ * therefore not a reliable signal for "new" vs "changed".
  */
-function reloadConfig(state: LiqvidServerState, message: string) {
+function reloadConfig(state: LiqvidServerState) {
   return Effect.gen(function* () {
-    yield* Effect.log(message);
+    const existed = Option.isSome(state.config);
+    yield* Effect.log(
+      existed
+        ? `${CONFIG_FILE} changed, reloading...`
+        : `${CONFIG_FILE} detected, loading...`,
+    );
     state.config = yield* loadLiqvidConfig().pipe(Effect.option);
   });
 }
@@ -44,14 +55,7 @@ export function watchLiqvidConfig(state: LiqvidServerState) {
         ([, group]) =>
           group.pipe(
             Stream.debounce("50 millis"),
-            Stream.runForEach((event) =>
-              reloadConfig(
-                state,
-                event._tag === "Create"
-                  ? `${CONFIG_FILE} detected, loading...`
-                  : `${CONFIG_FILE} changed, reloading...`,
-              ),
-            ),
+            Stream.runForEach(() => reloadConfig(state)),
           ),
         { concurrency: "unbounded" },
       ),

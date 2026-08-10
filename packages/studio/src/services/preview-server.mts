@@ -63,10 +63,20 @@ export function startProductionServer(state: LiqvidServerState) {
       });
     });
 
-    server.listen(port, () => {
-      // biome-ignore lint/suspicious/noConsole: this is ok
-      console.log(`Production server running on port ${port}...`);
+    yield* Effect.callback<void>((resume) => {
+      server.listen(port, () => {
+        resume(Effect.void);
+      });
     });
+
+    yield* Effect.log(`Production server running on port ${port}...`);
+
+    // The production server runs for the lifetime of the process. Keep the
+    // effect (and thus the service) alive, tearing the server down if the
+    // fiber is interrupted.
+    yield* Effect.never.pipe(
+      Effect.ensuring(Effect.sync(() => server.close())),
+    );
   });
 }
 

@@ -5,15 +5,19 @@ import { Effect, Option } from "effect";
 import type { Socket } from "effect/unstable/socket";
 import type { AbsoluteDir } from "effect-paths";
 
-import type { LoggableJob } from "./api/schemas.mts";
+import type { LoggableJob, Service } from "./api/schemas.mts";
 import { type UpdateInfo, watchForUpdates } from "./jobs/check-updates.mts";
 import {
   DEFAULT_PRODUCTION_SERVER_PORT,
   startProductionServer,
-} from "./jobs/preview-server.mts";
-import { watchAssets } from "./jobs/watch-assets.mts";
-import { watchLiqvidConfig } from "./jobs/watch-config.mts";
-import { watchProjectFiles } from "./jobs/watch-project-files.mts";
+} from "./services/preview-server.mts";
+import { watchAssets } from "./services/watch-assets.mts";
+import { watchLiqvidConfig } from "./services/watch-config.mts";
+import {
+  initProjectFiles,
+  watchProjectFiles,
+} from "./services/watch-project-files.mts";
+import { createService } from "./utils/services.mts";
 
 const symbol = Symbol.for("@liqvid/server");
 
@@ -35,11 +39,7 @@ export interface LiqvidServerState {
   cwd: AbsoluteDir;
   jobs: {
     checkUpdates: null | Promise<void>;
-    productionServer: null | Promise<void>;
     new: Map<string, LoggableJob>;
-    watchAssets: null | Promise<void>;
-    watchConfig: null | Promise<void>;
-    watchProjectFiles: null | Promise<void>;
   };
 
   /**
@@ -51,8 +51,19 @@ export interface LiqvidServerState {
   productionServerPort: number;
   projects: Record<string, ProjectMeta>;
 
+  /**
+   * Long-running services (production server, file watchers), keyed by id.
+   * Unlike {@link LiqvidServerState.jobs}, these are not expected to complete;
+   * they run for the lifetime of the process. Their captured logs are streamed
+   * to the Jobs page.
+   */
+  services: Map<string, Service>;
+
   started: {
     productionServer: boolean;
+    watchAssets: boolean;
+    watchConfig: boolean;
+    watchProjectFiles: boolean;
   };
 
   /**
@@ -96,28 +107,50 @@ export async function initializeServer() {
 
   jobs.checkUpdates ??= watchForUpdates();
 
-  jobs.watchAssets ??= watchAssets();
+  // Long-running watchers are registered as services so their log output is
+  // captured and streamed to the Jobs page. `createService` forks each effect
+  // detached and resolves immediately, so these promises resolve once the
+  // service has been registered (not when the watcher finishes).
 
-  jobs.watchConfig ??= Effect.runPromise(
-    watchLiqvidConfig(state).pipe(Effect.provide(NodeFileSystem.layer)),
-  );
+  if (!started.watchConfig) {
+    Effect.runSync(createService("watch config", watchLiqvidConfig(state)));
 
-  jobs.watchProjectFiles ??= jobs.watchAssets.then(() =>
-    watchProjectFiles(projects),
-  );
+    started.watchConfig = true;
+  }
+
+  // Do the initial scan of the project tree first so `projects` is fully
+  // populated, then start the watchers. Starting them only after the initial
+  // run succeeds avoids racing the watch events against the initial scan.
+  //
+  // The flags are flipped *before* awaiting the initial scan so a concurrent
+  // `initializeServer()` call doesn't slip past the guard while the scan is in
+  // flight and start the watchers a second time.
+  if (!started.watchProjectFiles && !started.watchAssets) {
+    started.watchProjectFiles = true;
+    started.watchAssets = true;
+
+    await Effect.runPromise(initProjectFiles(projects));
+
+    Effect.runSync(
+      createService("watch project files", watchProjectFiles(projects)),
+    );
+
+    Effect.runSync(createService("watch assets", watchAssets()));
+  }
 
   if (!started.productionServer) {
     envFiles ??= loadEnvFiles(cwd);
-    Effect.runFork(
-      startProductionServer(state).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(EnvFiles, envFiles),
-      ),
+    void Effect.runPromise(
+      createService(
+        "production server",
+        startProductionServer(state).pipe(
+          Effect.provide(NodeFileSystem.layer),
+          Effect.provideService(EnvFiles, envFiles),
+        ),
+      ).pipe(Effect.asVoid),
     );
     started.productionServer = true;
   }
-
-  await jobs.watchProjectFiles;
 }
 
 export function getServerState(): LiqvidServerState {
@@ -129,16 +162,16 @@ export function getServerState(): LiqvidServerState {
       jobs: {
         checkUpdates: null,
         new: new Map(),
-        productionServer: null,
-        watchAssets: null,
-        watchConfig: null,
-        watchProjectFiles: null,
       },
       lastBuildTime: null,
       productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
       projects: {},
+      services: new Map(),
       started: {
         productionServer: false,
+        watchAssets: false,
+        watchConfig: false,
+        watchProjectFiles: false,
       },
       updateInfo: null,
       wsConnections: new Set(),
