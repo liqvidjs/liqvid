@@ -9,7 +9,7 @@ export function deserialize<
 >(
   obj: In,
 
-  deserializers: DeserMap,
+  deserializers: DeserMap = {} as DeserMap
 ): DeserializedValue<In, DeserMap> {
   switch (typeof obj) {
     case "boolean":
@@ -28,6 +28,10 @@ export function deserialize<
       }
 
       if ("__deser" in obj && typeof obj.__deser === "string") {
+        if (obj.__deser === "Date" && "iso" in obj && typeof obj.iso === "string") {
+          return new Date(obj.iso) as any;
+        }
+
         const hydrationKey = obj.__deser as DeserKeys<In>;
         if (!Object.hasOwn(deserializers, hydrationKey)) {
           throw new Error(`missing deserializer: ${obj.__deser}`);
@@ -50,6 +54,8 @@ export function deserialize<
 export type SerializedValue<DeserKey extends string = string> = {
   __deser: DeserKey;
 };
+
+export type SerializedDate = SerializedValue<"Date"> & { iso: string };
 
 /** Any valid JSON value */
 export type JSONValue =
@@ -76,13 +82,27 @@ export type DeserKeys<T extends JSONValue> =
 export type DeserializedValue<
   In extends JSONValue,
   DeserMap extends Record<string, (value: unknown) => unknown>,
-> =
-  In extends SerializedValue<infer DK extends string & keyof DeserMap>
-    ? ReturnType<DeserMap[DK]>
-    : In extends ReadonlyArray<JSONValue> & { [key in string | symbol]: any }
-      ? {
-          [index in keyof In]: DeserializedValue<In[index], DeserMap>;
-        }
-      : In extends Record<string, JSONValue>
-        ? { [key in keyof In]: DeserializedValue<In[key], DeserMap> }
-        : In;
+  LimitDepth extends unknown[] = [],
+> = LimitDepth["length"] extends 5
+  ? any
+  : In extends SerializedDate
+    ? Date
+    : In extends SerializedValue<infer DK extends string & keyof DeserMap>
+      ? ReturnType<DeserMap[DK]>
+      : In extends ReadonlyArray<JSONValue> & { [key in string | symbol]: any }
+        ? {
+            [index in keyof In]: DeserializedValue<
+              In[index],
+              DeserMap,
+              [...LimitDepth, any]
+            >;
+          }
+        : In extends Record<string, JSONValue>
+          ? {
+              [key in keyof In]: DeserializedValue<
+                In[key],
+                DeserMap,
+                [...LimitDepth, any]
+              >;
+            }
+          : unknown extends In ? unknown : In;

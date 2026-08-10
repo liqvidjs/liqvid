@@ -1,5 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: lots of type magic in this file */
 
+import type { SerializedDate } from "./deserialize.ts";
+
 /** Use custom JSON serialization to send an object from server to client */
 export function serialize<T>(obj: T): SerializationResult<T> {
   switch (typeof obj) {
@@ -23,6 +25,9 @@ export function serialize<T>(obj: T): SerializationResult<T> {
       if (Array.isArray(obj)) {
         return obj.map(serialize) as unknown as any;
       }
+      if (obj instanceof Date) {
+        return { __deser: "Date", iso: obj.toISOString() } as any;
+      }
       if ("toJSON" in obj && typeof obj.toJSON === "function") {
         return obj.toJSON() as any;
       }
@@ -36,15 +41,17 @@ export function serialize<T>(obj: T): SerializationResult<T> {
 }
 
 /** Get the result of serializing a value */
-type SerializationResult<T> = T extends { toJSON(): infer S }
-  ? S
-  : T extends ReadonlyArray<any> & { [extra: string | symbol]: any }
-    ? { [key in keyof T]: SerializationResult<T[key]> }
-    : // put this here first to handle branded strings
-      T extends bigint | boolean | number | string | null
-      ? T
-      : T extends Record<string, any>
-        ? {
-            [k in keyof T]: SerializationResult<T[k]>;
-          }
-        : T;
+type SerializationResult<T> = T extends Date
+  ? SerializedDate
+  : T extends { toJSON(): infer S }
+    ? S
+    : T extends ReadonlyArray<any> & { [extra: string | symbol]: any }
+      ? { [key in keyof T]: SerializationResult<T[key]> }
+      : // put this here first to handle branded strings
+        T extends bigint | boolean | number | string | null
+        ? T
+        : T extends Record<string, any>
+          ? {
+              [k in keyof T]: SerializationResult<T[k]>;
+            }
+          : T;

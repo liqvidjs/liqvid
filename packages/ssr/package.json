@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/ssr",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Server-side rendering helpers for Liqvid",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
   "bugs": {
@@ -17,8 +17,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
       "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     }
   },
