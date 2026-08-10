@@ -1,5 +1,13 @@
 import { Progress } from "@liqvid/cli/utils";
-import { Effect, Logger, type LogLevel, References, type Types } from "effect";
+import {
+  Effect,
+  Logger,
+  type LogLevel,
+  type Record,
+  References,
+  type Schema,
+  type Types,
+} from "effect";
 
 import type {
   LoggableJob,
@@ -62,7 +70,13 @@ export function createJob<A, E, R>(
 
     // Custom logger that outputs log messages to the console
     const logger = Logger.make(({ date, fiber, logLevel, message }) => {
-      const annotations = fiber.getRef(References.CurrentLogAnnotations);
+      const annotations = fiber.getRef(
+        References.CurrentLogAnnotations,
+      ) as Record.ReadonlyRecord<string, Schema.Json>;
+      const activeSpans = fiber.getRef(References.CurrentLogSpans);
+
+      const timestamp = date.getTime();
+
       const mappedType = (
         {
           All: "log",
@@ -78,7 +92,8 @@ export function createJob<A, E, R>(
 
       appendLog(job, {
         annotations,
-        message: message as unknown[],
+        message: message as ReadonlyArray<Schema.Json>,
+        spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
         timestamp: date,
         type: mappedType,
       });

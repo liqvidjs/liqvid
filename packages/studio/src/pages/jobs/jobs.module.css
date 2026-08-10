@@ -119,8 +119,11 @@
   position: absolute;
   right: 1em;
   bottom: 1em;
+  display: flex;
+  align-items: flex-start;
   padding: 0.4em;
   font-size: 0.7em;
+  vertical-align: top;
   border-radius: 4px;
   box-shadow: 0 0 0 1px #ddd;
 

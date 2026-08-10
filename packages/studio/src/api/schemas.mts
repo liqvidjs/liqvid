@@ -1,7 +1,26 @@
 import { ThumbnailsJob } from "@liqvid/schemas";
-import { type Fiber, Schema } from "effect";
+import type { JSONValue } from "@liqvid/ssr";
+import { type Fiber, Schema, SchemaTransformation } from "effect";
 
 import { CaptionsMeta } from "../types/schemas.mts";
+
+export const SerializedDate = Schema.Struct({
+  __deser: Schema.Literal("Date"),
+  iso: Schema.String,
+}).pipe(
+  Schema.decodeTo(
+    Schema.Date,
+    SchemaTransformation.transform({
+      decode: (from) => new Date(from.iso),
+      encode: (to) => ({
+        __deser: "Date" as const,
+        iso: to.toISOString(),
+      }),
+    }),
+  ),
+);
+
+export type SerializedDate = (typeof SerializedDate)["Encoded"];
 
 /**
  * On-disk metadata for a single audio rendering (`audio-meta.json`).
@@ -130,18 +149,26 @@ export type StructuredLogType = (typeof StructuredLogType)["Type"];
 
 export const StructuredLog = Schema.Struct({
   /** Annotations for the log message */
-  annotations: Schema.Record(Schema.String, Schema.Unknown),
+  annotations: Schema.Record(Schema.String, Schema.Json),
 
   /** Log message */
-  message: Schema.Array(Schema.Unknown),
+  message: Schema.Array(Schema.Json),
+
+  /** Span timings */
+  spans: Schema.Array(Schema.Tuple([Schema.String, Schema.Number])),
 
   /** Timestamp of the log message */
-  timestamp: Schema.Date,
+  timestamp: SerializedDate,
 
   /** Log level */
   type: StructuredLogType,
 });
 
+export type StructuredLogEncoded = (typeof StructuredLog)["Encoded"] & {
+  readonly annotations: { readonly [key: string]: JSONValue };
+  readonly message: readonly JSONValue[];
+  readonly timestamp: SerializedDate;
+};
 export type StructuredLog = (typeof StructuredLog)["Type"];
 
 export const LoggableJobState = Schema.Literals([
@@ -162,11 +189,19 @@ export const LoggableJobClient = Schema.Struct({
 
   path: Schema.optional(Schema.String),
 
-  startTime: Schema.Date,
+  startTime: SerializedDate,
 
   state: LoggableJobState,
 });
 
+// TODO: awkward
+export type LoggableJobClientEncoded = Omit<
+  (typeof LoggableJobClient)["Encoded"],
+  "logs"
+> & {
+  readonly logs: StructuredLogEncoded[];
+  readonly startTime: SerializedDate;
+};
 export type LoggableJobClient = (typeof LoggableJobClient)["Type"];
 
 export const LoggableJob = LoggableJobClient.pipe(
@@ -198,11 +233,15 @@ export const ServiceClient = Schema.Struct({
 
   name: Schema.String,
 
-  startTime: Schema.Date,
+  startTime: SerializedDate,
 
   state: ServiceState,
 });
 
+export type ServiceClientEncoded = (typeof ServiceClient)["Encoded"] & {
+  logs: StructuredLogEncoded[];
+  readonly startTime: SerializedDate;
+};
 export type ServiceClient = (typeof ServiceClient)["Type"];
 
 /**

@@ -1,9 +1,10 @@
 "use client";
 
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { Exit } from "effect";
-import { useCallback, useEffect, useState } from "react";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useChannel } from "../../components/WebSocketProvider.tsx";
 import { ButtonWithDropdown } from "../../ui/ButtonWithDropdown.tsx";
 import {
   publishAction,
@@ -11,6 +12,8 @@ import {
   publishMediaAction,
   rebuildAction,
 } from "../root-actions.ts";
+
+import styles from "./RebuildButton.module.css";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -31,6 +34,10 @@ export function RebuildButtonClient({
   const [buildTime, setBuildTime] = useState<null | number>(lastBuildTime);
   const [now, setNow] = useState(() => Date.now());
   const { makeToast } = usePluginApi();
+
+  // Id of the in-progress rebuild job, if any. While set, the button shows a
+  // spinner until the job's completion arrives over the WebSocket.
+  const rebuildJobId = useRef<null | string>(null);
 
   // Whether the most recent build was within the publish window. When true, the
   // main button publishes; otherwise it rebuilds.
@@ -77,39 +84,53 @@ export function RebuildButtonClient({
     }
   }, []);
 
-  const handleRebuild = useCallback(
-    () =>
-      run(async () => {
-        const exit = await rebuildAction();
+  const handleRebuild = useCallback(async () => {
+    setIsBusy(true);
+    try {
+      // The build runs as a background job; its stdout/stderr are captured and
+      // viewable on the jobs page. We keep the spinner up (isBusy) until the
+      // job's completion arrives over the WebSocket (see useChannel below).
+      const { jobId } = await rebuildAction();
+      rebuildJobId.current = jobId;
+    } catch (error) {
+      rebuildJobId.current = null;
+      setIsBusy(false);
+      makeToast({
+        message: error instanceof Error ? error.message : String(error),
+        title: t.toast.failure,
+        type: "negative",
+      });
+    }
+  }, [makeToast, t.toast.failure]);
 
-        if (Exit.isSuccess(exit)) {
-          makeToast({ title: t.toast.success, type: "success" });
-          setBuildTime(Date.now());
-          setNow(Date.now());
-        } else {
-          makeToast({
-            message: exit.cause.reasons
-              .flatMap((reason) => {
-                if (reason._tag !== "Fail") return [];
-                const { error } = reason;
-                if (
-                  typeof error === "object" &&
-                  error !== null &&
-                  "messages" in error &&
-                  Array.isArray(error.messages)
-                ) {
-                  return error.messages as string[];
-                }
-                return [String(error)];
-              })
-              .join("\n"),
-            title: t.toast.failure,
-            type: "negative",
-          });
-        }
-      }),
-    [makeToast, run, t.toast.failure, t.toast.success],
-  );
+  // React to the rebuild job's completion. On success, show a success toast
+  // (no link needed); on failure/cancellation, link to the jobs page so the
+  // user can inspect the captured error output.
+  useChannel("jobs", {
+    updateJob: ({ job }) => {
+      if (job.id !== rebuildJobId.current) return;
+      if (job.state === "running") return;
+
+      rebuildJobId.current = null;
+      setIsBusy(false);
+
+      if (job.state === "completed") {
+        makeToast({ title: t.toast.success, type: "success" });
+        setBuildTime(Date.now());
+        setNow(Date.now());
+      } else {
+        makeToast({
+          message: (
+            <a href="/jobs" rel="noreferrer">
+              {t.toast.viewLogs}
+            </a>
+          ),
+          title: t.toast.failure,
+          type: "negative",
+        });
+      }
+    },
+  });
 
   const handlePublish = useCallback(
     () =>
@@ -135,7 +156,16 @@ export function RebuildButtonClient({
     [notify, run, t.toast.publishMediaSuccess],
   );
 
-  const label = isBusy ? t.busy : canPublish ? t.publish : t.rebuild;
+  const label = isBusy ? (
+    <span className={styles.label}>
+      <SpinnerGapIcon aria-hidden className={styles.spinner} />
+      {t.busy}
+    </span>
+  ) : canPublish ? (
+    t.publish
+  ) : (
+    t.rebuild
+  );
 
   return (
     <ButtonWithDropdown

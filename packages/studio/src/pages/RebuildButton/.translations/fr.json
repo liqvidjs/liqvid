@@ -10,6 +10,7 @@
     "publishContentSuccess": "Contenu publié",
     "publishMediaSuccess": "Médias publiés",
     "publishSuccess": "Publié",
-    "success": "Compilation réussie"
+    "success": "Compilation réussie",
+    "viewLogs": "Voir les journaux"
   }
 }

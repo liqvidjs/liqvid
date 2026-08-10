@@ -1,0 +1,15 @@
+.label {
+  display: inline-flex;
+  gap: 0.4em;
+  align-items: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

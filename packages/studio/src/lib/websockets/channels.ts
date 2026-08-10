@@ -1,9 +1,9 @@
 import { Schema } from "effect";
 
-import { JobMessage } from "./channels/jobs";
-import { ProjectMessage } from "./channels/projects";
-import { RecordingMessage } from "./channels/recordings";
-import { ServiceMessage } from "./channels/services";
+import { JobMessage } from "./channels/jobs.ts";
+import { ProjectMessage } from "./channels/projects.ts";
+import { RecordingMessage } from "./channels/recordings.ts";
+import { ServiceMessage } from "./channels/services.ts";
 
 /* ------------------------------ channel names ------------------------------ */
 export const ChannelName = Schema.Literals([
@@ -58,7 +58,7 @@ export type Channels = {
  */
 export const Envelope = Schema.Struct({
   channel: ChannelName,
-  message: Schema.Unknown,
+  message: Schema.Json,
 });
 
 export type Envelope = (typeof Envelope)["Type"];

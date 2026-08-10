@@ -16,7 +16,7 @@ import type {
   RelativePath,
 } from "effect-paths";
 
-import type { LoggableJob } from "../api/schemas.mts";
+import type { LoggableJob, StructuredLog } from "../api/schemas.mts";
 
 export function safeGetOption<
   M extends {
@@ -88,12 +88,24 @@ function isPlatformError(error: unknown): error is PlatformError.PlatformError {
   );
 }
 
-interface ProgressMessage {
-  __kind: "progress";
-  formattedTotal: string;
+type ProgressMessage = {
+  readonly __kind: "progress";
+  readonly formattedTotal: string;
   formattedValue: string;
-  total: number;
+  readonly total: number;
   value: number;
+};
+
+/**
+ * Callbacks used by {@link jobProgressLayer} to notify when a progress bar is
+ * created or mutated, so its state can be streamed to clients in real time.
+ */
+export interface JobProgressHooks {
+  /** Called when a new progress bar log entry is added to the job. */
+  onAppend: (log: LoggableJob["logs"][number]) => void;
+
+  /** Called when an existing progress bar's value changes. */
+  onUpdate: () => void;
 }
 
 /**
@@ -101,6 +113,7 @@ interface ProgressMessage {
  */
 export const jobProgressLayer = (
   job: LoggableJob,
+  hooks?: JobProgressHooks,
 ): Context.Service.Shape<typeof Progress> => ({
   SingleBar: class SingleBar {
     #message: ProgressMessage | undefined;
@@ -118,18 +131,26 @@ export const jobProgressLayer = (
         total,
         value: startValue,
       };
-      job.logs.push({
+      const log = {
         annotations: {},
         message: [this.#message],
+        spans: [],
         timestamp: new Date(),
         type: "log",
-      });
+      } satisfies StructuredLog;
+
+      if (hooks) {
+        hooks.onAppend(log);
+      } else {
+        job.logs.push(log);
+      }
     }
 
     increment(step = 1) {
       if (!this.#message) return;
       this.#message.value += step;
       this.#message.formattedValue = this.#formatValue(this.#message.value);
+      hooks?.onUpdate();
     }
 
     stop() {
@@ -140,6 +161,7 @@ export const jobProgressLayer = (
       if (!this.#message) return;
       this.#message.value = current;
       this.#message.formattedValue = this.#formatValue(current);
+      hooks?.onUpdate();
     }
   },
 });

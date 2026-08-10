@@ -1,9 +1,11 @@
+import { serialize } from "@liqvid/ssr";
 import { pick } from "@liqvid/utils";
 import { Effect, Fiber } from "effect";
 import { cookies } from "next/headers";
 
+import type { LoggableJobClient, ServiceClient } from "../../api/schemas.mts";
 import { WebSocketProvider } from "../../components/WebSocketProvider.tsx";
-import { LOG_LEVELS_COOKIE } from "../../cookies.ts";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "../../cookies.ts";
 import { getServerState, initializeServer } from "../../initialize.mts";
 import { broadcast } from "../../next/websockets.mts";
 import { getTranslations } from "../../utils/i18n.mts";
@@ -54,15 +56,15 @@ export async function Jobs() {
     ? JSON.parse(logLevelsCookie.value)
     : DEFAULT_LOG_LEVELS;
 
-  type Job = React.ComponentProps<typeof JobsClient>["jobs"][string];
-  type Service = React.ComponentProps<typeof JobsClient>["services"][string];
+  const jobsTabCookie = cookieStore.get(JOBS_TAB_COOKIE);
+  const initialTab = jobsTabCookie?.value === "services" ? "services" : "jobs";
 
   const jobs = Object.fromEntries(
     Array.from(serverJobs.new.entries()).map(
       ([id, job]) =>
         [id, pick(job, ["id", "logs", "name", "path", "state"])] as [
           string,
-          Job,
+          LoggableJobClient,
         ],
     ),
   );
@@ -72,7 +74,7 @@ export async function Jobs() {
       ([id, service]) =>
         [id, pick(service, ["id", "logs", "name", "state"])] as [
           string,
-          Service,
+          ServiceClient,
         ],
     ),
   );
@@ -80,7 +82,15 @@ export async function Jobs() {
   return (
     <WebSocketProvider>
       <JobsClient
-        {...{ cancelJob, deleteJob, initialLogLevels, jobs, services, t }}
+        {...{
+          cancelJob,
+          deleteJob,
+          initialLogLevels,
+          initialTab,
+          jobs: serialize(jobs),
+          services: serialize(services),
+          t,
+        }}
       />
     </WebSocketProvider>
   );

@@ -70,6 +70,8 @@ export function createService<A, E, R>(
     // Custom logger that captures log messages into the service.
     const logger = Logger.make(({ date, fiber, logLevel, message }) => {
       const annotations = fiber.getRef(References.CurrentLogAnnotations);
+      const activeSpans = fiber.getRef(References.CurrentLogSpans);
+
       const mappedType = (
         {
           All: "log",
@@ -86,6 +88,7 @@ export function createService<A, E, R>(
       appendLog(service, {
         annotations,
         message: message as unknown[],
+        spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
         timestamp: date,
         type: mappedType,
       });

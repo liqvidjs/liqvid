@@ -10,6 +10,7 @@
     "publishContentSuccess": "Content published",
     "publishMediaSuccess": "Media published",
     "publishSuccess": "Published",
-    "success": "Build completed"
+    "success": "Build completed",
+    "viewLogs": "View logs"
   }
 }

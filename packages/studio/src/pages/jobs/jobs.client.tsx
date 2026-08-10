@@ -1,6 +1,7 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
+import { deserialize } from "@liqvid/ssr";
 import {
   CheckCircleIcon,
   SpinnerIcon,
@@ -9,20 +10,22 @@ import {
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import clsx from "clsx";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
 import type {
   LoggableJobClient,
+  LoggableJobClientEncoded,
   ServiceClient,
+  ServiceClientEncoded,
   StructuredLog,
   StructuredLogType,
 } from "../../api/schemas.mts";
 import { useChannel } from "../../components/WebSocketProvider.tsx";
-import { LOG_LEVELS_COOKIE } from "../../cookies.ts";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "../../cookies.ts";
 import { Button } from "../../ui/Button.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
-import { Time } from "../../ui/Time.tsx";
+import { Time, TimeDuration } from "../../ui/Time.tsx";
 import { ToggleButton } from "../../ui/ToggleButton.tsx";
 
 import styles from "./jobs.module.css";
@@ -30,10 +33,6 @@ import styles from "./jobs.module.css";
 import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
-
-type Job = Pick<LoggableJobClient, "id" | "logs" | "name" | "path" | "state">;
-
-type Service = Pick<ServiceClient, "id" | "logs" | "name" | "state">;
 
 const LOG_LEVELS = ["error", "warn", "info", "log", "debug"] as const;
 
@@ -62,23 +61,19 @@ function reviveLog(log: StructuredLog): StructuredLog {
   };
 }
 
-/**
- * Jobs/services delivered over WebSockets are JSON, so their `Date` fields
- * arrive as ISO strings. Revive them so the UI (which formats timestamps) works
- * the same as with the server-rendered entries.
- */
-function reviveLogs<E extends { logs: readonly StructuredLog[] }>(entry: E): E {
-  return {
-    ...entry,
-    logs: entry.logs.map(reviveLog),
-  };
-}
+type TabValue = "jobs" | "services";
+
+type MetaState = {
+  readonly annotations: Record<string, unknown>;
+  readonly spans: readonly (readonly [string, number])[];
+};
 
 /** @package */
 export function JobsClient({
   cancelJob,
   deleteJob,
   initialLogLevels,
+  initialTab,
   jobs: initialJobs,
   services: initialServices,
   t,
@@ -86,21 +81,23 @@ export function JobsClient({
   cancelJob: (formData: FormData) => Promise<void>;
   deleteJob: (formData: FormData) => Promise<void>;
   initialLogLevels: string[];
-  jobs: Record<string, Job>;
-  services: Record<string, Service>;
+  initialTab: TabValue;
+  jobs: Record<string, LoggableJobClientEncoded>;
+  services: Record<string, ServiceClientEncoded>;
   t: T;
 }) {
-  const [jobs, setJobs] = useState<Record<string, Job>>(initialJobs);
-  const [services, setServices] =
-    useState<Record<string, Service>>(initialServices);
+  const [jobs, setJobs] = useState<Record<string, LoggableJobClient>>(() =>
+    deserialize(initialJobs),
+  );
+  const [services, setServices] = useState<Record<string, ServiceClient>>(() =>
+    deserialize(initialServices),
+  );
   const [levels, setLevels] = useState<ReadonlySet<LogLevel>>(
     () => new Set(initialLogLevels as LogLevel[]),
   );
+  const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
 
-  const [annotations, setAnnotations] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [meta, setAnnotations] = useState<MetaState | null>(null);
 
   const toggleLevel = (level: LogLevel) => {
     setLevels((prev) => {
@@ -116,12 +113,18 @@ export function JobsClient({
     });
   };
 
-  const upsertJob = useCallback((job: Job) => {
-    setJobs((prev) => ({ ...prev, [job.id]: reviveLogs(job) }));
+  const handleTabChange = (value: TabValue) => {
+    setActiveTab(value);
+    const cookies = new Cookies();
+    cookies.set(JOBS_TAB_COOKIE, value, cookieOptions);
+  };
+
+  const upsertJob = useCallback((job: LoggableJobClient) => {
+    setJobs((prev) => ({ ...prev, [job.id]: job }));
   }, []);
 
-  const upsertService = useCallback((service: Service) => {
-    setServices((prev) => ({ ...prev, [service.id]: reviveLogs(service) }));
+  const upsertService = useCallback((service: ServiceClient) => {
+    setServices((prev) => ({ ...prev, [service.id]: service }));
   }, []);
 
   const handleCancel = useCallback(
@@ -139,7 +142,7 @@ export function JobsClient({
     (id: string) => {
       // Optimistically remove the job so the list updates instantly without a
       // page refresh; restore it if the server action fails.
-      let removed: Job | undefined;
+      let removed: LoggableJobClient | undefined;
       setJobs((prev) => {
         removed = prev[id];
         if (!removed) return prev;
@@ -158,55 +161,67 @@ export function JobsClient({
     [deleteJob],
   );
 
-  useChannel("jobs", {
-    appendLog: ({ id, log }) => {
-      setJobs((prev) => {
-        const job = prev[id];
-        if (!job) return prev;
-        return {
-          ...prev,
-          [id]: { ...job, logs: [...job.logs, reviveLog(log)] },
-        };
-      });
-    },
+  useChannel(
+    "jobs",
+    useMemo(
+      () => ({
+        appendLog: ({ id, log }) => {
+          setJobs((prev) => {
+            const job = prev[id];
+            if (!job) return prev;
+            return {
+              ...prev,
+              [id]: { ...job, logs: [...job.logs, log] },
+            };
+          });
+        },
 
-    deleteJob: ({ id }) => {
-      setJobs((prev) => {
-        if (!(id in prev)) return prev;
-        const { [id]: _removed, ...rest } = prev;
-        return rest;
-      });
-    },
+        deleteJob: ({ id }) => {
+          setJobs((prev) => {
+            if (!(id in prev)) return prev;
+            const { [id]: _removed, ...rest } = prev;
+            return rest;
+          });
+        },
 
-    newJob: ({ job }) => {
-      upsertJob(job);
-    },
+        newJob: ({ job }) => {
+          upsertJob(job);
+        },
 
-    updateJob: ({ job }) => {
-      upsertJob(job);
-    },
-  });
+        updateJob: ({ job }) => {
+          upsertJob(job);
+        },
+      }),
+      [upsertJob],
+    ),
+  );
 
-  useChannel("services", {
-    appendLog: ({ id, log }) => {
-      setServices((prev) => {
-        const service = prev[id];
-        if (!service) return prev;
-        return {
-          ...prev,
-          [id]: { ...service, logs: [...service.logs, reviveLog(log)] },
-        };
-      });
-    },
+  useChannel(
+    "services",
+    useMemo(
+      () => ({
+        appendLog: ({ id, log }) => {
+          setServices((prev) => {
+            const service = prev[id];
+            if (!service) return prev;
+            return {
+              ...prev,
+              [id]: { ...service, logs: [...service.logs, reviveLog(log)] },
+            };
+          });
+        },
 
-    newService: ({ service }) => {
-      upsertService(service);
-    },
+        newService: ({ service }) => {
+          upsertService(service);
+        },
 
-    updateService: ({ service }) => {
-      upsertService(service);
-    },
-  });
+        updateService: ({ service }) => {
+          upsertService(service);
+        },
+      }),
+      [upsertService],
+    ),
+  );
 
   return (
     <main className={styles.main}>
@@ -214,7 +229,10 @@ export function JobsClient({
 
       <LogLevelFilter levels={levels} onToggle={toggleLevel} t={t} />
 
-      <Tabs defaultValue="jobs">
+      <Tabs
+        onValueChange={(v) => handleTabChange(v as TabValue)}
+        value={activeTab}
+      >
         <TabsList>
           <TabsTrigger value="jobs">{t.tabJobs}</TabsTrigger>
           <TabsTrigger value="services">{t.tabServices}</TabsTrigger>
@@ -270,9 +288,21 @@ export function JobsClient({
         </TabsContent>
       </Tabs>
 
-      {annotations && (
+      {meta && (
         <aside className={styles.annotations}>
-          <MetadataTable data={annotations} />
+          <MetadataTable data={meta.annotations} />
+          <table>
+            <tbody>
+              {meta.spans.map(([name, duration], i) => (
+                <tr key={i}>
+                  <th>{name}</th>
+                  <td>
+                    <TimeDuration value={{ milliseconds: duration }} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </aside>
       )}
     </main>
@@ -304,7 +334,13 @@ function MetadataTable({ data }: { data: Record<string, unknown> }) {
   );
 }
 
-function JobStateIcon({ state, t }: { state: Job["state"]; t: T }) {
+function JobStateIcon({
+  state,
+  t,
+}: {
+  state: LoggableJobClient["state"];
+  t: T;
+}) {
   switch (state) {
     case "cancelled":
       return (
@@ -333,7 +369,13 @@ function JobStateIcon({ state, t }: { state: Job["state"]; t: T }) {
   }
 }
 
-function ServiceStateIcon({ state, t }: { state: Service["state"]; t: T }) {
+function ServiceStateIcon({
+  state,
+  t,
+}: {
+  state: ServiceClient["state"];
+  t: T;
+}) {
   switch (state) {
     case "running":
       return (
@@ -363,7 +405,7 @@ function LogGroup({
 }: {
   levels: ReadonlySet<LogLevel>;
   logs: readonly StructuredLog[];
-  onAnnotations: (annotations: Record<string, unknown> | null) => void;
+  onAnnotations: (annotations: MetaState | null) => void;
 }) {
   return (
     <ol className={styles.logGroup}>
@@ -379,8 +421,10 @@ function LogGroup({
             className={styles.log}
             data-level={log.type}
             key={`${log.type}:${log.timestamp.toISOString()}:${i}`}
-            onPointerEnter={() => onAnnotations(log.annotations)}
-            onPointerLeave={() => onAnnotations(null)}
+            onPointerEnter={() =>
+              onAnnotations({ annotations: log.annotations, spans: log.spans })
+            }
+            // onPointerLeave={() => onAnnotations(null)}
           >
             <Time
               className={styles.timestamp}

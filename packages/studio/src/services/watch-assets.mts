@@ -249,7 +249,9 @@ function generateProjectTypes({
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
-    yield* Effect.logDebug(`generating types.ts for projectDir: ${projectDir}`);
+    yield* Effect.logDebug(
+      `generating ${PROJECT_FILES_AUTOGEN} and ${TYPES_AUTOGEN} `,
+    );
 
     const directoryStructure = yield* listProjectDir(projectDir);
     const assetsDir = path.join(projectDir, ASSETS_DIR);

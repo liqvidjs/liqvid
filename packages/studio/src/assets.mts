@@ -122,6 +122,7 @@ export class ServerDirectoryHelper<D extends Directory> extends DirectoryHelper<
     this.#files = files;
   }
 
+  /** Test for existence of a file */
   has(filename: Files<FileNames<D>> | (string & {})) {
     const parts = filename.split("/");
 

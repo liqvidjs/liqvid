@@ -1,11 +1,11 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import { deserialize, IS_CLIENT } from "@liqvid/ssr";
+import { deserialize, IS_CLIENT, type JSONValue } from "@liqvid/ssr";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 
 import {
   type ChannelMessage,
@@ -30,7 +30,7 @@ const runtime = ManagedRuntime.make(Socket.layerWebSocketConstructorGlobal);
  * them out to per-channel subscribers.
  */
 class WebSocketClient {
-  #subscribers = new Map<ChannelName, Set<Subscriber<ChannelName>>>();
+  subscribers = new Map<ChannelName, Set<Subscriber<ChannelName>>>();
   #fiber: Fiber.Fiber<void> | undefined;
   #write:
     | ((frame: string) => Effect.Effect<void, Socket.SocketError>)
@@ -46,11 +46,10 @@ class WebSocketClient {
         yield* socket.runString((data) =>
           Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
             Effect.andThen(({ channel, message }) => {
-              const subscribers = this.#subscribers.get(channel);
+              const subscribers = this.subscribers.get(channel);
               if (!subscribers) return Effect.void;
 
-              // biome-ignore lint/suspicious/noExplicitAny: excessive type deepness
-              message = deserialize(message as any, {
+              message = deserialize(message as JSONValue, {
                 "@liqvid/duration": Duration.fromJSON,
               });
 
@@ -96,10 +95,10 @@ class WebSocketClient {
   }
 
   subscribe<C extends ChannelName>(channel: C, cb: Subscriber<C>): CleanUpFn {
-    let set = this.#subscribers.get(channel);
+    let set = this.subscribers.get(channel);
     if (!set) {
       set = new Set();
-      this.#subscribers.set(channel, set);
+      this.subscribers.set(channel, set);
     }
 
     set.add(cb as Subscriber<ChannelName>);
@@ -120,21 +119,50 @@ function toAbsoluteUrl(url: string): string {
 
 const WebSocketContext = createContext<WebSocketClient | null>(null);
 
+/**
+ * Module-level singleton for the WebSocket client. This survives React
+ * StrictMode's double-mount cycle, ensuring we don't create multiple
+ * connections or close the connection during the simulated unmount.
+ */
+let sharedClient: WebSocketClient | null = null;
+let sharedClientRefCount = 0;
+
 /** @scopeException ../../app/providers.tsx */
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const [client] = useState(() => {
-    if (!IS_CLIENT) return null;
-    return new WebSocketClient("/api/liqvid/ws");
-  });
+  const clientRef = useRef<WebSocketClient | null>(null);
+
+  // On first render, get or create the shared client
+  if (IS_CLIENT && !clientRef.current) {
+    if (!sharedClient) {
+      sharedClient = new WebSocketClient("/api/liqvid/ws");
+    }
+    clientRef.current = sharedClient;
+  }
 
   useEffect(() => {
+    // Increment ref count on mount
+    sharedClientRefCount++;
+
     return () => {
-      client?.close();
+      // Decrement ref count on unmount
+      sharedClientRefCount--;
+
+      // Only close the client when all providers have unmounted (ref count
+      // reaches 0). This handles React StrictMode's double-mount: the first
+      // unmount decrements to 0, but the immediate remount increments back to 1
+      // before we can close. We use setTimeout to defer the close check,
+      // allowing the remount to happen first.
+      setTimeout(() => {
+        if (sharedClientRefCount === 0 && sharedClient) {
+          sharedClient.close();
+          sharedClient = null;
+        }
+      }, 0);
     };
-  }, [client]);
+  }, []);
 
   return (
-    <WebSocketContext.Provider value={client}>
+    <WebSocketContext.Provider value={clientRef.current}>
       {children}
     </WebSocketContext.Provider>
   );

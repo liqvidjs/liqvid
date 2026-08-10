@@ -35,6 +35,10 @@
   border-radius: 4px;
 }
 
+.screenshotTitle {
+  font-size: 0.8em;
+}
+
 .screenshotInfo {
   display: flex;
   flex: 1;

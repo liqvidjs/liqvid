@@ -56,7 +56,7 @@ export const AppendLogMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a job log is appended" }),
 );
 
-export type AppendLogMessage = (typeof AppendLogMessage)["Type"];
+export type AppendLogMessage = (typeof AppendLogMessage)["Encoded"];
 
 /* ------------------------------ export ------------------------------ */
 export const JobMessage = Schema.Union([
@@ -66,4 +66,4 @@ export const JobMessage = Schema.Union([
   UpdateJobMessage,
 ]);
 
-export type JobMessage = (typeof JobMessage)["Type"];
+export type JobMessage = (typeof JobMessage)["Encoded"];

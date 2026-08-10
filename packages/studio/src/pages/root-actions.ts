@@ -9,7 +9,6 @@ import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
 import { UP, writeJSON } from "@liqvid/cli/utils";
 import type { AutoGenProjectMeta } from "@liqvid/schemas";
-import { serialize } from "@liqvid/ssr";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import {
   type AbsoluteDir,
@@ -24,24 +23,48 @@ import {
   ASSETS_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  SCREENSHOTS_DIR,
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
 } from "../conventions.mts";
 import { getServerState } from "../initialize.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
+import { createJob } from "../utils/jobs.mts";
 import { getRoutesDir } from "../utils/misc.mts";
 
-export async function rebuildAction() {
+export interface RebuildActionResult {
+  /** ID of the created job, so the client can link to it. */
+  jobId: string;
+}
+
+/**
+ * Kick off a project rebuild as a background job. The build's stdout and stderr
+ * are captured into the job's logs (viewable on the jobs page) rather than run
+ * inline. Returns the id of the created job.
+ */
+export async function rebuildAction(): Promise<RebuildActionResult> {
   const { cwd } = getServerState();
-  const result = await Effect.runPromiseExit(
-    runNextBuild({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
+
+  // The build effect that the job runs. On success, record the build time so
+  // the UI can offer "Publish" within the publish window.
+  const buildEffect = runNextBuild({ cwd }).pipe(
+    Effect.tap(() =>
+      Effect.sync(() => {
+        getServerState().lastBuildTime = Date.now();
+      }),
+    ),
   );
 
-  if (Exit.isSuccess(result)) {
-    getServerState().lastBuildTime = Date.now();
-  }
+  // `createJob` registers the job and broadcasts a `newJob` message, and it
+  // broadcasts `updateJob` as the job completes/fails, so the jobs page (and
+  // the rebuild button) can react over WebSockets.
+  const job = await Effect.runPromise(
+    createJob("rebuild", buildEffect).pipe(
+      Effect.provide(NodeFileSystem.layer),
+    ),
+  );
 
-  return serialize(result) as typeof result;
+  return { jobId: job.id };
 }
 
 export interface PublishActionResult {
@@ -111,14 +134,13 @@ export async function publishAction(): Promise<PublishActionResult> {
 }
 
 export interface TemplateInfo {
+  /** Whether this is the default template */
+  default?: boolean;
   /** Unique identifier (directory name) */
   id: string;
 
   /** Display name from template.json */
   name: string;
-
-  /** Whether this is the default template */
-  default?: boolean;
 
   /** Full path to the template directory */
   path: AbsoluteDir;
@@ -131,8 +153,8 @@ interface CreateProjectInput {
 }
 
 interface CreateProjectResult {
-  success: boolean;
   error?: string;
+  success: boolean;
 }
 
 const TEMPLATES_DIR = path.join(
@@ -187,6 +209,33 @@ export async function openRenderInFinderAction(
     return { success: true };
   } catch (e) {
     console.error("Failed to open render in Finder:", e);
+    return { success: false };
+  }
+}
+
+/**
+ * Open a screenshot folder in Finder
+ */
+export async function openScreenshotInFinderAction(
+  projectPath: RelativeDir,
+  screenshotId: string,
+): Promise<{ success: boolean }> {
+  try {
+    // Validate paths to prevent directory traversal
+    if (projectPath.includes("..") || screenshotId.includes("..")) {
+      return { success: false };
+    }
+    const fullPath = path.join(
+      getRoutesDir(),
+      projectPath,
+      ASSETS_DIR,
+      SCREENSHOTS_DIR,
+      RelativeDir(screenshotId),
+    );
+    await execa("open", [fullPath]);
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to open screenshot in Finder:", e);
     return { success: false };
   }
 }
@@ -330,8 +379,8 @@ function copyTemplateDir(
 }
 
 interface UpdatePackageResult {
-  success: boolean;
   error?: string;
+  success: boolean;
 }
 
 /**

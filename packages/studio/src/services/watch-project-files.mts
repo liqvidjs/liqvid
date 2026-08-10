@@ -284,8 +284,6 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
  */
 function handleWatchEvent(event: WatchEvent, projects: Projects) {
   return Effect.gen(function* () {
-    yield* Effect.logDebug("watchEvent", event);
-
     // A recording is a directory under `.liqvid/recordings/`; its removal (as
     // opposed to a change to its `recording-meta.json`) surfaces as a dir
     // event, so handle those here before bailing on non-file events.
