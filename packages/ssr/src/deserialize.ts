@@ -9,7 +9,7 @@ export function deserialize<
 >(
   obj: In,
 
-  deserializers: DeserMap = {} as DeserMap
+  deserializers: DeserMap = {} as DeserMap,
 ): DeserializedValue<In, DeserMap> {
   switch (typeof obj) {
     case "boolean":
@@ -28,7 +28,11 @@ export function deserialize<
       }
 
       if ("__deser" in obj && typeof obj.__deser === "string") {
-        if (obj.__deser === "Date" && "iso" in obj && typeof obj.iso === "string") {
+        if (
+          obj.__deser === "Date" &&
+          "iso" in obj &&
+          typeof obj.iso === "string"
+        ) {
           return new Date(obj.iso) as any;
         }
 
@@ -52,10 +56,10 @@ export function deserialize<
 
 /** Serialized value tagged with hint about how to deserialize it */
 export type SerializedValue<DeserKey extends string = string> = {
-  __deser: DeserKey;
+  readonly __deser: DeserKey;
 };
 
-export type SerializedDate = SerializedValue<"Date"> & { iso: string };
+export type SerializedDate = SerializedValue<"Date"> & { readonly iso: string };
 
 /** Any valid JSON value */
 export type JSONValue =
@@ -82,8 +86,9 @@ export type DeserKeys<T extends JSONValue> =
 export type DeserializedValue<
   In extends JSONValue,
   DeserMap extends Record<string, (value: unknown) => unknown>,
+  MaxDepth extends number = 5,
   LimitDepth extends unknown[] = [],
-> = LimitDepth["length"] extends 5
+> = LimitDepth["length"] extends MaxDepth
   ? any
   : In extends SerializedDate
     ? Date
@@ -94,6 +99,7 @@ export type DeserializedValue<
             [index in keyof In]: DeserializedValue<
               In[index],
               DeserMap,
+              MaxDepth,
               [...LimitDepth, any]
             >;
           }
@@ -102,7 +108,10 @@ export type DeserializedValue<
               [key in keyof In]: DeserializedValue<
                 In[key],
                 DeserMap,
+                MaxDepth,
                 [...LimitDepth, any]
               >;
             }
-          : unknown extends In ? unknown : In;
+          : unknown extends In
+            ? unknown
+            : In;

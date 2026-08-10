@@ -2,7 +2,6 @@ import {
   Context,
   Data,
   Effect,
-  Option,
   Schema,
   SchemaIssue,
   SchemaTransformation,
@@ -108,17 +107,18 @@ export const decodeEnvVar = Schema.decodeTo(
     decode: (s: unknown) =>
       interpolateEnvVars(s as string).pipe(
         Effect.mapError(
-          (e) =>
-            new SchemaIssue.InvalidValue(Option.some(s), {
-              message: e.toString(),
-            }),
+          (e) => new SchemaIssue.InvalidValue({ message: e.toString() }, s),
         ),
       ),
     encode: (s) =>
       Effect.fail(
-        new SchemaIssue.Forbidden(Option.some(s), {
-          message: "Encoding hashed passwords back to plain text is forbidden.",
-        }),
+        new SchemaIssue.Forbidden(
+          {
+            message:
+              "Encoding hashed passwords back to plain text is forbidden.",
+          },
+          s,
+        ),
       ),
   }),
 );
