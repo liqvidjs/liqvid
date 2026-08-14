@@ -32,9 +32,16 @@ export function serialize<T>(obj: T): SerializationResult<T> {
         return obj.toJSON() as any;
       }
 
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [key, serialize(value)]),
-      ) as any;
+      return Object.entries(obj).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined) {
+            acc[key] = serialize(value);
+          }
+
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      ) as SerializationResult<T>;
     default:
       throw new Error("unknown value");
   }

@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/ssr",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Server-side rendering helpers for Liqvid",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/ssr#readme",
   "bugs": {
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
