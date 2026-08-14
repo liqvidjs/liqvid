@@ -424,7 +424,7 @@ function LogGroup({
             onPointerEnter={() =>
               onAnnotations({ annotations: log.annotations, spans: log.spans })
             }
-            // onPointerLeave={() => onAnnotations(null)}
+            onPointerLeave={() => onAnnotations(null)}
           >
             <Time
               className={styles.timestamp}

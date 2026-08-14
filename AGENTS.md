@@ -16,9 +16,13 @@ Plugin: `cursor`. Legacy (ignore): `captioning`, `server`, `cli`, `dev-watcher`,
 
 Run from a package dir (e.g. `packages/utils`), or from root via `pnpm --filter <pkg> <cmd>`.
 
+**Important:** Call `tsc` and `biome` directly via `npx` instead of through `pnpm` scripts — `pnpm` does a full workspace re-install which is slow.
+
 ```bash
 pnpm build                       # clean + compile (ESM + CJS)
-pnpm lint --reporter=concise     # Biome auto-fix; use pnpm lint:agent, never bare biome
+npx tsc --noEmit                 # type-check only (fast, no build)
+npx biome check --fix --reporter=concise  # lint + format with auto-fix
+npx biome check --reporter=concise        # lint + format (no fix)
 pnpm test                        # all tests (--coverage for coverage)
 npx jest tests/foo.test.ts       # single file
 npx jest -t "pattern"            # by name

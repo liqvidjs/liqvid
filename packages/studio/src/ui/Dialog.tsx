@@ -14,6 +14,8 @@ import {
   useState,
 } from "react";
 
+import { useCommonTranslations } from "../utils/react";
+
 import styles from "./Dialog.module.css";
 
 // api
@@ -98,12 +100,18 @@ export function DialogRoot({
 
 export function DialogClose({
   className,
-  children = <XIcon size={24} />,
+  children,
   ...props
 }: React.ComponentProps<typeof Dialog.Close>) {
+  const c = useCommonTranslations();
+
   return (
-    <Dialog.Close className={clsx(styles.Close, className)} {...props}>
-      {children}
+    <Dialog.Close
+      aria-label={children ? undefined : c.close}
+      className={clsx(styles.Close, className)}
+      {...props}
+    >
+      {children ?? <XIcon size={24} />}
     </Dialog.Close>
   );
 }

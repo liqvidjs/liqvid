@@ -16,7 +16,7 @@ Use the styled wrappers from @packages/studio/src/ui/Dialog.tsx (`DialogRoot`, `
 
 ## Effect
 
-This package uses **Effect v4 beta** (`effect@4.0.0-beta.93`, `@effect/platform-node@4.0.0-beta.93`), NOT Effect v3. The API differs significantly from v3 docs/blog posts — do not copy v3 patterns.
+This package uses **Effect v4 RC** (`effect@4.0.0-rc.108`, `@effect/platform-node@4.0.0-rc.108`), NOT Effect v3. The API differs significantly from v3 docs/blog posts — do not copy v3 patterns.
 
 ### Imports
 
@@ -71,3 +71,11 @@ Define API errors with `Schema.TaggedErrorClass` and a `httpApiStatus` annotatio
 - Derive the browser client with `HttpApiClient.make(WebApi)` (see `src/client.mts`, exported as `LiqvidStudioApiClient`), run it with `clientRuntime.runPromise(...)` where `clientRuntime = ManagedRuntime.make(FetchHttpClient.layer)`.
 - Call endpoints as `client.<group>.<endpoint>({ query, payload })` inside `Effect.gen`.
 - Legacy zod operations in `src/api/contract.mts` + `makeFetcher` in `src/client.mts` still exist for not-yet-migrated routes; prefer the Effect client for new/migrated work.
+
+## File Paths
+
+Use branded path types from `effect-paths` instead of plain `string` for all file and directory paths. The package provides `AbsoluteDir`, `AbsoluteFile`, `RelativeDir`, `RelativeFile` brands (and unions like `AbsolutePath`, `AnyFile`, etc.). See `src/conventions.mts` for shared path constants.
+
+- Import `effect-paths` to activate augmented `node:path`, `node:fs`, `node:fs/promises`, and `process` signatures that accept/return branded types.
+- Construct branded values with the nominal constructors: `RelativeFile("project.json")`, `AbsoluteDir(cwd)`.
+- Use `readDirWithFileTypes` (from `src/utils/fs.mts`) instead of `fs.readDirectory()` + `fs.stat()` — it returns `Dirent` entries with brand-aware `parentPath` in a single call.

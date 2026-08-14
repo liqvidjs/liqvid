@@ -1,5 +1,6 @@
 allowBuilds:
-  '@parcel/watcher': set this to true or false
+  "@biomejs/biome": set this to true or false
+  "@parcel/watcher": set this to true or false
   "@swc/core": true
   bufferutil: set this to true or false
   core-js: set this to true or false
@@ -48,8 +49,8 @@ catalog:
   "@docusaurus/preset-classic": 3.10.2
   "@docusaurus/tsconfig": 3.10.2
   "@docusaurus/types": 3.10.2
-  "@effect/platform-bun": 4.0.0-beta.106
-  "@effect/platform-node": 4.0.0-beta.106
+  "@effect/platform-bun": 4.0.0-rc.109
+  "@effect/platform-node": 4.0.0-rc.109
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
@@ -96,7 +97,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-beta.106
+  effect: 4.0.0-rc.109
   execa: ^9.6.1
   fast-glob: 3.3.3
   handlebars: ^4.7.8
@@ -146,7 +147,7 @@ catalog:
 
 catalogs:
   dev:
-    "@biomejs/biome": 2.5.7
+    "@biomejs/biome": 2.5.8
     "@codemirror/autocomplete": 6.20.2
     "@codemirror/collab": 6.1.1
     "@codemirror/commands": 6.10.3
@@ -171,7 +172,7 @@ catalogs:
     "@docusaurus/theme-common": 3.10.1
     "@docusaurus/types": 3.10.1
     "@effect/language-service": ^0.87.2
-    "@effect/tsgo": ^0.36.0
+    "@effect/tsgo": ^0.36.4
     "@jest/globals": ^30.3.0
     "@lezer/highlight": 1.2.3
     "@testing-library/react": ^16.3.2
@@ -193,7 +194,7 @@ catalogs:
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.1
     csstype: ^3.2.3
-    effect: 4.0.0-beta.106
+    effect: 4.0.0-rc.109
     glslx: ^0.3.1
     jest: ^30.2.0
     js-yaml: ^4.1.1
@@ -239,7 +240,7 @@ catalogs:
     "@tldraw/tlschema": ^5.2.5
     "@types/react": ">=19"
     "@types/react-dom": ">=19"
-    effect: ">=4.0.0-beta.0"
+    effect: ">=4.0.0-rc.0"
     glslx: ^0.3.1
     hls.js: ^1.6.16
     jszip: ^3.10.1
@@ -273,15 +274,15 @@ overrides:
   "@lezer/highlight": 1.2.3
 
 minimumReleaseAgeExclude:
-  - "@biomejs/biome@2.5.7"
-  - "@biomejs/cli-darwin-arm64@2.5.7"
-  - "@biomejs/cli-darwin-x64@2.5.7"
-  - "@biomejs/cli-linux-arm64-musl@2.5.7"
-  - "@biomejs/cli-linux-arm64@2.5.7"
-  - "@biomejs/cli-linux-x64-musl@2.5.7"
-  - "@biomejs/cli-linux-x64@2.5.7"
-  - "@biomejs/cli-win32-arm64@2.5.7"
-  - "@biomejs/cli-win32-x64@2.5.7"
+  - "@biomejs/biome@2.5.7 || 2.5.8"
+  - "@biomejs/cli-darwin-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-darwin-x64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-arm64-musl@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-x64-musl@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-x64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-win32-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-win32-x64@2.5.7 || 2.5.8"
   - prettier@3.9.6
   - no-private-imports@0.0.4
   - "@next/env@16.3.0"
@@ -294,15 +295,15 @@ minimumReleaseAgeExclude:
   - "@next/swc-win32-arm64-msvc@16.3.0"
   - "@next/swc-win32-x64-msvc@16.3.0"
   - next@16.3.0
-  - '@effect/platform-bun@4.0.0-beta.106'
-  - '@effect/platform-node-shared@4.0.0-beta.106'
-  - '@effect/platform-node@4.0.0-beta.106'
-  - '@effect/tsgo-darwin-arm64@0.36.0'
-  - '@effect/tsgo-darwin-x64@0.36.0'
-  - '@effect/tsgo-linux-arm64@0.36.0'
-  - '@effect/tsgo-linux-arm@0.36.0'
-  - '@effect/tsgo-linux-x64@0.36.0'
-  - '@effect/tsgo-win32-arm64@0.36.0'
-  - '@effect/tsgo-win32-x64@0.36.0'
-  - '@effect/tsgo@0.36.0'
-  - effect@4.0.0-beta.106
+  - '@effect/platform-bun@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109'
+  - '@effect/platform-node-shared@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109'
+  - '@effect/platform-node@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109'
+  - "@effect/tsgo-darwin-arm64@0.36.0"
+  - "@effect/tsgo-darwin-x64@0.36.0"
+  - "@effect/tsgo-linux-arm64@0.36.0"
+  - "@effect/tsgo-linux-arm@0.36.0"
+  - "@effect/tsgo-linux-x64@0.36.0"
+  - "@effect/tsgo-win32-arm64@0.36.0"
+  - "@effect/tsgo-win32-x64@0.36.0"
+  - "@effect/tsgo@0.36.0"
+  - effect@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109

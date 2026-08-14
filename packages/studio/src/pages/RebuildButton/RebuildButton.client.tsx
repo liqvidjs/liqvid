@@ -1,5 +1,6 @@
 "use client";
 
+import { Duration } from "@liqvid/duration";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { SpinnerGapIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,7 +21,7 @@ import type TranslationsJson from "./.translations/en.json";
 type T = typeof TranslationsJson;
 
 /** Publish is offered instead of rebuild within this window after a build. */
-const PUBLISH_WINDOW_MS = 5 * 60 * 1000;
+const PUBLISH_WINDOW_MS = Duration.inMilliseconds({ minutes: 5 });
 
 /** @package */
 export function RebuildButtonClient({

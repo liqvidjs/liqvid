@@ -74,7 +74,7 @@ export function startProductionServer(state: LiqvidServerState) {
     // The production server runs for the lifetime of the process. Keep the
     // effect (and thus the service) alive, tearing the server down if the
     // fiber is interrupted.
-    yield* Effect.never.pipe(
+    return yield* Effect.never.pipe(
       Effect.ensuring(Effect.sync(() => server.close())),
     );
   });
