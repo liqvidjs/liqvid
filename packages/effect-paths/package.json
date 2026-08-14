@@ -20,6 +20,11 @@
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
+    },
+    "./vanilla": {
+      "@liqvid/dev": "./src/vanilla.ts",
+      "types": "./dist/types/vanilla.d.ts",
+      "import": "./dist/esm/vanilla.js"
     }
   },
   "types": "dist/types/index.d.ts",
@@ -51,5 +56,10 @@
   },
   "peerDependencies": {
     "effect": "catalog:peer"
+  },
+  "peerDependenciesMeta": {
+    "effect": {
+      "optional": true
+    }
   }
 }
