@@ -12,6 +12,8 @@ import { getPages } from "../utils/connect.mts";
 import { Pool } from "../utils/pool.mts";
 import { stitch } from "../utils/stitch.mts";
 
+import { renderAudio } from "./render-audio.mts";
+
 /**
   Render an interactive ("liquid") video as a static ("solid") video.
 */
@@ -28,7 +30,10 @@ export function solidify({
   width,
   start = 0,
   ...o // passthrough parameters
-}: Omit<Parameters<typeof assembleVideo>[0], "framesDir" | "padLen"> & {
+}: Omit<
+  Parameters<typeof assembleVideo>[0],
+  "audioFile" | "framesDir" | "padLen"
+> & {
   browserExecutable: string;
   colorScheme: "light" | "dark";
   concurrency: number;
@@ -44,7 +49,7 @@ export function solidify({
     const fs = yield* FileSystem.FileSystem;
 
     let step = 1;
-    const total = sequence ? 2 : 3;
+    const total = sequence ? 2 : 4;
 
     /* validation */
     // make sure chrome exists, or download it
@@ -59,11 +64,6 @@ export function solidify({
       );
       yield* Effect.logError("https://ffmpeg.org/download.html");
       return yield* Effect.die("ffmpeg not found");
-    }
-
-    // check that audio file exists
-    if (o.audioFile && !(yield* fs.exists(o.audioFile))) {
-      return yield* Effect.die(`audio file ${o.audioFile} not found`);
     }
 
     // validate start/end time
@@ -88,85 +88,117 @@ export function solidify({
       ? o.output
       : yield* fs.makeTempDirectory({ prefix: "liqvid.render" });
 
-    const { padLen, realDuration } = yield* Effect.acquireUseRelease(
-      getPages({
-        colorScheme,
-        concurrency,
-        executablePath,
-        height,
-        renderMode: "video",
-        url,
-        width,
-      }),
-      (pages) =>
-        Effect.gen(function* () {
-          yield* Effect.log(`acquired ${pages.length} players`);
-          // for (const page of pages) {
-          //   (page as any).client = yield* Effect.promise(() =>
-          //     page.createCDPSession(),
-          //   );
-          // }
-          const pool = new Pool(pages);
+    // audio file (rendered in parallel with frames)
+    const audioFile = sequence
+      ? undefined
+      : yield* fs.makeTempFile({ prefix: "liqvid.audio", suffix: ".wav" });
 
-          // get duration
-          const totalDuration = yield* Effect.promise(() =>
-            pages[0]!.evaluate(() => {
-              return player.playback.duration;
-            }),
-          );
+    // Capture frames (in parallel with audio rendering)
+    const captureFrames = Effect.scoped(
+      Effect.gen(function* () {
+        const pages = yield* getPages({
+          colorScheme,
+          concurrency,
+          executablePath,
+          height,
+          renderMode: "video",
+          url,
+          width,
+        });
 
-          if (start >= totalDuration) {
-            return yield* Effect.die("start cannot be after video endtime");
+        yield* Effect.log(`acquired ${pages.length} players`);
+        const pool = new Pool(pages);
+
+        // get duration
+        const totalDuration = yield* Effect.promise(() =>
+          pages[0]!.evaluate(() => {
+            return player.playback.duration;
+          }),
+        );
+
+        if (start >= totalDuration) {
+          return yield* Effect.die("start cannot be after video endtime");
+        }
+
+        const realDuration = (() => {
+          if (typeof duration === "number") {
+            return Math.min(totalDuration - start, duration);
+          } else if (typeof end === "number") {
+            return Math.min(end - start, totalDuration);
           }
+          return totalDuration - start;
+        })();
 
-          const realDuration = (() => {
-            if (typeof duration === "number") {
-              return Math.min(totalDuration - start, duration);
-            } else if (typeof end === "number") {
-              return Math.min(end - start, totalDuration);
-            }
-            return totalDuration - start;
-          })();
+        // calculate how many frames
+        const count = Math.ceil(o.fps * realDuration);
+        const padLen = String(count - 1).length;
 
-          // calculate how many frames
-          const count = Math.ceil(o.fps * realDuration);
-          const padLen = String(count - 1).length;
+        /* capture frames */
+        yield* Effect.log(`(${step++}/${total}) Capturing frames...`);
+        yield* captureRange({
+          count,
+          filename: (i) =>
+            path.join(
+              framesDir,
+              String(i).padStart(padLen, "0") + `.${o.imageFormat}`,
+            ),
+          imageFormat: o.imageFormat,
+          pool,
+          quality,
+          time: (i) => start + i / o.fps,
+        });
 
-          /* capture and assemble */
-          // capture frames
-          yield* Effect.log(`(${step++}/${total}) Capturing frames...`);
-          yield* captureRange({
-            count,
-            filename: (i) =>
-              path.join(
-                framesDir,
-                String(i).padStart(padLen, "0") + `.${o.imageFormat}`,
-              ),
-            imageFormat: o.imageFormat,
-            pool,
-            quality,
-            time: (i) => start + i / o.fps,
-          });
+        yield* Effect.logDebug("finished capturing frames");
 
-          return {
-            padLen,
-            realDuration,
-          };
-        }),
+        return {
+          padLen,
+          realDuration,
+        };
+      }),
+    ).pipe(Effect.withLogSpan("capture-frames"));
 
-      // close chrome instances
-      (pages) =>
-        Effect.all(
-          pages.map((page) =>
-            Effect.promise(() => page.close({ runBeforeUnload: false })),
-          ),
-        ),
-    ).pipe(Effect.scoped);
+    // Render audio in parallel (only when not outputting a sequence)
+    // Returns the audio file path on success, undefined if audio rendering fails
+    // (e.g., video has no audio sources)
+    const renderAudioTask =
+      !sequence && audioFile
+        ? Effect.gen(function* () {
+            yield* Effect.log(`(${step++}/${total}) Rendering audio...`);
+            yield* renderAudio({
+              browserExecutable: executablePath,
+              output: audioFile,
+              url,
+            });
+            yield* Effect.logDebug("finished rendering audio");
+            return audioFile as string | undefined;
+          }).pipe(
+            Effect.catch(() =>
+              Effect.gen(function* () {
+                yield* Effect.logWarning(
+                  "Audio rendering failed, continuing with silent video",
+                );
+                // Clean up the temp audio file since we won't use it
+                yield* fs.remove(audioFile).pipe(Effect.ignore);
+                return undefined;
+              }),
+            ),
+            Effect.withLogSpan("render-audio"),
+          )
+        : Effect.succeed(undefined as string | undefined);
+
+    // Run frame capture and audio rendering in parallel
+    const [{ padLen, realDuration }, renderedAudioFile] = yield* Effect.all(
+      [captureFrames, renderAudioTask],
+      { concurrency: "unbounded" },
+    );
+
+    yield* Effect.logDebug({ padLen, realDuration });
 
     // stitch them
     if (!sequence) {
       yield* Effect.log(`(${step++}/${total}) Assembling video...`);
       yield* assembleVideo({
+        audioFile: renderedAudioFile,
         duration: realDuration,
         framesDir,
         padLen,
@@ -175,12 +207,18 @@ export function solidify({
 
       // clean up tmp files
       yield* Effect.log("Cleaning up...");
-      yield* fs.remove(framesDir, { recursive: true });
+      yield* Effect.all([
+        fs.remove(framesDir, { recursive: true }),
+        renderedAudioFile ? fs.remove(renderedAudioFile) : Effect.void,
+      ]);
     }
 
     // done
     yield* Effect.log("Done!");
-  });
+  }).pipe(
+    Effect.withLogSpan("solidify"),
+    Effect.annotateLogs({ colorScheme, height, sequence, url, width }),
+  );
 }
 
 /**
@@ -201,7 +239,7 @@ function assembleVideo({
       formatValue: formatTime,
     });
 
-    stitchingBar.start(o.duration, 0);
+    stitchingBar.start(o.duration * 1_000, 0);
 
     yield* Effect.promise((signal) => {
       // ffmpeg stitch job

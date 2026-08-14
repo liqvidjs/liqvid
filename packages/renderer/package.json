@@ -16,43 +16,43 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/tasks/index.d.mts",
       "@liqvid/dev": "./src/index.mts",
+      "types": "./dist/types/tasks/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./convert": {
-      "types": "./dist/types/tasks/convert.d.mts",
       "@liqvid/dev": "./src/tasks/convert.mts",
+      "types": "./dist/types/tasks/convert.d.mts",
       "import": "./dist/esm/tasks/convert.mjs"
     },
     "./debug": {
-      "types": "./dist/types/tasks/debug.d.mts",
       "@liqvid/dev": "./src/tasks/debug.mts",
+      "types": "./dist/types/tasks/debug.d.mts",
       "import": "./dist/esm/tasks/debug.mjs"
     },
     "./join": {
-      "types": "./dist/types/tasks/join.d.mts",
       "@liqvid/dev": "./src/tasks/join.mts",
+      "types": "./dist/types/tasks/join.d.mts",
       "import": "./dist/esm/tasks/join.mjs"
     },
     "./render-audio": {
-      "types": "./dist/types/tasks/render-audio.d.mts",
       "@liqvid/dev": "./src/tasks/render-audio.mts",
+      "types": "./dist/types/tasks/render-audio.d.mts",
       "import": "./dist/esm/tasks/render-audio.mjs"
     },
     "./screenshot": {
-      "types": "./dist/types/tasks/screenshot.d.mts",
       "@liqvid/dev": "./src/tasks/screenshot.mts",
+      "types": "./dist/types/tasks/screenshot.d.mts",
       "import": "./dist/esm/tasks/screenshot.mjs"
     },
     "./solidify": {
-      "types": "./dist/types/tasks/solidify.d.mts",
       "@liqvid/dev": "./src/tasks/solidify.mts",
+      "types": "./dist/types/tasks/solidify.d.mts",
       "import": "./dist/esm/tasks/solidify.mjs"
     },
     "./thumbs": {
-      "types": "./dist/types/tasks/thumbs.d.mts",
       "@liqvid/dev": "./src/tasks/thumbs.mts",
+      "types": "./dist/types/tasks/thumbs.d.mts",
       "import": "./dist/esm/tasks/thumbs.mjs"
     }
   },
