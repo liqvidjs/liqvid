@@ -1,4 +1,24 @@
 {
+  "$defs": {
+    "Union_": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -9,316 +29,40 @@
       "additionalProperties": false,
       "properties": {
         "d": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "days": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "h": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "hours": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "m": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "milliseconds": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "minutes": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "ms": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "s": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "seconds": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "w": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         },
         "weeks": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["NaN"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["Infinity"],
-                  "type": "string"
-                },
-                {
-                  "enum": ["-Infinity"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/Union_"
         }
       },
       "type": "object"

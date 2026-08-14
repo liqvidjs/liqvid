@@ -47,6 +47,11 @@ export const ProjectJson = Schema.Struct({
 
   /** name of the project */
   name: Schema.String,
+
+  /** static parameters */
+  parameters: Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
+    Schema.optional,
+  ),
 });
 
 export type ProjectJson = (typeof ProjectJson)["Type"];
@@ -68,6 +73,14 @@ export const ProjectMeta = Schema.Struct({
   name: Schema.String,
   openGraph: Schema.Boolean,
 
+  /**
+   * Static parameters for this project. Used to interpolate path parameters
+   * when linking to projects. Format: `{ parameterName: [value1, value2, ...] }`
+   */
+  parameters: Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
+    Schema.optional,
+  ),
+
   path: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
 
   twitter: Schema.Boolean,
@@ -83,3 +96,9 @@ export type ProjectMeta = (typeof ProjectMeta)["Type"];
 export type SerializedProjectMeta = Omit<ProjectMeta, "duration"> & {
   duration: SerializedDuration;
 };
+
+/**
+ * Root parameters type for the liqvid.json configuration.
+ * Format: `{ parameterName: [value1, value2, ...] }`
+ */
+export type RootParameters = Record<string, string[]>;

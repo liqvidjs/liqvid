@@ -23,6 +23,7 @@ export {
   AutoGenProjectMeta,
   ProjectJson,
   ProjectMeta,
+  type RootParameters,
   type SerializedProjectMeta,
 } from "./project.mts";
 // Re-export providers

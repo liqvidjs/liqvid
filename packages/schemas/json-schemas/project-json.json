@@ -1,4 +1,17 @@
 {
+  "$defs": {
+    "Union_": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "enum": ["Infinity", "-Infinity", "NaN"],
+          "type": "string"
+        }
+      ]
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -25,42 +38,10 @@
               "minItems": 2,
               "prefixItems": [
                 {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "enum": ["NaN"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["Infinity"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["-Infinity"],
-                      "type": "string"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 },
                 {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "enum": ["NaN"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["Infinity"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["-Infinity"],
-                      "type": "string"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 }
               ],
               "type": "array"
@@ -69,42 +50,10 @@
               "additionalProperties": false,
               "properties": {
                 "height": {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "enum": ["NaN"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["Infinity"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["-Infinity"],
-                      "type": "string"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 },
                 "width": {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "enum": ["NaN"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["Infinity"],
-                      "type": "string"
-                    },
-                    {
-                      "enum": ["-Infinity"],
-                      "type": "string"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 }
               },
               "required": ["height", "width"],
@@ -140,6 +89,22 @@
     },
     "name": {
       "type": "string"
+    },
+    "parameters": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": ["name"],

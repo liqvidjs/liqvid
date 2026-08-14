@@ -1,8 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
-  "properties": {
-    "$schema": {
+  "$defs": {
+    "TemplateLiteral_": {
+      "pattern": "^\\{env:[\\s\\S]*?\\}$",
+      "type": "string"
+    },
+    "Union_": {
       "anyOf": [
         {
           "type": "string"
@@ -11,6 +13,38 @@
           "type": "null"
         }
       ]
+    },
+    "Union_1": {
+      "enum": ["preview", "production"],
+      "type": "string"
+    },
+    "Union_2": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "enum": ["Infinity", "-Infinity", "NaN"],
+          "type": "string"
+        }
+      ]
+    },
+    "Union_3": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "$ref": "#/$defs/Union_"
     },
     "backend": {
       "anyOf": [
@@ -100,6 +134,9 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "source": {
+                      "$ref": "#/$defs/Union_1"
                     }
                   },
                   "type": "object"
@@ -156,7 +193,14 @@
                             "modelPath": {
                               "anyOf": [
                                 {
-                                  "type": "string"
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "null"
@@ -191,23 +235,7 @@
                                     "maxLen": {
                                       "anyOf": [
                                         {
-                                          "anyOf": [
-                                            {
-                                              "type": "number"
-                                            },
-                                            {
-                                              "enum": ["NaN"],
-                                              "type": "string"
-                                            },
-                                            {
-                                              "enum": ["Infinity"],
-                                              "type": "string"
-                                            },
-                                            {
-                                              "enum": ["-Infinity"],
-                                              "type": "string"
-                                            }
-                                          ]
+                                          "$ref": "#/$defs/Union_2"
                                         },
                                         {
                                           "type": "null"
@@ -217,23 +245,7 @@
                                     "nThreads": {
                                       "anyOf": [
                                         {
-                                          "anyOf": [
-                                            {
-                                              "type": "number"
-                                            },
-                                            {
-                                              "enum": ["NaN"],
-                                              "type": "string"
-                                            },
-                                            {
-                                              "enum": ["Infinity"],
-                                              "type": "string"
-                                            },
-                                            {
-                                              "enum": ["-Infinity"],
-                                              "type": "string"
-                                            }
-                                          ]
+                                          "$ref": "#/$defs/Union_2"
                                         },
                                         {
                                           "type": "null"
@@ -294,6 +306,38 @@
                 }
               ]
             },
+            "renders": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "source": {
+                      "$ref": "#/$defs/Union_1"
+                    }
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "screenshots": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "source": {
+                      "$ref": "#/$defs/Union_1"
+                    }
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "thumbnails": {
               "anyOf": [
                 {
@@ -303,35 +347,12 @@
                       "additionalProperties": false,
                       "properties": {
                         "browserExecutable": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
+                          "$ref": "#/$defs/Union_"
                         },
                         "browserHeight": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -341,23 +362,7 @@
                         "browserWidth": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -378,23 +383,7 @@
                         "cols": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -404,23 +393,7 @@
                         "concurrency": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -430,23 +403,7 @@
                         "frequency": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -456,23 +413,7 @@
                         "height": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -493,23 +434,7 @@
                         "quality": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -519,23 +444,7 @@
                         "rows": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -545,23 +454,7 @@
                         "width": {
                           "anyOf": [
                             {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "enum": ["NaN"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["Infinity"],
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": ["-Infinity"],
-                                  "type": "string"
-                                }
-                              ]
+                              "$ref": "#/$defs/Union_2"
                             },
                             {
                               "type": "null"
@@ -570,6 +463,9 @@
                         }
                       },
                       "type": "object"
+                    },
+                    "source": {
+                      "$ref": "#/$defs/Union_1"
                     }
                   },
                   "required": ["defaults"],
@@ -609,16 +505,16 @@
                 "destination": {
                   "anyOf": [
                     {
-                      "type": "string"
+                      "$ref": "#/$defs/Union_3"
                     },
                     {
                       "additionalProperties": false,
                       "properties": {
                         "hosting": {
-                          "type": "string"
+                          "$ref": "#/$defs/Union_3"
                         },
                         "media": {
-                          "type": "string"
+                          "$ref": "#/$defs/Union_3"
                         }
                       },
                       "required": ["hosting", "media"],
@@ -709,8 +605,7 @@
                         "accessKeyId": {
                           "anyOf": [
                             {
-                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
-                              "type": "string"
+                              "$ref": "#/$defs/TemplateLiteral_"
                             },
                             {
                               "type": "null"
@@ -740,8 +635,7 @@
                         "secretAccessKey": {
                           "anyOf": [
                             {
-                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
-                              "type": "string"
+                              "$ref": "#/$defs/TemplateLiteral_"
                             },
                             {
                               "type": "null"
@@ -765,24 +659,10 @@
                   "type": "string"
                 },
                 "prefix": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 },
                 "region": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "$ref": "#/$defs/Union_"
                 }
               },
               "required": ["auth", "bucket", "domain"],
@@ -864,6 +744,22 @@
                 }
               ]
             }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rootParameters": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "type": "object"
         },
