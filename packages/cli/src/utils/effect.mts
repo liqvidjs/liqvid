@@ -2,7 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas";
+import chalk from "chalk";
 import {
+  Cause,
   Effect,
   FileSystem,
   type Layer,
@@ -58,7 +60,6 @@ export function loadLiqvidConfig({
 }: {
   configPath?: AbsoluteFile;
 } = {}) {
-  // TODO: should not have to specify this
   return (
     loadJson(LiqvidConfig, configPath) as Effect.Effect<
       LiqvidConfig,
@@ -66,14 +67,26 @@ export function loadLiqvidConfig({
       EnvFiles | FileSystem.FileSystem
     >
   ).pipe(
+    // Correct v4 API to capture full runtime failure traces
+    Effect.catchCause((cause) => {
+      // Look through the flattened reasons array in Effect v4
+      const failReason = cause.reasons.find(Cause.isFailReason);
+
+      if (failReason && failReason.error._tag === "FileDecodeError") {
+        // TODO: should not have to specify this
+        return Effect.fail<
+          string | FileDecodeError | PlatformError.PlatformError
+        >(
+          `The ${CONFIG_FILE} configuration file is invalid:\n${Cause.pretty(cause)}`,
+        );
+      }
+
+      // Safely bubble unmatched exceptions or defects back up the stack
+      return Effect.failCause(cause);
+    }),
     Effect.catchReason("PlatformError", "NotFound", () =>
       Effect.fail(
         "Liqvid config file not found. Please create a liqvid.json file in the root of your project.",
-      ),
-    ),
-    Effect.catchTag("FileDecodeError", (error) =>
-      Effect.fail(
-        `The ${CONFIG_FILE} configuration file is invalid: ${error.cause}`,
       ),
     ),
   );
@@ -99,6 +112,12 @@ export function loadJson<S extends Schema.Top>(
     return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
       onExcessProperty: "ignore",
     })(file).pipe(
+      Effect.tapError((cause) =>
+        Effect.gen(function* () {
+          console.dir(cause);
+          console.log(chalk.blue(file));
+        }),
+      ),
       Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
     );
   });

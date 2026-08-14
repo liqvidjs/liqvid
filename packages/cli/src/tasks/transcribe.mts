@@ -279,7 +279,7 @@ function resolveModel(whisperConfig: Partial<WhisperConfig>) {
       return whisper;
     }).pipe(
       Effect.tapCause((cause) =>
-        Effect.sync(() => console.dir(cause, { depth: null })),
+        Effect.sync(() => console.dir(cause, { colors: true, depth: null })),
       ),
     );
 

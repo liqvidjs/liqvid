@@ -20,9 +20,6 @@ export interface RenderOptions {
   /** Additional flags to pass to ffmpeg, applying to the audio file */
   audioArgs?: string;
 
-  /** Path to audio file */
-  audioFile?: string;
-
   /** Path to browser executable (optional, will auto-detect) */
   browserExecutable?: string;
 
@@ -118,7 +115,6 @@ export function renderVideo(options: RenderOptions) {
     // values for optional fields. We use type assertions here.
     yield* solidify({
       audioArgs: options.audioArgs as string,
-      audioFile: options.audioFile as string,
       browserExecutable: options.browserExecutable ?? "",
       colorScheme,
       concurrency,
@@ -167,12 +163,7 @@ export const render: CommandModule = {
         ["liqvid render -u http://localhost:8080/dist/"],
       ])
       // Selection
-      .group(["audio-file", "output", "url"], "What to render")
-      .option("audio-file", {
-        alias: "a",
-        desc: "Path to audio file",
-        normalize: true,
-      })
+      .group(["output", "url"], "What to render")
       .option("output", {
         alias: "o",
         default: "./video.mp4",
