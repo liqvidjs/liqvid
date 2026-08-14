@@ -19,15 +19,31 @@ export type AbsoluteDir<S extends string = string> = S &
   Brand.Brand<"AbsoluteDir">;
 export const AbsoluteDir = Brand.nominal() as ConstBranded<AbsoluteDir>;
 
+/** Schema for absolute directory path */
+export const SchemaAbsoluteDir = Schema.String.pipe(
+  Schema.fromBrand("AbsoluteDir", AbsoluteDir),
+);
+
 /** Absolute file path */
 export type AbsoluteFile<S extends string = string> = S &
   Brand.Brand<"AbsoluteFile">;
 export const AbsoluteFile = Brand.nominal() as ConstBranded<AbsoluteFile>;
 
+/** Schema for absolute file path */
+export const SchemaAbsoluteFile = Schema.String.pipe(
+  Schema.fromBrand("AbsoluteFile", AbsoluteFile),
+);
+
 /** Absolute file or directory path */
 export type AbsolutePath<S extends string = string> =
   | AbsoluteDir<S>
   | AbsoluteFile<S>;
+
+/** Schema for absolute file or directory path */
+export const SchemaAbsolutePath = Schema.Union([
+  SchemaAbsoluteDir,
+  SchemaAbsoluteFile,
+]);
 
 /* ------------------------------ relative ------------------------------ */
 /** Relative directory path */
@@ -35,15 +51,31 @@ export type RelativeDir<S extends string = string> = S &
   Brand.Brand<"RelativeDir">;
 export const RelativeDir = Brand.nominal() as ConstBranded<RelativeDir>;
 
+/** Schema for relative directory path */
+export const SchemaRelativeDir = Schema.String.pipe(
+  Schema.fromBrand("RelativeDir", RelativeDir),
+);
+
 /** Relative file path */
 export type RelativeFile<S extends string = string> = S &
   Brand.Brand<"RelativeFile">;
 export const RelativeFile = Brand.nominal() as ConstBranded<RelativeFile>;
 
+/** Schema for relative file path */
+export const SchemaRelativeFile = Schema.String.pipe(
+  Schema.fromBrand("RelativeFile", RelativeFile),
+);
+
 /** Relative file or directory path */
 export type RelativePath<S extends string = string> =
   | RelativeDir<S>
   | RelativeFile<S>;
+
+/** Schema for relative file or directory path */
+export const SchemaRelativePath = Schema.Union([
+  SchemaRelativeDir,
+  SchemaRelativeFile,
+]);
 
 /* ------------------------------ any ------------------------------ */
 /** Absolute/relative file/directory path */
@@ -53,8 +85,8 @@ export type AnyPath<S extends string = string> =
 
 /** Absolute/relative file path */
 export const SchemaAnyFile = Schema.Union([
-  Schema.String.pipe(Schema.fromBrand("AbsoluteFile", AbsoluteFile)),
-  Schema.String.pipe(Schema.fromBrand("RelativeFile", RelativeFile)),
+  SchemaAbsoluteFile,
+  SchemaRelativeFile,
 ]);
 
 /** Absolute/relative file path */

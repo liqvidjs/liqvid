@@ -151,7 +151,7 @@ function ScreenshotItem({
   };
 
   const alt = `Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`;
-  const src = `/api/liqvid/static${encodeURIComponent(`${projectPath}${variant.path}`)}`;
+  const src = `/api/liqvid/static/${encodeURIComponent(`/${projectPath}${variant.path}`)}`;
 
   return (
     <li className={styles.screenshotItem}>

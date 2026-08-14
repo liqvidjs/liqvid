@@ -6,12 +6,7 @@ import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas";
 import { assertType } from "@liqvid/utils";
 import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
-import {
-  type AbsoluteDir,
-  RelativeDir,
-  RelativeFile,
-  type RelativePath,
-} from "effect-paths";
+import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
 import {
   ASSETS_DIR,
@@ -20,7 +15,7 @@ import {
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
 } from "../conventions.mts";
-import { existenceOptional } from "../utils/effect.mts";
+import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
 import {
   ConflictError,
   InvalidError,
@@ -56,7 +51,7 @@ function getScreenshotsDir(
 /**
  * Generate a datetime-based folder name
  */
-function generateFolderName() {
+function generateFolderName(): RelativeDir {
   const now = new Date();
   return RelativeDir(now.toISOString().replace(/[:.]/g, "-"));
 }
@@ -78,44 +73,48 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           // Build the relative path prefix for image paths
           const paramNames = extractParameterNames(projectPath);
-          let imagePathPrefix = "/.liqvid";
+          let imagePathPrefix: RelativeDir = ASSETS_DIR;
           if (paramNames.length > 0 && params) {
-            const paramSubpath = paramNames.map((n) => params[n] ?? "").join("/");
-            imagePathPrefix = `/.liqvid/${paramSubpath}`;
+            const paramSubpath = paramNames.map((n) =>
+              RelativeDir(params[n] ?? ""),
+            );
+            imagePathPrefix = path.join(ASSETS_DIR, ...paramSubpath);
           }
 
           const fs = yield* FileSystem.FileSystem;
 
-          const entries = (yield* fs
-            .readDirectory(screenshotsDir)
-            .pipe(existenceOptional)).pipe(
-            Option.getOrElse(() => [] as string[]),
-          ) as RelativePath[];
+          const entries = (yield* readDirWithFileTypes(screenshotsDir).pipe(
+            existenceOptional,
+          )).pipe(Option.getOrElse(() => []));
           const screenshots: ScreenshotEntry[] = [];
 
           yield* Effect.all(
-            entries.map((name) =>
+            entries.map(([name, kind]) =>
               Effect.gen(function* () {
-                const dirname = path.join(screenshotsDir, name);
+                if (kind !== "Directory") return;
 
-                const stats = yield* fs.stat(dirname);
-                if (stats.type !== "Directory") return;
-                assertType<AbsoluteDir>(dirname);
+                const dirname = path.join(screenshotsDir, name);
 
                 const meta = yield* loadJson(
                   ScreenshotMeta,
                   path.join(dirname, SCREENSHOT_META_FILE),
                 );
 
+                const prefix = path.join(
+                  imagePathPrefix,
+                  SCREENSHOTS_DIR,
+                  name,
+                );
+
                 // Determine image path based on colorScheme
                 let imagePath: ScreenshotEntry["imagePath"];
                 if (meta.colorScheme === "both") {
                   imagePath = {
-                    dark: `${imagePathPrefix}/screenshots/${name}/dark.png`,
-                    light: `${imagePathPrefix}/screenshots/${name}/light.png`,
+                    dark: path.join(prefix, SCREENSHOT_FILE_DARK),
+                    light: path.join(prefix, SCREENSHOT_FILE_LIGHT),
                   };
                 } else {
-                  imagePath = `${imagePathPrefix}/screenshots/${name}/screenshot.png`;
+                  imagePath = path.join(prefix, SCREENSHOT_PNG);
                 }
 
                 screenshots.push({ id: name, imagePath, meta });
@@ -149,7 +148,10 @@ export const screenshotsLive = HttpApiBuilder.group(
           const paramNames = extractParameterNames(projectPath);
           if (paramNames.length > 0) {
             const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
-            yield* ensureParamsMarker(baseAssetsDir as AbsoluteDir, projectPath);
+            yield* ensureParamsMarker(
+              baseAssetsDir as AbsoluteDir,
+              projectPath,
+            );
           }
 
           const screenshotsDir = getScreenshotsDir(projectPath, payload.params);
@@ -166,12 +168,12 @@ export const screenshotsLive = HttpApiBuilder.group(
           const colorScheme = payload.colorScheme ?? "light";
 
           // Build the relative path prefix for image paths
-          let imagePathPrefix = "/" + ASSETS_DIR;
+          let imagePathPrefix: RelativeDir = ASSETS_DIR;
           if (paramNames.length > 0 && payload.params) {
-            const paramSubpath = paramNames
-              .map((n) => payload.params![n] ?? "")
-              .join("/");
-            imagePathPrefix = `/${ASSETS_DIR}/${paramSubpath}`;
+            const paramSubpath = paramNames.map((name) =>
+              RelativeDir(payload.params![name] ?? ""),
+            );
+            imagePathPrefix = path.join(ASSETS_DIR, ...paramSubpath);
           }
 
           let imagePath: ScreenshotEntry["imagePath"];
@@ -222,10 +224,7 @@ export const screenshotsLive = HttpApiBuilder.group(
             };
           } else {
             // Capture single screenshot
-            const outputPath = path.join(
-              folderPath,
-              RelativeFile("screenshot.png"),
-            );
+            const outputPath = path.join(folderPath, SCREENSHOT_PNG);
 
             yield* screenshot({
               ...payload,
@@ -265,6 +264,7 @@ export const screenshotsLive = HttpApiBuilder.group(
           }),
           Effect.catchTags({
             PlatformError: Effect.die,
+            UnknownError: Effect.die,
           }),
         ),
       )

@@ -13,7 +13,7 @@ import {
   HttpApiGroup,
   OpenApi,
 } from "effect/unstable/httpapi";
-import { RelativeDir } from "effect-paths";
+import { RelativeDir, SchemaRelativeDir } from "effect-paths";
 
 import {
   ConflictError,
@@ -25,25 +25,26 @@ import { AudioEntry, RenderEntry, ThumbsData } from "./schemas.mts";
 
 const projectPathQuery = Schema.Struct({
   /** path to the project */
-  projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+  projectPath: SchemaRelativeDir,
 });
 
 /** Query parameters for endpoints that support parameterized projects */
 const projectPathWithParamsQuery = Schema.Struct({
-  /** path to the project */
-  projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
   /**
    * JSON-encoded parameter values for parameterized projects.
    * e.g., `{"lang":"en","locale":"US"}`
    */
-  params: Schema.optional(Schema.String),
+  params: Schema.String.pipe(Schema.optional),
+
+  /** path to the project */
+  projectPath: SchemaRelativeDir,
 });
 
 /* ------------------------------ audio ------------------------------ */
 const audioGroup = HttpApiGroup.make("audio")
   .add(
     HttpApiEndpoint.get("list", "/audio", {
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({
         items: Schema.Array(AudioEntry),
         /** Whether the project is configured for multiple audio renderings */
@@ -54,7 +55,7 @@ const audioGroup = HttpApiGroup.make("audio")
   .add(
     HttpApiEndpoint.post("generate", "/audio/generate", {
       payload: Schema.Null,
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({
         /** Id (folder name, or "default" in single-audio mode) */
         id: Schema.String,
@@ -70,7 +71,7 @@ const audioGroup = HttpApiGroup.make("audio")
         /** New name for the audio rendering */
         newName: Schema.String,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({
         /** New audio id (folder name) */
         newId: Schema.String,
@@ -84,7 +85,7 @@ const audioGroup = HttpApiGroup.make("audio")
         /** Audio id (folder name) to delete */
         id: Schema.String,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({ success: Schema.Boolean }),
     }).annotate(
       OpenApi.Summary,
@@ -104,7 +105,7 @@ const captionsGroup = HttpApiGroup.make("captions")
         /** Whisper model to use */
         modelName: Schema.optional(Schema.String),
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({
         /** Status of the generation */
         status: Schema.Literals(["started", "already_generating"]),
@@ -118,7 +119,7 @@ const captionsGroup = HttpApiGroup.make("captions")
         /** Audio id (folder name, or "default") whose captions to delete */
         audioId: Schema.String,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({ success: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Delete captions for an audio rendering"),
   )
@@ -166,9 +167,7 @@ const rendersGroup = HttpApiGroup.make("renders")
         width: Schema.optional(Schema.Number),
       }),
       query: Schema.Struct({
-        projectPath: Schema.String.pipe(
-          Schema.fromBrand("RelativeDir", RelativeDir),
-        ),
+        projectPath: SchemaRelativeDir,
       }),
       success: Schema.Struct({
         /** Render ID (datetime folder name) */
@@ -301,9 +300,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     HttpApiEndpoint.get("checkExists", "/screenshots/check-exists", {
       query: Schema.Struct({
         filename: targetFilename,
-        projectPath: Schema.String.pipe(
-          Schema.fromBrand("RelativeDir", RelativeDir),
-        ),
+        projectPath: SchemaRelativeDir,
       }),
       success: Schema.Struct({ exists: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Check whether a project image exists"),

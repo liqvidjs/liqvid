@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { SchemaRelativeDir, SchemaRelativeFile } from "effect-paths";
 
 /**
  * Color scheme options for screenshots
@@ -31,17 +32,17 @@ export type ScreenshotMeta = (typeof ScreenshotMeta)["Type"];
  */
 export const ScreenshotEntry = Schema.Struct({
   /** Folder name (datetime-based) */
-  id: Schema.String,
+  id: SchemaRelativeDir,
 
   /**
    * Path to the screenshot image.
    * For "both" mode, this will be an object with light and dark paths.
    */
   imagePath: Schema.Union([
-    Schema.String,
+    SchemaRelativeFile,
     Schema.Struct({
-      dark: Schema.String,
-      light: Schema.String,
+      dark: SchemaRelativeFile,
+      light: SchemaRelativeFile,
     }),
   ]),
 

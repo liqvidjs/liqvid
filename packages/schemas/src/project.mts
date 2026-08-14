@@ -2,7 +2,7 @@ import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
 import { Effect, Schema } from "effect";
-import { RelativeDir } from "effect-paths";
+import { SchemaRelativeDir } from "effect-paths";
 
 export const AspectRatio = Schema.Struct({
   height: Schema.Number,
@@ -81,7 +81,7 @@ export const ProjectMeta = Schema.Struct({
     Schema.optional,
   ),
 
-  path: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+  path: SchemaRelativeDir,
 
   twitter: Schema.Boolean,
 });

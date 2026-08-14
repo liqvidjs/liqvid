@@ -1,6 +1,6 @@
 import { ProjectMeta } from "@liqvid/schemas";
 import { Schema } from "effect";
-import { RelativeDir } from "effect-paths";
+import { RelativeDir, SchemaRelativeDir } from "effect-paths";
 
 /** Message sent when a project is created */
 export const NewProjectMessage = Schema.Struct({
@@ -15,7 +15,7 @@ export const NewProjectMessage = Schema.Struct({
 export const DeleteProjectMessage = Schema.Struct({
   data: Schema.Struct({
     /** ID of the project that was deleted */
-    path: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+    path: SchemaRelativeDir,
   }),
   type: Schema.Literal("deleteProject"),
 }).pipe(

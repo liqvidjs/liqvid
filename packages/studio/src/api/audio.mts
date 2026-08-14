@@ -8,7 +8,6 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
 import {
-  ASSETS_DIR,
   AUDIO_DIR,
   AUDIO_WAV,
   CAPTIONS_FILE,
@@ -24,6 +23,7 @@ import {
 } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
+import { getParameterizedAssetsDir } from "../utils/parameters.mts";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";
@@ -34,8 +34,17 @@ const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 export const SINGLE_AUDIO_ID = RelativeDir("default");
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
-function getAudioBaseDir(projectPath: RelativeDir) {
-  return path.join(getRoutesDir(), projectPath, ASSETS_DIR, AUDIO_DIR);
+function getAudioBaseDir(
+  projectPath: RelativeDir,
+  params?: Record<string, string>,
+) {
+  const routesDir = getRoutesDir();
+  const assetsDir = getParameterizedAssetsDir(
+    routesDir as AbsoluteDir,
+    projectPath,
+    params,
+  );
+  return path.join(assetsDir, AUDIO_DIR);
 }
 
 /**
@@ -48,8 +57,9 @@ export function getAudioDir(
   projectPath: RelativeDir,
   id: RelativeDir,
   multiple: boolean,
+  params?: Record<string, string>,
 ) {
-  const base = getAudioBaseDir(projectPath);
+  const base = getAudioBaseDir(projectPath, params);
   return multiple ? path.join(base, id) : base;
 }
 
@@ -94,12 +104,17 @@ function generateAudioId() {
 export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
   handlers
     // list existing audio renderings for a project
-    .handle("list", ({ query: { projectPath } }) =>
+    .handle("list", ({ query: { projectPath, params: paramsJson } }) =>
       Effect.gen(function* () {
+        // Parse params if provided
+        const params = paramsJson
+          ? (JSON.parse(paramsJson) as Record<string, string>)
+          : undefined;
+
         const config = yield* getConfig();
         const multiple = shouldGenerateMultipleAudio(config);
 
-        const baseDir = getAudioBaseDir(projectPath);
+        const baseDir = getAudioBaseDir(projectPath, params);
 
         /** Build an entry for one audio directory, or none if it has no meta. */
         const readEntry = (id: string, audioDir: AbsoluteDir) =>
@@ -155,13 +170,18 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
       ),
     )
     // render a new audio track
-    .handle("generate", ({ query: { projectPath } }) =>
+    .handle("generate", ({ query: { projectPath, params: paramsJson } }) =>
       Effect.gen(function* () {
+        // Parse params if provided
+        const params = paramsJson
+          ? (JSON.parse(paramsJson) as Record<string, string>)
+          : undefined;
+
         const config = yield* getConfig();
         const multiple = shouldGenerateMultipleAudio(config);
 
         const id = multiple ? generateAudioId() : SINGLE_AUDIO_ID;
-        const audioDir = getAudioDir(projectPath, id, multiple);
+        const audioDir = getAudioDir(projectPath, id, multiple, params);
 
         const fs = yield* FileSystem.FileSystem;
         yield* fs.makeDirectory(audioDir, { recursive: true });
@@ -199,71 +219,93 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
       }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     )
     // rename an audio rendering (multiple-audio mode only)
-    .handle("rename", ({ payload: { id, newName }, query: { projectPath } }) =>
-      Effect.gen(function* () {
-        const config = yield* getConfig();
+    .handle(
+      "rename",
+      ({
+        payload: { id, newName },
+        query: { projectPath, params: paramsJson },
+      }) =>
+        Effect.gen(function* () {
+          // Parse params if provided
+          const params = paramsJson
+            ? (JSON.parse(paramsJson) as Record<string, string>)
+            : undefined;
 
-        if (!shouldGenerateMultipleAudio(config)) {
-          return yield* new InvalidError({
-            message: "Cannot rename audio unless media.audio.multiple is set",
-          });
-        }
+          const config = yield* getConfig();
 
-        // Sanitize new name (remove path separators and invalid chars)
-        const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
+          if (!shouldGenerateMultipleAudio(config)) {
+            return yield* new InvalidError({
+              message: "Cannot rename audio unless media.audio.multiple is set",
+            });
+          }
 
-        if (!sanitizedName) {
-          return yield* new InvalidError({ message: "Invalid name" });
-        }
+          // Sanitize new name (remove path separators and invalid chars)
+          const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
-        const fs = yield* FileSystem.FileSystem;
+          if (!sanitizedName) {
+            return yield* new InvalidError({ message: "Invalid name" });
+          }
 
-        const baseDir = getAudioBaseDir(projectPath);
-        const oldPath = path.join(baseDir, RelativeDir(id));
-        const newPath = path.join(baseDir, RelativeDir(sanitizedName));
+          const fs = yield* FileSystem.FileSystem;
 
-        if (!(yield* fs.exists(oldPath))) {
-          return yield* new NotFoundError({ message: "Audio not found" });
-        }
+          const baseDir = getAudioBaseDir(projectPath, params);
+          const oldPath = path.join(baseDir, RelativeDir(id));
+          const newPath = path.join(baseDir, RelativeDir(sanitizedName));
 
-        if (yield* fs.exists(newPath)) {
-          return yield* new ConflictError({
-            message: "An audio rendering with this name already exists",
-          });
-        }
+          if (!(yield* fs.exists(oldPath))) {
+            return yield* new NotFoundError({ message: "Audio not found" });
+          }
 
-        yield* fs.rename(oldPath, newPath);
+          if (yield* fs.exists(newPath)) {
+            return yield* new ConflictError({
+              message: "An audio rendering with this name already exists",
+            });
+          }
 
-        return { newId: sanitizedName };
-      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+          yield* fs.rename(oldPath, newPath);
+
+          return { newId: sanitizedName };
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     )
     // delete an audio rendering (and any associated captions)
-    .handle("delete", ({ payload: { id }, query: { projectPath } }) =>
-      Effect.gen(function* () {
-        const config = yield* getConfig();
-        const multiple = shouldGenerateMultipleAudio(config);
+    .handle(
+      "delete",
+      ({ payload: { id }, query: { projectPath, params: paramsJson } }) =>
+        Effect.gen(function* () {
+          // Parse params if provided
+          const params = paramsJson
+            ? (JSON.parse(paramsJson) as Record<string, string>)
+            : undefined;
 
-        const fs = yield* FileSystem.FileSystem;
-        const audioDir = getAudioDir(projectPath, RelativeDir(id), multiple);
+          const config = yield* getConfig();
+          const multiple = shouldGenerateMultipleAudio(config);
 
-        if (multiple) {
-          yield* fs.remove(audioDir, { force: true, recursive: true });
-        } else {
-          // Single-audio mode: audio and captions share `.liqvid/audio`, so
-          // only remove the audio-related files (leave other content intact).
+          const fs = yield* FileSystem.FileSystem;
+          const audioDir = getAudioDir(
+            projectPath,
+            RelativeDir(id),
+            multiple,
+            params,
+          );
 
-          for (const file of [
-            AUDIO_WAV,
-            AUDIO_META_FILE,
-            CAPTIONS_FILE,
-            RICH_TRANSCRIPT,
-            CAPTIONS_META,
-          ]) {
-            yield* fs.remove(path.join(audioDir, file), { force: true });
+          if (multiple) {
+            yield* fs.remove(audioDir, { force: true, recursive: true });
+          } else {
+            // Single-audio mode: audio and captions share `.liqvid/audio`, so
+            // only remove the audio-related files (leave other content intact).
+
+            for (const file of [
+              AUDIO_WAV,
+              AUDIO_META_FILE,
+              CAPTIONS_FILE,
+              RICH_TRANSCRIPT,
+              CAPTIONS_META,
+            ]) {
+              yield* fs.remove(path.join(audioDir, file), { force: true });
+            }
           }
-        }
 
-        return { success: true };
-      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+          return { success: true };
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     ),
 );

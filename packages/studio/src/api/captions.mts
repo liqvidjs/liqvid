@@ -46,108 +46,134 @@ export const captionsLive = HttpApiBuilder.group(
   (handlers) =>
     handlers
       // generate captions for a specific audio rendering
-      .handle("generate", ({ payload: { audioId }, query: { projectPath } }) =>
-        Effect.gen(function* () {
-          const fs = yield* FileSystem.FileSystem;
+      .handle(
+        "generate",
+        ({
+          payload: { audioId },
+          query: { projectPath, params: paramsJson },
+        }) =>
+          Effect.gen(function* () {
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
 
-          const { jobs } = getServerState();
-          const config = yield* getConfig();
+            const fs = yield* FileSystem.FileSystem;
 
-          const multiple = config.media?.audio?.multiple ?? false;
-          const audioDir = getAudioDir(
-            projectPath,
-            RelativeDir(audioId),
-            multiple,
-          );
+            const { jobs } = getServerState();
+            const config = yield* getConfig();
 
-          // The audio must have been rendered first.
-          const audioFile = path.join(audioDir, AUDIO_WAV);
-          if (!(yield* fs.exists(audioFile))) {
-            return yield* new NotFoundError({
-              message: "Audio not found; render audio before captioning",
-            });
-          }
+            const multiple = config.media?.audio?.multiple ?? false;
+            const audioDir = getAudioDir(
+              projectPath,
+              RelativeDir(audioId),
+              multiple,
+              params,
+            );
 
-          // Check if a captioning job for this audio is already running.
-          const jobName = captioningJobName(projectPath, audioId);
-          for (const job of jobs.new.values()) {
-            if (job.name === jobName && job.state === "running") {
-              return { status: "already_generating" as const };
+            // The audio must have been rendered first.
+            const audioFile = path.join(audioDir, AUDIO_WAV);
+            if (!(yield* fs.exists(audioFile))) {
+              return yield* new NotFoundError({
+                message: "Audio not found; render audio before captioning",
+              });
             }
-          }
 
-          const initialMeta: CaptionsMeta = {
-            captionsPath: path.join(audioDir, CAPTIONS_FILE),
-            createdAt: new Date().toISOString(),
-            status: "generating",
-            transcriptPath: path.join(audioDir, RICH_TRANSCRIPT),
-          };
+            // Check if a captioning job for this audio is already running.
+            const jobName = captioningJobName(projectPath, audioId);
+            for (const job of jobs.new.values()) {
+              if (job.name === jobName && job.state === "running") {
+                return { status: "already_generating" as const };
+              }
+            }
 
-          // Start transcription in the background. The initial metadata is
-          // written inside the job so that no `yield*` occurs between the
-          // "already running" check and `createJob` (which registers the
-          // running job synchronously), avoiding a check-then-create race.
-          const fiber = Effect.gen(function* () {
-            yield* writeCaptionsMeta(audioDir, initialMeta);
+            const initialMeta: CaptionsMeta = {
+              captionsPath: path.join(audioDir, CAPTIONS_FILE),
+              createdAt: new Date().toISOString(),
+              status: "generating",
+              transcriptPath: path.join(audioDir, RICH_TRANSCRIPT),
+            };
 
-            yield* transcribe({
-              audioFile,
-              outputDir: audioDir,
-              whisperConfig: config.media?.captioning?.smartWhisperOptions,
+            // Start transcription in the background. The initial metadata is
+            // written inside the job so that no `yield*` occurs between the
+            // "already running" check and `createJob` (which registers the
+            // running job synchronously), avoiding a check-then-create race.
+            const fiber = Effect.gen(function* () {
+              yield* writeCaptionsMeta(audioDir, initialMeta);
+
+              yield* transcribe({
+                audioFile,
+                outputDir: audioDir,
+                whisperConfig: config.media?.captioning?.smartWhisperOptions,
+              });
+            }).pipe(
+              Effect.tap(() => Effect.logDebug("transcribing complete")),
+              Effect.tap(() =>
+                writeCaptionsMeta(audioDir, {
+                  ...initialMeta,
+                  status: "completed",
+                }),
+              ),
+              Effect.tapError((error) =>
+                Effect.logError("Failed to generate captions:", error),
+              ),
+              Effect.tapError(() =>
+                writeCaptionsMeta(audioDir, {
+                  ...initialMeta,
+                  status: "failed",
+                }),
+              ),
+            );
+
+            yield* createJob(jobName, fiber, {
+              path: projectPath,
             });
-          }).pipe(
-            Effect.tap(() => Effect.logDebug("transcribing complete")),
-            Effect.tap(() =>
-              writeCaptionsMeta(audioDir, {
-                ...initialMeta,
-                status: "completed",
-              }),
-            ),
-            Effect.tapError((error) =>
-              Effect.logError("Failed to generate captions:", error),
-            ),
-            Effect.tapError(() =>
-              writeCaptionsMeta(audioDir, {
-                ...initialMeta,
-                status: "failed",
-              }),
-            ),
-          );
 
-          yield* createJob(jobName, fiber, {
-            path: projectPath,
-          });
-
-          return { status: "started" as const };
-        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+            return { status: "started" as const };
+          }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       )
       // delete captions for an audio rendering (preserving the audio itself)
-      .handle("delete", ({ payload: { audioId }, query: { projectPath } }) =>
-        Effect.gen(function* () {
-          const config = yield* getConfig();
+      .handle(
+        "delete",
+        ({
+          payload: { audioId },
+          query: { projectPath, params: paramsJson },
+        }) =>
+          Effect.gen(function* () {
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
 
-          const multiple = config.media?.audio?.multiple ?? false;
-          const audioDir = getAudioDir(
-            projectPath,
-            RelativeDir(audioId),
-            multiple,
-          );
+            const config = yield* getConfig();
 
-          const fs = yield* FileSystem.FileSystem;
+            const multiple = config.media?.audio?.multiple ?? false;
+            const audioDir = getAudioDir(
+              projectPath,
+              RelativeDir(audioId),
+              multiple,
+              params,
+            );
 
-          const metaPath = path.join(audioDir, CAPTIONS_META);
-          if (!(yield* fs.exists(metaPath))) {
-            return yield* new NotFoundError({
-              message: "No captions found for this audio",
-            });
-          }
+            const fs = yield* FileSystem.FileSystem;
 
-          // Remove only captions-related files; leave the audio intact.
-          for (const file of [CAPTIONS_META, CAPTIONS_FILE, RICH_TRANSCRIPT]) {
-            yield* fs.remove(path.join(audioDir, file), { force: true });
-          }
+            const metaPath = path.join(audioDir, CAPTIONS_META);
+            if (!(yield* fs.exists(metaPath))) {
+              return yield* new NotFoundError({
+                message: "No captions found for this audio",
+              });
+            }
 
-          return { success: true };
-        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+            // Remove only captions-related files; leave the audio intact.
+            for (const file of [
+              CAPTIONS_META,
+              CAPTIONS_FILE,
+              RICH_TRANSCRIPT,
+            ]) {
+              yield* fs.remove(path.join(audioDir, file), { force: true });
+            }
+
+            return { success: true };
+          }).pipe(Effect.catchTag("PlatformError", Effect.die)),
       ),
 );

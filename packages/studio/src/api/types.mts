@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { RelativeFile } from "effect-paths";
+import { SchemaRelativeFile } from "effect-paths";
 
 export const SaveRecordingMetadata = Schema.Struct({
   /** duration */
@@ -13,10 +13,7 @@ export const SaveRecordingMetadata = Schema.Struct({
 
   plugins: Schema.Array(
     Schema.Struct({
-      filename: Schema.String.pipe(
-        Schema.fromBrand("RelativeFile", RelativeFile),
-        Schema.optional,
-      ),
+      filename: SchemaRelativeFile.pipe(Schema.optional),
       isBlob: Schema.Boolean,
       key: Schema.String,
     }),
