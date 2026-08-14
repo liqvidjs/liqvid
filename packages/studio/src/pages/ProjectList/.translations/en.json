@@ -26,6 +26,12 @@
   "openInFinder": "Open in Finder",
   "preview": "Preview",
   "renders": {
+    "delete": "Delete render",
+    "deleteDialog": {
+      "action": "Delete",
+      "confirm": "Are you sure you want to delete this render? This action cannot be undone.",
+      "title": "Delete Render"
+    },
     "dialog": {
       "action": "Start Render",
       "colorScheme": "Color Scheme",

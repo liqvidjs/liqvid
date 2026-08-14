@@ -49,6 +49,8 @@ interface ScreenshotsSectionProps {
   duration: Duration;
   productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
 }
 
 type ConfirmState = {
@@ -65,6 +67,7 @@ async function copyScreenshot(
   screenshotId: string,
   target: CopyTarget,
   variant?: VariantLabel,
+  params?: Record<string, string>,
 ) {
   try {
     await clientRuntime.runPromise(
@@ -79,7 +82,10 @@ async function copyScreenshot(
               : undefined,
             targetFilename: target,
           },
-          query: { projectPath },
+          query: {
+            params: params ? JSON.stringify(params) : undefined,
+            projectPath,
+          },
         });
       }),
     );
@@ -224,6 +230,7 @@ export function ScreenshotsSection({
   duration,
   productionServerPort,
   project,
+  selectedParams,
 }: ScreenshotsSectionProps) {
   const t = useTranslations<T>().screenshots;
   const { isOpen } = useDialogApi();
@@ -248,6 +255,11 @@ export function ScreenshotsSection({
 
   const projectPath = project.path;
 
+  // Serialize params for use as dependency
+  const paramsJson = selectedParams
+    ? JSON.stringify(selectedParams)
+    : undefined;
+
   const loadScreenshots = useCallback(async () => {
     setIsLoading(true);
 
@@ -256,7 +268,10 @@ export function ScreenshotsSection({
         const client = yield* LiqvidStudioApiClient;
 
         const screenshots = yield* client.screenshots.list({
-          query: { projectPath },
+          query: {
+            params: paramsJson,
+            projectPath,
+          },
         });
 
         setScreenshots(screenshots);
@@ -264,7 +279,7 @@ export function ScreenshotsSection({
     );
 
     setIsLoading(false);
-  }, [projectPath]);
+  }, [paramsJson, projectPath]);
 
   useEffect(() => {
     if (isOpen) {
@@ -293,6 +308,7 @@ export function ScreenshotsSection({
             onCaptured={loadScreenshots}
             productionServerPort={productionServerPort}
             project={project}
+            selectedParams={selectedParams}
           />
         </DialogRoot>
 

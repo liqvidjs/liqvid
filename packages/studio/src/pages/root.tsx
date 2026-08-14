@@ -75,6 +75,7 @@ export async function Homepage() {
             initialFolderView={initialFolderView}
             productionServerPort={productionServerPort}
             projects={serialize(projects)}
+            rootParameters={config.rootParameters ?? {}}
           />
         </main>
       </WebSocketProvider>

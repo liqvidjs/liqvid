@@ -352,6 +352,7 @@ function handleProjectJson({ dirname, filename, projects, relative }: Context) {
       duration:
         projects[projectPath]?.duration ?? new Duration({ seconds: 1000 }),
       openGraph: hasOpenGraphImage(dirname),
+      parameters: project.parameters,
       path: projectPath,
       twitter: hasTwitterImage(dirname),
     };
@@ -406,6 +407,7 @@ function createProject({ dirname, filename, projects, relative }: Context) {
       aspectRatio: parseAspectRatio(project.aspectRatio),
       duration,
       openGraph: hasOpenGraphImage(dirname),
+      parameters: project.parameters,
       path: path.dirname(relative),
       twitter: hasTwitterImage(dirname),
     };

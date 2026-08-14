@@ -21,6 +21,11 @@ import { getServerState } from "../initialize.mts";
 import { NotFoundError } from "../utils/errors.mts";
 import { createJob } from "../utils/jobs.mts";
 import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
+import {
+  ensureParamsMarker,
+  extractParameterNames,
+  getParameterizedAssetsDir,
+} from "../utils/parameters.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -113,17 +118,24 @@ function readThumbsJob(thumbsBaseDir: AbsoluteDir) {
 export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
   // list thumbnails for project
   handlers
-    .handle("list", ({ query: { projectPath } }) =>
+    .handle("list", ({ query: { projectPath, params: paramsJson } }) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        // read directories
-        const thumbsBaseDir = path.join(
-          getRoutesDir(),
+        // Parse params if provided
+        const params = paramsJson
+          ? (JSON.parse(paramsJson) as Record<string, string>)
+          : undefined;
+
+        const routesDir = getRoutesDir();
+        const assetsDir = getParameterizedAssetsDir(
+          routesDir as AbsoluteDir,
           projectPath,
-          ASSETS_DIR,
-          THUMBS_DIR,
+          params,
         );
+
+        // read directories
+        const thumbsBaseDir = path.join(assetsDir, THUMBS_DIR);
 
         if (!(yield* fs.exists(thumbsBaseDir))) {
           return yield* new NotFoundError({
@@ -165,12 +177,22 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const fs = yield* FileSystem.FileSystem;
 
         const config = yield* getConfig();
+        const routesDir = getRoutesDir();
 
-        const thumbsBaseDir = path.join(
-          getRoutesDir(),
+        // Ensure params marker exists for parameterized projects
+        const paramNames = extractParameterNames(projectPath);
+        if (paramNames.length > 0) {
+          const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
+          yield* ensureParamsMarker(baseAssetsDir as AbsoluteDir, projectPath);
+        }
+
+        const assetsDir = getParameterizedAssetsDir(
+          routesDir as AbsoluteDir,
           projectPath,
-          THUMBS_BASE_DIR,
+          payload.params,
         );
+
+        const thumbsBaseDir = path.join(assetsDir, THUMBS_DIR);
 
         const renderSource = config.media?.thumbnails?.source ?? "preview";
 

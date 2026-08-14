@@ -27,6 +27,11 @@ import {
   NotFoundError,
 } from "../utils/errors.mts";
 import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
+import {
+  ensureParamsMarker,
+  extractParameterNames,
+  getParameterizedAssetsDir,
+} from "../utils/parameters.mts";
 
 import { WebApi } from "./contract.mts";
 
@@ -35,8 +40,17 @@ const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
 /**
  * Get the screenshots directory for a project
  */
-function getScreenshotsDir(projectPath: RelativeDir) {
-  return path.join(getRoutesDir(), projectPath, ASSETS_DIR, SCREENSHOTS_DIR);
+function getScreenshotsDir(
+  projectPath: RelativeDir,
+  params?: Record<string, string>,
+) {
+  const routesDir = getRoutesDir();
+  const assetsDir = getParameterizedAssetsDir(
+    routesDir as AbsoluteDir,
+    projectPath,
+    params,
+  );
+  return path.join(assetsDir, SCREENSHOTS_DIR);
 }
 
 /**
@@ -53,9 +67,22 @@ export const screenshotsLive = HttpApiBuilder.group(
   (handlers) =>
     handlers
       // list existing screenshots for a project
-      .handle("list", ({ query: { projectPath } }) =>
+      .handle("list", ({ query: { projectPath, params: paramsJson } }) =>
         Effect.gen(function* () {
-          const screenshotsDir = getScreenshotsDir(projectPath);
+          // Parse params if provided
+          const params = paramsJson
+            ? (JSON.parse(paramsJson) as Record<string, string>)
+            : undefined;
+
+          const screenshotsDir = getScreenshotsDir(projectPath, params);
+
+          // Build the relative path prefix for image paths
+          const paramNames = extractParameterNames(projectPath);
+          let imagePathPrefix = "/.liqvid";
+          if (paramNames.length > 0 && params) {
+            const paramSubpath = paramNames.map((n) => params[n] ?? "").join("/");
+            imagePathPrefix = `/.liqvid/${paramSubpath}`;
+          }
 
           const fs = yield* FileSystem.FileSystem;
 
@@ -84,11 +111,11 @@ export const screenshotsLive = HttpApiBuilder.group(
                 let imagePath: ScreenshotEntry["imagePath"];
                 if (meta.colorScheme === "both") {
                   imagePath = {
-                    dark: `/.liqvid/screenshots/${name}/dark.png`,
-                    light: `/.liqvid/screenshots/${name}/light.png`,
+                    dark: `${imagePathPrefix}/screenshots/${name}/dark.png`,
+                    light: `${imagePathPrefix}/screenshots/${name}/light.png`,
                   };
                 } else {
-                  imagePath = `/.liqvid/screenshots/${name}/screenshot.png`;
+                  imagePath = `${imagePathPrefix}/screenshots/${name}/screenshot.png`;
                 }
 
                 screenshots.push({ id: name, imagePath, meta });
@@ -116,8 +143,16 @@ export const screenshotsLive = HttpApiBuilder.group(
           const fs = yield* FileSystem.FileSystem;
 
           const config = yield* getConfig();
+          const routesDir = getRoutesDir();
 
-          const screenshotsDir = getScreenshotsDir(projectPath);
+          // Ensure params marker exists for parameterized projects
+          const paramNames = extractParameterNames(projectPath);
+          if (paramNames.length > 0) {
+            const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
+            yield* ensureParamsMarker(baseAssetsDir as AbsoluteDir, projectPath);
+          }
+
+          const screenshotsDir = getScreenshotsDir(projectPath, payload.params);
           const folderId = generateFolderName();
           const folderPath = path.join(screenshotsDir, folderId);
 
@@ -129,6 +164,15 @@ export const screenshotsLive = HttpApiBuilder.group(
           const url = yield* getRenderUrl(renderSource, projectPath);
 
           const colorScheme = payload.colorScheme ?? "light";
+
+          // Build the relative path prefix for image paths
+          let imagePathPrefix = "/" + ASSETS_DIR;
+          if (paramNames.length > 0 && payload.params) {
+            const paramSubpath = paramNames
+              .map((n) => payload.params![n] ?? "")
+              .join("/");
+            imagePathPrefix = `/${ASSETS_DIR}/${paramSubpath}`;
+          }
 
           let imagePath: ScreenshotEntry["imagePath"];
 
@@ -163,22 +207,18 @@ export const screenshotsLive = HttpApiBuilder.group(
             ]);
 
             imagePath = {
-              dark:
-                "/" +
-                path.join(
-                  ASSETS_DIR,
-                  SCREENSHOTS_DIR,
-                  folderId,
-                  SCREENSHOT_FILE_DARK,
-                ),
-              light:
-                "/" +
-                path.join(
-                  ASSETS_DIR,
-                  SCREENSHOTS_DIR,
-                  folderId,
-                  SCREENSHOT_FILE_LIGHT,
-                ),
+              dark: path.join(
+                imagePathPrefix,
+                SCREENSHOTS_DIR,
+                folderId,
+                SCREENSHOT_FILE_DARK,
+              ),
+              light: path.join(
+                imagePathPrefix,
+                SCREENSHOTS_DIR,
+                folderId,
+                SCREENSHOT_FILE_LIGHT,
+              ),
             };
           } else {
             // Capture single screenshot
@@ -194,14 +234,12 @@ export const screenshotsLive = HttpApiBuilder.group(
               url,
             });
 
-            imagePath =
-              "/" +
-              path.join(
-                ASSETS_DIR,
-                SCREENSHOTS_DIR,
-                RelativeDir(folderId),
-                SCREENSHOT_PNG,
-              );
+            imagePath = path.join(
+              imagePathPrefix,
+              SCREENSHOTS_DIR,
+              RelativeDir(folderId),
+              SCREENSHOT_PNG,
+            );
           }
 
           // Create metadata
@@ -235,13 +273,18 @@ export const screenshotsLive = HttpApiBuilder.group(
         "copy",
         ({
           payload: { screenshotId, sourceFilename, targetFilename },
-          query: { projectPath },
+          query: { projectPath, params: paramsJson },
         }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
 
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
+
             const projectDir = path.join(getRoutesDir(), projectPath);
-            const screenshotsDir = getScreenshotsDir(projectPath);
+            const screenshotsDir = getScreenshotsDir(projectPath, params);
             const sourcePath = path.join(
               screenshotsDir,
               RelativeDir(screenshotId),
@@ -261,7 +304,10 @@ export const screenshotsLive = HttpApiBuilder.group(
       // rename a screenshot (changes the folder name)
       .handle(
         "rename",
-        ({ payload: { newName, screenshotId }, query: { projectPath } }) =>
+        ({
+          payload: { newName, screenshotId },
+          query: { projectPath, params: paramsJson },
+        }) =>
           Effect.gen(function* () {
             // Sanitize new name (remove path separators and invalid chars)
             const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
@@ -272,7 +318,12 @@ export const screenshotsLive = HttpApiBuilder.group(
 
             const fs = yield* FileSystem.FileSystem;
 
-            const screenshotsDir = getScreenshotsDir(projectPath);
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
+
+            const screenshotsDir = getScreenshotsDir(projectPath, params);
             const oldPath = path.join(
               screenshotsDir,
               RelativeDir(screenshotId),
@@ -305,11 +356,19 @@ export const screenshotsLive = HttpApiBuilder.group(
       // delete a screenshot (removes the folder)
       .handle(
         "delete",
-        ({ payload: { screenshotId }, query: { projectPath } }) =>
+        ({
+          payload: { screenshotId },
+          query: { projectPath, params: paramsJson },
+        }) =>
           Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
 
-            const screenshotsDir = getScreenshotsDir(projectPath);
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
+
+            const screenshotsDir = getScreenshotsDir(projectPath, params);
             const folderPath = path.join(
               screenshotsDir,
               RelativeDir(screenshotId),

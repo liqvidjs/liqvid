@@ -1,7 +1,11 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
+import type {
+  ProjectMeta,
+  RootParameters,
+  SerializedProjectMeta,
+} from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
@@ -36,6 +40,7 @@ export type ProjectListProps = {
   initialFolderView: boolean;
   productionServerPort: number;
   projects: Record<RelativeDir, SerializedProjectMeta>;
+  rootParameters: RootParameters;
   t: T;
 };
 
@@ -62,12 +67,40 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
+/**
+ * Interpolate path parameters (like `[lang]`) to their default values.
+ * @param path - The path containing parameters (e.g., `/[lang]/gng/1-cg/1-spaces/1-intro`)
+ * @param projectParameters - Parameters defined in the project's project.json (if any)
+ * @param rootParameters - Root parameters from liqvid.json
+ * @returns The interpolated path with default parameter values
+ */
+function interpolatePathParameters(
+  path: string,
+  projectParameters: Record<string, string[]> | undefined,
+  rootParameters: RootParameters,
+): string {
+  // Match all path parameters like [lang], [id], etc.
+  return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
+    // First, try project-level parameters
+    if (projectParameters?.[paramName]?.length) {
+      return projectParameters[paramName][0]!;
+    }
+    // Fall back to root parameters
+    if (rootParameters[paramName]?.length) {
+      return rootParameters[paramName][0]!;
+    }
+    // If no default found, keep the original
+    return match;
+  });
+}
+
 export function ProjectListClient({
   basePath,
   initialCollapsedFolders,
   initialFolderView,
   productionServerPort,
   projects: dehydratedProjects,
+  rootParameters,
   t,
 }: ProjectListProps) {
   const [projects, setProjects] = useState(
@@ -165,6 +198,7 @@ export function ProjectListClient({
                       key={key}
                       productionServerPort={productionServerPort}
                       project={project}
+                      rootParameters={rootParameters}
                     />
                   ))}
                 </ul>
@@ -177,6 +211,7 @@ export function ProjectListClient({
                   key={folderName}
                   onToggle={handleFolderToggle}
                   productionServerPort={productionServerPort}
+                  rootParameters={rootParameters}
                 />
               ),
             )}
@@ -189,6 +224,7 @@ export function ProjectListClient({
               key={key}
               productionServerPort={productionServerPort}
               project={project}
+              rootParameters={rootParameters}
             />
           ))}
         </ul>
@@ -204,11 +240,13 @@ function FolderItem({
   folderPath,
   onToggle,
   productionServerPort,
+  rootParameters,
 }: {
   basePath: string;
   collapsedFolders: Set<string>;
   folder: FolderNode;
   folderPath: string;
+  rootParameters: RootParameters;
   onToggle: (folderPath: string, expanded: boolean) => void;
   productionServerPort: number;
 }) {
@@ -251,6 +289,7 @@ function FolderItem({
             key={subfolderName}
             onToggle={onToggle}
             productionServerPort={productionServerPort}
+            rootParameters={rootParameters}
           />
         ))}
         {/* Then render projects in this folder */}
@@ -262,6 +301,7 @@ function FolderItem({
                 key={key}
                 productionServerPort={productionServerPort}
                 project={project}
+                rootParameters={rootParameters}
               />
             ))}
           </ul>
@@ -275,20 +315,29 @@ function ProjectItem({
   basePath,
   productionServerPort,
   project,
+  rootParameters,
 }: {
   basePath: string;
   productionServerPort: number;
   project: ProjectMeta;
+  rootParameters: RootParameters;
 }) {
+  // Interpolate path parameters to their default values for navigation
+  const interpolatedPath = interpolatePathParameters(
+    project.path,
+    project.parameters,
+    rootParameters,
+  );
+
   // Build the preview URL with basePath if configured
   const previewPath = basePath
-    ? `${basePath}/${project.path}`
-    : `/${project.path}`;
+    ? `${basePath}/${interpolatedPath}`
+    : `/${interpolatedPath}`;
 
   return (
     <ProjectPathProvider value={project.path}>
       <li>
-        <a href={project.path}>
+        <a href={interpolatedPath}>
           <Thumbnail {...project} />
           <div className="flex flex-col">
             {project.name}
@@ -301,6 +350,7 @@ function ProjectItem({
             duration={project.duration}
             productionServerPort={productionServerPort}
             project={omit(project, ["duration"])}
+            rootParameters={rootParameters}
           />
           <EmbedButton
             basePath={basePath}

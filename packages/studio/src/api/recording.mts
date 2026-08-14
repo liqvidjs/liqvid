@@ -31,6 +31,11 @@ import {
 import type { DynamicImports } from "../next/api.mts";
 import { readDirWithFileTypes, safeGetOption } from "../utils/effect.mts";
 import { getRoutesDir } from "../utils/misc.mts";
+import {
+  ensureParamsMarker,
+  extractParameterNames,
+  getParameterizedAssetsDir,
+} from "../utils/parameters.mts";
 
 import { WebApi } from "./contract.mts";
 import {
@@ -73,9 +78,28 @@ export function saveRecording(
 
     yield* Effect.logInfo("plugins", { plugins: metadata.plugins });
 
-    const assetsDir = path.join(getRoutesDir(), projectPath, ASSETS_DIR);
+    const routesDir = getRoutesDir();
+    const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
 
-    // Create assets dir if it doesn't exist
+    // Get parameterized assets directory
+    const paramNames = extractParameterNames(projectPath);
+    const assetsDir = getParameterizedAssetsDir(
+      routesDir as AbsoluteDir,
+      projectPath,
+      metadata.params,
+    );
+
+    // Create base assets dir and ensure params marker exists
+    if (!(yield* fs.exists(baseAssetsDir))) {
+      yield* fs.makeDirectory(baseAssetsDir, { recursive: true });
+    }
+
+    // Ensure params marker file exists for parameterized projects
+    if (paramNames.length > 0) {
+      yield* ensureParamsMarker(baseAssetsDir as AbsoluteDir, projectPath);
+    }
+
+    // Create parameterized assets dir if it doesn't exist
     if (!(yield* fs.exists(assetsDir))) {
       yield* fs.makeDirectory(assetsDir, { recursive: true });
     }
@@ -256,18 +280,31 @@ export const recordingsLive = HttpApiBuilder.group(
   WebApi,
   "recordings",
   (handlers) =>
-    handlers.handle("list", ({ query: { projectPath } }) =>
+    handlers.handle("list", ({ query: { projectPath, params: paramsJson } }) =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
 
-        const assetsDir = path.join(getRoutesDir(), projectPath, ASSETS_DIR);
+        const routesDir = getRoutesDir();
+        const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
 
-        // error if assets dir doesn't exist
-        if (!(yield* fs.exists(assetsDir))) {
+        // error if base assets dir doesn't exist
+        if (!(yield* fs.exists(baseAssetsDir))) {
           return yield* Effect.die({
             message: "assets dir does not exist",
           });
         }
+
+        // Parse params if provided
+        const params = paramsJson
+          ? (JSON.parse(paramsJson) as Record<string, string>)
+          : undefined;
+
+        // Get parameterized assets directory
+        const assetsDir = getParameterizedAssetsDir(
+          routesDir as AbsoluteDir,
+          projectPath,
+          params,
+        );
 
         const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
 

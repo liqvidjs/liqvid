@@ -28,6 +28,17 @@ const projectPathQuery = Schema.Struct({
   projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
 });
 
+/** Query parameters for endpoints that support parameterized projects */
+const projectPathWithParamsQuery = Schema.Struct({
+  /** path to the project */
+  projectPath: Schema.String.pipe(Schema.fromBrand("RelativeDir", RelativeDir)),
+  /**
+   * JSON-encoded parameter values for parameterized projects.
+   * e.g., `{"lang":"en","locale":"US"}`
+   */
+  params: Schema.optional(Schema.String),
+});
+
 /* ------------------------------ audio ------------------------------ */
 const audioGroup = HttpApiGroup.make("audio")
   .add(
@@ -120,7 +131,7 @@ const projectsGroup = HttpApiGroup.make("projects")
       payload: Schema.Struct({
         durationMs: Schema.Number,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
     }).annotate(OpenApi.Summary, "Set project metadata"),
   )
   .annotate(OpenApi.Title, "Projects");
@@ -129,7 +140,7 @@ const projectsGroup = HttpApiGroup.make("projects")
 const rendersGroup = HttpApiGroup.make("renders")
   .add(
     HttpApiEndpoint.get("list", "/renders", {
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Array(RenderEntry),
     }).annotate(OpenApi.Summary, "List renders for a project"),
   )
@@ -144,6 +155,12 @@ const rendersGroup = HttpApiGroup.make("renders")
 
         /** Video height */
         height: Schema.optional(Schema.Number),
+
+        /**
+         * Parameter values for parameterized projects.
+         * e.g., `{ lang: "en", locale: "US" }`
+         */
+        params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
 
         /** Video width */
         width: Schema.optional(Schema.Number),
@@ -169,7 +186,7 @@ const rendersGroup = HttpApiGroup.make("renders")
         renderId: Schema.String,
       }),
 
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
 
       success: Schema.Struct({
         /** New render ID (folder name) */
@@ -177,14 +194,26 @@ const rendersGroup = HttpApiGroup.make("renders")
       }),
     }).annotate(OpenApi.Summary, "Rename a render"),
   )
+  .add(
+    HttpApiEndpoint.delete("delete", "/renders/delete", {
+      error: NotFoundError,
+      payload: Schema.Struct({
+        /** Render folder id to delete */
+        renderId: Schema.String,
+      }),
+      query: projectPathWithParamsQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(OpenApi.Summary, "Delete a render"),
+  )
   .annotate(OpenApi.Description, "Static renders of a project")
   .annotate(OpenApi.Summary, "Renders for a project")
   .annotate(OpenApi.Title, "Static renders");
 
 /* ------------------------------ recordings ------------------------------ */
+
 const recordingsGroup = HttpApiGroup.make("recordings").add(
   HttpApiEndpoint.get("list", "/recordings", {
-    query: projectPathQuery,
+    query: projectPathWithParamsQuery,
     success: Schema.Array(RecordingMeta),
   }),
 );
@@ -198,7 +227,7 @@ const targetFilename = Schema.Literals([
 const screenshotsGroup = HttpApiGroup.make("screenshots")
   .add(
     HttpApiEndpoint.get("list", "/screenshots", {
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Array(ScreenshotEntry),
     }).annotate(OpenApi.Summary, "List screenshots for a project"),
   )
@@ -209,6 +238,11 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
         colorScheme: Schema.optional(ColorSchemeOption),
         /** Height of screenshot */
         height: Schema.Number,
+        /**
+         * Parameter values for parameterized projects.
+         * e.g., `{ lang: "en", locale: "US" }`
+         */
+        params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
         /** Time in seconds to capture */
         time: Schema.Number,
         /** Width of screenshot */
@@ -232,7 +266,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
         /** Target filename (opengraph-image.png or twitter-image.png) */
         targetFilename,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({ success: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Copy a screenshot to the project root"),
   )
@@ -245,7 +279,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
         /** Current screenshot folder id */
         screenshotId: Schema.String,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({
         /** New screenshot id (folder name) */
         newId: Schema.String,
@@ -259,7 +293,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
         /** Screenshot folder id to delete */
         screenshotId: Schema.String,
       }),
-      query: projectPathQuery,
+      query: projectPathWithParamsQuery,
       success: Schema.Struct({ success: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Delete a screenshot"),
   )
@@ -412,7 +446,7 @@ const settingsGroup = HttpApiGroup.make("settings")
 const thumbsGroup = HttpApiGroup.make("thumbs").add(
   HttpApiEndpoint.get("list", "/thumbs", {
     error: [NotFoundError],
-    query: projectPathQuery,
+    query: projectPathWithParamsQuery,
     success: ThumbsData,
   }),
 
@@ -433,6 +467,12 @@ const thumbsGroup = HttpApiGroup.make("thumbs").add(
 
         /** Image format: jpeg or png */
         imageFormat: Schema.optional(ImageFormat),
+
+        /**
+         * Parameter values for parameterized projects.
+         * e.g., `{ lang: "en", locale: "US" }`
+         */
+        params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
 
         /** Quality for JPEG images (0-100) */
         quality: Schema.optional(Schema.Number),

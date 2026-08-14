@@ -17,6 +17,7 @@ import {
   initProjectFiles,
   watchProjectFiles,
 } from "./services/watch-project-files.mts";
+import { watchRootTypes } from "./services/watch-root-types.mts";
 import { createService } from "./utils/services.mts";
 
 const symbol = Symbol.for("@liqvid/server");
@@ -64,6 +65,7 @@ export interface LiqvidServerState {
     watchAssets: boolean;
     watchConfig: boolean;
     watchProjectFiles: boolean;
+    watchRootTypes: boolean;
   };
 
   /**
@@ -116,6 +118,17 @@ export async function initializeServer() {
     Effect.runSync(createService("watch config", watchLiqvidConfig(state)));
 
     started.watchConfig = true;
+  }
+
+  if (!started.watchRootTypes) {
+    Effect.runSync(
+      createService(
+        "watch root types",
+        watchRootTypes(state).pipe(Effect.provide(NodeFileSystem.layer)),
+      ),
+    );
+
+    started.watchRootTypes = true;
   }
 
   // Do the initial scan of the project tree first so `projects` is fully
@@ -172,6 +185,7 @@ export function getServerState(): LiqvidServerState {
         watchAssets: false,
         watchConfig: false,
         watchProjectFiles: false,
+        watchRootTypes: false,
       },
       updateInfo: null,
       wsConnections: new Set(),

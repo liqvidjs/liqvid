@@ -63,14 +63,22 @@ export function CaptionRow({
   multiple,
   onReload,
   onStartRename,
+  selectedParams,
 }: {
   entry: AudioEntry;
   multiple: boolean;
   onReload: () => Promise<void>;
   onStartRename: (entry: AudioEntry) => void;
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
 }) {
   const projectPath = useProjectPath();
   const { hasCaptioningConfigured } = useDerivedConfig();
+
+  // Serialize params for use in API calls
+  const paramsJson = selectedParams
+    ? JSON.stringify(selectedParams)
+    : undefined;
 
   /** Whether captions are currently being (re)generated for this entry */
   const [captioning, setCaptioning] = useState(false);
@@ -88,7 +96,7 @@ export function CaptionRow({
         const client = yield* LiqvidStudioApiClient;
         return yield* client.captions.generate({
           payload: { audioId: entry.id },
-          query: { projectPath },
+          query: { params: paramsJson, projectPath },
         });
       }),
     );
@@ -107,7 +115,7 @@ export function CaptionRow({
         const client = yield* LiqvidStudioApiClient;
         return yield* client.captions.delete({
           payload: { audioId: entry.id },
-          query: { projectPath },
+          query: { params: paramsJson, projectPath },
         });
       }),
     );
@@ -124,7 +132,7 @@ export function CaptionRow({
         const client = yield* LiqvidStudioApiClient;
         return yield* client.audio.delete({
           payload: { id: entry.id },
-          query: { projectPath },
+          query: { params: paramsJson, projectPath },
         });
       }),
     );

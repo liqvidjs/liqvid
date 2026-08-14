@@ -2,7 +2,8 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { UP } from "@liqvid/cli/utils";
+import { loadJson, UP } from "@liqvid/cli/utils";
+import { ProjectJson } from "@liqvid/schemas";
 import {
   Cause,
   Effect,
@@ -39,7 +40,13 @@ import { getServerState } from "../initialize.mts";
 import type { Directory } from "../types/assets.mts";
 import { readDirWithFileTypes } from "../utils/effect.mts";
 import { getBiomePath } from "../utils/fs.mts";
-import { getLogLevel, getRoutesDir } from "../utils/misc.mts";
+import { cartesianProduct, getLogLevel, getRoutesDir } from "../utils/misc.mts";
+import {
+  buildParameterSubpath,
+  ensureParamsMarker,
+  extractParameterNames,
+  getProjectParameterValues,
+} from "../utils/parameters.mts";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -92,6 +99,88 @@ const TEMPLATES_DIR = path.join(
   UP,
   RelativeDir("templates"),
 );
+
+/**
+ * Generate all combinations of parameter values.
+ * e.g., `{ lang: ["en", "es"], locale: ["US", "CA"] }` →
+ * `[{ lang: "en", locale: "US" }, { lang: "en", locale: "CA" }, { lang: "es", locale: "US" }, { lang: "es", locale: "CA" }]`
+ */
+function generateParameterCombinations(
+  paramNames: string[],
+  parameterValues: Record<string, readonly string[]>,
+): Record<string, string>[] {
+  if (paramNames.length === 0) {
+    return [];
+  }
+
+  const combinations: Record<string, string>[] = [{}];
+
+  for (const paramName of paramNames) {
+    const values = parameterValues[paramName] ?? [];
+    if (values.length === 0) {
+      // No values for this parameter - can't generate combinations
+      return [];
+    }
+
+    const newCombinations: Record<string, string>[] = [];
+    for (const combo of combinations) {
+      for (const value of values) {
+        newCombinations.push({ ...combo, [paramName]: value });
+      }
+    }
+    combinations.length = 0;
+    combinations.push(...newCombinations);
+  }
+
+  return combinations;
+}
+
+/**
+ * Initialize the parameterized directory structure for a project.
+ * Creates directories like `.liqvid/en/US/`, `.liqvid/es/CA/`, etc.
+ * for all parameter value combinations.
+ */
+function initializeParameterizedDirs(
+  assetsDir: AbsoluteDir,
+  projectPath: RelativeDir,
+  projectParameters: Record<string, readonly string[]> | undefined,
+) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    const paramNames = extractParameterNames(projectPath);
+
+    if (paramNames.length === 0) {
+      // No parameters - nothing to initialize
+      return;
+    }
+
+    // Get parameter values from project or root config
+    const parameterValues = getProjectParameterValues(projectParameters);
+
+    // Generate all combinations
+    const combinations = cartesianProduct(parameterValues);
+
+    if (combinations.length === 0) {
+      yield* Effect.logDebug("No parameter combinations to initialize");
+      return;
+    }
+
+    // Create the .params= marker file
+    yield* ensureParamsMarker(assetsDir, projectPath);
+
+    // Create directory for each combination
+    for (const combo of combinations) {
+      const subpath = buildParameterSubpath(paramNames, combo);
+      const paramDir = path.join(assetsDir, subpath);
+
+      if (!(yield* fs.exists(paramDir))) {
+        yield* fs.makeDirectory(paramDir, { recursive: true });
+        yield* Effect.logDebug(`Created parameter directory: ${subpath}`);
+      }
+    }
+  }).pipe(Effect.annotateLogs({ assetsDir, projectPath }));
+}
 
 /**
  * Check if a directory is a project directory.
@@ -256,8 +345,41 @@ function generateProjectTypes({
     const directoryStructure = yield* listProjectDir(projectDir);
     const assetsDir = path.join(projectDir, ASSETS_DIR);
 
+    // Read project.json to extract parameters
+    const projectFile = path.join(projectDir, PROJECT_FILE);
+    const project = yield* loadJson(ProjectJson, projectFile);
+
+    // Use project parameters if defined, otherwise fall back to rootParameters from config
+    let parametersRecord: Record<string, string[]>;
+    if (project.parameters) {
+      parametersRecord = project.parameters;
+    } else {
+      // Fall back to rootParameters from liqvid.json
+      const { config } = getServerState();
+      parametersRecord = Option.isSome(config)
+        ? (config.value.rootParameters ?? {})
+        : {};
+    }
+
+    // Transform parameters into array format for template
+    const parameters = Object.entries(parametersRecord).map(
+      ([name, values]) => ({
+        name,
+        values,
+      }),
+    );
+
     // Ensure .liqvid directory exists
     yield* fs.makeDirectory(assetsDir, { recursive: true });
+
+    // Initialize parameterized directory structure if project has parameters
+    const routesDir = getRoutesDir();
+    const projectPath = path.relative(routesDir, projectDir);
+    yield* initializeParameterizedDirs(
+      assetsDir,
+      projectPath,
+      project.parameters,
+    );
 
     yield* Effect.forkDetach(
       Effect.all([
@@ -267,7 +389,7 @@ function generateProjectTypes({
         ),
         runTemplate({
           biomePath,
-          data: {},
+          data: { parameters },
           out: path.join(assetsDir, TYPES_AUTOGEN),
           template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
         }),

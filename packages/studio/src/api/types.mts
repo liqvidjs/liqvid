@@ -4,6 +4,13 @@ import { RelativeFile } from "effect-paths";
 export const SaveRecordingMetadata = Schema.Struct({
   /** duration */
   durationMs: Schema.Number,
+
+  /**
+   * Parameter values for parameterized projects.
+   * e.g., `{ lang: "en", locale: "US" }`
+   */
+  params: Schema.Record(Schema.String, Schema.String).pipe(Schema.optional),
+
   plugins: Schema.Array(
     Schema.Struct({
       filename: Schema.String.pipe(

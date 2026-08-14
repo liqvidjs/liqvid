@@ -31,12 +31,22 @@ import type TranslationsJson from "../.translations/en.json";
 
 type T = typeof TranslationsJson;
 
-export function CaptionsSection() {
+interface CaptionsSectionProps {
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
+}
+
+export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   // const { hasCaptioningConfigured } = useDerivedConfig();
   const t = useTranslations<T>().captions;
   const c = useCommonTranslations();
 
   const projectPath = useProjectPath();
+
+  // Serialize params for use in API calls
+  const paramsJson = selectedParams
+    ? JSON.stringify(selectedParams)
+    : undefined;
 
   const { isOpen } = useDialogApi();
 
@@ -54,7 +64,9 @@ export function CaptionsSection() {
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
-        return yield* client.audio.list({ query: { projectPath } });
+        return yield* client.audio.list({
+          query: { params: paramsJson, projectPath },
+        });
       }),
     );
 
@@ -66,7 +78,7 @@ export function CaptionsSection() {
     }
 
     setIsLoading(false);
-  }, [projectPath]);
+  }, [paramsJson, projectPath]);
 
   useEffect(() => {
     if (isOpen) {
@@ -97,7 +109,7 @@ export function CaptionsSection() {
         const client = yield* LiqvidStudioApiClient;
         return yield* client.audio.generate({
           payload: null,
-          query: { projectPath },
+          query: { params: paramsJson, projectPath },
         });
       }),
     );
@@ -126,7 +138,7 @@ export function CaptionsSection() {
         const client = yield* LiqvidStudioApiClient;
         return yield* client.audio.rename({
           payload: { id: renaming.id, newName: renameValue.trim() },
-          query: { projectPath },
+          query: { params: paramsJson, projectPath },
         });
       }),
     );
@@ -179,6 +191,7 @@ export function CaptionsSection() {
                 multiple={multiple}
                 onReload={loadAudio}
                 onStartRename={handleStartRename}
+                selectedParams={selectedParams}
               />
             ))}
           </ul>

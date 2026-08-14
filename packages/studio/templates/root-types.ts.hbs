@@ -1,0 +1,11 @@
+/** This file is automatically @generated. */
+
+{{#if parameters.length}}
+export type RootParams = {
+{{#each parameters}}
+  {{this.name}}: {{#each this.values}}{{#unless @first}} | {{/unless}}"{{this}}"{{/each}};
+{{/each}}
+};
+{{else}}
+export type RootParams = Record<string, never>;
+{{/if}}

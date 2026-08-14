@@ -3,7 +3,11 @@
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { useRecordingApi } from "@liqvid/recording";
-import { useIsPreview, useProjectPath } from "@liqvid/studio-plugin-api";
+import {
+  useIsPreview,
+  useProjectParams,
+  useProjectPath,
+} from "@liqvid/studio-plugin-api";
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef } from "react";
 
@@ -39,6 +43,7 @@ interface FinalizedData {
 export function RecordingControl({ shortcuts }: RecordingControlProps) {
   const { manager, discard, pauseResume, startStop } = useRecordingApi();
   const projectPath = useProjectPath();
+  const projectParams = useProjectParams();
   const isPreview = useIsPreview();
 
   const forceUpdate = useForceUpdate();
@@ -61,6 +66,11 @@ export function RecordingControl({ shortcuts }: RecordingControlProps) {
             saveRecording({
               body: {
                 durationMs: manager.duration.inMilliseconds(),
+                // Include project params for parameterized projects
+                params:
+                  Object.keys(projectParams).length > 0
+                    ? projectParams
+                    : undefined,
                 plugins: recordingData,
               },
               search: { projectPath },
@@ -72,7 +82,7 @@ export function RecordingControl({ shortcuts }: RecordingControlProps) {
         }
         forceUpdate();
       },
-      [forceUpdate, manager, projectPath],
+      [forceUpdate, manager, projectParams, projectPath],
     ),
   );
   useEventListener(manager, "start", forceUpdate);

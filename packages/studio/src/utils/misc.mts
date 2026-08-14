@@ -149,3 +149,28 @@ export function getRenderUrl(
     }
   });
 }
+
+/**
+ * Generate cartesian product of possible parameter values.
+ */
+export function cartesianProduct<T extends Record<string, readonly string[]>>(
+  parameters: T,
+): Array<{
+  [K in keyof T]: T[K][number];
+}> {
+  const keys = Object.keys(parameters) as (keyof T)[];
+
+  if (keys.length === 0) return [];
+
+  return keys.reduce<Array<Record<string, string>>>(
+    (acc, key) => {
+      const values = parameters[key]!;
+      return acc.flatMap((obj) =>
+        values.map((value) => ({ ...obj, [key]: value })),
+      );
+    },
+    [{}],
+  ) as Array<{
+    [K in keyof T]: T[K][number];
+  }>;
+}

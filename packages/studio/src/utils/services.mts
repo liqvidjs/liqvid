@@ -1,5 +1,13 @@
 import { NodeFileSystem } from "@effect/platform-node";
-import { Effect, Logger, type LogLevel, References, type Types } from "effect";
+import {
+  Effect,
+  Logger,
+  type LogLevel,
+  type Record,
+  References,
+  type Schema,
+  type Types,
+} from "effect";
 
 import type {
   Service,
@@ -69,8 +77,11 @@ export function createService<A, E, R>(
 
     // Custom logger that captures log messages into the service.
     const logger = Logger.make(({ date, fiber, logLevel, message }) => {
-      const annotations = fiber.getRef(References.CurrentLogAnnotations);
+      const annotations = fiber.getRef(
+        References.CurrentLogAnnotations,
+      ) as Record.ReadonlyRecord<string, Schema.Json>;
       const activeSpans = fiber.getRef(References.CurrentLogSpans);
+      const timestamp = date.getTime();
 
       const mappedType = (
         {
@@ -87,7 +98,7 @@ export function createService<A, E, R>(
 
       appendLog(service, {
         annotations,
-        message: message as unknown[],
+        message: message as ReadonlyArray<Schema.Json>,
         spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
         timestamp: date,
         type: mappedType,

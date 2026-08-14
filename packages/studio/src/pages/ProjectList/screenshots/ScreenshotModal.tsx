@@ -43,6 +43,8 @@ interface ScreenshotModalProps {
   onCaptured: () => void;
   productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
 }
 
 export function ScreenshotModal({
@@ -51,6 +53,7 @@ export function ScreenshotModal({
   productionServerPort,
   onCaptured,
   project,
+  selectedParams,
 }: ScreenshotModalProps) {
   const t = useTranslations<T>().screenshots;
   const c = useCommonTranslations();
@@ -108,7 +111,13 @@ export function ScreenshotModal({
           const client = yield* LiqvidStudioApiClient;
 
           yield* client.screenshots.capture({
-            payload: { colorScheme, height, time: previewTime, width },
+            payload: {
+              colorScheme,
+              height,
+              params: selectedParams,
+              time: previewTime,
+              width,
+            },
             query: { projectPath },
           });
         }),
@@ -183,7 +192,6 @@ export function ScreenshotModal({
         </div>
 
         <div className={styles.dialogActions}>
-          <DialogClose>{c.cancel}</DialogClose>
           <Button
             className={styles.submitButton}
             disabled={isCapturing}

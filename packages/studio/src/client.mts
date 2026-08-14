@@ -11,6 +11,11 @@ const apiRoot = "/api/liqvid";
 interface SaveRecordingOpts {
   body: {
     durationMs: number;
+    /**
+     * Parameter values for parameterized projects.
+     * e.g., `{ lang: "en", locale: "US" }`
+     */
+    params?: Record<string, string>;
     plugins: Array<{ key: string; data: unknown }>;
   };
   search: { projectPath: RelativeDir };
@@ -45,6 +50,7 @@ export async function saveRecording(
   // Add metadata
   const metadata = {
     durationMs: body.durationMs,
+    params: body.params,
     plugins: body.plugins.map(({ key, data }) => ({
       filename: data instanceof Blob ? getBlobFilename(data) : undefined,
       isBlob: data instanceof Blob,

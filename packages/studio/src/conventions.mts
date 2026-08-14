@@ -2,6 +2,14 @@ import { RelativeDir, RelativeFile } from "effect-paths";
 
 export const DS_STORE = RelativeFile(".DS_Store");
 
+/**
+ * Prefix for the parameter marker file in `.liqvid` directories.
+ * Format: `.params=lang,locale` where parameters are comma-separated.
+ * This empty file indicates the project uses parameters and allows tools
+ * with only filesystem access to discover the parameter structure.
+ */
+export const PARAMS_MARKER_PREFIX = ".params=";
+
 export const ROOT_HIDDEN_DIR = RelativeDir(".liqvid");
 
 export const BUILD_DIR = RelativeDir("out");

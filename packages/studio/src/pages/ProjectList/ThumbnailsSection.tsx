@@ -22,9 +22,14 @@ type T = typeof TranslationsJson;
 
 interface ThumbnailsSectionProps {
   duration: Duration;
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
 }
 
-export function ThumbnailsSection({ duration }: ThumbnailsSectionProps) {
+export function ThumbnailsSection({
+  duration,
+  selectedParams,
+}: ThumbnailsSectionProps) {
   const projectPath = useProjectPath();
   const t = useTranslations<T>().thumbs;
   const c = useCommonTranslations();
@@ -34,13 +39,18 @@ export function ThumbnailsSection({ duration }: ThumbnailsSectionProps) {
   const [sliderValue, setSliderValue] = useState(0);
   const { isOpen } = useDialogApi();
 
+  // Serialize params for use in query
+  const paramsJson = selectedParams ? JSON.stringify(selectedParams) : undefined;
+
   const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
-        return yield* client.thumbs.list({ query: { projectPath } });
+        return yield* client.thumbs.list({
+          query: { params: paramsJson, projectPath },
+        });
       }),
     );
 
@@ -65,7 +75,7 @@ export function ThumbnailsSection({ duration }: ThumbnailsSectionProps) {
     if (isOpen) {
       loadThumbs();
     }
-  }, [isOpen]);
+  }, [isOpen, paramsJson]);
 
   const handleGenerate = useEffectEvent(async () => {
     setIsGenerating(true);
@@ -74,7 +84,7 @@ export function ThumbnailsSection({ duration }: ThumbnailsSectionProps) {
         const client = yield* LiqvidStudioApiClient;
 
         yield* client.thumbs.generate({
-          payload: undefined,
+          payload: { params: selectedParams },
           query: { projectPath },
         });
       }),

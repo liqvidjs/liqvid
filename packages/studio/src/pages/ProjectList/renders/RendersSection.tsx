@@ -14,6 +14,7 @@ import {
   PlayIcon,
   SpinnerIcon,
   SunIcon,
+  TrashIcon,
   WarningCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
@@ -51,6 +52,8 @@ type T = typeof TranslationsJson;
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
   aspectRatio?: AspectRatio;
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Record<string, string>;
 }
 
 interface RenderConfig {
@@ -81,6 +84,7 @@ function widthFromHeight(height: number, aspectRatio: AspectRatio): number {
 
 export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
+  selectedParams,
 }: RendersSectionProps) {
   const t = useTranslations<T>().renders;
   const projectPath = useProjectPath();
@@ -95,6 +99,9 @@ export function RendersSection({
     null,
   );
   const [renameValue, setRenameValue] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState<{
+    renderId: string;
+  } | null>(null);
 
   // Render config state
   const [configOpen, setConfigOpen] = useState(false);
@@ -104,13 +111,18 @@ export function RendersSection({
     width: 1280,
   }));
 
+  // Serialize params for use in query
+  const paramsJson = selectedParams ? JSON.stringify(selectedParams) : undefined;
+
   const loadRenders = useCallback(async () => {
     setIsLoading(true);
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
-        return yield* client.renders.list({ query: { projectPath } });
+        return yield* client.renders.list({
+          query: { params: paramsJson, projectPath },
+        });
       }),
     );
 
@@ -121,7 +133,7 @@ export function RendersSection({
     }
 
     setIsLoading(false);
-  }, [projectPath]);
+  }, [paramsJson, projectPath]);
 
   useEffect(() => {
     if (isOpen) {
@@ -285,6 +297,13 @@ export function RendersSection({
                   >
                     <PencilSimpleIcon size={16} />
                   </Button>
+                  <Button
+                    className={shareStyles.deleteButton}
+                    onClick={() => setDeleteDialog({ renderId: render.id })}
+                    title={t.delete}
+                  >
+                    <TrashIcon size={16} />
+                  </Button>
                 </div>
               </li>
             ))}
@@ -317,6 +336,14 @@ export function RendersSection({
             }}
           />
         </DialogPortal>
+      </DialogRoot>
+
+      {/* Delete Dialog */}
+      <DialogRoot
+        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        open={!!deleteDialog}
+      >
+        <DeleteDialog {...{ deleteDialog, loadRenders, setDeleteDialog }} />
       </DialogRoot>
     </>
   );
@@ -583,6 +610,63 @@ function RenameDialog({
         </Button>
       </div>
     </DialogPopup>
+  );
+}
+
+function DeleteDialog({
+  deleteDialog,
+  loadRenders,
+  setDeleteDialog,
+}: {
+  deleteDialog: { renderId: string } | null;
+  loadRenders: () => Promise<void>;
+  setDeleteDialog: React.Dispatch<
+    React.SetStateAction<{ renderId: string } | null>
+  >;
+}) {
+  const t = useTranslations<T>().renders.deleteDialog;
+  const c = useCommonTranslations();
+  const projectPath = useProjectPath();
+
+  const performDelete = async () => {
+    if (!deleteDialog) return;
+
+    try {
+      await clientRuntime.runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
+
+          yield* client.renders.delete({
+            payload: { renderId: deleteDialog.renderId },
+            query: { projectPath },
+          });
+        }),
+      );
+
+      setDeleteDialog(null);
+      await loadRenders();
+    } catch (e) {
+      console.error("Failed to delete render:", e);
+    }
+  };
+
+  return (
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogPopup>
+        <DialogTitle>{t.title}</DialogTitle>
+        <p className={shareStyles.confirmMessage}>{t.confirm}</p>
+        <div className={rootStyles.dialogActions}>
+          <DialogClose>{c.cancel}</DialogClose>
+          <Button
+            className={shareStyles.deleteConfirmButton}
+            onClick={() => performDelete()}
+          >
+            {t.action}
+          </Button>
+        </div>
+      </DialogPopup>
+    </DialogPortal>
   );
 }
 

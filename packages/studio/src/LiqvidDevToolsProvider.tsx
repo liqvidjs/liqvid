@@ -7,6 +7,7 @@ import {
   type LiqvidStudioPlugin,
   LiqvidStudioPluginApiProvider,
   type PluginContext,
+  useProjectParams,
   useProjectPath,
 } from "@liqvid/studio-plugin-api";
 import { Effect } from "effect";
@@ -51,6 +52,7 @@ export function LiqvidDevToolsProvider({
   plugins?: LiqvidStudioPlugin[];
 }) {
   const projectPath = useProjectPath();
+  const projectParams = useProjectParams();
   const [instances] = useState<Record<string, Set<unknown>>>(() => ({}));
   const privateContext = useMemo(
     () => ({ instances, projectPath }),
@@ -79,13 +81,19 @@ export function LiqvidDevToolsProvider({
               payload: {
                 durationMs: Duration.inMilliseconds(duration),
               },
-              query: { projectPath },
+              query: {
+                projectPath,
+                params:
+                  Object.keys(projectParams).length > 0
+                    ? JSON.stringify(projectParams)
+                    : undefined,
+              },
             });
           }),
         );
       },
     }),
-    [instances, projectPath],
+    [instances, projectParams, projectPath],
   );
 
   const recordingPlugins = useMemo(

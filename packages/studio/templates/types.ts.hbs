@@ -1,20 +1,18 @@
-{{#*inline "directory"}}
-  {
-  {{#each this}}
-    "{{ @key }}":
-      {{#if this}}
-        {{> directory this}}
-      {{else}}
-        null
-      {{/if}},
-  {{/each}}
-  }
-{{/inline}}
 /** This file is automatically @generated. */
-import type { Directory, FileNames } from "@liqvid/studio";
+import type { FileNames } from "@liqvid/studio";
 
-export const PROJECT_DIRECTORY_STRUCTURE = ({{~> directory directoryStructure~}}) as const satisfies Directory;
+import type PROJECT_DIRECTORY_STRUCTURE from "./project-files.json";
 
-export type ProjectDirectoryStructure = typeof PROJECT_DIRECTORY_STRUCTURE;
+export type ProjectStructure = typeof PROJECT_DIRECTORY_STRUCTURE;
 
-export type ProjectDir = FileNames<ProjectDirectoryStructure>;
+export type ProjectDir = FileNames<ProjectStructure>;
+
+{{#if parameters.length}}
+export type ProjectParams = {
+{{#each parameters}}
+  {{this.name}}: {{#each this.values}}{{#unless @first}} | {{/unless}}"{{this}}"{{/each}};
+{{/each}}
+};
+{{else}}
+export type ProjectParams = Record<string, never>;
+{{/if}}
