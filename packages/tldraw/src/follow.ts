@@ -11,6 +11,10 @@ import type { Viewport } from "./types.ts";
  * is suspended, leaving the viewer in control. Re-enabling following (e.g. from
  * a "follow author" affordance) snaps the viewport back to the author's and
  * resumes following.
+ *
+ * The controller also handles viewport scaling: when the viewer's container
+ * differs in size from the author's, zoom values are scaled proportionally so
+ * the same canvas region remains visible.
  */
 export class FollowController {
   #editor: Editor | undefined;
@@ -18,8 +22,18 @@ export class FollowController {
   /** Whether the replay is currently following the author. */
   #following = true;
 
-  /** The author's most recent viewport (page + camera). */
+  /**
+   * The author's most recent viewport (page + camera), in author coordinates
+   * (i.e., unscaled). Stored unscaled so that when the scale changes (e.g., on
+   * container resize), we can recompute the scaled viewport.
+   */
   #authorViewport: Viewport | undefined;
+
+  /**
+   * The scale factor to apply to viewport zoom values. This is the ratio of
+   * viewer container width to author container width.
+   */
+  #scale = 1;
 
   /**
    * The viewport the controller most recently drove the editor to. Store
@@ -112,8 +126,24 @@ export class FollowController {
   }
 
   /**
+   * Set the scale factor for viewport zoom values. This should be the ratio of
+   * viewer container width to author container width.
+   */
+  setScale(scale: number): void {
+    this.#scale = scale;
+    // Re-snap with the new scale if following
+    if (this.#following) this.#snap();
+  }
+
+  /** Get the current scale factor. */
+  get scale(): number {
+    return this.#scale;
+  }
+
+  /**
    * Record the author's viewport (from a committed viewport action) and, if
-   * following, snap the editor to it.
+   * following, snap the editor to it. The viewport is stored in author
+   * coordinates (unscaled) and scaled when snapping.
    */
   setAuthorViewport(next: Partial<Viewport>): void {
     this.#authorViewport = {
@@ -170,16 +200,20 @@ export class FollowController {
     return this.#editor?.getCurrentPageId() ?? ("page:page" as TLPageId);
   }
 
-  /** Snap the editor to the author's viewport. */
+  /** Snap the editor to the author's viewport (scaled for viewer container). */
   #snap(): void {
     const editor = this.#editor;
     const viewport = this.#authorViewport;
     if (!editor || !viewport) return;
 
+    // Scale the zoom for the viewer's container size
+    const [x, y, z] = viewport.camera;
+    const scaledZ = z * this.#scale;
+
     // remember what we are about to drive the editor to, so the resulting
     // (possibly async) store writes are recognized as our own
     this.#expected = {
-      camera: [...viewport.camera] as Viewport["camera"],
+      camera: [x, y, scaledZ],
       page: viewport.page,
     };
 
@@ -189,8 +223,7 @@ export class FollowController {
     ) {
       editor.setCurrentPage(viewport.page);
     }
-    const [x, y, z] = viewport.camera;
-    editor.setCamera({ x, y, z });
+    editor.setCamera({ x, y, z: scaledZ });
 
     // tldraw may clamp the camera to its constraints; record the actual
     // resulting camera so a clamped value is still recognized as our own.

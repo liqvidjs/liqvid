@@ -78,6 +78,13 @@ export type TldrawData = {
 
 // state
 export type ReplayState = {
+  /**
+   * The width (in pixels) of the author's container at the time of recording.
+   * Used to scale the viewport zoom when replaying on a different-sized
+   * container, so the same canvas region remains visible.
+   */
+  containerWidth: number;
+
   /** The author's pointer position in canvas coordinates. */
   pointer: Pointer;
 

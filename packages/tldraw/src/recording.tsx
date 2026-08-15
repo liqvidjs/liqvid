@@ -32,6 +32,7 @@ import {
 import { extractSegmentAppend, isSegmentAppend } from "./zsa.ts";
 
 type TldrawState = {
+  containerWidth: number;
   pointer: Pointer;
   viewport: Viewport;
   snapshot: TLStoreSnapshot;
@@ -86,6 +87,8 @@ export class TldrawRecorder extends ReplayDataRecorder<
     this.#viewport = this.#readViewport();
 
     this.initial = {
+      // container width for viewport scaling on replay
+      containerWidth: this.#editor.getContainer().clientWidth,
       // most recent pointer position, in canvas coordinates
       pointer: this.#pointer,
       snapshot: this.#editor.store.getStoreSnapshot("all"),

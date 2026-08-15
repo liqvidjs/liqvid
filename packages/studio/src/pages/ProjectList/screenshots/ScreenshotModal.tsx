@@ -71,10 +71,25 @@ export function ScreenshotModal({
     ? `${basePath}/${projectPath}/`
     : `/${projectPath}/`;
 
-  const previewUrl =
-    renderSource.screenshots === "preview"
-      ? `/${projectPath}?preview`
-      : `http://localhost:${productionServerPort}${previewPath}`;
+  const previewUrl = (() => {
+    const baseUrl =
+      renderSource.screenshots === "preview"
+        ? `/${projectPath}/`
+        : `http://localhost:${productionServerPort}${previewPath}`;
+
+    const searchParams = new URLSearchParams();
+    if (renderSource.screenshots === "preview") {
+      searchParams.set("preview", "");
+    }
+    if (selectedParams) {
+      for (const [key, value] of Object.entries(selectedParams)) {
+        searchParams.set(key, value);
+      }
+    }
+
+    const queryString = searchParams.toString();
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+  })();
 
   const { api, ref: iframeRef } = useIframeApi(playerApiDeclaration);
 

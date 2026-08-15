@@ -1,9 +1,18 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { useKeymap } from "@liqvid/keymap/react";
-import { useIsPreviewOrProduction } from "@liqvid/studio-plugin-api";
-import { type Awaitable, assertType, createUniqueContext } from "@liqvid/utils";
+import {
+  useIsPreview,
+  useIsPreviewOrProduction,
+} from "@liqvid/studio-plugin-api";
+import {
+  type Awaitable,
+  assertType,
+  createUniqueContext,
+  omit,
+} from "@liqvid/utils";
 import { useSeekable } from "@lqv/playback/react";
 import {
+  lazy,
   useCallback,
   useContext,
   useEffect,
@@ -73,6 +82,29 @@ export function useFollow(): {
   return { controller, followAuthor, following };
 }
 
+const IS_DEV = process.env.NODE_ENV === "development";
+
+/**
+ * In development mode, `<TldrawRecord>` component.
+ * In production mode (or preview), a `<TldrawReplay>` component.
+ */
+export const TldrawAmbi = lazy(
+  IS_DEV
+    ? async () => ({
+        default: function TldrawAmbi(
+          props: React.ComponentProps<typeof TldrawReplay>,
+        ) {
+          const isPreview = useIsPreview();
+          if (isPreview) {
+            return <TldrawReplay {...props} />;
+          }
+
+          return <TldrawRecord {...omit(props, ["replay", "start"])} />;
+        },
+      })
+    : async () => ({ default: TldrawReplay }),
+);
+
 export function TldrawRecord({
   children,
   ...props
@@ -98,7 +130,7 @@ export function TldrawReplay({
   ...props
 }: Omit<
   Parameters<typeof tldrawReplay>[0],
-  "data" | "playback" | "editor" | "handlePointer"
+  "data" | "playback" | "editor" | "handlePointer" | "follow" | "recording"
 > &
   React.ComponentPropsWithoutRef<typeof Tldraw> & {
     /** Cursor data to replay. */
@@ -231,6 +263,7 @@ export function TldrawReplay({
          */}
         <SetEditor setEditor={setEditor} />
         <SetDataAffords />
+        <PreserveViewportOnResize />
         <CanvasLayer>
           <CursorImage ref={cursorRef} />
         </CanvasLayer>
@@ -273,6 +306,70 @@ function SetDataAffords() {
   useEffect(() => {
     editor.getContainer().setAttribute("data-affords", "click keys");
   }, [editor]);
+
+  return null;
+}
+
+/**
+ * Preserve the viewport when the container is resized. When the container width
+ * changes (assuming constant aspect ratio), the zoom is scaled proportionally
+ * so the same canvas region remains visible.
+ *
+ * This works in conjunction with the FollowController's scale factor:
+ * - When following: updates the scale factor, and the controller re-snaps
+ * - When not following: directly scales the camera zoom
+ */
+function PreserveViewportOnResize() {
+  const editor = useEditor();
+  const { controller } = useFollow();
+  const referenceWidthRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const container = editor.getContainer();
+
+    // Store the initial width as the reference
+    referenceWidthRef.current = container.clientWidth;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        const referenceWidth = referenceWidthRef.current;
+
+        if (newWidth > 0 && referenceWidth && referenceWidth > 0) {
+          const resizeScale = newWidth / referenceWidth;
+
+          // Only adjust if there's a meaningful change
+          if (Math.abs(resizeScale - 1) > 1e-6) {
+            if (controller) {
+              // Update the follow controller's scale (multiplied by the resize
+              // ratio). This handles both following and not-following cases:
+              // the controller stores the new scale for future viewport snaps.
+              const newScale = controller.scale * resizeScale;
+              controller.setScale(newScale);
+            }
+
+            // If not following, directly scale the camera
+            if (!controller?.following) {
+              const camera = editor.getCamera();
+              editor.setCamera({
+                x: camera.x,
+                y: camera.y,
+                z: camera.z * resizeScale,
+              });
+            }
+
+            referenceWidthRef.current = newWidth;
+          }
+        }
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [editor, controller]);
 
   return null;
 }

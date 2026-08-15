@@ -108,6 +108,7 @@ export const tldrawReplay = makeReplayPlugin<
 
   // blank state
   blankState: () => ({
+    containerWidth: 0,
     pointer: [0, 0],
     snapshot: {} as TLStoreSnapshot,
     viewport: { camera: [0, 0, 1], page: "page:page" as TLPageId },
@@ -323,18 +324,31 @@ export const tldrawReplay = makeReplayPlugin<
     // Decode the stored (base64) snapshot for in-memory use, but load the
     // re-encoded snapshot into tldraw, which expects base64 vectors.
     const decodedStore = decodeStore(state.snapshot.store);
+
+    // Set the scale factor on the follow controller based on the ratio of
+    // viewer container width to author container width.
+    const viewerContainerWidth = props.editor.getContainer().clientWidth;
+    const authorContainerWidth = state.containerWidth;
+    const scale =
+      authorContainerWidth > 0
+        ? viewerContainerWidth / authorContainerWidth
+        : 1;
+    props.follow.setScale(scale);
+
+    const authorViewport = state.viewport ?? {
+      camera: (({ x, y, z }) => [x, y, z] as Viewport["camera"])(
+        props.editor.getCamera(),
+      ),
+      page: props.editor.getCurrentPageId(),
+    };
+
     const decodedState: ReplayState = {
       ...state,
       snapshot: {
         ...state.snapshot,
         store: decodedStore,
       } as unknown as TLStoreSnapshot,
-      viewport: state.viewport ?? {
-        camera: (({ x, y, z }) => [x, y, z] as Viewport["camera"])(
-          props.editor.getCamera(),
-        ),
-        page: props.editor.getCurrentPageId(),
-      },
+      viewport: authorViewport,
     };
 
     props.editor.store.loadStoreSnapshot({
@@ -367,9 +381,10 @@ export const tldrawReplay = makeReplayPlugin<
       );
     });
 
-    // Seed the follow controller with the author's initial viewport and snap
-    // the editor to it (following is on by default).
-    props.follow.setAuthorViewport(decodedState.viewport);
+    // Seed the follow controller with the author's viewport (unscaled) and snap
+    // the editor to it (following is on by default). The controller applies the
+    // scale when snapping.
+    props.follow.setAuthorViewport(authorViewport);
 
     // position the cursor at the initial pointer
     const [x, y] = state.pointer;

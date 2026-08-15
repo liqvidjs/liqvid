@@ -4,8 +4,7 @@ import { compress } from "@liqvid/recording/utils";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
 import { Effect, FileSystem } from "effect";
-import type { AbsoluteDir } from "effect-paths";
-import { RelativeFile } from "effect-paths";
+import { type AbsoluteDir, RelativeFile } from "effect-paths";
 
 const RAW_JSON = RelativeFile("raw.json");
 const RAW_DTS = RelativeFile("raw.d.json.ts");
