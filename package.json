@@ -7,7 +7,7 @@
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "main": "index.js",
   "scripts": {
-    "all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' --filter '!xyjax' --filter '!my-app' --filter '!site' run --no-bail --recursive",
+    "all": "pnpm --filter '!create-liqvid' --filter '!docs' --filter '!@liqvid/stem-course~videos' --filter '!videos' --filter '!xyjax' --filter '!my-app' --filter '!site' --filter '!desmos-react' --filter '!graphing-calculator' run --no-bail --recursive",
     "build:all": "pnpm --workspace-root all build",
     "lint:all": "pnpm --workspace-root all lint",
     "toggle:dev": "./toggle-package-dev development",
@@ -17,7 +17,7 @@
   "devDependencies": {
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",
-    "turbo": "^2.8.17"
+    "turbo": "^2.10.10"
   },
   "packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c"
 }
