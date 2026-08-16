@@ -13,7 +13,37 @@ import { Progress } from "./progress.mts";
 export const PLAYER_API_NAMESPACE = "@liqvid/player";
 
 /**
+ * (Re)apply a color scheme to an already-connected page. Sets both the player's
+ * color scheme and the page-level `prefers-color-scheme` media feature. Safe to
+ * call multiple times, which lets a single page be reused to capture multiple
+ * schemes without reloading the URL.
+ */
+export function setColorScheme(page: Puppeteer.Page, colorScheme: ColorScheme) {
+  return Effect.gen(function* () {
+    yield* Effect.tryPromise(() =>
+      page.evaluate((colorScheme) => {
+        player.setColorScheme(colorScheme);
+      }, colorScheme),
+    );
+
+    yield* Effect.tryPromise(() =>
+      page.emulateMediaFeatures([
+        {
+          name: "prefers-color-scheme",
+          value: colorScheme,
+        },
+      ]),
+    );
+
+    yield* Effect.logDebug("set color scheme").pipe(
+      Effect.annotateLogs({ colorScheme }),
+    );
+  });
+}
+
+/**
  * Connect to a page running Liqvid.
+ * Returns the page after setup. Caller is responsible for page cleanup.
  */
 export function connect({
   browser,
@@ -31,11 +61,10 @@ export function connect({
   renderMode: RenderMode;
 }) {
   return Effect.gen(function* () {
-    // init page
-    const page = yield* Effect.acquireRelease(
-      Effect.promise(() => browser.newPage()),
-      (page) => Effect.promise(() => page.close()),
-    ).pipe(
+    const timeout = 5_000;
+
+    // Create page - caller manages lifecycle via getPages' finalizer
+    const page = yield* Effect.tryPromise(() => browser.newPage()).pipe(
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       Effect.orDie,
     );
@@ -45,19 +74,34 @@ export function connect({
 
     yield* Effect.logDebug("got new page");
 
-    yield* Effect.promise(() => page.setViewport({ height, width }));
+    yield* Effect.tryPromise(() => page.setViewport({ height, width })).pipe(
+      Effect.tapError((e) =>
+        Effect.logError("failed to set page viewport", { error: e }),
+      ),
+    );
 
     yield* Effect.logDebug("set page viewport");
 
-    yield* Effect.promise((signal) =>
-      page.goto(url, { signal, timeout: 5_000 }),
+    // Only wait for the DOM to be ready, not the full `load` event. Preview
+    // pages stream HLS video and pull assets from external CDNs, so `load` can
+    // take a long time (or effectively never settle). We wait for the player
+    // API separately below, which is the signal we actually care about.
+    yield* Effect.tryPromise((signal) =>
+      page.goto(url, { signal, timeout, waitUntil: "domcontentloaded" }),
+    ).pipe(
+      Effect.tapError((e) =>
+        Effect.logError("timed out navigating to page", {
+          error: e,
+        }).pipe(Effect.annotateLogs({ timeout })),
+      ),
     );
 
     yield* Effect.logDebug("connected to url, waiting for player api");
 
-    const timeout = 5_000;
-
-    // connect to player API
+    // connect to player API.
+    // Poll on an interval rather than the default requestAnimationFrame: rAF is
+    // throttled/paused in headless or backgrounded pages, which can make the
+    // wait time out even though the player API attaches almost immediately.
     yield* Effect.tryPromise((signal) =>
       page.waitForFunction(
         () =>
@@ -65,6 +109,7 @@ export function connect({
             Symbol.for("@liqvid/player/api")
           ]),
         {
+          polling: 100,
           signal,
           timeout,
         },
@@ -79,34 +124,20 @@ export function connect({
 
     yield* Effect.logDebug("found liqvid player api");
 
-    // set various things
+    // one-time page setup (independent of color scheme)
     yield* Effect.tryPromise(() =>
-      page.evaluate(
-        async (colorScheme, renderMode) => {
-          player.setColorScheme(colorScheme);
-          player.setRenderMode(renderMode);
-          player.toggleControls(false);
+      page.evaluate((renderMode) => {
+        player.setRenderMode(renderMode);
+        player.toggleControls(false);
 
-          document.body.style.background = "transparent";
-        },
-        colorScheme,
-        renderMode,
-      ),
+        document.body.style.background = "transparent";
+      }, renderMode),
     );
 
     yield* Effect.logDebug("called the player api for setup");
 
-    // set color scheme for whole page also
-    yield* Effect.tryPromise(() =>
-      page.emulateMediaFeatures([
-        {
-          name: "prefers-color-scheme",
-          value: colorScheme,
-        },
-      ]),
-    );
-
-    yield* Effect.logDebug("set color scheme");
+    // apply the initial color scheme (can be re-applied later for reuse)
+    yield* setColorScheme(page, colorScheme);
 
     yield* Effect.logDebug("page ready");
 
@@ -146,7 +177,7 @@ export function getPages({
     });
     playerBar.start(concurrency, 0);
 
-    // get local browser
+    // get local browser - acquireRelease handles cleanup when scope closes
     const browser = yield* acquireBrowser({
       acceptInsecureCerts: true,
       args: [process.platform === "linux" ? "--single-process" : null].filter(
@@ -157,6 +188,9 @@ export function getPages({
       headless: process.env.HEADLESS !== "false",
       timeout: 0,
     } satisfies Puppeteer.LaunchOptions);
+
+    // Track pages as they're created for interruption cleanup
+    const createdPages: Puppeteer.Page[] = [];
 
     // array of Page objects
     const pages = yield* Effect.all(
@@ -169,14 +203,32 @@ export function getPages({
           url,
           width,
         }).pipe(
-          Effect.tap(() =>
+          Effect.tap((page) =>
             Effect.sync(() => {
+              createdPages.push(page);
               playerBar.increment();
             }),
           ),
         ),
       ),
       { concurrency: "unbounded" },
+    ).pipe(
+      // If interrupted during connection, clean up any pages that were created
+      Effect.onInterrupt(() =>
+        Effect.all(
+          createdPages.map((page) => Effect.promise(() => page.close())),
+          { concurrency: "unbounded" },
+        ).pipe(Effect.ignore),
+      ),
+    );
+
+    // Register cleanup for pages when scope closes normally
+    // Note: browser.close() also closes all pages, but explicit cleanup is cleaner
+    yield* Effect.addFinalizer(() =>
+      Effect.all(
+        pages.map((page) => Effect.promise(() => page.close())),
+        { concurrency: "unbounded" },
+      ).pipe(Effect.ignore),
     );
 
     playerBar.stop();

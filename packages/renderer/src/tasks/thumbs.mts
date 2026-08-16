@@ -3,16 +3,33 @@ import path from "node:path";
 import { Effect, FileSystem } from "effect";
 import jimp from "jimp";
 
-import type { ImageFormat } from "../types.mts";
+import type { ColorScheme, ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { captureRange } from "../utils/capture.mts";
 import { validateConcurrency } from "../utils/concurrency.mts";
-import { getPages } from "../utils/connect.mts";
+import { getPages, setColorScheme } from "../utils/connect.mts";
 import { Pool } from "../utils/pool.mts";
 import { Progress } from "../utils/progress.mts";
 
+/** A single color scheme to capture and where to write its sheets. */
+type SchemePass = {
+  colorScheme: ColorScheme;
+
+  /**
+   * Pattern for output filenames. Interpolation patterns:
+   * - `%s` sheet number (required)
+   */
+  output: string;
+};
+
 /**
 Create thumbnail sheets for a Liqvid video.
+
+Accepts either a single `{ colorScheme, output }` pass or an array of `schemes`.
+When multiple schemes are given they share a single browser and set of loaded
+pages: the URL is loaded once and each scheme is captured by re-applying the
+color scheme to the existing pages, avoiding a second (contention-inducing)
+page load.
 */
 export function thumbs({
   browserExecutable,
@@ -27,13 +44,15 @@ export function thumbs({
   output,
   quality,
   rows,
+  schemes,
   url,
   width,
 }: {
   browserExecutable: string;
   browserHeight: number;
   browserWidth: number;
-  colorScheme: "light" | "dark";
+  /** Single-scheme color scheme (ignored when `schemes` is provided). */
+  colorScheme?: ColorScheme;
   cols: number;
   concurrency: number;
 
@@ -41,12 +60,22 @@ export function thumbs({
   frequency: number;
   height: number;
   imageFormat: ImageFormat;
-  output: string;
+  /** Single-scheme output pattern (ignored when `schemes` is provided). */
+  output?: string;
   quality: number;
   rows: number;
+  /** Multiple color schemes to capture, sharing one browser. */
+  schemes?: readonly SchemePass[];
   url: string;
   width: number;
 }) {
+  // Normalize to a list of scheme passes. Falls back to the single-scheme
+  // (colorScheme + output) form for backwards compatibility (e.g. the CLI).
+  const passes: readonly SchemePass[] =
+    schemes && schemes.length > 0
+      ? schemes
+      : [{ colorScheme, output: output! }];
+
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
@@ -58,10 +87,12 @@ export function thumbs({
       getEnsureChrome(browserExecutable),
     );
 
-    if (path.extname(output) !== `.${imageFormat}`) {
-      return yield* Effect.die(
-        `File pattern '${output}' does not match format '${imageFormat}'.`,
-      );
+    for (const { output } of passes) {
+      if (path.extname(output) !== `.${imageFormat}`) {
+        return yield* Effect.die(
+          `File pattern '${output}' does not match format '${imageFormat}'.`,
+        );
+      }
     }
 
     concurrency = validateConcurrency(concurrency);
@@ -70,81 +101,114 @@ export function thumbs({
     browserHeight ??= height;
     browserWidth ??= width;
 
-    // make directories
-    const [tmpDir] = yield* Effect.all([
-      fs.makeTempDirectory({ prefix: "liqvid.thumbs" }),
-      fs.makeDirectory(path.dirname(output), { recursive: true }),
-    ]);
+    // make a temp dir per scheme + ensure each output directory exists
+    const tmpDirs = yield* Effect.all(
+      passes.map(() => fs.makeTempDirectory({ prefix: "liqvid.thumbs" })),
+    );
+    yield* Effect.all(
+      passes.map(({ output }) =>
+        fs.makeDirectory(path.dirname(output), { recursive: true }),
+      ),
+      { concurrency: "unbounded" },
+    );
 
     yield* Effect.log(
       `Connecting to ${url} with ${concurrency} browser instances...`,
     );
 
     // pool of puppeteer instances
-    yield* Effect.logDebug("testing debug logging");
     yield* Effect.log(`(${step++}/${total}) Connecting to players...`);
-    yield* Effect.logDebug("testing debug logging");
 
-    const { numThumbs } = yield* Effect.gen(function* () {
-      const pages = yield* getPages({
-        colorScheme,
-        concurrency,
-        executablePath,
-        height: browserHeight,
-        renderMode: "thumbs",
-        url,
-        width: browserWidth,
-      });
+    // Note: getPages uses acquireRelease for browser, so it needs to stay in the
+    // outer scope (managed by Effect.scoped at the end of thumbs()). Do NOT wrap
+    // this in an inner Effect.scoped or the browser will close prematurely.
+    // Pages are loaded once with the first scheme; subsequent schemes reuse them.
+    const pages = yield* getPages({
+      colorScheme: passes[0]!.colorScheme,
+      concurrency,
+      executablePath,
+      height: browserHeight,
+      renderMode: "thumbs",
+      url,
+      width: browserWidth,
+    });
 
-      const pool = new Pool(pages);
-      // for (const page of pages) {
-      //   (page as any).client = yield* Effect.promise(() =>
-      //     page.createCDPSession(),
-      //   );
-      // }
+    const pool = new Pool(pages);
 
-      // calculate how many thumbs
-      const durationSeconds = yield* Effect.promise(() =>
-        pages[0]!.evaluate(() => {
-          return player.playback.duration;
-        }),
+    // calculate how many thumbs
+    const durationSeconds = yield* Effect.promise(() =>
+      pages[0]!.evaluate(() => {
+        return player.playback.duration;
+      }),
+    );
+
+    const numThumbs = Math.ceil(durationSeconds / frequency);
+
+    // grab thumbs for each scheme, reusing the same pages
+    yield* Effect.log(`(${step++}/${total}) Capturing thumbs...`);
+    for (const [i, { colorScheme }] of passes.entries()) {
+      // re-apply the scheme to every page before capturing this pass
+      yield* Effect.all(
+        pages.map((page) => setColorScheme(page, colorScheme)),
+        { concurrency: "unbounded" },
       );
 
-      const numThumbs = Math.ceil(durationSeconds / frequency);
-
-      // grab thumbs and assemble them
-      yield* Effect.log(`(${step++}/${total}) Capturing thumbs...`);
       yield* captureRange({
         count: numThumbs,
-        filename: (i) => path.join(tmpDir, `${i}.${imageFormat}`),
+        filename: (j) => path.join(tmpDirs[i]!, `${j}.${imageFormat}`),
         imageFormat,
         pool,
-        time: (i) => i * frequency,
-      });
+        time: (j) => j * frequency,
+      }).pipe(Effect.annotateLogs({ colorScheme }));
+    }
 
-      return { numThumbs };
-    }).pipe(Effect.scoped);
-
+    // assemble + clean up each scheme's sheets
     yield* Effect.log(`(${step++}/${total}) Assembling sheets...`);
-    yield* assembleSheets({
-      cols,
-      height,
-      imageFormat,
-      numThumbs,
-      output,
-      quality,
-      rows,
-      tmpDir,
-      width,
-    });
+    yield* Effect.all(
+      passes.map(({ output }, i) =>
+        assembleSheets({
+          cols,
+          height,
+          imageFormat,
+          numThumbs,
+          output,
+          quality,
+          rows,
+          tmpDir: tmpDirs[i]!,
+          width,
+        }),
+      ),
+      { concurrency: "unbounded" },
+    );
 
     // clean up tmp files
     yield* Effect.log("Cleaning up...");
-    yield* fs.remove(tmpDir, { recursive: true });
+    yield* Effect.all(
+      tmpDirs.map((tmpDir) => fs.remove(tmpDir, { recursive: true })),
+      { concurrency: "unbounded" },
+    );
 
     // done
     yield* Effect.log("Done!");
-  });
+  }).pipe(
+    Effect.withLogSpan("thumbs"),
+    Effect.annotateLogs({
+      browserExecutable,
+      browserHeight,
+      browserWidth,
+      cols,
+      concurrency,
+      frequency,
+      height,
+      imageFormat,
+      quality,
+      rows,
+      schemes: passes.map((p) => p.colorScheme),
+      url,
+      width,
+    }),
+    Effect.scoped,
+  );
 }
 
 /**
@@ -213,5 +277,5 @@ function assembleSheets({
     );
 
     sheetsBar.stop();
-  });
+  }).pipe(Effect.withLogSpan("assembleSheets"));
 }

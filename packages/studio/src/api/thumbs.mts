@@ -29,7 +29,6 @@ import {
 
 import { WebApi } from "./contract.mts";
 
-const THUMBS_BASE_DIR = path.join(ASSETS_DIR, THUMBS_DIR);
 const THUMBS_JOB_FILE = RelativeFile("thumbnails-job.json");
 
 interface GenerateThumbsBody {
@@ -63,13 +62,15 @@ function readThumbSheets(dir: string) {
 }
 
 /**
- * Generate thumbnails for a single color scheme.
+ * Generate thumbnails for one or more color schemes in a single job.
+ *
+ * All schemes share a single browser session (the URL is loaded once), which
+ * avoids overloading the dev server with simultaneous cold page loads.
  */
-function generateForScheme(
+function generateThumbnails(
   url: string,
-  outputDir: AbsoluteDir,
-  colorScheme: "light" | "dark",
-  body: GenerateThumbsBody,
+  schemes: readonly { colorScheme: "light" | "dark"; outputDir: AbsoluteDir }[],
+  { colorScheme: _, ...body }: GenerateThumbsBody,
   projectPath: RelativeDir,
 ) {
   return Effect.gen(function* () {
@@ -82,28 +83,34 @@ function generateForScheme(
     );
 
     const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
-    const outputPattern = path.join(
-      outputDir,
-      RelativeFile(`%s.${imageFormat}`),
-    );
 
-    // Ensure output directory exists
-    yield* fs.makeDirectory(outputDir, { recursive: true });
+    // Ensure output directories exist
+    yield* Effect.all(
+      schemes.map(({ outputDir }) =>
+        fs.makeDirectory(outputDir, { recursive: true }),
+      ),
+      { concurrency: "unbounded" },
+    );
 
     yield* createJob(
       "thumbnails",
       generateThumbsApi({
         ...defaults,
         ...body,
-        colorScheme,
         imageFormat,
-        output: outputPattern,
+        schemes: schemes.map(({ colorScheme, outputDir }) => ({
+          colorScheme,
+          output: path.join(outputDir, RelativeFile(`%s.${imageFormat}`)),
+        })),
         url,
       }),
       { path: projectPath },
     );
 
-    return yield* readThumbSheets(outputDir);
+    return yield* Effect.all(
+      schemes.map(({ outputDir }) => readThumbSheets(outputDir)),
+      { concurrency: "unbounded" },
+    );
   });
 }
 
@@ -196,7 +203,11 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
 
         const renderSource = config.media?.thumbnails?.source ?? "preview";
 
-        const url = yield* getRenderUrl(renderSource, projectPath);
+        const url = yield* getRenderUrl(
+          renderSource,
+          projectPath,
+          payload.params,
+        );
 
         const colorScheme = payload.colorScheme ?? "both";
 
@@ -227,28 +238,41 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
         const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
         yield* writeJSON(jobFilePath, resolvedOptions);
 
-        const { darkSheets, lightSheets } = yield* Effect.all({
-          darkSheets:
-            colorScheme === "dark" || colorScheme === "both"
-              ? generateForScheme(
-                  url,
-                  path.join(thumbsBaseDir, DARK_DIR),
-                  "dark",
-                  payload,
-                  projectPath,
-                )
-              : Effect.sync(() => []),
-          lightSheets:
-            colorScheme === "light" || colorScheme === "both"
-              ? generateForScheme(
-                  url,
-                  path.join(thumbsBaseDir, LIGHT_DIR),
-                  "light",
-                  payload,
-                  projectPath,
-                )
-              : Effect.sync(() => []),
-        });
+        // Build the list of schemes to capture (shared single browser session).
+        const wantLight = colorScheme === "light" || colorScheme === "both";
+        const wantDark = colorScheme === "dark" || colorScheme === "both";
+
+        const schemes = [
+          ...(wantLight
+            ? [
+                {
+                  colorScheme: "light" as const,
+                  outputDir: path.join(thumbsBaseDir, LIGHT_DIR),
+                },
+              ]
+            : []),
+          ...(wantDark
+            ? [
+                {
+                  colorScheme: "dark" as const,
+                  outputDir: path.join(thumbsBaseDir, DARK_DIR),
+                },
+              ]
+            : []),
+        ];
+
+        const sheetsByScheme = yield* generateThumbnails(
+          url,
+          schemes,
+          payload,
+          projectPath,
+        );
+
+        const lightIndex = schemes.findIndex((s) => s.colorScheme === "light");
+        const darkIndex = schemes.findIndex((s) => s.colorScheme === "dark");
+
+        const lightSheets = lightIndex >= 0 ? sheetsByScheme[lightIndex]! : [];
+        const darkSheets = darkIndex >= 0 ? sheetsByScheme[darkIndex]! : [];
 
         const numSheets = Math.max(lightSheets.length, darkSheets.length);
 
