@@ -112,7 +112,9 @@ export function RendersSection({
   }));
 
   // Serialize params for use in query
-  const paramsJson = selectedParams ? JSON.stringify(selectedParams) : undefined;
+  const paramsJson = selectedParams
+    ? JSON.stringify(selectedParams)
+    : undefined;
 
   const loadRenders = useCallback(async () => {
     setIsLoading(true);

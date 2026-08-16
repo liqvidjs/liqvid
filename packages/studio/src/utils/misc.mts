@@ -132,19 +132,36 @@ export function getOrigin() {
   });
 }
 
+/**
+ * Interpolate path parameters (like `[lang]`) with their actual values.
+ */
+function interpolatePathParams(
+  urlPath: string,
+  params?: Record<string, string>,
+): string {
+  if (!params) return urlPath;
+  return urlPath.replace(/\[([^\]]+)\]/g, (match, paramName: string) => {
+    return params[paramName] ?? match;
+  });
+}
+
 export function getRenderUrl(
   renderSource: RenderSource,
   projectPath: RelativeDir,
+  params?: Record<string, string>,
 ) {
   return Effect.gen(function* () {
     const origin = yield* getOrigin();
 
     const { basePath, productionServerPort } = getServerState();
 
+    // Interpolate path parameters (e.g., [lang] -> "en")
+    const interpolatedPath = interpolatePathParams(projectPath, params);
+
     if (renderSource === "preview") {
-      return `${origin}/${projectPath}?preview`;
+      return `${origin}/${interpolatedPath}?preview`;
     } else {
-      const previewPath = `${basePath || ""}/${projectPath}/`;
+      const previewPath = `${basePath || ""}/${interpolatedPath}/`;
       return `http://localhost:${productionServerPort}${previewPath}`;
     }
   });

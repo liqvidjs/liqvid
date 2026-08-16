@@ -2,8 +2,8 @@ import path from "node:path";
 
 import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
-import type { AbsoluteDir } from "effect-paths";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import type { AbsoluteDir } from "effect-paths";
 
 import { PROJECT_META_FILE } from "../conventions.mts";
 import { getRoutesDir } from "../utils/misc.mts";

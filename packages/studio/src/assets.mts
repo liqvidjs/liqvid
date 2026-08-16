@@ -111,15 +111,39 @@ export class DirectoryHelper<
   }
 }
 
-export class ServerDirectoryHelper<D extends Directory> extends DirectoryHelper<
-  FileNames<D>
-> {
+type Resolve<
+  D extends Directory,
+  P extends string,
+> = P extends `${infer Head extends string & keyof D}/${infer Tail}`
+  ? D[Head] extends Directory
+    ? Resolve<D[Head], Tail>
+    : never
+  : P extends keyof D
+    ? D[P] extends Directory
+      ? D[P]
+      : never
+    : never;
+
+export class ServerDirectoryHelper<D extends Directory> {
   #files: D;
 
   constructor(files: D) {
-    super();
-
     this.#files = files;
+  }
+
+  /** get a new ServerDirectoryHelper for a subdirectory */
+  dir<Dir extends Dirs<FileNames<D>>>(
+    dirname: Dir,
+  ): ServerDirectoryHelper<Resolve<D, Dir>> {
+    const newFiles = dirname.split("/").reduce((current, part) => {
+      const child = current[part];
+      if (child === undefined || typeof child !== "object" || child === null) {
+        throw new Error(`Directory "${dirname}" does not exist`);
+      }
+      return child;
+    }, this.#files as Directory) as Resolve<D, Dir>;
+
+    return new ServerDirectoryHelper(newFiles);
   }
 
   /** Test for existence of a file */

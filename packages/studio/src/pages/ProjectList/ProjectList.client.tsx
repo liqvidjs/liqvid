@@ -26,6 +26,10 @@ import { TranslationProvider } from "../../utils/react.tsx";
 import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
+import {
+  getDefaultParams,
+  RootParameterSelector,
+} from "./ParameterSelector.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
 
 import styles from "./ProjectList.module.css";
@@ -38,6 +42,8 @@ export type ProjectListProps = {
   basePath: string;
   initialCollapsedFolders: string[];
   initialFolderView: boolean;
+  /** Initial selected root parameter values (from cookie) */
+  initialSelectedRootParams: Record<string, string>;
   productionServerPort: number;
   projects: Record<RelativeDir, SerializedProjectMeta>;
   rootParameters: RootParameters;
@@ -68,28 +74,29 @@ const cookieOptions = {
 };
 
 /**
- * Interpolate path parameters (like `[lang]`) to their default values.
+ * Interpolate path parameters (like `[lang]`) using the selected root parameter values.
+ * Project-level parameters override root parameters.
  * @param path - The path containing parameters (e.g., `/[lang]/gng/1-cg/1-spaces/1-intro`)
  * @param projectParameters - Parameters defined in the project's project.json (if any)
- * @param rootParameters - Root parameters from liqvid.json
- * @returns The interpolated path with default parameter values
+ * @param selectedRootParams - Currently selected root parameter values
+ * @returns The interpolated path with parameter values
  */
-function interpolatePathParameters(
+function interpolatePathParametersWithSelected(
   path: string,
-  projectParameters: Record<string, string[]> | undefined,
-  rootParameters: RootParameters,
+  projectParameters: Record<string, readonly string[]> | undefined,
+  selectedRootParams: Record<string, string>,
 ): string {
   // Match all path parameters like [lang], [id], etc.
   return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
-    // First, try project-level parameters
+    // First, try project-level parameters (use first value as default)
     if (projectParameters?.[paramName]?.length) {
       return projectParameters[paramName][0]!;
     }
-    // Fall back to root parameters
-    if (rootParameters[paramName]?.length) {
-      return rootParameters[paramName][0]!;
+    // Fall back to selected root parameter value
+    if (selectedRootParams[paramName]) {
+      return selectedRootParams[paramName];
     }
-    // If no default found, keep the original
+    // If no value found, keep the original
     return match;
   });
 }
@@ -98,6 +105,7 @@ export function ProjectListClient({
   basePath,
   initialCollapsedFolders,
   initialFolderView,
+  initialSelectedRootParams,
   productionServerPort,
   projects: dehydratedProjects,
   rootParameters,
@@ -112,6 +120,19 @@ export function ProjectListClient({
   const [folderView, setFolderView] = useState(initialFolderView);
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
     () => new Set(initialCollapsedFolders),
+  );
+  // Selected root parameter values - initialized from cookie or defaults
+  const [selectedRootParams, setSelectedRootParams] = useState<
+    Record<string, string>
+  >(() => {
+    // Use initial values from cookie, fill in any missing with defaults
+    const defaults = getDefaultParams(rootParameters);
+    return { ...defaults, ...initialSelectedRootParams };
+  });
+
+  // Check if we have any root parameters to display
+  const hasRootParameters = Object.values(rootParameters).some(
+    (values) => values.length > 0,
   );
 
   useChannel("projects", {
@@ -162,6 +183,15 @@ export function ProjectListClient({
 
   return (
     <TranslationProvider t={t}>
+      {/* Root parameter selector at top of project list */}
+      {hasRootParameters && (
+        <RootParameterSelector
+          onRootParamsChange={setSelectedRootParams}
+          rootParameters={rootParameters}
+          selectedRootParams={selectedRootParams}
+        />
+      )}
+
       <div className={styles.viewToggle}>
         <label className={styles.toggleLabel}>
           <span>{t.folderView}</span>
@@ -199,6 +229,7 @@ export function ProjectListClient({
                       productionServerPort={productionServerPort}
                       project={project}
                       rootParameters={rootParameters}
+                      selectedRootParams={selectedRootParams}
                     />
                   ))}
                 </ul>
@@ -212,6 +243,7 @@ export function ProjectListClient({
                   onToggle={handleFolderToggle}
                   productionServerPort={productionServerPort}
                   rootParameters={rootParameters}
+                  selectedRootParams={selectedRootParams}
                 />
               ),
             )}
@@ -225,6 +257,7 @@ export function ProjectListClient({
               productionServerPort={productionServerPort}
               project={project}
               rootParameters={rootParameters}
+              selectedRootParams={selectedRootParams}
             />
           ))}
         </ul>
@@ -241,12 +274,14 @@ function FolderItem({
   onToggle,
   productionServerPort,
   rootParameters,
+  selectedRootParams,
 }: {
   basePath: string;
   collapsedFolders: Set<string>;
   folder: FolderNode;
   folderPath: string;
   rootParameters: RootParameters;
+  selectedRootParams: Record<string, string>;
   onToggle: (folderPath: string, expanded: boolean) => void;
   productionServerPort: number;
 }) {
@@ -290,6 +325,7 @@ function FolderItem({
             onToggle={onToggle}
             productionServerPort={productionServerPort}
             rootParameters={rootParameters}
+            selectedRootParams={selectedRootParams}
           />
         ))}
         {/* Then render projects in this folder */}
@@ -302,6 +338,7 @@ function FolderItem({
                 productionServerPort={productionServerPort}
                 project={project}
                 rootParameters={rootParameters}
+                selectedRootParams={selectedRootParams}
               />
             ))}
           </ul>
@@ -316,17 +353,19 @@ function ProjectItem({
   productionServerPort,
   project,
   rootParameters,
+  selectedRootParams,
 }: {
   basePath: string;
   productionServerPort: number;
   project: ProjectMeta;
   rootParameters: RootParameters;
+  selectedRootParams: Record<string, string>;
 }) {
-  // Interpolate path parameters to their default values for navigation
-  const interpolatedPath = interpolatePathParameters(
+  // Interpolate path parameters using selected root params + project params
+  const interpolatedPath = interpolatePathParametersWithSelected(
     project.path,
     project.parameters,
-    rootParameters,
+    selectedRootParams,
   );
 
   // Build the preview URL with basePath if configured
@@ -351,6 +390,7 @@ function ProjectItem({
             productionServerPort={productionServerPort}
             project={omit(project, ["duration"])}
             rootParameters={rootParameters}
+            selectedRootParams={selectedRootParams}
           />
           <EmbedButton
             basePath={basePath}
@@ -376,7 +416,7 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
         backgroundSize: "100% 100%",
         ...(openGraph
           ? {
-              backgroundImage: `url("/${path}/opengraph-image.png")`,
+              backgroundImage: `url("/api/liqvid/static/${path}/opengraph-image.png")`,
             }
           : {}),
       }}

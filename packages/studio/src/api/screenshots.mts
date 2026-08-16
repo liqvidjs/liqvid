@@ -81,8 +81,6 @@ export const screenshotsLive = HttpApiBuilder.group(
             imagePathPrefix = path.join(ASSETS_DIR, ...paramSubpath);
           }
 
-          const fs = yield* FileSystem.FileSystem;
-
           const entries = (yield* readDirWithFileTypes(screenshotsDir).pipe(
             existenceOptional,
           )).pipe(Option.getOrElse(() => []));
@@ -163,7 +161,11 @@ export const screenshotsLive = HttpApiBuilder.group(
 
           const renderSource = config.media?.screenshots?.source ?? "preview";
 
-          const url = yield* getRenderUrl(renderSource, projectPath);
+          const url = yield* getRenderUrl(
+            renderSource,
+            projectPath,
+            payload.params,
+          );
 
           const colorScheme = payload.colorScheme ?? "light";
 

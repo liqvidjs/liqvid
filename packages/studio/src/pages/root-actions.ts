@@ -23,6 +23,7 @@ import {
   ASSETS_DIR,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  PROJECT_PATH,
   SCREENSHOTS_DIR,
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
@@ -498,6 +499,12 @@ export async function createProjectAction(
       yield* writeJSON<AutoGenProjectMeta>(
         path.join(fullProjectPath, ASSETS_DIR, PROJECT_META_FILE),
         { duration: { milliseconds: 0 } },
+      );
+
+      // Generate .liqvid/project-path.json
+      yield* writeJSON<string>(
+        path.join(fullProjectPath, ASSETS_DIR, PROJECT_PATH),
+        projectPath,
       );
 
       // Generate .liqvid/types.ts (initial structure)

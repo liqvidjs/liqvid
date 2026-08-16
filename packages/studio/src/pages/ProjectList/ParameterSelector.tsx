@@ -1,18 +1,21 @@
 "use client";
 
 import type { RootParameters } from "@liqvid/schemas";
-import { useProjectParams } from "@liqvid/studio-plugin-api";
 import { useMemo } from "react";
+import Cookies from "universal-cookie";
 
+import { ROOT_PARAMS_COOKIE } from "../../cookies.ts";
+
+import listStyles from "./ProjectList.module.css";
 import styles from "./share.module.css";
 
 interface ParameterSelectorProps {
+  /** Callback when parameter values change */
+  onParamsChange: (params: Record<string, string>) => void;
   /** Parameter definitions from project.json or liqvid.json */
   parameters: RootParameters;
   /** Currently selected parameter values */
   selectedParams: Record<string, string>;
-  /** Callback when parameter values change */
-  onParamsChange: (params: Record<string, string>) => void;
 }
 
 /**
@@ -36,17 +39,83 @@ export function ParameterSelector({
   return (
     <div className={styles.parameterSelector}>
       {paramEntries.map(([paramName, values]) => (
-        <label key={paramName} className={styles.parameterField}>
+        <label className={styles.parameterField} key={paramName}>
           <span className={styles.parameterLabel}>{paramName}</span>
           <select
             className={styles.parameterSelect}
-            value={selectedParams[paramName] ?? values[0]}
             onChange={(e) => {
               onParamsChange({
                 ...selectedParams,
                 [paramName]: e.target.value,
               });
             }}
+            value={selectedParams[paramName] ?? values[0]}
+          >
+            {values.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+interface RootParameterSelectorProps {
+  /** Callback when root parameter values change */
+  onRootParamsChange: (params: Record<string, string>) => void;
+  /** Root parameter definitions from liqvid.json */
+  rootParameters: RootParameters;
+  /** Currently selected root parameter values */
+  selectedRootParams: Record<string, string>;
+}
+
+const cookieOptions = {
+  maxAge: 365 * 24 * 60 * 60, // 1 year in seconds
+  path: "/",
+  sameSite: "lax" as const,
+};
+
+/**
+ * A row of dropdowns for selecting root parameter values.
+ * Displayed at the top of the project list page.
+ * Persists selection to a server-side cookie.
+ */
+export function RootParameterSelector({
+  rootParameters,
+  selectedRootParams,
+  onRootParamsChange,
+}: RootParameterSelectorProps) {
+  const paramEntries = useMemo(
+    () =>
+      Object.entries(rootParameters).filter(([, values]) => values.length > 0),
+    [rootParameters],
+  );
+
+  if (paramEntries.length === 0) {
+    return null;
+  }
+
+  function handleChange(paramName: string, value: string) {
+    const newParams = { ...selectedRootParams, [paramName]: value };
+    onRootParamsChange(newParams);
+
+    // Persist to cookie
+    const cookies = new Cookies();
+    cookies.set(ROOT_PARAMS_COOKIE, JSON.stringify(newParams), cookieOptions);
+  }
+
+  return (
+    <div className={listStyles.rootParameterSelector}>
+      {paramEntries.map(([paramName, values]) => (
+        <label className={listStyles.rootParameterField} key={paramName}>
+          <span className={listStyles.rootParameterLabel}>{paramName}</span>
+          <select
+            className={listStyles.rootParameterSelect}
+            onChange={(e) => handleChange(paramName, e.target.value)}
+            value={selectedRootParams[paramName] ?? values[0]}
           >
             {values.map((value) => (
               <option key={value} value={value}>
@@ -68,8 +137,6 @@ export function useProjectParameterValues(
   projectParameters?: Record<string, string[]>,
   rootParameters?: RootParameters,
 ): Record<string, string[]> {
-  const contextParams = useProjectParams();
-
   return useMemo(() => {
     // Start with root parameters as fallback
     const params: Record<string, string[]> = { ...rootParameters };

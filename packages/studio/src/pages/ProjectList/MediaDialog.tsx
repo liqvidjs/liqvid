@@ -24,10 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
 import { useTranslations } from "../../utils/react.tsx";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
-import {
-  getDefaultParams,
-  ParameterSelector,
-} from "./ParameterSelector.tsx";
+import { getDefaultParams, ParameterSelector } from "./ParameterSelector.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
@@ -46,6 +43,48 @@ interface ShareButtonProps {
   project: Omit<ProjectMeta, "duration">;
   /** Root parameters from liqvid.json (used as fallback) */
   rootParameters?: RootParameters;
+  /** Currently selected root parameter values */
+  selectedRootParams: Record<string, string>;
+}
+
+/**
+ * Get project-level parameters that should be shown in the media dialog.
+ * Only shows parameters where:
+ * 1. The project defines its own values that differ from root parameters, OR
+ * 2. The project has more values for that parameter than the root
+ */
+function getProjectOnlyParameters(
+  projectParameters: Record<string, readonly string[]> | undefined,
+  rootParameters: RootParameters,
+): Record<string, string[]> {
+  if (!projectParameters) {
+    return {};
+  }
+
+  const result: Record<string, string[]> = {};
+
+  for (const [key, projectValues] of Object.entries(projectParameters)) {
+    const rootValues = rootParameters[key];
+
+    // Include if project has more values than root
+    if (!rootValues || projectValues.length > rootValues.length) {
+      result[key] = [...projectValues];
+      continue;
+    }
+
+    // Include if project has different values than root
+    const projectSet = new Set(projectValues);
+    const rootSet = new Set(rootValues);
+    const hasDifferentValues =
+      projectValues.some((v) => !rootSet.has(v)) ||
+      rootValues.some((v) => !projectSet.has(v));
+
+    if (hasDifferentValues) {
+      result[key] = [...projectValues];
+    }
+  }
+
+  return result;
 }
 
 export function MediaButton({
@@ -54,29 +93,37 @@ export function MediaButton({
   project,
   productionServerPort,
   rootParameters = {},
+  selectedRootParams,
 }: ShareButtonProps) {
   const t = useTranslations<T>().media;
 
-  // Merge project-level and root-level parameters
-  const parameters = useMemo(() => {
-    const merged: Record<string, string[]> = { ...rootParameters };
-    if (project.parameters) {
-      for (const [key, values] of Object.entries(project.parameters)) {
-        merged[key] = values;
-      }
-    }
-    return merged;
-  }, [project.parameters, rootParameters]);
-
-  // Check if project has any parameters
-  const hasParameters = Object.keys(parameters).some(
-    (key) => parameters[key]!.length > 0,
+  // Get only project-level parameters that differ from root
+  const projectOnlyParams = useMemo(
+    () => getProjectOnlyParameters(project.parameters, rootParameters),
+    [project.parameters, rootParameters],
   );
 
-  // State for selected parameter values
-  const [selectedParams, setSelectedParams] = useState<Record<string, string>>(
-    () => getDefaultParams(parameters),
+  // Check if we have any project-specific parameters to show
+  const hasProjectOnlyParams = Object.keys(projectOnlyParams).some(
+    (key) => projectOnlyParams[key]!.length > 0,
   );
+
+  // State for selected project-only parameter values
+  const [selectedProjectParams, setSelectedProjectParams] = useState<
+    Record<string, string>
+  >(() => getDefaultParams(projectOnlyParams));
+
+  // Combine selected root params with project-specific params for API calls
+  // Project params override root params
+  const selectedParams = useMemo(
+    () => ({ ...selectedRootParams, ...selectedProjectParams }),
+    [selectedRootParams, selectedProjectParams],
+  );
+
+  // Determine if we have any parameters at all (for passing to sections)
+  const hasAnyParameters =
+    hasProjectOnlyParams ||
+    Object.values(rootParameters).some((v) => v.length > 0);
 
   return (
     <DialogRoot>
@@ -98,12 +145,12 @@ export function MediaButton({
 
           <DialogClose />
 
-          {/* Parameter selector above tabs */}
-          {hasParameters && (
+          {/* Parameter selector - only show project-specific parameters */}
+          {hasProjectOnlyParams && (
             <ParameterSelector
-              parameters={parameters}
-              selectedParams={selectedParams}
-              onParamsChange={setSelectedParams}
+              onParamsChange={setSelectedProjectParams}
+              parameters={projectOnlyParams}
+              selectedParams={selectedProjectParams}
             />
           )}
 
@@ -129,27 +176,27 @@ export function MediaButton({
                 duration={duration}
                 productionServerPort={productionServerPort}
                 project={project}
-                selectedParams={hasParameters ? selectedParams : undefined}
+                selectedParams={hasAnyParameters ? selectedParams : undefined}
               />
             </TabsContent>
 
             <TabsContent value="thumbnails">
               <ThumbnailsSection
                 duration={duration}
-                selectedParams={hasParameters ? selectedParams : undefined}
+                selectedParams={hasAnyParameters ? selectedParams : undefined}
               />
             </TabsContent>
 
             <TabsContent value="renders">
               <RendersSection
                 aspectRatio={project.aspectRatio}
-                selectedParams={hasParameters ? selectedParams : undefined}
+                selectedParams={hasAnyParameters ? selectedParams : undefined}
               />
             </TabsContent>
 
             <TabsContent value="captions">
               <CaptionsSection
-                selectedParams={hasParameters ? selectedParams : undefined}
+                selectedParams={hasAnyParameters ? selectedParams : undefined}
               />
             </TabsContent>
           </Tabs>

@@ -37,6 +37,7 @@ import {
   NEXT_PAGE,
   PROJECT_FILE,
   PROJECT_META_FILE,
+  PROJECT_PATH,
   RECORDING_META_FILE,
   RECORDINGS_DIR,
 } from "../conventions.mts";
@@ -44,6 +45,11 @@ import { broadcast } from "../next/websockets.mts";
 import { existenceOptional } from "../utils/effect.mts";
 import { walkDir } from "../utils/fs.mts";
 import { getLogLevel, getRoutesDir } from "../utils/misc.mts";
+import {
+  extractParameterNames,
+  getDefaultParameterValues,
+  getProjectParameterValues,
+} from "../utils/parameters.mts";
 
 type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 
@@ -369,7 +375,7 @@ function handleProjectJson({ dirname, filename, projects, relative }: Context) {
 
     yield* Effect.logDebug("generating assets dir");
 
-    yield* generateAssetsDir({ dirname });
+    yield* generateAssetsDir({ dirname, projectPath });
 
     yield* Effect.logDebug("generated assets dir");
   }).pipe(Effect.annotateLogs({ _op: "handleProjectJson", dirname, filename }));
@@ -393,13 +399,53 @@ function createProject({ dirname, filename, projects, relative }: Context) {
     // read project file
     const project = yield* loadJson(ProjectJson, filename);
 
-    // read duration
+    const projectPath = path.dirname(relative);
+
+    // Determine the correct assets directory for parameterized projects
+    // Use default parameter values (first value of each parameter)
+    const paramNames = extractParameterNames(projectPath);
+    let assetsDir = path.join(dirname, ASSETS_DIR);
+
+    if (paramNames.length > 0) {
+      // Get merged parameters (project + root)
+      const mergedParams = getProjectParameterValues(project.parameters);
+      const defaultValues = getDefaultParameterValues(
+        mergedParams as Record<string, string[]>,
+      );
+
+      // Build the parameterized subdirectory path
+      const paramSubpath = paramNames
+        .map((name) => defaultValues[name] ?? "")
+        .filter(Boolean)
+        .join("/");
+
+      if (paramSubpath) {
+        assetsDir = path.join(assetsDir, RelativeDir(paramSubpath));
+      }
+    }
+
+    // read duration - try parameterized location first, fall back to base assets dir
     const duration = (yield* loadJson(
       AutoGenProjectMeta,
-      path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
+      path.join(assetsDir, PROJECT_META_FILE),
     ).pipe(
       Effect.map((meta) => new Duration(meta.duration)),
       existenceOptional,
+      // If parameterized location doesn't exist, try base assets dir
+      Effect.flatMap((opt) => {
+        if (Option.isSome(opt)) return Effect.succeed(opt);
+        if (assetsDir !== path.join(dirname, ASSETS_DIR)) {
+          return loadJson(
+            AutoGenProjectMeta,
+            path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
+          ).pipe(
+            Effect.map((meta) => Option.some(new Duration(meta.duration))),
+            existenceOptional,
+            Effect.map(Option.flatten),
+          );
+        }
+        return Effect.succeed(Option.none<Duration>());
+      }),
     )).pipe(Option.getOrElse(() => new Duration({ seconds: 1000 })));
 
     const meta: ProjectMeta = {
@@ -408,13 +454,13 @@ function createProject({ dirname, filename, projects, relative }: Context) {
       duration,
       openGraph: hasOpenGraphImage(dirname),
       parameters: project.parameters,
-      path: path.dirname(relative),
+      path: projectPath,
       twitter: hasTwitterImage(dirname),
     };
 
     projects[meta.path] = meta;
 
-    yield* generateAssetsDir({ dirname });
+    yield* generateAssetsDir({ dirname, projectPath: meta.path });
   }).pipe(
     Effect.annotateLogs({ _op: "createProject", dirname, filename, relative }),
   );
@@ -422,15 +468,42 @@ function createProject({ dirname, filename, projects, relative }: Context) {
 
 /**
  * Handle auto-generated project-meta.json files
+ *
+ * For parameterized projects, project-meta.json can be at:
+ * - .liqvid/en/US/project-meta.json (parameterized)
+ * - .liqvid/project-meta.json (non-parameterized)
+ *
+ * We need to find the project by walking up from the .liqvid directory.
  */
 function handleProjectMeta({
-  dirname: dotLiqvidDir,
+  dirname: metaDir,
   filename,
   projects,
   relative,
 }: Context) {
   return Effect.gen(function* () {
-    const projectPath = path.dirname(path.dirname(relative));
+    // Walk up from the meta file's directory to find the .liqvid directory
+    // Then the project is one level above .liqvid
+    let currentDir = metaDir;
+    let depth = 0;
+    const maxDepth = 10; // Prevent infinite loops
+
+    // Find the .liqvid directory
+    while (depth < maxDepth && path.basename(currentDir) !== ASSETS_DIR) {
+      currentDir = AbsoluteDir(path.dirname(currentDir));
+      depth++;
+    }
+
+    if (path.basename(currentDir) !== ASSETS_DIR) {
+      return yield* Effect.logError(
+        `could not find .liqvid directory for ${relative}`,
+      );
+    }
+
+    // The project directory is one level up from .liqvid
+    const projectDir = AbsoluteDir(path.dirname(currentDir));
+    const routesDir = getRoutesDir();
+    const projectPath = path.relative(routesDir, projectDir);
 
     const projectMeta = yield* loadJson(AutoGenProjectMeta, filename);
 
@@ -443,7 +516,7 @@ function handleProjectMeta({
   }).pipe(
     Effect.annotateLogs({
       _op: "handleProjectMeta",
-      dotLiqvidDir,
+      metaDir,
       projects: Object.keys(projects),
     }),
   );
@@ -604,12 +677,23 @@ function parseAspectRatio(value: unknown): AspectRatio {
   switch (typeof value) {
     case "object": {
       if (value === null) return defaultValue;
+
       if (Array.isArray(value)) {
         const [width, height] = value;
         if (typeof width === "number" && typeof height === "number") {
           return { height, width };
         }
       }
+
+      if (
+        "height" in value &&
+        "width" in value &&
+        typeof value.height === "number" &&
+        typeof value.width === "number"
+      ) {
+        return value as AspectRatio;
+      }
+
       break;
     }
     case "string": {
@@ -623,17 +707,29 @@ function parseAspectRatio(value: unknown): AspectRatio {
       return defaultValue;
   }
 
-  throw new Error(`Invalid aspect ratio: ${value}`);
+  throw new Error(`Invalid aspect ratio: ${JSON.stringify(value)}`);
 }
 
-function generateAssetsDir({ dirname }: { dirname: AbsoluteDir }) {
+function generateAssetsDir({
+  dirname,
+  projectPath,
+}: {
+  dirname: AbsoluteDir;
+  projectPath: RelativeDir;
+}) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
 
     const assetsDir = path.join(dirname, ASSETS_DIR);
 
-    if (yield* fs.exists(assetsDir)) return;
+    if (!(yield* fs.exists(assetsDir))) {
+      yield* fs.makeDirectory(assetsDir);
+    }
 
-    yield* fs.makeDirectory(assetsDir);
+    // Always write project-path.json so client components can read it at runtime
+    yield* fs.writeFileString(
+      path.join(assetsDir, PROJECT_PATH),
+      JSON.stringify(projectPath),
+    );
   });
 }

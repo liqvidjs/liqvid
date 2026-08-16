@@ -25,10 +25,7 @@ import {
   DialogTitle,
 } from "../../../ui/Dialog.tsx";
 import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
-import {
-  useCommonTranslations,
-  useTranslations,
-} from "../../../utils/react.tsx";
+import { useTranslations } from "../../../utils/react.tsx";
 
 import styles from "../../root.module.css";
 import shareStyles from "../share.module.css";
@@ -56,7 +53,6 @@ export function ScreenshotModal({
   selectedParams,
 }: ScreenshotModalProps) {
   const t = useTranslations<T>().screenshots;
-  const c = useCommonTranslations();
 
   const { renderSource } = useDerivedConfig();
   const [previewTime, setPreviewTime] = useState(0);

@@ -55,6 +55,9 @@ export const ASSETS_DIR = RelativeDir(".liqvid");
 /** Auto-generated meta file inside `.liqvid` directory */
 export const PROJECT_META_FILE = RelativeFile("project-meta.json");
 
+/** Auto-generated meta file inside `.liqvid` directory */
+export const PROJECT_PATH = RelativeFile("project-path.json");
+
 /* ------------------------------ recording ------------------------------ */
 export const RECORDINGS_DIR = RelativeDir("recordings");
 

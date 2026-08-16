@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: variance */
 import { Brand } from "effect";
 
 export type RecordSignificantKeyOrder<K extends keyof any, V> = Record<K, V> &

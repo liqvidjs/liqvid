@@ -39,11 +39,13 @@ export function ThumbnailsSection({
   const [sliderValue, setSliderValue] = useState(0);
   const { isOpen } = useDialogApi();
 
-  // Serialize params for use in query
-  const paramsJson = selectedParams ? JSON.stringify(selectedParams) : undefined;
-
   const loadThumbs = useEffectEvent(async () => {
     setIsLoading(true);
+
+    // Serialize params for use in query
+    const paramsJson = selectedParams
+      ? JSON.stringify(selectedParams)
+      : undefined;
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -75,7 +77,7 @@ export function ThumbnailsSection({
     if (isOpen) {
       loadThumbs();
     }
-  }, [isOpen, paramsJson]);
+  }, [isOpen]);
 
   const handleGenerate = useEffectEvent(async () => {
     setIsGenerating(true);
@@ -137,15 +139,33 @@ export function ThumbnailsSection({
 
   const getSheetUrl = (colorScheme: "light" | "dark") => {
     if (!thumbInfo) return "";
-    return `/api/liqvid/static${encodeURIComponent(
-      [
-        projectPath,
-        ASSETS_DIR,
-        THUMBS_DIR,
-        colorScheme,
-        `${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`,
-      ].join("/"),
-    )}`;
+
+    // Build the path segments
+    const pathSegments: string[] = [projectPath, ASSETS_DIR];
+
+    // For parameterized projects, add the parameter subpath
+    // Extract param names from path (e.g., `/[lang]/[locale]/foo` → ["lang", "locale"])
+    // and build subpath from values (e.g., { lang: "en", locale: "US" } → "en/US")
+    if (selectedParams) {
+      const paramNames = Array.from(
+        projectPath.matchAll(/\[([^\]]+)\]/g),
+        (m) => m[1]!,
+      );
+      if (paramNames.length > 0) {
+        const subpath = paramNames
+          .map((name) => selectedParams[name] ?? "")
+          .join("/");
+        pathSegments.push(subpath);
+      }
+    }
+
+    pathSegments.push(
+      THUMBS_DIR,
+      colorScheme,
+      `${thumbInfo.sheetNum}.${thumbInfo.imageFormat}`,
+    );
+
+    return `/api/liqvid/static${encodeURIComponent(pathSegments.join("/"))}`;
   };
 
   return (

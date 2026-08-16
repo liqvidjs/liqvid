@@ -191,7 +191,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
 
         const renderSource = config.media?.audio?.source ?? "preview";
 
-        const url = yield* getRenderUrl(renderSource, projectPath);
+        const url = yield* getRenderUrl(renderSource, projectPath, params);
 
         const meta: AudioMeta = {
           createdAt: new Date().toISOString(),

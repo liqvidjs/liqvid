@@ -2,7 +2,11 @@ import { serialize } from "@liqvid/ssr";
 import { cookies } from "next/headers";
 
 import { WebSocketProvider } from "../components/WebSocketProvider.tsx";
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../cookies.ts";
+import {
+  COLLAPSED_FOLDERS_COOKIE,
+  FOLDER_VIEW_COOKIE,
+  ROOT_PARAMS_COOKIE,
+} from "../cookies.ts";
 import { getServerState, initializeServer } from "../initialize.mts";
 
 import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
@@ -59,6 +63,11 @@ export async function Homepage() {
     ? JSON.parse(collapsedFoldersCookie.value)
     : [];
 
+  // Read selected root parameters from cookie
+  const rootParamsCookie = cookieStore.get(ROOT_PARAMS_COOKIE);
+  const initialSelectedRootParams: Record<string, string> =
+    rootParamsCookie?.value ? JSON.parse(rootParamsCookie.value) : {};
+
   return (
     <DerivedConfigProvider value={derivedConfig}>
       <WebSocketProvider>
@@ -73,9 +82,12 @@ export async function Homepage() {
             basePath={basePath}
             initialCollapsedFolders={initialCollapsedFolders}
             initialFolderView={initialFolderView}
+            initialSelectedRootParams={initialSelectedRootParams}
             productionServerPort={productionServerPort}
             projects={serialize(projects)}
-            rootParameters={config.rootParameters ?? {}}
+            rootParameters={
+              (config.rootParameters ?? {}) as Record<string, string[]>
+            }
           />
         </main>
       </WebSocketProvider>

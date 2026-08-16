@@ -101,41 +101,6 @@ const TEMPLATES_DIR = path.join(
 );
 
 /**
- * Generate all combinations of parameter values.
- * e.g., `{ lang: ["en", "es"], locale: ["US", "CA"] }` →
- * `[{ lang: "en", locale: "US" }, { lang: "en", locale: "CA" }, { lang: "es", locale: "US" }, { lang: "es", locale: "CA" }]`
- */
-function generateParameterCombinations(
-  paramNames: string[],
-  parameterValues: Record<string, readonly string[]>,
-): Record<string, string>[] {
-  if (paramNames.length === 0) {
-    return [];
-  }
-
-  const combinations: Record<string, string>[] = [{}];
-
-  for (const paramName of paramNames) {
-    const values = parameterValues[paramName] ?? [];
-    if (values.length === 0) {
-      // No values for this parameter - can't generate combinations
-      return [];
-    }
-
-    const newCombinations: Record<string, string>[] = [];
-    for (const combo of combinations) {
-      for (const value of values) {
-        newCombinations.push({ ...combo, [paramName]: value });
-      }
-    }
-    combinations.length = 0;
-    combinations.push(...newCombinations);
-  }
-
-  return combinations;
-}
-
-/**
  * Initialize the parameterized directory structure for a project.
  * Creates directories like `.liqvid/en/US/`, `.liqvid/es/CA/`, etc.
  * for all parameter value combinations.
@@ -350,7 +315,7 @@ function generateProjectTypes({
     const project = yield* loadJson(ProjectJson, projectFile);
 
     // Use project parameters if defined, otherwise fall back to rootParameters from config
-    let parametersRecord: Record<string, string[]>;
+    let parametersRecord: Record<string, readonly string[]>;
     if (project.parameters) {
       parametersRecord = project.parameters;
     } else {
@@ -489,11 +454,7 @@ function listProjectDir(
                 relPath,
               );
 
-              // Only include non-empty directories
-              if (Object.keys(subDir).length > 0) {
-                return [basename, subDir] as const;
-              }
-              return null;
+              return [basename, subDir] as const;
             }
             case "File": {
               const relPath = relativePath

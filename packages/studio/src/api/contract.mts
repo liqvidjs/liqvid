@@ -11,9 +11,10 @@ import {
   HttpApi,
   HttpApiEndpoint,
   HttpApiGroup,
+  HttpApiSchema,
   OpenApi,
 } from "effect/unstable/httpapi";
-import { RelativeDir, SchemaRelativeDir } from "effect-paths";
+import { SchemaRelativeDir } from "effect-paths";
 
 import {
   ConflictError,
@@ -210,12 +211,40 @@ const rendersGroup = HttpApiGroup.make("renders")
 
 /* ------------------------------ recordings ------------------------------ */
 
-const recordingsGroup = HttpApiGroup.make("recordings").add(
-  HttpApiEndpoint.get("list", "/recordings", {
-    query: projectPathWithParamsQuery,
-    success: Schema.Array(RecordingMeta),
-  }),
-);
+const recordingsGroup = HttpApiGroup.make("recordings")
+  .add(
+    HttpApiEndpoint.get("list", "/recordings", {
+      query: projectPathWithParamsQuery,
+      success: Schema.Array(RecordingMeta),
+    }),
+  )
+  .add(
+    HttpApiEndpoint.post("save", "/recordings", {
+      // Multipart payload: metadata JSON + plugin data (blobs or JSON strings)
+      // We use handleRaw in the implementation since plugin keys are dynamic
+      payload: Schema.Struct({
+        metadata: Schema.String,
+      }).pipe(HttpApiSchema.asMultipart()),
+      query: Schema.Struct({
+        /** path to the project */
+        projectPath: SchemaRelativeDir,
+      }),
+      success: HttpApiSchema.Created,
+    }).annotate(OpenApi.Summary, "Save a new recording"),
+  )
+  .add(
+    HttpApiEndpoint.post("reprocess", "/recordings/reprocess", {
+      payload: Schema.Struct({
+        /** Recording name (ISO timestamp format, e.g., "2024-01-15T12-30-00-000Z") */
+        recordingName: Schema.String,
+      }),
+      query: projectPathWithParamsQuery,
+      success: Schema.Struct({ success: Schema.Boolean }),
+    }).annotate(
+      OpenApi.Summary,
+      "Re-run post-processing plugins for a recording",
+    ),
+  );
 
 /* ------------------------------ screenshots ------------------------------ */
 const targetFilename = Schema.Literals([

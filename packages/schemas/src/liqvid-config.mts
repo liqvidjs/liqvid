@@ -134,15 +134,6 @@ export const LiqvidConfig = Schema.Struct({
     sftp: ProviderConfigSFTP.pipe(Schema.optional),
   }),
 
-  /**
-   * Root-level static parameters that apply to all projects.
-   * These are used as fallbacks when a project does not define its own parameters.
-   * Format: `{ parameterName: [value1, value2, ...] }`
-   */
-  rootParameters: Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
-    Schema.optional,
-  ),
-
   /** Publishing configuration */
   publishing: Schema.Struct({
     /**
@@ -213,6 +204,16 @@ export const LiqvidConfig = Schema.Struct({
       ),
     }).pipe(Schema.optional),
   }).pipe(Schema.optional),
+
+  /**
+   * Root-level static parameters that apply to all projects.
+   * These are used as fallbacks when a project does not define its own parameters.
+   * Format: `{ parameterName: [value1, value2, ...] }`
+   */
+  rootParameters: Schema.Record(
+    Schema.String,
+    Schema.Array(Schema.String),
+  ).pipe(Schema.optional),
 
   ui: Schema.Struct({
     /** Locale for Liqvid Studio user interface. */

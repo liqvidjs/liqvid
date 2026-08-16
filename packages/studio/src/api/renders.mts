@@ -113,66 +113,68 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         Effect.catchTag("FileDecodeError", Effect.die),
       ),
     )
-    .handle("rename", ({ query: { projectPath, params: paramsJson }, payload }) =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
+    .handle(
+      "rename",
+      ({ query: { projectPath, params: paramsJson }, payload }) =>
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem;
 
-        const { renderId, newName } = payload;
+          const { renderId, newName } = payload;
 
-        // Validate inputs
-        if (!renderId || !newName) {
-          return yield* Effect.die({
-            message: "renderId and newName are required",
-            status: StatusCodes.BAD_REQUEST,
-          });
-        }
+          // Validate inputs
+          if (!renderId || !newName) {
+            return yield* Effect.die({
+              message: "renderId and newName are required",
+              status: StatusCodes.BAD_REQUEST,
+            });
+          }
 
-        // Sanitize new name (remove path separators and other invalid characters)
-        const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
+          // Sanitize new name (remove path separators and other invalid characters)
+          const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
 
-        if (!sanitizedName) {
-          return yield* Effect.die({
-            message: "Invalid name",
-            status: StatusCodes.BAD_REQUEST,
-          });
-        }
+          if (!sanitizedName) {
+            return yield* Effect.die({
+              message: "Invalid name",
+              status: StatusCodes.BAD_REQUEST,
+            });
+          }
 
-        // Parse params if provided
-        const params = paramsJson
-          ? (JSON.parse(paramsJson) as Record<string, string>)
-          : undefined;
+          // Parse params if provided
+          const params = paramsJson
+            ? (JSON.parse(paramsJson) as Record<string, string>)
+            : undefined;
 
-        const routesDir = getRoutesDir();
-        const assetsDir = getParameterizedAssetsDir(
-          routesDir as AbsoluteDir,
-          projectPath,
-          params,
-        );
+          const routesDir = getRoutesDir();
+          const assetsDir = getParameterizedAssetsDir(
+            routesDir as AbsoluteDir,
+            projectPath,
+            params,
+          );
 
-        const rendersBaseDir = path.join(assetsDir, RENDERS_DIR);
+          const rendersBaseDir = path.join(assetsDir, RENDERS_DIR);
 
-        const oldPath = path.join(rendersBaseDir, RelativeDir(renderId));
-        const newPath = path.join(rendersBaseDir, RelativeDir(sanitizedName));
+          const oldPath = path.join(rendersBaseDir, RelativeDir(renderId));
+          const newPath = path.join(rendersBaseDir, RelativeDir(sanitizedName));
 
-        // Check if source exists
-        if (!(yield* fs.exists(oldPath))) {
-          return yield* new NotFoundError({
-            message: "render not found",
-          });
-        }
+          // Check if source exists
+          if (!(yield* fs.exists(oldPath))) {
+            return yield* new NotFoundError({
+              message: "render not found",
+            });
+          }
 
-        // Check if destination already exists
-        if (yield* fs.exists(newPath)) {
-          return yield* new ConflictError({
-            message: "a render with this name already exists",
-          });
-        }
+          // Check if destination already exists
+          if (yield* fs.exists(newPath)) {
+            return yield* new ConflictError({
+              message: "a render with this name already exists",
+            });
+          }
 
-        // Rename the directory
-        yield* fs.rename(oldPath, newPath);
+          // Rename the directory
+          yield* fs.rename(oldPath, newPath);
 
-        return { newId: sanitizedName };
-      }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+          return { newId: sanitizedName };
+        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
     )
     .handle("start", ({ query: { projectPath }, payload }) =>
       Effect.gen(function* () {
@@ -205,7 +207,11 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
 
         const renderSource = config?.media?.renders?.source ?? "preview";
 
-        const url = yield* getRenderUrl(renderSource, projectPath);
+        const url = yield* getRenderUrl(
+          renderSource,
+          projectPath,
+          payload.params,
+        );
 
         // Apply defaults
         const colorScheme = payload.colorScheme ?? "light";
@@ -275,10 +281,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
     // delete a render (removes the folder and cancels any running job)
     .handle(
       "delete",
-      ({
-        payload: { renderId },
-        query: { projectPath, params: paramsJson },
-      }) =>
+      ({ payload: { renderId }, query: { projectPath, params: paramsJson } }) =>
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
 
