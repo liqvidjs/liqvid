@@ -3,8 +3,13 @@ import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
-import { useIsPreview, usePluginApi } from "@liqvid/studio-plugin-api";
+import {
+  useIsPreview,
+  usePluginApi,
+  useProjectParams,
+} from "@liqvid/studio-plugin-api";
 import { compare, isMac, useToggle } from "@liqvid/utils";
+import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import clsx from "clsx";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
@@ -20,6 +25,7 @@ import {
 import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 import { useChannel } from "../components/WebSocketProvider.tsx";
 import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
+import { Button } from "../ui/Button.tsx";
 import { DockableDialog } from "../ui/DockableDialog.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
 import { TimeDuration } from "../ui/Time.tsx";
@@ -57,6 +63,7 @@ export function RecordingDialog({
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
   const isPreview = useIsPreview();
+  const projectParams = useProjectParams();
 
   const [recordings, setRecordings] = useState<readonly RecordingMeta[]>([]);
 
@@ -129,13 +136,19 @@ export function RecordingDialog({
         const client = yield* LiqvidStudioApiClient;
 
         const recordings = yield* client.recordings.list({
-          query: { projectPath },
+          query: {
+            params:
+              Object.keys(projectParams).length > 0
+                ? JSON.stringify(projectParams)
+                : undefined,
+            projectPath,
+          },
         });
 
         setRecordings(recordings);
       }),
     );
-  }, [projectPath]);
+  }, [projectParams, projectPath]);
 
   // Live-update the list as recordings are created/updated/deleted on disk.
   useChannel(
@@ -242,7 +255,12 @@ export function RecordingDialog({
                 <h3>{t.tabs.saved.subtitle}</h3>
                 <div className={styles.Recordings}>
                   {recordings.map((r) => (
-                    <RecordingRow key={r.name} recording={r} />
+                    <RecordingRow
+                      key={r.name}
+                      projectParams={projectParams}
+                      projectPath={projectPath}
+                      recording={r}
+                    />
                   ))}
                 </div>
               </section>
@@ -264,10 +282,43 @@ export function RecordingDialog({
   );
 }
 
-export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
+export function RecordingRow({
+  projectParams,
+  projectPath,
+  recording: r,
+}: {
+  projectParams: Record<string, string>;
+  projectPath: RelativeDir;
+  recording: RecordingMeta;
+}) {
   const { value: expanded, set: setExpanded } = useToggle();
+  const [isReprocessing, setIsReprocessing] = useState(false);
 
   const { plugins } = usePluginApi();
+
+  const handleReprocess = useCallback(() => {
+    setIsReprocessing(true);
+    clientRuntime
+      .runPromise(
+        Effect.gen(function* () {
+          const client = yield* LiqvidStudioApiClient;
+
+          yield* client.recordings.reprocess({
+            payload: { recordingName: r.name },
+            query: {
+              params:
+                Object.keys(projectParams).length > 0
+                  ? JSON.stringify(projectParams)
+                  : undefined,
+              projectPath,
+            },
+          });
+        }),
+      )
+      .finally(() => {
+        setIsReprocessing(false);
+      });
+  }, [projectParams, projectPath, r.name]);
 
   return (
     <Collapsible.Root
@@ -291,6 +342,20 @@ export function RecordingRow({ recording: r }: { recording: RecordingMeta }) {
         <TimeDuration className={styles.recordingDuration} value={r.duration} />
       </Collapsible.Trigger>
       <Collapsible.Panel className={styles.RecordingRowExpand}>
+        <div className={styles.recordingActions}>
+          <Button
+            className={styles.reprocessButton}
+            disabled={isReprocessing}
+            onClick={handleReprocess}
+            title="Re-run post-processing plugins"
+          >
+            <ArrowsClockwiseIcon
+              className={isReprocessing ? styles.spinning : undefined}
+              size={16}
+            />
+            {isReprocessing ? "Reprocessing..." : "Reprocess"}
+          </Button>
+        </div>
         {r.plugins.map((p) => {
           const plugin = plugins[p];
 

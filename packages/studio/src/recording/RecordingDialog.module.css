@@ -196,3 +196,44 @@
     color: var(--gray-text-muted, #888);
   }
 }
+
+.recordingActions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--gray-sep);
+}
+
+.reprocessButton {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  background-color: var(--gray-ui);
+  border: 1px solid var(--gray-sep);
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    background-color: var(--gray-hover);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
