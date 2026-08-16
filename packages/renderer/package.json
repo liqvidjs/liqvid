@@ -87,6 +87,7 @@
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/yargs-parser": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",

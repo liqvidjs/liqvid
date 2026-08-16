@@ -49,6 +49,7 @@
     "@liqvid/player": "workspace:^",
     "@types/jest": "catalog:dev",
     "@types/katex": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",

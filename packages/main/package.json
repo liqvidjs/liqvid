@@ -49,6 +49,7 @@
     "@biomejs/biome": "catalog:dev",
     "@testing-library/react": "catalog:dev",
     "@types/jest": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",

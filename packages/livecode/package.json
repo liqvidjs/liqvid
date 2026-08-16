@@ -67,6 +67,7 @@
     "@codemirror/view": "catalog:dev",
     "@lqv/codemirror": "workspace:^",
     "@types/babel__standalone": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "glslx": "catalog:dev",

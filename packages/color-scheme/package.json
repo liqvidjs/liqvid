@@ -46,6 +46,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@docusaurus/types": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
