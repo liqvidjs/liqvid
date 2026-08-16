@@ -6,14 +6,12 @@ import { provideIframeApi } from "@liqvid/iframe-api/child";
 import { KeymapProvider } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
 import { usePlaybackOptional } from "@liqvid/playback/react";
+import type { AspectRatioSpecifier } from "@liqvid/schemas";
 import { combineRefs } from "@liqvid/utils";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  type AspectRatioSpecifier,
-  normalizeAspectRatio,
-} from "./aspect-ratio.ts";
+import { normalizeAspectRatio } from "./aspect-ratio.ts";
 import { Canvas } from "./Canvas.tsx";
 import { Controls } from "./Controls.tsx";
 import { PlayerContext, type RenderingTask } from "./hooks.ts";
@@ -142,10 +140,13 @@ export function Root({
       data-color-scheme={colorScheme}
       data-render-mode={renderMode}
       ref={combineRefs(ref, forwardedRef)}
-      style={{
-        ...style,
-        colorScheme,
-      }}
+      style={
+        {
+          ...style,
+          "--lv-aspect-ratio": `calc(${aspectRatio.width} / ${aspectRatio.height})`,
+          colorScheme,
+        } as React.CSSProperties
+      }
       {...props}
     >
       {children}

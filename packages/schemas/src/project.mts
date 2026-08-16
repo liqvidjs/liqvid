@@ -1,7 +1,7 @@
 import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
-import { Effect, Schema } from "effect";
+import { Effect, Schema, SchemaTransformation } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
 
 export const AspectRatio = Schema.Struct({
@@ -11,11 +11,43 @@ export const AspectRatio = Schema.Struct({
 export type AspectRatio = (typeof AspectRatio)["Type"];
 
 export const AspectRatioSpecifier = Schema.Union([
+  Schema.Literal("square"),
+  Schema.Literal("video"),
   Schema.TemplateLiteral([Schema.Number, ":", Schema.Number]),
   Schema.Tuple([Schema.Number, Schema.Number]),
   AspectRatio,
-]);
-export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Type"];
+]).pipe(
+  Schema.decodeTo(
+    AspectRatio,
+    SchemaTransformation.transform({
+      decode: (from) => {
+        if (typeof from === "string") {
+          if (from === "video") {
+            return { height: 9, width: 16 };
+          }
+
+          if (from === "square") {
+            return { height: 1, width: 1 };
+          }
+
+          const [width, height] = from.split(":").map(Number) as [
+            number,
+            number,
+          ];
+          return { height, width };
+        } else if (Array.isArray(from)) {
+          const [width, height] = from;
+          return { height, width };
+        } else {
+          // https://github.com/microsoft/TypeScript/issues/17002
+          return from as AspectRatio;
+        }
+      },
+      encode: (to) => to,
+    }),
+  ),
+);
+export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Encoded"];
 
 /**
  * project.json files
