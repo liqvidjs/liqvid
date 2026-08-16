@@ -2,47 +2,43 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { ProjectJson } from "@liqvid/schemas";
+import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
+import { ProjectJson } from "@liqvid/schemas";
+import { Effect, Exit, type Record } from "effect";
 import type { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { createElement } from "react";
 
-import { ServerDirectoryHelper } from "../assets.mts";
 import {
   ASSETS_DIR,
   PROJECT_FILE,
   PROJECT_FILES_AUTOGEN,
 } from "../conventions.mts";
 import type { Directory } from "../types/assets.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+import { cartesianProduct, getRoutesDir } from "../utils/misc.mts";
 import { extractParameterNames } from "../utils/parameters.mts";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 
-/** Omit page from production bundle by returning a 404 */
-export function omitFromProduction() {
-  if (process.env.NODE_ENV === "production") {
-    notFound();
-  }
-}
-
 export function liqvidProject<
   D extends Directory,
-  P = Record<string, never>,
+  P extends Record<string, unknown>,
   SP = Record<string, never>,
 >(
   importMetaUrl: string,
   Component: (props: {
-    params: Promise<P>;
+    params: P;
 
     searchParams: Promise<SP>;
+
+    project: ProjectJson;
 
     /** Project path; this is mainly used by development tools. */
     projectPath: RelativeDir;
 
     /** Files in the project. */
-    projectFiles: ServerDirectoryHelper<D>;
+    projectFiles: D;
   }) => React.ReactNode,
 ) {
   const __filename = fileURLToPath(importMetaUrl);
@@ -55,7 +51,11 @@ export function liqvidProject<
 
   // development
   if (process.env.NODE_ENV === "development") {
-    return async function LiqvidProject(props: {
+    return async function LiqvidProject({
+      params: $params,
+      searchParams: $searchParams,
+      ...props
+    }: {
       params: Promise<P>;
       searchParams: Promise<SP & { preview?: string | string[] | undefined }>;
     }) {
@@ -72,21 +72,49 @@ export function liqvidProject<
         // console.error(e);
       }
 
-      const searchParams = await props.searchParams;
-      const params = await props.params;
+      const [params, searchParams] = await Promise.all([
+        $params,
+        $searchParams,
+      ]);
 
-      // Extract project parameter values from Next.js params
+      // Load project.json to get declared parameters
+      let declaredParameters: Record<string, readonly string[]> | undefined;
+
+      const $project = await Effect.runPromiseExit(
+        loadJson(ProjectJson, path.join(__dirname, PROJECT_FILE)).pipe(
+          Effect.provide((await agnosticFileSystem()).layer),
+        ),
+      );
+
+      if (!Exit.isSuccess($project)) {
+        console.error("Failed to load project.json:", $project.cause);
+        return notFound();
+      }
+
+      const project = $project.value;
+
+      declaredParameters = project.parameters;
+
+      // Extract and validate project parameter values from Next.js params
       const projectParams: Record<string, string> = {};
       for (const paramName of paramNames) {
         const value = (params as Record<string, unknown>)[paramName];
         if (typeof value === "string") {
+          // Validate that the value is in the declared set of allowed values
+          const allowedValues = declaredParameters?.[paramName];
+          if (allowedValues && !allowedValues.includes(value)) {
+            return notFound();
+          }
           projectParams[paramName] = value;
         }
       }
 
       const children = createElement(Component, {
-        projectFiles: new ServerDirectoryHelper(projectFiles),
+        params,
+        project,
+        projectFiles,
         projectPath,
+        searchParams: $searchParams,
         ...props,
       });
 
@@ -100,7 +128,10 @@ export function liqvidProject<
   }
 
   // production
-  return async function LiqvidProject(props: {
+  return async function LiqvidProject({
+    params: $params,
+    ...props
+  }: {
     params: Promise<P>;
     searchParams: Promise<SP & { preview?: string | string[] | undefined }>;
   }) {
@@ -125,8 +156,24 @@ export function liqvidProject<
       return notFound();
     }
 
+    // Validate parameter values against declared allowed values
+    const params = await $params;
+
+    const declaredParameters = project.parameters;
+    for (const paramName of paramNames) {
+      const value = (params as Record<string, unknown>)[paramName];
+      if (typeof value === "string") {
+        const allowedValues = declaredParameters?.[paramName];
+        if (allowedValues && !allowedValues.includes(value)) {
+          return notFound();
+        }
+      }
+    }
+
     return Component({
-      projectFiles: new ServerDirectoryHelper(projectFiles),
+      params,
+      project,
+      projectFiles,
       projectPath,
       ...props,
     });
@@ -165,22 +212,4 @@ export function liqvidGenerateProjectStaticParams(importMetaUrl: string) {
 
     return cartesianProduct(project.parameters ?? {});
   };
-}
-
-function cartesianProduct<T extends Record<string, readonly string[]>>(
-  parameters: T,
-): Array<{ [K in keyof T]: T[K][number] }> {
-  const keys = Object.keys(parameters) as (keyof T)[];
-
-  if (keys.length === 0) return [];
-
-  return keys.reduce<Array<Record<string, string>>>(
-    (acc, key) => {
-      const values = parameters[key]!;
-      return acc.flatMap((obj) =>
-        values.map((value) => ({ ...obj, [key]: value })),
-      );
-    },
-    [{}],
-  ) as Array<{ [K in keyof T]: T[K][number] }>;
 }

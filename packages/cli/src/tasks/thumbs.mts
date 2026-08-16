@@ -46,8 +46,17 @@ export function generateThumbs(
      * Pattern for output filenames
      * Interpolation patterns:
      * - `%s` sheet number (required)
+     *
+     * Ignored when `schemes` is provided.
      */
-    output: string;
+    output?: string;
+
+    /**
+     * Multiple color schemes to capture in a single browser session. When
+     * provided, `colorScheme`/`output` are ignored and each scheme is captured
+     * by reusing the same loaded pages (only one page load per URL).
+     */
+    schemes?: readonly { colorScheme: "light" | "dark"; output: string }[];
 
     /** URL of video to generate thumbs for */
     url: string;
@@ -75,40 +84,48 @@ export function generateThumbs(
     const quality = options.quality ?? defaults.quality;
     const concurrency = options.concurrency ?? defaults.concurrency;
 
+    // Normalize to a list of scheme passes.
+    const passes =
+      options.schemes && options.schemes.length > 0
+        ? options.schemes
+        : [{ colorScheme, output: options.output! }];
+
     yield* renderThumbs({
       browserExecutable: options.browserExecutable ?? "",
       browserHeight: options.browserHeight ?? height,
       browserWidth: options.browserWidth ?? width,
-      colorScheme,
       cols,
       concurrency,
       frequency,
       height,
       imageFormat,
-      output: options.output,
       quality,
       rows,
+      schemes: passes,
       url: options.url,
       width,
     });
 
-    // Calculate number of sheets based on video duration
-    // Since we don't have direct access to the result, we'll read the output directory
-
-    const outputDir = path.dirname(options.output);
+    // Calculate number of sheets by reading each scheme's output directory.
     const ext = `.${imageFormat}`;
 
-    const files = yield* fs
-      .readDirectory(outputDir)
-      .pipe(Effect.catch(() => Effect.succeed([])));
-
-    const sheets = files.filter(
-      (f) => /^\d+\.(jpeg|png)$/.test(f) && f.endsWith(ext),
+    const perSchemeCounts = yield* Effect.all(
+      passes.map(({ output }) =>
+        Effect.gen(function* () {
+          const files = yield* fs
+            .readDirectory(path.dirname(output))
+            .pipe(Effect.catch(() => Effect.succeed([])));
+          return files.filter(
+            (f) => /^\d+\.(jpeg|png)$/.test(f) && f.endsWith(ext),
+          ).length;
+        }),
+      ),
+      { concurrency: "unbounded" },
     );
 
     return {
-      numSheets: sheets.length,
-      output: options.output,
+      numSheets: Math.max(0, ...perSchemeCounts),
+      output: passes[0]!.output,
     };
   });
 }

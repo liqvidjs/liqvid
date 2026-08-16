@@ -63,6 +63,7 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.0",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
+    "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "react": "catalog:peer"
   }

@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "moduleResolution": "nodenext",
+    "plugins": [{ "name": "@effect/language-service" }]
   },
   "extends": "../../tsconfig.json"
 }

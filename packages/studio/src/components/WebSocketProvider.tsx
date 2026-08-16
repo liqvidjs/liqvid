@@ -1,7 +1,7 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import { deserialize, IS_CLIENT, type JSONValue } from "@liqvid/ssr";
+import { deserialize, IS_CLIENT, type JSONValue, serialize } from "@liqvid/ssr";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
@@ -87,10 +87,10 @@ class WebSocketClient {
     if (!write) return;
 
     runtime.runFork(
-      Schema.encodeEffect(EnvelopeFromJson)({ channel, message }).pipe(
-        Effect.andThen(write),
-        Effect.ignore,
-      ),
+      Schema.encodeEffect(EnvelopeFromJson)({
+        channel,
+        message: serialize(message),
+      }).pipe(Effect.andThen(write), Effect.ignore),
     );
   }
 

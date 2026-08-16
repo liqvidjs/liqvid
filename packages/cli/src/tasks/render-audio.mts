@@ -2,6 +2,8 @@ import { Effect, Exit } from "effect";
 import type { AbsoluteFile } from "effect-paths";
 import type { CommandModule } from "yargs";
 
+import { agnosticFileSystem } from "../utils.mts";
+
 import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
 
 /**
@@ -78,8 +80,12 @@ export const renderAudioCommand: CommandModule = {
     const { renderAudio: renderAudioTask } = await import(
       "@liqvid/renderer/render-audio"
     );
-    // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-    const exit = await Effect.runPromiseExit(renderAudioTask(argv as any));
+    const exit = await Effect.runPromiseExit(
+      // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
+      renderAudioTask(argv as any).pipe(
+        Effect.provide((await agnosticFileSystem()).layer),
+      ),
+    );
 
     if (Exit.isFailure(exit)) {
       console.error(exit.cause);

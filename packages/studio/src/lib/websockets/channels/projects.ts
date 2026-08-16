@@ -1,6 +1,6 @@
 import { ProjectMeta } from "@liqvid/schemas";
 import { Schema } from "effect";
-import { RelativeDir, SchemaRelativeDir } from "effect-paths";
+import { SchemaRelativeDir } from "effect-paths";
 
 /** Message sent when a project is created */
 export const NewProjectMessage = Schema.Struct({

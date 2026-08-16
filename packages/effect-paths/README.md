@@ -2,7 +2,7 @@
 
 This provides helpers for working with paths in [Effect-TS](https://effect.website). Specifically, it provides branded types for absolute vs relative paths, and for directories vs files. We also extend Node types (`fs`, `fs/promises`, `path`, etc.) to use these branded types.
 
- This uses Effect v4 Beta, although it may also work with v3, I haven't tried.
+ This uses Effect v4 RC, although it may also work with v3, I haven't tried.
 
 ## Installation
 

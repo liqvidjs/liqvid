@@ -1,5 +1,3 @@
-import * as url from "node:url";
-
 import {
   NodeFileSystem,
   NodeHttpPlatform,
@@ -7,7 +5,6 @@ import {
 } from "@effect/platform-node";
 import { loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
-import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import {
   Cause,
   Effect,
@@ -27,7 +24,11 @@ import { audioLive } from "../api/audio.mts";
 import { captionsLive } from "../api/captions.mts";
 import { WebApi } from "../api/contract.mts";
 import { projectMetaLive } from "../api/project-meta.mts";
-import { recordingsLive, saveRecording } from "../api/recording.mts";
+import {
+  DynamicImports,
+  type DynamicImports as DynamicImportsType,
+  recordingsLive,
+} from "../api/recording.mts";
 import { rendersLive } from "../api/renders.mts";
 import { getRoot } from "../api/root.mts";
 import { screenshotsLive } from "../api/screenshots.mts";
@@ -43,19 +44,15 @@ interface RequestContext {
   }>;
 }
 
-export type DynamicImports = Record<
-  string,
-  () => Promise<
-    {
-      default?: LiqvidStudioServerPlugin;
-    } & LiqvidStudioServerPlugin
-  >
->;
+// Re-export for backwards compatibility
+export type { DynamicImportsType as DynamicImports };
 
 /**
  * Liqvid server GET handler
  */
-export function getHandler(_dynamicImports: DynamicImports) {
+export function getHandler(dynamicImports: DynamicImportsType) {
+  const handler = createWebApiHandler(dynamicImports);
+
   return async function GET(req: Request, { params }: RequestContext) {
     const paramsObject = await params;
     const keys = Object.keys(paramsObject);
@@ -96,67 +93,58 @@ export function getHandler(_dynamicImports: DynamicImports) {
       return runEffect(program);
     }
 
-    return webApiHandler(req);
+    return handler(req);
   };
 }
 
 /**
  * Liqvid server POST handler
  */
-export function postHandler(dynamicImports: DynamicImports) {
+export function postHandler(dynamicImports: DynamicImportsType) {
+  const handler = createWebApiHandler(dynamicImports);
+
   return async function POST(
     req: Request,
-    { params }: RequestContext,
+    _ctx: RequestContext,
   ): Promise<Response> {
-    const paramsObject = await params;
-    const keys = Object.keys(paramsObject);
-    const routeParams = keys.length === 1 ? paramsObject[keys[0]!]! : [];
-
-    const route = "/" + routeParams.join("/");
-
     await initializeServer();
-
-    const { search } = url.parse(req.url, true);
-
-    if (route === "/recordings") {
-      const searchParams = new URLSearchParams(search ?? "");
-
-      return runEffect(
-        saveRecording(searchParams, await req.formData(), dynamicImports),
-      );
-    }
-
-    return webApiHandler(req);
+    return handler(req);
   };
 }
 
 /**
  * Liqvid server DELETE handler
  */
-export function deleteHandler(_dynamicImports: DynamicImports) {
+export function deleteHandler(dynamicImports: DynamicImportsType) {
+  const handler = createWebApiHandler(dynamicImports);
+
   return async function DELETE(req: Request, _ctx: RequestContext) {
     await initializeServer();
-    return webApiHandler(req);
+    return handler(req);
   };
 }
 
 /**
  * Liqvid server PUT handler
  */
-export function putHandler(_dynamicImports: DynamicImports) {
+export function putHandler(dynamicImports: DynamicImportsType) {
+  const handler = createWebApiHandler(dynamicImports);
+
   return async function PUT(req: Request, _ctx: RequestContext) {
     await initializeServer();
-    return webApiHandler(req);
+    return handler(req);
   };
 }
 
 /**
  * Liqvid server PATCH handler
  */
-export function patchHandler(_dynamicImports: DynamicImports) {
+export function patchHandler(dynamicImports: DynamicImportsType) {
+  const handler = createWebApiHandler(dynamicImports);
+
   return async function PATCH(req: Request, _ctx: RequestContext) {
     await initializeServer();
-    return webApiHandler(req);
+    return handler(req);
   };
 }
 
@@ -197,34 +185,57 @@ async function runEffect<A, E>(
 }
 
 /**
- * Web handler for the Effect `HttpApi`.
+ * Create the web handler for the Effect `HttpApi`.
  *
- * The API is assembled from the endpoint definitions in `contract-effect.mts`,
+ * The API is assembled from the endpoint definitions in `contract.mts`,
  * the group implementations (e.g. `screenshotsLive`), and the Node platform
- * services required to run it. It is built once and reused across requests.
+ * services required to run it.
+ *
+ * The handler is memoized so that the same `dynamicImports` object returns
+ * the same handler instance.
  */
-const apiLive = HttpApiBuilder.layer(WebApi).pipe(
-  Layer.provide([
-    audioLive,
-    captionsLive,
-    projectMetaLive,
-    recordingsLive,
-    rendersLive,
-    screenshotsLive,
-    settingsLive,
-    thumbsLive,
-  ]),
-  Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
-  Layer.provideMerge(NodeFileSystem.layer),
-  Layer.provide(
-    Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
-  ),
-  Layer.provideMerge(Layer.succeed(References.MinimumLogLevel, getLogLevel())),
-);
+const handlerCache = new WeakMap<
+  DynamicImportsType,
+  (request: Request) => Promise<Response>
+>();
 
-const appLive = Layer.mergeAll(
-  apiLive,
-  HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }), // Matches the Next.js catch-all base path below
-);
+function createWebApiHandler(
+  dynamicImports: DynamicImportsType,
+): (request: Request) => Promise<Response> {
+  const cached = handlerCache.get(dynamicImports);
+  if (cached) return cached;
 
-const { handler: webApiHandler } = toWebHandler(appLive);
+  const apiLive = HttpApiBuilder.layer(WebApi).pipe(
+    Layer.provide([
+      audioLive,
+      captionsLive,
+      projectMetaLive,
+      recordingsLive,
+      rendersLive,
+      screenshotsLive,
+      settingsLive,
+      thumbsLive,
+    ]),
+    Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
+    Layer.provideMerge(NodeFileSystem.layer),
+    Layer.provide(
+      Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
+    ),
+    Layer.provideMerge(
+      Layer.succeed(References.MinimumLogLevel, getLogLevel()),
+    ),
+    // Provide DynamicImports service
+    Layer.provideMerge(Layer.succeed(DynamicImports, dynamicImports)),
+  );
+
+  const appLive = Layer.mergeAll(
+    apiLive,
+    HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }),
+  );
+
+  const { handler } = toWebHandler(appLive);
+  // The handler only requires Request when all dependencies are provided via layers
+  const typedHandler = handler as (request: Request) => Promise<Response>;
+  handlerCache.set(dynamicImports, typedHandler);
+  return typedHandler;
+}

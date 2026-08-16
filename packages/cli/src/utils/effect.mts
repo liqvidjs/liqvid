@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas";
-import chalk from "chalk";
 import {
   Cause,
   Effect,
@@ -112,12 +111,6 @@ export function loadJson<S extends Schema.Top>(
     return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
       onExcessProperty: "ignore",
     })(file).pipe(
-      Effect.tapError((cause) =>
-        Effect.gen(function* () {
-          console.dir(cause);
-          console.log(chalk.blue(file));
-        }),
-      ),
       Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
     );
   });
