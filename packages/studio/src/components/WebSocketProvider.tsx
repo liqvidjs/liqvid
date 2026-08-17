@@ -1,7 +1,8 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import { deserialize, IS_CLIENT, type JSONValue, serialize } from "@liqvid/ssr";
+import { IS_CLIENT } from "@liqvid/ssr";
+import { deserialize, type JSONValue, serialize } from "@liqvid/ssr/serde";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";

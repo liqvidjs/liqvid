@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Class for unitless time intervals",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "bugs": {
@@ -57,7 +57,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
+    "@liqvid/ssr": "workspace:^1.0.0-alpha.3",
     "effect": "catalog:peer",
     "zod": "catalog:peer"
   },

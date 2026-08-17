@@ -1,4 +1,4 @@
-import { serialize } from "@liqvid/ssr";
+import { serialize } from "@liqvid/ssr/serde";
 import { pick } from "@liqvid/utils";
 import { Effect, Fiber } from "effect";
 import { cookies } from "next/headers";

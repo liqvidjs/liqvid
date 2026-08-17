@@ -9,6 +9,3 @@ export const IS_DEV = process.env.NODE_ENV === "development";
 
 /** whether we are currently in a production environment */
 export const IS_PROD = process.env.NODE_ENV === "production";
-
-export * from "./deserialize.ts";
-export * from "./serialize.ts";

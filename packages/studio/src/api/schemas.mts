@@ -1,5 +1,5 @@
 import { ThumbnailsJob } from "@liqvid/schemas";
-import type { JSONValue } from "@liqvid/ssr";
+import type { JSONValue } from "@liqvid/ssr/serde";
 import { type Fiber, Schema, SchemaTransformation } from "effect";
 
 import { CaptionsMeta } from "../types/schemas.mts";

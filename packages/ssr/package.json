@@ -20,6 +20,11 @@
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
+    },
+    "./serde": {
+      "@liqvid/dev": "./src/serde.ts",
+      "types": "./dist/types/serde.d.ts",
+      "import": "./dist/esm/serde.js"
     }
   },
   "types": "dist/types/index.d.ts",

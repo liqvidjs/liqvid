@@ -1,4 +1,4 @@
-import { serialize } from "@liqvid/ssr";
+import { serialize } from "@liqvid/ssr/serde";
 import { cookies } from "next/headers";
 
 import { WebSocketProvider } from "../components/WebSocketProvider.tsx";

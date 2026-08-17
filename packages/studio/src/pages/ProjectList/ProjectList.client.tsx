@@ -6,7 +6,7 @@ import type {
   RootParameters,
   SerializedProjectMeta,
 } from "@liqvid/schemas";
-import { deserialize } from "@liqvid/ssr";
+import { deserialize } from "@liqvid/ssr/serde";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
 import {

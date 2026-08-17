@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: variance */
-import type { SerializedValue } from "@liqvid/ssr";
+import type { SerializedValue } from "@liqvid/ssr/serde";
 
 import { type Maybe, None, Some } from "./maybe.mts";
 

@@ -1,5 +1,5 @@
 import { NodeSocket } from "@effect/platform-node";
-import { serialize } from "@liqvid/ssr";
+import { serialize } from "@liqvid/ssr/serde";
 import {
   Effect,
   Fiber,

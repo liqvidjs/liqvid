@@ -1,7 +1,7 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import { deserialize } from "@liqvid/ssr";
+import { deserialize } from "@liqvid/ssr/serde";
 import {
   CheckCircleIcon,
   SpinnerIcon,

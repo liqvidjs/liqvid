@@ -1,4 +1,4 @@
-import type { SerializedValue } from "@liqvid/ssr";
+import type { SerializedValue } from "@liqvid/ssr/serde";
 
 const SECONDS = 1000,
   MINUTES = 60 * SECONDS,
