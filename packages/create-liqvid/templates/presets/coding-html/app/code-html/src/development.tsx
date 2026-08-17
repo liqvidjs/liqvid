@@ -46,13 +46,13 @@ export function LiveCodeHTMLRecord() {
       plugins={[CodeRecording]}
       // script={script}
     >
-      <Audio src={latest.dir("@liqvid@media").file("audio.webm")}>
+      <Audio src={latest.dir("@liqvid+media").file("audio.webm")}>
         <source
-          src={latest.dir("@liqvid@media").file("audio.webm")}
+          src={latest.dir("@liqvid+media").file("audio.webm")}
           type="audio/webm"
         />
         <source
-          src={latest.dir("@liqvid@media").file("audio.mp4")}
+          src={latest.dir("@liqvid+media").file("audio.mp4")}
           type="audio/mp4"
         />
       </Audio>

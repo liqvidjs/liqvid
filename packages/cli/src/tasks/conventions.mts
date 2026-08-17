@@ -16,6 +16,9 @@ export const DEFAULT_MEDIA_PATTERNS = [
   "**/*.webm",
   "**/*.vtt",
 
+  // omit params file
+  "!**/.params=*",
+
   // omit social share images handled by Next
   "!**/opengraph-image.*",
   "!**/twitter-image.*",
@@ -28,7 +31,9 @@ export const DEFAULT_MEDIA_PATTERNS = [
 
   // assets dir
   "**/.liqvid/**/*",
-  "!**/.liqvid/project-meta.json",
+  "!**/.liqvid/project-files.json",
+  "!**/.liqvid/project-path.json",
+  "!**/.liqvid/**/project-meta.json",
 
   // distinguish Transport Stream files from TypeScript files
   "**/.liqvid/**/*.ts",
@@ -37,20 +42,22 @@ export const DEFAULT_MEDIA_PATTERNS = [
   "!**/*.d.json.ts",
 
   // audio
-  "!**/.liqvid/audio/audio-meta.json",
-  "!**/.liqvid/audio/captions-meta.json",
-  "!**/.liqvid/audio/transcript-raw.json",
+  "!**/.liqvid/**/audio/audio.wav",
+  "!**/.liqvid/**/audio/audio-meta.json",
+  "!**/.liqvid/**/audio/captions-meta.json",
+  "!**/.liqvid/**/audio/transcript-raw.json",
 
   // codemirror
-  "!**/.liqvid/**/@lqv@codemirror/raw.json",
+  "!**/.liqvid/**/@lqv+codemirror/raw.json",
 
   // media recording
-  "!**/.liqvid/**/@liqvid@media/video.webm",
+  "!**/.liqvid/**/@liqvid+media/video.webm",
 
   // renders
-  "!**/.liqvid/renders",
-  "!**/.liqvid/screenshots",
-  "!**/.liqvid/thumbs/thumbnails-job.json",
+  "!**/.liqvid/**/renders",
+  "!**/.liqvid/**/recordings/recording-meta.json",
+  "!**/.liqvid/**/screenshots",
+  "!**/.liqvid/**/thumbs/thumbnails-job.json",
 ];
 
 /** Default base directory for media files */

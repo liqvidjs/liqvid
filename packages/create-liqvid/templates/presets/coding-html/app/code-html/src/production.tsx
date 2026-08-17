@@ -56,16 +56,16 @@ export function LiveCodeHTMLReplay() {
       <HlsVideo
         className="absolute right-0 bottom-(--lv-controls-height) z-30 h-1/5"
         greenscreen
-        hls={latest.dir("@liqvid@media/hls").file("stream.m3u8")}
+        hls={latest.dir("@liqvid+media/hls").file("stream.m3u8")}
       />
 
-      <Audio src={latest.dir("@liqvid@media").file("audio.webm")}>
+      <Audio src={latest.dir("@liqvid+media").file("audio.webm")}>
         <source
-          src={latest.dir("@liqvid@media").file("audio.webm")}
+          src={latest.dir("@liqvid+media").file("audio.webm")}
           type="audio/webm"
         />
         <source
-          src={latest.dir("@liqvid@media").file("audio.mp4")}
+          src={latest.dir("@liqvid+media").file("audio.mp4")}
           type="audio/mp4"
         />
       </Audio>
@@ -83,7 +83,7 @@ export function LiveCodeHTMLReplay() {
               </EditorPanel>
             ))}
             <ReplayMultiple
-              replay={latest.dir("@lqv@codemirror").fetch("recording.json")}
+              replay={latest.dir("@lqv+codemirror").fetch("recording.json")}
             />
           </EditorGroup>
           <EditorGroup name="playground">
