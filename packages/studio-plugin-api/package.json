@@ -49,13 +49,13 @@
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "effect": "catalog:dev",
-    "effect-paths": "workspace:^",
+    "effect-paths": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "effect-paths": "workspace:^",
+    "effect-paths": "catalog:peer",
     "react": "catalog:peer"
   }
 }

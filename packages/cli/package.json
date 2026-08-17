@@ -124,7 +124,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "effect-paths": "workspace:^",
+    "effect-paths": "catalog:peer",
     "smart-whisper": "catalog:peer"
   }
 }

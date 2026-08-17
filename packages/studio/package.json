@@ -126,7 +126,7 @@
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.1",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
-    "effect-paths": "workspace:^",
+    "effect-paths": "catalog:peer",
     "next-ws": "catalog:peer",
     "react": "catalog:peer",
     "serve-handler": "^6.1.7",

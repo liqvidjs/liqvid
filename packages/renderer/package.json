@@ -95,6 +95,6 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "effect-paths": "workspace:^"
+    "effect-paths": "catalog:peer"
   }
 }

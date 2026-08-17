@@ -35,7 +35,7 @@
   "babel-plugin-react-compiler": "1.0.0",
   "clsx": "^2.1",
   "desmos-react": "^1.2",
-  "effect-paths": "workspace:^",
+  "effect-paths": "^0.0.2",
   "hls.js": "^1.6.16",
   "jszip": "^3.10.1",
   "katex": "^0.18.1",

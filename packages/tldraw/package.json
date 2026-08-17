@@ -86,7 +86,7 @@
     "@tldraw/tlschema": "catalog:peer",
     "@types/react": "catalog:peer",
     "effect": "catalog:dev",
-    "effect-paths": "workspace:^",
+    "effect-paths": "catalog:peer",
     "react": "catalog:peer",
     "tldraw": "catalog:peer"
   },

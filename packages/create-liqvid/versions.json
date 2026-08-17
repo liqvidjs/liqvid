@@ -9,7 +9,6 @@
   "diff": "workspace:^",
   "docs": "workspace:^",
   "duration": "workspace:^",
-  "effect-paths": "workspace:^",
   "event-emitter": "workspace:^",
   "fp": "workspace:^",
   "gsap": "workspace:^",
