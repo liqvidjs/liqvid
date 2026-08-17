@@ -1,4 +1,6 @@
 import type { ProviderConfigSFTP } from "@liqvid/schemas";
+import { Effect } from "effect";
+import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 
 import { rsyncRemoteDirectory } from "../../utils/rsync.mts";
 import type {
@@ -17,22 +19,24 @@ export class SFTPProvider implements MediaHostingProvider {
     this.#path = options.path;
   }
 
-  async checkFiles(
-    _files: string[],
-    _rootDir: string,
-  ): Promise<FileUploadStatus[]> {
-    throw new Error("SFTPProvider.checkFiles not implemented");
+  checkFiles(
+    _files: AbsoluteFile[],
+    _rootDir: AbsoluteDir,
+  ): Effect.Effect<FileUploadStatus[]> {
+    return Effect.die(new Error("SFTPProvider.checkFiles not implemented"));
   }
 
-  async checkRemoteFiles(
+  checkRemoteFiles(
     _remoteFiles: RemoteFileInfo[],
-    _rootDir: string,
-  ): Promise<FileDownloadStatus[]> {
-    throw new Error("SFTPProvider.checkRemoteFiles not implemented");
+    _rootDir: AbsoluteDir,
+  ): Effect.Effect<FileDownloadStatus[]> {
+    return Effect.die(
+      new Error("SFTPProvider.checkRemoteFiles not implemented"),
+    );
   }
 
-  async downloadMedia(_files: FileDownloadStatus[]): Promise<number> {
-    throw new Error("SFTPProvider.downloadMedia not implemented");
+  downloadMedia(_files: FileDownloadStatus[]): Effect.Effect<number> {
+    return Effect.die(new Error("SFTPProvider.downloadMedia not implemented"));
   }
 
   getBaseUrl(): string {
@@ -51,5 +55,10 @@ export class SFTPProvider implements MediaHostingProvider {
     });
   }
 
-  async publishMedia(_localDirs: string[], _rootDir: string): Promise<void> {}
+  publishMedia(
+    _localDirs: AbsoluteFile[],
+    _rootDir: AbsoluteDir,
+  ): Effect.Effect<void> {
+    return Effect.die(new Error("SFTPProvider.publishMedia not implemented"));
+  }
 }

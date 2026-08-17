@@ -11,22 +11,22 @@ import {
 import { fromIni } from "@aws-sdk/credential-providers";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { ProviderConfigS3 } from "@liqvid/schemas";
-import { Redacted } from "effect";
+import { Effect, FileSystem, Option, Redacted } from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
   RelativeFile,
 } from "effect-paths";
 
-import { parallelMap } from "../../utils/parallel.mts";
 import type {
   FileDownloadStatus,
-  FileUploadStatus,
   MediaHostingProvider,
   RemoteFileInfo,
 } from "../types.mts";
 
-const MAX_CONCURRENCY = 50;
+const CHECK_CONCURRENCY = 50;
+const DOWNLOAD_CONCURRENCY = 5;
+const UPLOAD_CONCURRENCY = 5;
 
 /** Content type mapping for common media files */
 const CONTENT_TYPES: Record<string, string> = {
@@ -115,18 +115,14 @@ export class S3Provider implements MediaHostingProvider {
     }
   }
 
-  async checkFiles(
-    files: AbsoluteFile[],
-    rootDir: AbsoluteDir,
-  ): Promise<FileUploadStatus[]> {
-    return parallelMap(
-      files,
-      async (filePath) => {
+  checkFiles(files: AbsoluteFile[], rootDir: AbsoluteDir) {
+    return Effect.all(
+      files.map((filePath) => {
         const relativeFromRoot = path.relative(rootDir, filePath);
         const key = this.buildKey(relativeFromRoot);
         return this.getUploadStatus(filePath, key);
-      },
-      MAX_CONCURRENCY,
+      }),
+      { concurrency: CHECK_CONCURRENCY },
     );
   }
 
@@ -134,36 +130,37 @@ export class S3Provider implements MediaHostingProvider {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
 
-  async publishMedia(
-    files: AbsoluteFile[],
-    rootDir: AbsoluteDir,
-  ): Promise<void> {
-    if (files.length === 0) {
-      console.log("No media files to upload.");
-      return;
-    }
+  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir) {
+    const that = this;
+    return Effect.gen(function* () {
+      if (files.length === 0) {
+        yield* Effect.log("No media files to upload.");
+        return;
+      }
 
-    console.log(
-      `Checking ${files.length} files against s3://${this.bucket}...`,
-    );
+      yield* Effect.log(
+        `Checking ${files.length} files against s3://${that.bucket}...`,
+      );
 
-    const statuses = await this.checkFiles(files, rootDir);
-    const toUpload = statuses.filter((s) => s.needsUpload);
+      const statuses = yield* that.checkFiles(files, rootDir);
+      const toUpload = statuses.filter((s) => s.needsUpload);
 
-    if (toUpload.length === 0) {
-      console.log("All files are up to date. Nothing to upload.");
-      return;
-    }
+      if (toUpload.length === 0) {
+        yield* Effect.log("All files are up to date. Nothing to upload.");
+        return;
+      }
 
-    console.log(
-      `Uploading ${toUpload.length} files (${statuses.length - toUpload.length} unchanged)...`,
-    );
+      yield* Effect.log(
+        `Uploading ${toUpload.length} files (${statuses.length - toUpload.length} unchanged)...`,
+      );
 
-    for (const { filePath, key } of toUpload) {
-      await this.uploadFile(filePath, key);
-    }
+      yield* Effect.all(
+        toUpload.map(({ filePath, key }) => that.uploadFile(filePath, key)),
+        { concurrency: UPLOAD_CONCURRENCY },
+      );
 
-    console.log(`Upload complete.`);
+      yield* Effect.log(`Upload complete.`);
+    });
   }
 
   async listRemoteFiles(): Promise<RemoteFileInfo[]> {
@@ -205,52 +202,58 @@ export class S3Provider implements MediaHostingProvider {
     return results;
   }
 
-  async checkRemoteFiles(
-    remoteFiles: RemoteFileInfo[],
-    rootDir: AbsoluteDir,
-  ): Promise<FileDownloadStatus[]> {
-    return parallelMap(
-      remoteFiles,
-      async (remoteFile) => {
+  checkRemoteFiles(remoteFiles: RemoteFileInfo[], rootDir: AbsoluteDir) {
+    return Effect.all(
+      remoteFiles.map((remoteFile) => {
         const localPath = path.join(rootDir, remoteFile.key);
         return this.getDownloadStatus(remoteFile, localPath);
-      },
-      MAX_CONCURRENCY,
+      }),
+      { concurrency: CHECK_CONCURRENCY },
     );
   }
 
-  async downloadMedia(files: FileDownloadStatus[]): Promise<number> {
-    const toDownload = files.filter((f) => f.needsDownload);
+  downloadMedia(files: FileDownloadStatus[]) {
+    const that = this;
+    return Effect.gen(function* () {
+      const toDownload = files.filter((f) => f.needsDownload);
 
-    if (toDownload.length === 0) {
-      console.log("All files are up to date. Nothing to download.");
-      return 0;
-    }
+      if (toDownload.length === 0) {
+        yield* Effect.log("All files are up to date. Nothing to download.");
+        return 0;
+      }
 
-    console.log(
-      `Downloading ${toDownload.length} files (${files.length - toDownload.length} unchanged)...`,
-    );
+      yield* Effect.log(
+        `Downloading ${toDownload.length} files (${files.length - toDownload.length} unchanged)...`,
+      );
 
-    for (const { key, localPath } of toDownload) {
-      await this.downloadFile(key, localPath);
-    }
+      yield* Effect.all(
+        toDownload.map(({ key, localPath }) =>
+          Effect.promise(() => that.downloadFile(key, localPath)),
+        ),
+        { concurrency: DOWNLOAD_CONCURRENCY },
+      );
 
-    console.log(`Download complete.`);
-    return toDownload.length;
+      yield* Effect.log(`Download complete.`);
+      return toDownload.length;
+    });
   }
 
   /**
    * Get the download status for a single file.
    * Never marks a file for download if the local version is newer.
    */
-  private async getDownloadStatus(
+  private getDownloadStatus(
     remoteFile: RemoteFileInfo,
     localPath: AbsoluteFile,
-  ): Promise<FileDownloadStatus> {
-    try {
+  ) {
+    return Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
       // Get local file modification time
-      const localStats = await fsp.stat(localPath);
-      const localLastModified = localStats.mtime;
+      const localStats = yield* fs.stat(localPath);
+      const localLastModified = localStats.mtime.pipe(
+        Option.getOrElse(() => new Date()),
+      );
 
       // Download only if remote file is newer than local
       if (remoteFile.lastModified > localLastModified) {
@@ -258,7 +261,7 @@ export class S3Provider implements MediaHostingProvider {
           key: remoteFile.key,
           localPath,
           needsDownload: true,
-          reason: "modified",
+          reason: "modified" as const,
         };
       }
 
@@ -266,30 +269,24 @@ export class S3Provider implements MediaHostingProvider {
         key: remoteFile.key,
         localPath,
         needsDownload: false,
-        reason: "unchanged",
+        reason: "unchanged" as const,
       };
-    } catch (err) {
-      // If the local file doesn't exist, we need to download it
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        return {
+    }).pipe(
+      Effect.catchReason("PlatformError", "NotFound", () =>
+        Effect.succeed({
           key: remoteFile.key,
           localPath,
           needsDownload: true,
-          reason: "new",
-        };
-      }
-      // For other errors, rethrow
-      throw err;
-    }
+          reason: "new" as const,
+        }),
+      ),
+    );
   }
 
   /**
    * Download a single file from S3
    */
-  private async downloadFile(
-    key: RelativeFile,
-    localPath: AbsoluteFile,
-  ): Promise<void> {
+  private async downloadFile(key: RelativeFile, localPath: AbsoluteFile) {
     const fullKey = this.buildKey(key);
 
     const response = await this.client.send(
@@ -322,43 +319,67 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Get the upload status for a single file.
    */
-  private async getUploadStatus(
-    filePath: AbsoluteFile,
-    key: RelativeFile,
-  ): Promise<FileUploadStatus> {
-    try {
-      // Get remote file metadata
-      const headResponse = await this.client.send(
-        new HeadObjectCommand({
-          Bucket: this.bucket,
-          Key: key,
-        }),
+  private getUploadStatus(filePath: AbsoluteFile, key: RelativeFile) {
+    const that = this;
+    return Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
+      yield* Effect.logDebug("checking").pipe(
+        Effect.annotateLogs({ filePath, key }),
       );
+
+      // Get remote file metadata
+      const headResponse = yield* Effect.tryPromise({
+        catch: (err) => err as { name?: string },
+        try: () =>
+          that.client.send(
+            new HeadObjectCommand({
+              Bucket: that.bucket,
+              Key: key,
+            }),
+          ),
+      });
 
       const remoteLastModified = headResponse.LastModified;
       if (!remoteLastModified) {
         // Can't determine remote modification time, upload to be safe
-        return { filePath, key, needsUpload: true, reason: "new" };
+        return { filePath, key, needsUpload: true, reason: "new" } as const;
       }
 
       // Get local file modification time
-      const localStats = await fsp.stat(filePath);
-      const localLastModified = localStats.mtime;
+      const localStats = yield* fs.stat(filePath);
+      const localLastModified = localStats.mtime.pipe(
+        Option.getOrElse(() => new Date()),
+      );
 
       // Upload if local file is newer than remote
       if (localLastModified > remoteLastModified) {
-        return { filePath, key, needsUpload: true, reason: "modified" };
+        return {
+          filePath,
+          key,
+          needsUpload: true,
+          reason: "modified",
+        } as const;
       }
 
-      return { filePath, key, needsUpload: false, reason: "unchanged" };
-    } catch (err) {
-      // If the file doesn't exist (404), we need to upload it
-      if ((err as { name?: string }).name === "NotFound") {
-        return { filePath, key, needsUpload: true, reason: "new" };
-      }
-      // For other errors, rethrow
-      throw err;
-    }
+      return {
+        filePath,
+        key,
+        needsUpload: false,
+        reason: "unchanged",
+      } as const;
+    }).pipe(
+      Effect.catchIf(
+        (err): err is { name?: string } => err?.name === "NotFound",
+        () =>
+          Effect.succeed({
+            filePath,
+            key,
+            needsUpload: true,
+            reason: "new",
+          } as const),
+      ),
+    );
   }
 
   /**
@@ -380,24 +401,30 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Upload a single file to S3 using multipart upload for large files
    */
-  private async uploadFile(filePath: string, key: string): Promise<void> {
-    const fileContent = await fsp.readFile(filePath);
-    const contentType = getContentType(filePath);
+  private uploadFile(filePath: string, key: string) {
+    const that = this;
 
-    const params: PutObjectCommandInput = {
-      Body: fileContent,
-      Bucket: this.bucket,
-      ContentType: contentType,
-      Key: key,
-    };
+    return Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
 
-    // Use multipart upload for better reliability
-    const upload = new Upload({
-      client: this.client,
-      params,
+      const fileContent = yield* fs.readFile(filePath);
+      const contentType = getContentType(filePath);
+
+      const params: PutObjectCommandInput = {
+        Body: fileContent,
+        Bucket: that.bucket,
+        ContentType: contentType,
+        Key: key,
+      };
+
+      // Use multipart upload for better reliability
+      const upload = new Upload({
+        client: that.client,
+        params,
+      });
+
+      yield* Effect.promise(() => upload.done());
+      yield* Effect.log(`  Uploaded: ${key}`);
     });
-
-    await upload.done();
-    console.log(`  Uploaded: ${key}`);
   }
 }

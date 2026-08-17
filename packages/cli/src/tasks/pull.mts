@@ -129,7 +129,11 @@ export const pull: CommandModule = {
     console.log();
 
     // Check which files need to be downloaded
-    const statuses = await provider.checkRemoteFiles(mediaFiles, targetDir);
+    const statuses = await Effect.runPromise(
+      provider
+        .checkRemoteFiles(mediaFiles, targetDir)
+        .pipe(Effect.provide(NodeFileSystem.layer)),
+    );
 
     if (dryRun) {
       console.log("Dry run mode - showing what would be downloaded...\n");
@@ -138,7 +142,9 @@ export const pull: CommandModule = {
     }
 
     // Download files (this never deletes local content)
-    const downloadCount = await provider.downloadMedia(statuses);
+    const downloadCount = await Effect.runPromise(
+      provider.downloadMedia(statuses),
+    );
 
     if (downloadCount > 0) {
       console.log("\nPull complete!");

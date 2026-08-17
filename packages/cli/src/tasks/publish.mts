@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Cause, Effect, FileSystem } from "effect";
+import { Cause, Effect, FileSystem, Option, References } from "effect";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";
@@ -17,6 +17,7 @@ import type {
   MediaHostingProvider,
 } from "../providers/types.mts";
 import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
+import { getLogLevel } from "../utils/misc.mts";
 
 import { CONFIG_FILE, DEFAULT_MEDIA_PATTERNS } from "./conventions.mts";
 
@@ -174,6 +175,10 @@ export async function publishMedia(options: PublishOptions = {}) {
 
   await Effect.runPromise(
     publishMediaFiles(config, searchDir, baseDir, dryRun).pipe(
+      Effect.provideService(
+        References.MinimumLogLevel,
+        getLogLevel(Option.some(config)),
+      ),
       Effect.provide(NodeFileSystem.layer),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       Effect.catch(Effect.die),
@@ -267,7 +272,7 @@ function publishMediaFiles(
     }
 
     // Publish all media files (paths relative to searchDir)
-    yield* Effect.promise(() => provider.publishMedia(mediaFiles, searchDir));
+    yield* provider.publishMedia(mediaFiles, searchDir);
     yield* Effect.log("Media publishing complete.");
   });
 }
@@ -380,9 +385,7 @@ function showDryRunInfo(
     const fs = yield* FileSystem.FileSystem;
 
     // Check which files need to be uploaded
-    const statuses = yield* Effect.promise(() =>
-      provider.checkFiles(mediaFiles, rootDir),
-    );
+    const statuses = yield* provider.checkFiles(mediaFiles, rootDir);
 
     const toUpload = statuses.filter((s) => s.needsUpload);
     const unchanged = statuses.filter((s) => !s.needsUpload);

@@ -2,7 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { ProviderConfigCopy } from "@liqvid/schemas";
-import { promiseAllKeyed } from "@liqvid/utils";
+import { Effect, FileSystem, Option } from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -13,12 +13,12 @@ import {
 import { expandTilde } from "../../utils/paths.mts";
 import type {
   FileDownloadStatus,
-  FileUploadStatus,
   HostingProvider,
   MediaHostingProvider,
   RemoteFileInfo,
 } from "../types.mts";
 
+const CHECK_CONCURRENCY = 50;
 /**
  * Copy provider that copies output to another location on disk.
  * Implements both HostingProvider and MediaHostingProvider.
@@ -107,45 +107,42 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
   // MediaHostingProvider implementation
 
-  async checkFiles(
-    files: AbsoluteFile[],
-    rootDir: AbsoluteDir,
-  ): Promise<FileUploadStatus[]> {
+  checkFiles(files: AbsoluteFile[], rootDir: AbsoluteDir) {
     const destination = this.#getDestination("media");
-    const results: FileUploadStatus[] = [];
 
-    for (const filePath of files) {
-      const relativePath = path.relative(rootDir, filePath);
-      const destPath = path.join(destination, relativePath);
-      const status = await this.#getUploadStatus(
-        filePath,
-        destPath,
-        relativePath,
-      );
-      results.push(status);
-    }
-
-    return results;
+    return Effect.all(
+      files.map((filePath) => {
+        const relativePath = path.relative(rootDir, filePath);
+        const destPath = path.join(destination, relativePath);
+        return this.#getUploadStatus(filePath, destPath, relativePath);
+      }),
+      { concurrency: CHECK_CONCURRENCY },
+    );
   }
 
-  async #getUploadStatus(
+  #getUploadStatus(
     srcPath: AbsoluteFile,
     destPath: AbsoluteFile,
     key: RelativeFile,
-  ): Promise<FileUploadStatus> {
-    try {
-      const { srcStats, destStats } = await promiseAllKeyed({
-        destStats: fsp.stat(destPath),
-        srcStats: fsp.stat(srcPath),
-      });
+  ) {
+    return Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
+      const srcStats = yield* fs.stat(srcPath);
+      const destStats = yield* fs.stat(destPath);
+
+      const srcMtime = srcStats.mtime.pipe(Option.getOrElse(() => new Date()));
+      const destMtime = destStats.mtime.pipe(
+        Option.getOrElse(() => new Date()),
+      );
 
       // Copy if source is newer than destination
-      if (srcStats.mtime > destStats.mtime) {
+      if (srcMtime > destMtime) {
         return {
           filePath: srcPath,
           key,
           needsUpload: true,
-          reason: "modified",
+          reason: "modified" as const,
         };
       }
 
@@ -153,54 +150,58 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
         filePath: srcPath,
         key,
         needsUpload: false,
-        reason: "unchanged",
+        reason: "unchanged" as const,
       };
-    } catch (err) {
-      // If destination doesn't exist, we need to copy
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        return { filePath: srcPath, key, needsUpload: true, reason: "new" };
-      }
-      throw err;
-    }
+    }).pipe(
+      Effect.catchReason("PlatformError", "NotFound", () =>
+        Effect.succeed({
+          filePath: srcPath,
+          key,
+          needsUpload: true,
+          reason: "new" as const,
+        }),
+      ),
+    );
   }
 
-  async checkRemoteFiles(
-    remoteFiles: RemoteFileInfo[],
-    rootDir: AbsoluteDir,
-  ): Promise<FileDownloadStatus[]> {
+  checkRemoteFiles(remoteFiles: RemoteFileInfo[], rootDir: AbsoluteDir) {
     const destination = this.#getDestination("media");
-    const results: FileDownloadStatus[] = [];
 
-    for (const remoteFile of remoteFiles) {
-      const localPath = path.join(rootDir, remoteFile.key);
-      const remotePath = path.join(destination, remoteFile.key);
-      const status = await this.#getDownloadStatus(
-        remoteFile,
-        localPath,
-        remotePath,
-      );
-      results.push(status);
-    }
-
-    return results;
+    return Effect.all(
+      remoteFiles.map((remoteFile) => {
+        const localPath = path.join(rootDir, remoteFile.key);
+        const remotePath = path.join(destination, remoteFile.key);
+        return this.#getDownloadStatus(remoteFile, localPath, remotePath);
+      }),
+      { concurrency: CHECK_CONCURRENCY },
+    );
   }
 
-  async #getDownloadStatus(
+  #getDownloadStatus(
     remoteFile: RemoteFileInfo,
     localPath: AbsoluteFile,
     remotePath: AbsoluteFile,
-  ): Promise<FileDownloadStatus> {
-    try {
-      const localStats = await fsp.stat(localPath);
+  ) {
+    return Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
+      const localStats = yield* fs.stat(localPath);
+      const remoteStats = yield* fs.stat(remotePath);
+
+      const localMtime = localStats.mtime.pipe(
+        Option.getOrElse(() => new Date()),
+      );
+      const remoteMtime = remoteStats.mtime.pipe(
+        Option.getOrElse(() => new Date()),
+      );
 
       // Check if remote file is newer
-      const remoteStats = await fsp.stat(remotePath);
-      if (remoteStats.mtime > localStats.mtime) {
+      if (remoteMtime > localMtime) {
         return {
           key: remoteFile.key,
           localPath,
           needsDownload: true,
-          reason: "modified",
+          reason: "modified" as const,
         };
       }
 
@@ -208,42 +209,45 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
         key: remoteFile.key,
         localPath,
         needsDownload: false,
-        reason: "unchanged",
+        reason: "unchanged" as const,
       };
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        return {
+    }).pipe(
+      Effect.catchReason("PlatformError", "NotFound", () =>
+        Effect.succeed({
           key: remoteFile.key,
           localPath,
           needsDownload: true,
-          reason: "new",
-        };
-      }
-      throw err;
-    }
+          reason: "new" as const,
+        }),
+      ),
+    );
   }
 
-  async downloadMedia(files: FileDownloadStatus[]): Promise<number> {
+  downloadMedia(files: FileDownloadStatus[]) {
     const destination = this.#getDestination("media");
-    const toDownload = files.filter((f) => f.needsDownload);
+    const that = this;
 
-    if (toDownload.length === 0) {
-      console.log("All files are up to date. Nothing to download.");
-      return 0;
-    }
+    return Effect.gen(function* () {
+      const toDownload = files.filter((f) => f.needsDownload);
 
-    console.log(
-      `Copying ${toDownload.length} files (${files.length - toDownload.length} unchanged)...`,
-    );
+      if (toDownload.length === 0) {
+        yield* Effect.log("All files are up to date. Nothing to download.");
+        return 0;
+      }
 
-    for (const { key, localPath } of toDownload) {
-      const srcPath = path.join(destination, key);
-      await this.#copyFile(srcPath, localPath);
-      console.log(`  Copied: ${key}`);
-    }
+      yield* Effect.log(
+        `Copying ${toDownload.length} files (${files.length - toDownload.length} unchanged)...`,
+      );
 
-    console.log("Copy complete.");
-    return toDownload.length;
+      for (const { key, localPath } of toDownload) {
+        const srcPath = path.join(destination, key);
+        yield* Effect.promise(() => that.#copyFile(srcPath, localPath));
+        yield* Effect.log(`  Copied: ${key}`);
+      }
+
+      yield* Effect.log("Copy complete.");
+      return toDownload.length;
+    });
   }
 
   getBaseUrl(): string {
@@ -296,42 +300,42 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     }
   }
 
-  async publishMedia(
-    files: AbsoluteFile[],
-    rootDir: AbsoluteDir,
-  ): Promise<void> {
+  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir) {
     const destination = this.#getDestination("media");
+    const that = this;
 
-    if (files.length === 0) {
-      console.log("No media files to copy.");
-      return;
-    }
+    return Effect.gen(function* () {
+      if (files.length === 0) {
+        yield* Effect.log("No media files to copy.");
+        return;
+      }
 
-    if (this.#config.clean) {
-      console.log(`Cleaning destination directory: ${destination}`);
-      await this.#cleanDirectory(destination);
-    }
+      if (that.#config.clean) {
+        yield* Effect.log(`Cleaning destination directory: ${destination}`);
+        yield* Effect.promise(() => that.#cleanDirectory(destination));
+      }
 
-    console.log(`Checking ${files.length} files...`);
+      yield* Effect.log(`Checking ${files.length} files...`);
 
-    const statuses = await this.checkFiles(files, rootDir);
-    const toCopy = statuses.filter((s) => s.needsUpload);
+      const statuses = yield* that.checkFiles(files, rootDir);
+      const toCopy = statuses.filter((s) => s.needsUpload);
 
-    if (toCopy.length === 0) {
-      console.log("All files are up to date. Nothing to copy.");
-      return;
-    }
+      if (toCopy.length === 0) {
+        yield* Effect.log("All files are up to date. Nothing to copy.");
+        return;
+      }
 
-    console.log(
-      `Copying ${toCopy.length} files (${statuses.length - toCopy.length} unchanged)...`,
-    );
+      yield* Effect.log(
+        `Copying ${toCopy.length} files (${statuses.length - toCopy.length} unchanged)...`,
+      );
 
-    for (const { filePath, key } of toCopy) {
-      const destPath = path.join(destination, key);
-      await this.#copyFile(filePath, destPath);
-      console.log(`  Copied: ${key}`);
-    }
+      for (const { filePath, key } of toCopy) {
+        const destPath = path.join(destination, key);
+        yield* Effect.promise(() => that.#copyFile(filePath, destPath));
+        yield* Effect.log(`  Copied: ${key}`);
+      }
 
-    console.log("Copy complete.");
+      yield* Effect.log("Copy complete.");
+    });
   }
 }

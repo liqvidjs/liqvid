@@ -1,3 +1,4 @@
+import type { Effect, FileSystem, PlatformError } from "effect";
 import type { AbsoluteDir, AbsoluteFile, RelativeFile } from "effect-paths";
 
 export interface HostingProvider {
@@ -53,7 +54,7 @@ export interface MediaHostingProvider {
   checkFiles(
     files: AbsoluteFile[],
     rootDir: AbsoluteDir,
-  ): Promise<FileUploadStatus[]>;
+  ): Effect.Effect<FileUploadStatus[], unknown, FileSystem.FileSystem>;
 
   /**
    * Check which remote files need to be downloaded.
@@ -63,15 +64,15 @@ export interface MediaHostingProvider {
    */
   checkRemoteFiles(
     remoteFiles: RemoteFileInfo[],
-    rootDir: string,
-  ): Promise<FileDownloadStatus[]>;
+    rootDir: AbsoluteDir,
+  ): Effect.Effect<FileDownloadStatus[], unknown, FileSystem.FileSystem>;
 
   /**
    * Download media files from the hosting provider.
    * @param files - Download statuses for files to download
    * @returns Number of files downloaded
    */
-  downloadMedia(files: FileDownloadStatus[]): Promise<number>;
+  downloadMedia(files: FileDownloadStatus[]): Effect.Effect<number>;
 
   /** Get the value of the `NEXT_PUBLIC_LIQVID_MEDIA_BASE` environment variable. */
   getBaseUrl(): string;
@@ -87,5 +88,8 @@ export interface MediaHostingProvider {
    * @param files - Absolute paths to the media files
    * @param rootDir - The root directory (for computing relative paths)
    */
-  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir): Promise<void>;
+  publishMedia(
+    files: AbsoluteFile[],
+    rootDir: AbsoluteDir,
+  ): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>;
 }
