@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/utils",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Utility functions for Liqvid",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/utils#readme",
   "bugs": {

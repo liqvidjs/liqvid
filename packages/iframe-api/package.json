@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/iframe-api",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Cross-iframe communication API",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/iframe-api#readme",
   "bugs": {
@@ -47,12 +47,14 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
+    "lint:tsc": "tsc --noEmit",
     "test": "jest",
     "watch": "tsc --watch"
   },
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
