@@ -22,16 +22,19 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "files": [
     "dist/*"
   ],
   "scripts": {
+    ".build:cjs": "tsc --module commonjs --outDir dist/cjs --verbatimModuleSyntax false",
     ".build:clean": "rm -rf dist",
+    ".build:esm": "tsc",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "build": "tsc",
+    "build": "pnpm .build:esm && pnpm .build:cjs",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -41,7 +44,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@liqvid/utils": "workspace:^2.0.0-alpha.3",
+    "@liqvid/utils": "workspace:^2.0.0-alpha.6",
     "@radix-ui/react-slot": "catalog:"
   },
   "devDependencies": {
@@ -58,13 +61,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/player": "workspace:^1.0.0-alpha.0",
     "katex": "catalog:peer",
     "react": "catalog:peer"
-  },
-  "peerDependenciesMeta": {
-    "@liqvid/player": {
-      "optional": true
-    }
   }
 }

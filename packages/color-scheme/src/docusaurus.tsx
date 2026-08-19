@@ -1,8 +1,7 @@
 import { useColorMode } from "@docusaurus/theme-common";
 // @ts-expect-error defined externally
 import SiteStorage from "@generated/site-storage";
-import type { LocalValueConfig } from "@liqvid/hydration";
-import { usePersist } from "@liqvid/hydration";
+import { type LocalValueConfig, usePersist } from "@liqvid/hydration";
 import { IS_CLIENT } from "@liqvid/ssr";
 import type { ReactNode } from "react";
 

@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/duration",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Class for unitless time intervals",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/duration#readme",
   "bugs": {
@@ -18,7 +18,8 @@
     ".": {
       "@liqvid/dev": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./effect": {
       "@liqvid/dev": "./src/effect.ts",
@@ -36,9 +37,11 @@
     "dist/*"
   ],
   "scripts": {
+    ".build:cjs": "tsc --module commonjs --outDir dist/cjs",
     ".build:clean": "rm -rf dist",
+    ".build:esm": "tsc",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "build": "tsc",
+    "build": "pnpm .build:esm && pnpm .build:cjs",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
