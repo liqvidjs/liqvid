@@ -3,6 +3,8 @@ import { useMarker, useScript } from "@liqvid/script/react";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
+import { usePromptsApi } from "./PromptsProvider";
+
 export type CueState = "active" | "future" | "past";
 
 /** Lines to be read at a particular marker */
@@ -31,11 +33,13 @@ export function Cue<M extends string>({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [lines, setLines] = useState<string[]>();
+  const { splitLines } = usePromptsApi();
 
   // split into lines
   useEffect(() => {
     if (!props.children) return;
     if (!ref.current) return;
+    if (!splitLines) return;
 
     ref.current?.normalize();
 
@@ -69,7 +73,7 @@ export function Cue<M extends string>({
     }
 
     setLines(lines);
-  }, [props.children]);
+  }, [props.children, splitLines]);
 
   // render
   if (!props.children) {
@@ -92,16 +96,20 @@ export function Cue<M extends string>({
     >
       <dt className={classes?.cue}>{props.on}</dt>
 
-      {lines ? (
-        lines.map((line, n) => (
-          <dd className={classes?.line} key={n}>
-            {line}
+      {splitLines ? (
+        lines ? (
+          lines.map((line, n) => (
+            <dd className={classes?.line} key={n}>
+              {line}
+            </dd>
+          ))
+        ) : (
+          <dd className={classes?.measure} ref={ref}>
+            {props.children}
           </dd>
-        ))
+        )
       ) : (
-        <dd className={classes?.measure} ref={ref}>
-          {props.children}
-        </dd>
+        <dd className={classes?.line}>{props.children}</dd>
       )}
     </div>
   );

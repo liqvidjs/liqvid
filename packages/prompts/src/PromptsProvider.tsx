@@ -5,6 +5,7 @@ import {
   type ClientValueSource,
   usePersistentState,
 } from "@liqvid/hydration";
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import {
   useIsPreviewOrProduction,
@@ -30,12 +31,14 @@ export interface PromptsContext {
   enabled: boolean;
   persistence?: PromptsPersistence;
   setEnabled: (enabled: boolean) => void;
+  splitLines: boolean;
   toggleEnabled: () => void;
 }
 
 const promptsContext = createUniqueContext<PromptsContext>("@liqvid/prompts", {
   enabled: true,
   setEnabled() {},
+  splitLines: false,
   toggleEnabled() {},
 });
 promptsContext.displayName = "Prompts";
@@ -45,6 +48,7 @@ export function PromptsProvider({
   defaultEnabled = true,
   persistence,
   shortcut,
+  splitLines = false,
 }: {
   children?: React.ReactNode;
   defaultEnabled?: boolean;
@@ -54,7 +58,14 @@ export function PromptsProvider({
    * storage, and the enabled/disabled state will also be persisted.
    */
   persistence?: PromptsPersistence;
-  shortcut?: string;
+  shortcut?: ShortcutsSpecifier;
+
+  /**
+   * Whether to split lines into separate HTML elements. This makes
+   * it easier to apply effects such as alternating line colors, but
+   * disallows usage of HTML markup inside lines.
+   */
+  splitLines?: boolean;
 }) {
   const projectPath = useProjectPath();
 
@@ -87,9 +98,10 @@ export function PromptsProvider({
       enabled,
       persistence,
       setEnabled,
+      splitLines,
       toggleEnabled,
     }),
-    [enabled, persistence, toggleEnabled, setEnabled],
+    [enabled, persistence, toggleEnabled, setEnabled, splitLines],
   );
 
   if (isPreviewOrProduction) return children;
