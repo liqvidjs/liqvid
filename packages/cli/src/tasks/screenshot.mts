@@ -37,17 +37,17 @@ export interface ScreenshotResult {
  * });
  * ```
  */
-export function screenshot(options: ScreenshotOptions) {
-  return Effect.gen(function* () {
-    const { screenshot: renderScreenshot } = yield* Effect.promise(
-      () => import("@liqvid/renderer/screenshot"),
-    );
+export const screenshot = Effect.fnUntraced(function* (
+  options: ScreenshotOptions,
+) {
+  const { screenshot: renderScreenshot } = yield* Effect.promise(
+    () => import("@liqvid/renderer/screenshot"),
+  );
 
-    // TODO: load screenshot configuration from config file here
+  // TODO: load screenshot configuration from config file here
 
-    return yield* renderScreenshot(options);
-  });
-}
+  return yield* renderScreenshot(options);
+});
 
 /** Capture a screenshot. */
 export const screenshotCommand: CommandModule = {

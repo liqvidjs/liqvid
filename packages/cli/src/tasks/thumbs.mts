@@ -40,7 +40,7 @@ export interface ThumbsResult {
  * });
  * ```
  */
-export function generateThumbs(
+export const generateThumbs = Effect.fn("generateThumbs")(function* (
   options: ThumbnailOptionsIn & {
     /**
      * Pattern for output filenames
@@ -62,73 +62,71 @@ export function generateThumbs(
     url: string;
   },
 ) {
-  return Effect.gen(function* () {
-    const path = yield* Effect.promise(() => import("node:path"));
-    const fs = yield* FileSystem.FileSystem;
+  const path = yield* Effect.promise(() => import("node:path"));
+  const fs = yield* FileSystem.FileSystem;
 
-    const { thumbs: renderThumbs } = yield* Effect.promise(
-      () => import("@liqvid/renderer/thumbs"),
-    );
+  const { thumbs: renderThumbs } = yield* Effect.promise(
+    () => import("@liqvid/renderer/thumbs"),
+  );
 
-    // Decode an empty object to obtain the schema's default values.
-    const defaults = Schema.decodeUnknownSync(ThumbnailOptions)({});
+  // Decode an empty object to obtain the schema's default values.
+  const defaults = Schema.decodeUnknownSync(ThumbnailOptions)({});
 
-    // Apply defaults
-    const cols = options.cols ?? defaults.cols;
-    const rows = options.rows ?? defaults.rows;
-    const frequency = options.frequency ?? defaults.frequency;
-    const width = options.width ?? defaults.width;
-    const height = options.height ?? defaults.height;
-    const imageFormat = options.imageFormat ?? defaults.imageFormat;
-    const colorScheme = options.colorScheme ?? defaults.colorScheme;
-    const quality = options.quality ?? defaults.quality;
-    const concurrency = options.concurrency ?? defaults.concurrency;
+  // Apply defaults
+  const cols = options.cols ?? defaults.cols;
+  const rows = options.rows ?? defaults.rows;
+  const frequency = options.frequency ?? defaults.frequency;
+  const width = options.width ?? defaults.width;
+  const height = options.height ?? defaults.height;
+  const imageFormat = options.imageFormat ?? defaults.imageFormat;
+  const colorScheme = options.colorScheme ?? defaults.colorScheme;
+  const quality = options.quality ?? defaults.quality;
+  const concurrency = options.concurrency ?? defaults.concurrency;
 
-    // Normalize to a list of scheme passes.
-    const passes =
-      options.schemes && options.schemes.length > 0
-        ? options.schemes
-        : [{ colorScheme, output: options.output! }];
+  // Normalize to a list of scheme passes.
+  const passes =
+    options.schemes && options.schemes.length > 0
+      ? options.schemes
+      : [{ colorScheme, output: options.output! }];
 
-    yield* renderThumbs({
-      browserExecutable: options.browserExecutable ?? "",
-      browserHeight: options.browserHeight ?? height,
-      browserWidth: options.browserWidth ?? width,
-      cols,
-      concurrency,
-      frequency,
-      height,
-      imageFormat,
-      quality,
-      rows,
-      schemes: passes,
-      url: options.url,
-      width,
-    });
-
-    // Calculate number of sheets by reading each scheme's output directory.
-    const ext = `.${imageFormat}`;
-
-    const perSchemeCounts = yield* Effect.all(
-      passes.map(({ output }) =>
-        Effect.gen(function* () {
-          const files = yield* fs
-            .readDirectory(path.dirname(output))
-            .pipe(Effect.catch(() => Effect.succeed([])));
-          return files.filter(
-            (f) => /^\d+\.(jpeg|png)$/.test(f) && f.endsWith(ext),
-          ).length;
-        }),
-      ),
-      { concurrency: "unbounded" },
-    );
-
-    return {
-      numSheets: Math.max(0, ...perSchemeCounts),
-      output: passes[0]!.output,
-    };
+  yield* renderThumbs({
+    browserExecutable: options.browserExecutable,
+    browserHeight: options.browserHeight ?? height,
+    browserWidth: options.browserWidth ?? width,
+    cols,
+    concurrency,
+    frequency,
+    height,
+    imageFormat,
+    quality,
+    rows,
+    schemes: passes,
+    url: options.url,
+    width,
   });
-}
+
+  // Calculate number of sheets by reading each scheme's output directory.
+  const ext = `.${imageFormat}`;
+
+  const perSchemeCounts = yield* Effect.all(
+    passes.map(({ output }) =>
+      Effect.gen(function* () {
+        const files = yield* fs
+          .readDirectory(path.dirname(output))
+          .pipe(Effect.catch(() => Effect.succeed([])));
+        return files.filter(
+          (f) => /^\d+\.(jpeg|png)$/.test(f) && f.endsWith(ext),
+        ).length;
+      }),
+    ),
+    { concurrency: "unbounded" },
+  );
+
+  return {
+    numSheets: Math.max(0, ...perSchemeCounts),
+    output: passes[0]!.output,
+  };
+});
 
 /**
  * Transform thumbnail config from liqvid.json to CLI option names.

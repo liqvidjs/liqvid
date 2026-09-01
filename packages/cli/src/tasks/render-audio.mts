@@ -33,19 +33,19 @@ export interface RenderAudioOptions {
  * });
  * ```
  */
-export function renderAudio(options: RenderAudioOptions) {
-  return Effect.gen(function* () {
-    const { renderAudio: renderAudioTask } = yield* Effect.promise(
-      () => import("@liqvid/renderer/render-audio"),
-    );
+export const renderAudio = Effect.fnUntraced(function* (
+  options: RenderAudioOptions,
+) {
+  const { renderAudio: renderAudioTask } = yield* Effect.promise(
+    () => import("@liqvid/renderer/render-audio"),
+  );
 
-    return yield* renderAudioTask({
-      browserExecutable: options.browserExecutable ?? "",
-      output: options.output,
-      url: options.url,
-    });
+  return yield* renderAudioTask({
+    browserExecutable: options.browserExecutable,
+    output: options.output,
+    url: options.url,
   });
-}
+});
 
 /** Render audio to WAV file. */
 export const renderAudioCommand: CommandModule = {

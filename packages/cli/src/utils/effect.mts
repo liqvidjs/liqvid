@@ -86,41 +86,41 @@ export const resolveConfigPath = Effect.fn("resolveConfigPath")(function* ({
 /**
  * Load and parse liqvid.jsonc or liqvid.json (checked in that order).
  */
-export function loadLiqvidConfig({
-  configPath,
-}: {
-  configPath?: AbsoluteFile;
-} = {}) {
-  return Effect.gen(function* () {
+export const loadLiqvidConfig = Effect.fn("loadLiqvidConfig")(
+  function* ({ configPath }: { configPath?: AbsoluteFile } = {}) {
     const resolvedPath = configPath ?? (yield* resolveConfigPath());
     return yield* loadJsonc(LiqvidConfig, resolvedPath);
-  }).pipe(
-    // Correct v4 API to capture full runtime failure traces
-    Effect.catchCause((cause) => {
-      // Look through the flattened reasons array in Effect v4
-      const failReason = cause.reasons.find(Cause.isFailReason);
+  },
+  (effect) =>
+    effect.pipe(
+      // Correct v4 API to capture full runtime failure traces
+      Effect.catchCause((cause) => {
+        // Look through the flattened reasons array in Effect v4
+        const failReason = cause.reasons.find(Cause.isFailReason);
 
-      if (failReason && failReason.error._tag === "FileDecodeError") {
-        // TODO: should not have to specify this
-        return Effect.fail<
-          string | FileDecodeError | PlatformError.PlatformError
-        >(`The Liqvid configuration file is invalid:\n${Cause.pretty(cause)}`);
-      }
+        if (failReason && failReason.error._tag === "FileDecodeError") {
+          // TODO: should not have to specify this
+          return Effect.fail<
+            string | FileDecodeError | PlatformError.PlatformError
+          >(
+            `The Liqvid configuration file is invalid:\n${Cause.pretty(cause)}`,
+          );
+        }
 
-      // Safely bubble unmatched exceptions or defects back up the stack
-      return Effect.failCause(cause);
-    }),
-    Effect.catchReason("PlatformError", "NotFound", () =>
-      Effect.fail(
-        `Liqvid config file not found. Please create a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file in the root of your project.`,
+        // Safely bubble unmatched exceptions or defects back up the stack
+        return Effect.failCause(cause);
+      }),
+      Effect.catchReason("PlatformError", "NotFound", () =>
+        Effect.fail(
+          `Liqvid config file not found. Please create a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file in the root of your project.`,
+        ),
       ),
-    ),
-  ) as Effect.Effect<
-    LiqvidConfig,
-    string | FileDecodeError | PlatformError.PlatformError,
-    EnvFiles | FileSystem.FileSystem
-  >;
-}
+    ) as Effect.Effect<
+      LiqvidConfig,
+      string | FileDecodeError | PlatformError.PlatformError,
+      EnvFiles | FileSystem.FileSystem
+    >,
+);
 
 /**
  * Load a file and decode its JSON contents with the given schema.

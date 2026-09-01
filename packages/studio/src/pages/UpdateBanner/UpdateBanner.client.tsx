@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 
 import type { PackageUpdate } from "#_/jobs/check-updates.mjs";
 import { updatePackageAction } from "#_/pages/root-actions.js";
+import type { PackageName } from "#_/types/misc.mjs";
 import { Button } from "#_/ui/Button.js";
 import { IconButton } from "#_/ui/IconButton.js";
 
@@ -37,7 +38,7 @@ export function UpdateBannerClient({
   const [busy, setBusy] = useState<string | null>(null);
 
   const handleUpdate = useCallback(
-    async (name: string) => {
+    async (name: PackageName) => {
       setBusy(name);
       try {
         const result = await updatePackageAction(name);

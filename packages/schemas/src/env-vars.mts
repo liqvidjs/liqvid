@@ -42,64 +42,60 @@ class EnvVarError extends Data.TaggedError("EnvVarError")<{
  *   - {env:production:VAR_NAME} - reads from .env.production
  *   - {env:development:VAR_NAME} - reads from .env.development
  */
-export function interpolateEnvVars(str: string) {
-  return Effect.gen(function* () {
-    const envFiles = yield* Effect.service(EnvFiles);
+export const interpolateEnvVars = Effect.fnUntraced(function* (str: string) {
+  const envFiles = yield* Effect.service(EnvFiles);
 
-    return yield* Effect.try({
-      catch: (e) =>
-        new EnvVarError({
-          message: (e as Error).message,
-          string: str,
-        }),
-      try: () =>
-        str.replace(/\{env:([^}]+)\}/g, (_match: string, content: string) => {
-          const parts = content.split(":");
+  return yield* Effect.try({
+    catch: (e) =>
+      new EnvVarError({
+        message: (e as Error).message,
+        string: str,
+      }),
+    try: () =>
+      str.replace(/\{env:([^}]+)\}/g, (_match: string, content: string) => {
+        const parts = content.split(":");
 
-          if (parts.length === 1) {
-            // {env:VAR_NAME} - use process.env
-            const varName = parts[0]!;
-            const value = process.env[varName];
+        if (parts.length === 1) {
+          // {env:VAR_NAME} - use process.env
+          const varName = parts[0]!;
+          const value = process.env[varName];
+          if (value === undefined) {
+            throw new Error(`Environment variable ${varName} is not set`);
+          }
+          return value;
+        } else if (parts.length === 2) {
+          // {env:environment:VAR_NAME}
+          const [environment, varName] = parts as [string, string];
+
+          if (environment === "production") {
+            const value = envFiles.production[varName] ?? process.env[varName];
             if (value === undefined) {
-              throw new Error(`Environment variable ${varName} is not set`);
-            }
-            return value;
-          } else if (parts.length === 2) {
-            // {env:environment:VAR_NAME}
-            const [environment, varName] = parts as [string, string];
-
-            if (environment === "production") {
-              const value =
-                envFiles.production[varName] ?? process.env[varName];
-              if (value === undefined) {
-                throw new Error(
-                  `Environment variable ${varName} is not set in .env.production or process.env`,
-                );
-              }
-              return value;
-            } else if (environment === "development") {
-              const value =
-                envFiles.development[varName] ?? process.env[varName];
-              if (value === undefined) {
-                throw new Error(
-                  `Environment variable ${varName} is not set in .env.development or process.env`,
-                );
-              }
-              return value;
-            } else {
               throw new Error(
-                `Invalid environment "${environment}" in placeholder. Use "production" or "development".`,
+                `Environment variable ${varName} is not set in .env.production or process.env`,
               );
             }
+            return value;
+          } else if (environment === "development") {
+            const value = envFiles.development[varName] ?? process.env[varName];
+            if (value === undefined) {
+              throw new Error(
+                `Environment variable ${varName} is not set in .env.development or process.env`,
+              );
+            }
+            return value;
           } else {
             throw new Error(
-              `Invalid environment variable placeholder: {env:${content}}`,
+              `Invalid environment "${environment}" in placeholder. Use "production" or "development".`,
             );
           }
-        }),
-    });
+        } else {
+          throw new Error(
+            `Invalid environment variable placeholder: {env:${content}}`,
+          );
+        }
+      }),
   });
-}
+});
 
 export const decodeEnvVar = Schema.decodeTo(
   Schema.String,

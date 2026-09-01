@@ -1,14 +1,26 @@
 import path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
-import { Effect, FileSystem, Schedule, Schema } from "effect";
+import {
+  Brand,
+  Effect,
+  FileSystem,
+  Layer,
+  Option,
+  Schedule,
+  Schema,
+} from "effect";
 import { FetchHttpClient, HttpClient } from "effect/unstable/http";
-import { RelativeFile } from "effect-paths";
+import { type AbsoluteDir, type RelativeDir, RelativeFile } from "effect-paths";
 
 import { getServerState } from "#_/initialize.mjs";
+import { PackageName } from "#_/types/misc.mjs";
 
 /** Packages we check for updates. */
-const TRACKED_PACKAGES = ["liqvid", "@liqvid/studio"] as const;
+const TRACKED_PACKAGES = [
+  PackageName("liqvid"),
+  PackageName("@liqvid/studio"),
+] as const;
 
 /** How often to re-check npm for updates. */
 const CHECK_INTERVAL = "1 hour";
@@ -24,7 +36,7 @@ type DependencyField = "dependencies" | "devDependencies";
  */
 export interface PackageUpdate {
   /** Currently installed version (resolved from `node_modules`). */
-  current: string;
+  current: VersionString;
 
   /**
    * Which `package.json` field the dependency lives in, so an update can be
@@ -33,9 +45,10 @@ export interface PackageUpdate {
   field: DependencyField | null;
 
   /** Latest version published to npm. */
-  latest: string;
+  latest: VersionString;
+
   /** Package name (e.g. `liqvid` or `@liqvid/studio`). */
-  name: string;
+  name: PackageName;
 
   /**
    * The raw version range declared in `package.json` (e.g. `^1.2.3`), or
@@ -43,7 +56,7 @@ export interface PackageUpdate {
    * uses the `workspace:` protocol, a `file:`/`link:` specifier, or a git URL).
    * When `null`, the "click to update" CTA is not offered.
    */
-  range: string | null;
+  range: VersionRange | null;
 }
 
 /** Aggregate update state exposed to the UI. */
@@ -55,10 +68,31 @@ export interface UpdateInfo {
   updates: PackageUpdate[];
 }
 
+/** NPM version string */
+type VersionString = string & Brand.Brand<"VersionString">;
+
+const VersionString = Brand.nominal<VersionString>();
+
+const SchemaVersionString = Schema.String.pipe(
+  Schema.fromBrand("VersionString", VersionString),
+);
+
+/** NPM version range */
+type VersionRange = string & Brand.Brand<"VersionRange">;
+
+const VersionRange = Brand.nominal<VersionRange>();
+const SchemaVersionRange = Schema.String.pipe(
+  Schema.fromBrand("VersionRange", VersionRange),
+);
+
 /** Schema for the relevant slice of a `package.json`. */
 const PackageJson = Schema.Struct({
-  dependencies: Schema.optional(Schema.Record(Schema.String, Schema.String)),
-  devDependencies: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+  dependencies: Schema.optional(
+    Schema.Record(Schema.String, SchemaVersionRange),
+  ),
+  devDependencies: Schema.optional(
+    Schema.Record(Schema.String, SchemaVersionRange),
+  ),
 });
 type PackageJson = (typeof PackageJson)["Type"];
 
@@ -68,7 +102,7 @@ const decodePackageJson = Schema.decodeUnknownEffect(
 
 /** Schema for the fields we read out of an npm registry document. */
 const NpmPackageDoc = Schema.Struct({
-  version: Schema.optional(Schema.String),
+  version: Schema.optional(SchemaVersionString),
 });
 
 /** A parsed semantic version (ignoring prerelease/build metadata ordering). */
@@ -84,7 +118,7 @@ interface ParsedVersion {
  * Parse a plain semver string. Returns `null` if it is not a clean
  * `x.y.z[-prerelease]` version (we do not attempt to parse ranges here).
  */
-function parseVersion(version: string): ParsedVersion | null {
+function parseVersion(version: VersionString): ParsedVersion | null {
   const match =
     /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-.]+))?(?:\+[0-9A-Za-z-.]+)?$/.exec(
       version.trim(),
@@ -139,7 +173,10 @@ function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
 /**
  * Determine whether `latest` is a newer version than `current`.
  */
-export function isNewer(current: string, latest: string): boolean {
+export function isNewer(
+  current: VersionString,
+  latest: VersionString,
+): boolean {
   const c = parseVersion(current);
   const l = parseVersion(latest);
   if (!c || !l) return false;
@@ -167,8 +204,8 @@ function isSemverRange(spec: string): boolean {
  */
 function findDependency(
   pkg: PackageJson,
-  name: string,
-): { field: DependencyField; range: string } | null {
+  name: PackageName,
+): { field: DependencyField; range: VersionRange } | null {
   if (pkg.dependencies && name in pkg.dependencies) {
     return { field: "dependencies", range: pkg.dependencies[name]! };
   }
@@ -182,52 +219,51 @@ function findDependency(
  * Read the installed version of a package from its `node_modules` entry.
  * Yields `null` on any failure (missing package, unreadable/invalid JSON).
  */
-function getInstalledVersion(cwd: string, name: string) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const pkgJsonPath = path.join(
-      cwd,
-      "node_modules",
-      ...name.split("/"),
-      "package.json",
-    );
-    const contents = yield* fs.readFileString(pkgJsonPath, "utf8");
-    const doc = yield* Schema.decodeUnknownEffect(
-      Schema.fromJsonString(NpmPackageDoc),
-    )(contents);
-    return doc.version ?? null;
-  }).pipe(Effect.orElseSucceed(() => null));
-}
+const getInstalledVersion = Effect.fnUntraced(function* (
+  cwd: AbsoluteDir,
+  name: PackageName,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const pkgJsonPath = path.join(
+    cwd,
+    "node_modules" as RelativeDir,
+    ...(name.split("/") as RelativeDir[]),
+    "package.json" as RelativeFile,
+  );
+  const contents = yield* fs.readFileString(pkgJsonPath, "utf8");
+  const doc = yield* Schema.decodeUnknownEffect(
+    Schema.fromJsonString(NpmPackageDoc),
+  )(contents);
+  return Option.fromUndefinedOr(doc.version);
+});
 
 /**
  * Query the npm registry for the latest published version of a package.
  * Yields `null` on any failure (offline, non-2xx, invalid JSON).
  */
-function getLatestVersion(name: string) {
-  return Effect.gen(function* () {
-    const client = yield* HttpClient.HttpClient;
-    const url = `${NPM_REGISTRY}/${encodeURIComponent(name).replace("%40", "@")}/latest`;
+const getLatestVersion = Effect.fnUntraced(function* (name: PackageName) {
+  const client = yield* HttpClient.HttpClient;
+  const url = `${NPM_REGISTRY}/${encodeURIComponent(name).replace("%40", "@")}/latest`;
 
-    const response = yield* client.get(url, {
-      headers: { accept: "application/json" },
-    });
-    if (response.status < 200 || response.status >= 300) {
-      return null;
-    }
+  const response = yield* client.get(url, {
+    headers: { accept: "application/json" },
+  });
+  if (response.status < 200 || response.status >= 300) {
+    return Option.none();
+  }
 
-    const body = yield* response.json;
-    const doc = yield* Schema.decodeUnknownEffect(NpmPackageDoc)(body);
-    return doc.version ?? null;
-  }).pipe(Effect.orElseSucceed(() => null));
-}
+  const body = yield* response.json;
+  const doc = yield* Schema.decodeUnknownEffect(NpmPackageDoc)(body);
+  return Option.fromUndefinedOr(doc.version);
+});
 
 /**
  * Check npm for newer versions of the tracked Liqvid packages and update the
  * server state. Never fails — errors (offline, registry errors, missing
  * `package.json`) leave the previous {@link UpdateInfo} untouched.
  */
-export function checkForUpdates() {
-  return Effect.gen(function* () {
+export const checkForUpdates = Effect.fn("checkForUpdates")(
+  function* () {
     const fs = yield* FileSystem.FileSystem;
     const state = getServerState();
     const { cwd } = state;
@@ -242,12 +278,15 @@ export function checkForUpdates() {
       TRACKED_PACKAGES,
       (name) =>
         Effect.gen(function* () {
-          const [installed, latest] = yield* Effect.all(
+          const [$installed, $latest] = yield* Effect.all(
             [getInstalledVersion(cwd, name), getLatestVersion(name)],
             { concurrency: "unbounded" },
           );
 
-          if (!installed || !latest) return null;
+          if (!Option.isSome($installed) || !Option.isSome($latest))
+            return null;
+          const installed = $installed.value;
+          const latest = $latest.value;
           if (!isNewer(installed, latest)) return null;
 
           const declared = findDependency(pkg, name);
@@ -270,12 +309,16 @@ export function checkForUpdates() {
     const updates = results.filter((u): u is PackageUpdate => u !== null);
 
     state.updateInfo = { checkedAt: Date.now(), updates };
-  }).pipe(
-    // A failure here (e.g. no readable package.json) is non-fatal: keep the
-    // previous state untouched and log for diagnostics.
-    Effect.catchCause((cause) => Effect.logError("Update check failed", cause)),
-  );
-}
+  },
+  (effect) =>
+    effect.pipe(
+      // A failure here (e.g. no readable package.json) is non-fatal: keep the
+      // previous state untouched and log for diagnostics.
+      Effect.catchCause((cause) =>
+        Effect.logError("Update check failed", cause),
+      ),
+    ),
+);
 
 /**
  * Start the update checker: run once immediately, then re-check every hour.
@@ -283,8 +326,7 @@ export function checkForUpdates() {
  */
 export async function watchForUpdates(): Promise<void> {
   const check = checkForUpdates().pipe(
-    Effect.provide(NodeFileSystem.layer),
-    Effect.provide(FetchHttpClient.layer),
+    Effect.provide(Layer.mergeAll(NodeFileSystem.layer, FetchHttpClient.layer)),
   );
 
   // Run the first check and await it, so callers can rely on `updateInfo`

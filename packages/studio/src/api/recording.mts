@@ -144,27 +144,27 @@ export function runPostProcessing(
  * Read a single recording directory into a {@link RecordingMeta}, discovering
  * its plugins from the immediate subdirectories.
  */
-export function loadRecordingMeta(recordingDir: AbsoluteDir) {
-  return Effect.gen(function* () {
-    const file = yield* loadJson(
-      RecordingMetaFile,
-      path.join(recordingDir, RECORDING_META_FILE),
-    );
+export const loadRecordingMeta = Effect.fn("loadRecordingMeta")(function* (
+  recordingDir: AbsoluteDir,
+) {
+  const file = yield* loadJson(
+    RecordingMetaFile,
+    path.join(recordingDir, RECORDING_META_FILE),
+  );
 
-    const children = yield* readDirWithFileTypes(recordingDir);
+  const children = yield* readDirWithFileTypes(recordingDir);
 
-    return {
-      ...file,
-      name: dirNameToPackageName(path.basename(recordingDir)),
-      plugins: children.reduce((acc, [name, kind]) => {
-        if (kind === "Directory") {
-          acc.push(dirNameToPackageName(name));
-        }
-        return acc;
-      }, [] as string[]),
-    } satisfies RecordingMeta;
-  });
-}
+  return {
+    ...file,
+    name: dirNameToPackageName(path.basename(recordingDir)),
+    plugins: children.reduce((acc, [name, kind]) => {
+      if (kind === "Directory") {
+        acc.push(dirNameToPackageName(name));
+      }
+      return acc;
+    }, [] as string[]),
+  } satisfies RecordingMeta;
+});
 
 export const recordingsLive = HttpApiBuilder.group(
   WebApi,

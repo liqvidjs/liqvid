@@ -130,19 +130,19 @@ export class S3Provider implements MediaHostingProvider {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
 
-  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir) {
-    const that = this;
-    return Effect.gen(function* () {
+  publishMedia = Effect.fn("publishMedia")(
+    { self: this },
+    function* (this: S3Provider, files: AbsoluteFile[], rootDir: AbsoluteDir) {
       if (files.length === 0) {
         yield* Effect.log("No media files to upload.");
         return;
       }
 
       yield* Effect.log(
-        `Checking ${files.length} files against s3://${that.bucket}...`,
+        `Checking ${files.length} files against s3://${this.bucket}...`,
       );
 
-      const statuses = yield* that.checkFiles(files, rootDir);
+      const statuses = yield* this.checkFiles(files, rootDir);
       const toUpload = statuses.filter((s) => s.needsUpload);
 
       if (toUpload.length === 0) {
@@ -155,13 +155,13 @@ export class S3Provider implements MediaHostingProvider {
       );
 
       yield* Effect.all(
-        toUpload.map(({ filePath, key }) => that.uploadFile(filePath, key)),
+        toUpload.map(({ filePath, key }) => this.uploadFile(filePath, key)),
         { concurrency: UPLOAD_CONCURRENCY },
       );
 
       yield* Effect.log(`Upload complete.`);
-    });
-  }
+    },
+  );
 
   async listRemoteFiles(): Promise<RemoteFileInfo[]> {
     const results: RemoteFileInfo[] = [];
@@ -212,9 +212,9 @@ export class S3Provider implements MediaHostingProvider {
     );
   }
 
-  downloadMedia(files: FileDownloadStatus[]) {
-    const that = this;
-    return Effect.gen(function* () {
+  downloadMedia = Effect.fn("downloadMedia")(
+    { self: this },
+    function* (this: S3Provider, files: FileDownloadStatus[]) {
       const toDownload = files.filter((f) => f.needsDownload);
 
       if (toDownload.length === 0) {
@@ -228,25 +228,22 @@ export class S3Provider implements MediaHostingProvider {
 
       yield* Effect.all(
         toDownload.map(({ key, localPath }) =>
-          Effect.promise(() => that.downloadFile(key, localPath)),
+          Effect.promise(() => this.downloadFile(key, localPath)),
         ),
         { concurrency: DOWNLOAD_CONCURRENCY },
       );
 
       yield* Effect.log(`Download complete.`);
       return toDownload.length;
-    });
-  }
+    },
+  );
 
   /**
    * Get the download status for a single file.
    * Never marks a file for download if the local version is newer.
    */
-  private getDownloadStatus(
-    remoteFile: RemoteFileInfo,
-    localPath: AbsoluteFile,
-  ) {
-    return Effect.gen(function* () {
+  private getDownloadStatus = Effect.fn("getDownloadStatus")(
+    function* (remoteFile: RemoteFileInfo, localPath: AbsoluteFile) {
       const fs = yield* FileSystem.FileSystem;
 
       // Get local file modification time
@@ -271,17 +268,19 @@ export class S3Provider implements MediaHostingProvider {
         needsDownload: false,
         reason: "unchanged" as const,
       };
-    }).pipe(
-      Effect.catchReason("PlatformError", "NotFound", () =>
-        Effect.succeed({
-          key: remoteFile.key,
-          localPath,
-          needsDownload: true,
-          reason: "new" as const,
-        }),
+    },
+    (effect, remoteFile, localPath) =>
+      effect.pipe(
+        Effect.catchReason("PlatformError", "NotFound", () =>
+          Effect.succeed({
+            key: remoteFile.key,
+            localPath,
+            needsDownload: true,
+            reason: "new" as const,
+          }),
+        ),
       ),
-    );
-  }
+  );
 
   /**
    * Download a single file from S3
@@ -319,9 +318,9 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Get the upload status for a single file.
    */
-  private getUploadStatus(filePath: AbsoluteFile, key: RelativeFile) {
-    const that = this;
-    return Effect.gen(function* () {
+  private getUploadStatus = Effect.fn("getUploadStatus")(
+    { self: this },
+    function* (this: S3Provider, filePath: AbsoluteFile, key: RelativeFile) {
       const fs = yield* FileSystem.FileSystem;
 
       yield* Effect.logDebug("checking").pipe(
@@ -332,9 +331,9 @@ export class S3Provider implements MediaHostingProvider {
       const headResponse = yield* Effect.tryPromise({
         catch: (err) => err as { name?: string },
         try: () =>
-          that.client.send(
+          this.client.send(
             new HeadObjectCommand({
-              Bucket: that.bucket,
+              Bucket: this.bucket,
               Key: key,
             }),
           ),
@@ -368,19 +367,21 @@ export class S3Provider implements MediaHostingProvider {
         needsUpload: false,
         reason: "unchanged",
       } as const;
-    }).pipe(
-      Effect.catchIf(
-        (err): err is { name?: string } => err?.name === "NotFound",
-        () =>
-          Effect.succeed({
-            filePath,
-            key,
-            needsUpload: true,
-            reason: "new",
-          } as const),
+    },
+    (effect, filePath, key) =>
+      effect.pipe(
+        Effect.catchIf(
+          (err): err is { name?: string } => err?.name === "NotFound",
+          () =>
+            Effect.succeed({
+              filePath,
+              key,
+              needsUpload: true,
+              reason: "new",
+            } as const),
+        ),
       ),
-    );
-  }
+  );
 
   /**
    * Build the S3 key for a file
@@ -401,10 +402,9 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Upload a single file to S3 using multipart upload for large files
    */
-  private uploadFile(filePath: string, key: string) {
-    const that = this;
-
-    return Effect.gen(function* () {
+  private uploadFile = Effect.fn("uploadFile")(
+    { self: this },
+    function* (this: S3Provider, filePath: AbsoluteFile, key: string) {
       const fs = yield* FileSystem.FileSystem;
 
       const fileContent = yield* fs.readFile(filePath);
@@ -412,19 +412,19 @@ export class S3Provider implements MediaHostingProvider {
 
       const params: PutObjectCommandInput = {
         Body: fileContent,
-        Bucket: that.bucket,
+        Bucket: this.bucket,
         ContentType: contentType,
         Key: key,
       };
 
       // Use multipart upload for better reliability
       const upload = new Upload({
-        client: that.client,
+        client: this.client,
         params,
       });
 
       yield* Effect.promise(() => upload.done());
       yield* Effect.log(`  Uploaded: ${key}`);
-    });
-  }
+    },
+  );
 }

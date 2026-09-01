@@ -30,36 +30,34 @@ export function safeGetOption<
   return Option.some(map.get(key) as T);
 }
 
-export function readDirWithFileTypes(
+export const readDirWithFileTypes = Effect.fnUntraced(function* (
   dirname: AbsoluteDir,
   {
     concurrency,
     recursive,
   }: { concurrency?: Concurrency; recursive?: boolean } = {},
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    const files = (yield* fs.readDirectory(dirname, {
-      recursive,
-    })) as RelativePath[];
+  const files = (yield* fs.readDirectory(dirname, {
+    recursive,
+  })) as RelativePath[];
 
-    return yield* Effect.all(
-      files.map((basename) =>
-        Effect.gen(function* () {
-          const stats = yield* fs.stat(
-            path.join(dirname, basename as RelativePath),
-          );
-          return [basename, stats.type] as
-            | [RelativeFile, "File"]
-            | [RelativeDir, "Directory"]
-            | [RelativePath, "SymbolicLink"];
-        }),
-      ),
-      { concurrency },
-    );
-  });
-}
+  return yield* Effect.all(
+    files.map((basename) =>
+      Effect.gen(function* () {
+        const stats = yield* fs.stat(
+          path.join(dirname, basename as RelativePath),
+        );
+        return [basename, stats.type] as
+          | [RelativeFile, "File"]
+          | [RelativeDir, "Directory"]
+          | [RelativePath, "SymbolicLink"];
+      }),
+    ),
+    { concurrency },
+  );
+});
 
 /**
  * Treat file not found errors as Option

@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { formatTime, parseTime } from "@liqvid/utils";
 import { Effect, FileSystem } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 
 import { Progress } from "../index.mts";
 import type { ImageFormat } from "../types.mts";
@@ -34,7 +35,7 @@ export function solidify({
   Parameters<typeof assembleVideo>[0],
   "audioFile" | "framesDir" | "padLen"
 > & {
-  browserExecutable: string;
+  browserExecutable: AbsoluteFile;
   colorScheme: "light" | "dark";
   concurrency: number;
   duration: number;
@@ -224,42 +225,40 @@ export function solidify({
 /**
 Assemble frames into a video.
 */
-function assembleVideo({
+const assembleVideo = Effect.fn("assembleVideo")(function* ({
   padLen,
   ...o // passthrough parameters
 }: Omit<Parameters<typeof stitch>[0], "pattern" | "signal"> & {
   imageFormat: ImageFormat;
   padLen: number;
 }) {
-  return Effect.gen(function* () {
-    // progress bar
-    const progress = yield* Progress;
-    const stitchingBar = new progress.SingleBar({
-      etaBuffer: 50,
-      formatValue: formatTime,
-    });
-
-    stitchingBar.start(o.duration * 1_000, 0);
-
-    yield* Effect.promise((signal) => {
-      // ffmpeg stitch job
-      const job = stitch({
-        pattern: `%0${padLen}d.${o.imageFormat}`,
-        signal,
-        ...o,
-      });
-
-      // parse ffmpeg progress
-      job.stderr.on("data", (msg: Buffer) => {
-        const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
-        if ($_) {
-          stitchingBar.update(parseTime($_[1]!));
-        }
-      });
-
-      return job;
-    });
-
-    stitchingBar.stop();
+  // progress bar
+  const progress = yield* Progress;
+  const stitchingBar = new progress.SingleBar({
+    etaBuffer: 50,
+    formatValue: formatTime,
   });
-}
+
+  stitchingBar.start(o.duration * 1_000, 0);
+
+  yield* Effect.promise((signal) => {
+    // ffmpeg stitch job
+    const job = stitch({
+      pattern: `%0${padLen}d.${o.imageFormat}`,
+      signal,
+      ...o,
+    });
+
+    // parse ffmpeg progress
+    job.stderr.on("data", (msg: Buffer) => {
+      const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
+      if ($_) {
+        stitchingBar.update(parseTime($_[1]!));
+      }
+    });
+
+    return job;
+  });
+
+  stitchingBar.stop();
+});

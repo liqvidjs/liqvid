@@ -106,35 +106,33 @@ export function getParameterizedAssetsDir(
  * Ensure the .params= marker file exists in the assets directory.
  * Creates the marker file if the project has parameters.
  */
-export function ensureParamsMarker(
+export const ensureParamsMarker = Effect.fn("ensureParamsMarker")(function* (
   assetsDir: AbsoluteDir,
   projectPath: RelativeDir,
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    const paramNames = extractParameterNames(projectPath);
+  const paramNames = extractParameterNames(projectPath);
 
-    if (paramNames.length === 0) {
-      // No parameters - no marker needed
-      return;
-    }
+  if (paramNames.length === 0) {
+    // No parameters - no marker needed
+    return;
+  }
 
-    // Ensure assets directory exists
-    if (!(yield* fs.exists(assetsDir))) {
-      yield* fs.makeDirectory(assetsDir, { recursive: true });
-    }
+  // Ensure assets directory exists
+  if (!(yield* fs.exists(assetsDir))) {
+    yield* fs.makeDirectory(assetsDir, { recursive: true });
+  }
 
-    const markerFilename = generateParamsMarkerFilename(paramNames);
-    const markerPath = path.join(assetsDir, RelativeFile(markerFilename));
+  const markerFilename = generateParamsMarkerFilename(paramNames);
+  const markerPath = path.join(assetsDir, RelativeFile(markerFilename));
 
-    if (!(yield* fs.exists(markerPath))) {
-      // Create empty marker file
-      yield* fs.writeFileString(markerPath, "");
-      yield* Effect.logDebug(`Created params marker: ${markerFilename}`);
-    }
-  });
-}
+  if (!(yield* fs.exists(markerPath))) {
+    // Create empty marker file
+    yield* fs.writeFileString(markerPath, "");
+    yield* Effect.logDebug(`Created params marker: ${markerFilename}`);
+  }
+});
 
 /**
  * Get all existing parameter value combinations for a project by reading
@@ -143,75 +141,66 @@ export function ensureParamsMarker(
  * Returns an array of parameter value objects, e.g.:
  * `[{ lang: "en", locale: "US" }, { lang: "en", locale: "CA" }, ...]`
  */
-export function getExistingParameterCombinations(
+export const getExistingParameterCombinations = Effect.fnUntraced(function* (
   assetsDir: AbsoluteDir,
   paramNames: string[],
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    if (paramNames.length === 0) {
-      return [{}];
-    }
+  if (paramNames.length === 0) {
+    return [{}];
+  }
 
-    const combinations: Record<string, string>[] = [];
+  const combinations: Record<string, string>[] = [];
 
-    // Use Effect to traverse directories
-    yield* traverseParameterDirs(
-      fs,
-      assetsDir,
-      paramNames,
-      0,
-      {},
-      combinations,
-    );
+  // Use Effect to traverse directories
+  yield* traverseParameterDirs(fs, assetsDir, paramNames, 0, {}, combinations);
 
-    return combinations;
-  });
-}
+  return combinations;
+});
 
-function traverseParameterDirs(
+const traverseParameterDirs = Effect.fnUntraced(function* (
   fs: FileSystem.FileSystem,
   currentDir: AbsoluteDir,
   paramNames: string[],
   depth: number,
   currentValues: Record<string, string>,
   combinations: Record<string, string>[],
-): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem> {
-  return Effect.gen(function* () {
-    if (depth >= paramNames.length) {
-      combinations.push({ ...currentValues });
-      return;
+): Generator<
+  Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>
+> {
+  if (depth >= paramNames.length) {
+    combinations.push({ ...currentValues });
+    return;
+  }
+
+  const paramName = paramNames[depth]!;
+
+  if (!(yield* fs.exists(currentDir))) {
+    return;
+  }
+
+  const entries = yield* readDirWithFileTypes(currentDir);
+
+  for (const [entry, kind] of entries) {
+    // Skip marker files and hidden files (except .liqvid subdirs which we handle elsewhere)
+    if (entry.startsWith(".")) {
+      continue;
     }
 
-    const paramName = paramNames[depth]!;
-
-    if (!(yield* fs.exists(currentDir))) {
-      return;
+    if (kind === "Directory") {
+      const entryPath = path.join(currentDir, entry);
+      yield* traverseParameterDirs(
+        fs,
+        entryPath,
+        paramNames,
+        depth + 1,
+        { ...currentValues, [paramName]: entry },
+        combinations,
+      );
     }
-
-    const entries = yield* readDirWithFileTypes(currentDir);
-
-    for (const [entry, kind] of entries) {
-      // Skip marker files and hidden files (except .liqvid subdirs which we handle elsewhere)
-      if (entry.startsWith(".")) {
-        continue;
-      }
-
-      if (kind === "Directory") {
-        const entryPath = path.join(currentDir, entry);
-        yield* traverseParameterDirs(
-          fs,
-          entryPath,
-          paramNames,
-          depth + 1,
-          { ...currentValues, [paramName]: entry },
-          combinations,
-        );
-      }
-    }
-  });
-}
+  }
+});
 
 /**
  * Get the parameter values for a project from the project.json and liqvid.json.

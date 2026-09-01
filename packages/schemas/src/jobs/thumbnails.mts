@@ -1,4 +1,5 @@
 import { Effect, Schema } from "effect";
+import { SchemaAbsoluteFile } from "effect-paths";
 
 import {
   ColorSchemeInputSpecifier,
@@ -64,7 +65,7 @@ export type ThumbnailsJob = (typeof ThumbnailsJob)["Type"];
 /** Configuration for a thumbnail generation job */
 export const ThumbnailOptions = Schema.Struct({
   /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable: Schema.String.pipe(Schema.optional),
+  browserExecutable: SchemaAbsoluteFile.pipe(Schema.optional),
 
   /**
    * Height of screenshot before resizing

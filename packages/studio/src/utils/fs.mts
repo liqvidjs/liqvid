@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
-import { Option } from "effect";
+import { Effect, Option } from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -119,13 +119,15 @@ export function walkDirSync(
 /**
  * Get the path to the Biome executable, if available
  */
-export async function getBiomePath(
+export const getBiomePath = Effect.fn("getBiomePath")(function* (
   dirname: AbsoluteDir,
-): Promise<Option.Option<AbsoluteFile>> {
-  const packageDir = await findUpwards(dirname, async (dir) => {
-    const files = await fsp.readdir(dir);
-    return files.includes(RelativeFile("package.json"));
-  });
+) {
+  const packageDir = yield* Effect.promise(() =>
+    findUpwards(dirname, async (dir) => {
+      const files = await fsp.readdir(dir);
+      return files.includes(RelativeFile("package.json"));
+    }),
+  );
 
   return packageDir.pipe(
     Option.map((dir) =>
@@ -137,4 +139,4 @@ export async function getBiomePath(
       ),
     ),
   );
-}
+});

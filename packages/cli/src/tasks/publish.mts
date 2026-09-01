@@ -203,12 +203,8 @@ export async function publishMedia(options: PublishOptions = {}) {
 /**
  * Publish content files (html/css/js) to the hosting provider.
  */
-function publishContentFiles(
-  config: LiqvidConfig,
-  cwd: AbsoluteDir,
-  dryRun: boolean,
-) {
-  return Effect.gen(function* () {
+const publishContentFiles = Effect.fn("publishContentFiles")(
+  function* (config: LiqvidConfig, cwd: AbsoluteDir, dryRun: boolean) {
     const fs = yield* FileSystem.FileSystem;
 
     // Next.js builds to the 'out' directory by default for static export
@@ -234,62 +230,60 @@ function publishContentFiles(
 
     yield* Effect.promise(() => hostingProvider.publishContent(outDir));
     yield* Effect.log("Content publishing complete.");
-  }).pipe(Effect.annotateLogs({ cwd, dryRun }));
-}
+  },
+  (effect, cwd, dryRun) => effect.pipe(Effect.annotateLogs({ cwd, dryRun })),
+);
 
 /**
  * Publish media files to the media hosting provider.
  */
-function publishMediaFiles(
+const publishMediaFiles = Effect.fn("publishMediaFiles")(function* (
   config: LiqvidConfig,
   searchDir: AbsoluteDir,
   baseDir: RelativeDir,
   dryRun: boolean,
 ) {
-  return Effect.gen(function* () {
-    // Get glob patterns from config, with sensible defaults
-    const patterns =
-      config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
+  // Get glob patterns from config, with sensible defaults
+  const patterns = config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
 
-    // Find media files matching the glob patterns
-    const mediaFiles = yield* Effect.promise(
-      () =>
-        fg(patterns as string[], {
-          absolute: true,
-          cwd: searchDir,
-          dot: true, // Include files in .liqvid directories
-          onlyFiles: true,
-        }) as Promise<AbsoluteFile[]>,
-    );
+  // Find media files matching the glob patterns
+  const mediaFiles = yield* Effect.promise(
+    () =>
+      fg(patterns as string[], {
+        absolute: true,
+        cwd: searchDir,
+        dot: true, // Include files in .liqvid directories
+        onlyFiles: true,
+      }) as Promise<AbsoluteFile[]>,
+  );
 
-    if (mediaFiles.length === 0) {
-      yield* Effect.log(
-        `No media files found in ${baseDir}/. Nothing to publish.`,
-      );
-      return;
-    }
-
-    // Sort for consistent output
-    mediaFiles.sort();
-
+  if (mediaFiles.length === 0) {
     yield* Effect.log(
-      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/\n`,
+      `No media files found in ${baseDir}/. Nothing to publish.`,
     );
+    return;
+  }
 
-    // Create provider based on config
-    const provider = createMediaProvider(config);
+  // Sort for consistent output
+  mediaFiles.sort();
 
-    if (dryRun) {
-      yield* Effect.log("Dry run mode - checking remote state...\n");
-      yield* showDryRunInfo(provider, mediaFiles, searchDir, config);
-      return;
-    }
+  yield* Effect.log(
+    `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} in ${baseDir}/\n`,
+  );
 
-    // Publish all media files (paths relative to searchDir)
-    yield* provider.publishMedia(mediaFiles, searchDir);
-    yield* Effect.log("Media publishing complete.");
-  });
-}
+  // Create provider based on config
+  const provider = createMediaProvider(config);
+
+  if (dryRun) {
+    yield* Effect.log("Dry run mode - checking remote state...\n");
+    yield* showDryRunInfo(provider, mediaFiles, searchDir, config);
+    return;
+  }
+
+  // Publish all media files (paths relative to searchDir)
+  yield* provider.publishMedia(mediaFiles, searchDir);
+  yield* Effect.log("Media publishing complete.");
+});
 
 /**
  * Create the appropriate media provider based on config
@@ -389,45 +383,43 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
 /**
  * Show what would be uploaded in dry-run mode
  */
-function showDryRunInfo(
+const showDryRunInfo = Effect.fnUntraced(function* (
   provider: MediaHostingProvider,
   mediaFiles: AbsoluteFile[],
   rootDir: AbsoluteDir,
   _config: LiqvidConfig,
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    // Check which files need to be uploaded
-    const statuses = yield* provider.checkFiles(mediaFiles, rootDir);
+  // Check which files need to be uploaded
+  const statuses = yield* provider.checkFiles(mediaFiles, rootDir);
 
-    const toUpload = statuses.filter((s) => s.needsUpload);
-    const unchanged = statuses.filter((s) => !s.needsUpload);
+  const toUpload = statuses.filter((s) => s.needsUpload);
+  const unchanged = statuses.filter((s) => !s.needsUpload);
 
-    if (toUpload.length > 0) {
-      yield* Effect.log("Files that would be uploaded:\n");
-      for (const { filePath, key, reason } of toUpload) {
-        const stats = yield* fs.stat(filePath);
-        const sizeStr = formatFileSize(stats.size);
-        const reasonStr = reason === "new" ? "(new)" : "(modified)";
-        yield* Effect.log(
-          `  ${path.relative(rootDir, filePath)} → ${key} (${sizeStr}) ${reasonStr}`,
-        );
-      }
-      yield* Effect.log();
-    }
-
-    if (unchanged.length > 0) {
+  if (toUpload.length > 0) {
+    yield* Effect.log("Files that would be uploaded:\n");
+    for (const { filePath, key, reason } of toUpload) {
+      const stats = yield* fs.stat(filePath);
+      const sizeStr = formatFileSize(stats.size);
+      const reasonStr = reason === "new" ? "(new)" : "(modified)";
       yield* Effect.log(
-        `Unchanged: ${unchanged.length} ${pluralize("file", unchanged.length)}`,
+        `  ${path.relative(rootDir, filePath)} → ${key} (${sizeStr}) ${reasonStr}`,
       );
     }
+    yield* Effect.log();
+  }
 
+  if (unchanged.length > 0) {
     yield* Effect.log(
-      `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
+      `Unchanged: ${unchanged.length} ${pluralize("file", unchanged.length)}`,
     );
-  });
-}
+  }
+
+  yield* Effect.log(
+    `\nSummary: ${toUpload.length} to upload, ${unchanged.length} unchanged`,
+  );
+});
 
 /**
  * Format file size in human-readable format

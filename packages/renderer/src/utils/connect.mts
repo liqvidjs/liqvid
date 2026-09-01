@@ -2,6 +2,7 @@
 
 import { range } from "@liqvid/utils";
 import { Cause, Effect } from "effect";
+import type { AbsoluteFile, AbsolutePath } from "effect-paths";
 import type * as Puppeteer from "puppeteer-core";
 
 import type { ColorScheme, RenderMode } from "../types.mts";
@@ -18,49 +19,50 @@ export const PLAYER_API_NAMESPACE = "@liqvid/player";
  * call multiple times, which lets a single page be reused to capture multiple
  * schemes without reloading the URL.
  */
-export function setColorScheme(page: Puppeteer.Page, colorScheme: ColorScheme) {
-  return Effect.gen(function* () {
-    yield* Effect.tryPromise(() =>
-      page.evaluate((colorScheme) => {
-        player.setColorScheme(colorScheme);
-      }, colorScheme),
-    );
+export const setColorScheme = Effect.fn("setColorScheme")(function* (
+  page: Puppeteer.Page,
+  colorScheme: ColorScheme,
+) {
+  yield* Effect.tryPromise(() =>
+    page.evaluate((colorScheme) => {
+      player.setColorScheme(colorScheme);
+    }, colorScheme),
+  );
 
-    yield* Effect.tryPromise(() =>
-      page.emulateMediaFeatures([
-        {
-          name: "prefers-color-scheme",
-          value: colorScheme,
-        },
-      ]),
-    );
+  yield* Effect.tryPromise(() =>
+    page.emulateMediaFeatures([
+      {
+        name: "prefers-color-scheme",
+        value: colorScheme,
+      },
+    ]),
+  );
 
-    yield* Effect.logDebug("set color scheme").pipe(
-      Effect.annotateLogs({ colorScheme }),
-    );
-  });
-}
+  yield* Effect.logDebug("set color scheme").pipe(
+    Effect.annotateLogs({ colorScheme }),
+  );
+});
 
 /**
  * Connect to a page running Liqvid.
  * Returns the page after setup. Caller is responsible for page cleanup.
  */
-export function connect({
-  browser,
-  colorScheme = "light",
-  height,
-  url,
-  renderMode,
-  width,
-}: {
-  browser: Puppeteer.Browser;
-  colorScheme?: ColorScheme;
-  height: number;
-  url: string;
-  width: number;
-  renderMode: RenderMode;
-}) {
-  return Effect.gen(function* () {
+export const connect = Effect.fn("connect")(
+  function* ({
+    browser,
+    colorScheme = "light",
+    height,
+    url,
+    renderMode,
+    width,
+  }: {
+    browser: Puppeteer.Browser;
+    colorScheme?: ColorScheme;
+    height: number;
+    url: string;
+    width: number;
+    renderMode: RenderMode;
+  }) {
     const timeout = 5_000;
 
     // Create page - caller manages lifecycle via getPages' finalizer
@@ -142,34 +144,36 @@ export function connect({
     yield* Effect.logDebug("page ready");
 
     return page;
-  }).pipe(
-    Effect.withLogSpan("player-api"),
-    // biome-ignore assist/source/useSortedKeys: meaningful order (url is most important)
-    Effect.annotateLogs({ url, colorScheme, height, width }),
-  );
-}
+  },
+  (effect, { url, colorScheme, height, width }) =>
+    effect.pipe(
+      Effect.withLogSpan("player-api"),
+      // biome-ignore assist/source/useSortedKeys: meaningful order (url is most important)
+      Effect.annotateLogs({ url, colorScheme, height, width }),
+    ),
+);
 
 /**
 Connect to players.
 */
-export function getPages({
-  colorScheme = "light",
-  concurrency,
-  executablePath,
-  height,
-  renderMode,
-  url,
-  width,
-}: {
-  colorScheme: "light" | "dark";
-  concurrency: number;
-  executablePath: string;
-  height: number;
-  renderMode: RenderMode;
-  url: string;
-  width: number;
-}) {
-  return Effect.gen(function* () {
+export const getPages = Effect.fn("getPages")(
+  function* ({
+    colorScheme = "light",
+    concurrency,
+    executablePath,
+    height,
+    renderMode,
+    url,
+    width,
+  }: {
+    colorScheme: "light" | "dark";
+    concurrency: number;
+    executablePath: AbsoluteFile;
+    height: number;
+    renderMode: RenderMode;
+    url: string;
+    width: number;
+  }) {
     // progress bar
     const progress = yield* Progress;
     const playerBar = new progress.SingleBar({
@@ -236,14 +240,16 @@ export function getPages({
     yield* Effect.logDebug("connected to all pages");
 
     return pages;
-  }).pipe(
-    Effect.annotateLogs({
-      concurrency,
-      renderMode,
-      url,
-    }),
-  );
-}
+  },
+  (effect, { concurrency, renderMode, url }) =>
+    effect.pipe(
+      Effect.annotateLogs({
+        concurrency,
+        renderMode,
+        url,
+      }),
+    ),
+);
 
 /**
  * Call a method on the Liqvid player via postMessage API.

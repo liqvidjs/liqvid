@@ -48,7 +48,7 @@ export const generateRootTypes = Effect.fn("generateRootTypes")(
     const assetsDir = path.join(cwd, ROOT_HIDDEN_DIR);
     yield* fs.makeDirectory(assetsDir, { recursive: true });
 
-    const biomePath = yield* Effect.promise(() => getBiomePath(cwd));
+    const biomePath = yield* getBiomePath(cwd);
 
     yield* runTemplate({
       biomePath,

@@ -23,17 +23,18 @@ function isConfigFile(filePath: string): boolean {
  * OS reports a `Create` even when the file already existed — the event tag is
  * therefore not a reliable signal for "new" vs "changed".
  */
-function reloadConfig(state: LiqvidServerState, changedFile: string) {
-  return Effect.gen(function* () {
-    const existed = Option.isSome(state.config);
-    yield* Effect.log(
-      existed
-        ? `${changedFile} changed, reloading...`
-        : `${changedFile} detected, loading...`,
-    );
-    state.config = yield* loadLiqvidConfig().pipe(Effect.option);
-  });
-}
+const reloadConfig = Effect.fn("reloadConfig")(function* (
+  state: LiqvidServerState,
+  changedFile: string,
+) {
+  const existed = Option.isSome(state.config);
+  yield* Effect.log(
+    existed
+      ? `${changedFile} changed, reloading...`
+      : `${changedFile} detected, loading...`,
+  );
+  state.config = yield* loadLiqvidConfig().pipe(Effect.option);
+});
 
 /**
  * Watch liqvid.jsonc and liqvid.json for changes and reload when modified.
@@ -45,8 +46,8 @@ function reloadConfig(state: LiqvidServerState, changedFile: string) {
  * down if the file were removed. Node reports the changed entry as a path
  * relative to the watched directory, so we filter on the config basename.
  */
-export function watchLiqvidConfig(state: LiqvidServerState) {
-  return Effect.gen(function* () {
+export const watchLiqvidConfig = Effect.fn("watchLiqvidConfig")(
+  function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
 
@@ -71,8 +72,10 @@ export function watchLiqvidConfig(state: LiqvidServerState) {
       ),
       Stream.runDrain,
     );
-  }).pipe(
-    Effect.scoped,
-    Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)),
-  );
-}
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.scoped,
+      Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)),
+    ),
+);

@@ -10,6 +10,7 @@ import {
   install,
   resolveBuildId,
 } from "@puppeteer/browsers";
+import type { AbsoluteFile } from "effect-paths";
 import { ExecaError, execa } from "execa";
 
 /** Default cache directory for browser downloads */
@@ -28,7 +29,7 @@ export async function ffmpegExists() {
 /**
 Ensure that a Chrome/ium executable exists on the machine, and return the path to it.
 */
-export async function getEnsureChrome(userChrome: string) {
+export async function getEnsureChrome(userChrome?: AbsoluteFile) {
   // user-supplied path
   if (userChrome) {
     if (!fs.existsSync(userChrome)) {
@@ -40,7 +41,7 @@ export async function getEnsureChrome(userChrome: string) {
 
   // typical install
   const systemChrome = await findChromeByPlatform();
-  if (systemChrome) return systemChrome;
+  if (systemChrome) return systemChrome as AbsoluteFile;
 
   // check for already installed browser in cache
   const platform = detectBrowserPlatform();
@@ -53,7 +54,7 @@ export async function getEnsureChrome(userChrome: string) {
     (b) => b.browser === Browser.CHROME,
   );
   if (installedChrome) {
-    return installedChrome.executablePath;
+    return installedChrome.executablePath as AbsoluteFile;
   }
 
   // download and install Chrome
@@ -73,7 +74,7 @@ export async function getEnsureChrome(userChrome: string) {
     downloadProgressCallback: "default",
   });
 
-  return installedBrowser.executablePath;
+  return installedBrowser.executablePath as AbsoluteFile;
 }
 
 /**
@@ -82,14 +83,18 @@ Look for Chrome/ium in standard locations across platforms.
 async function findChromeByPlatform() {
   switch (process.platform) {
     case "win32":
-      return [
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-      ].find((location) => fs.existsSync(location));
+      return (
+        [
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+          "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        ] as AbsoluteFile[]
+      ).find((location) => fs.existsSync(location));
     case "darwin":
-      return [
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      ].find((location) => fs.existsSync(location));
+      return (
+        [
+          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        ] as AbsoluteFile[]
+      ).find((location) => fs.existsSync(location));
     default:
       try {
         const { stdout } = await execa("which", [
@@ -97,11 +102,13 @@ async function findChromeByPlatform() {
           "chromium",
           "chromium-browser",
         ]);
-        return stdout.split("\n")[0];
+        return stdout.split("\n")[0] as AbsoluteFile;
       } catch (e) {
         if (e instanceof ExecaError) {
           const { stdout } = e;
-          return (stdout as unknown as string).split("\n").filter(Boolean)[0];
+          return (stdout as unknown as string)
+            .split("\n")
+            .filter(Boolean)[0] as AbsoluteFile;
         }
         throw e;
       }

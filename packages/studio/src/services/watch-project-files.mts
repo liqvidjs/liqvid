@@ -241,7 +241,7 @@ function watchFileEvents(
  * For removal events the path is already gone, so we fall back to a heuristic:
  * paths without an extension are treated as directories.
  */
-const isDirectory = Effect.fn("isDirectory")(function* (
+const isDirectory = Effect.fnUntraced(function* (
   filename: AbsolutePath,
   event: FileSystem.WatchEvent | undefined,
 ) {

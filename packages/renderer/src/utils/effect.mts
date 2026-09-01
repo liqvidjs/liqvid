@@ -5,8 +5,8 @@ import puppeteer from "puppeteer-core";
 /**
  * Effectfully acquire a Puppeteer instance.
  */
-export function acquireBrowser(options?: Puppeteer.LaunchOptions) {
-  return Effect.gen(function* () {
+export const acquireBrowser = Effect.fn("acquireBrowser")(
+  function* (options?: Puppeteer.LaunchOptions) {
     yield* Effect.logDebug("acquiring browser");
 
     const browser = yield* Effect.acquireRelease(
@@ -19,5 +19,6 @@ export function acquireBrowser(options?: Puppeteer.LaunchOptions) {
     yield* Effect.logDebug("acquired browser");
 
     return browser;
-  }).pipe(Effect.annotateLogs({ options }));
-}
+  },
+  (effect, options) => effect.pipe(Effect.annotateLogs({ options })),
+);

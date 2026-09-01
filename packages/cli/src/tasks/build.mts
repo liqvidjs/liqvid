@@ -108,104 +108,103 @@ export type BuildError = {
 /**
  * Run Next.js build
  */
-export function runNextBuild(options: BuildOptions = {}) {
-  return Effect.gen(function* () {
-    const cwd = options.cwd ?? process.cwd();
-    const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
+export const runNextBuild = Effect.fn("runNextBuild")(function* (
+  options: BuildOptions = {},
+) {
+  const cwd = options.cwd ?? process.cwd();
+  const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
 
-    const envFiles = loadEnvFiles(cwd);
+  const envFiles = loadEnvFiles(cwd);
 
-    // Load config to get media base URL
-    const config = yield* loadLiqvidConfig({ configPath }).pipe(
-      Effect.provideService(EnvFiles, envFiles),
-    );
+  // Load config to get media base URL
+  const config = yield* loadLiqvidConfig({ configPath }).pipe(
+    Effect.provideService(EnvFiles, envFiles),
+  );
 
-    const env: Record<string, string> = {
-      ...process.env,
-      ...envFiles.production,
-      ...envFiles.local,
-      NODE_ENV: "production",
-    };
+  const env: Record<string, string> = {
+    ...process.env,
+    ...envFiles.production,
+    ...envFiles.local,
+    NODE_ENV: "production",
+  };
 
-    if (config) {
-      const mediaProvider = getMediaProvider(config);
-      if (Option.isSome(mediaProvider)) {
-        const mediaBaseUrl = mediaProvider.value.getBaseUrl();
-        env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
-      }
+  if (config) {
+    const mediaProvider = getMediaProvider(config);
+    if (Option.isSome(mediaProvider)) {
+      const mediaBaseUrl = mediaProvider.value.getBaseUrl();
+      env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
     }
+  }
 
-    yield* Effect.log("Running 'next build'...");
+  yield* Effect.log("Running 'next build'...");
 
-    // Capture the current context (which carries the active logger) so that
-    // output lines forwarded from the subprocess are logged through the same
-    // logger as the surrounding effect (e.g. the studio job's log collector).
-    const context = yield* Effect.context<never>();
-    const runFork = Effect.runForkWith(context);
+  // Capture the current context (which carries the active logger) so that
+  // output lines forwarded from the subprocess are logged through the same
+  // logger as the surrounding effect (e.g. the studio job's log collector).
+  const context = yield* Effect.context<never>();
+  const runFork = Effect.runForkWith(context);
 
-    // Run the build, capturing stdout/stderr so that callers (e.g. the studio
-    // jobs UI) can surface the output. Each line is forwarded to the logger as
-    // it is produced so logs stream in real time, and the full stderr is
-    // retained for error parsing.
-    const result = yield* Effect.callback<Awaited<ReturnType<typeof execa>>>(
-      (resume, signal) => {
-        const subprocess = execa("npx", ["next", "build"], {
-          cwd,
-          env,
-          reject: false,
-          stderr: "pipe",
-          stdout: "pipe",
+  // Run the build, capturing stdout/stderr so that callers (e.g. the studio
+  // jobs UI) can surface the output. Each line is forwarded to the logger as
+  // it is produced so logs stream in real time, and the full stderr is
+  // retained for error parsing.
+  const result = yield* Effect.callback<Awaited<ReturnType<typeof execa>>>(
+    (resume, signal) => {
+      const subprocess = execa("npx", ["next", "build"], {
+        cwd,
+        env,
+        reject: false,
+        stderr: "pipe",
+        stdout: "pipe",
+      });
+
+      // Kill the subprocess if the effect is interrupted (e.g. job cancel).
+      signal.addEventListener("abort", () => subprocess.kill());
+
+      const forward = (
+        stream: NodeJS.ReadableStream | null,
+        log: (line: string) => Effect.Effect<void>,
+      ) => {
+        if (!stream) return;
+        let buffer = "";
+        stream.setEncoding("utf8");
+        stream.on("data", (chunk: string) => {
+          buffer += chunk;
+          let index = buffer.indexOf("\n");
+          while (index !== -1) {
+            const line = buffer.slice(0, index);
+            buffer = buffer.slice(index + 1);
+            runFork(log(line));
+            index = buffer.indexOf("\n");
+          }
         });
+        stream.on("end", () => {
+          if (buffer.length > 0) {
+            runFork(log(buffer));
+          }
+        });
+      };
 
-        // Kill the subprocess if the effect is interrupted (e.g. job cancel).
-        signal.addEventListener("abort", () => subprocess.kill());
+      forward(subprocess.stdout, (line) => Effect.log(line));
+      forward(subprocess.stderr, (line) => Effect.logError(line));
 
-        const forward = (
-          stream: NodeJS.ReadableStream | null,
-          log: (line: string) => Effect.Effect<void>,
-        ) => {
-          if (!stream) return;
-          let buffer = "";
-          stream.setEncoding("utf8");
-          stream.on("data", (chunk: string) => {
-            buffer += chunk;
-            let index = buffer.indexOf("\n");
-            while (index !== -1) {
-              const line = buffer.slice(0, index);
-              buffer = buffer.slice(index + 1);
-              runFork(log(line));
-              index = buffer.indexOf("\n");
-            }
-          });
-          stream.on("end", () => {
-            if (buffer.length > 0) {
-              runFork(log(buffer));
-            }
-          });
-        };
+      subprocess.then(
+        (value) => resume(Effect.succeed(value)),
+        // execa is configured with `reject: false`, so it should not reject;
+        // surface any unexpected rejection as a defect.
+        (error) => resume(Effect.die(error)),
+      );
+    },
+  );
 
-        forward(subprocess.stdout, (line) => Effect.log(line));
-        forward(subprocess.stderr, (line) => Effect.logError(line));
+  if (result.exitCode !== 0) {
+    const stderrOutput = typeof result.stderr === "string" ? result.stderr : "";
+    const messages = parseNextBuildErrors(stderrOutput);
+    return yield* Effect.fail({ messages });
+  }
 
-        subprocess.then(
-          (value) => resume(Effect.succeed(value)),
-          // execa is configured with `reject: false`, so it should not reject;
-          // surface any unexpected rejection as a defect.
-          (error) => resume(Effect.die(error)),
-        );
-      },
-    );
-
-    if (result.exitCode !== 0) {
-      const stderrOutput =
-        typeof result.stderr === "string" ? result.stderr : "";
-      const messages = parseNextBuildErrors(stderrOutput);
-      return yield* Effect.fail({ messages });
-    }
-
-    yield* Effect.log("'next build' completed.");
-  });
-}
+  yield* Effect.log("'next build' completed.");
+});
 
 /**
  * Parse error messages from Next.js build stderr output

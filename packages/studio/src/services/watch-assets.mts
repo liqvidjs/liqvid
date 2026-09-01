@@ -105,12 +105,12 @@ const TEMPLATES_DIR = path.join(
  * Creates directories like `.liqvid/en/US/`, `.liqvid/es/CA/`, etc.
  * for all parameter value combinations.
  */
-function initializeParameterizedDirs(
-  assetsDir: AbsoluteDir,
-  projectPath: RelativeDir,
-  projectParameters: Record<string, readonly string[]> | undefined,
-) {
-  return Effect.gen(function* () {
+const initializeParameterizedDirs = Effect.fn("function")(
+  function* (
+    assetsDir: AbsoluteDir,
+    projectPath: RelativeDir,
+    projectParameters: Record<string, readonly string[]> | undefined,
+  ) {
     const fs = yield* FileSystem.FileSystem;
 
     const paramNames = extractParameterNames(projectPath);
@@ -144,67 +144,67 @@ function initializeParameterizedDirs(
         yield* Effect.logDebug(`Created parameter directory: ${subpath}`);
       }
     }
-  }).pipe(Effect.annotateLogs({ assetsDir, projectPath }));
-}
+  },
+  (effect, assetsDir, projectPath) =>
+    effect.pipe(Effect.annotateLogs({ assetsDir, projectPath })),
+);
 
 /**
  * Check if a directory is a project directory.
  * A project directory contains both project.json and page.tsx.
  */
-function isProjectDirectory(dir: AbsoluteDir) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+const isProjectDirectory = Effect.fnUntraced(function* (dir: AbsoluteDir) {
+  const fs = yield* FileSystem.FileSystem;
 
-    const { hasPageTsx, hasProjectJson } = yield* Effect.all({
-      hasPageTsx: fs.exists(path.join(dir, NEXT_PAGE)),
-      hasProjectJson: fs.exists(path.join(dir, PROJECT_FILE)),
-    });
-
-    return hasProjectJson && hasPageTsx;
+  const { hasPageTsx, hasProjectJson } = yield* Effect.all({
+    hasPageTsx: fs.exists(path.join(dir, NEXT_PAGE)),
+    hasProjectJson: fs.exists(path.join(dir, PROJECT_FILE)),
   });
-}
+
+  return hasProjectJson && hasPageTsx;
+});
 
 /**
  * Find the project directory that contains the given file path.
  * Walks up the directory tree until it finds a project directory or reaches TARGET_DIR.
  */
-function findProjectDirectory(filePath: AbsolutePath) {
-  return Effect.gen(function* () {
-    let dir = path.dirname(filePath);
-
-    const TARGET_DIR = getRoutesDir();
-
-    while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
-      if (yield* isProjectDirectory(dir)) {
-        return Option.some(dir);
-      }
-      dir = path.dirname(dir);
-    }
-
-    // Check if TARGET_DIR itself is a project directory
-    if (dir === TARGET_DIR && (yield* isProjectDirectory(dir))) {
-      return Option.some(dir);
-    }
-
-    return Option.none();
-  });
-}
-
-export function watchAssets() {
-  Handlebars.registerHelper("json", (obj) => {
-    return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
-  });
+const findProjectDirectory = Effect.fn("findProjectDirectory")(function* (
+  filePath: AbsolutePath,
+) {
+  let dir = path.dirname(filePath);
 
   const TARGET_DIR = getRoutesDir();
 
-  // A resolved asset change: the project directory whose types.ts should be
-  // regenerated for this event.
-  type WatchEvent = { projectDir: AbsoluteDir };
+  while (dir.startsWith(TARGET_DIR) && dir !== TARGET_DIR) {
+    if (yield* isProjectDirectory(dir)) {
+      return Option.some(dir);
+    }
+    dir = path.dirname(dir);
+  }
 
-  // set up watch: a Pub/Sub fans watch events out to the consumer that
-  // regenerates the affected project's types. The watcher lives for the
-  // lifetime of the process.
-  return Effect.gen(function* () {
+  // Check if TARGET_DIR itself is a project directory
+  if (dir === TARGET_DIR && (yield* isProjectDirectory(dir))) {
+    return Option.some(dir);
+  }
+
+  return Option.none();
+});
+
+export const watchAssets = Effect.fn("watchAssets")(
+  function* () {
+    Handlebars.registerHelper("json", (obj) => {
+      return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
+    });
+
+    const TARGET_DIR = getRoutesDir();
+
+    // A resolved asset change: the project directory whose types.ts should be
+    // regenerated for this event.
+    type WatchEvent = { projectDir: AbsoluteDir };
+
+    // set up watch: a Pub/Sub fans watch events out to the consumer that
+    // regenerates the affected project's types. The watcher lives for the
+    // lifetime of the process.
     const pubsub = yield* PubSub.unbounded<WatchEvent>();
 
     // Consumer: subscribe to the Pub/Sub and regenerate types per project.
@@ -225,9 +225,7 @@ export function watchAssets() {
             Stream.debounce("50 millis"),
             Stream.runForEach(() =>
               Effect.gen(function* () {
-                const biomePath = yield* Effect.promise(() =>
-                  getBiomePath(projectDir),
-                );
+                const biomePath = yield* getBiomePath(projectDir);
                 yield* generateProjectTypes({ biomePath, projectDir });
               }).pipe(
                 Effect.tapCause((cause) =>
@@ -249,8 +247,9 @@ export function watchAssets() {
       Stream.runForEach((event) => PubSub.publish(pubsub, event)),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     );
-  }).pipe(Effect.provide(NodeFileSystem.layer), Effect.scoped);
-}
+  },
+  (effect) => effect.pipe(Effect.provide(NodeFileSystem.layer), Effect.scoped),
+);
 
 /**
  * A stream of asset-relevant change events, backed by the platform's recursive

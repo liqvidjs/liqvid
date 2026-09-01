@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
 import { ProjectJson } from "@liqvid/schemas";
-import { Effect, Exit, type Record } from "effect";
+import { Effect, Exit } from "effect";
 import type { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -21,6 +21,7 @@ import { extractParameterNames } from "#_/utils/parameters.mjs";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 
+const IS_DEV = process.env.NODE_ENV === "development";
 export function liqvidProject<
   D extends Directory,
   P extends Record<string, unknown>,
@@ -50,7 +51,7 @@ export function liqvidProject<
   const paramNames = extractParameterNames(projectPath);
 
   // development
-  if (process.env.NODE_ENV === "development") {
+  if (IS_DEV) {
     return async function LiqvidProject({
       params: $params,
       searchParams: $searchParams,
@@ -148,9 +149,18 @@ export function liqvidProject<
       // console.error(e);
     }
 
-    const project = JSON.parse(
-      await fsp.readFile(path.join(__dirname, PROJECT_FILE), "utf8"),
-    ) as ProjectJson;
+    const $project = await Effect.runPromiseExit(
+      loadJson(ProjectJson, path.join(__dirname, PROJECT_FILE)).pipe(
+        Effect.provide((await agnosticFileSystem()).layer),
+      ),
+    );
+
+    if (!Exit.isSuccess($project)) {
+      console.error("Failed to load project.json:", $project.cause);
+      return notFound();
+    }
+
+    const project = $project.value;
 
     if (project.draft) {
       return notFound();

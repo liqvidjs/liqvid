@@ -32,13 +32,14 @@ function captioningJobName(projectPath: RelativeDir, audioId: string): string {
 /**
  * Write captions metadata alongside the audio it captions.
  */
-function writeCaptionsMeta(audioDir: AbsoluteDir, meta: CaptionsMeta) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    yield* fs.makeDirectory(audioDir, { recursive: true });
-    yield* writeJSON(path.join(audioDir, CAPTIONS_META), meta);
-  });
-}
+const writeCaptionsMeta = Effect.fnUntraced(function* (
+  audioDir: AbsoluteDir,
+  meta: CaptionsMeta,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  yield* fs.makeDirectory(audioDir, { recursive: true });
+  yield* writeJSON(path.join(audioDir, CAPTIONS_META), meta);
+});
 
 export const captionsLive = HttpApiBuilder.group(
   WebApi,

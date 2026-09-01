@@ -21,38 +21,40 @@ export default data;
  * Post-process @lqv/tldraw recording data.
  * Creates raw.d.json.ts declaration file.
  */
-function postProcessRecording({ dirname }: { dirname: AbsoluteDir }) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    yield* Effect.logInfo("tldraw post-processing");
+const postProcessRecording = Effect.fn("postProcessRecording")(function* ({
+  dirname,
+}: {
+  dirname: AbsoluteDir;
+}) {
+  const fs = yield* FileSystem.FileSystem;
+  yield* Effect.logInfo("tldraw post-processing");
 
-    const rawJsonPath = path.join(dirname, RAW_JSON);
-    const rawDtsPath = path.join(dirname, RAW_DTS);
+  const rawJsonPath = path.join(dirname, RAW_JSON);
+  const rawDtsPath = path.join(dirname, RAW_DTS);
 
-    // Check if raw.json exists
-    if (!(yield* fs.exists(rawJsonPath))) {
-      // raw.json doesn't exist, nothing to do
-      return;
-    }
+  // Check if raw.json exists
+  if (!(yield* fs.exists(rawJsonPath))) {
+    // raw.json doesn't exist, nothing to do
+    return;
+  }
 
-    // Write raw.d.json.ts
-    yield* fs.writeFileString(rawDtsPath, declaration);
+  // Write raw.d.json.ts
+  yield* fs.writeFileString(rawDtsPath, declaration);
 
-    // copy compressed data
-    const data = JSON.parse(yield* fs.readFileString(rawJsonPath, "utf8"));
+  // copy compressed data
+  const data = JSON.parse(yield* fs.readFileString(rawJsonPath, "utf8"));
 
-    yield* Effect.log("Compressing recording data...");
+  yield* Effect.log("Compressing recording data...");
 
-    yield* writeTypedJson({
-      data: compress(data, 2),
-      declaration,
-      dirname,
-      filename: RelativeFile("recording.json"),
-    });
-
-    yield* Effect.log("wrote recording.json for tldraw");
+  yield* writeTypedJson({
+    data: compress(data, 2),
+    declaration,
+    dirname,
+    filename: RelativeFile("recording.json"),
   });
-}
+
+  yield* Effect.log("wrote recording.json for tldraw");
+});
 
 const plugin: LiqvidStudioServerPlugin = {
   postProcessRecording,

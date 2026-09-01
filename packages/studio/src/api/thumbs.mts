@@ -45,21 +45,19 @@ interface GenerateThumbsBody {
 /**
  * Read thumbnail sheets from a directory.
  */
-function readThumbSheets(dir: string) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+const readThumbSheets = Effect.fnUntraced(function* (dir: AbsoluteDir) {
+  const fs = yield* FileSystem.FileSystem;
 
-    const files = yield* fs.readDirectory(dir);
+  const files = yield* fs.readDirectory(dir);
 
-    return files
-      .filter((f) => /^\d+\.(jpeg|png)$/.test(f))
-      .sort((a, b) => {
-        const numA = Number.parseInt(a, 10);
-        const numB = Number.parseInt(b, 10);
-        return numA - numB;
-      });
-  });
-}
+  return files
+    .filter((f) => /^\d+\.(jpeg|png)$/.test(f))
+    .sort((a, b) => {
+      const numA = Number.parseInt(a, 10);
+      const numB = Number.parseInt(b, 10);
+      return numA - numB;
+    });
+});
 
 /**
  * Generate thumbnails for one or more color schemes in a single job.
@@ -67,52 +65,50 @@ function readThumbSheets(dir: string) {
  * All schemes share a single browser session (the URL is loaded once), which
  * avoids overloading the dev server with simultaneous cold page loads.
  */
-function generateThumbnails(
+const generateThumbnails = Effect.fn("generateThumbnails")(function* (
   url: string,
   schemes: readonly { colorScheme: "light" | "dark"; outputDir: AbsoluteDir }[],
   { colorScheme: _, ...body }: GenerateThumbsBody,
   projectPath: RelativeDir,
 ) {
-  return Effect.gen(function* () {
-    const { config: $config } = getServerState();
-    const fs = yield* FileSystem.FileSystem;
+  const { config: $config } = getServerState();
+  const fs = yield* FileSystem.FileSystem;
 
-    const defaults = $config.pipe(
-      Option.flatMapNullishOr((config) => config.media?.thumbnails?.defaults),
-      Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
-    );
+  const defaults = $config.pipe(
+    Option.flatMapNullishOr((config) => config.media?.thumbnails?.defaults),
+    Option.getOrElse(() => ({}) as Partial<ThumbnailOptions>),
+  );
 
-    const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
+  const imageFormat = body.imageFormat ?? defaults?.imageFormat ?? "jpeg";
 
-    // Ensure output directories exist
-    yield* Effect.all(
-      schemes.map(({ outputDir }) =>
-        fs.makeDirectory(outputDir, { recursive: true }),
-      ),
-      { concurrency: "unbounded" },
-    );
+  // Ensure output directories exist
+  yield* Effect.all(
+    schemes.map(({ outputDir }) =>
+      fs.makeDirectory(outputDir, { recursive: true }),
+    ),
+    { concurrency: "unbounded" },
+  );
 
-    yield* createJob(
-      "thumbnails",
-      generateThumbsApi({
-        ...defaults,
-        ...body,
-        imageFormat,
-        schemes: schemes.map(({ colorScheme, outputDir }) => ({
-          colorScheme,
-          output: path.join(outputDir, RelativeFile(`%s.${imageFormat}`)),
-        })),
-        url,
-      }),
-      { path: projectPath },
-    );
+  yield* createJob(
+    "thumbnails",
+    generateThumbsApi({
+      ...defaults,
+      ...body,
+      imageFormat,
+      schemes: schemes.map(({ colorScheme, outputDir }) => ({
+        colorScheme,
+        output: path.join(outputDir, RelativeFile(`%s.${imageFormat}`)),
+      })),
+      url,
+    }),
+    { path: projectPath },
+  );
 
-    return yield* Effect.all(
-      schemes.map(({ outputDir }) => readThumbSheets(outputDir)),
-      { concurrency: "unbounded" },
-    );
-  });
-}
+  return yield* Effect.all(
+    schemes.map(({ outputDir }) => readThumbSheets(outputDir)),
+    { concurrency: "unbounded" },
+  );
+});
 
 /**
  * Read the thumbnail job configuration from a project.

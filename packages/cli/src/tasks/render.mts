@@ -2,6 +2,7 @@ import { NodeFileSystem } from "@effect/platform-node";
 import type { ImageFormat } from "@liqvid/schemas";
 import { parseTime } from "@liqvid/utils";
 import { Console, Effect, Exit } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 import type { CommandModule } from "yargs";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";
@@ -21,7 +22,7 @@ export interface RenderOptions {
   audioArgs?: string;
 
   /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /** Color scheme: light or dark */
   colorScheme?: "light" | "dark";
@@ -93,63 +94,63 @@ export interface RenderResult {
  * });
  * ```
  */
-export function renderVideo(options: RenderOptions) {
-  return Effect.gen(function* () {
-    const { solidify } = yield* Effect.promise(
-      () => import("@liqvid/renderer/solidify"),
-    );
+export const renderVideo = Effect.gen("renderVideo")(function* (
+  options: RenderOptions,
+) {
+  const { solidify } = yield* Effect.promise(
+    () => import("@liqvid/renderer/solidify"),
+  );
 
-    // Apply defaults
-    const colorScheme = options.colorScheme ?? "light";
-    const concurrency = options.concurrency ?? 1;
-    const fps = options.fps ?? 30;
-    const height = options.height ?? 800;
-    const width = options.width ?? 1280;
-    const imageFormat = options.imageFormat ?? "jpeg";
-    const quality = options.quality ?? 80;
-    const pixelFormat = options.pixelFormat ?? "yuv420p";
-    const start = options.start ?? 0;
-    const sequence = options.sequence ?? false;
+  // Apply defaults
+  const colorScheme = options.colorScheme ?? "light";
+  const concurrency = options.concurrency ?? 1;
+  const fps = options.fps ?? 30;
+  const height = options.height ?? 800;
+  const width = options.width ?? 1280;
+  const imageFormat = options.imageFormat ?? "jpeg";
+  const quality = options.quality ?? 80;
+  const pixelFormat = options.pixelFormat ?? "yuv420p";
+  const start = options.start ?? 0;
+  const sequence = options.sequence ?? false;
 
-    // Note: solidify's types are stricter than the runtime - it handles undefined
-    // values for optional fields. We use type assertions here.
-    yield* solidify({
-      audioArgs: options.audioArgs as string,
-      browserExecutable: options.browserExecutable ?? "",
-      colorScheme,
-      concurrency,
-      duration: options.duration as number,
-      end: options.end as number,
-      fps,
-      height,
-      imageFormat,
-      output: options.output,
-      pixelFormat,
-      quality,
-      sequence,
-      start,
-      url: options.url,
-      videoArgs: options.videoArgs as string,
-      width,
-    });
-
-    // Calculate actual duration
-    const duration = (() => {
-      if (typeof options.duration === "number") {
-        return options.duration;
-      } else if (typeof options.end === "number") {
-        return options.end - start;
-      }
-      // We don't know the actual duration without querying the video
-      return 0;
-    })();
-
-    return {
-      duration,
-      output: options.output,
-    };
+  // Note: solidify's types are stricter than the runtime - it handles undefined
+  // values for optional fields. We use type assertions here.
+  yield* solidify({
+    audioArgs: options.audioArgs as string,
+    browserExecutable: options.browserExecutable,
+    colorScheme,
+    concurrency,
+    duration: options.duration as number,
+    end: options.end as number,
+    fps,
+    height,
+    imageFormat,
+    output: options.output,
+    pixelFormat,
+    quality,
+    sequence,
+    start,
+    url: options.url,
+    videoArgs: options.videoArgs as string,
+    width,
   });
-}
+
+  // Calculate actual duration
+  const duration = (() => {
+    if (typeof options.duration === "number") {
+      return options.duration;
+    } else if (typeof options.end === "number") {
+      return options.end - start;
+    }
+    // We don't know the actual duration without querying the video
+    return 0;
+  })();
+
+  return {
+    duration,
+    output: options.output,
+  };
+});
 
 /** Render to static video. */
 export const render: CommandModule = {

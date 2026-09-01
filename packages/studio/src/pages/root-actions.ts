@@ -29,6 +29,7 @@ import {
   TYPES_AUTOGEN,
 } from "#_/conventions.mjs";
 import { getServerState } from "#_/initialize.mjs";
+import type { PackageName } from "#_/types/misc.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { createJob } from "#_/utils/jobs.mjs";
 import { getRoutesDir } from "#_/utils/misc.mjs";
@@ -318,66 +319,64 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
 /**
  * Compile a Handlebars template and write it to the output path.
  */
-function compileTemplate(
+const compileTemplate = Effect.fnUntraced(function* (
   templatePath: AbsoluteFile,
   outputPath: AbsoluteFile,
   data: Record<string, unknown>,
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const templateContent = yield* fs.readFileString(templatePath);
-    const template = Handlebars.compile(templateContent);
-    const result = template(data);
-    yield* fs.writeFileString(outputPath, result);
-  });
-}
+  const fs = yield* FileSystem.FileSystem;
+  const templateContent = yield* fs.readFileString(templatePath);
+  const template = Handlebars.compile(templateContent);
+  const result = template(data);
+  yield* fs.writeFileString(outputPath, result);
+});
 
 /**
  * Recursively copy and compile template files from source to destination.
  * Files ending in .hbs are compiled with Handlebars and have the .hbs extension removed.
  * Other files are copied as-is. template.json is skipped.
  */
-function copyTemplateDir(
+const copyTemplateDir = Effect.fn("copyTemplateDir")(function* (
   srcDir: AbsoluteDir,
   destDir: AbsoluteDir,
   data: Record<string, unknown>,
-): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem> {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    yield* fs.makeDirectory(destDir, { recursive: true });
+): Generator<
+  Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>
+> {
+  const fs = yield* FileSystem.FileSystem;
+  yield* fs.makeDirectory(destDir, { recursive: true });
 
-    const entries = yield* readDirWithFileTypes(srcDir);
+  const entries = yield* readDirWithFileTypes(srcDir);
 
-    for (const [basename, kind] of entries) {
-      if (kind === "SymbolicLink") continue;
+  for (const [basename, kind] of entries) {
+    if (kind === "SymbolicLink") continue;
 
-      if (basename === TEMPLATE_FILE) {
-        // Skip template.json
-        continue;
-      }
+    if (basename === TEMPLATE_FILE) {
+      // Skip template.json
+      continue;
+    }
 
-      if (kind === "Directory") {
-        const srcPath = path.join(srcDir, basename);
-        const destPath = path.join(destDir, basename);
+    if (kind === "Directory") {
+      const srcPath = path.join(srcDir, basename);
+      const destPath = path.join(destDir, basename);
 
-        yield* copyTemplateDir(srcPath, destPath, data);
+      yield* copyTemplateDir(srcPath, destPath, data);
+    } else {
+      const srcPath = path.join(srcDir, basename);
+      const destName = basename.endsWith(".hbs")
+        ? (basename.slice(0, -4) as RelativeFile)
+        : basename;
+
+      const destPath = path.join(destDir, destName);
+
+      if (basename.endsWith(".hbs")) {
+        yield* compileTemplate(srcPath, destPath, data);
       } else {
-        const srcPath = path.join(srcDir, basename);
-        const destName = basename.endsWith(".hbs")
-          ? (basename.slice(0, -4) as RelativeFile)
-          : basename;
-
-        const destPath = path.join(destDir, destName);
-
-        if (basename.endsWith(".hbs")) {
-          yield* compileTemplate(srcPath, destPath, data);
-        } else {
-          yield* fs.copyFile(srcPath, destPath);
-        }
+        yield* fs.copyFile(srcPath, destPath);
       }
     }
-  });
-}
+  }
+});
 
 interface UpdatePackageResult {
   error?: string;
@@ -391,7 +390,7 @@ interface UpdatePackageResult {
  * eligible; `workspace:` and other protocol specifiers are rejected.
  */
 export async function updatePackageAction(
-  name: string,
+  name: PackageName,
 ): Promise<UpdatePackageResult> {
   const { cwd, updateInfo } = getServerState();
 

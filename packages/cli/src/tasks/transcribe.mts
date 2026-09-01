@@ -272,33 +272,33 @@ function buildVtt(segments: TranscribeDetailedResult<boolean>[]): string {
 /**
  * Resolve a whisper model file path, downloading a named model on demand.
  */
-function resolveModel(whisperConfig: Partial<WhisperConfig>) {
-  return Effect.gen(function* () {
-    const { manager } = yield* Effect.tryPromise(async () => {
-      const whisper = await import("smart-whisper");
-      return whisper;
-    }).pipe(
-      Effect.tapCause((cause) =>
-        Effect.sync(() => console.dir(cause, { colors: true, depth: null })),
-      ),
-    );
+const resolveModel = Effect.fn("resolveModel")(function* (
+  whisperConfig: Partial<WhisperConfig>,
+) {
+  const { manager } = yield* Effect.tryPromise(async () => {
+    const whisper = await import("smart-whisper");
+    return whisper;
+  }).pipe(
+    Effect.tapCause((cause) =>
+      Effect.sync(() => console.dir(cause, { colors: true, depth: null })),
+    ),
+  );
 
-    yield* Effect.logDebug("imported smart-whisper");
+  yield* Effect.logDebug("imported smart-whisper");
 
-    if (whisperConfig.modelPath) {
-      return expandTilde(whisperConfig.modelPath);
-    }
+  if (whisperConfig.modelPath) {
+    return expandTilde(whisperConfig.modelPath);
+  }
 
-    const modelName = whisperConfig.modelName ?? "base.en";
+  const modelName = whisperConfig.modelName ?? "base.en";
 
-    if (!manager.check(modelName)) {
-      yield* Effect.log(`Downloading Whisper model "${modelName}"...`);
-      yield* Effect.tryPromise(() => manager.download(modelName));
-    }
+  if (!manager.check(modelName)) {
+    yield* Effect.log(`Downloading Whisper model "${modelName}"...`);
+    yield* Effect.tryPromise(() => manager.download(modelName));
+  }
 
-    return manager.resolve(modelName);
-  });
-}
+  return manager.resolve(modelName);
+});
 
 /**
  * Transcribe an audio file using Whisper (via `smart-whisper`).

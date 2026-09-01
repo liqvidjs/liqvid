@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { Effect, FileSystem } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 import jimp from "jimp";
 
 import type { ColorScheme, ImageFormat } from "../types.mts";
@@ -48,7 +49,7 @@ export function thumbs({
   url,
   width,
 }: {
-  browserExecutable: string;
+  browserExecutable: AbsoluteFile;
   browserHeight: number;
   browserWidth: number;
   /** Single-scheme color scheme (ignored when `schemes` is provided). */
@@ -214,28 +215,28 @@ export function thumbs({
 /**
 Assemble thumb screenshots into sheets.
 */
-function assembleSheets({
-  cols,
-  height,
-  imageFormat,
-  numThumbs,
-  output,
-  quality,
-  rows,
-  tmpDir,
-  width,
-}: {
-  cols: number;
-  height: number;
-  imageFormat: ImageFormat;
-  numThumbs: number;
-  output: string;
-  quality: number;
-  rows: number;
-  tmpDir: string;
-  width: number;
-}) {
-  return Effect.gen(function* () {
+const assembleSheets = Effect.fn("assembleSheets")(
+  function* ({
+    cols,
+    height,
+    imageFormat,
+    numThumbs,
+    output,
+    quality,
+    rows,
+    tmpDir,
+    width,
+  }: {
+    cols: number;
+    height: number;
+    imageFormat: ImageFormat;
+    numThumbs: number;
+    output: string;
+    quality: number;
+    rows: number;
+    tmpDir: string;
+    width: number;
+  }) {
     const numSheets = Math.ceil(numThumbs / cols / rows);
 
     // progress bar
@@ -277,5 +278,6 @@ function assembleSheets({
     );
 
     sheetsBar.stop();
-  }).pipe(Effect.withLogSpan("assembleSheets"));
-}
+  },
+  (effect) => effect.pipe(Effect.withLogSpan("assembleSheets")),
+);

@@ -25,40 +25,39 @@ type RawConfig = {
  *
  * Uses jsonc.min to strip comments for parsing.
  */
-function readRawConfig(configPath: AbsoluteFile) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const contents = yield* fs.readFileString(configPath, "utf8");
-    const minified = JSONC.minify(contents);
-    return JSON.parse(minified) as RawConfig;
-  });
-}
+const readRawConfig = Effect.fnUntraced(function* (configPath: AbsoluteFile) {
+  const fs = yield* FileSystem.FileSystem;
+  const contents = yield* fs.readFileString(configPath, "utf8");
+  const minified = JSONC.minify(contents);
+  return JSON.parse(minified) as RawConfig;
+});
 
 /**
  * Read the raw config file preserving comments (for write-back).
  * Uses comment-json to parse while retaining comment structure.
  */
-function readRawConfigWithComments(configPath: AbsoluteFile) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const contents = yield* fs.readFileString(configPath, "utf8");
-    return commentJson.parse(contents) as RawConfig;
-  });
-}
+const readRawConfigWithComments = Effect.fnUntraced(function* (
+  configPath: AbsoluteFile,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const contents = yield* fs.readFileString(configPath, "utf8");
+  return commentJson.parse(contents) as RawConfig;
+});
 
 /**
  * Write raw config back to file, preserving comments if writing to .jsonc.
  */
-function writeRawConfig(configPath: AbsoluteFile, data: RawConfig) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const isJsonc = configPath.endsWith(CONFIG_FILE_JSONC);
-    const jsonString = isJsonc
-      ? commentJson.stringify(data, null, 2)
-      : JSON.stringify(data, null, 2);
-    yield* fs.writeFileString(configPath, jsonString);
-  });
-}
+const writeRawConfig = Effect.fnUntraced(function* (
+  configPath: AbsoluteFile,
+  data: RawConfig,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const isJsonc = configPath.endsWith(CONFIG_FILE_JSONC);
+  const jsonString = isJsonc
+    ? commentJson.stringify(data, null, 2)
+    : JSON.stringify(data, null, 2);
+  yield* fs.writeFileString(configPath, jsonString);
+});
 
 const decodeSettings = Schema.decodeUnknownEffect(SettingsConfig);
 const encodeSettings = Schema.encodeUnknownEffect(SettingsConfig);
@@ -71,21 +70,19 @@ const encodeSettings = Schema.encodeUnknownEffect(SettingsConfig);
  * Requires a {@link FileSystem.FileSystem} in context (e.g. via
  * `NodeFileSystem.layer`).
  */
-export function getSettingsConfig() {
-  return Effect.gen(function* () {
-    const state = getServerState();
-    const configPath = yield* resolveConfigPath({ cwd: state.cwd });
+export const getSettingsConfig = Effect.fn("getSettingsConfig")(function* () {
+  const state = getServerState();
+  const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
-    const raw = yield* readRawConfig(configPath);
+  const raw = yield* readRawConfig(configPath);
 
-    return yield* decodeSettings({
-      backend: raw.backend,
-      basePath: raw.basePath,
-      media: raw.media,
-      providers: raw.providers,
-    });
+  return yield* decodeSettings({
+    backend: raw.backend,
+    basePath: raw.basePath,
+    media: raw.media,
+    providers: raw.providers,
   });
-}
+});
 
 /**
  * Merge validated settings into the raw config object, pruning fields that

@@ -2,6 +2,7 @@ import { promises as fsp } from "node:fs";
 import * as path from "node:path";
 
 import { Effect, FileSystem } from "effect";
+import type { AbsoluteFile } from "effect-paths";
 
 import { getEnsureChrome } from "../utils/binaries.mts";
 import { connect } from "../utils/connect.mts";
@@ -9,7 +10,7 @@ import { acquireBrowser } from "../utils/effect.mts";
 
 export interface RenderAudioOptions {
   /** Path to Chrome/ium executable */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /**
    * Number of channels to use
@@ -57,7 +58,7 @@ export function renderAudio({
 
     // Find browser executable
     const executablePath = yield* Effect.promise(() =>
-      getEnsureChrome(browserExecutable ?? ""),
+      getEnsureChrome(browserExecutable),
     );
 
     // Launch browser

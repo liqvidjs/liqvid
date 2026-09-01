@@ -63,11 +63,8 @@ function appendLog(service: Service, log: StructuredLog) {
  * All log output from the effect (via `Effect.log*`) is captured, tagged with
  * its level, and streamed to the Jobs page.
  */
-export function createService<A, E, R>(
-  name: string,
-  effect: Effect.Effect<A, E, R>,
-) {
-  return Effect.gen(function* () {
+export const createService = Effect.fn("createService")(
+  function* <A, E, R>(name: string, effect: Effect.Effect<A, E, R>) {
     yield* Effect.logDebug("starting service", { name });
     const { services } = getServerState();
     const startTime = new Date();
@@ -150,5 +147,9 @@ export function createService<A, E, R>(
     });
 
     return service;
-  }).pipe(Effect.provideService(References.MinimumLogLevel, getLogLevel()));
-}
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+    ),
+);

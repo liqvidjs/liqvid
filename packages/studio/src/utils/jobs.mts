@@ -54,111 +54,109 @@ function appendLog(job: LoggableJob, log: StructuredLog) {
 /**
  * Start a job in a detached fiber and add it to the global list of jobs.
  */
-export function createJob<A, E, R>(
+export const createJob = Effect.fn("createJob")(function* <A, E, R>(
   name: string,
   effect: Effect.Effect<A, E, R>,
   options?: {
     path?: string;
   },
 ) {
-  return Effect.gen(function* () {
-    const { jobs } = getServerState();
-    const startTime = new Date();
+  const { jobs } = getServerState();
+  const startTime = new Date();
 
-    const logs: StructuredLog[] = [];
-    const id = crypto.randomUUID();
+  const logs: StructuredLog[] = [];
+  const id = crypto.randomUUID();
 
-    // Custom logger that outputs log messages to the console
-    const logger = Logger.make(({ date, fiber, logLevel, message }) => {
-      const annotations = fiber.getRef(
-        References.CurrentLogAnnotations,
-      ) as Record.ReadonlyRecord<string, Schema.Json>;
-      const activeSpans = fiber.getRef(References.CurrentLogSpans);
+  // Custom logger that outputs log messages to the console
+  const logger = Logger.make(({ date, fiber, logLevel, message }) => {
+    const annotations = fiber.getRef(
+      References.CurrentLogAnnotations,
+    ) as Record.ReadonlyRecord<string, Schema.Json>;
+    const activeSpans = fiber.getRef(References.CurrentLogSpans);
 
-      const timestamp = date.getTime();
+    const timestamp = date.getTime();
 
-      const mappedType = (
-        {
-          All: "log",
-          Debug: "debug",
-          Error: "error",
-          Fatal: "error",
-          Info: "info",
-          None: "log",
-          Trace: "debug",
-          Warn: "warn",
-        } satisfies Record<LogLevel.LogLevel, StructuredLogType>
-      )[logLevel];
+    const mappedType = (
+      {
+        All: "log",
+        Debug: "debug",
+        Error: "error",
+        Fatal: "error",
+        Info: "info",
+        None: "log",
+        Trace: "debug",
+        Warn: "warn",
+      } satisfies Record<LogLevel.LogLevel, StructuredLogType>
+    )[logLevel];
 
-      appendLog(job, {
-        annotations,
-        message: message as ReadonlyArray<Schema.Json>,
-        spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
-        timestamp: date,
-        type: mappedType,
-      });
+    appendLog(job, {
+      annotations,
+      message: message as ReadonlyArray<Schema.Json>,
+      spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
+      timestamp: date,
+      type: mappedType,
     });
+  });
 
-    const job: Types.Mutable<LoggableJob> = {
-      fiber: yield* Effect.forkDetach(
-        effect.pipe(
-          // logging
-          Effect.provideService(References.MinimumLogLevel, getLogLevel()),
-          Effect.provide(Logger.layer([logger])),
+  const job: Types.Mutable<LoggableJob> = {
+    fiber: yield* Effect.forkDetach(
+      effect.pipe(
+        // logging
+        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+        Effect.provide(Logger.layer([logger])),
 
-          Effect.provideServiceEffect(
-            Progress,
-            Effect.suspend(() =>
-              Effect.succeed(
-                jobProgressLayer(job, {
-                  // A new progress bar is a new log entry: append + stream it.
-                  onAppend: (log) => appendLog(job, log),
-                  // Progress bars mutate an existing entry in place; re-send the
-                  // whole job so clients reflect the updated value.
-                  onUpdate: () => {
-                    Effect.runFork(broadcastJobUpdate(job));
-                  },
-                }),
-              ),
+        Effect.provideServiceEffect(
+          Progress,
+          Effect.suspend(() =>
+            Effect.succeed(
+              jobProgressLayer(job, {
+                // A new progress bar is a new log entry: append + stream it.
+                onAppend: (log) => appendLog(job, log),
+                // Progress bars mutate an existing entry in place; re-send the
+                // whole job so clients reflect the updated value.
+                onUpdate: () => {
+                  Effect.runFork(broadcastJobUpdate(job));
+                },
+              }),
             ),
           ),
+        ),
 
-          // mark cancelled
-          Effect.onInterrupt(() =>
-            Effect.sync(() => {
-              job.state = "cancelled";
-            }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
-          ),
-          // mark failed
-          Effect.tapError(() =>
-            Effect.sync(() => {
-              job.state = "failed";
-            }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
-          ),
-          // mark completed
-          Effect.tap(
-            Effect.sync(() => {
-              job.state = "completed";
-            }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
-          ),
+        // mark cancelled
+        Effect.onInterrupt(() =>
+          Effect.sync(() => {
+            job.state = "cancelled";
+          }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
+        ),
+        // mark failed
+        Effect.tapError(() =>
+          Effect.sync(() => {
+            job.state = "failed";
+          }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
+        ),
+        // mark completed
+        Effect.tap(
+          Effect.sync(() => {
+            job.state = "completed";
+          }).pipe(Effect.andThen(() => broadcastJobUpdate(job))),
         ),
       ),
-      id,
-      logs,
-      name,
-      startTime,
-      state: "running",
-      ...options,
-    };
+    ),
+    id,
+    logs,
+    name,
+    startTime,
+    state: "running",
+    ...options,
+  };
 
-    jobs.new.set(id, job);
+  jobs.new.set(id, job);
 
-    // Announce the new job to connected clients.
-    yield* broadcast("jobs", {
-      data: { job: toClientJob(job) },
-      type: "newJob",
-    });
-
-    return job;
+  // Announce the new job to connected clients.
+  yield* broadcast("jobs", {
+    data: { job: toClientJob(job) },
+    type: "newJob",
   });
-}
+
+  return job;
+});

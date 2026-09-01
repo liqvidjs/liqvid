@@ -12,7 +12,7 @@ import { acquireBrowser } from "../utils/effect.mts";
 
 export type ScreenshotOptions = {
   /** Path to Chrome/ium executable */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /** Color scheme */
   colorScheme?: "light" | "dark";
@@ -65,8 +65,8 @@ export interface ScreenshotResult {
 /**
  * Capture a single screenshot from a Liqvid player.
  */
-export function screenshot(options: ScreenshotOptions) {
-  return Effect.gen(function* () {
+export const screenshot = Effect.fn("screenshot")(
+  function* (options: ScreenshotOptions) {
     const {
       browserExecutable,
       colorScheme = "light",
@@ -84,7 +84,7 @@ export function screenshot(options: ScreenshotOptions) {
 
     // Find browser executable
     const executablePath = yield* Effect.promise(() =>
-      getEnsureChrome(browserExecutable ?? ""),
+      getEnsureChrome(browserExecutable),
     );
 
     // Launch browser
@@ -130,5 +130,6 @@ export function screenshot(options: ScreenshotOptions) {
       path: output,
       width,
     };
-  }).pipe(Effect.scoped);
-}
+  },
+  (effect) => effect.pipe(Effect.scoped),
+);

@@ -1,10 +1,11 @@
+import type { AbsoluteFile } from "effect-paths";
 import puppeteer from "puppeteer-core";
 
 import { getEnsureChrome } from "../utils/binaries.mts";
 
 export interface DebugOptions {
   /** Path to Chrome/ium executable (optional, will auto-detect) */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /** URL to open */
   url: string;
@@ -20,7 +21,7 @@ export async function debug(options: DebugOptions): Promise<void> {
   const { browserExecutable, url } = options;
 
   // Find browser executable
-  const executablePath = await getEnsureChrome(browserExecutable ?? "");
+  const executablePath = await getEnsureChrome(browserExecutable);
 
   // Launch a visible browser
   const browser = await puppeteer.launch({

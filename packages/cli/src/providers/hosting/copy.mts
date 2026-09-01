@@ -178,12 +178,12 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     );
   }
 
-  #getDownloadStatus(
-    remoteFile: RemoteFileInfo,
-    localPath: AbsoluteFile,
-    remotePath: AbsoluteFile,
-  ) {
-    return Effect.gen(function* () {
+  #getDownloadStatus = Effect.fnUntraced(
+    function* (
+      remoteFile: RemoteFileInfo,
+      localPath: AbsoluteFile,
+      remotePath: AbsoluteFile,
+    ) {
       const fs = yield* FileSystem.FileSystem;
 
       const localStats = yield* fs.stat(localPath);
@@ -212,23 +212,25 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
         needsDownload: false,
         reason: "unchanged" as const,
       };
-    }).pipe(
-      Effect.catchReason("PlatformError", "NotFound", () =>
-        Effect.succeed({
-          key: remoteFile.key,
-          localPath,
-          needsDownload: true,
-          reason: "new" as const,
-        }),
+    },
+    (effect, remoteFile, localPath) =>
+      effect.pipe(
+        Effect.catchReason("PlatformError", "NotFound", () =>
+          Effect.succeed({
+            key: remoteFile.key,
+            localPath,
+            needsDownload: true,
+            reason: "new" as const,
+          }),
+        ),
       ),
-    );
-  }
+  );
 
-  downloadMedia(files: FileDownloadStatus[]) {
-    const destination = this.#getDestination("media");
-    const that = this;
+  downloadMedia = Effect.fn("downloadMedia")(
+    { self: this },
+    function* (this: CopyProvider, files: FileDownloadStatus[]) {
+      const destination = this.#getDestination("media");
 
-    return Effect.gen(function* () {
       const toDownload = files.filter((f) => f.needsDownload);
 
       if (toDownload.length === 0) {
@@ -242,14 +244,14 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
       for (const { key, localPath } of toDownload) {
         const srcPath = path.join(destination, key);
-        yield* Effect.promise(() => that.#copyFile(srcPath, localPath));
+        yield* Effect.promise(() => this.#copyFile(srcPath, localPath));
         yield* Effect.log(`  Copied: ${key}`);
       }
 
       yield* Effect.log("Copy complete.");
       return toDownload.length;
-    });
-  }
+    },
+  );
 
   getBaseUrl(): string {
     // For local copy, return a file:// URL or empty string
@@ -301,24 +303,27 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     }
   }
 
-  publishMedia(files: AbsoluteFile[], rootDir: AbsoluteDir) {
-    const destination = this.#getDestination("media");
-    const that = this;
-
-    return Effect.gen(function* () {
+  publishMedia = Effect.fn("publishMedia")(
+    { self: this },
+    function* (
+      this: CopyProvider,
+      files: AbsoluteFile[],
+      rootDir: AbsoluteDir,
+    ) {
+      const destination = this.#getDestination("media");
       if (files.length === 0) {
         yield* Effect.log("No media files to copy.");
         return;
       }
 
-      if (that.#config.clean) {
+      if (this.#config.clean) {
         yield* Effect.log(`Cleaning destination directory: ${destination}`);
-        yield* Effect.promise(() => that.#cleanDirectory(destination));
+        yield* Effect.promise(() => this.#cleanDirectory(destination));
       }
 
       yield* Effect.log(`Checking ${files.length} files...`);
 
-      const statuses = yield* that.checkFiles(files, rootDir);
+      const statuses = yield* this.checkFiles(files, rootDir);
       const toCopy = statuses.filter((s) => s.needsUpload);
 
       if (toCopy.length === 0) {
@@ -332,11 +337,11 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
       for (const { filePath, key } of toCopy) {
         const destPath = path.join(destination, key);
-        yield* Effect.promise(() => that.#copyFile(filePath, destPath));
+        yield* Effect.promise(() => this.#copyFile(filePath, destPath));
         yield* Effect.log(`  Copied: ${key}`);
       }
 
       yield* Effect.log("Copy complete.");
-    });
-  }
+    },
+  );
 }

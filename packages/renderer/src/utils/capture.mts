@@ -47,7 +47,7 @@ export async function capture({
 /**
 Capture a range of frames.
 */
-export function captureRange({
+export const captureRange = Effect.fn("captureRange")(function* ({
   count,
   filename,
   imageFormat,
@@ -62,48 +62,46 @@ export function captureRange({
   quality?: number | undefined;
   time: (i: number) => number;
 }) {
-  return Effect.gen(function* () {
-    // progress bar
-    const progress = yield* Progress;
-    const captureBar = new progress.SingleBar();
-    captureBar.start(count, 0);
+  // progress bar
+  const progress = yield* Progress;
+  const captureBar = new progress.SingleBar();
+  captureBar.start(count, 0);
 
-    // grab the thumbs
-    yield* Effect.all(
-      new Array(count).fill(null).map((_, i) =>
-        Effect.gen(function* () {
-          // get available puppeteer instance
-          const page = yield* Effect.acquireRelease(
-            Effect.promise(() => pool.acquire()),
-            (page) => Effect.sync(() => pool.release(page)),
-          );
+  // grab the thumbs
+  yield* Effect.all(
+    new Array(count).fill(null).map((_, i) =>
+      Effect.gen(function* () {
+        // get available puppeteer instance
+        const page = yield* Effect.acquireRelease(
+          Effect.promise(() => pool.acquire()),
+          (page) => Effect.sync(() => pool.release(page)),
+        );
 
-          // capture frame
+        // capture frame
+        yield* Effect.promise(() =>
+          capture({
+            page,
+            path: filename(i),
+            quality,
+            time: time(i),
+            type: imageFormat,
+          }),
+        );
+
+        captureBar.increment();
+
+        // for debugging
+        if (
           yield* Effect.promise(() =>
-            capture({
-              page,
-              path: filename(i),
-              quality,
-              time: time(i),
-              type: imageFormat,
-            }),
-          );
+            page.evaluate(() => window.__pause === true),
+          )
+        ) {
+          yield* Effect.sleep("1 minutes");
+        }
+      }).pipe(Effect.annotateLogs({ i, time: time(i) }), Effect.scoped),
+    ),
+    { concurrency: "unbounded" },
+  );
 
-          captureBar.increment();
-
-          // for debugging
-          if (
-            yield* Effect.promise(() =>
-              page.evaluate(() => window.__pause === true),
-            )
-          ) {
-            yield* Effect.sleep("1 minutes");
-          }
-        }).pipe(Effect.annotateLogs({ i, time: time(i) }), Effect.scoped),
-      ),
-      { concurrency: "unbounded" },
-    );
-
-    captureBar.stop();
-  });
-}
+  captureBar.stop();
+});

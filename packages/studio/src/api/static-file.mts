@@ -47,54 +47,54 @@ function getMimeType(filePath: string): string {
  * Serve static files from the app directory.
  * Example: /api/liqvid/static/projects/my-video/.liqvid/recordings/test/@liqvid.media/audio.webm
  */
-export function serveStaticFile(requestedPath: RelativePath) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+export const serveStaticFile = Effect.fnUntraced(function* (
+  requestedPath: RelativePath,
+) {
+  const fs = yield* FileSystem.FileSystem;
 
-    // Security: Prevent directory traversal attacks
-    const normalizedPath = path.normalize(requestedPath);
-    if (normalizedPath.includes("..")) {
-      return yield* new InvalidError({
-        message: "invalid path",
-      });
-    }
-
-    // Resolve relative to the app directory
-    const appDir = getRoutesDir();
-    const absolutePath = path.join(appDir, normalizedPath);
-
-    // Security: Ensure the resolved path is within the app directory
-    if (!absolutePath.startsWith(appDir + path.sep)) {
-      return yield* new InvalidError({
-        message: "invalid path",
-      });
-    }
-
-    // Check if file exists
-    if (!(yield* fs.exists(absolutePath))) {
-      return yield* new NotFoundError({
-        message: "file not found",
-      });
-    }
-
-    // Check if it's a file (not a directory)
-    const stat = yield* fs.stat(absolutePath);
-    if (stat.type !== "File") {
-      return yield* new InvalidError({
-        message: "not a file",
-      });
-    }
-
-    // Read and serve the file
-    const content = yield* fs.readFile(absolutePath);
-    const mimeType = getMimeType(absolutePath);
-
-    return new Response(content as BodyInit, {
-      headers: {
-        "Content-Length": String(content.length),
-        "Content-Type": mimeType,
-      },
-      status: StatusCodes.OK,
+  // Security: Prevent directory traversal attacks
+  const normalizedPath = path.normalize(requestedPath);
+  if (normalizedPath.includes("..")) {
+    return yield* new InvalidError({
+      message: "invalid path",
     });
+  }
+
+  // Resolve relative to the app directory
+  const appDir = getRoutesDir();
+  const absolutePath = path.join(appDir, normalizedPath);
+
+  // Security: Ensure the resolved path is within the app directory
+  if (!absolutePath.startsWith(appDir + path.sep)) {
+    return yield* new InvalidError({
+      message: "invalid path",
+    });
+  }
+
+  // Check if file exists
+  if (!(yield* fs.exists(absolutePath))) {
+    return yield* new NotFoundError({
+      message: "file not found",
+    });
+  }
+
+  // Check if it's a file (not a directory)
+  const stat = yield* fs.stat(absolutePath);
+  if (stat.type !== "File") {
+    return yield* new InvalidError({
+      message: "not a file",
+    });
+  }
+
+  // Read and serve the file
+  const content = yield* fs.readFile(absolutePath);
+  const mimeType = getMimeType(absolutePath);
+
+  return new Response(content as BodyInit, {
+    headers: {
+      "Content-Length": String(content.length),
+      "Content-Type": mimeType,
+    },
+    status: StatusCodes.OK,
   });
-}
+});
