@@ -2,6 +2,7 @@ import * as path from "node:path";
 
 import {
   CONFIG_FILE,
+  CONFIG_FILE_JSONC,
   loadEnvFiles,
 } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";

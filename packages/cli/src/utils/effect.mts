@@ -17,9 +17,11 @@ import {
   RelativeDir,
   RelativeFile,
 } from "effect-paths";
+import { JSONC } from "jsonc.min";
+
+import { CONFIG_FILE, CONFIG_FILE_JSONC } from "#_/tasks/conventions.mjs";
 
 import { FileDecodeError } from "../errors.mts";
-import { CONFIG_FILE } from "../tasks/conventions.mts";
 
 /**
  * Get the file-system layer appropriate to the execution environment (Node, Bun, etc.)
@@ -52,20 +54,47 @@ export function loadEnvFiles(rootDir: AbsoluteDir): EnvFiles {
 }
 
 /**
- * Load and parse liqvid.json.
+ * Resolve the config file path, checking for liqvid.jsonc first, then liqvid.json.
+ * Returns the path to the first file that exists, or the .jsonc path if neither exists
+ * (so the error message refers to the preferred format).
+ */
+export const resolveConfigPath = Effect.fn("resolveConfigPath")(function* ({
+  cwd = process.cwd(),
+}: {
+  cwd?: AbsoluteDir;
+} = {}) {
+  const fs = yield* FileSystem.FileSystem;
+  const jsoncPath = path.join(cwd, CONFIG_FILE_JSONC);
+  const jsonPath = path.join(cwd, CONFIG_FILE);
+
+  // Check for .jsonc first
+  const jsoncExists = yield* fs.exists(jsoncPath);
+  if (jsoncExists) {
+    return jsoncPath;
+  }
+
+  // Fall back to .json
+  const jsonExists = yield* fs.exists(jsonPath);
+  if (jsonExists) {
+    return jsonPath;
+  }
+
+  // Neither exists, return .jsonc path for error messaging
+  return jsoncPath;
+});
+
+/**
+ * Load and parse liqvid.jsonc or liqvid.json (checked in that order).
  */
 export function loadLiqvidConfig({
-  configPath = path.join(process.cwd(), CONFIG_FILE),
+  configPath,
 }: {
   configPath?: AbsoluteFile;
 } = {}) {
-  return (
-    loadJson(LiqvidConfig, configPath) as Effect.Effect<
-      LiqvidConfig,
-      FileDecodeError | PlatformError.PlatformError,
-      EnvFiles | FileSystem.FileSystem
-    >
-  ).pipe(
+  return Effect.gen(function* () {
+    const resolvedPath = configPath ?? (yield* resolveConfigPath());
+    return yield* loadJsonc(LiqvidConfig, resolvedPath);
+  }).pipe(
     // Correct v4 API to capture full runtime failure traces
     Effect.catchCause((cause) => {
       // Look through the flattened reasons array in Effect v4
@@ -75,9 +104,7 @@ export function loadLiqvidConfig({
         // TODO: should not have to specify this
         return Effect.fail<
           string | FileDecodeError | PlatformError.PlatformError
-        >(
-          `The ${CONFIG_FILE} configuration file is invalid:\n${Cause.pretty(cause)}`,
-        );
+        >(`The Liqvid configuration file is invalid:\n${Cause.pretty(cause)}`);
       }
 
       // Safely bubble unmatched exceptions or defects back up the stack
@@ -85,10 +112,14 @@ export function loadLiqvidConfig({
     }),
     Effect.catchReason("PlatformError", "NotFound", () =>
       Effect.fail(
-        "Liqvid config file not found. Please create a liqvid.json file in the root of your project.",
+        `Liqvid config file not found. Please create a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file in the root of your project.`,
       ),
     ),
-  );
+  ) as Effect.Effect<
+    LiqvidConfig,
+    string | FileDecodeError | PlatformError.PlatformError,
+    EnvFiles | FileSystem.FileSystem
+  >;
 }
 
 /**
@@ -99,22 +130,41 @@ export function loadLiqvidConfig({
  * (e.g. `EnvFiles`) surface those requirements to the caller instead of being
  * erased to `unknown`.
  */
-export function loadJson<S extends Schema.Top>(
+export const loadJson = Effect.fn("loadJson")(function* <S extends Schema.Top>(
   parser: S,
   filename: AbsoluteFile,
 ) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    const file = yield* fs.readFileString(filename, "utf8");
+  const file = yield* fs.readFileString(filename, "utf8");
 
-    return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
-      onExcessProperty: "ignore",
-    })(file).pipe(
-      Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
-    );
-  });
-}
+  return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
+    onExcessProperty: "ignore",
+  })(file).pipe(
+    Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
+  );
+});
+
+/**
+ * Load a file (supporting JSONC format with comments) and decode its contents
+ * with the given schema.
+ *
+ * Uses jsonc.min to strip comments before parsing.
+ */
+export const loadJsonc = Effect.fn("loadJsonc")(function* <
+  S extends Schema.Top,
+>(parser: S, filename: AbsoluteFile) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const file = yield* fs.readFileString(filename, "utf8");
+  const minified = JSONC.minify(file);
+
+  return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
+    onExcessProperty: "ignore",
+  })(minified).pipe(
+    Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
+  );
+});
 
 /**
  * Parse a .env file and return key-value pairs.
@@ -157,13 +207,14 @@ function parseEnvFile(filePath: AbsolutePath): Record<string, string> {
 }
 
 /** Write JSON data to a file, pretty-printed with 2-space indentation. */
-export function writeJSON<T>(path: AbsoluteFile, data: T) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const jsonString = JSON.stringify(data, null, 2);
-    yield* fs.writeFileString(path, jsonString);
-  });
-}
+export const writeJSON = Effect.fn("writeJSON")(function* <T>(
+  path: AbsoluteFile,
+  data: T,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const jsonString = JSON.stringify(data, null, 2);
+  yield* fs.writeFileString(path, jsonString);
+});
 
 /** go up one directory */
 export const UP = RelativeDir("..");

@@ -7,8 +7,6 @@ import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
-
-import { CONFIG_FILE } from "./conventions.mts";
 import { CopyProvider } from "#_/providers/hosting/copy.mjs";
 import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
 import { S3Provider } from "#_/providers/hosting/s3.mjs";
@@ -17,7 +15,10 @@ import type { MediaHostingProvider } from "#_/providers/types.mjs";
 import {
   loadEnvFiles,
   loadLiqvidConfig,
+  resolveConfigPath,
 } from "#_/utils/effect.mjs";
+
+import { CONFIG_FILE, CONFIG_FILE_JSONC } from "./conventions.mts";
 
 /**
  * Build project
@@ -33,17 +34,20 @@ export const build: CommandModule = {
       })
       .option("config", {
         alias: "c",
-        desc: `Path to config file (default: ${CONFIG_FILE} in cwd)`,
+        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
         normalize: true,
       }),
   command: "build",
   describe: "Build project",
   handler: async (args) => {
     const cwd = args.cwd as AbsoluteDir;
-    const configPath =
-      (args.config as AbsoluteFile) ?? path.join(cwd, CONFIG_FILE);
     await Effect.runPromise(
-      runNextBuild({ configPath, cwd }).pipe(
+      Effect.gen(function* () {
+        const configPath =
+          (args.config as AbsoluteFile | undefined) ??
+          (yield* resolveConfigPath({ cwd }));
+        yield* runNextBuild({ configPath, cwd });
+      }).pipe(
         Effect.provide(NodeFileSystem.layer),
         Effect.provideService(References.MinimumLogLevel, "Debug"),
       ),

@@ -12,9 +12,13 @@ import type {
   FileDownloadStatus,
   RemoteFileInfo,
 } from "../providers/types.mts";
-import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
+import {
+  loadEnvFiles,
+  loadLiqvidConfig,
+  resolveConfigPath,
+} from "../utils/effect.mts";
 
-import { CONFIG_FILE } from "./conventions.mts";
+import { CONFIG_FILE, CONFIG_FILE_JSONC } from "./conventions.mts";
 
 /** File extensions that are considered media files for downloading */
 const MEDIA_EXTENSIONS = new Set([
@@ -65,12 +69,12 @@ export const pull: CommandModule = {
       .option("cwd", {
         alias: "C",
         default: process.cwd(),
-        desc: "Working directory containing liqvid.json",
+        desc: "Working directory containing liqvid.jsonc or liqvid.json",
         normalize: true,
       })
       .option("config", {
         alias: "c",
-        desc: `Path to config file (default: ${CONFIG_FILE} in cwd)`,
+        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
         normalize: true,
       })
       .option("base-dir", {
@@ -92,8 +96,13 @@ export const pull: CommandModule = {
     const cwd = argv.cwd as AbsoluteDir;
     const baseDir = argv["base-dir"] as RelativeDir;
     const dryRun = argv["dry-run"] as boolean;
+
+    // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
     const configPath =
-      (argv.config as AbsoluteFile) ?? path.join(cwd, CONFIG_FILE);
+      (argv.config as AbsoluteFile | undefined) ??
+      (await Effect.runPromise(
+        resolveConfigPath({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
+      ));
 
     // The base directory is where we save media files
     // and paths are computed relative to it
@@ -173,7 +182,7 @@ async function loadConfig(configPath: AbsoluteFile): Promise<LiqvidConfig> {
     if (cause.includes("ENOENT") || cause.includes("NotFound")) {
       console.error(`Config file not found: ${configPath}`);
       console.error(
-        "\nCreate a liqvid.json file with your media hosting configuration.",
+        `\nCreate a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file with your media hosting configuration.`,
       );
       console.error("Example:\n");
       console.error(
@@ -214,7 +223,7 @@ function createProvider(config: LiqvidConfig): S3Provider {
 
   if (!mediaBackend) {
     throw new Error(
-      "No media backend configured. Please specify a media backend in your liqvid.json config file.",
+      `No media backend configured. Please specify a media backend in your ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} config file.`,
     );
   }
 

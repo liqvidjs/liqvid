@@ -1,31 +1,62 @@
-import path from "node:path";
-
-import { CONFIG_FILE, writeJSON } from "@liqvid/cli/utils";
+import { CONFIG_FILE_JSONC, resolveConfigPath } from "@liqvid/cli/utils";
 import type { Locale } from "@liqvid/schemas";
+import * as commentJson from "comment-json";
 import { Effect, FileSystem, Option, Schema } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import type { AbsoluteFile } from "effect-paths";
+import { JSONC } from "jsonc.min";
 
-import { getServerState } from "../initialize.mts";
-import { getLocale } from "../utils/i18n.mts";
+import { getServerState } from "#_/initialize.mjs";
+import { getLocale } from "#_/utils/i18n.mjs";
 
 import { SettingsConfig, WebApi } from "./contract.mts";
 
-/** Shape of the raw `liqvid.json`, with an optional `ui.locale` field. */
+/** Shape of the raw `liqvid.json(c)`, with an optional `ui.locale` field. */
 type RawConfig = {
   ui?: { locale?: Locale } & Record<string, unknown>;
 } & Record<string, unknown>;
 
 /**
- * Read the raw `liqvid.json` as an object, preserving all existing fields.
+ * Read the raw config file (`liqvid.jsonc` or `liqvid.json`) as an object,
+ * preserving all existing fields.
  *
  * We deliberately avoid decoding through the config schema here so that
  * writing the file back does not inject schema defaults into the user's config.
+ *
+ * Uses jsonc.min to strip comments for parsing.
  */
-function readRawConfig(configPath: string) {
+function readRawConfig(configPath: AbsoluteFile) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const contents = yield* fs.readFileString(configPath, "utf8");
-    return JSON.parse(contents) as RawConfig;
+    const minified = JSONC.minify(contents);
+    return JSON.parse(minified) as RawConfig;
+  });
+}
+
+/**
+ * Read the raw config file preserving comments (for write-back).
+ * Uses comment-json to parse while retaining comment structure.
+ */
+function readRawConfigWithComments(configPath: AbsoluteFile) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const contents = yield* fs.readFileString(configPath, "utf8");
+    return commentJson.parse(contents) as RawConfig;
+  });
+}
+
+/**
+ * Write raw config back to file, preserving comments if writing to .jsonc.
+ */
+function writeRawConfig(configPath: AbsoluteFile, data: RawConfig) {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const isJsonc = configPath.endsWith(CONFIG_FILE_JSONC);
+    const jsonString = isJsonc
+      ? commentJson.stringify(data, null, 2)
+      : JSON.stringify(data, null, 2);
+    yield* fs.writeFileString(configPath, jsonString);
   });
 }
 
@@ -34,7 +65,8 @@ const encodeSettings = Schema.encodeUnknownEffect(SettingsConfig);
 
 /**
  * Read the editable settings (backend, basePath, media, providers) directly
- * from `liqvid.json`. Shared between the HTTP handler and server components.
+ * from `liqvid.jsonc` or `liqvid.json`. Shared between the HTTP handler and
+ * server components.
  *
  * Requires a {@link FileSystem.FileSystem} in context (e.g. via
  * `NodeFileSystem.layer`).
@@ -42,7 +74,7 @@ const encodeSettings = Schema.encodeUnknownEffect(SettingsConfig);
 export function getSettingsConfig() {
   return Effect.gen(function* () {
     const state = getServerState();
-    const configPath = path.join(state.cwd, CONFIG_FILE);
+    const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
     const raw = yield* readRawConfig(configPath);
 
@@ -114,12 +146,12 @@ export const settingsLive = HttpApiBuilder.group(
       .handle("setLocale", ({ payload: { locale } }) =>
         Effect.gen(function* () {
           const state = getServerState();
-          const configPath = path.join(state.cwd, CONFIG_FILE);
+          const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
-          // Update the raw config on disk, preserving all other fields.
-          const raw = yield* readRawConfig(configPath);
+          // Update the raw config on disk, preserving all other fields and comments.
+          const raw = yield* readRawConfigWithComments(configPath);
           raw.ui = { ...raw.ui, locale };
-          yield* writeJSON(configPath, raw);
+          yield* writeRawConfig(configPath, raw);
 
           // Update the in-memory config so subsequent renders reflect the change
           // immediately (the config watcher will also pick this up).
@@ -140,11 +172,12 @@ export const settingsLive = HttpApiBuilder.group(
       .handle("setConfig", ({ payload }) =>
         Effect.gen(function* () {
           const state = getServerState();
-          const configPath = path.join(state.cwd, CONFIG_FILE);
+          const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
-          const raw = yield* readRawConfig(configPath);
+          // Read with comments preserved, apply settings, write back.
+          const raw = yield* readRawConfigWithComments(configPath);
           const next = applySettings(raw, payload);
-          yield* writeJSON(configPath, next);
+          yield* writeRawConfig(configPath, next);
 
           // Return the persisted (round-tripped) settings so the client can
           // reconcile its local state.

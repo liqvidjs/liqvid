@@ -3,6 +3,9 @@ import { RelativeDir, RelativeFile } from "effect-paths";
 /** Main configuration file */
 export const CONFIG_FILE = RelativeFile("liqvid.json");
 
+/** Main configuration file with comments */
+export const CONFIG_FILE_JSONC = RelativeFile("liqvid.jsonc");
+
 /** Default glob patterns for media files (matches schema defaults) */
 export const DEFAULT_MEDIA_PATTERNS = [
   // standard media files

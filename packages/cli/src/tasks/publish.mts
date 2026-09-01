@@ -25,6 +25,7 @@ import { getLogLevel } from "#_/utils/misc.mjs";
 
 import {
   CONFIG_FILE,
+  CONFIG_FILE_JSONC,
   DEFAULT_MEDIA_PATTERNS,
 } from "./conventions.mts";
 
@@ -66,13 +67,13 @@ export const publish: CommandModule<
         alias: "C",
         coerce: path.resolve,
         default: process.cwd(),
-        desc: "Working directory containing liqvid.json and media files",
+        desc: "Working directory containing liqvid.jsonc or liqvid.json and media files",
         normalize: true,
       })
       .option("config", {
         alias: "c",
         coerce: path.resolve,
-        desc: `Path to config file (default: ${CONFIG_FILE} in cwd)`,
+        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
         normalize: true,
       })
       .option("base-dir", {
@@ -107,7 +108,13 @@ export const publish: CommandModule<
     const dryRun = argv.dryRun;
     const contentFlag = argv.content;
     const mediaFlag = argv.media;
-    const configPath = argv.config ?? path.join(cwd, CONFIG_FILE);
+
+    // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
+    const configPath =
+      argv.config ??
+      (await Effect.runPromise(
+        resolveConfigPath({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
+      ));
 
     // If neither --content nor --media is specified, publish both
     const shouldPublishContent = contentFlag || (!contentFlag && !mediaFlag);
@@ -291,7 +298,7 @@ function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
   const mediaBackend = config.backend?.media;
   if (!mediaBackend) {
     throw new Error(
-      "No media backend configured. Please set `backend.media` in liqvid.json",
+      `No media backend configured. Please set \`backend.media\` in ${CONFIG_FILE_JSONC} or ${CONFIG_FILE}`,
     );
   }
 

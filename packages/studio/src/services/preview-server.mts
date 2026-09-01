@@ -2,7 +2,7 @@ import * as http from "node:http";
 import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
-import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
+import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
 import { type AbsoluteDir, RelativeDir, type RelativePath } from "effect-paths";
 import handler from "serve-handler";
@@ -29,10 +29,8 @@ export function startProductionServer(state: LiqvidServerState) {
     // Parse environment files
     const envFiles = loadEnvFiles(cwd);
 
-    // Load liqvid.json config
-    const config = yield* loadLiqvidConfig({
-      configPath: path.join(cwd, CONFIG_FILE),
-    });
+    // Load liqvid.jsonc or liqvid.json config
+    const config = yield* loadLiqvidConfig();
     const basePath = config?.basePath ?? "";
     state.basePath = basePath;
 

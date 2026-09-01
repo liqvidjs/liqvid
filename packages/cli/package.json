@@ -120,6 +120,7 @@
     "execa": "catalog:",
     "fast-glob": "catalog:",
     "handlebars": "catalog:",
+    "jsonc.min": "catalog:",
     "pluralize": "catalog:",
     "sharp": "catalog:",
     "yargs": "catalog:",
