@@ -15,10 +15,18 @@ import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
-import type { Transcript } from "../../types/schemas.mts";
-import type { Awaitable } from "../../types.mts";
-import { Button } from "../../ui/Button.tsx";
-import { DialogClose, DialogRoot, DialogTrigger } from "../../ui/Dialog.tsx";
+import { useChannel } from "#_/components/WebSocketProvider.js";
+import type { Transcript } from "#_/types/schemas.mjs";
+import type { Awaitable } from "#_/types.mjs";
+import { Button } from "#_/ui/Button.js";
+import {
+  DialogBackdrop,
+  DialogClose,
+  DialogPopup,
+  DialogPortal,
+  DialogRoot,
+  DialogTrigger,
+} from "#_/ui/Dialog.js";
 import {
   MenuItem,
   MenuPopup,
@@ -26,10 +34,9 @@ import {
   MenuPositioner,
   MenuRoot,
   MenuTrigger,
-} from "../../ui/Menu.tsx";
-import { TimeDuration } from "../../ui/Time.tsx";
-import { useAsyncTranslations } from "../../utils/react.tsx";
-import { useChannel } from "../WebSocketProvider.tsx";
+} from "#_/ui/Menu.js";
+import { TimeDuration } from "#_/ui/Time.js";
+import { useAsyncTranslations } from "#_/utils/react.js";
 
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { saveCaptions } from "./server.ts";

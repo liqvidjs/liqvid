@@ -1,5 +1,5 @@
-import { getServerState } from "../../initialize.mts";
-import { getTranslations } from "../../utils/i18n.mts";
+import { getServerState } from "#_/initialize.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { UpdateBannerClient } from "./UpdateBanner.client.tsx";
 

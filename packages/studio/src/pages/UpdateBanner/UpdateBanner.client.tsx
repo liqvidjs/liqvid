@@ -5,10 +5,10 @@ import { ArrowClockwiseIcon, XIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-import type { PackageUpdate } from "../../jobs/check-updates.mts";
-import { Button } from "../../ui/Button.tsx";
-import { IconButton } from "../../ui/IconButton.tsx";
-import { updatePackageAction } from "../root-actions.ts";
+import type { PackageUpdate } from "#_/jobs/check-updates.mjs";
+import { updatePackageAction } from "#_/pages/root-actions.js";
+import { Button } from "#_/ui/Button.js";
+import { IconButton } from "#_/ui/IconButton.js";
 
 import styles from "./UpdateBanner.module.css";
 

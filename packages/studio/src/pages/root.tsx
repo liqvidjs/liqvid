@@ -1,33 +1,31 @@
 import { serialize } from "@liqvid/ssr/serde";
+import { Option } from "effect";
 import { cookies } from "next/headers";
 
-import { WebSocketProvider } from "../components/WebSocketProvider.tsx";
+import {
+  type DerivedConfig,
+  DerivedConfigProvider,
+} from "#_/components/DerivedConfig.js";
+import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
 import {
   COLLAPSED_FOLDERS_COOKIE,
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
-} from "../cookies.ts";
-import { getServerState, initializeServer } from "../initialize.mts";
+} from "#_/cookies.js";
+import { getServerState, initializeServer } from "#_/initialize.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
 import { ProjectList } from "./ProjectList/ProjectList.tsx";
 import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
-import "../studio.css";
-import "../palette.css";
-
-import { Option } from "effect";
-
-import {
-  type DerivedConfig,
-  DerivedConfigProvider,
-} from "../components/DerivedConfig.tsx";
-import { getTranslations } from "../utils/i18n.mts";
-
 import styles from "./root.module.css";
 
 import type TranslationsJson from "./.translations/en.json";
+
+import "../studio.css";
+import "../palette.css";
 
 type T = typeof TranslationsJson;
 

@@ -7,12 +7,12 @@ import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
-import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
-import { ConflictError, NotFoundError } from "../utils/errors.mts";
-import { createJob } from "../utils/jobs.mts";
-import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
+import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
+import { ConflictError, NotFoundError } from "#_/utils/errors.mjs";
+import { createJob } from "#_/utils/jobs.mjs";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   ensureParamsMarker,
   extractParameterNames,

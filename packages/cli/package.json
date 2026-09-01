@@ -13,6 +13,20 @@
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "sideEffects": false,
+  "imports": {
+    "#_/*.js": {
+      "@liqvid/dev": [
+        "./src/*.mts",
+        "./src/*.ts",
+        "./src/*.tsx"
+      ],
+      "import": "./src/*"
+    },
+    "#_/*.mjs": {
+      "default": "./src/*.mts",
+      "import": "./src/*"
+    }
+  },
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",

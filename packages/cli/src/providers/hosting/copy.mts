@@ -10,7 +10,8 @@ import {
   type RelativeFile,
 } from "effect-paths";
 
-import { expandTilde } from "../../utils/paths.mts";
+import { expandTilde } from "#_/utils/paths.mjs";
+
 import type {
   FileDownloadStatus,
   HostingProvider,

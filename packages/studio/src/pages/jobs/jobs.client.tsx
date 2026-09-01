@@ -20,13 +20,13 @@ import type {
   ServiceClientEncoded,
   StructuredLog,
   StructuredLogType,
-} from "../../api/schemas.mts";
-import { useChannel } from "../../components/WebSocketProvider.tsx";
-import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "../../cookies.ts";
-import { Button } from "../../ui/Button.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
-import { Time, TimeDuration } from "../../ui/Time.tsx";
-import { ToggleButton } from "../../ui/ToggleButton.tsx";
+} from "#_/api/schemas.mjs";
+import { useChannel } from "#_/components/WebSocketProvider.js";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
+import { Button } from "#_/ui/Button.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
+import { Time, TimeDuration } from "#_/ui/Time.js";
+import { ToggleButton } from "#_/ui/ToggleButton.js";
 
 import styles from "./jobs.module.css";
 

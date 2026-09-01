@@ -2,13 +2,13 @@
 
 import { Fragment } from "react";
 
-import { Button } from "../../ui/Button.tsx";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogClose,
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "../../ui/Dialog.tsx";
+} from "#_/ui/Dialog.js";
 
 import {
   defaultShortcuts,

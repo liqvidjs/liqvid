@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 import { Option } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
 
-import { TRANSLATIONS_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
+import { TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
 
 import type CommonTranslationsJson from "../.translations/en.json";
 

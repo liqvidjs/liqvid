@@ -1,4 +1,4 @@
-import { getTranslations } from "../../utils/i18n.mts";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import {
   ProjectListClient,

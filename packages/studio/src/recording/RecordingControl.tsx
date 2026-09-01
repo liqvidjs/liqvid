@@ -11,10 +11,10 @@ import {
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef } from "react";
 
-import { saveRecording } from "../client.mts";
-import { DockableDialog } from "../ui/DockableDialog.tsx";
+import { saveRecording } from "#_/client.mjs";
+import { DockableDialog } from "#_/ui/DockableDialog.js";
 
-import { RecordingDialog } from "./RecordingDialog.tsx";
+import { RecordingDialog } from "./RecordingDialog/RecordingDialog.tsx";
 
 export interface RecordingControlProps {
   shortcuts?: {

@@ -8,18 +8,25 @@ import fg from "fast-glob";
 import pluralize from "pluralize";
 import type { CommandModule } from "yargs";
 
-import { CopyProvider } from "../providers/hosting/copy.mts";
-import { LiqvidStudioProvider } from "../providers/hosting/liqvid-studio.mts";
-import { S3Provider } from "../providers/hosting/s3.mts";
-import { SFTPProvider } from "../providers/hosting/sftp.mts";
+import { CopyProvider } from "#_/providers/hosting/copy.mjs";
+import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
+import { S3Provider } from "#_/providers/hosting/s3.mjs";
+import { SFTPProvider } from "#_/providers/hosting/sftp.mjs";
 import type {
   HostingProvider,
   MediaHostingProvider,
-} from "../providers/types.mts";
-import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
-import { getLogLevel } from "../utils/misc.mts";
+} from "#_/providers/types.mjs";
+import {
+  loadEnvFiles,
+  loadLiqvidConfig,
+  resolveConfigPath,
+} from "#_/utils/effect.mjs";
+import { getLogLevel } from "#_/utils/misc.mjs";
 
-import { CONFIG_FILE, DEFAULT_MEDIA_PATTERNS } from "./conventions.mts";
+import {
+  CONFIG_FILE,
+  DEFAULT_MEDIA_PATTERNS,
+} from "./conventions.mts";
 
 export type PublishOptions = {
   /** Base directory containing media files (relative to cwd). Defaults to "app". */

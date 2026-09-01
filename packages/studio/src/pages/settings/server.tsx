@@ -2,8 +2,8 @@ import { NodeFileSystem } from "@effect/platform-node";
 import type { Locale } from "@liqvid/schemas";
 import { Effect } from "effect";
 
-import { getSettingsConfig } from "../../api/settings.mts";
-import { getLocale, getTranslations } from "../../utils/i18n.mts";
+import { getSettingsConfig } from "#_/api/settings.mjs";
+import { getLocale, getTranslations } from "#_/utils/i18n.mjs";
 
 import { SettingsClient } from "./client.tsx";
 

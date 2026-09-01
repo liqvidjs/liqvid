@@ -11,8 +11,8 @@ import {
   RelativeFile,
 } from "effect-paths";
 
-import { TRANSLATIONS_DIR } from "../conventions.mts";
-import { DEFAULT_LOCALE } from "../utils/i18n.mts";
+import { TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import { DEFAULT_LOCALE } from "#_/utils/i18n.mjs";
 
 /** Directories that never contain source translations worth checking. */
 const IGNORED_DIRS = new Set<string>([

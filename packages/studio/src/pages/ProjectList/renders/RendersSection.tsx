@@ -21,9 +21,10 @@ import {
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { RenderEntry } from "../../../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { Button } from "../../../ui/Button.tsx";
+import type { RenderEntry } from "#_/api/schemas.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { openRenderInFinderAction } from "#_/pages/root-actions.js";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
   DialogClose,
@@ -33,13 +34,9 @@ import {
   DialogTitle,
   DialogTrigger,
   useDialogApi,
-} from "../../../ui/Dialog.tsx";
-import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
-import {
-  useCommonTranslations,
-  useTranslations,
-} from "../../../utils/react.tsx";
-import { openRenderInFinderAction } from "../../root-actions.ts";
+} from "#_/ui/Dialog.js";
+import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
+import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import rootStyles from "../../root.module.css";
 import shareStyles from "../share.module.css";

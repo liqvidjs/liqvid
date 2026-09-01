@@ -1,6 +1,4 @@
-import { Collapsible } from "@base-ui/react/collapsible";
 import { usePersist, usePersistentState } from "@liqvid/hydration";
-import { Keymap } from "@liqvid/keymap";
 import { useRecordingApi } from "@liqvid/recording";
 import type { RecordingMeta } from "@liqvid/schemas";
 import {
@@ -8,36 +6,27 @@ import {
   usePluginApi,
   useProjectParams,
 } from "@liqvid/studio-plugin-api";
-import { compare, isMac, useToggle } from "@liqvid/utils";
-import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import { compare } from "@liqvid/utils";
 import clsx from "clsx";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
-import { useChannel } from "../components/WebSocketProvider.tsx";
-import { useStudioPrivateApi } from "../LiqvidDevToolsProvider.tsx";
-import { Button } from "../ui/Button.tsx";
-import { DockableDialog } from "../ui/DockableDialog.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs.tsx";
-import { TimeDuration } from "../ui/Time.tsx";
-import { useAsyncTranslations } from "../utils/react.tsx";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { useStudioPrivateApi } from "#_/components/LiqvidDevToolsProvider.js";
+import { useChannel } from "#_/components/WebSocketProvider.js";
+import { DockableDialog } from "#_/ui/DockableDialog.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
+import { useAsyncTranslations } from "#_/utils/react.js";
 
-import type { RecordingControlProps } from "./RecordingControl.tsx";
+import type { RecordingControlProps } from "../RecordingControl.tsx";
+
+import { RecordingRow } from "./RecordingRow.tsx";
+import { ShortcutsTable } from "./ShortcutsTable.tsx";
 
 import styles from "./RecordingDialog.module.css";
 
-import Translations from "./.translations/en.json";
-
-type T = typeof Translations;
+import Translations from "../.translations/en.json";
 
 export interface RecordingDialogProps {
   onShortcutChange?: (
@@ -282,193 +271,6 @@ export function RecordingDialog({
   );
 }
 
-export function RecordingRow({
-  projectParams,
-  projectPath,
-  recording: r,
-}: {
-  projectParams: Record<string, string>;
-  projectPath: RelativeDir;
-  recording: RecordingMeta;
-}) {
-  const { value: expanded, set: setExpanded } = useToggle();
-  const [isReprocessing, setIsReprocessing] = useState(false);
-
-  const { plugins } = usePluginApi();
-
-  const handleReprocess = useCallback(() => {
-    setIsReprocessing(true);
-    clientRuntime
-      .runPromise(
-        Effect.gen(function* () {
-          const client = yield* LiqvidStudioApiClient;
-
-          yield* client.recordings.reprocess({
-            payload: { recordingName: r.name },
-            query: {
-              params:
-                Object.keys(projectParams).length > 0
-                  ? JSON.stringify(projectParams)
-                  : undefined,
-              projectPath,
-            },
-          });
-        }),
-      )
-      .finally(() => {
-        setIsReprocessing(false);
-      });
-  }, [projectParams, projectPath, r.name]);
-
-  return (
-    <Collapsible.Root
-      className={styles.RecordingRow}
-      onOpenChange={setExpanded}
-      open={expanded}
-    >
-      <Collapsible.Trigger className={styles.RecordingRowTrigger}>
-        <span className={styles.recordingName}>{r.name}</span>
-        <span className={styles.pluginIcons}>
-          {r.plugins.map((p) =>
-            Object.hasOwn(plugins, p) ? (
-              <Fragment key={p}>{plugins[p]!.icon()}</Fragment>
-            ) : null,
-          )}
-        </span>
-        {/* <time style={{ fontSize: "12px" }}> */}
-        {/*   {new Intl.DateTimeFormat("en-US").format(new Date(r.created))} */}
-        {/* </time> */}
-        {/**/}
-        <TimeDuration className={styles.recordingDuration} value={r.duration} />
-      </Collapsible.Trigger>
-      <Collapsible.Panel className={styles.RecordingRowExpand}>
-        <div className={styles.recordingActions}>
-          <Button
-            className={styles.reprocessButton}
-            disabled={isReprocessing}
-            onClick={handleReprocess}
-            title="Re-run post-processing plugins"
-          >
-            <ArrowsClockwiseIcon
-              className={isReprocessing ? styles.spinning : undefined}
-              size={16}
-            />
-            {isReprocessing ? "Reprocessing..." : "Reprocess"}
-          </Button>
-        </div>
-        {r.plugins.map((p) => {
-          const plugin = plugins[p];
-
-          if (!plugin) return null;
-
-          const Component = plugin.recordingComponent;
-          if (!Component) return null;
-
-          return <Component key={plugin.package} name={r.name} />;
-        })}
-      </Collapsible.Panel>
-    </Collapsible.Root>
-  );
-}
-
-type ShortcutKey = keyof NonNullable<RecordingControlProps["shortcuts"]>;
-
-const shortcutCommands: [string, ShortcutKey][] = [
-  ["Toggle panel", "toggle"],
-  ["Start/Stop recording", "startStop"],
-  ["Pause recording", "pause"],
-  ["Discard recording", "discard"],
-];
-
-function ShortcutsTable({
-  shortcuts,
-  onShortcutChange,
-  t,
-}: {
-  shortcuts?: RecordingControlProps["shortcuts"];
-  onShortcutChange?: (key: ShortcutKey, value: string) => void;
-  t: T["tabs"]["shortcuts"];
-}) {
-  return (
-    <table className={styles.shortcutsTable}>
-      <thead>
-        <tr>
-          <th>{t.command}</th>
-          <th>{t.shortcut}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {shortcutCommands.map(([label, key]) => (
-          <ShortcutRow
-            key={key}
-            label={label}
-            onChange={
-              onShortcutChange
-                ? (value) => onShortcutChange(key, value)
-                : undefined
-            }
-            shortcut={shortcuts?.[key]}
-          />
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function ShortcutRow({
-  label,
-  shortcut,
-  onChange,
-}: {
-  label: string;
-  shortcut?: string;
-  onChange?: (value: string) => void;
-}) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [localValue, setLocalValue] = useState<string | undefined>(undefined);
-
-  const displayValue = localValue ?? shortcut;
-
-  const identifyKey = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      e.preventDefault();
-
-      const seq = Keymap.identify(e as unknown as KeyboardEvent);
-      setLocalValue(seq);
-      onChange?.(seq);
-      setIsRecording(false);
-    },
-    [onChange],
-  );
-
-  const handleFocus = useCallback(() => {
-    setIsRecording(true);
-  }, []);
-
-  const handleBlur = useCallback(() => {
-    setIsRecording(false);
-  }, []);
-
-  return (
-    <tr>
-      <td>{label}</td>
-      <td>
-        <input
-          className={styles.shortcutInput}
-          data-recording={isRecording || undefined}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          onKeyDown={identifyKey}
-          placeholder={isRecording ? "Press a key..." : "Click to record"}
-          readOnly
-          type="text"
-          value={displayValue ? fmtSeq(displayValue) : ""}
-        />
-      </td>
-    </tr>
-  );
-}
-
 /**
  * Insert or replace a recording (keyed by `name`), keeping the list sorted by
  * creation time to match the server's `list` ordering.
@@ -481,20 +283,4 @@ function upsertRecording(
   next.push(recording);
   next.sort((a, b) => compare(a.created, b.created));
   return next;
-}
-
-/** Format key sequences with special characters on Mac */
-function fmtSeq(str: string) {
-  if (!isMac) return str;
-  if (str === undefined) return str;
-  return str
-    .split("+")
-    .map((k) => {
-      if (k === "Ctrl") return "^";
-      else if (k === "Alt") return "\u2325";
-      if (k === "Shift") return "\u21E7";
-      if (k === "Meta") return "\u2318";
-      return k;
-    })
-    .join("");
 }

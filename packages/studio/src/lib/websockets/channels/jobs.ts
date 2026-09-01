@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 
-import { LoggableJobClient, StructuredLog } from "../../../api/schemas.mts";
+import { LoggableJobClient, StructuredLog } from "#_/api/schemas.mjs";
 
 /** Message sent when a job is deleted */
 export const DeleteJobMessage = Schema.Struct({

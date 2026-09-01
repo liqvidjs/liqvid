@@ -6,13 +6,13 @@ import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
-import type { ThumbsData } from "../../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
-import { ASSETS_DIR, THUMBS_DIR } from "../../conventions.mts";
-import { Button } from "../../ui/Button.tsx";
-import { useDialogApi } from "../../ui/Dialog.tsx";
-import { TimeDuration } from "../../ui/Time.tsx";
-import { useCommonTranslations, useTranslations } from "../../utils/react.tsx";
+import type { ThumbsData } from "#_/api/schemas.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
+import { Button } from "#_/ui/Button.js";
+import { useDialogApi } from "#_/ui/Dialog.js";
+import { TimeDuration } from "#_/ui/Time.js";
+import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import shareStyles from "./share.module.css";
 

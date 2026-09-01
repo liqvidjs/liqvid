@@ -11,6 +11,7 @@ import {
   useProjectPath,
 } from "@liqvid/studio-plugin-api";
 import { Effect } from "effect";
+import type { RelativeDir } from "effect-paths";
 import {
   createContext,
   useCallback,
@@ -20,14 +21,14 @@ import {
   useState,
 } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "./client.mts";
-import type { ToastPropsWithTime } from "./ui/Toast.tsx";
-import { Toaster } from "./ui/Toaster.tsx";
-import "./palette.css";
+import type { ToastPropsWithTime } from "#_/ui/Toast.js";
+import { Toaster } from "#_/ui/Toaster.js";
 
-import type { RelativeDir } from "effect-paths";
+import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 
-import { WebSocketProvider } from "./components/WebSocketProvider.tsx";
+import { WebSocketProvider } from "./WebSocketProvider.tsx";
+
+import "../palette.css";
 
 export interface StudioPrivateContextShape {
   instances: Record<string, Set<unknown>>;

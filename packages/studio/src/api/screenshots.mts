@@ -14,19 +14,19 @@ import {
   SCREENSHOT_FILE_LIGHT,
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
-} from "../conventions.mts";
-import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
+} from "#_/conventions.mjs";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
 import {
   ConflictError,
   InvalidError,
   NotFoundError,
-} from "../utils/errors.mts";
-import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
+} from "#_/utils/errors.mjs";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "../utils/parameters.mts";
+} from "#_/utils/parameters.mjs";
 
 import { WebApi } from "./contract.mts";
 

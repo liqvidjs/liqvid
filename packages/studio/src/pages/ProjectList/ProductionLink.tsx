@@ -2,7 +2,7 @@
 
 import { EyeIcon } from "@phosphor-icons/react";
 
-import { useTranslations } from "../../utils/react.tsx";
+import { useTranslations } from "#_/utils/react.js";
 
 import styles from "./share.module.css";
 

@@ -5,9 +5,9 @@ import { Effect, FileSystem } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import type { AbsoluteDir } from "effect-paths";
 
-import { PROJECT_META_FILE } from "../conventions.mts";
-import { getRoutesDir } from "../utils/misc.mts";
-import { getParameterizedAssetsDir } from "../utils/parameters.mts";
+import { PROJECT_META_FILE } from "#_/conventions.mjs";
+import { getRoutesDir } from "#_/utils/misc.mjs";
+import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
 
 import { WebApi } from "./contract.mts";
 

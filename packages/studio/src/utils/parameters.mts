@@ -3,8 +3,8 @@ import path from "node:path";
 import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
-import { ASSETS_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
+import { ASSETS_DIR } from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
 
 import { readDirWithFileTypes } from "./effect.mts";
 

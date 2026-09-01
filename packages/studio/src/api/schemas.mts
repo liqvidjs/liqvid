@@ -2,7 +2,7 @@ import { ThumbnailsJob } from "@liqvid/schemas";
 import type { JSONValue } from "@liqvid/ssr/serde";
 import { type Fiber, Schema, SchemaTransformation } from "effect";
 
-import { CaptionsMeta } from "../types/schemas.mts";
+import { CaptionsMeta } from "#_/types/schemas.mjs";
 
 export const SerializedDate = Schema.Struct({
   __deser: Schema.Literal("Date"),

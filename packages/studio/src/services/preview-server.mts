@@ -7,9 +7,9 @@ import { Effect, FileSystem } from "effect";
 import { type AbsoluteDir, RelativeDir, type RelativePath } from "effect-paths";
 import handler from "serve-handler";
 
-import { BUILD_DIR, PREVIEW_DIR, ROOT_HIDDEN_DIR } from "../conventions.mts";
-import { getServerState, type LiqvidServerState } from "../initialize.mts";
-import { readDirWithFileTypes } from "../utils/effect.mts";
+import { BUILD_DIR, PREVIEW_DIR, ROOT_HIDDEN_DIR } from "#_/conventions.mjs";
+import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 
 export const DEFAULT_PRODUCTION_SERVER_PORT = 4000;
 

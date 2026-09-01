@@ -19,9 +19,9 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../../ui/Dialog.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/Tabs.tsx";
-import { useTranslations } from "../../utils/react.tsx";
+} from "#_/ui/Dialog.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { getDefaultParams, ParameterSelector } from "./ParameterSelector.tsx";

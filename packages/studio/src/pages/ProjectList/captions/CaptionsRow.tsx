@@ -10,12 +10,12 @@ import {
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import type { AudioEntry } from "../../../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
-import { AUDIO_WAV } from "../../../conventions.mts";
-import { Button } from "../../../ui/Button.tsx";
-import { Time, TimeDuration } from "../../../ui/Time.tsx";
+import type { AudioEntry } from "#_/api/schemas.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { useDerivedConfig } from "#_/components/DerivedConfig.js";
+import { AUDIO_WAV } from "#_/conventions.mjs";
+import { Button } from "#_/ui/Button.js";
+import { Time, TimeDuration } from "#_/ui/Time.js";
 
 import shareStyles from "../share.module.css";
 

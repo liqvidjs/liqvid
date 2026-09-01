@@ -11,12 +11,12 @@ import {
   CAPTIONS_FILE,
   CAPTIONS_META,
   RICH_TRANSCRIPT,
-} from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
-import type { CaptionsMeta } from "../types/schemas.mts";
-import { NotFoundError } from "../utils/errors.mts";
-import { createJob } from "../utils/jobs.mts";
-import { getConfig } from "../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
+import type { CaptionsMeta } from "#_/types/schemas.mjs";
+import { NotFoundError } from "#_/utils/errors.mjs";
+import { createJob } from "#_/utils/jobs.mjs";
+import { getConfig } from "#_/utils/misc.mjs";
 
 import { getAudioDir } from "./audio.mts";
 import { WebApi } from "./contract.mts";

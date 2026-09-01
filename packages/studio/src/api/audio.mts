@@ -13,17 +13,17 @@ import {
   CAPTIONS_FILE,
   CAPTIONS_META,
   RICH_TRANSCRIPT,
-} from "../conventions.mts";
-import { CaptionsMeta } from "../types/schemas.mts";
-import { existenceOptional, readDirWithFileTypes } from "../utils/effect.mts";
+} from "#_/conventions.mjs";
+import { CaptionsMeta } from "#_/types/schemas.mjs";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
 import {
   ConflictError,
   InvalidError,
   NotFoundError,
-} from "../utils/errors.mts";
-import { createJob } from "../utils/jobs.mts";
-import { getConfig, getRenderUrl, getRoutesDir } from "../utils/misc.mts";
-import { getParameterizedAssetsDir } from "../utils/parameters.mts";
+} from "#_/utils/errors.mjs";
+import { createJob } from "#_/utils/jobs.mjs";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
+import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
 
 import { WebApi } from "./contract.mts";
 import { type AudioEntry, AudioMeta } from "./schemas.mts";

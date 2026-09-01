@@ -9,9 +9,9 @@ import {
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import type { SettingsConfig } from "../../api/contract.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
-import { Button } from "../../ui/Button.tsx";
+import type { SettingsConfig } from "#_/api/contract.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Button } from "#_/ui/Button.js";
 import {
   SelectIcon,
   SelectItem,
@@ -23,7 +23,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "../../ui/Select.tsx";
+} from "#_/ui/Select.js";
 
 import styles from "./settings.module.css";
 

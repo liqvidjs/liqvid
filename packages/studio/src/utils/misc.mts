@@ -7,8 +7,8 @@ import { Effect, type LogLevel, Option } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { headers } from "next/headers";
 
-import { NEXT_APP_DIR } from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
+import { NEXT_APP_DIR } from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
 
 /** Pending debounced calls to generateProjectTypes, keyed by assetsDir */
 const pendingCalls = new Map<string, NodeJS.Timeout>();

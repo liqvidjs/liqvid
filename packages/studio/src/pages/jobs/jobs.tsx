@@ -3,12 +3,12 @@ import { pick } from "@liqvid/utils";
 import { Effect, Fiber } from "effect";
 import { cookies } from "next/headers";
 
-import type { LoggableJobClient, ServiceClient } from "../../api/schemas.mts";
-import { WebSocketProvider } from "../../components/WebSocketProvider.tsx";
-import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "../../cookies.ts";
-import { getServerState, initializeServer } from "../../initialize.mts";
-import { broadcast } from "../../next/websockets.mts";
-import { getTranslations } from "../../utils/i18n.mts";
+import type { LoggableJobClient, ServiceClient } from "#_/api/schemas.mjs";
+import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
+import { getServerState, initializeServer } from "#_/initialize.mjs";
+import { broadcast } from "#_/next/websockets.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
 

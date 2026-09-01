@@ -7,14 +7,17 @@ import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 import type { CommandModule } from "yargs";
 
-import { CopyProvider } from "../providers/hosting/copy.mts";
-import { LiqvidStudioProvider } from "../providers/hosting/liqvid-studio.mts";
-import { S3Provider } from "../providers/hosting/s3.mts";
-import { SFTPProvider } from "../providers/hosting/sftp.mts";
-import type { MediaHostingProvider } from "../providers/types.mts";
-import { loadEnvFiles, loadLiqvidConfig } from "../utils/effect.mts";
 
 import { CONFIG_FILE } from "./conventions.mts";
+import { CopyProvider } from "#_/providers/hosting/copy.mjs";
+import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
+import { S3Provider } from "#_/providers/hosting/s3.mjs";
+import { SFTPProvider } from "#_/providers/hosting/sftp.mjs";
+import type { MediaHostingProvider } from "#_/providers/types.mjs";
+import {
+  loadEnvFiles,
+  loadLiqvidConfig,
+} from "#_/utils/effect.mjs";
 
 /**
  * Build project

@@ -2,7 +2,7 @@ import { CONFIG_FILE, loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
 import { Effect, FileSystem, Option, Stream } from "effect";
 
-import { getServerState, type LiqvidServerState } from "../initialize.mts";
+import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
 
 /**
  * Reload the config into `state.config`, logging the reason.

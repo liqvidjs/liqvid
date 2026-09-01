@@ -2,7 +2,8 @@ import type { ProviderConfigSFTP } from "@liqvid/schemas";
 import { Effect } from "effect";
 import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 
-import { rsyncRemoteDirectory } from "../../utils/rsync.mts";
+import { rsyncRemoteDirectory } from "#_/utils/rsync.mjs";
+
 import type {
   FileDownloadStatus,
   FileUploadStatus,

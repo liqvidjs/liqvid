@@ -27,14 +27,14 @@ import {
   RECORDING_RAW_BLOB,
   RECORDING_RAW_FILE,
   RECORDINGS_DIR,
-} from "../conventions.mts";
-import { readDirWithFileTypes } from "../utils/effect.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
+import { getRoutesDir } from "#_/utils/misc.mjs";
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "../utils/parameters.mts";
+} from "#_/utils/parameters.mjs";
 
 import { WebApi } from "./contract.mts";
 import {

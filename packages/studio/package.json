@@ -15,6 +15,20 @@
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "sideEffects": false,
   "type": "module",
+  "imports": {
+    "#_/*.js": {
+      "@liqvid/dev": [
+        "./src/*.ts",
+        "./src/*.tsx"
+      ],
+      "import": "./src/*"
+    },
+    "#_/*.json": "./src/*.json",
+    "#_/*.mjs": {
+      "default": "./src/*.mts",
+      "import": "./src/*"
+    }
+  },
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",

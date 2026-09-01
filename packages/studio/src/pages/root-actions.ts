@@ -27,11 +27,11 @@ import {
   SCREENSHOTS_DIR,
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
-} from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
-import { readDirWithFileTypes } from "../utils/effect.mts";
-import { createJob } from "../utils/jobs.mts";
-import { getRoutesDir } from "../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
+import { createJob } from "#_/utils/jobs.mjs";
+import { getRoutesDir } from "#_/utils/misc.mjs";
 
 export interface RebuildActionResult {
   /** ID of the created job, so the client can link to it. */

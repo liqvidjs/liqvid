@@ -5,14 +5,14 @@ import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { SpinnerGapIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useChannel } from "../../components/WebSocketProvider.tsx";
-import { ButtonWithDropdown } from "../../ui/ButtonWithDropdown.tsx";
+import { useChannel } from "#_/components/WebSocketProvider.js";
 import {
   publishAction,
   publishContentAction,
   publishMediaAction,
   rebuildAction,
-} from "../root-actions.ts";
+} from "#_/pages/root-actions.js";
+import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
 
 import styles from "./RebuildButton.module.css";
 

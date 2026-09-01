@@ -14,18 +14,18 @@ import {
 import { Effect } from "effect";
 import { useEffect, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { useDerivedConfig } from "../../../components/DerivedConfig.tsx";
-import { Button } from "../../../ui/Button.tsx";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { useDerivedConfig } from "#_/components/DerivedConfig.js";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
   DialogClose,
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "../../../ui/Dialog.tsx";
-import { RadioTabs, RadioTabsItem } from "../../../ui/RadioTabs.tsx";
-import { useTranslations } from "../../../utils/react.tsx";
+} from "#_/ui/Dialog.js";
+import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import styles from "../../root.module.css";
 import shareStyles from "../share.module.css";

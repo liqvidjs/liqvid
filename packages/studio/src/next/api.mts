@@ -20,23 +20,23 @@ import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
 import { RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { audioLive } from "../api/audio.mts";
-import { captionsLive } from "../api/captions.mts";
-import { WebApi } from "../api/contract.mts";
-import { projectMetaLive } from "../api/project-meta.mts";
+import { audioLive } from "#_/api/audio.mjs";
+import { captionsLive } from "#_/api/captions.mjs";
+import { WebApi } from "#_/api/contract.mjs";
+import { projectMetaLive } from "#_/api/project-meta.mjs";
 import {
   DynamicImports,
   type DynamicImports as DynamicImportsType,
   recordingsLive,
-} from "../api/recording.mts";
-import { rendersLive } from "../api/renders.mts";
-import { getRoot } from "../api/root.mts";
-import { screenshotsLive } from "../api/screenshots.mts";
-import { settingsLive } from "../api/settings.mts";
-import { serveStaticFile } from "../api/static-file.mts";
-import { thumbsLive } from "../api/thumbs.mts";
-import { getServerState, initializeServer } from "../initialize.mts";
-import { getLogLevel } from "../utils/misc.mts";
+} from "#_/api/recording.mjs";
+import { rendersLive } from "#_/api/renders.mjs";
+import { getRoot } from "#_/api/root.mjs";
+import { screenshotsLive } from "#_/api/screenshots.mjs";
+import { settingsLive } from "#_/api/settings.mjs";
+import { serveStaticFile } from "#_/api/static-file.mjs";
+import { thumbsLive } from "#_/api/thumbs.mjs";
+import { getServerState, initializeServer } from "#_/initialize.mjs";
+import { getLogLevel } from "#_/utils/misc.mjs";
 
 interface RequestContext {
   params: Promise<{

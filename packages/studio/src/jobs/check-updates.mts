@@ -5,7 +5,7 @@ import { Effect, FileSystem, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient } from "effect/unstable/http";
 import { RelativeFile } from "effect-paths";
 
-import { getServerState } from "../initialize.mts";
+import { getServerState } from "#_/initialize.mjs";
 
 /** Packages we check for updates. */
 const TRACKED_PACKAGES = ["liqvid", "@liqvid/studio"] as const;

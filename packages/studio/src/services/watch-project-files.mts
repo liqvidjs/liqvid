@@ -31,7 +31,7 @@ import {
   type RelativePath,
 } from "effect-paths";
 
-import { loadRecordingMeta } from "../api/recording.mts";
+import { loadRecordingMeta } from "#_/api/recording.mjs";
 import {
   ASSETS_DIR,
   NEXT_PAGE,
@@ -40,16 +40,16 @@ import {
   PROJECT_PATH,
   RECORDING_META_FILE,
   RECORDINGS_DIR,
-} from "../conventions.mts";
-import { broadcast } from "../next/websockets.mts";
-import { existenceOptional } from "../utils/effect.mts";
-import { walkDir } from "../utils/fs.mts";
-import { getLogLevel, getRoutesDir } from "../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { broadcast } from "#_/next/websockets.mjs";
+import { existenceOptional } from "#_/utils/effect.mjs";
+import { walkDir } from "#_/utils/fs.mjs";
+import { getLogLevel, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   extractParameterNames,
   getDefaultParameterValues,
   getProjectParameterValues,
-} from "../utils/parameters.mts";
+} from "#_/utils/parameters.mjs";
 
 type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 

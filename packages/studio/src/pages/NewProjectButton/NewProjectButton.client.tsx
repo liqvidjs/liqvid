@@ -4,7 +4,12 @@ import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
-import { Button } from "../../ui/Button.tsx";
+import {
+  createProjectAction,
+  loadTemplatesAction,
+  type TemplateInfo,
+} from "#_/pages/root-actions.js";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
   DialogClose,
@@ -13,8 +18,8 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../../ui/Dialog.tsx";
-import { IconButton } from "../../ui/IconButton.tsx";
+} from "#_/ui/Dialog.js";
+import { IconButton } from "#_/ui/IconButton.js";
 import {
   SelectIcon,
   SelectItem,
@@ -27,12 +32,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "../../ui/Select.tsx";
-import {
-  createProjectAction,
-  loadTemplatesAction,
-  type TemplateInfo,
-} from "../root-actions.ts";
+} from "#_/ui/Select.js";
 
 import styles from "../root.module.css";
 

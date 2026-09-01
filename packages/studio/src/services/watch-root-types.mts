@@ -1,6 +1,9 @@
 import * as path from "node:path";
 
-import { CONFIG_FILE, loadEnvFiles } from "@liqvid/cli/utils";
+import {
+  CONFIG_FILE,
+  loadEnvFiles,
+} from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
 import {
   Cause,
@@ -13,10 +16,10 @@ import {
 } from "effect";
 import { RelativeFile } from "effect-paths";
 
-import { ROOT_HIDDEN_DIR, TYPES_AUTOGEN } from "../conventions.mts";
-import { getServerState, type LiqvidServerState } from "../initialize.mts";
-import { getBiomePath } from "../utils/fs.mts";
-import { getLogLevel } from "../utils/misc.mts";
+import { ROOT_HIDDEN_DIR, TYPES_AUTOGEN } from "#_/conventions.mjs";
+import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
+import { getBiomePath } from "#_/utils/fs.mjs";
+import { getLogLevel } from "#_/utils/misc.mjs";
 
 import { runTemplate } from "./watch-assets.mts";
 

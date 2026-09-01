@@ -18,10 +18,10 @@ import type { RelativeDir } from "effect-paths";
 import { useId, useState } from "react";
 import Cookies from "universal-cookie";
 
-import { useChannel } from "../../components/WebSocketProvider.tsx";
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "../../cookies.ts";
-import { TimeDuration } from "../../ui/Time.tsx";
-import { TranslationProvider } from "../../utils/react.tsx";
+import { useChannel } from "#_/components/WebSocketProvider.js";
+import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
+import { TimeDuration } from "#_/ui/Time.js";
+import { TranslationProvider } from "#_/utils/react.js";
 
 import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog.tsx";

@@ -13,11 +13,11 @@ import { type AnyDir, type AnyFile, RelativeFile } from "effect-paths";
 import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
 import type { CommandModule } from "yargs";
 
-import { CAPTIONS_FILE, RICH_TRANSCRIPT } from "../conventions.mts";
-import { writeJSON } from "../utils/effect.mts";
-import { expandTilde } from "../utils/paths.mts";
-import { defaultCliProgressLayer } from "../utils/progress.mts";
-import { Progress } from "../utils.mts";
+import { CAPTIONS_FILE, RICH_TRANSCRIPT } from "#_/conventions.mjs";
+import { writeJSON } from "#_/utils/effect.mjs";
+import { expandTilde } from "#_/utils/paths.mjs";
+import { defaultCliProgressLayer } from "#_/utils/progress.mjs";
+import { Progress } from "#_/utils.mjs";
 
 import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
 

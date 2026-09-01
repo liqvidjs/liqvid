@@ -12,13 +12,13 @@ import { Socket } from "effect/unstable/socket";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
 
-import { getServerState } from "../initialize.mts";
+import { getServerState } from "#_/initialize.mjs";
 import {
   type ChannelMessage,
   type ChannelName,
   EnvelopeFromJson,
-} from "../lib/websockets/channels.ts";
-import { getLogLevel } from "../utils/misc.mts";
+} from "#_/lib/websockets/channels.js";
+import { getLogLevel } from "#_/utils/misc.mjs";
 
 import type { DynamicImports } from "./api.mts";
 

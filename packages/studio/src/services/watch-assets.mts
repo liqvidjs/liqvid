@@ -35,18 +35,18 @@ import {
   PROJECT_FILES_AUTOGEN,
   PROJECT_META_FILE,
   TYPES_AUTOGEN,
-} from "../conventions.mts";
-import { getServerState } from "../initialize.mts";
-import type { Directory } from "../types/assets.mts";
-import { readDirWithFileTypes } from "../utils/effect.mts";
-import { getBiomePath } from "../utils/fs.mts";
-import { cartesianProduct, getLogLevel, getRoutesDir } from "../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { getServerState } from "#_/initialize.mjs";
+import type { Directory } from "#_/types/assets.mjs";
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
+import { getBiomePath } from "#_/utils/fs.mjs";
+import { cartesianProduct, getLogLevel, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   buildParameterSubpath,
   ensureParamsMarker,
   extractParameterNames,
   getProjectParameterValues,
-} from "../utils/parameters.mts";
+} from "#_/utils/parameters.mjs";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).

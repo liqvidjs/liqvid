@@ -15,8 +15,8 @@ import {
   AUDIO_DIR,
   CAPTIONS_FILE,
   RICH_TRANSCRIPT,
-} from "../../conventions.mts";
-import { getRoutesDir } from "../../utils/misc.mts";
+} from "#_/conventions.mjs";
+import { getRoutesDir } from "#_/utils/misc.mjs";
 
 import type { Transcript } from "./state.ts";
 

@@ -27,14 +27,14 @@ export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
  */
 export const LiqvidDevToolsProvider = isDevelopment
   ? lazy(() =>
-      import("./LiqvidDevToolsProvider.tsx").then((imports) => ({
+      import("./components/LiqvidDevToolsProvider.tsx").then((imports) => ({
         default: imports.LiqvidDevToolsProvider,
       })),
     )
   : Fragment;
 
 /** LiqvidDevToolsProvider without env-switching */
-export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./LiqvidDevToolsProvider.tsx";
+export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./components/LiqvidDevToolsProvider.tsx";
 
 /**
  * Liqvid recording control.

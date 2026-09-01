@@ -3,9 +3,9 @@
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
 
-import { Button } from "../../ui/Button.tsx";
-import { useTranslations } from "../../utils/react.tsx";
-import { openInFinderAction } from "../root-actions.ts";
+import { openInFinderAction } from "#_/pages/root-actions.js";
+import { Button } from "#_/ui/Button.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import styles from "./share.module.css";
 

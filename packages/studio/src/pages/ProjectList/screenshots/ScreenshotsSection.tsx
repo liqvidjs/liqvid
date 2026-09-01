@@ -15,8 +15,9 @@ import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { Button } from "../../../ui/Button.tsx";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { openScreenshotInFinderAction } from "#_/pages/root-actions.js";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
   DialogClose,
@@ -26,13 +27,9 @@ import {
   DialogTitle,
   DialogTrigger,
   useDialogApi,
-} from "../../../ui/Dialog.tsx";
-import { Time } from "../../../ui/Time.tsx";
-import {
-  useCommonTranslations,
-  useTranslations,
-} from "../../../utils/react.tsx";
-import { openScreenshotInFinderAction } from "../../root-actions.ts";
+} from "#_/ui/Dialog.js";
+import { Time } from "#_/ui/Time.js";
+import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 

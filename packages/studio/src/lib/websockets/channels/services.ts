@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 
-import { ServiceClient, StructuredLog } from "../../../api/schemas.mts";
+import { ServiceClient, StructuredLog } from "#_/api/schemas.mjs";
 
 /** Message sent when a new service is started */
 export const NewServiceMessage = Schema.Struct({

@@ -14,10 +14,10 @@ import {
   ASSETS_DIR,
   PROJECT_FILE,
   PROJECT_FILES_AUTOGEN,
-} from "../conventions.mts";
-import type { Directory } from "../types/assets.mts";
-import { cartesianProduct, getRoutesDir } from "../utils/misc.mts";
-import { extractParameterNames } from "../utils/parameters.mts";
+} from "#_/conventions.mjs";
+import type { Directory } from "#_/types/assets.mjs";
+import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
+import { extractParameterNames } from "#_/utils/parameters.mjs";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 

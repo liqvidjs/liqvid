@@ -7,12 +7,11 @@ import {
   useState,
 } from "react";
 
-import { COMMON_TRANSLATIONS_DIR } from "../conventions.mts";
-import { getTranslationsFromServer } from "../server-actions.ts";
+import CommonTranslations from "#_/.translations/en.json";
+import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import { getTranslationsFromServer } from "#_/server-actions.js";
 
 import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
-
-import CommonTranslations from "../.translations/en.json";
 
 type TranslationJson = {
   [key: string]: string | TranslationJson;

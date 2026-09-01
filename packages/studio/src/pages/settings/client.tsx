@@ -13,8 +13,8 @@ import {
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import type { SettingsConfig } from "../../api/contract.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../client.mts";
+import type { SettingsConfig } from "#_/api/contract.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 
 import { ConfigClient } from "./ConfigClient.tsx";
 

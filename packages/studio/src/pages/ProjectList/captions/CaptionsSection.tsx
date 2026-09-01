@@ -5,9 +5,9 @@ import { SpinnerIcon, WaveformIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { AudioEntry } from "../../../api/schemas.mts";
-import { clientRuntime, LiqvidStudioApiClient } from "../../../client.mts";
-import { Button } from "../../../ui/Button.tsx";
+import type { AudioEntry } from "#_/api/schemas.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
   DialogClose,
@@ -16,11 +16,8 @@ import {
   DialogRoot,
   DialogTitle,
   useDialogApi,
-} from "../../../ui/Dialog.tsx";
-import {
-  useCommonTranslations,
-  useTranslations,
-} from "../../../utils/react.tsx";
+} from "#_/ui/Dialog.js";
+import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { CaptionRow } from "./CaptionsRow.tsx";
 

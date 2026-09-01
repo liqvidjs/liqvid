@@ -4,7 +4,7 @@ import type { RootParameters } from "@liqvid/schemas";
 import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
-import { ROOT_PARAMS_COOKIE } from "../../cookies.ts";
+import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
 
 import listStyles from "./ProjectList.module.css";
 import styles from "./share.module.css";
