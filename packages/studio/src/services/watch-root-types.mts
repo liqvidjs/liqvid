@@ -67,6 +67,10 @@ export const generateRootTypes = Effect.fn("generateRootTypes")(
       Effect.ignore,
     ),
 );
+
+/** Check if the path matches either config file name. */
+function isConfigFile(filePath: string): boolean {
+  return filePath === CONFIG_FILE || filePath === CONFIG_FILE_JSONC;
 }
 
 /**
