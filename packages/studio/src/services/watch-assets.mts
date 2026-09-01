@@ -293,14 +293,14 @@ function watchAssetEvents(
 /**
  * Generate the types.ts file inside the .liqvid directory.
  */
-function generateProjectTypes({
-  biomePath,
-  projectDir,
-}: {
-  biomePath: Option.Option<AbsoluteFile>;
-  projectDir: AbsoluteDir;
-}) {
-  return Effect.gen(function* () {
+const generateProjectTypes = Effect.fn("generateProjectTypes")(
+  function* ({
+    biomePath,
+    projectDir,
+  }: {
+    biomePath: Option.Option<AbsoluteFile>;
+    projectDir: AbsoluteDir;
+  }) {
     const fs = yield* FileSystem.FileSystem;
 
     yield* Effect.logDebug(
@@ -364,31 +364,32 @@ function generateProjectTypes({
         Effect.provide(Logger.layer([Logger.consolePretty()])),
       ),
     );
-  }).pipe(Effect.annotateLogs({ projectDir }));
-}
+  },
+  (effect, projectDir) => effect.pipe(Effect.annotateLogs({ projectDir })),
+);
 
 /**
  * Generate a file from a Handlebars template, and format the result with Biome (if available).
  */
-export function runTemplate({
-  biomePath,
-  data,
-  out,
-  template,
-}: {
-  /** Path to the Biome executable. */
-  biomePath: Option.Option<AbsoluteFile>;
+export const runTemplate = Effect.fn("runTemplate")(
+  function* ({
+    biomePath,
+    data,
+    out,
+    template,
+  }: {
+    /** Path to the Biome executable. */
+    biomePath: Option.Option<AbsoluteFile>;
 
-  /** Data to pass to the template */
-  data: unknown;
+    /** Data to pass to the template */
+    data: unknown;
 
-  /** Path to the output file */
-  out: AbsoluteFile;
+    /** Path to the output file */
+    out: AbsoluteFile;
 
-  /** Path to the template file */
-  template: RelativeFile;
-}) {
-  return Effect.gen(function* () {
+    /** Path to the template file */
+    template: RelativeFile;
+  }) {
     const fs = yield* FileSystem.FileSystem;
 
     const { cwd } = getServerState();
@@ -409,11 +410,13 @@ export function runTemplate({
         execa(biomePath.value, ["check", "--fix", out], { cwd }),
       );
     }
-  }).pipe(
-    Effect.annotateLogs({ data, out, template }),
-    Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-  );
-}
+  },
+  (effect, { data, out, template }) =>
+    effect.pipe(
+      Effect.annotateLogs({ data, out, template }),
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+    ),
+);
 
 /**
  * List a project directory, applying include/exclude patterns.

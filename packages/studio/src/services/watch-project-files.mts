@@ -26,6 +26,7 @@ import {
 import {
   AbsoluteDir,
   AbsoluteFile,
+  type AbsolutePath,
   RelativeDir,
   RelativeFile,
   type RelativePath,
@@ -117,10 +118,10 @@ export function initProjectFiles(projects: Projects) {
   ).pipe(Effect.provideService(References.MinimumLogLevel, getLogLevel()));
 }
 
-export function watchProjectFiles(projects: Projects) {
-  const TARGET_DIR = getRoutesDir();
+export const watchProjectFiles = Effect.fn("watchProjectFiles")(
+  function* (projects: Projects) {
+    const TARGET_DIR = getRoutesDir();
 
-  return Effect.gen(function* () {
     // set up watch: a Pub/Sub fans watch events out to the consumer that
     // dispatches them to the appropriate handler. The watcher lives for the
     // lifetime of the process.
@@ -165,12 +166,14 @@ export function watchProjectFiles(projects: Projects) {
       Stream.runForEach((event) => PubSub.publish(pubsub, event)),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     );
-  }).pipe(
-    Effect.provide(NodeFileSystem.layer),
-    Effect.provideService(References.MinimumLogLevel, getLogLevel()),
-    Effect.scoped,
-  );
-}
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+      Effect.scoped,
+    ),
+);
 
 /**
  * A stream of file-system change events for the given directory, backed by the
@@ -238,25 +241,23 @@ function watchFileEvents(
  * For removal events the path is already gone, so we fall back to a heuristic:
  * paths without an extension are treated as directories.
  */
-function isDirectory(
-  filename: string,
+const isDirectory = Effect.fn("isDirectory")(function* (
+  filename: AbsolutePath,
   event: FileSystem.WatchEvent | undefined,
-): Effect.Effect<boolean, never, FileSystem.FileSystem> {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+) {
+  const fs = yield* FileSystem.FileSystem;
 
-    if (event?._tag === "Remove") {
-      return path.extname(filename) === "";
-    }
+  if (event?._tag === "Remove") {
+    return path.extname(filename) === "";
+  }
 
-    const info = yield* fs.stat(filename).pipe(Effect.option);
-    if (info._tag === "None") {
-      return path.extname(filename) === "";
-    }
+  const info = yield* fs.stat(filename).pipe(Effect.option);
+  if (info._tag === "None") {
+    return path.extname(filename) === "";
+  }
 
-    return info.value.type === "Directory";
-  });
-}
+  return info.value.type === "Directory";
+});
 
 /**
  * Rewrite an editor backup/temp path to the real file it shadows.
@@ -288,8 +289,8 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
 /**
  * Dispatch a single watch event to the appropriate handler.
  */
-function handleWatchEvent(event: WatchEvent, projects: Projects) {
-  return Effect.gen(function* () {
+const handleWatchEvent = Effect.fn("handleWatchEvent")(
+  function* (event: WatchEvent, projects: Projects) {
     // A recording is a directory under `.liqvid/recordings/`; its removal (as
     // opposed to a change to its `recording-meta.json`) surfaces as a dir
     // event, so handle those here before bailing on non-file events.
@@ -324,14 +325,15 @@ function handleWatchEvent(event: WatchEvent, projects: Projects) {
         }
       }
     }
-  }).pipe(Effect.annotateLogs({ _op: "handleWatchEvent" }));
-}
+  },
+  (effect) => effect.pipe(Effect.annotateLogs({ _op: "handleWatchEvent" })),
+);
 
 /**
  * Handle new or deleted project.json files
  */
-function handleProjectJson({ dirname, filename, projects, relative }: Context) {
-  return Effect.gen(function* () {
+const handleProjectJson = Effect.fn("handleProjectJson")(
+  function* ({ dirname, filename, projects, relative }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
     yield* Effect.logDebug(`handling project.json change`);
@@ -378,14 +380,18 @@ function handleProjectJson({ dirname, filename, projects, relative }: Context) {
     yield* generateAssetsDir({ dirname, projectPath });
 
     yield* Effect.logDebug("generated assets dir");
-  }).pipe(Effect.annotateLogs({ _op: "handleProjectJson", dirname, filename }));
-}
+  },
+  (effect, { dirname, filename }) =>
+    effect.pipe(
+      Effect.annotateLogs({ _op: "handleProjectJson", dirname, filename }),
+    ),
+);
 
 /**
  * Handle new or deleted project.json files
  */
-function createProject({ dirname, filename, projects, relative }: Context) {
-  return Effect.gen(function* () {
+const createProject = Effect.fn("createProject")(
+  function* ({ dirname, filename, projects, relative }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
     const entryFile = path.join(dirname, NEXT_PAGE);
@@ -461,10 +467,17 @@ function createProject({ dirname, filename, projects, relative }: Context) {
     projects[meta.path] = meta;
 
     yield* generateAssetsDir({ dirname, projectPath: meta.path });
-  }).pipe(
-    Effect.annotateLogs({ _op: "createProject", dirname, filename, relative }),
-  );
-}
+  },
+  (effect, { dirname, filename, relative }) =>
+    effect.pipe(
+      Effect.annotateLogs({
+        _op: "createProject",
+        dirname,
+        filename,
+        relative,
+      }),
+    ),
+);
 
 /**
  * Handle auto-generated project-meta.json files
@@ -475,13 +488,8 @@ function createProject({ dirname, filename, projects, relative }: Context) {
  *
  * We need to find the project by walking up from the .liqvid directory.
  */
-function handleProjectMeta({
-  dirname: metaDir,
-  filename,
-  projects,
-  relative,
-}: Context) {
-  return Effect.gen(function* () {
+const handleProjectMeta = Effect.fn("handleProjectMeta")(
+  function* ({ dirname: metaDir, filename, projects, relative }: Context) {
     // Walk up from the meta file's directory to find the .liqvid directory
     // Then the project is one level above .liqvid
     let currentDir = metaDir;
@@ -513,14 +521,16 @@ function handleProjectMeta({
     }
 
     project.duration = new Duration(projectMeta.duration);
-  }).pipe(
-    Effect.annotateLogs({
-      _op: "handleProjectMeta",
-      metaDir,
-      projects: Object.keys(projects),
-    }),
-  );
-}
+  },
+  (effect, { dirname: metaDir, projects }) =>
+    effect.pipe(
+      Effect.annotateLogs({
+        _op: "handleProjectMeta",
+        metaDir,
+        projects: Object.keys(projects),
+      }),
+    ),
+);
 
 /**
  * Handle removal of a recording directory (`.liqvid/recordings/<name>`).
@@ -529,8 +539,8 @@ function handleProjectMeta({
  * metadata is actually written, so this only acts on directories that no
  * longer exist.
  */
-function handleRecordingDir(recordingDir: AbsoluteDir) {
-  return Effect.gen(function* () {
+const handleRecordingDir = Effect.fn("handleRecordingDir")(
+  function* (recordingDir: AbsoluteDir) {
     const fs = yield* FileSystem.FileSystem;
 
     if (yield* fs.exists(recordingDir)) return;
@@ -548,8 +558,12 @@ function handleRecordingDir(recordingDir: AbsoluteDir) {
       data: { name, url },
       type: "deleteRecording",
     });
-  }).pipe(Effect.annotateLogs({ _op: "handleRecordingDir", recordingDir }));
-}
+  },
+  (effect, recordingDir) =>
+    effect.pipe(
+      Effect.annotateLogs({ _op: "handleRecordingDir", recordingDir }),
+    ),
+);
 
 /**
  * Handle creation, modification, or deletion of a recording's
@@ -560,8 +574,8 @@ function handleRecordingDir(recordingDir: AbsoluteDir) {
  * `recordings` and `.liqvid` dirs) is the project directory. Whether the file
  * still exists tells create/update from delete.
  */
-function handleRecordingMeta({ dirname: recordingDir, filename }: Context) {
-  return Effect.gen(function* () {
+const handleRecordingMeta = Effect.fn("handleRecordingMeta")(
+  function* ({ dirname: recordingDir, filename }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
     // Validate the expected `.liqvid/recordings/<name>` structure.
@@ -595,13 +609,15 @@ function handleRecordingMeta({ dirname: recordingDir, filename }: Context) {
       data: { recording, url },
       type: "newRecording",
     });
-  }).pipe(
-    Effect.catchTag("FileDecodeError", (error) =>
-      Effect.logWarning("failed to read recording-meta.json", error),
+  },
+  (effect, { filename }) =>
+    effect.pipe(
+      Effect.catchTag("FileDecodeError", (error) =>
+        Effect.logWarning("failed to read recording-meta.json", error),
+      ),
+      Effect.annotateLogs({ _op: "handleRecordingMeta", filename }),
     ),
-    Effect.annotateLogs({ _op: "handleRecordingMeta", filename }),
-  );
-}
+);
 
 const OPENGRAPH_IMAGE_FILENAMES = [
   "opengraph-image.gif",
@@ -710,26 +726,24 @@ function parseAspectRatio(value: unknown): AspectRatio {
   throw new Error(`Invalid aspect ratio: ${JSON.stringify(value)}`);
 }
 
-function generateAssetsDir({
+const generateAssetsDir = Effect.fn("generateAssetsDir")(function* ({
   dirname,
   projectPath,
 }: {
   dirname: AbsoluteDir;
   projectPath: RelativeDir;
 }) {
-  return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    const assetsDir = path.join(dirname, ASSETS_DIR);
+  const assetsDir = path.join(dirname, ASSETS_DIR);
 
-    if (!(yield* fs.exists(assetsDir))) {
-      yield* fs.makeDirectory(assetsDir);
-    }
+  if (!(yield* fs.exists(assetsDir))) {
+    yield* fs.makeDirectory(assetsDir);
+  }
 
-    // Always write project-path.json so client components can read it at runtime
-    yield* fs.writeFileString(
-      path.join(assetsDir, PROJECT_PATH),
-      JSON.stringify(projectPath),
-    );
-  });
-}
+  // Always write project-path.json so client components can read it at runtime
+  yield* fs.writeFileString(
+    path.join(assetsDir, PROJECT_PATH),
+    JSON.stringify(projectPath),
+  );
+});

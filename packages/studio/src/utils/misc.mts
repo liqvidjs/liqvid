@@ -117,20 +117,18 @@ export function getConfig() {
   );
 }
 
-export function getOrigin() {
-  return Effect.gen(function* () {
-    const headersList = yield* Effect.promise(headers);
+const getOrigin = Effect.fn("getOrigin")(function* () {
+  const headersList = yield* Effect.promise(headers);
 
-    const origin = headersList.get("origin");
-    if (!origin) {
-      return yield* Effect.die({
-        message: "Origin header is missing",
-      });
-    }
+  const origin = headersList.get("origin");
+  if (!origin) {
+    return yield* Effect.die({
+      message: "Origin header is missing",
+    });
+  }
 
-    return origin;
-  });
-}
+  return origin;
+});
 
 /**
  * Interpolate path parameters (like `[lang]`) with their actual values.
@@ -145,27 +143,25 @@ function interpolatePathParams(
   });
 }
 
-export function getRenderUrl(
+export const getRenderUrl = Effect.fn("getRenderUrl")(function* (
   renderSource: RenderSource,
   projectPath: RelativeDir,
   params?: Record<string, string>,
 ) {
-  return Effect.gen(function* () {
-    const origin = yield* getOrigin();
+  const origin = yield* getOrigin();
 
-    const { basePath, productionServerPort } = getServerState();
+  const { basePath, productionServerPort } = getServerState();
 
-    // Interpolate path parameters (e.g., [lang] -> "en")
-    const interpolatedPath = interpolatePathParams(projectPath, params);
+  // Interpolate path parameters (e.g., [lang] -> "en")
+  const interpolatedPath = interpolatePathParams(projectPath, params);
 
-    if (renderSource === "preview") {
-      return `${origin}/${interpolatedPath}?preview`;
-    } else {
-      const previewPath = `${basePath || ""}/${interpolatedPath}/`;
-      return `http://localhost:${productionServerPort}${previewPath}`;
-    }
-  });
-}
+  if (renderSource === "preview") {
+    return `${origin}/${interpolatedPath}?preview`;
+  } else {
+    const previewPath = `${basePath || ""}/${interpolatedPath}/`;
+    return `http://localhost:${productionServerPort}${previewPath}`;
+  }
+});
 
 /**
  * Generate cartesian product of possible parameter values.

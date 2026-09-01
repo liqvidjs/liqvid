@@ -27,8 +27,8 @@ import { runTemplate } from "./watch-assets.mts";
 /**
  * Generate the root-level .liqvid/types.ts file containing RootParams type.
  */
-export function generateRootTypes(state: LiqvidServerState) {
-  return Effect.gen(function* () {
+export const generateRootTypes = Effect.fn("generateRootTypes")(
+  function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
 
@@ -60,10 +60,13 @@ export function generateRootTypes(state: LiqvidServerState) {
     yield* Effect.log(
       `Generated root ${TYPES_AUTOGEN} with ${parameters.length} parameter(s)`,
     );
-  }).pipe(
-    Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-    Effect.ignore,
-  );
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+      Effect.ignore,
+    ),
+);
 }
 
 /**
