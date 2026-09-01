@@ -539,7 +539,7 @@ export const WebApi = HttpApi.make("LiqvidStudioWebApi")
     thumbsGroup,
   )
   .prefix("/api/liqvid")
-  .annotate(OpenApi.Title, "Liqvid Studio Web API")
+  .annotate(OpenApi.Title, "Liqvid Web API")
   .annotate(OpenApi.Version, "1.0.0");
 
 export type WebApi = typeof WebApi;

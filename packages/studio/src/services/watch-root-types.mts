@@ -74,10 +74,11 @@ function isConfigFile(filePath: string): boolean {
 }
 
 /**
- * Watch liqvid.json for changes and regenerate root-level types when rootParameters changes.
+ * Watch liqvid.jsonc and liqvid.json for changes and regenerate root-level
+ * types when rootParameters changes.
  */
-export function watchRootTypes(state: LiqvidServerState) {
-  return Effect.gen(function* () {
+export const watchRootTypes = Effect.fn("watchRootTypes")(
+  function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
 
@@ -89,8 +90,8 @@ export function watchRootTypes(state: LiqvidServerState) {
 
     // Watch for config changes
     yield* fs.watch(cwd).pipe(
-      // Only react to events touching the config file itself.
-      Stream.filter((event) => event.path === CONFIG_FILE),
+      // Only react to events touching either config file.
+      Stream.filter((event) => isConfigFile(event.path)),
       Stream.groupBy((event) => Effect.succeed([event.path, event] as const), {
         idleTimeToLive: "1 seconds",
       }),
@@ -112,8 +113,10 @@ export function watchRootTypes(state: LiqvidServerState) {
       ),
       Stream.runDrain,
     );
-  }).pipe(
-    Effect.scoped,
-    Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)),
-  );
-}
+  },
+  (effect) =>
+    effect.pipe(
+      Effect.scoped,
+      Effect.provideService(EnvFiles, loadEnvFiles(getServerState().cwd)),
+    ),
+);

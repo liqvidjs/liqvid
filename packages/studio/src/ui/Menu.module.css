@@ -1,7 +1,7 @@
 /* Menu (Base UI) */
 
 .Positioner {
-  z-index: 100;
+  z-index: calc(1000 * var(--dialog-level) + 1);
   outline: none;
 }
 

@@ -66,7 +66,7 @@ export async function generateMetadata({
       );
       break;
     default:
-      return { title: "Liqvid Studio" };
+      return { title: "Liqvid" };
   }
 
   return { title: t.title };

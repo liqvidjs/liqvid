@@ -101,7 +101,7 @@ export {
  * }
  * ```
  */
-export function cacheDynamicImports<
+export function experimental_cacheDynamicImports<
   // biome-ignore lint/suspicious/noExplicitAny: variance
   T extends Record<string, () => Promise<any>>,
   K extends keyof Awaited<ReturnType<T[keyof T]>>,
@@ -111,7 +111,7 @@ export function cacheDynamicImports<
 ): {
   [key in keyof T]: Promise<Awaited<ReturnType<T[key]>>[K]>;
 };
-export function cacheDynamicImports<
+export function experimental_cacheDynamicImports<
   // biome-ignore lint/suspicious/noExplicitAny: variance
   T extends Record<string, () => Promise<any>>,
 >(
@@ -120,7 +120,7 @@ export function cacheDynamicImports<
 ): {
   [key in keyof T]: ReturnType<T[key]>;
 };
-export function cacheDynamicImports<
+export function experimental_cacheDynamicImports<
   // biome-ignore lint/suspicious/noExplicitAny: variance
   T extends Record<string, () => Promise<any>>,
   K extends keyof Awaited<ReturnType<T[keyof T]>>,

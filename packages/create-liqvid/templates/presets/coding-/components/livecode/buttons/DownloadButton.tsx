@@ -41,6 +41,7 @@ export function DownloadButton({
     return (
       <button
         // autoComplete necessary to avoid hydration mismatch with `disabled` in Firefox
+        // https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
         autoComplete="off"
         className={buttonStyles}
         disabled={isDisabled}

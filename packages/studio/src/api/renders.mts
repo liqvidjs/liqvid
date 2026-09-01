@@ -13,6 +13,7 @@ import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { ConflictError, NotFoundError } from "#_/utils/errors.mjs";
 import { createJob } from "#_/utils/jobs.mjs";
 import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
+
 import {
   ensureParamsMarker,
   extractParameterNames,
@@ -25,7 +26,7 @@ import { RenderMeta } from "./schemas.mts";
 /**
  * Generate a unique job name for a render.
  */
-function renderJobName(projectPath: string, renderId: string): string {
+function renderJobName(projectPath: RelativeDir, renderId: string): string {
   return `render:${projectPath}:${renderId}`;
 }
 

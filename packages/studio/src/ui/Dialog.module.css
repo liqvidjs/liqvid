@@ -9,7 +9,7 @@
   position: fixed;
   top: 50%;
   left: 50%;
-  z-index: calc(1000 - var(--nested-dialogs));
+  z-index: calc(1000 * var(--dialog-level));
 
   width: calc(100% - 2rem);
   max-width: 28rem;

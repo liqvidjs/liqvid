@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/js-yaml": "catalog:dev",
     "js-yaml": "catalog:dev",
     "typedoc": "catalog:dev",

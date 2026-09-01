@@ -61,7 +61,9 @@ export function ButtonWithDropdown({
   variant = "default",
 }: ButtonWithDropdownProps) {
   return (
-    <div className={clsx(styles.group, styles[variant])}>
+    <div
+      className={clsx(styles.group, variant !== "default" && styles[variant])}
+    >
       {/** biome-ignore lint/correctness/noRestrictedElements: this is a component */}
       <button
         className={styles.mainButton}
