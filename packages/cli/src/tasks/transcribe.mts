@@ -272,7 +272,7 @@ function buildVtt(segments: TranscribeDetailedResult<boolean>[]): string {
 /**
  * Resolve a whisper model file path, downloading a named model on demand.
  */
-const resolveModel = Effect.fn("resolveModel")(function* (
+const resolveModel = Effect.fnUntraced(function* (
   whisperConfig: Partial<WhisperConfig>,
 ) {
   const { manager } = yield* Effect.tryPromise(async () => {

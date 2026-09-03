@@ -47,7 +47,7 @@ export async function capture({
 /**
 Capture a range of frames.
 */
-export const captureRange = Effect.fn("captureRange")(function* ({
+export const captureRange = Effect.fnUntraced(function* ({
   count,
   filename,
   imageFormat,

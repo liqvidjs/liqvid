@@ -225,7 +225,7 @@ export function solidify({
 /**
 Assemble frames into a video.
 */
-const assembleVideo = Effect.fn("assembleVideo")(function* ({
+const assembleVideo = Effect.fnUntraced(function* ({
   padLen,
   ...o // passthrough parameters
 }: Omit<Parameters<typeof stitch>[0], "pattern" | "signal"> & {

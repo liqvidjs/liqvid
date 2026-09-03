@@ -54,7 +54,7 @@ function appendLog(job: LoggableJob, log: StructuredLog) {
 /**
  * Start a job in a detached fiber and add it to the global list of jobs.
  */
-export const createJob = Effect.fn("createJob")(function* <A, E, R>(
+export const createJob = Effect.fnUntraced(function* <A, E, R>(
   name: string,
   effect: Effect.Effect<A, E, R>,
   options?: {

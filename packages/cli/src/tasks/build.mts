@@ -108,7 +108,7 @@ export type BuildError = {
 /**
  * Run Next.js build
  */
-export const runNextBuild = Effect.fn("runNextBuild")(function* (
+export const runNextBuild = Effect.fnUntraced(function* (
   options: BuildOptions = {},
 ) {
   const cwd = options.cwd ?? process.cwd();

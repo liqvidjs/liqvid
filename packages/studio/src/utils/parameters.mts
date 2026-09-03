@@ -106,7 +106,7 @@ export function getParameterizedAssetsDir(
  * Ensure the .params= marker file exists in the assets directory.
  * Creates the marker file if the project has parameters.
  */
-export const ensureParamsMarker = Effect.fn("ensureParamsMarker")(function* (
+export const ensureParamsMarker = Effect.fnUntraced(function* (
   assetsDir: AbsoluteDir,
   projectPath: RelativeDir,
 ) {

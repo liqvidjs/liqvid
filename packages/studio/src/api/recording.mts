@@ -144,7 +144,7 @@ export function runPostProcessing(
  * Read a single recording directory into a {@link RecordingMeta}, discovering
  * its plugins from the immediate subdirectories.
  */
-export const loadRecordingMeta = Effect.fn("loadRecordingMeta")(function* (
+export const loadRecordingMeta = Effect.fnUntraced(function* (
   recordingDir: AbsoluteDir,
 ) {
   const file = yield* loadJson(
@@ -171,199 +171,214 @@ export const recordingsLive = HttpApiBuilder.group(
   "recordings",
   (handlers) =>
     handlers
-      .handle("list", ({ query: { projectPath, params: paramsJson } }) =>
-        Effect.gen(function* () {
-          const fs = yield* FileSystem.FileSystem;
+      .handle(
+        "list",
+        Effect.fnUntraced(
+          function* ({ query: { projectPath, params: paramsJson } }) {
+            const fs = yield* FileSystem.FileSystem;
 
-          const routesDir = getRoutesDir();
-          const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
+            const routesDir = getRoutesDir();
+            const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
 
-          // error if base assets dir doesn't exist
-          if (!(yield* fs.exists(baseAssetsDir))) {
-            return yield* Effect.die({
-              message: "assets dir does not exist",
-            });
-          }
+            // error if base assets dir doesn't exist
+            if (!(yield* fs.exists(baseAssetsDir))) {
+              return yield* Effect.die({
+                message: "assets dir does not exist",
+              });
+            }
 
-          // Parse params if provided
-          const params = paramsJson
-            ? (JSON.parse(paramsJson) as Record<string, string>)
-            : undefined;
+            // Parse params if provided
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
 
-          // Get parameterized assets directory
-          const assetsDir = getParameterizedAssetsDir(
-            routesDir as AbsoluteDir,
-            projectPath,
-            params,
-          );
+            // Get parameterized assets directory
+            const assetsDir = getParameterizedAssetsDir(
+              routesDir as AbsoluteDir,
+              projectPath,
+              params,
+            );
 
-          const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
+            const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
 
-          if (!(yield* fs.exists(recordingsDir))) {
-            return [] as RecordingMeta[];
-          }
+            if (!(yield* fs.exists(recordingsDir))) {
+              return [] as RecordingMeta[];
+            }
 
-          const recordingDirs = yield* readDirWithFileTypes(recordingsDir);
+            const recordingDirs = yield* readDirWithFileTypes(recordingsDir);
 
-          const recordings = yield* Effect.all(
-            recordingDirs.reduce(
-              (acc, [filename, kind]) => {
-                if (kind !== "Directory") return acc;
+            const recordings = yield* Effect.all(
+              recordingDirs.reduce(
+                (acc, [filename, kind]) => {
+                  if (kind !== "Directory") return acc;
 
-                const dir = path.join(recordingsDir, filename);
-                acc.push(loadRecordingMeta(dir));
+                  const dir = path.join(recordingsDir, filename);
+                  acc.push(loadRecordingMeta(dir));
 
-                return acc;
-              },
-              // TODO: find more idiomatic way to write this
-              [] as Effect.Effect<
-                RecordingMeta,
-                FileDecodeError | PlatformError.PlatformError,
-                FileSystem.FileSystem
-              >[],
+                  return acc;
+                },
+                // TODO: find more idiomatic way to write this
+                [] as Effect.Effect<
+                  RecordingMeta,
+                  FileDecodeError | PlatformError.PlatformError,
+                  FileSystem.FileSystem
+                >[],
+              ),
+            );
+
+            recordings.sort((a, b) => compare(a.created, b.created));
+
+            return recordings;
+          },
+          (effect) =>
+            effect.pipe(
+              Effect.withLogSpan("recordings.list"),
+              Effect.catchTag("FileDecodeError", Effect.die),
+              Effect.catchTag("PlatformError", Effect.die),
             ),
-          );
-
-          recordings.sort((a, b) => compare(a.created, b.created));
-
-          return recordings;
-        }).pipe(
-          Effect.catchTag("FileDecodeError", Effect.die),
-          Effect.catchTag("PlatformError", Effect.die),
         ),
       )
-      .handleRaw("save", ({ query: { projectPath }, request }) =>
-        Effect.gen(function* () {
-          const fs = yield* FileSystem.FileSystem;
+      .handleRaw(
+        "save",
+        Effect.fnUntraced(
+          function* ({ query: { projectPath }, request }) {
+            const fs = yield* FileSystem.FileSystem;
 
-          // Parse multipart data from the request
-          const persisted = yield* request.multipart;
+            // Parse multipart data from the request
+            const persisted = yield* request.multipart;
 
-          const dynamicImports = yield* DynamicImports;
+            const dynamicImports = yield* DynamicImports;
 
-          // Parse metadata from the persisted multipart data
-          const metadataField = persisted.metadata;
-          if (typeof metadataField !== "string") {
-            return yield* Effect.die({
-              message: "missing or invalid metadata field",
-            });
-          }
+            // Parse metadata from the persisted multipart data
+            const metadataField = persisted.metadata;
+            if (typeof metadataField !== "string") {
+              return yield* Effect.die({
+                message: "missing or invalid metadata field",
+              });
+            }
 
-          const metadata = yield* Schema.decodeEffect(
-            SaveRecordingMetadataFromJson,
-          )(metadataField);
+            const metadata = yield* Schema.decodeEffect(
+              SaveRecordingMetadataFromJson,
+            )(metadataField);
 
-          yield* Effect.logInfo("plugins", { plugins: metadata.plugins });
+            yield* Effect.logInfo("plugins", { plugins: metadata.plugins });
 
-          const routesDir = getRoutesDir();
-          const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
+            const routesDir = getRoutesDir();
+            const baseAssetsDir = path.join(routesDir, projectPath, ASSETS_DIR);
 
-          // Get parameterized assets directory
-          const paramNames = extractParameterNames(projectPath);
-          const assetsDir = getParameterizedAssetsDir(
-            routesDir as AbsoluteDir,
-            projectPath,
-            metadata.params,
-          );
-
-          // Create base assets dir and ensure params marker exists
-          if (!(yield* fs.exists(baseAssetsDir))) {
-            yield* fs.makeDirectory(baseAssetsDir, { recursive: true });
-          }
-
-          // Ensure params marker file exists for parameterized projects
-          if (paramNames.length > 0) {
-            yield* ensureParamsMarker(
-              baseAssetsDir as AbsoluteDir,
+            // Get parameterized assets directory
+            const paramNames = extractParameterNames(projectPath);
+            const assetsDir = getParameterizedAssetsDir(
+              routesDir as AbsoluteDir,
               projectPath,
+              metadata.params,
             );
-          }
 
-          // Create parameterized assets dir if it doesn't exist
-          if (!(yield* fs.exists(assetsDir))) {
-            yield* fs.makeDirectory(assetsDir, { recursive: true });
-          }
+            // Create base assets dir and ensure params marker exists
+            if (!(yield* fs.exists(baseAssetsDir))) {
+              yield* fs.makeDirectory(baseAssetsDir, { recursive: true });
+            }
 
-          const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
-          if (!(yield* fs.exists(recordingsDir))) {
-            yield* fs.makeDirectory(recordingsDir, { recursive: true });
-          }
+            // Ensure params marker file exists for parameterized projects
+            if (paramNames.length > 0) {
+              yield* ensureParamsMarker(
+                baseAssetsDir as AbsoluteDir,
+                projectPath,
+              );
+            }
 
-          // Create recording directory with ISO datetime name
-          const recordingName = new Date().toISOString().replace(/[:.]/g, "-");
-          const recordingDir = path.join(
-            recordingsDir,
-            RelativeDir(recordingName),
-          );
-          yield* fs.makeDirectory(recordingDir, { recursive: true });
+            // Create parameterized assets dir if it doesn't exist
+            if (!(yield* fs.exists(assetsDir))) {
+              yield* fs.makeDirectory(assetsDir, { recursive: true });
+            }
 
-          // Write recording-meta.json
-          const recordingMeta: RecordingMetaFile = {
-            created: new Date().toISOString(),
-            duration: {
-              milliseconds: metadata.durationMs,
-            },
-          };
+            const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
+            if (!(yield* fs.exists(recordingsDir))) {
+              yield* fs.makeDirectory(recordingsDir, { recursive: true });
+            }
 
-          yield* writeTypedJson({
-            data: recordingMeta,
-            declaration: recordingMetaDeclaration,
-            dirname: recordingDir,
-            filename: RECORDING_META_FILE,
-            pretty: true,
-          });
+            // Create recording directory with ISO datetime name
+            const recordingName = new Date()
+              .toISOString()
+              .replace(/[:.]/g, "-");
+            const recordingDir = path.join(
+              recordingsDir,
+              RelativeDir(recordingName),
+            );
+            yield* fs.makeDirectory(recordingDir, { recursive: true });
 
-          // Write plugin data from persisted multipart
-          yield* Effect.all(
-            metadata.plugins.map((pluginInfo) =>
-              Effect.gen(function* () {
-                const pluginDir = path.join(
-                  recordingDir,
-                  packageNameToDirName(pluginInfo.key),
-                );
-                yield* fs.makeDirectory(pluginDir, { recursive: true });
+            // Write recording-meta.json
+            const recordingMeta: RecordingMetaFile = {
+              created: new Date().toISOString(),
+              duration: {
+                milliseconds: metadata.durationMs,
+              },
+            };
 
-                const data = persisted[pluginInfo.key];
+            yield* writeTypedJson({
+              data: recordingMeta,
+              declaration: recordingMetaDeclaration,
+              dirname: recordingDir,
+              filename: RECORDING_META_FILE,
+              pretty: true,
+            });
 
-                if (data === undefined) return;
+            // Write plugin data from persisted multipart
+            yield* Effect.all(
+              metadata.plugins.map((pluginInfo) =>
+                Effect.gen(function* () {
+                  const pluginDir = path.join(
+                    recordingDir,
+                    packageNameToDirName(pluginInfo.key),
+                  );
+                  yield* fs.makeDirectory(pluginDir, { recursive: true });
 
-                if (pluginInfo.isBlob) {
-                  // For blob data, the persisted value is an array of PersistedFile
-                  const files = data as ReadonlyArray<Multipart.PersistedFile>;
-                  if (files.length > 0) {
-                    const file = files[0]!;
-                    const filename = pluginInfo.filename ?? RECORDING_RAW_BLOB;
-                    // Read from the temporary persisted file path and write to our destination
-                    const content = yield* fs.readFile(file.path);
-                    yield* fs.writeFile(
-                      path.join(pluginDir, filename),
-                      content,
+                  const data = persisted[pluginInfo.key];
+
+                  if (data === undefined) return;
+
+                  if (pluginInfo.isBlob) {
+                    // For blob data, the persisted value is an array of PersistedFile
+                    const files =
+                      data as ReadonlyArray<Multipart.PersistedFile>;
+                    if (files.length > 0) {
+                      const file = files[0]!;
+                      const filename =
+                        pluginInfo.filename ?? RECORDING_RAW_BLOB;
+                      // Read from the temporary persisted file path and write to our destination
+                      const content = yield* fs.readFile(file.path);
+                      yield* fs.writeFile(
+                        path.join(pluginDir, filename),
+                        content,
+                      );
+                    }
+                  } else if (typeof data === "string") {
+                    // Write raw JSON data
+                    yield* fs.writeFileString(
+                      path.join(pluginDir, RECORDING_RAW_FILE),
+                      data,
                     );
                   }
-                } else if (typeof data === "string") {
-                  // Write raw JSON data
-                  yield* fs.writeFileString(
-                    path.join(pluginDir, RECORDING_RAW_FILE),
-                    data,
-                  );
-                }
-              }).pipe(Effect.annotateLogs({ _plugin: pluginInfo.key })),
-            ),
-            { concurrency: "unbounded" },
-          );
+                }).pipe(Effect.annotateLogs({ _plugin: pluginInfo.key })),
+              ),
+              { concurrency: "unbounded" },
+            );
 
-          // Run post-processing plugins
-          yield* runPostProcessing(
-            recordingDir,
-            metadata.plugins,
-            dynamicImports,
-          );
-        }).pipe(Effect.orDie),
+            // Run post-processing plugins
+            yield* runPostProcessing(
+              recordingDir,
+              metadata.plugins,
+              dynamicImports,
+            );
+          },
+          (effect) =>
+            effect.pipe(Effect.withLogSpan("recordings.save"), Effect.orDie),
+        ),
       )
       .handle(
         "reprocess",
-        ({ query: { projectPath, params: paramsJson }, payload }) =>
-          Effect.gen(function* () {
+        Effect.fnUntraced(
+          function* ({ query: { projectPath, params: paramsJson }, payload }) {
             const fs = yield* FileSystem.FileSystem;
             const dynamicImports = yield* DynamicImports;
 
@@ -407,6 +422,12 @@ export const recordingsLive = HttpApiBuilder.group(
             yield* runPostProcessing(recordingDir, plugins, dynamicImports);
 
             return { success: true };
-          }).pipe(Effect.orDie),
+          },
+          (effect) =>
+            effect.pipe(
+              Effect.withLogSpan("recordings.reprocess"),
+              Effect.orDie,
+            ),
+        ),
       ),
 );

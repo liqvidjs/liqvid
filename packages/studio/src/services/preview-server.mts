@@ -13,76 +13,76 @@ import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 
 export const DEFAULT_PRODUCTION_SERVER_PORT = 4000;
 
-export const startProductionServer = Effect.fn("startProductionServer")(
-  function* (state: LiqvidServerState) {
-    const { cwd } = state;
-    const previewDir = path.join(cwd, ROOT_HIDDEN_DIR, PREVIEW_DIR);
+export const startProductionServer = Effect.fnUntraced(function* (
+  state: LiqvidServerState,
+) {
+  const { cwd } = state;
+  const previewDir = path.join(cwd, ROOT_HIDDEN_DIR, PREVIEW_DIR);
 
-    const fs = yield* FileSystem.FileSystem;
+  const fs = yield* FileSystem.FileSystem;
 
-    // Check if 'out' directory exists, if not run 'next build'
-    if (!(yield* fs.exists(previewDir))) {
-      yield* Effect.log("'out' directory not found, running 'next build'...");
-      yield* runNextBuild({ cwd });
-    }
+  // Check if 'out' directory exists, if not run 'next build'
+  if (!(yield* fs.exists(previewDir))) {
+    yield* Effect.log("'out' directory not found, running 'next build'...");
+    yield* runNextBuild({ cwd });
+  }
 
-    // Parse environment files
-    const envFiles = loadEnvFiles(cwd);
+  // Parse environment files
+  const envFiles = loadEnvFiles(cwd);
 
-    // Load liqvid.jsonc or liqvid.json config
-    const config = yield* loadLiqvidConfig();
-    const basePath = config?.basePath ?? "";
-    state.basePath = basePath;
+  // Load liqvid.jsonc or liqvid.json config
+  const config = yield* loadLiqvidConfig();
+  const basePath = config?.basePath ?? "";
+  state.basePath = basePath;
 
-    // Setup symlinks for basePath if configured
-    yield* setupPreviewSymlinks(previewDir, basePath);
+  // Setup symlinks for basePath if configured
+  yield* setupPreviewSymlinks(previewDir, basePath);
 
-    // Start the production server
-    const port =
-      Number(
-        getEnvVar("LIQVID_PRODUCTION_SERVER_PORT", envFiles.production, {}),
-      ) || DEFAULT_PRODUCTION_SERVER_PORT;
-    state.productionServerPort = port;
+  // Start the production server
+  const port =
+    Number(
+      getEnvVar("LIQVID_PRODUCTION_SERVER_PORT", envFiles.production, {}),
+    ) || DEFAULT_PRODUCTION_SERVER_PORT;
+  state.productionServerPort = port;
 
-    const server = http.createServer((request, response) => {
-      return handler(request, response, {
-        headers: [
-          {
-            headers: [
-              { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
-              { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-              { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
-            ],
-            source: "**",
-          },
-        ],
-        public: previewDir,
-        trailingSlash: true,
-      });
+  const server = http.createServer((request, response) => {
+    return handler(request, response, {
+      headers: [
+        {
+          headers: [
+            { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+            { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+            { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          ],
+          source: "**",
+        },
+      ],
+      public: previewDir,
+      trailingSlash: true,
     });
+  });
 
-    yield* Effect.callback<void>((resume) => {
-      server.listen(port, () => {
-        resume(Effect.void);
-      });
+  yield* Effect.callback<void>((resume) => {
+    server.listen(port, () => {
+      resume(Effect.void);
     });
+  });
 
-    yield* Effect.log(`Production server running on port ${port}...`);
+  yield* Effect.log(`Production server running on port ${port}...`);
 
-    // The production server runs for the lifetime of the process. Keep the
-    // effect (and thus the service) alive, tearing the server down if the
-    // fiber is interrupted.
-    return yield* Effect.never.pipe(
-      Effect.ensuring(Effect.sync(() => server.close())),
-    );
-  },
-);
+  // The production server runs for the lifetime of the process. Keep the
+  // effect (and thus the service) alive, tearing the server down if the
+  // fiber is interrupted.
+  return yield* Effect.never.pipe(
+    Effect.ensuring(Effect.sync(() => server.close())),
+  );
+});
 
 /**
  * Setup symlinks in the preview directory to support basePath.
  * For example, if basePath is "/videos", creates .liqvid/preview/videos -> ../../out
  */
-const setupPreviewSymlinks = Effect.fn("setupPreviewSymlinks")(function* (
+const setupPreviewSymlinks = Effect.fnUntraced(function* (
   previewDir: AbsoluteDir,
   basePath: string,
 ) {

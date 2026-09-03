@@ -65,7 +65,7 @@ const readThumbSheets = Effect.fnUntraced(function* (dir: AbsoluteDir) {
  * All schemes share a single browser session (the URL is loaded once), which
  * avoids overloading the dev server with simultaneous cold page loads.
  */
-const generateThumbnails = Effect.fn("generateThumbnails")(function* (
+const generateThumbnails = Effect.fnUntraced(function* (
   url: string,
   schemes: readonly { colorScheme: "light" | "dark"; outputDir: AbsoluteDir }[],
   { colorScheme: _, ...body }: GenerateThumbsBody,

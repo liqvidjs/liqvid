@@ -21,7 +21,7 @@ export default data;
  * Post-process @lqv/tldraw recording data.
  * Creates raw.d.json.ts declaration file.
  */
-const postProcessRecording = Effect.fn("postProcessRecording")(function* ({
+const postProcessRecording = Effect.fnUntraced(function* ({
   dirname,
 }: {
   dirname: AbsoluteDir;

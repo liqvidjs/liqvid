@@ -23,7 +23,7 @@ function isConfigFile(filePath: string): boolean {
  * OS reports a `Create` even when the file already existed — the event tag is
  * therefore not a reliable signal for "new" vs "changed".
  */
-const reloadConfig = Effect.fn("reloadConfig")(function* (
+const reloadConfig = Effect.fnUntraced(function* (
   state: LiqvidServerState,
   changedFile: string,
 ) {
@@ -46,7 +46,7 @@ const reloadConfig = Effect.fn("reloadConfig")(function* (
  * down if the file were removed. Node reports the changed entry as a path
  * relative to the watched directory, so we filter on the config basename.
  */
-export const watchLiqvidConfig = Effect.fn("watchLiqvidConfig")(
+export const watchLiqvidConfig = Effect.fnUntraced(
   function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();

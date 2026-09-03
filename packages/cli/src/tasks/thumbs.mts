@@ -40,7 +40,7 @@ export interface ThumbsResult {
  * });
  * ```
  */
-export const generateThumbs = Effect.fn("generateThumbs")(function* (
+export const generateThumbs = Effect.fnUntraced(function* (
   options: ThumbnailOptionsIn & {
     /**
      * Pattern for output filenames

@@ -70,7 +70,7 @@ const encodeSettings = Schema.encodeUnknownEffect(SettingsConfig);
  * Requires a {@link FileSystem.FileSystem} in context (e.g. via
  * `NodeFileSystem.layer`).
  */
-export const getSettingsConfig = Effect.fn("getSettingsConfig")(function* () {
+export const getSettingsConfig = Effect.fnUntraced(function* () {
   const state = getServerState();
   const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 

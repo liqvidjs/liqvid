@@ -117,7 +117,7 @@ export function getConfig() {
   );
 }
 
-const getOrigin = Effect.fn("getOrigin")(function* () {
+const getOrigin = Effect.fnUntraced(function* () {
   const headersList = yield* Effect.promise(headers);
 
   const origin = headersList.get("origin");
@@ -143,7 +143,7 @@ function interpolatePathParams(
   });
 }
 
-export const getRenderUrl = Effect.fn("getRenderUrl")(function* (
+export const getRenderUrl = Effect.fnUntraced(function* (
   renderSource: RenderSource,
   projectPath: RelativeDir,
   params?: Record<string, string>,

@@ -105,7 +105,7 @@ const TEMPLATES_DIR = path.join(
  * Creates directories like `.liqvid/en/US/`, `.liqvid/es/CA/`, etc.
  * for all parameter value combinations.
  */
-const initializeParameterizedDirs = Effect.fn("function")(
+const initializeParameterizedDirs = Effect.fnUntraced(
   function* (
     assetsDir: AbsoluteDir,
     projectPath: RelativeDir,
@@ -168,7 +168,7 @@ const isProjectDirectory = Effect.fnUntraced(function* (dir: AbsoluteDir) {
  * Find the project directory that contains the given file path.
  * Walks up the directory tree until it finds a project directory or reaches TARGET_DIR.
  */
-const findProjectDirectory = Effect.fn("findProjectDirectory")(function* (
+const findProjectDirectory = Effect.fnUntraced(function* (
   filePath: AbsolutePath,
 ) {
   let dir = path.dirname(filePath);
@@ -190,7 +190,7 @@ const findProjectDirectory = Effect.fn("findProjectDirectory")(function* (
   return Option.none();
 });
 
-export const watchAssets = Effect.fn("watchAssets")(
+export const watchAssets = Effect.fnUntraced(
   function* () {
     Handlebars.registerHelper("json", (obj) => {
       return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
@@ -292,7 +292,7 @@ function watchAssetEvents(
 /**
  * Generate the types.ts file inside the .liqvid directory.
  */
-const generateProjectTypes = Effect.fn("generateProjectTypes")(
+const generateProjectTypes = Effect.fnUntraced(
   function* ({
     biomePath,
     projectDir,
@@ -370,7 +370,7 @@ const generateProjectTypes = Effect.fn("generateProjectTypes")(
 /**
  * Generate a file from a Handlebars template, and format the result with Biome (if available).
  */
-export const runTemplate = Effect.fn("runTemplate")(
+export const runTemplate = Effect.fnUntraced(
   function* ({
     biomePath,
     data,
@@ -423,68 +423,60 @@ export const runTemplate = Effect.fn("runTemplate")(
  * @param currentDir - The current directory being listed (defaults to projectDir)
  * @param relativePath - The path relative to projectDir (defaults to "")
  */
-function listProjectDir(
+const listProjectDir = Effect.fnUntraced<
+  Effect.Effect<Directory, PlatformError.PlatformError, FileSystem.FileSystem>
+>(function* (
   projectDir: AbsoluteDir,
   currentDir: AbsoluteDir = projectDir,
   relativePath: RelativeDir = RelativeDir(""),
-): Effect.Effect<
-  Directory,
-  PlatformError.PlatformError,
-  FileSystem.FileSystem
-> {
-  return Effect.gen(function* () {
-    const entries = yield* readDirWithFileTypes(currentDir);
+) {
+  const entries = yield* readDirWithFileTypes(currentDir);
 
-    const results = yield* Effect.all(
-      entries.map(([basename, kind]) => {
-        return Effect.gen(function* () {
-          switch (kind) {
-            case "Directory": {
-              const fullPath = path.join(currentDir, basename);
-              const relPath = relativePath
-                ? path.join(relativePath, basename)
-                : basename;
+  const results = yield* Effect.all(
+    entries.map(([basename, kind]) => {
+      return Effect.gen(function* () {
+        switch (kind) {
+          case "Directory": {
+            const fullPath = path.join(currentDir, basename);
+            const relPath = relativePath
+              ? path.join(relativePath, basename)
+              : basename;
 
-              // Check if this entry should be excluded
-              if (shouldExclude(relPath, basename)) {
-                return null;
-              }
-
-              const subDir = yield* listProjectDir(
-                projectDir,
-                fullPath,
-                relPath,
-              );
-
-              return [basename, subDir] as const;
-            }
-            case "File": {
-              const relPath = relativePath
-                ? path.join(relativePath, basename)
-                : basename;
-
-              // Check if this entry should be excluded
-              if (shouldExclude(relPath, basename)) {
-                return null;
-              }
-
-              return [basename, null] as const;
-            }
-            default:
+            // Check if this entry should be excluded
+            if (shouldExclude(relPath, basename)) {
               return null;
+            }
+
+            const subDir = yield* listProjectDir(projectDir, fullPath, relPath);
+
+            return [basename, subDir] as const;
           }
-        });
-      }),
-    );
+          case "File": {
+            const relPath = relativePath
+              ? path.join(relativePath, basename)
+              : basename;
 
-    return results.reduce((acc, entry) => {
-      if (!entry) return acc;
+            // Check if this entry should be excluded
+            if (shouldExclude(relPath, basename)) {
+              return null;
+            }
 
-      const [basename, value] = entry;
+            return [basename, null] as const;
+          }
+          default:
+            return null;
+        }
+      });
+    }),
+  );
 
-      acc[basename] = value;
+  return results.reduce((acc, entry) => {
+    if (!entry) return acc;
 
-      return acc;
-    }, {} as Directory);
-  });
-}
+    const [basename, value] = entry;
+
+    acc[basename] = value;
+
+    return acc;
+  }, {} as Directory);
+});

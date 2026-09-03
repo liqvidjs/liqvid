@@ -27,7 +27,7 @@ import { runTemplate } from "./watch-assets.mts";
 /**
  * Generate the root-level .liqvid/types.ts file containing RootParams type.
  */
-export const generateRootTypes = Effect.fn("generateRootTypes")(
+export const generateRootTypes = Effect.fnUntraced(
   function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();
@@ -77,7 +77,7 @@ function isConfigFile(filePath: string): boolean {
  * Watch liqvid.jsonc and liqvid.json for changes and regenerate root-level
  * types when rootParameters changes.
  */
-export const watchRootTypes = Effect.fn("watchRootTypes")(
+export const watchRootTypes = Effect.fnUntraced(
   function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();

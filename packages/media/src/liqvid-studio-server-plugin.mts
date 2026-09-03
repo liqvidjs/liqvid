@@ -36,9 +36,7 @@ async function checkFfmpeg(): Promise<boolean> {
 /**
  * Re-encode WebM file to fix timing/seeking issues from browser recording.
  */
-const fixWebmTiming = Effect.fn("fixWebmTiming")(function* (
-  inputPath: AbsoluteFile,
-) {
+const fixWebmTiming = Effect.fnUntraced(function* (inputPath: AbsoluteFile) {
   const fs = yield* FileSystem.FileSystem;
 
   const dir = path.dirname(inputPath);
@@ -85,7 +83,7 @@ function stripAudio(inputPath: AbsoluteFile, outputPath: AbsoluteFile) {
  * Encode video to HLS format for adaptive streaming.
  * Creates two quality levels: 360p (lo-fi) and original (hi-fi).
  */
-const encodeHls = Effect.fn("encodeHls")(function* (
+const encodeHls = Effect.fnUntraced(function* (
   inputPath: AbsoluteFile,
   outputDir: AbsoluteDir,
 ) {
@@ -193,7 +191,7 @@ const encodeHls = Effect.fn("encodeHls")(function* (
  * - Fix WebM timing for seeking
  * - Create MP4/AAC version
  */
-const processAudioOnly = Effect.fn("processAudioOnly")(
+const processAudioOnly = Effect.fnUntraced(
   function* (dirname: AbsoluteDir) {
     const audioWebm = path.join(dirname, AUDIO_WEBM);
     const audioMp4 = path.join(dirname, AUDIO_MP4);
@@ -222,7 +220,7 @@ const processAudioOnly = Effect.fn("processAudioOnly")(
  * - Encode audio to MP4
  * - Encode video to HLS
  */
-const processVideo = Effect.fn("processVideo")(
+const processVideo = Effect.fnUntraced(
   function* (dirname: AbsoluteDir) {
     const videoWebm = path.join(dirname, VIDEO_WEBM);
     const audioWebm = path.join(dirname, AUDIO_WEBM);
@@ -279,7 +277,7 @@ const processVideo = Effect.fn("processVideo")(
 /**
  * Post-process @liqvid/media recording data.
  */
-const postProcessRecording = Effect.fn("postProcessRecording")(function* ({
+const postProcessRecording = Effect.fnUntraced(function* ({
   dirname,
 }: {
   dirname: AbsoluteDir;

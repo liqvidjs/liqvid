@@ -94,7 +94,7 @@ export interface RenderResult {
  * });
  * ```
  */
-export const renderVideo = Effect.gen("renderVideo")(function* (
+export const renderVideo = Effect.fnUntraced(function* (
   options: RenderOptions,
 ) {
   const { solidify } = yield* Effect.promise(

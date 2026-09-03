@@ -203,7 +203,7 @@ export async function publishMedia(options: PublishOptions = {}) {
 /**
  * Publish content files (html/css/js) to the hosting provider.
  */
-const publishContentFiles = Effect.fn("publishContentFiles")(
+const publishContentFiles = Effect.fnUntraced(
   function* (config: LiqvidConfig, cwd: AbsoluteDir, dryRun: boolean) {
     const fs = yield* FileSystem.FileSystem;
 
@@ -237,7 +237,7 @@ const publishContentFiles = Effect.fn("publishContentFiles")(
 /**
  * Publish media files to the media hosting provider.
  */
-const publishMediaFiles = Effect.fn("publishMediaFiles")(function* (
+const publishMediaFiles = Effect.fnUntraced(function* (
   config: LiqvidConfig,
   searchDir: AbsoluteDir,
   baseDir: RelativeDir,

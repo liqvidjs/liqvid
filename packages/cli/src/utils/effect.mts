@@ -58,7 +58,7 @@ export function loadEnvFiles(rootDir: AbsoluteDir): EnvFiles {
  * Returns the path to the first file that exists, or the .jsonc path if neither exists
  * (so the error message refers to the preferred format).
  */
-export const resolveConfigPath = Effect.fn("resolveConfigPath")(function* ({
+export const resolveConfigPath = Effect.fnUntraced(function* ({
   cwd = process.cwd(),
 }: {
   cwd?: AbsoluteDir;
@@ -86,7 +86,7 @@ export const resolveConfigPath = Effect.fn("resolveConfigPath")(function* ({
 /**
  * Load and parse liqvid.jsonc or liqvid.json (checked in that order).
  */
-export const loadLiqvidConfig = Effect.fn("loadLiqvidConfig")(
+export const loadLiqvidConfig = Effect.fnUntraced(
   function* ({ configPath }: { configPath?: AbsoluteFile } = {}) {
     const resolvedPath = configPath ?? (yield* resolveConfigPath());
     return yield* loadJsonc(LiqvidConfig, resolvedPath);
@@ -130,7 +130,7 @@ export const loadLiqvidConfig = Effect.fn("loadLiqvidConfig")(
  * (e.g. `EnvFiles`) surface those requirements to the caller instead of being
  * erased to `unknown`.
  */
-export const loadJson = Effect.fn("loadJson")(function* <S extends Schema.Top>(
+export const loadJson = Effect.fnUntraced(function* <S extends Schema.Top>(
   parser: S,
   filename: AbsoluteFile,
 ) {
@@ -151,9 +151,10 @@ export const loadJson = Effect.fn("loadJson")(function* <S extends Schema.Top>(
  *
  * Uses jsonc.min to strip comments before parsing.
  */
-export const loadJsonc = Effect.fn("loadJsonc")(function* <
-  S extends Schema.Top,
->(parser: S, filename: AbsoluteFile) {
+export const loadJsonc = Effect.fnUntraced(function* <S extends Schema.Top>(
+  parser: S,
+  filename: AbsoluteFile,
+) {
   const fs = yield* FileSystem.FileSystem;
 
   const file = yield* fs.readFileString(filename, "utf8");
@@ -207,7 +208,7 @@ function parseEnvFile(filePath: AbsolutePath): Record<string, string> {
 }
 
 /** Write JSON data to a file, pretty-printed with 2-space indentation. */
-export const writeJSON = Effect.fn("writeJSON")(function* <T>(
+export const writeJSON = Effect.fnUntraced(function* <T>(
   path: AbsoluteFile,
   data: T,
 ) {

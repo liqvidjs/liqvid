@@ -5,7 +5,7 @@ import puppeteer from "puppeteer-core";
 /**
  * Effectfully acquire a Puppeteer instance.
  */
-export const acquireBrowser = Effect.fn("acquireBrowser")(
+export const acquireBrowser = Effect.fnUntraced(
   function* (options?: Puppeteer.LaunchOptions) {
     yield* Effect.logDebug("acquiring browser");
 

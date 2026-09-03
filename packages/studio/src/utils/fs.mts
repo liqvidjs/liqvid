@@ -119,9 +119,7 @@ export function walkDirSync(
 /**
  * Get the path to the Biome executable, if available
  */
-export const getBiomePath = Effect.fn("getBiomePath")(function* (
-  dirname: AbsoluteDir,
-) {
+export const getBiomePath = Effect.fnUntraced(function* (dirname: AbsoluteDir) {
   const packageDir = yield* Effect.promise(() =>
     findUpwards(dirname, async (dir) => {
       const files = await fsp.readdir(dir);

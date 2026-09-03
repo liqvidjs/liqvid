@@ -215,7 +215,7 @@ export function thumbs({
 /**
 Assemble thumb screenshots into sheets.
 */
-const assembleSheets = Effect.fn("assembleSheets")(
+const assembleSheets = Effect.fnUntraced(
   function* ({
     cols,
     height,

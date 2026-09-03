@@ -336,7 +336,7 @@ const compileTemplate = Effect.fnUntraced(function* (
  * Files ending in .hbs are compiled with Handlebars and have the .hbs extension removed.
  * Other files are copied as-is. template.json is skipped.
  */
-const copyTemplateDir = Effect.fn("copyTemplateDir")(function* (
+const copyTemplateDir = Effect.fnUntraced(function* (
   srcDir: AbsoluteDir,
   destDir: AbsoluteDir,
   data: Record<string, unknown>,

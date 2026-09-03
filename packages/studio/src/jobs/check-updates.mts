@@ -262,7 +262,7 @@ const getLatestVersion = Effect.fnUntraced(function* (name: PackageName) {
  * server state. Never fails — errors (offline, registry errors, missing
  * `package.json`) leave the previous {@link UpdateInfo} untouched.
  */
-export const checkForUpdates = Effect.fn("checkForUpdates")(
+export const checkForUpdates = Effect.fnUntraced(
   function* () {
     const fs = yield* FileSystem.FileSystem;
     const state = getServerState();

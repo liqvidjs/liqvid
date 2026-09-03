@@ -118,7 +118,7 @@ export function initProjectFiles(projects: Projects) {
   ).pipe(Effect.provideService(References.MinimumLogLevel, getLogLevel()));
 }
 
-export const watchProjectFiles = Effect.fn("watchProjectFiles")(
+export const watchProjectFiles = Effect.fnUntraced(
   function* (projects: Projects) {
     const TARGET_DIR = getRoutesDir();
 
@@ -289,7 +289,7 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
 /**
  * Dispatch a single watch event to the appropriate handler.
  */
-const handleWatchEvent = Effect.fn("handleWatchEvent")(
+const handleWatchEvent = Effect.fnUntraced(
   function* (event: WatchEvent, projects: Projects) {
     // A recording is a directory under `.liqvid/recordings/`; its removal (as
     // opposed to a change to its `recording-meta.json`) surfaces as a dir
@@ -332,7 +332,7 @@ const handleWatchEvent = Effect.fn("handleWatchEvent")(
 /**
  * Handle new or deleted project.json files
  */
-const handleProjectJson = Effect.fn("handleProjectJson")(
+const handleProjectJson = Effect.fnUntraced(
   function* ({ dirname, filename, projects, relative }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
@@ -390,7 +390,7 @@ const handleProjectJson = Effect.fn("handleProjectJson")(
 /**
  * Handle new or deleted project.json files
  */
-const createProject = Effect.fn("createProject")(
+const createProject = Effect.fnUntraced(
   function* ({ dirname, filename, projects, relative }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
@@ -488,7 +488,7 @@ const createProject = Effect.fn("createProject")(
  *
  * We need to find the project by walking up from the .liqvid directory.
  */
-const handleProjectMeta = Effect.fn("handleProjectMeta")(
+const handleProjectMeta = Effect.fnUntraced(
   function* ({ dirname: metaDir, filename, projects, relative }: Context) {
     // Walk up from the meta file's directory to find the .liqvid directory
     // Then the project is one level above .liqvid
@@ -539,7 +539,7 @@ const handleProjectMeta = Effect.fn("handleProjectMeta")(
  * metadata is actually written, so this only acts on directories that no
  * longer exist.
  */
-const handleRecordingDir = Effect.fn("handleRecordingDir")(
+const handleRecordingDir = Effect.fnUntraced(
   function* (recordingDir: AbsoluteDir) {
     const fs = yield* FileSystem.FileSystem;
 
@@ -574,7 +574,7 @@ const handleRecordingDir = Effect.fn("handleRecordingDir")(
  * `recordings` and `.liqvid` dirs) is the project directory. Whether the file
  * still exists tells create/update from delete.
  */
-const handleRecordingMeta = Effect.fn("handleRecordingMeta")(
+const handleRecordingMeta = Effect.fnUntraced(
   function* ({ dirname: recordingDir, filename }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
@@ -726,7 +726,7 @@ function parseAspectRatio(value: unknown): AspectRatio {
   throw new Error(`Invalid aspect ratio: ${JSON.stringify(value)}`);
 }
 
-const generateAssetsDir = Effect.fn("generateAssetsDir")(function* ({
+const generateAssetsDir = Effect.fnUntraced(function* ({
   dirname,
   projectPath,
 }: {

@@ -63,7 +63,7 @@ function appendLog(service: Service, log: StructuredLog) {
  * All log output from the effect (via `Effect.log*`) is captured, tagged with
  * its level, and streamed to the Jobs page.
  */
-export const createService = Effect.fn("createService")(
+export const createService = Effect.fnUntraced(
   function* <A, E, R>(name: string, effect: Effect.Effect<A, E, R>) {
     yield* Effect.logDebug("starting service", { name });
     const { services } = getServerState();

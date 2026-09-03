@@ -19,7 +19,7 @@ export const PLAYER_API_NAMESPACE = "@liqvid/player";
  * call multiple times, which lets a single page be reused to capture multiple
  * schemes without reloading the URL.
  */
-export const setColorScheme = Effect.fn("setColorScheme")(function* (
+export const setColorScheme = Effect.fnUntraced(function* (
   page: Puppeteer.Page,
   colorScheme: ColorScheme,
 ) {
@@ -47,7 +47,7 @@ export const setColorScheme = Effect.fn("setColorScheme")(function* (
  * Connect to a page running Liqvid.
  * Returns the page after setup. Caller is responsible for page cleanup.
  */
-export const connect = Effect.fn("connect")(
+export const connect = Effect.fnUntraced(
   function* ({
     browser,
     colorScheme = "light",
@@ -156,7 +156,7 @@ export const connect = Effect.fn("connect")(
 /**
 Connect to players.
 */
-export const getPages = Effect.fn("getPages")(
+export const getPages = Effect.fnUntraced(
   function* ({
     colorScheme = "light",
     concurrency,

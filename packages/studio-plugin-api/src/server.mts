@@ -12,7 +12,7 @@ type JsonFile = (typeof JsonFile)["Type"];
 /**
  * Write a JSON file along with an adjacent `.d.ts` file specifying its type.
  */
-export const writeTypedJson = Effect.fn("writeTypedJson")(function* ({
+export const writeTypedJson = Effect.fnUntraced(function* ({
   data,
   declaration,
   dirname,

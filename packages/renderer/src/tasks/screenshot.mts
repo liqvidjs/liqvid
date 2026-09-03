@@ -65,7 +65,7 @@ export interface ScreenshotResult {
 /**
  * Capture a single screenshot from a Liqvid player.
  */
-export const screenshot = Effect.fn("screenshot")(
+export const screenshot = Effect.fnUntraced(
   function* (options: ScreenshotOptions) {
     const {
       browserExecutable,
