@@ -13,17 +13,21 @@ projectParamsContext.displayName = "ProjectParams";
 /**
  * Get the current project parameter values, or null if not in a parameterized project.
  */
-export function useProjectParamsOptional(): Record<string, string> | null {
-  return useContext(projectParamsContext);
+export function useProjectParamsOptional<
+  PP extends Record<string, string> = Record<string, string>,
+>(): PP | null {
+  return useContext(projectParamsContext) as PP | null;
 }
 
 /**
  * Get the current project parameter values.
  * Returns an empty object if not in a parameterized project.
  */
-export function useProjectParams(): Record<string, string> {
-  const value = useProjectParamsOptional();
-  return value ?? {};
+export function useProjectParams<
+  PP extends Record<string, string> = Record<string, string>,
+>(): PP {
+  const value = useProjectParamsOptional<PP>();
+  return value ?? ({} as PP);
 }
 
 export const ProjectParamsProvider = projectParamsContext.Provider;
