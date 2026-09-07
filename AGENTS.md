@@ -10,7 +10,11 @@ TypeScript (strict, ES2022, ESM) · pnpm 10.25+ workspaces · Biome (lint/format
 
 Core: `main`→`liqvid`, plus `@liqvid/{assets,color-scheme,duration,event-emitter,hydration,iframe-api,keymap,media,playback,prompts,recording,script,ssr,studio,studio-plugin-api,utils}`
 
-Plugin: `cursor`. Legacy (ignore): `captioning`, `server`, `cli`, `dev-watcher`, `dev-watcher-rs`
+Integrations: `katex`, `react-three`
+
+Plugin: `cursor`, `livecode`, `tldraw`.
+
+Legacy (ignore): `captioning`, `server`, `cli`, `dev-watcher`, `dev-watcher-rs`, `test`, `epiplexis`, `polyfills`, `mathjax`, `xyjax`, `gsap`, `lqv-playback`, `react`
 
 ## Commands
 
@@ -20,14 +24,14 @@ Run from a package dir (e.g. `packages/utils`), or from root via `pnpm --filter 
 
 ```bash
 pnpm build                       # clean + compile (ESM + CJS)
-npx tsc --noEmit                 # type-check only (fast, no build)
-npx biome check --fix --reporter=concise  # lint + format with auto-fix
-npx biome check --reporter=concise        # lint + format (no fix)
+tsc --noEmit                 # type-check only (fast, no build)
+biome check --fix --reporter=concise  # lint + format with auto-fix
+biome check --reporter=concise        # lint + format (no fix)
 pnpm test                        # all tests (--coverage for coverage)
-npx jest tests/foo.test.ts       # single file
-npx jest -t "pattern"            # by name
+jest tests/foo.test.ts       # single file
+jest -t "pattern"            # by name
 pnpm test:playwright             # e2e (main package only)
-npx playwright test e2e/tests/x.ts
+playwright test e2e/tests/x.ts
 ```
 
 ## Code Style (Biome-enforced)

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -98,7 +98,10 @@
         "useExhaustiveDependencies": {
           "level": "on",
           "options": {
-            "hooks": [{ "name": "useInitial", "stableResult": true }]
+            "hooks": [
+              { "name": "useInitial", "stableResult": true },
+              { "name": "useIsStrictMode", "stableResult": true }
+            ]
           }
         },
         "useImportExtensions": "off",

@@ -1,17 +1,18 @@
 allowBuilds:
-  "@biomejs/biome": set this to true or false
-  "@parcel/watcher": set this to true or false
+  "@biomejs/biome": true
+  "@parcel/watcher": true
   "@swc/core": true
-  bufferutil: set this to true or false
-  core-js: set this to true or false
-  es5-ext: set this to true or false
-  esbuild: set this to true or false
-  msgpackr-extract: set this to true or false
+  bufferutil: true
+  core-js: false
+  es5-ext: false
+  esbuild: false
+  inotify: false
+  msgpackr-extract: true
   sharp: true
   smart-whisper: true
-  unrs-resolver: set this to true or false
-  utf-8-validate: set this to true or false
-  workerd: set this to true or false
+  unrs-resolver: false
+  utf-8-validate: false
+  workerd: true
 
 packages:
   - packages/**
@@ -49,8 +50,8 @@ catalog:
   "@docusaurus/preset-classic": 3.10.2
   "@docusaurus/tsconfig": 3.10.2
   "@docusaurus/types": 3.10.2
-  "@effect/platform-bun": 4.0.0-rc.109
-  "@effect/platform-node": 4.0.0-rc.109
+  "@effect/platform-bun": 4.0.0-rc.112
+  "@effect/platform-node": 4.0.0-rc.112
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
   "@juggle/resize-observer": ^3.4.0
@@ -71,6 +72,8 @@ catalog:
   "@react-router/serve": ^7.9.6
   "@react-three/drei": ^10.7.8
   "@react-three/fiber": ^9.7.0
+  "@stylexjs/babel-plugin": ^0.19.0
+  "@stylexjs/postcss-plugin": ^0.19.0
   "@svgr/webpack": ^8.1.0
   "@tailwindcss/postcss": ^4.3.3
   "@tailwindcss/vite": ^4.1.12
@@ -94,11 +97,12 @@ catalog:
   client-only: ^0.0.1
   clsx: ^2.1.1
   codemirror-lang-glsl: ^0.5.0
+  comment-json: ^5.0.0
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-rc.109
-  "effect-paths": "^0.0.2"
+  effect: 4.0.0-rc.112
+  "effect-paths": "^1.0.1"
   execa: ^9.6.1
   fast-glob: 3.3.3
   handlebars: ^4.7.9
@@ -110,11 +114,12 @@ catalog:
   jest-environment-jsdom: ^30.2.0
   jimp: ^0.16.13
   jotai: ^2.13.1
+  jsonc.min: ^1.1.2
   katex: ^0.16.47
   lodash: ^4.17.21
   lodash.debounce: ^4.0.8
   mathjax: ^3.2.2
-  next: ^16.3.1
+  next: ^16.3.2
   pluralize: ^8.0.0
   postcss: ^8.5.6
   prettier-plugin-glsl: ^0.3.1
@@ -148,7 +153,7 @@ catalog:
 
 catalogs:
   dev:
-    "@biomejs/biome": 2.5.8
+    "@biomejs/biome": 2.5.10
     "@codemirror/autocomplete": 6.20.2
     "@codemirror/collab": 6.1.1
     "@codemirror/commands": 6.10.3
@@ -195,8 +200,8 @@ catalogs:
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.4
     csstype: ^3.2.3
-    effect: 4.0.0-rc.110
-    "effect-paths": "^0.0.2"
+    effect: 4.0.0-rc.112
+    "effect-paths": "^1.0.1"
     glslx: ^0.3.1
     jest: ^30.4.2
     js-yaml: ^4.1.1
@@ -236,16 +241,16 @@ catalogs:
     "@react-three/drei": ">=10"
     "@react-three/fiber": ">=9"
     "@replit/codemirror-vim": ^6.3
-    "@tldraw/editor": ^5.3.1
-    "@tldraw/store": ^5.3.1
-    "@tldraw/store-react": ^5.3.1
-    "@tldraw/tldraw": ^5.3.1
-    "@tldraw/tlschema": ^5.3.1
-    "@tldraw/validate": ^5.3.1
+    "@tldraw/editor": ^5.4.0
+    "@tldraw/store": ^5.4.0
+    "@tldraw/store-react": ^5.4.0
+    "@tldraw/tldraw": ^5.4.0
+    "@tldraw/tlschema": ^5.4.0
+    "@tldraw/validate": ^5.4.0
     "@types/react": "19.2.18"
     "@types/react-dom": "19.2.4"
     effect: ">=4.0.0-rc.0"
-    "effect-paths": ">=0.0.2"
+    "effect-paths": "^1.0.1"
     glslx: ^0.3.1
     hls.js: ^1.6.16
     jszip: ^3.10.1
@@ -261,7 +266,7 @@ catalogs:
     skulpt: ^1.2
     smart-whisper: "^0.8.1"
     three: ">=0.183"
-    tldraw: ^5.3.1
+    tldraw: ^5.4.0
     ws: ^8.21.3
     zod: ">=4"
 
@@ -277,16 +282,15 @@ overrides:
   "@docusaurus/theme-common": 3.10.2
   "@docusaurus/types": 3.10.2
   "@lezer/highlight": 1.2.3
-  "@tldraw/editor": 5.3.1
-  "@tldraw/state": 5.3.1
-  "@tldraw/state-react": 5.3.1
-  "@tldraw/store": 5.3.1
-  "@tldraw/tlschema": 5.3.1
-  "@tldraw/utils": 5.3.1
-  "@tldraw/validate": 5.3.1
+  "@tldraw/editor": 5.4.0
+  "@tldraw/state": 5.4.0
+  "@tldraw/state-react": 5.4.0
+  "@tldraw/store": 5.4.0
+  "@tldraw/tlschema": 5.4.0
+  "@tldraw/utils": 5.4.0
+  "@tldraw/validate": 5.4.0
   "@types/react": 19.2.18
   "@types/react-dom": 19.2.4
-  jiti: ^2
   "react-dom": 19.2.8
   react: 19.2.8
 
@@ -302,19 +306,19 @@ minimumReleaseAgeExclude:
   - "@biomejs/cli-win32-x64@2.5.7 || 2.5.8"
   - prettier@3.9.6
   - no-private-imports@0.0.4
-  - "@next/env@16.3.0 || 16.3.1"
-  - "@next/swc-darwin-arm64@16.3.0 || 16.3.1"
-  - "@next/swc-darwin-x64@16.3.0 || 16.3.1"
-  - "@next/swc-linux-arm64-gnu@16.3.0 || 16.3.1"
-  - "@next/swc-linux-arm64-musl@16.3.0 || 16.3.1"
-  - "@next/swc-linux-x64-gnu@16.3.0 || 16.3.1"
-  - "@next/swc-linux-x64-musl@16.3.0 || 16.3.1"
-  - "@next/swc-win32-arm64-msvc@16.3.0 || 16.3.1"
-  - "@next/swc-win32-x64-msvc@16.3.0 || 16.3.1"
-  - next@16.3.0 || 16.3.1
-  - "@effect/platform-bun@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109"
-  - "@effect/platform-node-shared@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109"
-  - "@effect/platform-node@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109"
+  - "@next/env@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-darwin-arm64@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-darwin-x64@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-linux-arm64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-linux-arm64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-linux-x64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-linux-x64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-win32-arm64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - "@next/swc-win32-x64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1"
+  - next@16.3.0 || 16.3.1 || 16.4.0-canary.1
+  - "@effect/platform-bun@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110"
+  - "@effect/platform-node-shared@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110"
+  - "@effect/platform-node@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110"
   - "@effect/tsgo-darwin-arm64@0.36.0"
   - "@effect/tsgo-darwin-x64@0.36.0"
   - "@effect/tsgo-linux-arm64@0.36.0"
@@ -324,14 +328,15 @@ minimumReleaseAgeExclude:
   - "@effect/tsgo-win32-x64@0.36.0"
   - "@effect/tsgo@0.36.0"
   - effect@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110
-  - "@tldraw/driver@5.3.1"
-  - "@tldraw/editor@5.3.1"
-  - "@tldraw/state-react@5.3.1"
-  - "@tldraw/state@5.3.1"
-  - "@tldraw/store@5.3.1"
-  - "@tldraw/tlschema@5.3.1"
-  - "@tldraw/utils@5.3.1"
-  - "@tldraw/validate@5.3.1"
-  - tldraw@5.3.1
-  - "@tldraw/assets@5.3.1"
-  - effect-paths@0.0.2
+  - "@tldraw/driver@5.4.0"
+  - "@tldraw/editor@5.4.0"
+  - "@tldraw/state-react@5.4.0"
+  - "@tldraw/state@5.4.0"
+  - "@tldraw/store@5.4.0"
+  - "@tldraw/tlschema@5.4.0"
+  - "@tldraw/utils@5.4.0"
+  - "@tldraw/validate@5.4.0"
+  - tldraw@5.4.0
+  - "@tldraw/assets@5.4.0"
+  - "@liqvid/color-scheme@1.0.0-alpha.5"
+  - effect-paths@1.0.1

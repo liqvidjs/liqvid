@@ -1,6 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "disabled_providers": ["amazon-bedrock"],
+  "formatter": {
+    "prettier": {
+      "disabled": true
+    }
+  },
   "mcp": {
     "next-devtools": {
       "command": ["npx", "-y", "next-devtools-mcp@latest"],
@@ -14,12 +19,15 @@
       "cat *": "allow",
       "cd *": "allow",
       "echo *": "allow",
+      "*find* -delete*": "deny",
+      "find *": "allow",
       "git *": "deny",
       "grep *": "allow",
       "head *": "allow",
       "ls *": "allow",
       "mkdir *": "allow",
       "node --version": "allow",
+      "node build-stylex.mjs *": "allow",
       "npm *": "ask",
       "npm list": "allow",
       "npm run build *": "allow",
@@ -29,25 +37,24 @@
       "pnpm add *": "allow",
       "pnpm build *": "allow",
       "pnpm build:js": "allow",
-      "pnpm generate:schemas": "allow",
       "pnpm exec biome *": "allow",
       "pnpm exec tsc --noEmit *": "allow",
       "pnpm filter *": "allow",
       "pnpm format *": "allow",
       "pnpm generate:openapi *": "allow",
+      "pnpm generate:schemas": "allow",
       "pnpm info *": "allow",
       "pnpm install *": "allow",
       "pnpm lint *": "allow",
       "pnpm lint:agent": "allow",
+      "pnpm ls *": "allow",
+      "ripwire *": "allow",
       "rm *": "deny",
-      "rtk find *": "allow",
-      "rtk git diff *": "allow",
-      "rtk grep *": "allow",
-      "rtk lint biome": "allow",
-      "rtk ls *": "allow",
-      "rtk tsc *": "allow",
+      "sed *": "allow",
+      "sort *": "allow",
       "tail *": "allow",
-      "tsc --noEmit *": "allow"
+      "tsc --noEmit *": "allow",
+      "xargs *": "allow"
     }
   },
   "provider": {
