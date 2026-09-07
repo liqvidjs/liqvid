@@ -36,6 +36,7 @@
     "@biomejs/biome": "catalog:dev",
     "@testing-library/react": "catalog:dev",
     "@types/jest": "catalog:dev",
+    "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "jest": "catalog:dev",
     "ts-jest": "catalog:dev",

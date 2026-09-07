@@ -49,7 +49,7 @@ export function thumbs({
   url,
   width,
 }: {
-  browserExecutable: AbsoluteFile;
+  browserExecutable?: AbsoluteFile;
   browserHeight: number;
   browserWidth: number;
   /** Single-scheme color scheme (ignored when `schemes` is provided). */

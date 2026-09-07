@@ -1,3 +1,4 @@
+import type { AbsoluteFile } from "effect-paths";
 import type { CommandModule } from "yargs";
 
 import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
@@ -7,7 +8,7 @@ import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
  */
 export interface DebugOptions {
   /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable?: string;
+  browserExecutable?: AbsoluteFile;
 
   /** URL to open */
   url: string;
@@ -27,7 +28,7 @@ export async function debug(options: DebugOptions): Promise<void> {
   const { debug: openDebug } = await import("@liqvid/renderer/debug");
 
   await openDebug({
-    browserExecutable: options.browserExecutable ?? "",
+    browserExecutable: options.browserExecutable,
     url: options.url,
   });
 }
@@ -56,7 +57,7 @@ export const debugCommand: CommandModule = {
   handler: async (argv) => {
     const { debug: openDebug } = await import("@liqvid/renderer/debug");
     await openDebug({
-      browserExecutable: (argv.browserExecutable as string) ?? "",
+      browserExecutable: argv.browserExecutable as AbsoluteFile,
       url: argv.url as string,
     });
     process.exit(0);

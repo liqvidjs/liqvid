@@ -226,7 +226,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
       ),
   );
 
-  downloadMedia = Effect.fnUntraced(
+  downloadMedia = Effect.fn("downloadMedia")(
     { self: this },
     function* (this: CopyProvider, files: FileDownloadStatus[]) {
       const destination = this.#getDestination("media");
@@ -303,7 +303,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     }
   }
 
-  publishMedia = Effect.fnUntraced(
+  publishMedia = Effect.fn("publishMedia")(
     { self: this },
     function* (
       this: CopyProvider,

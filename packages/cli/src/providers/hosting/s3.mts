@@ -130,7 +130,7 @@ export class S3Provider implements MediaHostingProvider {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
 
-  publishMedia = Effect.fnUntraced(
+  publishMedia = Effect.fn("publishMedia")(
     { self: this },
     function* (this: S3Provider, files: AbsoluteFile[], rootDir: AbsoluteDir) {
       if (files.length === 0) {
@@ -212,7 +212,7 @@ export class S3Provider implements MediaHostingProvider {
     );
   }
 
-  downloadMedia = Effect.fnUntraced(
+  downloadMedia = Effect.fn("downloadMedia")(
     { self: this },
     function* (this: S3Provider, files: FileDownloadStatus[]) {
       const toDownload = files.filter((f) => f.needsDownload);
@@ -318,7 +318,7 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Get the upload status for a single file.
    */
-  private getUploadStatus = Effect.fnUntraced(
+  private getUploadStatus = Effect.fn("getUploadStatus")(
     { self: this },
     function* (this: S3Provider, filePath: AbsoluteFile, key: RelativeFile) {
       const fs = yield* FileSystem.FileSystem;
@@ -402,7 +402,7 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Upload a single file to S3 using multipart upload for large files
    */
-  private uploadFile = Effect.fnUntraced(
+  private uploadFile = Effect.fn("uploadFile")(
     { self: this },
     function* (this: S3Provider, filePath: AbsoluteFile, key: string) {
       const fs = yield* FileSystem.FileSystem;

@@ -41,26 +41,27 @@ export interface ThumbsResult {
  * ```
  */
 export const generateThumbs = Effect.fnUntraced(function* (
-  options: ThumbnailOptionsIn & {
-    /**
-     * Pattern for output filenames
-     * Interpolation patterns:
-     * - `%s` sheet number (required)
-     *
-     * Ignored when `schemes` is provided.
-     */
-    output?: string;
+  options: ThumbnailOptionsIn &
+    Pick<ThumbnailOptions, "browserExecutable"> & {
+      /**
+       * Pattern for output filenames
+       * Interpolation patterns:
+       * - `%s` sheet number (required)
+       *
+       * Ignored when `schemes` is provided.
+       */
+      output?: string;
 
-    /**
-     * Multiple color schemes to capture in a single browser session. When
-     * provided, `colorScheme`/`output` are ignored and each scheme is captured
-     * by reusing the same loaded pages (only one page load per URL).
-     */
-    schemes?: readonly { colorScheme: "light" | "dark"; output: string }[];
+      /**
+       * Multiple color schemes to capture in a single browser session. When
+       * provided, `colorScheme`/`output` are ignored and each scheme is captured
+       * by reusing the same loaded pages (only one page load per URL).
+       */
+      schemes?: readonly { colorScheme: "light" | "dark"; output: string }[];
 
-    /** URL of video to generate thumbs for */
-    url: string;
-  },
+      /** URL of video to generate thumbs for */
+      url: string;
+    },
 ) {
   const path = yield* Effect.promise(() => import("node:path"));
   const fs = yield* FileSystem.FileSystem;

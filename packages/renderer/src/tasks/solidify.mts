@@ -35,7 +35,7 @@ export function solidify({
   Parameters<typeof assembleVideo>[0],
   "audioFile" | "framesDir" | "padLen"
 > & {
-  browserExecutable: AbsoluteFile;
+  browserExecutable?: AbsoluteFile;
   colorScheme: "light" | "dark";
   concurrency: number;
   duration: number;
