@@ -5,6 +5,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { XIcon } from "@phosphor-icons/react";
 import clsx from "clsx";
+import type React from "react";
 import type { ReactNode } from "react";
 import {
   createContext,
@@ -119,17 +120,27 @@ export function DialogClose({
 export function DialogPopup({
   className,
   size = "auto",
+  style,
   ...props
 }: React.ComponentProps<typeof Dialog.Popup> & {
   size?: "auto" | "small" | "medium" | "large" | "huge";
 }) {
   const { colorScheme } = useColorScheme();
+  const { level } = useDialogApi();
 
   return (
     <Dialog.Popup
-      className={clsx(styles.Content, styles[size], className)}
+      className={clsx(
+        styles.Content,
+        size !== "auto" && styles[size],
+        className,
+      )}
       data-color-scheme={colorScheme}
-      style={{ colorScheme }}
+      style={{
+        colorScheme,
+        ...style,
+        "--dialog-level": `${level}`,
+      }}
       {...props}
     />
   );

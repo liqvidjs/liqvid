@@ -13,20 +13,25 @@
   },
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "imports": {
     "#_/*.js": {
       "@liqvid/dev": [
-        "./src/*.ts",
-        "./src/*.tsx"
+        "./src/*.tsx",
+        "./src/*.ts"
       ],
-      "import": "./src/*"
+      "import": "./dist/esm/*"
     },
-    "#_/*.json": "./src/*.json",
+    "#_/*.json": {
+      "default": "./src/*.json",
+      "import": "./dist/esm/*.json"
+    },
     "#_/*.mjs": {
       "default": "./src/*.mts",
-      "import": "./src/*"
+      "import": "./dist/esm/*"
     }
   },
   "exports": {
@@ -64,7 +69,7 @@
     "liqvid-validate-translations.mjs"
   ],
   "scripts": {
-    "..build:clean": "rm -rf dist",
+    ".build:clean": "rm -rf dist",
     ".build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
     ".build:hbs": "cp -R templates dist",
     ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
@@ -72,7 +77,8 @@
     ".watch:hbs": "watch -n1 pnpm build:hbs",
     ".watch:tcm": "tcm src --watch",
     ".watch:tsc": "tsc --watch",
-    "build": "pnpm build:js ; pnpm .build:hbs ; pnpm .build:css",
+    ".build:stylex": "node build-stylex.mjs",
+    "build": "pnpm build:js ; pnpm .build:hbs ; pnpm .build:css ; pnpm .build:stylex",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "build:js": "tsc",
     "docs:gen": "typedoc",
@@ -90,6 +96,7 @@
     "@effect/platform-node": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
+    "@radix-ui/react-slot": "catalog:",
     "@stylexjs/stylex": "^0.19.0",
     "chalk": "catalog:",
     "clsx": "catalog:",
@@ -100,22 +107,28 @@
     "http-status-codes": "catalog:",
     "jsonc.min": "catalog:",
     "lodash.debounce": "catalog:",
+    "server-only": "catalog:",
     "ts-morph": "catalog:",
     "universal-cookie": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.8",
     "@biomejs/biome": "catalog:dev",
     "@effect/language-service": "catalog:dev",
     "@jest/globals": "catalog:dev",
+    "@stylexjs/babel-plugin": "catalog:",
+    "@stylexjs/postcss-plugin": "catalog:",
     "@types/jest": "catalog:dev",
     "@types/node": "catalog:dev",
-    "@types/react": "catalog:dev",
-    "@types/react-dom": "catalog:dev",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
     "@types/serve-handler": "catalog:dev",
     "@types/ws": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "concurrently": "catalog:dev",
+    "csstype": "catalog:",
+    "dev": "catalog:",
     "jest": "catalog:dev",
     "next": "catalog:",
     "next-ws": "catalog:peer",

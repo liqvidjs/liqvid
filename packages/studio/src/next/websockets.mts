@@ -1,13 +1,6 @@
 import { NodeSocket } from "@effect/platform-node";
 import { serialize } from "@liqvid/ssr/serde";
-import {
-  Effect,
-  Fiber,
-  Logger,
-  ManagedRuntime,
-  References,
-  Schema,
-} from "effect";
+import { Effect, Fiber, Logger, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/unstable/socket";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
@@ -18,7 +11,7 @@ import {
   type ChannelName,
   EnvelopeFromJson,
 } from "#_/lib/websockets/channels.js";
-import { getLogLevel } from "#_/utils/misc.mjs";
+import { withLogLevel } from "#_/server-runtime.mjs";
 
 import type { DynamicImports } from "./api.mts";
 
@@ -115,11 +108,10 @@ export function upgradeHandler(_dynamicImports: DynamicImports) {
     _context: unknown,
   ) {
     const fiber = runtime.runFork(
-      handleConnection(client).pipe(
+      withLogLevel(handleConnection(client)).pipe(
         // Effect.catchCause((cause) =>
         //   Effect.logDebug("WebSocket connection closed", Cause.pretty(cause)),
         // ),
-        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
         Effect.provide(Logger.layer([Logger.consolePretty()])),
       ),
     );

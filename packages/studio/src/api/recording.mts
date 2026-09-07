@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { type FileDecodeError, loadJson } from "@liqvid/cli/utils";
+import { loadJson } from "@liqvid/cli/utils";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,
@@ -29,6 +29,7 @@ import {
   RECORDINGS_DIR,
 } from "#_/conventions.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
+import { InvalidProjectStructure } from "#_/utils/errors.mjs";
 import { getRoutesDir } from "#_/utils/misc.mjs";
 import {
   ensureParamsMarker,
@@ -147,9 +148,26 @@ export function runPostProcessing(
 export const loadRecordingMeta = Effect.fnUntraced(function* (
   recordingDir: AbsoluteDir,
 ) {
-  const file = yield* loadJson(
-    RecordingMetaFile,
-    path.join(recordingDir, RECORDING_META_FILE),
+  const filename = path.join(recordingDir, RECORDING_META_FILE);
+
+  const file = yield* loadJson(RecordingMetaFile, filename).pipe(
+    Effect.catchReason(
+      "PlatformError",
+      "NotFound",
+      (cause) =>
+        new InvalidProjectStructure({
+          cause,
+          message: `${RECORDING_META_FILE} not found in ${recordingDir}`,
+        }),
+    ),
+    Effect.catchTag(
+      "FileDecodeError",
+      (cause) =>
+        new InvalidProjectStructure({
+          cause,
+          message: `invalid recording meta file ${filename}`,
+        }),
+    ),
   );
 
   const children = yield* readDirWithFileTypes(recordingDir);
@@ -182,9 +200,11 @@ export const recordingsLive = HttpApiBuilder.group(
 
             // error if base assets dir doesn't exist
             if (!(yield* fs.exists(baseAssetsDir))) {
-              return yield* Effect.die({
-                message: "assets dir does not exist",
-              });
+              return yield* Effect.die(
+                new InvalidProjectStructure({
+                  message: `assets dir does not exist at ${baseAssetsDir}`,
+                }),
+              );
             }
 
             // Parse params if provided
@@ -220,7 +240,7 @@ export const recordingsLive = HttpApiBuilder.group(
                 // TODO: find more idiomatic way to write this
                 [] as Effect.Effect<
                   RecordingMeta,
-                  FileDecodeError | PlatformError.PlatformError,
+                  InvalidProjectStructure | PlatformError.PlatformError,
                   FileSystem.FileSystem
                 >[],
               ),
@@ -232,9 +252,8 @@ export const recordingsLive = HttpApiBuilder.group(
           },
           (effect) =>
             effect.pipe(
+              Effect.catchTag("PlatformError", Effect.orDie),
               Effect.withLogSpan("recordings.list"),
-              Effect.catchTag("FileDecodeError", Effect.die),
-              Effect.catchTag("PlatformError", Effect.die),
             ),
         ),
       )

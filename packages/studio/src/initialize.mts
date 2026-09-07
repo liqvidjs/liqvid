@@ -1,4 +1,3 @@
-import { NodeFileSystem } from "@effect/platform-node";
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles, type LiqvidConfig, type ProjectMeta } from "@liqvid/schemas";
 import { Effect, Option } from "effect";
@@ -7,6 +6,7 @@ import type { AbsoluteDir } from "effect-paths";
 
 import type { LoggableJob, Service } from "./api/schemas.mts";
 import { type UpdateInfo, watchForUpdates } from "./jobs/check-updates.mts";
+import { serverRuntime } from "./server-runtime.mts";
 import {
   DEFAULT_PRODUCTION_SERVER_PORT,
   startProductionServer,
@@ -97,11 +97,8 @@ export async function initializeServer() {
   // Load config initially
   if (Option.isNone(state.config)) {
     envFiles ??= loadEnvFiles(cwd);
-    const config = await Effect.runPromise(
-      loadLiqvidConfig().pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(EnvFiles, envFiles),
-      ),
+    const config = await serverRuntime.runPromise(
+      loadLiqvidConfig().pipe(Effect.provideService(EnvFiles, envFiles)),
     );
 
     state.config = Option.some(config);
@@ -115,17 +112,16 @@ export async function initializeServer() {
   // service has been registered (not when the watcher finishes).
 
   if (!started.watchConfig) {
-    Effect.runSync(createService("watch config", watchLiqvidConfig(state)));
+    serverRuntime.runSync(
+      createService("watch config", watchLiqvidConfig(state)),
+    );
 
     started.watchConfig = true;
   }
 
   if (!started.watchRootTypes) {
-    Effect.runSync(
-      createService(
-        "watch root types",
-        watchRootTypes(state).pipe(Effect.provide(NodeFileSystem.layer)),
-      ),
+    serverRuntime.runSync(
+      createService("watch root types", watchRootTypes(state)),
     );
 
     started.watchRootTypes = true;
@@ -142,22 +138,21 @@ export async function initializeServer() {
     started.watchProjectFiles = true;
     started.watchAssets = true;
 
-    await Effect.runPromise(initProjectFiles(projects));
+    await serverRuntime.runPromise(initProjectFiles(projects));
 
-    Effect.runSync(
+    serverRuntime.runSync(
       createService("watch project files", watchProjectFiles(projects)),
     );
 
-    Effect.runSync(createService("watch assets", watchAssets()));
+    serverRuntime.runSync(createService("watch assets", watchAssets()));
   }
 
   if (!started.productionServer) {
     envFiles ??= loadEnvFiles(cwd);
-    void Effect.runPromise(
+    void serverRuntime.runPromise(
       createService(
         "production server",
         startProductionServer(state).pipe(
-          Effect.provide(NodeFileSystem.layer),
           Effect.provideService(EnvFiles, envFiles),
         ),
       ).pipe(Effect.asVoid),

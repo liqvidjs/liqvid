@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
-import { ProjectJson } from "@liqvid/schemas";
-import { Effect, Exit } from "effect";
+import { ProjectJson, resolveParametrizedString } from "@liqvid/schemas";
+import { Effect, Exit, Logger } from "effect";
 import type { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -15,6 +15,7 @@ import {
   PROJECT_FILE,
   PROJECT_FILES_AUTOGEN,
 } from "#_/conventions.mjs";
+import { withLogLevel } from "#_/server-runtime.mjs";
 import type { Directory } from "#_/types/assets.mjs";
 import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
 import { extractParameterNames } from "#_/utils/parameters.mjs";
@@ -82,13 +83,28 @@ export function liqvidProject<
       let declaredParameters: Record<string, readonly string[]> | undefined;
 
       const $project = await Effect.runPromiseExit(
-        loadJson(ProjectJson, path.join(__dirname, PROJECT_FILE)).pipe(
+        withLogLevel(
+          loadJson(ProjectJson, path.join(__dirname, PROJECT_FILE)),
+        ).pipe(
+          Effect.tapCauseIf(
+            (cause) =>
+              cause.reasons.some(
+                (reason) =>
+                  reason._tag === "Fail" &&
+                  reason.error._tag === "FileDecodeError",
+              ),
+            (cause) =>
+              Effect.logError(
+                `[page render] Failed to load project.json for ${projectPath}:`,
+                cause,
+              ),
+          ),
+          Effect.provide(Logger.layer([Logger.consolePretty()])),
           Effect.provide((await agnosticFileSystem()).layer),
         ),
       );
 
       if (!Exit.isSuccess($project)) {
-        console.error("Failed to load project.json:", $project.cause);
         return notFound();
       }
 
@@ -156,7 +172,10 @@ export function liqvidProject<
     );
 
     if (!Exit.isSuccess($project)) {
-      console.error("Failed to load project.json:", $project.cause);
+      console.error(
+        `[page render] Failed to load project.json for ${projectPath}:`,
+        $project.cause,
+      );
       return notFound();
     }
 
@@ -192,7 +211,7 @@ export function liqvidProject<
 
 export function liqvidGenerateProjectMetadata(importMetaUrl: string) {
   return async function generateMetadata(
-    _props: unknown,
+    props: { params: Promise<Record<string, string>> },
     _parent: ResolvingMetadata,
   ): Promise<Metadata> {
     const __filename = fileURLToPath(importMetaUrl);
@@ -202,9 +221,17 @@ export function liqvidGenerateProjectMetadata(importMetaUrl: string) {
       await fsp.readFile(path.join(__dirname, PROJECT_FILE), "utf8"),
     ) as ProjectJson;
 
+    const params = await props.params;
+
+    const title = resolveParametrizedString(project.title, params);
+
+    const description = project.description
+      ? resolveParametrizedString(project.description, params)
+      : undefined;
+
     return {
-      description: project.description,
-      title: project.name,
+      description,
+      title,
     };
   };
 }

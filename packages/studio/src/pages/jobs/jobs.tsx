@@ -1,6 +1,6 @@
 import { serialize } from "@liqvid/ssr/serde";
 import { pick } from "@liqvid/utils";
-import { Effect, Fiber } from "effect";
+import { Fiber } from "effect";
 import { cookies } from "next/headers";
 
 import type { LoggableJobClient, ServiceClient } from "#_/api/schemas.mjs";
@@ -8,6 +8,7 @@ import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
 import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
+import { serverRuntime } from "#_/server-runtime.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
@@ -26,7 +27,7 @@ async function cancelJob(formData: FormData) {
   const job = jobs.new.get(id);
   if (!job) return;
 
-  await Effect.runPromise(Fiber.interrupt(job.fiber));
+  await serverRuntime.runPromise(Fiber.interrupt(job.fiber));
 }
 
 async function deleteJob(formData: FormData) {
@@ -39,7 +40,7 @@ async function deleteJob(formData: FormData) {
 
   jobs.new.delete(id);
 
-  await Effect.runPromise(
+  await serverRuntime.runPromise(
     broadcast("jobs", { data: { id }, type: "deleteJob" }),
   );
 }

@@ -1,8 +1,4 @@
-import {
-  NodeFileSystem,
-  NodeHttpPlatform,
-  NodeServices,
-} from "@effect/platform-node";
+import { NodeHttpPlatform, NodeServices } from "@effect/platform-node";
 import { loadEnvFiles } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
 import {
@@ -36,6 +32,11 @@ import { settingsLive } from "#_/api/settings.mjs";
 import { serveStaticFile } from "#_/api/static-file.mjs";
 import { thumbsLive } from "#_/api/thumbs.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
+import {
+  ServerLayer,
+  serverRuntime,
+  withLogLevel,
+} from "#_/server-runtime.mjs";
 import { getLogLevel } from "#_/utils/misc.mjs";
 
 interface RequestContext {
@@ -151,18 +152,11 @@ export function patchHandler(dynamicImports: DynamicImportsType) {
 export { upgradeHandler } from "./websockets.mts";
 
 async function runEffect<A, E>(
-  program: Effect.Effect<A, E, FileSystem.FileSystem | EnvFiles>,
+  program: Effect.Effect<A, E, EnvFiles | FileSystem.FileSystem>,
 ) {
   const { cwd } = getServerState();
-  const result = await Effect.runPromiseExit(
-    program.pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          NodeFileSystem.layer,
-          Logger.layer([Logger.consolePretty()]),
-        ),
-      ),
-      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+  const result = await serverRuntime.runPromiseExit(
+    withLogLevel(program).pipe(
       Effect.provideService(EnvFiles, loadEnvFiles(cwd)),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     ),
@@ -217,7 +211,8 @@ function createWebApiHandler(
       thumbsLive,
     ]),
     Layer.provide([NodeServices.layer, NodeHttpPlatform.layer, Etag.layerWeak]),
-    Layer.provideMerge(NodeFileSystem.layer),
+    Layer.provideMerge(ServerLayer),
+    // Override with tty-specific logger for the HTTP handler.
     Layer.provide(
       Logger.layer([Logger.consolePretty({ colors: true, mode: "tty" })]),
     ),
@@ -233,7 +228,12 @@ function createWebApiHandler(
     HttpApiSwagger.layer(WebApi, { path: "/api/liqvid/docs" }),
   );
 
-  const { handler } = toWebHandler(appLive);
+  const { handler } = toWebHandler(appLive, {
+    middleware: (effect) =>
+      effect.pipe(
+        Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+      ),
+  });
   // The handler only requires Request when all dependencies are provided via layers
   const typedHandler = handler as (request: Request) => Promise<Response>;
   handlerCache.set(dynamicImports, typedHandler);

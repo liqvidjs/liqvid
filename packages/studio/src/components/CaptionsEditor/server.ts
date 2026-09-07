@@ -2,7 +2,6 @@
 
 import path from "node:path";
 
-import { NodeFileSystem } from "@effect/platform-node";
 import { writeJSON } from "@liqvid/cli/utils";
 import type { RichTranscript } from "@liqvid/schemas";
 import { formatVttTimestamp } from "@liqvid/utils";
@@ -16,6 +15,7 @@ import {
   CAPTIONS_FILE,
   RICH_TRANSCRIPT,
 } from "#_/conventions.mjs";
+import { serverRuntime } from "#_/server-runtime.mjs";
 import { getRoutesDir } from "#_/utils/misc.mjs";
 
 import type { Transcript } from "./state.ts";
@@ -29,7 +29,7 @@ export async function saveCaptions({
 }) {
   const projectDir = path.join(getRoutesDir(), projectPath);
 
-  const exit = await Effect.runPromiseExit(
+  const exit = await serverRuntime.runPromiseExit(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
 
@@ -50,10 +50,7 @@ export async function saveCaptions({
         ],
         { concurrency: "unbounded" },
       );
-    }).pipe(
-      Effect.provide(NodeFileSystem.layer),
-      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-    ),
+    }).pipe(Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause)))),
   );
 
   if (Exit.isFailure(exit)) {

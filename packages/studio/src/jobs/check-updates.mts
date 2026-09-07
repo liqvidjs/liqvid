@@ -1,19 +1,11 @@
 import path from "node:path";
 
-import { NodeFileSystem } from "@effect/platform-node";
-import {
-  Brand,
-  Effect,
-  FileSystem,
-  Layer,
-  Option,
-  Schedule,
-  Schema,
-} from "effect";
+import { Brand, Effect, FileSystem, Option, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient } from "effect/unstable/http";
 import { type AbsoluteDir, type RelativeDir, RelativeFile } from "effect-paths";
 
 import { getServerState } from "#_/initialize.mjs";
+import { serverRuntime } from "#_/server-runtime.mjs";
 import { PackageName } from "#_/types/misc.mjs";
 
 /** Packages we check for updates. */
@@ -325,15 +317,13 @@ export const checkForUpdates = Effect.fnUntraced(
  * The returned promise resolves once the initial check completes.
  */
 export async function watchForUpdates(): Promise<void> {
-  const check = checkForUpdates().pipe(
-    Effect.provide(Layer.mergeAll(NodeFileSystem.layer, FetchHttpClient.layer)),
-  );
+  const check = checkForUpdates().pipe(Effect.provide(FetchHttpClient.layer));
 
   // Run the first check and await it, so callers can rely on `updateInfo`
   // being populated once this resolves.
-  await Effect.runPromise(check);
+  await serverRuntime.runPromise(check);
 
   // Re-check on a fixed cadence in a detached fiber. `Schedule.spaced` waits
   // the interval *between* runs, so the next check happens an hour from now.
-  Effect.runFork(Effect.repeat(check, Schedule.spaced(CHECK_INTERVAL)));
+  serverRuntime.runFork(Effect.repeat(check, Schedule.spaced(CHECK_INTERVAL)));
 }

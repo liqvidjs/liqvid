@@ -19,6 +19,7 @@ import { SchemaRelativeDir } from "effect-paths";
 import {
   ConflictError,
   InvalidError,
+  InvalidProjectStructure,
   NotFoundError,
 } from "../utils/errors.mts";
 
@@ -214,6 +215,7 @@ const rendersGroup = HttpApiGroup.make("renders")
 const recordingsGroup = HttpApiGroup.make("recordings")
   .add(
     HttpApiEndpoint.get("list", "/recordings", {
+      error: InvalidProjectStructure,
       query: projectPathWithParamsQuery,
       success: Schema.Array(RecordingMeta),
     }),

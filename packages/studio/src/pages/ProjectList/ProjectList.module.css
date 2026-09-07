@@ -58,36 +58,6 @@
   user-select: none;
 }
 
-.toggleSwitch {
-  position: relative;
-  width: 2.25rem;
-  height: 1.25rem;
-  padding: 2px;
-  cursor: pointer;
-  background: var(--gray-solid);
-  border: none;
-  border-radius: 9999px;
-  transition: background-color 0.2s;
-
-  &[data-state="checked"] {
-    background: var(--accent-solid);
-  }
-}
-
-.toggleThumb {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-  background: #fff;
-  border-radius: 9999px;
-  transform: translateX(0);
-  transition: transform 0.2s;
-
-  [data-state="checked"] > & {
-    transform: translateX(1rem);
-  }
-}
-
 /* Folder View */
 .folderList {
   display: flex;

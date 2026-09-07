@@ -3,6 +3,8 @@
 import { Menu } from "@base-ui/react/menu";
 import clsx from "clsx";
 
+import { useDialogApi } from "./Dialog";
+
 import styles from "./Menu.module.css";
 
 export function MenuRoot(props: React.ComponentProps<typeof Menu.Root>) {
@@ -24,12 +26,15 @@ export function MenuPortal(props: React.ComponentProps<typeof Menu.Portal>) {
 
 export function MenuPositioner({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof Menu.Positioner>) {
+  const { level } = useDialogApi();
   return (
     <Menu.Positioner
       className={clsx(styles.Positioner, className)}
       {...props}
+      style={{ "--dialog-level": `${level}` }}
     />
   );
 }

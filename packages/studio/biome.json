@@ -2,6 +2,14 @@
   "extends": ["../../biome.json"],
   "linter": {
     "rules": {
+      "a11y": {
+        "noLabelWithoutControl": {
+          "level": "on",
+          "options": {
+            "inputComponents": ["Switch"]
+          }
+        }
+      },
       "correctness": {
         "noNextAsyncClientComponent": "on",
         "noRestrictedElements": {

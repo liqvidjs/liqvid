@@ -1,0 +1,17 @@
+{{#*inline "directory"}}
+{
+  {{#each this}}
+    "{{ @key }}":
+      {{#if this}}
+        {{> directory this}}
+      {{else}}
+        true
+      {{/if}}
+      {{#unless @last}}
+        ,
+      {{/unless}}
+  {{/each}}
+}
+{{/inline}}
+
+{{~> directory directoryStructure~}}

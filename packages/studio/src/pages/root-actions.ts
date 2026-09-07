@@ -4,7 +4,6 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
 import { UP, writeJSON } from "@liqvid/cli/utils";
@@ -29,6 +28,7 @@ import {
   TYPES_AUTOGEN,
 } from "#_/conventions.mjs";
 import { getServerState } from "#_/initialize.mjs";
+import { serverRuntime } from "#_/server-runtime.mjs";
 import type { PackageName } from "#_/types/misc.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { createJob } from "#_/utils/jobs.mjs";
@@ -60,11 +60,7 @@ export async function rebuildAction(): Promise<RebuildActionResult> {
   // `createJob` registers the job and broadcasts a `newJob` message, and it
   // broadcasts `updateJob` as the job completes/fails, so the jobs page (and
   // the rebuild button) can react over WebSockets.
-  const job = await Effect.runPromise(
-    createJob("rebuild", buildEffect).pipe(
-      Effect.provide(NodeFileSystem.layer),
-    ),
-  );
+  const job = await serverRuntime.runPromise(createJob("rebuild", buildEffect));
 
   return { jobId: job.id };
 }
@@ -445,7 +441,7 @@ export async function updatePackageAction(
 export async function createProjectAction(
   input: CreateProjectInput,
 ): Promise<CreateProjectResult> {
-  const result = await Effect.runPromiseExit(
+  const result = await serverRuntime.runPromiseExit(
     Effect.gen(function* () {
       const { name, projectPath, templateId } = input;
 
@@ -519,7 +515,7 @@ export async function createProjectAction(
       );
 
       return { success: true };
-    }).pipe(Effect.provide(NodeFileSystem.layer)),
+    }),
   );
 
   return Exit.match(result, {

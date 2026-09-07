@@ -2,8 +2,8 @@ import { DirectoryHelper } from "@liqvid/studio";
 
 import type { ProjectDir } from "../.liqvid/types";
 
-/** @package */
+/** @access parent */
 export const assets = new DirectoryHelper<ProjectDir>();
 
-/** @package */
+/** @access parent */
 export const recordings = assets.dir("recordings");

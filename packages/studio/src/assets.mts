@@ -1,5 +1,3 @@
-import { IS_SERVER } from "@liqvid/ssr";
-
 import type { Directory } from "./types/assets.mts";
 
 export interface ProjectFile {
@@ -56,7 +54,7 @@ export class DirectoryHelper<
     },
   ): Promise<T> {
     // TODO: maybe support RSC here
-    if (IS_SERVER) {
+    if (import.meta.env.SSR) {
       return null as T;
     }
 

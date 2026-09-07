@@ -6,6 +6,7 @@ import type {
   RootParameters,
   SerializedProjectMeta,
 } from "@liqvid/schemas";
+import { resolveParametrizedString } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
@@ -14,12 +15,14 @@ import {
   CaretRightIcon,
   FolderIcon,
 } from "@phosphor-icons/react";
+import { combine } from "effect/Order";
 import type { RelativeDir } from "effect-paths";
 import { useId, useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
+import { Switch } from "#_/ui/Switch.js";
 import { TimeDuration } from "#_/ui/Time.js";
 import { TranslationProvider } from "#_/utils/react.js";
 
@@ -42,8 +45,10 @@ export type ProjectListProps = {
   basePath: string;
   initialCollapsedFolders: string[];
   initialFolderView: boolean;
+
   /** Initial selected root parameter values (from cookie) */
   initialSelectedRootParams: Record<string, string>;
+
   productionServerPort: number;
   projects: Record<RelativeDir, SerializedProjectMeta>;
   rootParameters: RootParameters;
@@ -195,17 +200,10 @@ export function ProjectListClient({
       <div className={styles.viewToggle}>
         <label className={styles.toggleLabel}>
           <span>{t.folderView}</span>
-          {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
-          <button
-            aria-checked={folderView}
-            className={styles.toggleSwitch}
-            data-state={folderView ? "checked" : "unchecked"}
+          <Switch
+            checked={folderView}
             onClick={() => handleFolderViewChange(!folderView)}
-            role="switch"
-            type="button"
-          >
-            <span className={styles.toggleThumb} />
-          </button>
+          />
         </label>
       </div>
 
@@ -361,6 +359,21 @@ function ProjectItem({
   rootParameters: RootParameters;
   selectedRootParams: Record<string, string>;
 }) {
+  // Build combined params: root params as base, project params (first value) override
+  const combinedParams = { ...selectedRootParams };
+  if (project.parameters) {
+    for (const [key, values] of Object.entries(project.parameters)) {
+      if (!Object.hasOwn(combinedParams, key) && values.length > 0) {
+        combinedParams[key] = values[0]!;
+      }
+    }
+  }
+
+  // Resolve parametrized title using combined params
+  const resolvedTitle = project.title
+    ? resolveParametrizedString(project.title, combinedParams)
+    : undefined;
+
   // Interpolate path parameters using selected root params + project params
   const interpolatedPath = interpolatePathParametersWithSelected(
     project.path,
@@ -379,7 +392,7 @@ function ProjectItem({
         <a href={interpolatedPath}>
           <Thumbnail {...project} />
           <div className="flex flex-col">
-            {project.name}
+            {resolvedTitle ?? project.path}
             <pre className="text-sm">{project.path}</pre>
           </div>
         </a>

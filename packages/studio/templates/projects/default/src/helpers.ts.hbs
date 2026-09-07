@@ -11,10 +11,12 @@ import type { ProjectDir } from "../.liqvid/types.ts";
 
 import { type M, script } from "./markers.ts";
 
+import projectPath from "../.liqvid/project-path.json" with { type: "json" };
+
 /* -------------------- helper components -------------------- */
 
 /**
- * @package
+ * @access parent
  * General-purpose helper component for:
  * - creating `<Segment>`s, when passed `during`, `from`, or `to`
  * - positioning, when passed `b`ottom, `r`ight `x` (= left), or `y` (= top)
@@ -25,7 +27,7 @@ export const $u = UniversalHelper<M>;
 /** @package animation helper */
 export const $anim = Animate<M>;
 
-/** @package
+/** @access parent
  * Helper to apply transforms to descendants. This is primarily for
  * working with content managed by third-party plugins outside of React,
  * e.g. animating equations rendered by KaTeX.
@@ -34,17 +36,19 @@ export const $desc = TargetDescendants<M>;
 
 /* -------------------- helper functions -------------------- */
 
-/** @package Get marker by name */
-export const $m = script.markers.get.bind(script.markers.get);
 
-const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
+/**
+ * Reference the files in this project with type-safety.
+ * @access parent
+ */
+export const projectFiles = new DirectoryHelper<ProjectDir, "projectPath">(
 	process.env.NODE_ENV === "development"
-		? "/api/liqvid/static{pathname}"
-		: `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
+		? `/api/liqvid/static/${projectPath}`
+		: `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}/${projectPath}`,
 );
 
-/** @package Reference the files in this project with type-safety. */
-export function useProjectFiles() {
-	const pathname = usePathname();
-	return projectDirTemplated.interpolate({ pathname });
-}
+/**
+ * Reference the files in the `.liqvid` directory of this project with type-safety.
+ * @access parent
+ */
+export const assets = projectFiles.dir(".liqvid");

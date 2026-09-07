@@ -2,7 +2,6 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { NodeFileSystem } from "@effect/platform-node";
 import { loadJson } from "@liqvid/cli/utils";
 import { Duration } from "@liqvid/duration";
 import {
@@ -19,7 +18,6 @@ import {
   Option,
   type PlatformError,
   PubSub,
-  References,
   type Schema,
   Stream,
 } from "effect";
@@ -43,9 +41,10 @@ import {
   RECORDINGS_DIR,
 } from "#_/conventions.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
+import { serverRuntime } from "#_/server-runtime.mjs";
 import { existenceOptional } from "#_/utils/effect.mjs";
 import { walkDir } from "#_/utils/fs.mjs";
-import { getLogLevel, getRoutesDir } from "#_/utils/misc.mjs";
+import { getRoutesDir } from "#_/utils/misc.mjs";
 import {
   extractParameterNames,
   getDefaultParameterValues,
@@ -96,7 +95,7 @@ export function initProjectFiles(projects: Projects) {
       async ({ basename, dirname, filename }) => {
         // initialize project metadata
         if (basename === PROJECT_FILE) {
-          await Effect.runPromise(
+          await serverRuntime.runPromise(
             createProject({
               basename,
               dirname,
@@ -104,8 +103,12 @@ export function initProjectFiles(projects: Projects) {
               projects,
               relative: path.relative(TARGET_DIR, filename),
             }).pipe(
-              Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-              Effect.provide(NodeFileSystem.layer),
+              Effect.tapCause((cause) =>
+                Effect.logError(
+                  `[project init] Failed to initialize project:`,
+                  Cause.pretty(cause),
+                ),
+              ),
             ),
           );
         }
@@ -115,7 +118,7 @@ export function initProjectFiles(projects: Projects) {
         return true;
       },
     ),
-  ).pipe(Effect.provideService(References.MinimumLogLevel, getLogLevel()));
+  );
 }
 
 export const watchProjectFiles = Effect.fnUntraced(
@@ -167,12 +170,7 @@ export const watchProjectFiles = Effect.fnUntraced(
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     );
   },
-  (effect) =>
-    effect.pipe(
-      Effect.provide(NodeFileSystem.layer),
-      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
-      Effect.scoped,
-    ),
+  (effect) => effect.pipe(Effect.scoped),
 );
 
 /**
@@ -348,7 +346,17 @@ const handleProjectJson = Effect.fnUntraced(
     }
 
     // read project file
-    const project = yield* loadJson(ProjectJson, filename);
+    const project = yield* loadJson(ProjectJson, filename).pipe(
+      Effect.tapCauseIf(
+        (cause) =>
+          cause.reasons.some(
+            (reason) =>
+              reason._tag === "Fail" && reason.error._tag === "FileDecodeError",
+          ),
+        (cause) =>
+          Effect.logError(`[file watcher] Failed to load project.json:`, cause),
+      ),
+    );
 
     yield* Effect.log(`loaded project.json`, project);
 
@@ -357,11 +365,13 @@ const handleProjectJson = Effect.fnUntraced(
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
+      description: project.description,
       duration:
         projects[projectPath]?.duration ?? new Duration({ seconds: 1000 }),
       openGraph: hasOpenGraphImage(dirname),
       parameters: project.parameters,
       path: projectPath,
+      title: project.title,
       twitter: hasTwitterImage(dirname),
     };
 
@@ -457,10 +467,12 @@ const createProject = Effect.fnUntraced(
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
+      description: project.description,
       duration,
       openGraph: hasOpenGraphImage(dirname),
       parameters: project.parameters,
       path: projectPath,
+      title: project.title,
       twitter: hasTwitterImage(dirname),
     };
 
@@ -611,12 +623,7 @@ const handleRecordingMeta = Effect.fnUntraced(
     });
   },
   (effect, { filename }) =>
-    effect.pipe(
-      Effect.catchTag("FileDecodeError", (error) =>
-        Effect.logWarning("failed to read recording-meta.json", error),
-      ),
-      Effect.annotateLogs({ _op: "handleRecordingMeta", filename }),
-    ),
+    effect.pipe(Effect.annotateLogs({ _op: "handleRecordingMeta", filename })),
 );
 
 const OPENGRAPH_IMAGE_FILENAMES = [

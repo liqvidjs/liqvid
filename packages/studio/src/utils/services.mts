@@ -1,4 +1,3 @@
-import { NodeFileSystem } from "@effect/platform-node";
 import {
   Effect,
   Logger,
@@ -17,8 +16,7 @@ import type {
 } from "#_/api/schemas.mjs";
 import { getServerState } from "#_/initialize.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
-
-import { getLogLevel } from "./misc.mts";
+import { withLogLevel } from "#_/server-runtime.mjs";
 
 /**
  * Strip the (non-serializable) fiber from a service to get the client-facing
@@ -63,93 +61,88 @@ function appendLog(service: Service, log: StructuredLog) {
  * All log output from the effect (via `Effect.log*`) is captured, tagged with
  * its level, and streamed to the Jobs page.
  */
-export const createService = Effect.fnUntraced(
-  function* <A, E, R>(name: string, effect: Effect.Effect<A, E, R>) {
-    yield* Effect.logDebug("starting service", { name });
-    const { services } = getServerState();
-    const startTime = new Date();
+export const createService = Effect.fnUntraced(function* <A, E, R>(
+  name: string,
+  effect: Effect.Effect<A, E, R>,
+) {
+  yield* Effect.logDebug("starting service", { name });
+  const { services } = getServerState();
+  const startTime = new Date();
 
-    const logs: StructuredLog[] = [];
-    const id = crypto.randomUUID();
+  const logs: StructuredLog[] = [];
+  const id = crypto.randomUUID();
 
-    // Custom logger that captures log messages into the service.
-    const logger = Logger.make(({ date, fiber, logLevel, message }) => {
-      const annotations = fiber.getRef(
-        References.CurrentLogAnnotations,
-      ) as Record.ReadonlyRecord<string, Schema.Json>;
-      const activeSpans = fiber.getRef(References.CurrentLogSpans);
-      const timestamp = date.getTime();
+  // Custom logger that captures log messages into the service.
+  const logger = Logger.make(({ date, fiber, logLevel, message }) => {
+    const annotations = fiber.getRef(
+      References.CurrentLogAnnotations,
+    ) as Record.ReadonlyRecord<string, Schema.Json>;
+    const activeSpans = fiber.getRef(References.CurrentLogSpans);
+    const timestamp = date.getTime();
 
-      const mappedType = (
-        {
-          All: "log",
-          Debug: "debug",
-          Error: "error",
-          Fatal: "error",
-          Info: "info",
-          None: "log",
-          Trace: "debug",
-          Warn: "warn",
-        } satisfies Record<LogLevel.LogLevel, StructuredLogType>
-      )[logLevel];
+    const mappedType = (
+      {
+        All: "log",
+        Debug: "debug",
+        Error: "error",
+        Fatal: "error",
+        Info: "info",
+        None: "log",
+        Trace: "debug",
+        Warn: "warn",
+      } satisfies Record<LogLevel.LogLevel, StructuredLogType>
+    )[logLevel];
 
-      appendLog(service, {
-        annotations,
-        message: message as ReadonlyArray<Schema.Json>,
-        spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
-        timestamp: date,
-        type: mappedType,
-      });
+    appendLog(service, {
+      annotations,
+      message: message as ReadonlyArray<Schema.Json>,
+      spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
+      timestamp: date,
+      type: mappedType,
     });
+  });
 
-    const service: Types.Mutable<Service> = {
-      fiber: yield* Effect.forkDetach(
-        effect.pipe(
-          Effect.provide(NodeFileSystem.layer),
+  const service: Types.Mutable<Service> = {
+    fiber: yield* Effect.forkDetach(
+      withLogLevel(effect).pipe(
+        // Override the runtime's logger with our structured-log-capturing
+        // logger so output is streamed to the Jobs page.
+        Effect.provide(Logger.layer([logger])),
 
-          // logging
-          Effect.provideService(References.MinimumLogLevel, getLogLevel()),
-          Effect.provide(Logger.layer([logger])),
-
-          // mark stopped on interrupt
-          Effect.onInterrupt(() =>
-            Effect.sync(() => {
-              service.state = "stopped";
-            }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
-          ),
-          // mark failed
-          Effect.tapError(() =>
-            Effect.sync(() => {
-              service.state = "failed";
-            }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
-          ),
-          // mark stopped when the effect returns (services normally run forever)
-          Effect.tap(
-            Effect.sync(() => {
-              service.state = "stopped";
-            }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
-          ),
+        // mark stopped on interrupt
+        Effect.onInterrupt(() =>
+          Effect.sync(() => {
+            service.state = "stopped";
+          }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
+        ),
+        // mark failed
+        Effect.tapError(() =>
+          Effect.sync(() => {
+            service.state = "failed";
+          }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
+        ),
+        // mark stopped when the effect returns (services normally run forever)
+        Effect.tap(
+          Effect.sync(() => {
+            service.state = "stopped";
+          }).pipe(Effect.andThen(() => broadcastServiceUpdate(service))),
         ),
       ),
-      id,
-      logs,
-      name,
-      startTime,
-      state: "running",
-    };
-
-    services.set(id, service);
-
-    // Announce the new service to connected clients.
-    yield* broadcast("services", {
-      data: { service: toClientService(service) },
-      type: "newService",
-    });
-
-    return service;
-  },
-  (effect) =>
-    effect.pipe(
-      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
     ),
-);
+    id,
+    logs,
+    name,
+    startTime,
+    state: "running",
+  };
+
+  services.set(id, service);
+
+  // Announce the new service to connected clients.
+  yield* broadcast("services", {
+    data: { service: toClientService(service) },
+    type: "newService",
+  });
+
+  return service;
+});

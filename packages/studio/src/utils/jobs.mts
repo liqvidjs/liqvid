@@ -17,9 +17,9 @@ import type {
 } from "#_/api/schemas.mjs";
 import { getServerState } from "#_/initialize.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
+import { withLogLevel } from "#_/server-runtime.mjs";
 
 import { jobProgressLayer } from "./effect.mts";
-import { getLogLevel } from "./misc.mts";
 
 /**
  * Strip the (non-serializable) fiber from a job to get the client-facing
@@ -100,9 +100,9 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
 
   const job: Types.Mutable<LoggableJob> = {
     fiber: yield* Effect.forkDetach(
-      effect.pipe(
-        // logging
-        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+      withLogLevel(effect).pipe(
+        // Override the runtime's logger with our structured-log-capturing
+        // logger so output is streamed to the Jobs page.
         Effect.provide(Logger.layer([logger])),
 
         Effect.provideServiceEffect(

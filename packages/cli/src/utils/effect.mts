@@ -6,6 +6,7 @@ import {
   Cause,
   Effect,
   FileSystem,
+  flow,
   type Layer,
   type PlatformError,
   Schema,
@@ -86,11 +87,15 @@ export const resolveConfigPath = Effect.fnUntraced(function* ({
 /**
  * Load and parse liqvid.jsonc or liqvid.json (checked in that order).
  */
-export const loadLiqvidConfig = Effect.fnUntraced(
-  function* ({ configPath }: { configPath?: AbsoluteFile } = {}) {
+export const loadLiqvidConfig = flow(
+  Effect.fnUntraced(function* ({
+    configPath,
+  }: {
+    configPath?: AbsoluteFile;
+  } = {}) {
     const resolvedPath = configPath ?? (yield* resolveConfigPath());
     return yield* loadJsonc(LiqvidConfig, resolvedPath);
-  },
+  }),
   (effect) =>
     effect.pipe(
       // Correct v4 API to capture full runtime failure traces
@@ -141,7 +146,13 @@ export const loadJson = Effect.fnUntraced(function* <S extends Schema.Top>(
   return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
     onExcessProperty: "ignore",
   })(file).pipe(
-    Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
+    Effect.mapError(
+      (cause) =>
+        new FileDecodeError({
+          cause,
+          filename,
+        }),
+    ),
   );
 });
 
@@ -163,7 +174,13 @@ export const loadJsonc = Effect.fnUntraced(function* <S extends Schema.Top>(
   return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
     onExcessProperty: "ignore",
   })(minified).pipe(
-    Effect.mapError((cause) => new FileDecodeError({ cause, filename })),
+    Effect.mapError(
+      (cause) =>
+        new FileDecodeError({
+          cause,
+          filename,
+        }),
+    ),
   );
 });
 

@@ -26,6 +26,7 @@ import type TranslationsJson from "./.translations/en.json";
 
 import "../studio.css";
 import "../palette.css";
+import "../stylex.css";
 
 type T = typeof TranslationsJson;
 

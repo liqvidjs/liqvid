@@ -24,3 +24,12 @@ export class NotFoundError extends Schema.TaggedError<NotFoundError>()(
   },
   { httpApiStatus: StatusCodes.NOT_FOUND },
 ) {}
+
+export class InvalidProjectStructure extends Schema.TaggedError<InvalidProjectStructure>()(
+  "InvalidProjectStructure",
+  {
+    cause: Schema.Defect().pipe(Schema.optional),
+    message: Schema.String,
+  },
+  { httpApiStatus: StatusCodes.INTERNAL_SERVER_ERROR },
+) {}

@@ -1,3 +1,5 @@
+# Studio package agent guide
+
 ## Look and feel
 
 For theming, use the CSS variables in `src/palette.css`.
@@ -8,6 +10,10 @@ Use Phosphor icons from `@phosphor-icons/react`. Icons are named in PascalCase, 
 
 For displaying formatted times, use the `<Time>` component in `src/ui/Time.tsx`. If you need direct access use the `formatTime`, `formatTimeMs`, and `formatTimeDuration` functions from `@liqvid/utils`, but prefer the `<Time>` where possible.
 
+### StyleX
+
+Docs are at https://stylexjs.com. Use StyleX for new components, although some legacy components are still using CSS modules.
+
 ### Base UI
 
 Use Base UI (`@base-ui/react`) for primitives like dialogs. When building a dialog, the `<Dialog.Popup>` part (Base UI's equivalent of Radix's `<Dialog.Content>`) should be split into a separate file. The consumer is responsible for passing `<DialogRoot>` and `<DialogTrigger>` (since we may want to open the same dialog from multiple different triggers throughout the app).
@@ -16,7 +22,7 @@ Use the styled wrappers from @packages/studio/src/ui/Dialog.tsx (`DialogRoot`, `
 
 ## Effect
 
-This package uses **Effect v4 RC** (`effect@4.0.0-rc.108`, `@effect/platform-node@4.0.0-rc.108`), NOT Effect v3. The API differs significantly from v3 docs/blog posts — do not copy v3 patterns.
+This package uses **Effect v4 RC** (`effect@4.0.0-rc.112`, `@effect/platform-node@4.0.0-rc.112`), NOT Effect v3. The API differs significantly from v3 docs/blog posts — do not copy v3 patterns.
 
 ### Imports
 

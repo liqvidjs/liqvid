@@ -6,21 +6,13 @@ import {
   loadEnvFiles,
 } from "@liqvid/cli/utils";
 import { EnvFiles } from "@liqvid/schemas";
-import {
-  Cause,
-  Effect,
-  FileSystem,
-  Logger,
-  Option,
-  References,
-  Stream,
-} from "effect";
+import { Cause, Effect, FileSystem, Logger, Option, Stream } from "effect";
 import { RelativeFile } from "effect-paths";
 
 import { ROOT_HIDDEN_DIR, TYPES_AUTOGEN } from "#_/conventions.mjs";
 import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
+import { withLogLevel } from "#_/server-runtime.mjs";
 import { getBiomePath } from "#_/utils/fs.mjs";
-import { getLogLevel } from "#_/utils/misc.mjs";
 
 import { runTemplate } from "./watch-assets.mts";
 
@@ -83,9 +75,9 @@ export const watchRootTypes = Effect.fnUntraced(
     const { cwd } = getServerState();
 
     // Generate initial root types
-    yield* generateRootTypes(state).pipe(
+    yield* withLogLevel(generateRootTypes(state)).pipe(
+      // Send these logs to the console, not the service's structured logger.
       Effect.provide(Logger.layer([Logger.consolePretty()])),
-      Effect.provideService(References.MinimumLogLevel, getLogLevel()),
     );
 
     // Watch for config changes
@@ -100,12 +92,9 @@ export const watchRootTypes = Effect.fnUntraced(
           group.pipe(
             Stream.debounce("50 millis"),
             Stream.runForEach(() =>
-              generateRootTypes(state).pipe(
+              withLogLevel(generateRootTypes(state)).pipe(
+                // Send these logs to the console, not the service's structured logger.
                 Effect.provide(Logger.layer([Logger.consolePretty()])),
-                Effect.provideService(
-                  References.MinimumLogLevel,
-                  getLogLevel(),
-                ),
               ),
             ),
           ),

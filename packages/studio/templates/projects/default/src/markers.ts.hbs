@@ -12,8 +12,14 @@ const timings = {};
 // all markers have been assigned timings.
 const markers = withTimings(markerNames, timings);
 
-/** @package script for this project */
+/**
+ * @access parent
+ * script for this project
+ */
 export const script = new Script(markers);
 
-/** @package marker name */
+/** 
+ * @access parent
+ * marker name
+ */
 export type M = (typeof markerNames)[number];

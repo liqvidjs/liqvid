@@ -1,7 +1,6 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { NodeFileSystem } from "@effect/platform-node";
 import { loadJson, UP } from "@liqvid/cli/utils";
 import { ProjectJson } from "@liqvid/schemas";
 import {
@@ -12,7 +11,6 @@ import {
   Option,
   type PlatformError,
   PubSub,
-  References,
   Result,
   Stream,
 } from "effect";
@@ -37,10 +35,11 @@ import {
   TYPES_AUTOGEN,
 } from "#_/conventions.mjs";
 import { getServerState } from "#_/initialize.mjs";
+import { withLogLevel } from "#_/server-runtime.mjs";
 import type { Directory } from "#_/types/assets.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { getBiomePath } from "#_/utils/fs.mjs";
-import { cartesianProduct, getLogLevel, getRoutesDir } from "#_/utils/misc.mjs";
+import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   buildParameterSubpath,
   ensureParamsMarker,
@@ -248,7 +247,7 @@ export const watchAssets = Effect.fnUntraced(
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     );
   },
-  (effect) => effect.pipe(Effect.provide(NodeFileSystem.layer), Effect.scoped),
+  (effect) => effect.pipe(Effect.scoped),
 );
 
 /**
@@ -346,20 +345,21 @@ const generateProjectTypes = Effect.fnUntraced(
     );
 
     yield* Effect.forkDetach(
-      Effect.all([
-        fs.writeFileString(
-          path.join(assetsDir, PROJECT_FILES_AUTOGEN),
-          JSON.stringify(directoryStructure, null, 2),
-        ),
-        runTemplate({
-          biomePath,
-          data: { parameters },
-          out: path.join(assetsDir, TYPES_AUTOGEN),
-          template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
-        }),
-      ]).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(References.MinimumLogLevel, getLogLevel()),
+      withLogLevel(
+        Effect.all([
+          fs.writeFileString(
+            path.join(assetsDir, PROJECT_FILES_AUTOGEN),
+            JSON.stringify(directoryStructure, null, 2),
+          ),
+          runTemplate({
+            biomePath,
+            data: { parameters },
+            out: path.join(assetsDir, TYPES_AUTOGEN),
+            template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
+          }),
+        ]),
+      ).pipe(
+        // Send these logs to the console, not the service's structured logger.
         Effect.provide(Logger.layer([Logger.consolePretty()])),
       ),
     );
@@ -423,13 +423,15 @@ export const runTemplate = Effect.fnUntraced(
  * @param currentDir - The current directory being listed (defaults to projectDir)
  * @param relativePath - The path relative to projectDir (defaults to "")
  */
-const listProjectDir = Effect.fnUntraced<
-  Effect.Effect<Directory, PlatformError.PlatformError, FileSystem.FileSystem>
->(function* (
+const listProjectDir = Effect.fnUntraced(function* (
   projectDir: AbsoluteDir,
   currentDir: AbsoluteDir = projectDir,
   relativePath: RelativeDir = RelativeDir(""),
-) {
+): Effect.fn.Return<
+  Directory,
+  PlatformError.PlatformError,
+  FileSystem.FileSystem
+> {
   const entries = yield* readDirWithFileTypes(currentDir);
 
   const results = yield* Effect.all(

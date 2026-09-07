@@ -140,25 +140,29 @@ export const settingsLive = HttpApiBuilder.group(
       .handle("getLocale", () =>
         Effect.sync(() => ({ locale: getLocale() as Locale })),
       )
-      .handle("setLocale", ({ payload: { locale } }) =>
-        Effect.gen(function* () {
-          const state = getServerState();
-          const configPath = yield* resolveConfigPath({ cwd: state.cwd });
+      .handle(
+        "setLocale",
+        Effect.fnUntraced(
+          function* ({ payload: { locale } }) {
+            const state = getServerState();
+            const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
-          // Update the raw config on disk, preserving all other fields and comments.
-          const raw = yield* readRawConfigWithComments(configPath);
-          raw.ui = { ...raw.ui, locale };
-          yield* writeRawConfig(configPath, raw);
+            // Update the raw config on disk, preserving all other fields and comments.
+            const raw = yield* readRawConfigWithComments(configPath);
+            raw.ui = { ...raw.ui, locale };
+            yield* writeRawConfig(configPath, raw);
 
-          // Update the in-memory config so subsequent renders reflect the change
-          // immediately (the config watcher will also pick this up).
-          state.config = Option.map(state.config, (config) => ({
-            ...config,
-            ui: { ...config.ui, locale },
-          }));
+            // Update the in-memory config so subsequent renders reflect the change
+            // immediately (the config watcher will also pick this up).
+            state.config = Option.map(state.config, (config) => ({
+              ...config,
+              ui: { ...config.ui, locale },
+            }));
 
-          return { locale };
-        }).pipe(Effect.catchTag("PlatformError", Effect.die)),
+            return { locale };
+          },
+          (effect) => effect.pipe(Effect.catchTag("PlatformError", Effect.die)),
+        ),
       )
       .handle("getConfig", () =>
         getSettingsConfig().pipe(
@@ -166,22 +170,27 @@ export const settingsLive = HttpApiBuilder.group(
           Effect.catchTag("SchemaError", Effect.die),
         ),
       )
-      .handle("setConfig", ({ payload }) =>
-        Effect.gen(function* () {
-          const state = getServerState();
-          const configPath = yield* resolveConfigPath({ cwd: state.cwd });
+      .handle(
+        "setConfig",
+        Effect.fnUntraced(
+          function* ({ payload }) {
+            const state = getServerState();
+            const configPath = yield* resolveConfigPath({ cwd: state.cwd });
 
-          // Read with comments preserved, apply settings, write back.
-          const raw = yield* readRawConfigWithComments(configPath);
-          const next = applySettings(raw, payload);
-          yield* writeRawConfig(configPath, next);
+            // Read with comments preserved, apply settings, write back.
+            const raw = yield* readRawConfigWithComments(configPath);
+            const next = applySettings(raw, payload);
+            yield* writeRawConfig(configPath, next);
 
-          // Return the persisted (round-tripped) settings so the client can
-          // reconcile its local state.
-          return yield* encodeSettings(payload);
-        }).pipe(
-          Effect.catchTag("PlatformError", Effect.die),
-          Effect.catchTag("SchemaError", Effect.die),
+            // Return the persisted (round-tripped) settings so the client can
+            // reconcile its local state.
+            return yield* encodeSettings(payload);
+          },
+          (effect) =>
+            effect.pipe(
+              Effect.catchTag("PlatformError", Effect.die),
+              Effect.catchTag("SchemaError", Effect.die),
+            ),
         ),
       ),
 );
