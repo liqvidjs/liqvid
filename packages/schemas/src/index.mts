@@ -25,8 +25,8 @@ export {
   type ParametrizedStringEntry,
   ProjectJson,
   ProjectMeta,
-  resolveParametrizedString,
   type RootParameters,
+  resolveParametrizedString,
   type SerializedProjectMeta,
 } from "./project.mts";
 // Re-export providers

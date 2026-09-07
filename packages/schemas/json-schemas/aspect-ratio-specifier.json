@@ -1,19 +1,14 @@
 {
-  "$defs": {
-    "Union_": {
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "enum": ["Infinity", "-Infinity", "NaN"],
-          "type": "string"
-        }
-      ]
-    }
-  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "anyOf": [
+    {
+      "enum": ["square"],
+      "type": "string"
+    },
+    {
+      "enum": ["video"],
+      "type": "string"
+    },
     {
       "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$",
       "type": "string"
@@ -23,10 +18,26 @@
       "minItems": 2,
       "prefixItems": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         }
       ],
       "type": "array"
@@ -35,10 +46,26 @@
       "additionalProperties": false,
       "properties": {
         "height": {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         "width": {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         }
       },
       "required": ["height", "width"],

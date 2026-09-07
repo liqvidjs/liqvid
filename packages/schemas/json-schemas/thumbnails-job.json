@@ -1,17 +1,4 @@
 {
-  "$defs": {
-    "Union_": {
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "enum": ["Infinity", "-Infinity", "NaN"],
-          "type": "string"
-        }
-      ]
-    }
-  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -22,7 +9,15 @@
     "cols": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
           "type": "null"
@@ -32,7 +27,15 @@
     "frequency": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
           "type": "null"
@@ -42,7 +45,15 @@
     "height": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
           "type": "null"
@@ -65,7 +76,15 @@
         {
           "anyOf": [
             {
-              "$ref": "#/$defs/Union_"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
             },
             {
               "type": "null"
@@ -80,7 +99,15 @@
     "rows": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
           "type": "null"
@@ -90,7 +117,15 @@
     "width": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Union_"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["Infinity", "-Infinity", "NaN"],
+              "type": "string"
+            }
+          ]
         },
         {
           "type": "null"
