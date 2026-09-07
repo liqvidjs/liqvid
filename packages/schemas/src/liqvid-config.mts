@@ -213,6 +213,10 @@ export const LiqvidConfig = Schema.Struct({
    * Root-level static parameters that apply to all projects.
    * These are used as fallbacks when a project does not define its own parameters.
    * Format: `{ parameterName: [value1, value2, ...] }`
+   *
+   * **Note:** `"value"` is not permitted as a parameter name, since it is
+   * reserved for use in parametrized string entries (e.g. parametrized `title`
+   * and `description`).
    */
   rootParameters: Schema.Record(
     Schema.String,

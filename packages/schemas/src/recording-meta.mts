@@ -2,6 +2,8 @@ import { DurationOptions } from "@liqvid/duration/effect";
 import { Schema } from "effect";
 
 export const RecordingMetaFile = Schema.Struct({
+  $schema: Schema.String.pipe(Schema.optional),
+
   // TODO: enforce date format
   created: Schema.String,
   duration: DurationOptions,

@@ -4,6 +4,40 @@ import { DurationOptions } from "@liqvid/duration/effect";
 import { Effect, Schema, SchemaTransformation } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
 
+/**
+ * A single entry in a parametrized string array.
+ * Contains a `"value"` key with the string value, plus additional keys
+ * matching parameter names.
+ *
+ * Example: `{ "lang": "en", "value": "Spaces" }`
+ *
+ * **Note:** `"value"` is reserved and must not be used as a parameter name.
+ */
+export const ParametrizedStringEntry = Schema.StructWithRest(
+  Schema.Struct({ value: Schema.String }),
+  [Schema.Record(Schema.String, Schema.String)],
+);
+
+export type ParametrizedStringEntry = (typeof ParametrizedStringEntry)["Type"];
+
+/**
+ * A string that can optionally vary by parameter values.
+ *
+ * - Plain form: `"My Title"`
+ * - Parametrized form: `[{ "lang": "en", "value": "Spaces" }, { "lang": "fr", "value": "Espaces" }]`
+ *
+ * When parameters are defined (at root or project level), use the array form
+ * to provide different values for different parameter combinations.
+ *
+ * **Note:** `"value"` is reserved and must not be used as a parameter name.
+ */
+export const ParametrizedString = Schema.Union([
+  Schema.String,
+  Schema.Array(ParametrizedStringEntry),
+]);
+
+export type ParametrizedString = (typeof ParametrizedString)["Type"];
+
 export const AspectRatio = Schema.Struct({
   height: Schema.Number,
   width: Schema.Number,
@@ -65,7 +99,8 @@ export const ProjectJson = Schema.Struct({
     ),
   ),
 
-  description: Schema.String.pipe(Schema.optional),
+  /** Description of the project. Supports parametrized form. */
+  description: ParametrizedString.pipe(Schema.optional),
 
   /** Set this to true to omit the project from the production build. */
   draft: Schema.Boolean.pipe(
@@ -77,13 +112,18 @@ export const ProjectJson = Schema.Struct({
     }),
   ),
 
-  /** name of the project */
-  name: Schema.String,
-
-  /** static parameters */
+  /**
+   * Static parameters for this project.
+   *
+   * **Note:** `"value"` is not permitted as a parameter name, since it is
+   * reserved for use in {@link ParametrizedString} entries.
+   */
   parameters: Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
     Schema.optional,
   ),
+
+  /** Name of the project */
+  title: ParametrizedString,
 });
 
 export type ProjectJson = (typeof ProjectJson)["Type"];
@@ -100,9 +140,11 @@ export type AutoGenProjectMeta = (typeof AutoGenProjectMeta)["Type"];
 export const ProjectMeta = Schema.Struct({
   aspectRatio: AspectRatio,
 
+  /** Description of the project. Supports parametrized form. */
+  description: ParametrizedString.pipe(Schema.optional),
+
   duration: DurationOptions.pipe(Schema.decodeTo(Schema.instanceOf(Duration))),
 
-  name: Schema.String,
   openGraph: Schema.Boolean,
 
   /**
@@ -114,6 +156,9 @@ export const ProjectMeta = Schema.Struct({
   ),
 
   path: SchemaRelativeDir,
+
+  /** Title of the project. Supports parametrized form. Falls back to `name` if not specified. */
+  title: ParametrizedString.pipe(Schema.optional),
 
   twitter: Schema.Boolean,
 });
@@ -134,3 +179,42 @@ export type SerializedProjectMeta = Omit<ProjectMeta, "duration"> & {
  * Format: `{ parameterName: [value1, value2, ...] }`
  */
 export type RootParameters = Record<string, string[]>;
+
+/**
+ * Resolve a {@link ParametrizedString} to a plain string given a set of
+ * parameter values.
+ *
+ * - If the input is a plain string, it is returned as-is.
+ * - If the input is an array of entries, the first entry whose parameter keys
+ *   all match the provided values is returned. If no entry matches,
+ *   `undefined` is returned.
+ *
+ * @example
+ * ```ts
+ * const title: ParametrizedString = [
+ *   { lang: "en", value: "Spaces" },
+ *   { lang: "fr", value: "Espaces" },
+ * ];
+ * resolveParametrizedString(title, { lang: "fr" }); // "Espaces"
+ * resolveParametrizedString("Hello", {}); // "Hello"
+ * ```
+ */
+export function resolveParametrizedString(
+  input: ParametrizedString,
+  params: Record<string, string>,
+): string | undefined {
+  if (typeof input === "string") {
+    return input;
+  }
+
+  for (const entry of input) {
+    const matches = Object.entries(entry).every(
+      ([key, val]) => key === "value" || params[key] === val,
+    );
+    if (matches) {
+      return entry.value;
+    }
+  }
+
+  return undefined;
+}

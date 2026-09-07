@@ -21,8 +21,11 @@ export {
   AspectRatio,
   AspectRatioSpecifier,
   AutoGenProjectMeta,
+  ParametrizedString,
+  type ParametrizedStringEntry,
   ProjectJson,
   ProjectMeta,
+  resolveParametrizedString,
   type RootParameters,
   type SerializedProjectMeta,
 } from "./project.mts";
