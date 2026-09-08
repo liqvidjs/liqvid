@@ -9,7 +9,7 @@ import {
   WarningCircleIcon,
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import clsx from "clsx";
+import * as stylex from "@stylexjs/stylex";
 import { useCallback, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
@@ -28,11 +28,176 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
 import { ToggleButton } from "#_/ui/ToggleButton.js";
 
-import styles from "./jobs.module.css";
-
 import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
+
+import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
+
+const spin = stylex.keyframes({
+  from: { transform: "rotate(0deg)" },
+  to: { transform: "rotate(360deg)" },
+});
+
+export const styles = stylex.create({
+  annotations: {
+    alignItems: "flex-start",
+    borderRadius: radii.md,
+    bottom: "1em",
+    boxShadow: `0 0 0 1px ${colors.graySep}`,
+    display: "flex",
+    fontSize: "0.7em",
+    padding: "0.4em",
+    position: "fixed",
+    right: "1em",
+    verticalAlign: "top",
+  },
+
+  cancelledIcon: {
+    fill: "grey",
+  },
+
+  completedIcon: {
+    fill: colors.successSolid,
+  },
+
+  filter: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.xs,
+    marginBlock: '1em',
+    marginInline: '0',
+  },
+
+  filterActive: {
+    background: {
+      ":hover": "var(--accent-ui)",
+      default: "var(--accent-ui)",
+    },
+    borderBottomColor: colors.accentSolid,
+    color: colors.accentSolid,
+  },
+
+  filterButton: {
+    background: {
+      ":hover": colors.grayHover,
+      default: "transparent",
+    },
+    borderStyle: "none",
+    borderBottomWidth: '2px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'transparent',
+    borderTopLeftRadius: '4px',
+    borderTopRightRadius: '4px',
+    borderBottomRightRadius: '0',
+    borderBottomLeftRadius: '0',
+    color: colors.grayNormal,
+    cursor: "pointer",
+    fontSize: text.base,
+    outline: {
+      ":focus-visible": `2px solid ${colors.accentSolid}`,
+      default: null,
+    },
+    outlineOffset: {
+      ":focus-visible": "1px",
+      default: null,
+    },
+    padding: `${spacing.xs} 0.6rem`,
+    transition: "background-color 0.15s, color 0.15s, border-color 0.15s",
+  },
+
+  header: {
+    alignItems: "center",
+    display: "flex",
+    gap: "2px",
+  },
+
+  job: {
+    marginBlock: '1em',
+    marginInline: '0',
+  },
+
+  log: {
+    backgroundColor: colors.grayApp,
+    paddingBlock: '0.1em',
+    paddingInline: '0.2em',
+    position: "relative",
+    scrollbarWidth: "thin",
+    width: "100%",
+  },
+
+  logDebug: {
+    color: "purple",
+  },
+
+  logError: {
+    color: colors.errorText,
+  },
+
+  logGroup: {
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: colors.graySep,
+    borderRadius: "2px",
+    fontSize: "16px",
+  },
+  main: {
+    marginBlock: '0',
+    marginInline: 'auto',
+    width: "75%",
+  },
+
+  message: {
+    whiteSpace: "pre-wrap",
+  },
+
+  progress: {
+    alignItems: "center",
+    display: "flex",
+    gap: "0.5em",
+  },
+
+  runningIcon: {
+    animationDuration: "2s",
+    animationIterationCount: "infinite",
+    animationName: spin,
+    animationTimingFunction: "linear",
+    fill: colors.accentSolid,
+  },
+
+  timestamp: {
+    background: colors.grayApp,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: colors.graySep,
+    borderTopLeftRadius: '0',
+    borderTopRightRadius: '0',
+    borderBottomRightRadius: '0',
+    borderBottomLeftRadius: '2px',
+    borderTopStyle: 'none',
+    borderRightStyle: 'none',
+    borderBottomStyle: 'solid',
+    borderLeftStyle: 'solid',
+    color: colors.grayDim,
+    flexShrink: 0,
+    fontSize: "0.6em",
+    opacity: 0,
+    paddingBlock: '1px',
+    paddingInline: '4px',
+    position: "absolute",
+    right: 0,
+    top: 0,
+    transition: "opacity 150ms ease-in-out",
+  },
+
+  timestampVisible: {
+    opacity: 1,
+  },
+
+  warningIcon: {
+    fill: colors.errorText,
+  },
+});
 
 const LOG_LEVELS = ["error", "warn", "info", "log", "debug"] as const;
 
@@ -224,7 +389,7 @@ export function JobsClient({
   );
 
   return (
-    <main className={styles.main}>
+    <main {...stylex.props(styles.main)}>
       <h1>{t.title}</h1>
 
       <LogLevelFilter levels={levels} onToggle={toggleLevel} t={t} />
@@ -241,8 +406,8 @@ export function JobsClient({
         <TabsContent value="jobs">
           <ul>
             {Object.values(jobs).map((job) => (
-              <li className={styles.job} key={job.id}>
-                <header className={styles.header}>
+              <li {...stylex.props(styles.job)} key={job.id}>
+                <header {...stylex.props(styles.header)}>
                   <JobStateIcon state={job.state} t={t} />
                   <pre>{job.path}</pre>
                   {">"}
@@ -271,8 +436,8 @@ export function JobsClient({
         <TabsContent value="services">
           <ul>
             {Object.values(services).map((service) => (
-              <li className={styles.job} key={service.id}>
-                <header className={styles.header}>
+              <li {...stylex.props(styles.job)} key={service.id}>
+                <header {...stylex.props(styles.header)}>
                   <ServiceStateIcon state={service.state} t={t} />
                   <span>{service.name}</span>
                 </header>
@@ -289,7 +454,7 @@ export function JobsClient({
       </Tabs>
 
       {meta && (
-        <aside className={styles.annotations}>
+        <aside {...stylex.props(styles.annotations)}>
           <MetadataTable data={meta.annotations} />
           <table>
             <tbody>
@@ -344,25 +509,25 @@ function JobStateIcon({
   switch (state) {
     case "cancelled":
       return (
-        <XCircleIcon className={styles.cancelledIcon} weight="fill">
+        <XCircleIcon {...stylex.props(styles.cancelledIcon)} weight="fill">
           <title>{t.cancelled}</title>
         </XCircleIcon>
       );
     case "completed":
       return (
-        <CheckCircleIcon className={styles.completedIcon} weight="fill">
+        <CheckCircleIcon {...stylex.props(styles.completedIcon)} weight="fill">
           <title>{t.completed}</title>
         </CheckCircleIcon>
       );
     case "running":
       return (
-        <SpinnerIcon className={styles.runningIcon}>
+        <SpinnerIcon {...stylex.props(styles.runningIcon)}>
           <title>{t.running}</title>
         </SpinnerIcon>
       );
     case "failed":
       return (
-        <WarningCircleIcon className={styles.warningIcon} weight="fill">
+        <WarningCircleIcon {...stylex.props(styles.warningIcon)} weight="fill">
           <title>{t.failed}</title>
         </WarningCircleIcon>
       );
@@ -379,19 +544,19 @@ function ServiceStateIcon({
   switch (state) {
     case "running":
       return (
-        <SpinnerIcon className={styles.runningIcon}>
+        <SpinnerIcon {...stylex.props(styles.runningIcon)}>
           <title>{t.running}</title>
         </SpinnerIcon>
       );
     case "stopped":
       return (
-        <StopCircleIcon className={styles.cancelledIcon} weight="fill">
+        <StopCircleIcon {...stylex.props(styles.cancelledIcon)} weight="fill">
           <title>{t.stopped}</title>
         </StopCircleIcon>
       );
     case "failed":
       return (
-        <WarningCircleIcon className={styles.warningIcon} weight="fill">
+        <WarningCircleIcon {...stylex.props(styles.warningIcon)} weight="fill">
           <title>{t.failed}</title>
         </WarningCircleIcon>
       );
@@ -407,8 +572,10 @@ function LogGroup({
   logs: readonly StructuredLog[];
   onAnnotations: (annotations: MetaState | null) => void;
 }) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
   return (
-    <ol className={styles.logGroup}>
+    <ol {...stylex.props(styles.logGroup)}>
       {logs.map((log, i) => {
         if (!levels.has(log.type)) {
           return null;
@@ -418,27 +585,40 @@ function LogGroup({
 
         return (
           <li
-            className={styles.log}
-            data-level={log.type}
+            {...stylex.props(
+              styles.log,
+              log.type === "error" && styles.logError,
+              log.type === "debug" && styles.logDebug,
+            )}
             key={`${log.type}:${log.timestamp.toISOString()}:${i}`}
-            onPointerEnter={() =>
-              onAnnotations({ annotations: log.annotations, spans: log.spans })
-            }
-            onPointerLeave={() => onAnnotations(null)}
+            onPointerEnter={() => {
+              setHoveredIdx(i);
+              onAnnotations({
+                annotations: log.annotations,
+                spans: log.spans,
+              });
+            }}
+            onPointerLeave={() => {
+              setHoveredIdx(null);
+              onAnnotations(null);
+            }}
           >
             <Time
-              className={styles.timestamp}
+              {...stylex.props(
+                styles.timestamp,
+                hoveredIdx === i && styles.timestampVisible,
+              )}
               format="date-and-time"
               value={log.timestamp}
             />
             {(() => {
               if (typeof msg === "string" || typeof msg === "number") {
-                return <pre className={styles.message}>{msg}</pre>;
+                return <pre {...stylex.props(styles.message)}>{msg}</pre>;
               }
 
               if (isProgressEvent(msg)) {
                 return (
-                  <div className={styles.progress}>
+                  <div {...stylex.props(styles.progress)}>
                     <progress max={msg.total} value={msg.value} />
                     {`${msg.formattedValue} / ${msg.formattedTotal}`}
                   </div>
@@ -446,7 +626,7 @@ function LogGroup({
               }
 
               return (
-                <pre className={styles.message}>
+                <pre {...stylex.props(styles.message)}>
                   {JSON.stringify(msg, null, 2)}
                 </pre>
               );
@@ -476,13 +656,16 @@ function LogLevelFilter({
   };
 
   return (
-    <div className={styles.filter}>
+    <div {...stylex.props(styles.filter)}>
       {LOG_LEVELS.map((level) => {
         const active = levels.has(level);
         return (
           <ToggleButton
             aria-pressed={active}
-            className={clsx(styles.filterButton, active && styles.filterActive)}
+            {...stylex.props(
+              styles.filterButton,
+              active && styles.filterActive,
+            )}
             key={level}
             onClick={() => onToggle(level)}
           >

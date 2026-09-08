@@ -7,6 +7,7 @@ import {
   TrashIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
@@ -17,7 +18,7 @@ import { AUDIO_WAV } from "#_/conventions.mjs";
 import { Button } from "#_/ui/Button.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
 
-import shareStyles from "../share.module.css";
+import { shareStyles } from "../share.sx.ts";
 
 type CaptionsStatus = NonNullable<AudioEntry["captions"]>["status"];
 
@@ -25,11 +26,11 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
   switch (status) {
     case "pending":
     case "generating":
-      return <SpinnerIcon className={shareStyles.spinner} size={16} />;
+      return <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />;
     case "completed":
       return (
         <CheckCircleIcon
-          className={shareStyles.statusCompleted}
+          {...stylex.props(shareStyles.statusCompleted)}
           size={16}
           weight="fill"
         />
@@ -37,7 +38,7 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
     case "failed":
       return (
         <WarningCircleIcon
-          className={shareStyles.statusFailed}
+          {...stylex.props(shareStyles.statusFailed)}
           size={16}
           weight="fill"
         />
@@ -144,27 +145,27 @@ export function CaptionRow({
   };
 
   return (
-    <li className={shareStyles.renderItem}>
-      <div className={shareStyles.renderInfo}>
-        <div className={shareStyles.renderHeader}>
-          <span className={shareStyles.renderName}>
+    <li {...stylex.props(shareStyles.renderItem)}>
+      <div {...stylex.props(shareStyles.renderInfo)}>
+        <div {...stylex.props(shareStyles.renderHeader)}>
+          <span {...stylex.props(shareStyles.renderName)}>
             {multiple ? entry.id : AUDIO_WAV}
           </span>
           {entry.captions && (
-            <span className={shareStyles.renderStatus}>
+            <span {...stylex.props(shareStyles.renderStatus)}>
               {getCaptionsStatusIcon(entry.captions.status)}
               {getCaptionsStatusLabel(entry.captions.status)}
             </span>
           )}
         </div>
-        <div className={shareStyles.renderDetails}>
+        <div {...stylex.props(shareStyles.renderDetails)}>
           <Time format="date-and-time" value={entry.meta.createdAt} />
           {entry.meta.state === "completed" && (
             <TimeDuration value={{ seconds: entry.meta.duration }} />
           )}
         </div>
       </div>
-      <div className={shareStyles.renderActions}>
+      <div {...stylex.props(shareStyles.renderActions)}>
         <Button
           disabled={!hasCaptioningConfigured || isGenerating}
           onClick={handleGenerateCaptions}
@@ -178,14 +179,14 @@ export function CaptionRow({
           type="button"
         >
           {isGenerating ? (
-            <SpinnerIcon className={shareStyles.spinner} size={16} />
+            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />
           ) : (
             <ClosedCaptioningIcon size={16} />
           )}
         </Button>
         {entry.captions && (
           <Button
-            className={shareStyles.deleteButton}
+            {...stylex.props(shareStyles.deleteButton)}
             onClick={handleDeleteCaptions}
             title="Delete captions"
             type="button"
@@ -195,7 +196,7 @@ export function CaptionRow({
         )}
         {multiple && (
           <Button
-            className={shareStyles.renderActionButton}
+            {...stylex.props(shareStyles.renderActionButton)}
             onClick={() => onStartRename(entry)}
             title="Rename audio"
             type="button"
@@ -204,7 +205,7 @@ export function CaptionRow({
           </Button>
         )}
         <Button
-          className={shareStyles.deleteButton}
+          {...stylex.props(shareStyles.deleteButton)}
           onClick={handleDeleteAudio}
           title="Delete audio (and captions)"
           type="button"

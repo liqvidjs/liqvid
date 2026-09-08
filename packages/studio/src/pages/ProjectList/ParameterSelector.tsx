@@ -1,22 +1,72 @@
 "use client";
 
 import type { RootParameters } from "@liqvid/schemas";
+import * as stylex from "@stylexjs/stylex";
+import type { ReadonlyRecord } from "effect/Record";
 import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
 import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
+import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 
-import listStyles from "./ProjectList.module.css";
-import styles from "./share.module.css";
+import { projectListStyles } from "./projectList.sx.ts";
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
-  onParamsChange: (params: Record<string, string>) => void;
+  onParamsChange: (params: ReadonlyRecord<string, string>) => void;
+
   /** Parameter definitions from project.json or liqvid.json */
   parameters: RootParameters;
+
   /** Currently selected parameter values */
-  selectedParams: Record<string, string>;
+  selectedParams: ReadonlyRecord<string, string>;
 }
+
+const styles = stylex.create({
+  parameterField: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+  },
+  parameterLabel: {
+    color: colors.grayDim,
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    textTransform: "capitalize",
+  },
+  parameterSelect: {
+    backgroundColor: colors.grayApp,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    color: colors.grayNormal,
+    cursor: "pointer",
+    fontSize: "0.8125rem",
+    outline: {
+      ":focus": "none",
+    },
+    paddingBlock: "0.375rem",
+    paddingInline: "0.625rem",
+  },
+
+  parameterSelector: {
+    alignItems: "center",
+    backgroundColor: colors.graySubtle,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: spacing.lg,
+    marginBottom: spacing.md,
+    padding: spacing.lg,
+  },
+});
 
 /**
  * A row of dropdowns for selecting parameter values.
@@ -37,12 +87,12 @@ export function ParameterSelector({
   }
 
   return (
-    <div className={styles.parameterSelector}>
+    <div {...stylex.props(styles.parameterSelector)}>
       {paramEntries.map(([paramName, values]) => (
-        <label className={styles.parameterField} key={paramName}>
-          <span className={styles.parameterLabel}>{paramName}</span>
+        <label {...stylex.props(styles.parameterField)} key={paramName}>
+          <span {...stylex.props(styles.parameterLabel)}>{paramName}</span>
           <select
-            className={styles.parameterSelect}
+            {...stylex.props(styles.parameterSelect)}
             onChange={(e) => {
               onParamsChange({
                 ...selectedParams,
@@ -88,6 +138,7 @@ export function RootParameterSelector({
   selectedRootParams,
   onRootParamsChange,
 }: RootParameterSelectorProps) {
+  "use no memo";
   const paramEntries = useMemo(
     () =>
       Object.entries(rootParameters).filter(([, values]) => values.length > 0),
@@ -108,12 +159,20 @@ export function RootParameterSelector({
   }
 
   return (
-    <div className={listStyles.rootParameterSelector}>
+    <div {...stylex.props(projectListStyles.rootParameterSelector)}>
       {paramEntries.map(([paramName, values]) => (
-        <label className={listStyles.rootParameterField} key={paramName}>
-          <span className={listStyles.rootParameterLabel}>{paramName}</span>
+        <label
+          key={paramName}
+          {...stylex.props(projectListStyles.rootParameterField)}
+        >
+          <span
+            {...stylex.props(projectListStyles.rootParameterLabel)}
+            key="???"
+          >
+            {paramName}
+          </span>
           <select
-            className={listStyles.rootParameterSelect}
+            {...stylex.props(projectListStyles.rootParameterSelect)}
             onChange={(e) => handleChange(paramName, e.target.value)}
             value={selectedRootParams[paramName] ?? values[0]}
           >
@@ -134,12 +193,12 @@ export function RootParameterSelector({
  * merged with project-level parameter definitions.
  */
 export function useProjectParameterValues(
-  projectParameters?: Record<string, string[]>,
+  projectParameters?: ReadonlyRecord<string, string[]>,
   rootParameters?: RootParameters,
-): Record<string, string[]> {
+): ReadonlyRecord<string, readonly string[]> {
   return useMemo(() => {
     // Start with root parameters as fallback
-    const params: Record<string, string[]> = { ...rootParameters };
+    const params = { ...rootParameters };
 
     // Project parameters override root parameters
     if (projectParameters) {
@@ -156,8 +215,8 @@ export function useProjectParameterValues(
  * Get default parameter values (first value of each parameter).
  */
 export function getDefaultParams(
-  parameters: Record<string, string[]>,
-): Record<string, string> {
+  parameters: ReadonlyRecord<string, readonly string[]>,
+): ReadonlyRecord<string, string> {
   const result: Record<string, string> = {};
   for (const [key, values] of Object.entries(parameters)) {
     if (values.length > 0) {

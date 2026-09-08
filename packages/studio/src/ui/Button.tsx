@@ -25,7 +25,8 @@ const styles = stylex.create({
     display: "flex",
     fontSize: ".75rem",
     gap: ".25rem",
-    padding: ".3em .5em",
+    paddingBlock: '.3em',
+    paddingInline: '.5em',
     transition: "background-color 0.15s",
   },
 });

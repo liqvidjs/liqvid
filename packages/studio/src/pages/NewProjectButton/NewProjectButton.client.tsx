@@ -1,6 +1,7 @@
 "use client";
 
 import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
@@ -34,7 +35,7 @@ import {
   SelectValue,
 } from "#_/ui/Select.js";
 
-import styles from "../root.module.css";
+import { form } from "../root.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -119,8 +120,8 @@ export function NewProjectButtonClient({ t }: { t: T }) {
         <DialogBackdrop />
         <DialogPopup>
           <DialogTitle>{t.dialog.title}</DialogTitle>
-          <form className={styles.dialogForm} onSubmit={handleSubmit}>
-            <div className={styles.formField}>
+          <form {...stylex.props(form.dialogForm)} onSubmit={handleSubmit}>
+            <div {...stylex.props(form.formField)}>
               <label htmlFor={ids.projectName}>{t.dialog.name}</label>
               <input
                 autoComplete="off"
@@ -134,7 +135,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               />
             </div>
 
-            <div className={styles.formField}>
+            <div {...stylex.props(form.formField)}>
               <label htmlFor={ids.projectPath}>{t.dialog.path}</label>
               <input
                 autoComplete="off"
@@ -147,13 +148,13 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 value={projectPath}
               />
               {pathError ? (
-                <span className={styles.fieldError}>{pathError}</span>
+                <span {...stylex.props(form.fieldError)}>{pathError}</span>
               ) : (
-                <span className={styles.fieldHint}>{t.path}</span>
+                <span {...stylex.props(form.fieldHint)}>{t.path}</span>
               )}
             </div>
 
-            <div className={styles.formField}>
+            <div {...stylex.props(form.formField)}>
               <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
               <SelectRoot
                 disabled={isCreating || templates.length === 0}
@@ -185,9 +186,9 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               </SelectRoot>
             </div>
 
-            {error && <div className={styles.error}>{error}</div>}
+            {error && <div {...stylex.props(form.error)}>{error}</div>}
 
-            <div className={styles.dialogActions}>
+            <div {...stylex.props(form.dialogActions)}>
               <DialogClose
                 disabled={isCreating}
                 // biome-ignore lint/correctness/noRestrictedElements: this is different
@@ -196,7 +197,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 {t.dialog.cancel}
               </DialogClose>
               <Button
-                className={styles.submitButton}
+                className={stylex.props(form.submitButton).className}
                 disabled={
                   isCreating ||
                   !name ||

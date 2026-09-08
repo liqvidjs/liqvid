@@ -2,12 +2,13 @@
 
 import type { ProjectMeta } from "@liqvid/schemas";
 import { CodeIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
 import { Button } from "#_/ui/Button.js";
 import { useTranslations } from "#_/utils/react.js";
 
-import styles from "./share.module.css";
+import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -37,7 +38,7 @@ export function EmbedButton({
 
   return (
     <Button
-      className={styles.productionLink}
+      {...stylex.props(shareStyles.productionLink)}
       onClick={handleClick}
       title={t.copyEmbedCode}
     >

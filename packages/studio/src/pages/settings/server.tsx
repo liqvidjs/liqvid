@@ -1,20 +1,48 @@
-import type { Locale } from "@liqvid/schemas";
+import * as stylex from "@stylexjs/stylex";
 
-import { getSettingsConfig } from "#_/api/settings.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { getLocale, getTranslations } from "#_/utils/i18n.mjs";
+import { H, Section } from "#_/components/headings.js";
+import { breakpoints, colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
-import { SettingsClient } from "./client.tsx";
+import { PublishingConfig } from "./PublishingConfig/server.tsx";
+import { UiConfig } from "./UiConfig/server.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
 
+export const styles = stylex.create({
+  check: {
+    color: colors.accentSolid,
+  },
+
+  description: {
+    color: colors.grayDim,
+    margin: `${spacing.xs} 0 ${spacing.lg}`,
+  },
+
+  main: {
+    fontSize: text.base,
+    marginBlock: "0",
+    marginInline: "auto",
+    padding: `${spacing.control} 0`,
+    width: {
+      default: null,
+      [breakpoints.desktop]: "48rem",
+    },
+  },
+});
+
 export async function Settings() {
   const t = await getTranslations<T>(import.meta.url);
-  const locale = getLocale() as Locale;
 
-  const config = await serverRuntime.runPromise(getSettingsConfig());
+  return (
+    <main {...stylex.props(styles.main)}>
+      <Section component={<H>{t.title}</H>}>
+        <UiConfig />
 
-  return <SettingsClient config={config} locale={locale} t={t} />;
+        <PublishingConfig />
+      </Section>
+    </main>
+  );
 }

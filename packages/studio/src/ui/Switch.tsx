@@ -2,7 +2,7 @@ import { Switch as BaseSwitch } from "@base-ui/react";
 import type { SwitchRootState } from "@base-ui/react/switch";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
+import { colors, radii } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   root: {
@@ -22,7 +22,7 @@ const styles = stylex.create({
   },
   thumb: {
     backgroundColor: "#fff",
-    borderRadius: "9999px",
+    borderRadius: radii.full,
     display: "block",
     height: "1rem",
     transform: "translateX(0)",

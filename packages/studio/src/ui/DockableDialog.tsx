@@ -5,6 +5,7 @@ import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, onDragReact, useToggle } from "@liqvid/utils";
 import { Portal } from "@radix-ui/react-portal";
+import * as stylex from "@stylexjs/stylex";
 import clsx from "clsx";
 import { Option, Schema } from "effect";
 import {
@@ -18,7 +19,35 @@ import {
   useRef,
 } from "react";
 
-import styles from "./DockableDialog.module.css";
+import { colors, radii, text } from "#_/design/tokens.stylex.js";
+
+const styles = stylex.create({
+  content: {
+    backgroundColor: "light-dark(#e0e0e0, #333)",
+    borderRadius: `0 0 ${radii.md} ${radii.md}`,
+    color: "light-dark(#000, #fff)",
+    paddingBlock: '8px',
+    paddingInline: '16px',
+  },
+  dialog: {
+    boxShadow:
+      "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    display: "flex",
+    flexDirection: "column",
+    position: "absolute",
+    width: "500px",
+  },
+  header: {
+    backgroundColor: colors.accentSolid,
+    borderRadius: `${radii.md} ${radii.md} 0 0`,
+    color: colors.white,
+    fontSize: text.sm,
+    fontWeight: "bold",
+    paddingBlock: '4px',
+    paddingInline: '8px',
+    userSelect: "none",
+  },
+});
 
 /**
  * Merges props onto a single React child element.
@@ -126,13 +155,9 @@ function Content({
   asChild?: boolean;
 } & React.HTMLAttributes<HTMLElement>) {
   const Component = asChild ? Slot : "div";
+  const sx = stylex.props(styles.content);
 
-  return (
-    <Component
-      className={clsx(styles.DockableDialogContent, className)}
-      {...props}
-    />
-  );
+  return <Component className={clsx(sx.className, className)} {...props} />;
 }
 
 function Header({
@@ -203,9 +228,11 @@ function Header({
     });
   }, [name]);
 
+  const sx = stylex.props(styles.header);
+
   return (
     <Component
-      className={clsx(styles.DockableDialogHeader, className)}
+      className={clsx(sx.className, className)}
       ref={ref}
       {...events}
       {...props}
@@ -217,12 +244,15 @@ function Dialog({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   const { open } = useDockableDialogState();
   const { colorScheme } = useColorScheme();
 
+  const sx = stylex.props(styles.dialog);
+
   return (
     <Portal>
       <aside
-        className={clsx(styles.DockableDialog, "shadow-lg", className)}
+        className={clsx(sx.className, className)}
         hidden={!open}
         style={{
+          ...sx.style,
           colorScheme,
         }}
         {...props}

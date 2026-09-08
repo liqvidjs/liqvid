@@ -3,6 +3,7 @@
 import { Duration } from "@liqvid/duration";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { SpinnerGapIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
@@ -14,9 +15,26 @@ import {
 } from "#_/pages/root-actions.js";
 import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
 
-import styles from "./RebuildButton.module.css";
-
 import type TranslationsJson from "./.translations/en.json";
+
+const spin = stylex.keyframes({
+  from: { transform: "rotate(0deg)" },
+  to: { transform: "rotate(360deg)" },
+});
+
+const styles = stylex.create({
+  label: {
+    alignItems: "center",
+    display: "inline-flex",
+    gap: "0.4em",
+  },
+  spinner: {
+    animationDuration: "1s",
+    animationIterationCount: "infinite",
+    animationName: spin,
+    animationTimingFunction: "linear",
+  },
+});
 
 type T = typeof TranslationsJson;
 
@@ -158,8 +176,8 @@ export function RebuildButtonClient({
   );
 
   const label = isBusy ? (
-    <span className={styles.label}>
-      <SpinnerGapIcon aria-hidden className={styles.spinner} />
+    <span {...stylex.props(styles.label)}>
+      <SpinnerGapIcon aria-hidden {...stylex.props(styles.spinner)} />
       {t.busy}
     </span>
   ) : canPublish ? (

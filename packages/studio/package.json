@@ -19,11 +19,11 @@
   "type": "module",
   "imports": {
     "#_/*.js": {
+      "default": "./src/*",
       "@liqvid/dev": [
         "./src/*.ts",
         "./src/*.tsx"
       ],
-      "default": "./src/*",
       "import": "./dist/esm/*"
     },
     "#_/*.json": {
@@ -50,6 +50,11 @@
       "default": "./src/next/api.mts",
       "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
+    },
+    "./next/layout": {
+      "default": "./src/next/layout.tsx",
+      "types": "./dist/types/next/layout.d.ts",
+      "import": "./dist/esm/next/layout.js"
     },
     "./next/page": {
       "default": "./src/next/page.tsx",
@@ -86,6 +91,7 @@
     "docs:watch": "typedoc --watch",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
+    "lint:stylex": "eslint",
     "lint:tsc": "tsc --noEmit",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "validate-translations": "node liqvid-validate-translations.mjs",
@@ -95,6 +101,8 @@
     "@base-ui/react": "catalog:",
     "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
+    "@fontsource-variable/alegreya": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "@radix-ui/react-slot": "catalog:",
@@ -108,6 +116,7 @@
     "http-status-codes": "catalog:",
     "jsonc.min": "catalog:",
     "lodash.debounce": "catalog:",
+    "react-headings": "catalog:",
     "server-only": "catalog:",
     "ts-morph": "catalog:",
     "universal-cookie": "catalog:",
@@ -119,6 +128,7 @@
     "@effect/language-service": "catalog:dev",
     "@jest/globals": "catalog:dev",
     "@stylexjs/babel-plugin": "catalog:",
+    "@stylexjs/eslint-plugin": "catalog:dev",
     "@stylexjs/postcss-plugin": "catalog:",
     "@types/jest": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -126,13 +136,16 @@
     "@types/react-dom": "19.2.4",
     "@types/serve-handler": "catalog:dev",
     "@types/ws": "catalog:dev",
-    "@typescript/typescript6": "catalog:dev",
+    "@typescript-eslint/parser": "catalog:dev",
     "concurrently": "catalog:dev",
     "csstype": "catalog:",
+    "eslint": "catalog:dev",
     "jest": "catalog:dev",
     "next": "catalog:",
     "next-ws": "catalog:peer",
+    "no-restricted-imports": "^0.0.3",
     "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typed-css-modules": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
@@ -162,5 +175,10 @@
     "serve-handler": "^6.1.7",
     "smart-whisper": "catalog:peer",
     "ws": "catalog:peer"
+  },
+  "overrides": {
+    "@typescript-eslint/parser": {
+      "typescript": "6"
+    }
   }
 }

@@ -9,8 +9,11 @@ import {
   FilmStripIcon,
   ImagesIcon,
 } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
+import type { ReadonlyRecord } from "effect/Record";
 import { useMemo, useState } from "react";
 
+import { colors, radii } from "#_/design/tokens.stylex.js";
 import {
   DialogBackdrop,
   DialogClose,
@@ -27,10 +30,8 @@ import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { getDefaultParams, ParameterSelector } from "./ParameterSelector.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
+import { shareStyles } from "./share.sx.ts";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
-
-import rootStyles from "../root.module.css";
-import shareStyles from "./share.module.css";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -41,11 +42,37 @@ interface ShareButtonProps {
   duration: Duration;
   productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
+
   /** Root parameters from liqvid.json (used as fallback) */
   rootParameters?: RootParameters;
+
   /** Currently selected root parameter values */
-  selectedRootParams: Record<string, string>;
+  selectedRootParams: ReadonlyRecord<string, string>;
 }
+
+const rebuildButton = stylex.create({
+  base: {
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    color: colors.grayNormal,
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: '0.5rem',
+    paddingInline: '1rem',
+    transition: "background-color 0.15s",
+  },
+});
 
 /**
  * Get project-level parameters that should be shown in the media dialog.
@@ -54,9 +81,9 @@ interface ShareButtonProps {
  * 2. The project has more values for that parameter than the root
  */
 function getProjectOnlyParameters(
-  projectParameters: Record<string, readonly string[]> | undefined,
+  projectParameters: ReadonlyRecord<string, readonly string[]> | undefined,
   rootParameters: RootParameters,
-): Record<string, string[]> {
+): ReadonlyRecord<string, readonly string[]> {
   if (!projectParameters) {
     return {};
   }
@@ -128,7 +155,7 @@ export function MediaButton({
   return (
     <DialogRoot>
       <DialogTrigger
-        className={rootStyles.rebuildButton}
+        {...stylex.props(rebuildButton.base)}
         title={t.trigger}
         type="button"
       >
@@ -138,7 +165,7 @@ export function MediaButton({
         <DialogBackdrop />
         <DialogPopup
           aria-describedby={undefined}
-          className={shareStyles.shareDialog}
+          {...stylex.props(shareStyles.shareDialog)}
           size="large"
         >
           <DialogTitle>{t.title}</DialogTitle>
@@ -154,7 +181,7 @@ export function MediaButton({
             />
           )}
 
-          <Tabs className={shareStyles.shareTabs} defaultValue="screenshots">
+          <Tabs defaultValue="screenshots" style={{ marginTop: "1rem" }}>
             <TabsList style={{ fontSize: "18px" }}>
               <TabsTrigger value="screenshots">
                 <CameraIcon size={14} /> {t.tabs.screenshots}

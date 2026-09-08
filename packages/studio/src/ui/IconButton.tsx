@@ -9,7 +9,7 @@ const styles = stylex.create({
   base: {
     alignItems: "center",
     backgroundColor: colors.accentSolid,
-    border: "none",
+    borderStyle: "none",
     borderRadius: "50%",
     cursor: {
       ":disabled": "not-allowed",

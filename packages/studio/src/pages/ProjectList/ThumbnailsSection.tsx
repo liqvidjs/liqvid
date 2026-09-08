@@ -3,6 +3,7 @@
 import type { Duration } from "@liqvid/duration";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
@@ -14,7 +15,7 @@ import { useDialogApi } from "#_/ui/Dialog.js";
 import { TimeDuration } from "#_/ui/Time.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import shareStyles from "./share.module.css";
+import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -169,17 +170,17 @@ export function ThumbnailsSection({
   };
 
   return (
-    <div className={shareStyles.section}>
-      <div className={shareStyles.sectionActions}>
+    <div {...stylex.props(shareStyles.section)}>
+      <div {...stylex.props(shareStyles.sectionActions)}>
         <Button
-          className={shareStyles.addButton}
+          {...stylex.props(shareStyles.addButton)}
           disabled={isGenerating}
           onClick={handleGenerate}
           type="button"
         >
           {isGenerating ? (
             <>
-              <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+              <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
               {t.inProgress}
             </>
           ) : (
@@ -191,80 +192,112 @@ export function ThumbnailsSection({
       </div>
 
       {isLoading ? (
-        <div className={shareStyles.loading}>
-          <SpinnerIcon className={shareStyles.spinner} size={24} />
+        <div {...stylex.props(shareStyles.loading)}>
+          <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
         </div>
       ) : hasNoThumbs ? (
-        <p className={shareStyles.emptyMessage}>{t.empty}</p>
+        <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
       ) : thumbInfo ? (
-        <div className={shareStyles.thumbsPreview}>
-          <div className={shareStyles.thumbsPreviewRow}>
+        <div {...stylex.props(shareStyles.thumbsPreview)}>
+          <div {...stylex.props(shareStyles.thumbsPreviewRow)}>
             {/* Light thumbnail */}
             {thumbsData.light.length > 0 && (
-              <div className={shareStyles.thumbsPreviewItem}>
-                <span className={shareStyles.thumbsSchemeLabel}>{c.light}</span>
-                <div
-                  className={shareStyles.thumbsPreviewBox}
-                  style={{
-                    height: thumbInfo.height,
-                    width: thumbInfo.width,
-                  }}
-                >
-                  <img
-                    alt="Light thumbnail"
-                    src={getSheetUrl("light")}
-                    style={{
-                      left: -thumbInfo.col * thumbInfo.width,
-                      maxWidth: "unset",
-                      top: -thumbInfo.row * thumbInfo.height,
-                    }}
-                  />
-                </div>
+              <div {...stylex.props(shareStyles.thumbsPreviewItem)}>
+                <span {...stylex.props(shareStyles.thumbsSchemeLabel)}>
+                  {c.light}
+                </span>
+                {(() => {
+                  const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
+                  const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
+                  return (
+                    <div
+                      className={boxSx.className}
+                      style={{
+                        ...boxSx.style,
+                        height: thumbInfo.height,
+                        width: thumbInfo.width,
+                      }}
+                    >
+                      <img
+                        alt="Light thumbnail"
+                        className={imgSx.className}
+                        src={getSheetUrl("light")}
+                        style={{
+                          ...imgSx.style,
+                          left: -thumbInfo.col * thumbInfo.width,
+                          maxWidth: "unset",
+                          top: -thumbInfo.row * thumbInfo.height,
+                        }}
+                      />
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
             {/* Dark thumbnail */}
             {thumbsData.dark.length > 0 && (
-              <div className={shareStyles.thumbsPreviewItem}>
-                <span className={shareStyles.thumbsSchemeLabel}>{c.dark}</span>
-                <div
-                  className={shareStyles.thumbsPreviewBox}
-                  style={{
-                    height: thumbInfo.height,
-                    width: thumbInfo.width,
-                  }}
-                >
-                  <img
-                    alt="Dark thumbnail"
-                    src={getSheetUrl("dark")}
-                    style={{
-                      left: -thumbInfo.col * thumbInfo.width,
-                      maxWidth: "unset",
-                      top: -thumbInfo.row * thumbInfo.height,
-                    }}
-                  />
-                </div>
+              <div {...stylex.props(shareStyles.thumbsPreviewItem)}>
+                <span {...stylex.props(shareStyles.thumbsSchemeLabel)}>
+                  {c.dark}
+                </span>
+                {(() => {
+                  const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
+                  const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
+                  return (
+                    <div
+                      className={boxSx.className}
+                      style={{
+                        ...boxSx.style,
+                        height: thumbInfo.height,
+                        width: thumbInfo.width,
+                      }}
+                    >
+                      <img
+                        alt="Dark thumbnail"
+                        className={imgSx.className}
+                        src={getSheetUrl("dark")}
+                        style={{
+                          ...imgSx.style,
+                          left: -thumbInfo.col * thumbInfo.width,
+                          maxWidth: "unset",
+                          top: -thumbInfo.row * thumbInfo.height,
+                        }}
+                      />
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
 
           {/* Slider controls */}
-          <div className={shareStyles.thumbsSliderControls}>
+          <div {...stylex.props(shareStyles.thumbsSliderControls)}>
             <TimeDuration
-              className={shareStyles.timeDisplay}
+              {...stylex.props(shareStyles.timeDisplay)}
               value={{ seconds: thumbInfo.time }}
             />
-            <input
-              className={shareStyles.seekSlider}
-              max={100}
-              min={0}
-              onChange={(e) => setSliderValue(Number(e.target.value))}
-              step={0.1}
-              type="range"
-              value={sliderValue}
-            />
+            {(() => {
+              const sliderSx = stylex.props(shareStyles.seekSlider);
+              return (
+                <input
+                  className={sliderSx.className}
+                  max={100}
+                  min={0}
+                  onChange={(e) => setSliderValue(Number(e.target.value))}
+                  step={0.1}
+                  style={{
+                    ...sliderSx.style,
+                    // biome-ignore lint/suspicious/noExplicitAny: vendor-prefixed slider thumb styling not supported in StyleX
+                    ["--slider-thumb-bg" as any]: "var(--accent-solid)",
+                  }}
+                  type="range"
+                  value={sliderValue}
+                />
+              );
+            })()}
             <TimeDuration
-              className={shareStyles.timeDisplay}
+              {...stylex.props(shareStyles.timeDisplay)}
               value={duration}
             />
           </div>

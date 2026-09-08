@@ -2,6 +2,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import type { Locale } from "@liqvid/schemas";
 import { Option } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
 
@@ -88,11 +89,11 @@ export function getCommonTranslations(): Promise<CommonTranslations> {
   );
 }
 
-export function getLocale() {
+export function getLocale(): Locale {
   const { config } = getServerState();
   return config.pipe(
     Option.flatMapNullishOr((c) => c.ui?.locale),
-    Option.getOrElse(() => "en"),
+    Option.getOrElse(() => "en" as const),
   );
 }
 

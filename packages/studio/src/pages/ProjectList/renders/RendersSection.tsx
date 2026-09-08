@@ -18,6 +18,7 @@ import {
   WarningCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
@@ -38,9 +39,10 @@ import {
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import rootStyles from "../../root.module.css";
-import shareStyles from "../share.module.css";
-import styles from "./renders.module.css";
+import { form } from "../../root.sx.ts";
+import { shareStyles } from "../share.sx.ts";
+
+import { rendersStyles as styles } from "./renders.sx.ts";
 
 import type TranslationsJson from "../.translations/en.json";
 
@@ -171,11 +173,11 @@ export function RendersSection({
     switch (status) {
       case "pending":
       case "rendering":
-        return <SpinnerIcon className={shareStyles.spinner} size={16} />;
+        return <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />;
       case "completed":
         return (
           <CheckCircleIcon
-            className={shareStyles.statusCompleted}
+            {...stylex.props(shareStyles.statusCompleted)}
             size={16}
             weight="fill"
           />
@@ -183,7 +185,7 @@ export function RendersSection({
       case "failed":
         return (
           <WarningCircleIcon
-            className={shareStyles.statusFailed}
+            {...stylex.props(shareStyles.statusFailed)}
             size={16}
             weight="fill"
           />
@@ -206,17 +208,20 @@ export function RendersSection({
 
   return (
     <>
-      <div className={shareStyles.section}>
-        <div className={shareStyles.sectionActions}>
+      <div {...stylex.props(shareStyles.section)}>
+        <div {...stylex.props(shareStyles.sectionActions)}>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
             <DialogTrigger
-              className={shareStyles.addButton}
+              {...stylex.props(shareStyles.addButton)}
               disabled={isStarting}
               type="button"
             >
               {isStarting ? (
                 <>
-                  <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+                  <SpinnerIcon
+                    {...stylex.props(shareStyles.spinner)}
+                    size={16}
+                  />{" "}
                   {t.inProgress}
                 </>
               ) : (
@@ -239,24 +244,26 @@ export function RendersSection({
         </div>
 
         {isLoading && renders.length === 0 ? (
-          <div className={shareStyles.loading}>
-            <SpinnerIcon className={shareStyles.spinner} size={24} />
+          <div {...stylex.props(shareStyles.loading)}>
+            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
           </div>
         ) : renders.length === 0 ? (
-          <p className={shareStyles.emptyMessage}>{t.empty}</p>
+          <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
         ) : (
-          <ul className={shareStyles.renderList}>
+          <ul {...stylex.props(shareStyles.renderList)}>
             {renders.map((render) => (
-              <li className={shareStyles.renderItem} key={render.id}>
-                <div className={shareStyles.renderInfo}>
-                  <div className={shareStyles.renderHeader}>
-                    <span className={shareStyles.renderName}>{render.id}</span>
-                    <span className={shareStyles.renderStatus}>
+              <li {...stylex.props(shareStyles.renderItem)} key={render.id}>
+                <div {...stylex.props(shareStyles.renderInfo)}>
+                  <div {...stylex.props(shareStyles.renderHeader)}>
+                    <span {...stylex.props(shareStyles.renderName)}>
+                      {render.id}
+                    </span>
+                    <span {...stylex.props(shareStyles.renderStatus)}>
                       {getStatusIcon(render.meta.status)}
                       {getStatusLabel(render.meta.status)}
                     </span>
                   </div>
-                  <div className={shareStyles.renderDetails}>
+                  <div {...stylex.props(shareStyles.renderDetails)}>
                     <span>{formatDate(render.meta.createdAt)}</span>
                     <span>
                       {render.meta.width}
@@ -270,18 +277,18 @@ export function RendersSection({
                     <span>{render.meta.colorScheme}</span>
                   </div>
                 </div>
-                <div className={shareStyles.renderActions}>
+                <div {...stylex.props(shareStyles.renderActions)}>
                   {render.meta.status === "completed" && (
                     <>
                       <Button
-                        className={shareStyles.renderActionButton}
+                        {...stylex.props(shareStyles.renderActionButton)}
                         onClick={() => setPlayingRender(render)}
                         title={t.play}
                       >
                         <PlayIcon size={16} weight="fill" />
                       </Button>
                       <Button
-                        className={shareStyles.renderActionButton}
+                        {...stylex.props(shareStyles.renderActionButton)}
                         onClick={() => handleOpenInFinder(render.id)}
                         title={t.openInFinder}
                       >
@@ -290,14 +297,14 @@ export function RendersSection({
                     </>
                   )}
                   <Button
-                    className={shareStyles.renderActionButton}
+                    {...stylex.props(shareStyles.renderActionButton)}
                     onClick={() => handleStartRename(render)}
                     title={t.rename.trigger}
                   >
                     <PencilSimpleIcon size={16} />
                   </Button>
                   <Button
-                    className={shareStyles.deleteButton}
+                    {...stylex.props(shareStyles.deleteButton)}
                     onClick={() => setDeleteDialog({ renderId: render.id })}
                     title={t.delete}
                   >
@@ -440,7 +447,7 @@ function ConfigDialog({
       <DialogPopup>
         <DialogTitle>{t.dialog.title}</DialogTitle>
 
-        <div className={rootStyles.formField}>
+        <div {...stylex.props(form.formField)}>
           <span id="render-color-scheme-label">{t.dialog.colorScheme}</span>
           <RadioTabs<ColorScheme>
             aria-labelledby="render-color-scheme-label"
@@ -452,13 +459,15 @@ function ConfigDialog({
           </RadioTabs>
         </div>
 
-        <div className={rootStyles.formField}>
+        <div {...stylex.props(form.formField)}>
           <span>{t.dialog.resolution}</span>
-          <div className={shareStyles.resolutionPresets}>
+          <div {...stylex.props(shareStyles.resolutionPresets)}>
             {WIDTH_PRESETS.map((width) => (
               <Button
-                className={shareStyles.presetButton}
-                data-active={config.width === width}
+                {...stylex.props(
+                  shareStyles.presetButton,
+                  config.width === width && shareStyles.presetButtonActive,
+                )}
                 key={width}
                 onClick={() => handleWidthPreset(width)}
                 type="button"
@@ -467,9 +476,9 @@ function ConfigDialog({
               </Button>
             ))}
           </div>
-          <div className={styles.dimensionInputs}>
+          <div {...stylex.props(styles.dimensionInputs)}>
             <input
-              className={styles.dimensionInput}
+              {...stylex.props(styles.dimensionInput)}
               min={1}
               onChange={(e) =>
                 handleWidthChange(Number(e.target.value) || config.width)
@@ -477,9 +486,9 @@ function ConfigDialog({
               type="number"
               value={config.width}
             />
-            <span className={styles.dimensionSeparator}>{"×"}</span>
+            <span {...stylex.props(styles.dimensionSeparator)}>{"×"}</span>
             <input
-              className={styles.dimensionInput}
+              {...stylex.props(styles.dimensionInput)}
               min={1}
               onChange={(e) =>
                 handleHeightChange(Number(e.target.value) || config.height)
@@ -489,8 +498,10 @@ function ConfigDialog({
             />
             <Button
               aria-pressed={lockAspectRatio}
-              className={styles.lockButton}
-              data-active={lockAspectRatio}
+              {...stylex.props(
+                styles.lockButton,
+                lockAspectRatio && styles.lockButtonActive,
+              )}
               onClick={handleToggleLock}
               title={
                 lockAspectRatio
@@ -508,10 +519,10 @@ function ConfigDialog({
           </div>
         </div>
 
-        <div className={rootStyles.dialogActions}>
+        <div {...stylex.props(form.dialogActions)}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            className={rootStyles.submitButton}
+            className={stylex.props(form.submitButton).className}
             onClick={handleStartRender}
             type="button"
           >
@@ -574,11 +585,11 @@ function RenameDialog({
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
-      <div className={rootStyles.formField}>
+      <div {...stylex.props(form.formField)}>
         <label htmlFor="render-name">{t.name}</label>
         <input
           // autoFocus
-          className={shareStyles.textInput}
+          {...stylex.props(shareStyles.textInput)}
           id="render-name"
           onChange={(e) => setRenameValue(e.target.value)}
           onKeyDown={(e) => {
@@ -590,17 +601,17 @@ function RenameDialog({
           value={renameValue}
         />
       </div>
-      <div className={rootStyles.dialogActions}>
+      <div {...stylex.props(form.dialogActions)}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
-          className={rootStyles.submitButton}
+          className={stylex.props(form.submitButton).className}
           disabled={isRenaming || !renameValue.trim()}
           onClick={handleRename}
           type="button"
         >
           {isRenaming ? (
             <>
-              <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+              <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
               {t.inProgress}
             </>
           ) : (
@@ -654,11 +665,11 @@ function DeleteDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p className={shareStyles.confirmMessage}>{t.confirm}</p>
-        <div className={rootStyles.dialogActions}>
+        <p {...stylex.props(shareStyles.confirmMessage)}>{t.confirm}</p>
+        <div {...stylex.props(form.dialogActions)}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            className={shareStyles.deleteConfirmButton}
+            {...stylex.props(shareStyles.deleteConfirmButton)}
             onClick={() => performDelete()}
           >
             {t.action}
@@ -683,17 +694,17 @@ function VideoPlayerDialog({
   return (
     <DialogPortal>
       <DialogBackdrop />
-      <DialogPopup className={styles.videoDialog}>
-        <div className={styles.videoHeader}>
+      <DialogPopup {...stylex.props(styles.videoDialog)}>
+        <div {...stylex.props(styles.videoHeader)}>
           <DialogTitle>{playingRender?.id}</DialogTitle>
-          <DialogClose className={shareStyles.closeButton}>
+          <DialogClose {...stylex.props(shareStyles.closeButton)}>
             <XIcon size={20} />
           </DialogClose>
         </div>
         {playingRender && (
           <video
             autoPlay
-            className={styles.videoPlayer}
+            {...stylex.props(styles.videoPlayer)}
             controls
             src={getVideoUrl(playingRender)}
           >

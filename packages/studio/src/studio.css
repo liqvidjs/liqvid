@@ -1,7 +1,35 @@
+@import "@fontsource-variable/inter";
+
 :root {
+  font-family: "Inter Variable", Arial, Helvetica, sans-serif;
   font-size: 20px;
+  background: light-dark(#f3f3f3, black);
 }
 
+@layer reset {
+  /* reset */
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+  }
+
+  :link,
+  :visited {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ul,
+  ol,
+  dl {
+    list-style: none;
+  }
+}
+
+/* ------------------------------ ui, to be moved later ------------------------------ */
 .lv-studio-button {
   padding: 4px 8px;
   font-size: 14px;

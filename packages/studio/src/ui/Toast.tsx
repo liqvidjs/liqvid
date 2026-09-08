@@ -1,13 +1,60 @@
 import type { PluginContext } from "@liqvid/studio-plugin-api";
 import { combineRefs } from "@liqvid/utils";
 import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
-import clsx from "clsx";
+import * as stylex from "@stylexjs/stylex";
 import { useEffect, useRef } from "react";
 
-import styles from "./Toast.module.css";
+import { colors, radii } from "#_/design/tokens.stylex.js";
+
+const ICON_SIZE = "24px";
+const ICON_OFFSET = "8px";
+
+const styles = stylex.create({
+  header: {
+    color: colors.grayNormal,
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "16px",
+    fontWeight: 500,
+    gridColumnEnd: 'header',
+    gridColumnStart: 'header',
+    gridRowEnd: 'header',
+    gridRowStart: 'header',
+    lineHeight: ICON_SIZE,
+  },
+  icon: {
+    gridColumnEnd: 'icon',
+    gridColumnStart: 'icon',
+    gridRowEnd: 'icon',
+    gridRowStart: 'icon',
+    height: ICON_SIZE,
+    width: ICON_SIZE,
+  },
+  message: {
+    color: colors.grayDim,
+    gridColumnEnd: 'message',
+    gridColumnStart: 'message',
+    gridRowEnd: 'message',
+    gridRowStart: 'message',
+  },
+  toast: {
+    backgroundColor: colors.grayApp,
+    borderColor: colors.graySep,
+    borderRadius: radii.xl,
+    boxShadow:
+      "0px 1px 2px 0px light-dark(#00000026, #33333326), 0px 3px 7px 0px light-dark(#00000040, #33333340)",
+    color: "light-dark(#000, #fff)",
+    display: "grid",
+    fontSize: "14px",
+    gridTemplate: `"icon header" "icon message" / calc(${ICON_SIZE} + ${ICON_OFFSET}) auto auto`,
+    padding: "8px",
+    position: "relative",
+    transitionDuration: "150ms",
+    transitionProperty: "background-color, color",
+    width: "300px",
+  },
+});
 
 export type ToastProps = Parameters<PluginContext["makeToast"]>[0] & {
-  className?: string;
   ref?: React.Ref<HTMLElement>;
 };
 
@@ -22,7 +69,6 @@ const icons = {
 };
 
 export function Toast({
-  className,
   message,
   ref,
   title,
@@ -37,30 +83,13 @@ export function Toast({
     elt.current.animate(appearToast.keyframes, appearToast.options);
   }, []);
 
-  // useImperativeHandle(ref, () => ({
-  //   hide(opts = {}) {
-  //     return new Promise<void>((resolve) => {
-  //       if (!elt.current) return;
-  //
-  //       const anim = elt.current.animate(hideToast.keyframes, {
-  //         ...hideToast.options,
-  //         ...opts,
-  //       });
-  //       anim.addEventListener("finish", () => resolve());
-  //     });
-  //   },
-  // }));
-
   const icon = icons[toastType];
 
   return (
-    <aside
-      className={clsx(styles.Toast, className)}
-      ref={combineRefs(ref, elt)}
-    >
-      <div className={styles.icon}>{icon}</div>
-      <header>{title}</header>
-      {message && <div className={styles.message}>{message}</div>}
+    <aside {...stylex.props(styles.toast)} ref={combineRefs(ref, elt)}>
+      <div {...stylex.props(styles.icon)}>{icon}</div>
+      <header {...stylex.props(styles.header)}>{title}</header>
+      {message && <div {...stylex.props(styles.message)}>{message}</div>}
     </aside>
   );
 }

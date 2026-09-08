@@ -2,6 +2,7 @@
 
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { SpinnerIcon, WaveformIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
@@ -19,10 +20,10 @@ import {
 } from "#_/ui/Dialog.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import { CaptionRow } from "./CaptionsRow.tsx";
+import { form } from "../../root.sx.ts";
+import { shareStyles } from "../share.sx.ts";
 
-import styles from "../../root.module.css";
-import shareStyles from "../share.module.css";
+import { CaptionRow } from "./CaptionsRow.tsx";
 
 import type TranslationsJson from "../.translations/en.json";
 
@@ -152,17 +153,17 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
   return (
     <>
-      <div className={shareStyles.section}>
-        <div className={shareStyles.sectionActions}>
+      <div {...stylex.props(shareStyles.section)}>
+        <div {...stylex.props(shareStyles.sectionActions)}>
           <Button
-            className={shareStyles.addButton}
+            {...stylex.props(shareStyles.addButton)}
             disabled={isGeneratingAudio}
             onClick={handleGenerateAudio}
             type="button"
           >
             {isGeneratingAudio ? (
               <>
-                <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+                <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
                 {t.inProgress}
               </>
             ) : (
@@ -174,13 +175,13 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
         </div>
 
         {isLoading && audio.length === 0 ? (
-          <div className={shareStyles.loading}>
-            <SpinnerIcon className={shareStyles.spinner} size={24} />
+          <div {...stylex.props(shareStyles.loading)}>
+            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
           </div>
         ) : audio.length === 0 ? (
-          <p className={shareStyles.emptyMessage}>{t.empty}</p>
+          <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
         ) : (
-          <ul className={shareStyles.renderList}>
+          <ul {...stylex.props(shareStyles.renderList)}>
             {audio.map((entry) => (
               <CaptionRow
                 entry={entry}
@@ -204,10 +205,10 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
           <DialogBackdrop />
           <DialogPopup>
             <DialogTitle>{t.rename.title}</DialogTitle>
-            <div className={styles.formField}>
+            <div {...stylex.props(form.formField)}>
               <label htmlFor="audio-name">{t.rename.name}</label>
               <input
-                className={shareStyles.textInput}
+                {...stylex.props(shareStyles.textInput)}
                 id="audio-name"
                 onChange={(e) => setRenameValue(e.target.value)}
                 onKeyDown={(e) => {
@@ -219,17 +220,20 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
                 value={renameValue}
               />
             </div>
-            <div className={styles.dialogActions}>
+            <div {...stylex.props(form.dialogActions)}>
               <DialogClose>{c.cancel}</DialogClose>
               <Button
-                className={styles.submitButton}
+                className={stylex.props(form.submitButton).className}
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
                 type="button"
               >
                 {isRenaming ? (
                   <>
-                    <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+                    <SpinnerIcon
+                      {...stylex.props(shareStyles.spinner)}
+                      size={16}
+                    />{" "}
                     {t.rename.inProgress}
                   </>
                 ) : (

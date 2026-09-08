@@ -7,34 +7,11 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useId } from "react";
 
-import { colors, text } from "#_/design/tokens.stylex.js";
-
 import { ProjectItem } from "./ProjectItem.tsx";
-
-import styles from "./ProjectList.module.css";
-
-const newStyles = stylex.create({
-  chevron: {
-    color: "light-dark(#6b7280, #9ca3af)",
-    flexShrink: 0,
-  },
-  count: {
-    backgroundColor: "light-dark(#e5e7eb, #4b5563)",
-    borderRadius: "100%",
-    color: "light-dark(#374151, #d1d5db)",
-    fontSize: text.sm,
-    fontWeight: 500,
-    padding: "0.125rem 0.5rem",
-  },
-  icon: {
-    color: colors.accentSolid,
-    fill: colors.accentSolid,
-    flexShrink: 0,
-  },
-  name: {
-    flex: 1,
-  },
-});
+import {
+  folderItemStyles,
+  projectListStyles as styles,
+} from "./projectList.sx.ts";
 
 export type FolderNode = {
   name: string;
@@ -52,6 +29,7 @@ export function FolderItem({
   productionServerPort,
   rootParameters,
   selectedRootParams,
+  nested = false,
 }: {
   basePath: string;
   collapsedFolders: Set<string>;
@@ -61,6 +39,7 @@ export function FolderItem({
   selectedRootParams: Record<string, string>;
   onToggle: (folderPath: string, expanded: boolean) => void;
   productionServerPort: number;
+  nested?: boolean;
 }) {
   const expanded = !collapsedFolders.has(folderPath);
   const totalCount = countTotalProjects(folder);
@@ -71,23 +50,32 @@ export function FolderItem({
   const id = useId();
 
   return (
-    <div className={styles.folder}>
+    <div {...stylex.props(styles.folder, nested && styles.nestedFolder)}>
       {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
       <button
         aria-controls={id}
         aria-expanded={expanded}
-        className={styles.folderHeader}
+        {...stylex.props(
+          styles.folderHeader,
+          nested && styles.nestedFolderHeader,
+        )}
         onClick={() => onToggle(folderPath, !expanded)}
         type="button"
       >
         {expanded ? (
-          <CaretDownIcon size={16} {...stylex.props(newStyles.chevron)} />
+          <CaretDownIcon
+            size={16}
+            {...stylex.props(folderItemStyles.chevron)}
+          />
         ) : (
-          <CaretRightIcon size={16} {...stylex.props(newStyles.chevron)} />
+          <CaretRightIcon
+            size={16}
+            {...stylex.props(folderItemStyles.chevron)}
+          />
         )}
-        <FolderIcon size={18} {...stylex.props(newStyles.icon)} />
-        <span {...stylex.props(newStyles.name)}>{folderPath}</span>
-        <span {...stylex.props(newStyles.count)}>{totalCount}</span>
+        <FolderIcon size={18} {...stylex.props(folderItemStyles.icon)} />
+        <span {...stylex.props(folderItemStyles.name)}>{folderPath}</span>
+        <span {...stylex.props(folderItemStyles.count)}>{totalCount}</span>
       </button>
 
       <div hidden={!expanded} id={id}>
@@ -99,6 +87,7 @@ export function FolderItem({
             folder={subfolder}
             folderPath={`${folderPath}/${subfolderName}`}
             key={subfolderName}
+            nested
             onToggle={onToggle}
             productionServerPort={productionServerPort}
             rootParameters={rootParameters}
@@ -107,7 +96,7 @@ export function FolderItem({
         ))}
         {/* Then render projects in this folder */}
         {folder.projects.length > 0 && (
-          <ul className={styles.projectList}>
+          <ul {...stylex.props(styles.projectList, styles.folderProjectList)}>
             {folder.projects.map(([key, project]) => (
               <ProjectItem
                 basePath={basePath}

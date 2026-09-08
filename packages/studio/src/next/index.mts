@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
 import { ProjectJson, resolveParametrizedString } from "@liqvid/schemas";
-import { Effect, Exit, Logger } from "effect";
+import { Effect, Exit, Layer, Logger } from "effect";
 import type { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -22,7 +22,6 @@ import { extractParameterNames } from "#_/utils/parameters.mjs";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 
-const IS_DEV = process.env.NODE_ENV === "development";
 export function liqvidProject<
   D extends Directory,
   P extends Record<string, unknown>,
@@ -52,7 +51,7 @@ export function liqvidProject<
   const paramNames = extractParameterNames(projectPath);
 
   // development
-  if (IS_DEV) {
+  if (import.meta.env.DEV) {
     return async function LiqvidProject({
       params: $params,
       searchParams: $searchParams,
@@ -99,8 +98,12 @@ export function liqvidProject<
                 cause,
               ),
           ),
-          Effect.provide(Logger.layer([Logger.consolePretty()])),
-          Effect.provide((await agnosticFileSystem()).layer),
+          Effect.provide(
+            Layer.mergeAll(
+              Logger.layer([Logger.consolePretty()]),
+              (await agnosticFileSystem()).layer,
+            ),
+          ),
         ),
       );
 

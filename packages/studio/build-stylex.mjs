@@ -8,6 +8,7 @@
  * After this step, consumers do NOT need the StyleX compiler — they only
  * need the tiny stylex.props() runtime (shipped as a dependency).
  */
+/** biome-ignore-all lint/suspicious/noConsole: internal helper */
 
 import fs from "node:fs";
 import path from "node:path";

@@ -11,11 +11,13 @@ import {
   XIcon,
   YinYangIcon,
 } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import { useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
+import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
@@ -27,8 +29,8 @@ import {
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
 import { useTranslations } from "#_/utils/react.js";
 
-import styles from "../../root.module.css";
-import shareStyles from "../share.module.css";
+import { form } from "../../root.sx.ts";
+import { shareStyles } from "../share.sx.ts";
 
 import type TranslationsJson from "../.translations/en.json";
 
@@ -43,6 +45,29 @@ interface ScreenshotModalProps {
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
 }
+
+const styles = stylex.create({
+  previewContainer: {
+    backgroundColor: colors.graySubtle,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    maxHeight: "60vh",
+    overflow: "hidden",
+    position: "relative",
+    width: "100%",
+  },
+
+  previewControls: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.lg,
+    marginTop: spacing.xl,
+    paddingBlock: "0",
+    paddingInline: "0.25rem",
+  },
+});
 
 export function ScreenshotModal({
   basePath,
@@ -147,36 +172,42 @@ export function ScreenshotModal({
       <DialogBackdrop />
       <DialogPopup
         aria-describedby={undefined}
-        className={shareStyles.previewDialog}
+        {...stylex.props(shareStyles.previewDialog)}
         size="huge"
       >
-        <div className={shareStyles.previewHeader}>
+        <div {...stylex.props(shareStyles.previewHeader)}>
           <DialogTitle>{t.title}</DialogTitle>
-          <DialogClose className={shareStyles.closeButton}>
+          <DialogClose {...stylex.props(shareStyles.closeButton)}>
             <XIcon size={20} />
           </DialogClose>
         </div>
 
-        <div
-          className={shareStyles.previewContainer}
-          style={{
-            aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
-          }}
-        >
-          <iframe
-            className={shareStyles.previewIframe}
-            ref={iframeRef}
-            src={previewUrl}
-            title="Video Preview"
-          />
-        </div>
+        {(() => {
+          const previewSx = stylex.props(styles.previewContainer);
+          return (
+            <div
+              className={previewSx.className}
+              style={{
+                ...previewSx.style,
+                aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
+              }}
+            >
+              <iframe
+                {...stylex.props(shareStyles.previewIframe)}
+                ref={iframeRef}
+                src={previewUrl}
+                title="Video Preview"
+              />
+            </div>
+          );
+        })()}
 
-        <div className={shareStyles.previewControls}>
-          <span className={shareStyles.timeDisplay}>
+        <div {...stylex.props(styles.previewControls)}>
+          <span {...stylex.props(shareStyles.timeDisplay)}>
             {formatTime(previewTime)}
           </span>
           <input
-            className={shareStyles.seekSlider}
+            {...stylex.props(shareStyles.seekSlider)}
             max={Duration.inSeconds(duration) || 60}
             min={0}
             onChange={(e) => setPreviewTime(e.target.valueAsNumber)}
@@ -184,12 +215,12 @@ export function ScreenshotModal({
             type="range"
             value={previewTime}
           />
-          <span className={shareStyles.timeDisplay}>
+          <span {...stylex.props(shareStyles.timeDisplay)}>
             {formatTime(duration)}
           </span>
         </div>
 
-        <div className={styles.formField}>
+        <div {...stylex.props(form.formField)}>
           <span id="color-scheme-label">{t.colorScheme}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby="color-scheme-label"
@@ -202,16 +233,16 @@ export function ScreenshotModal({
           </RadioTabs>
         </div>
 
-        <div className={styles.dialogActions}>
+        <div {...stylex.props(form.dialogActions)}>
           <Button
-            className={styles.submitButton}
+            className={stylex.props(form.submitButton).className}
             disabled={isCapturing}
             onClick={handleCapture}
             type="button"
           >
             {isCapturing ? (
               <>
-                <SpinnerIcon className={shareStyles.spinner} size={16} />{" "}
+                <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
                 {t.inProgress}
               </>
             ) : (

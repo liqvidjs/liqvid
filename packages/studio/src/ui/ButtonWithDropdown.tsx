@@ -2,9 +2,8 @@
 
 import { CaretDownIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
-import clsx from "clsx";
 
-import { padding, radii } from "#_/design/tokens.stylex.js";
+import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
 import {
   MenuItem,
@@ -15,12 +14,61 @@ import {
   MenuTrigger,
 } from "./Menu.tsx";
 
-const newStyles = stylex.create({
+const styles = stylex.create({
+  group: {
+    alignItems: "stretch",
+    display: "inline-flex",
+  },
   joinButtons: {
     /* collapse the shared border between the two buttons */
-    borderInlineStart: "none",
+    borderInlineStartWidth: 0,
+    borderInlineStartStyle: "none",
     borderRadius: `0 ${radii.md} ${radii.md} 0`,
-    paddingInline: padding.md,
+    paddingInline: spacing.md,
+  },
+  mainButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": "light-dark(#f0f0f0, #333)",
+      ":enabled:active": "light-dark(#d0d0d0, #333)",
+      ":enabled:hover": "light-dark(#fafafa, #444)",
+      default: "light-dark(#f0f0f0, #333)",
+    },
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'light-dark(#ccc, #555)',
+    borderRadius: `${radii.md} 0 0 ${radii.md}`,
+    color: {
+      ":disabled": "light-dark(#aaa, #eee)",
+      default: "light-dark(#000, #fff)",
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.base,
+    gap: "0.25rem",
+    justifyContent: "center",
+    paddingBlock: '0.3em',
+    paddingInline: '0.5em',
+    transition: "background-color 0.15s",
+  },
+  mainButtonPrimary: {
+    backgroundColor: {
+      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      ":enabled:active": "light-dark(#1e40af, #1d4ed8)",
+      ":enabled:hover": "light-dark(#1d4ed8, #2563eb)",
+      default: colors.accentSolid,
+    },
+    borderColor: {
+      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      default: colors.accentSolid,
+    },
+    color: {
+      ":disabled": "light-dark(#e5e7eb, #e5e7eb)",
+      default: "#fff",
+    },
   },
   shared: {
     alignItems: "center",
@@ -30,7 +78,9 @@ const newStyles = stylex.create({
       ":enabled:hover": "light-dark(#fafafa, #444)",
       default: "light-dark(#f0f0f0, #333)",
     },
-    border: "1px solid light-dark(#ccc, #555)",
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'light-dark(#ccc, #555)',
     color: {
       ":disabled": "light-dark(#aaa, #eee)",
       default: "light-dark(#000, #fff)",
@@ -42,12 +92,27 @@ const newStyles = stylex.create({
     display: "flex",
     gap: "0.25rem",
     justifyContent: "center",
-    padding: "0.3em 0.5em",
+    paddingBlock: '0.3em',
+    paddingInline: '0.5em',
     transition: "background-color 0.15s",
   },
+  sharedPrimary: {
+    backgroundColor: {
+      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      ":enabled:active": "light-dark(#1e40af, #1d4ed8)",
+      ":enabled:hover": "light-dark(#1d4ed8, #2563eb)",
+      default: colors.accentSolid,
+    },
+    borderColor: {
+      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      default: colors.accentSolid,
+    },
+    color: {
+      ":disabled": "light-dark(#e5e7eb, #e5e7eb)",
+      default: "#fff",
+    },
+  },
 });
-
-import styles from "./ButtonWithDropdown.module.css";
 
 export interface DropdownOption {
   /** Whether the option is disabled */
@@ -95,16 +160,19 @@ export function ButtonWithDropdown({
   options,
   variant = "default",
 }: ButtonWithDropdownProps) {
+  const isPrimary = variant === "primary";
+
   return (
-    <div
-      className={clsx(styles.group, variant !== "default" && styles[variant])}
-    >
+    <div {...stylex.props(styles.group)}>
       {/** biome-ignore lint/correctness/noRestrictedElements: this is a component */}
       <button
-        className={styles.mainButton}
         disabled={disabled}
         onClick={onClick}
         type="button"
+        {...stylex.props(
+          styles.mainButton,
+          isPrimary && styles.mainButtonPrimary,
+        )}
       >
         {children}
       </button>
@@ -112,7 +180,11 @@ export function ButtonWithDropdown({
         <MenuTrigger
           aria-label={dropdownLabel}
           disabled={disabled}
-          style={[newStyles.joinButtons, newStyles.shared]}
+          style={[
+            styles.joinButtons,
+            styles.shared,
+            isPrimary && styles.sharedPrimary,
+          ]}
         >
           <CaretDownIcon />
         </MenuTrigger>

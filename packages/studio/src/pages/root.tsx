@@ -1,6 +1,9 @@
 import { serialize } from "@liqvid/ssr/serde";
+import { GearIcon } from "@phosphor-icons/react/dist/ssr";
+import * as stylex from "@stylexjs/stylex";
 import { Option } from "effect";
 import { cookies } from "next/headers";
+import Link from "next/link";
 
 import {
   type DerivedConfig,
@@ -12,6 +15,7 @@ import {
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
 } from "#_/cookies.js";
+import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
@@ -20,13 +24,39 @@ import { ProjectList } from "./ProjectList/ProjectList.tsx";
 import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
-import styles from "./root.module.css";
+import "../stylex.css";
 
 import type TranslationsJson from "./.translations/en.json";
 
-import "../studio.css";
-import "../palette.css";
-import "../stylex.css";
+const styles = stylex.create({
+  header: {
+    fontSize: {
+      [breakpoints.desktop]: text.mega,
+      default: text.lg,
+    },
+    fontWeight: "bold",
+  },
+  headerRow: {
+    alignItems: "center",
+    display: "flex",
+    gap: "1rem",
+    marginBottom: "1rem",
+  },
+  main: {
+    fontSize: text.base,
+    marginBlock: "0",
+    marginInline: "auto",
+    padding: `${spacing.control} 0`,
+    width: {
+      [breakpoints.desktop]: "48rem",
+      default: null,
+    },
+  },
+
+  settingsLink: {
+    marginLeft: "auto",
+  },
+});
 
 type T = typeof TranslationsJson;
 
@@ -70,12 +100,19 @@ export async function Homepage() {
   return (
     <DerivedConfigProvider value={derivedConfig}>
       <WebSocketProvider>
-        <main className={styles.main}>
+        <main {...stylex.props(styles.main)}>
           <UpdateBanner />
-          <div className={styles.headerRow}>
-            <h1 className={styles.header}>{t.title}</h1>
+          <div {...stylex.props(styles.headerRow)}>
+            <h1 {...stylex.props(styles.header)}>{t.title}</h1>
             <NewProjectButton />
             <RebuildButton />
+            <Link
+              href="./settings"
+              title={t.settings}
+              {...stylex.props(styles.settingsLink)}
+            >
+              <GearIcon size={32} weight="fill" />
+            </Link>
           </div>
           <ProjectList
             basePath={basePath}

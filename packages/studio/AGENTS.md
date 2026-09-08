@@ -4,6 +4,17 @@
 
 For theming, use the CSS variables in `src/palette.css`.
 
+## Imports
+
+Use original extensions for relative imports, and remapped extensions for absolute (subpath) imports. e.g.
+
+```ts
+// original file is `i18n.mts`
+import { getTranslations } from "#_/utils/i18n.mjs";
+
+import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
+```
+
 ## Libraries
 
 Use Phosphor icons from `@phosphor-icons/react`. Icons are named in PascalCase, and must always end in `Icon`, e.g. `CameraIcon`. Use the `weight` prop for variants: `"thin"`, `"light"`, `"regular"` (default), `"bold"`, `"fill"`, or `"duotone"`.
@@ -13,6 +24,8 @@ For displaying formatted times, use the `<Time>` component in `src/ui/Time.tsx`.
 ### StyleX
 
 Docs are at https://stylexjs.com. Use StyleX for new components, although some legacy components are still using CSS modules.
+
+Run `eslint` to check for StyleX usage errors. **This is the only time you should ever run eslint, we use Biome for regular linting.**
 
 ### Base UI
 

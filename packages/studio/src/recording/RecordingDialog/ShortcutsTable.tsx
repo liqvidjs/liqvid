@@ -1,16 +1,93 @@
 import { Keymap } from "@liqvid/keymap";
 import { isMac } from "@liqvid/utils";
+import * as stylex from "@stylexjs/stylex";
 import { useCallback, useState } from "react";
 
-import type { RecordingControlProps } from "../RecordingControl.tsx";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
-import styles from "./RecordingDialog.module.css";
+import type { RecordingControlProps } from "../RecordingControl.tsx";
 
 import type Translations from "../.translations/en.json";
 
 type ShortcutKey = keyof NonNullable<RecordingControlProps["shortcuts"]>;
 
 type T = typeof Translations;
+
+const spin = stylex.keyframes({
+  from: { transform: "rotate(0deg)" },
+  to: { transform: "rotate(360deg)" },
+});
+
+const styles = stylex.create({
+  shortcutInput: {
+    "::placeholder": {
+      color: colors.grayDim,
+      fontStyle: "italic",
+    },
+    backgroundColor: colors.graySubtle,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    cursor: "pointer",
+    fontFamily: "monospace",
+    fontSize: text.sm,
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    padding: `${spacing.md} ${spacing.lg}`,
+    textAlign: "center",
+    width: "100%",
+  },
+
+  shortcutInputRecording: {
+    backgroundColor: "light-dark(#fffbe6, #3d3800)",
+    borderColor: "light-dark(#d9a600, #665000)",
+  },
+
+  shortcutsBodyRow: {
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: null,
+    },
+  },
+
+  shortcutsCell: {
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: colors.graySep,
+    paddingBlock: '6px',
+    paddingInline: '8px',
+    textAlign: "left",
+  },
+
+  shortcutsTable: {
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: colors.graySep,
+    borderCollapse: "collapse",
+    marginBlock: '0.5em',
+    marginInline: '0',
+    width: "100%",
+  },
+
+  shortcutsTheadTh: {
+    backgroundColor: colors.grayUi,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: colors.graySep,
+    fontSize: "12px",
+    fontWeight: 600,
+    paddingBlock: '6px',
+    paddingInline: '8px',
+    textAlign: "left",
+    textTransform: "uppercase",
+  },
+});
 
 const shortcutCommands: [string, ShortcutKey][] = [
   ["Toggle panel", "toggle"],
@@ -30,11 +107,11 @@ export function ShortcutsTable({
   t: T["tabs"]["shortcuts"];
 }) {
   return (
-    <table className={styles.shortcutsTable}>
+    <table {...stylex.props(styles.shortcutsTable)}>
       <thead>
         <tr>
-          <th>{t.command}</th>
-          <th>{t.shortcut}</th>
+          <th {...stylex.props(styles.shortcutsTheadTh)}>{t.command}</th>
+          <th {...stylex.props(styles.shortcutsTheadTh)}>{t.shortcut}</th>
         </tr>
       </thead>
       <tbody>
@@ -90,11 +167,14 @@ function ShortcutRow({
   }, []);
 
   return (
-    <tr>
-      <td>{label}</td>
-      <td>
+    <tr {...stylex.props(styles.shortcutsBodyRow)}>
+      <td {...stylex.props(styles.shortcutsCell)}>{label}</td>
+      <td {...stylex.props(styles.shortcutsCell)}>
         <input
-          className={styles.shortcutInput}
+          {...stylex.props(
+            styles.shortcutInput,
+            isRecording && styles.shortcutInputRecording,
+          )}
           data-recording={isRecording || undefined}
           onBlur={handleBlur}
           onFocus={handleFocus}

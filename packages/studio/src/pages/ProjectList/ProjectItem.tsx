@@ -5,6 +5,7 @@ import {
 } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
+import * as stylex from "@stylexjs/stylex";
 
 import { TimeDuration } from "#_/ui/Time.js";
 
@@ -12,8 +13,7 @@ import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
-
-import styles from "./ProjectList.module.css";
+import { projectListStyles as styles } from "./projectList.sx.ts";
 
 /** @package */
 export function ProjectItem({
@@ -58,15 +58,15 @@ export function ProjectItem({
 
   return (
     <ProjectPathProvider value={project.path}>
-      <li>
-        <a href={interpolatedPath}>
+      <li {...stylex.props(styles.listItem)}>
+        <a href={interpolatedPath} {...stylex.props(styles.listItemLink)}>
           <Thumbnail {...project} />
           <div className="flex flex-col">
             {resolvedTitle ?? project.path}
             <pre className="text-sm">{project.path}</pre>
           </div>
         </a>
-        <div className={styles.actions}>
+        <div {...stylex.props(styles.actions)}>
           <MediaButton
             basePath={basePath}
             duration={project.duration}
@@ -91,10 +91,12 @@ export function ProjectItem({
 }
 
 function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
+  const thumbnailSx = stylex.props(styles.thumbnail);
   return (
     <div
-      className={styles.thumbnail}
+      className={thumbnailSx.className}
       style={{
+        ...thumbnailSx.style,
         aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
         backgroundSize: "100% 100%",
         ...(openGraph
@@ -105,7 +107,7 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
       }}
     >
       {duration && (
-        <TimeDuration className={styles.duration} value={duration} />
+        <TimeDuration {...stylex.props(styles.duration)} value={duration} />
       )}
     </div>
   );

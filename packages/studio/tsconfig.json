@@ -2,7 +2,17 @@
   "compilerOptions": {
     "plugins": [
       { "name": "@effect/language-service" },
-      { "name": "typescript-plugin-css-modules" }
+      { "name": "typescript-plugin-css-modules" },
+      {
+        "name": "no-restricted-imports",
+        "options": {
+          "paths": {
+            "@base-ui/react/dialog": "import styled versions from \"#_/ui/Dialog.js\"",
+            "@base-ui/react/navigation-menu": "import styled versions from \"#_/ui/NavigationMenu.js\"",
+            "@base-ui/react/select": "import styled versions from \"#_/ui/Select.js\""
+          }
+        }
+      }
     ],
     "resolveJsonModule": true
   },

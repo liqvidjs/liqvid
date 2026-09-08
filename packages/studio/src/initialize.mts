@@ -189,3 +189,12 @@ export function getServerState(): LiqvidServerState {
 
   return (globalThis as unknown as GlobalThis)[symbol];
 }
+
+export function getConfigSync(): LiqvidConfig {
+  const { config: $config } = getServerState();
+  if (!Option.isSome($config)) {
+    throw new Error("Server not initialized: config is not loaded");
+  }
+
+  return $config.value;
+}

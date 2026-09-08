@@ -23,8 +23,7 @@ import {
   RootParameterSelector,
 } from "./ParameterSelector.tsx";
 import { ProjectItem } from "./ProjectItem.tsx";
-
-import styles from "./ProjectList.module.css";
+import { projectListStyles as styles } from "./projectList.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -43,15 +42,6 @@ export type ProjectListProps = {
   rootParameters: RootParameters;
   t: T;
 };
-
-const newStyles = stylex.create({
-  // TODO: unclear if this does anything (maybe it does on mobile?)
-  folderList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10rem",
-  },
-});
 
 const cookieOptions = {
   maxAge: Duration.inSeconds({ days: 365 }),
@@ -150,8 +140,8 @@ export function ProjectListClient({
         />
       )}
 
-      <div className={styles.viewToggle}>
-        <label className={styles.toggleLabel}>
+      <div {...stylex.props(styles.viewToggle)}>
+        <label {...stylex.props(styles.toggleLabel)}>
           <span>{t.folderView}</span>
           <Switch
             checked={folderView}
@@ -161,7 +151,7 @@ export function ProjectListClient({
       </div>
 
       {folderView ? (
-        <div {...stylex.props(newStyles.folderList)}>
+        <div {...stylex.props(styles.folderList)}>
           {Array.from(folderTree.entries())
             .sort(([a], [b]) => {
               // Empty folder name (root projects) should come last
@@ -172,7 +162,7 @@ export function ProjectListClient({
             .map(([folderName, folder]) =>
               folderName === "" ? (
                 // Root-level projects (no folder)
-                <ul className={styles.projectList} key="__root__">
+                <ul {...stylex.props(styles.projectList)} key="__root__">
                   {folder.projects.map(([key, project]) => (
                     <ProjectItem
                       basePath={basePath}
@@ -200,7 +190,7 @@ export function ProjectListClient({
             )}
         </div>
       ) : (
-        <ul className={styles.projectList}>
+        <ul {...stylex.props(styles.projectList)}>
           {sortedProjects.map(([key, project]) => (
             <ProjectItem
               basePath={basePath}

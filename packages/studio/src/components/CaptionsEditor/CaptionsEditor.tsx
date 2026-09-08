@@ -10,6 +10,7 @@ import {
   KeyboardIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
@@ -37,15 +38,20 @@ import {
 import { TimeDuration } from "#_/ui/Time.js";
 import { useAsyncTranslations } from "#_/utils/react.js";
 
+import { styles } from "./captions.sx.ts";
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { saveCaptions } from "./server.ts";
 import { type Shortcuts, useCaptionsEditorShortcuts } from "./shortcuts.ts";
 import { makeStore, type Store } from "./store.ts";
 import { activeWordIndex, apply, isSentenceEnd } from "./utils.ts";
 
-import styles from "./CaptionsEditor.module.css";
-
 import Translations from "./.translations/en.json";
+
+const sxStyles = stylex.create({
+  closeButton: {
+    marginLeft: "auto",
+  },
+});
 
 export function CaptionsEditor({
   displayProps = {},
@@ -163,7 +169,7 @@ export function CaptionsEditor({
     return (
       <>
         {before ? `${before} ` : ""}
-        <mark className={styles.activeWord}>{word}</mark>
+        <mark {...stylex.props(styles.activeWord)}>{word}</mark>
         {after ? ` ${after}` : ""}
       </>
     );
@@ -213,17 +219,20 @@ export function CaptionsEditor({
 
   if (transcript.length === 0) return;
 
+  const hoverWordSx = stylex.props(styles.hoverWord);
+  const wordInputSx = stylex.props(styles.wordInput);
+
   return (
     <DialogRoot {...props}>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogPopup className={styles.CaptionsEditor}>
+        <DialogPopup {...stylex.props(styles.CaptionsEditor)}>
           <div data-affords="click">
-            <div className={styles.actions}>
+            <div {...stylex.props(styles.actions)}>
               {/* save affordance */}
               <Button disabled={saving} onClick={save} type="submit">
                 {saving ? (
-                  <SpinnerIcon className={styles.spinner} size={16} />
+                  <SpinnerIcon {...stylex.props(styles.spinner)} size={16} />
                 ) : (
                   <FloppyDiskIcon />
                 )}
@@ -290,10 +299,10 @@ export function CaptionsEditor({
               </DialogRoot>
 
               {/* close button */}
-              <DialogClose style={{ marginLeft: "auto" }} title={t.close} />
+              <DialogClose style={sxStyles.closeButton} title={t.close} />
             </div>
 
-            <div className={styles.time}>
+            <div {...stylex.props(styles.time)}>
               <TimeDuration
                 format="milliseconds"
                 value={{ ms: transcript[selection.start]![1] }}
@@ -307,16 +316,21 @@ export function CaptionsEditor({
             {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
             {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
             <div
-              className={styles.transcript}
+              {...stylex.props(styles.transcript)}
               onClick={onClick}
               onMouseLeave={onMouseLeave}
               onMouseMove={onMouseMove}
             >
-              <div className={styles.stripes} ref={stripesRef}>
+              <div
+                {...stylex.props(styles.stripes)}
+                data-role="stripes"
+                ref={stripesRef}
+              >
                 {highlight && (
                   <div
-                    className={styles.hoverWord}
+                    className={hoverWordSx.className}
                     style={{
+                      ...hoverWordSx.style,
                       height: highlight.height,
                       left: highlight.left,
                       top: highlight.top,
@@ -328,7 +342,7 @@ export function CaptionsEditor({
                   <input
                     // biome-ignore lint/a11y/noAutofocus: focus is the point of the inline editor
                     autoFocus
-                    className={styles.wordInput}
+                    className={wordInputSx.className}
                     data-affords="keys"
                     onBlur={cancelEdit}
                     onChange={(e) => setEditValue(e.target.value)}
@@ -343,6 +357,7 @@ export function CaptionsEditor({
                       }
                     }}
                     style={{
+                      ...wordInputSx.style,
                       left: editing.rect.left,
                       top: editing.rect.top,
                     }}
@@ -384,7 +399,7 @@ export function CaptionsEditor({
 
                     const captionBreakMarker = hasCaptionBreak && (
                       <>
-                        <span className={styles.captionBreak} />{" "}
+                        <span {...stylex.props(styles.captionBreak)} />{" "}
                         {coincidingParagraphBreak && <br />}
                       </>
                     );
@@ -404,7 +419,7 @@ export function CaptionsEditor({
                         {hasSelection && (
                           <>
                             <mark
-                              className={styles.selection}
+                              {...stylex.props(styles.selection)}
                               key={selection.start}
                               ref={isAnchorSegment ? selectionRef : undefined}
                             >
@@ -591,7 +606,7 @@ function join(words: readonly TranscriptEntry[]) {
 function useSelectOnClick(store: Store) {
   return (e: React.MouseEvent<HTMLDivElement>) => {
     const container = e.currentTarget.querySelector<HTMLElement>(
-      `.${styles.stripes}`,
+      '[data-role="stripes"]',
     );
     if (!container) return;
 

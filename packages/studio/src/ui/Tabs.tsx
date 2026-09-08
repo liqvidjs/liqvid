@@ -1,34 +1,76 @@
 "use client";
 
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
+import * as stylex from "@stylexjs/stylex";
 import clsx from "clsx";
 import type { ReactElement } from "react";
 import { Children, cloneElement, isValidElement } from "react";
 
-import styles from "./Tabs.module.css";
+import { colors, radii } from "#_/design/tokens.stylex.js";
+
+const styles = stylex.create({
+  content: {
+    flex: "1",
+    outline: "none",
+  },
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
+  tabsList: {
+    borderRadius: radii.md,
+    height: "min-content",
+    marginBlock: '0',
+    marginInline: 'auto',
+    overflow: "hidden",
+  },
+  tabsTrigger: {
+    alignItems: "center",
+    backgroundColor: "#aaa",
+    color: "#fff",
+    display: "inline-flex",
+    fontFamily: '"Inter Variable", sans-serif',
+    fontWeight: 500,
+    gap: "0.2em",
+    paddingBlock: '1px',
+    paddingInline: '8px',
+  },
+  tabsTriggerActive: {
+    backgroundColor: colors.accentSolid,
+  },
+  tabsTriggerDisabled: {
+    opacity: 0.5,
+    pointerEvents: "none",
+  },
+});
 
 function Tabs({
-  className,
+  style: inlineStyle,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+}: Omit<React.ComponentProps<typeof TabsPrimitive.Root>, "className">) {
+  const sx = stylex.props(styles.root);
   return (
     <TabsPrimitive.Root
-      className={clsx("flex flex-col gap-2", className)}
       data-slot="tabs"
       {...props}
+      className={sx.className}
+      style={{ ...sx.style, ...(inlineStyle as React.CSSProperties) }}
     />
   );
 }
 
 function TabsList({
-  className,
+  style: inlineStyle,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: Omit<React.ComponentProps<typeof TabsPrimitive.List>, "className">) {
+  const sx = stylex.props(styles.tabsList);
   return (
     <TabsPrimitive.List
-      className={clsx(styles.TabsList, className)}
       data-slot="tabs-list"
       {...props}
+      className={sx.className}
+      style={{ ...sx.style, ...(inlineStyle as React.CSSProperties) }}
     />
   );
 }
@@ -39,9 +81,16 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
-      className={clsx(styles.TabsTrigger, className)}
       data-slot="tabs-trigger"
       {...props}
+      className={(state) => {
+        const sx = stylex.props(
+          styles.tabsTrigger,
+          state.active && styles.tabsTriggerActive,
+          state.disabled && styles.tabsTriggerDisabled,
+        );
+        return clsx(sx.className, className);
+      }}
     />
   );
 }
@@ -57,7 +106,8 @@ function TabsContent({
   className,
   ...props
 }: TabsContentProps) {
-  const combinedClassName = clsx("flex-1 outline-none", className);
+  const sxProps = stylex.props(styles.content);
+  const combinedClassName = clsx(sxProps.className, className);
 
   if (asChild && isValidElement(children)) {
     return (

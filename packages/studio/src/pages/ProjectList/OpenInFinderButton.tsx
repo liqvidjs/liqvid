@@ -2,12 +2,13 @@
 
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 
 import { openInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
 import { useTranslations } from "#_/utils/react.js";
 
-import styles from "./share.module.css";
+import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -22,7 +23,7 @@ export function OpenInFinderButton() {
 
   return (
     <Button
-      className={styles.productionLink}
+      {...stylex.props(shareStyles.productionLink)}
       onClick={handleClick}
       title={t.openInFinder}
     >

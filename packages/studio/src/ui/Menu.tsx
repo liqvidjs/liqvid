@@ -2,21 +2,60 @@
 
 import { Menu } from "@base-ui/react/menu";
 import * as stylex from "@stylexjs/stylex";
-import clsx from "clsx";
 
-import { dims, radii } from "#_/design/tokens.stylex.js";
+import { extensible, themed } from "#_/design/themed.js";
+import { colors, dims, radii } from "#_/design/tokens.stylex.js";
 
 import { useDialogApi } from "./Dialog";
 
-import styles from "./Menu.module.css";
-
-const newStyles = stylex.create({
+const styles = stylex.create({
+  item: {
+    alignItems: "center",
+    background: {
+      ":focus": colors.grayHover,
+      default: null,
+    },
+    borderRadius: "3px",
+    color: colors.grayNormal,
+    cursor: "pointer",
+    display: "flex",
+    fontSize: "0.875rem",
+    gap: "0.5rem",
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    paddingBlock: "0.5rem",
+    paddingInline: "0.75rem",
+    userSelect: "none",
+  },
+  popup: {
+    background: colors.grayApp,
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    boxShadow:
+      "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
+    minWidth: "12rem",
+    outline: "none",
+    padding: "0.25rem",
+  },
+  positioner: {
+    outline: "none",
+  },
+  separator: {
+    background: colors.graySep,
+    height: "1px",
+    marginBlock: "0.25rem",
+    marginInline: "0",
+  },
   trigger: {
     alignItems: "center",
-    background: "light-dark(#fff, #2a2a2a)",
+    background: colors.grayApp,
     borderColor: {
-      ":focus": "light-dark(#2563eb, #3b82f6)",
-      default: "light-dark(#d1d5db, #4b5563)",
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
     },
     borderRadius: radii.md,
     borderStyle: "solid",
@@ -27,70 +66,43 @@ const newStyles = stylex.create({
     fontSize: "0.75rem",
     gap: "0.5rem",
     outline: {
-      ":focus": "2px solid light-dark(#2563eb, #3b82f6)",
+      ":focus": `2px solid ${colors.accentSolid}`,
       default: null,
     },
     outlineOffset: {
       ":focus": "1px",
       default: null,
     },
-    padding: "0.3em 0.5em",
+    paddingBlock: "0.3em",
+    paddingInline: "0.5em",
   },
 });
 
-export function MenuRoot(props: React.ComponentProps<typeof Menu.Root>) {
-  return <Menu.Root {...props} />;
-}
+export const MenuItem = themed(Menu.Item, styles.item);
 
-export function MenuTrigger({
-  style,
-  ...props
-}: Omit<React.ComponentProps<typeof Menu.Trigger>, "style"> & {
-  style?: stylex.StyleXStyles;
-}) {
-  return (
-    <Menu.Trigger {...props} {...stylex.props(newStyles.trigger, style)} />
-  );
-}
+export const MenuPopup = themed(Menu.Popup, styles.popup);
 
-export function MenuPortal(props: React.ComponentProps<typeof Menu.Portal>) {
-  return <Menu.Portal {...props} />;
-}
+export const MenuPortal = Menu.Portal;
 
-export function MenuPositioner({
-  className,
-  style,
-  ...props
-}: React.ComponentProps<typeof Menu.Positioner>) {
+export function MenuPositioner(
+  props: Omit<React.ComponentProps<typeof Menu.Positioner>, "className">,
+) {
   const { level } = useDialogApi();
+  const sx = stylex.props(styles.positioner);
   return (
     <Menu.Positioner
-      className={clsx(styles.Positioner, className)}
       {...props}
-      style={{ "--dialog-level": `${level}` }}
+      className={sx.className}
+      style={{ ...sx.style, zIndex: `calc(1000 * ${level} + 1)` }}
     />
   );
 }
 
-export function MenuPopup({
-  className,
-  ...props
-}: React.ComponentProps<typeof Menu.Popup>) {
-  return <Menu.Popup className={clsx(styles.Popup, className)} {...props} />;
-}
+export const MenuRoot = Menu.Root;
 
-export function MenuItem({
-  className,
-  ...props
-}: React.ComponentProps<typeof Menu.Item>) {
-  return <Menu.Item className={clsx(styles.Item, className)} {...props} />;
-}
+export const MenuSeparator = themed(Menu.Separator, styles.separator);
 
-export function MenuSeparator({
-  className,
-  ...props
-}: React.ComponentProps<typeof Menu.Separator>) {
-  return (
-    <Menu.Separator className={clsx(styles.Separator, className)} {...props} />
-  );
-}
+export const MenuTrigger = extensible<stylex.StyleXStyles>()(
+  Menu.Trigger,
+  styles.trigger,
+);

@@ -1,7 +1,6 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import { IS_CLIENT } from "@liqvid/ssr";
 import { deserialize, type JSONValue, serialize } from "@liqvid/ssr/serde";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
@@ -133,7 +132,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const clientRef = useRef<WebSocketClient | null>(null);
 
   // On first render, get or create the shared client
-  if (IS_CLIENT && !clientRef.current) {
+  if (!import.meta.env.SSR && !clientRef.current) {
     if (!sharedClient) {
       sharedClient = new WebSocketClient("/api/liqvid/ws");
     }
