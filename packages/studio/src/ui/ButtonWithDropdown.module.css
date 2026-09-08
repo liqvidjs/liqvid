@@ -39,13 +39,6 @@
   border-radius: 4px 0 0 4px;
 }
 
-.dropdownButton {
-  padding-inline: 0.35em;
-  /* collapse the shared border between the two buttons */
-  border-inline-start: none;
-  border-radius: 0 4px 4px 0;
-}
-
 /* primary variant */
 .primary {
   .mainButton,

@@ -1,0 +1,140 @@
+import {
+  type ProjectMeta,
+  type RootParameters,
+  resolveParametrizedString,
+} from "@liqvid/schemas";
+import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
+import { omit } from "@liqvid/utils";
+
+import { TimeDuration } from "#_/ui/Time.js";
+
+import { EmbedButton } from "./EmbedButton.tsx";
+import { MediaButton } from "./MediaDialog.tsx";
+import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
+import { PreviewButton } from "./ProductionLink.tsx";
+
+import styles from "./ProjectList.module.css";
+
+/** @package */
+export function ProjectItem({
+  basePath,
+  productionServerPort,
+  project,
+  rootParameters,
+  selectedRootParams,
+}: {
+  basePath: string;
+  productionServerPort: number;
+  project: ProjectMeta;
+  rootParameters: RootParameters;
+  selectedRootParams: Record<string, string>;
+}) {
+  // Build combined params: root params as base, project params (first value) override
+  const combinedParams = { ...selectedRootParams };
+  if (project.parameters) {
+    for (const [key, values] of Object.entries(project.parameters)) {
+      if (!Object.hasOwn(combinedParams, key) && values.length > 0) {
+        combinedParams[key] = values[0]!;
+      }
+    }
+  }
+
+  // Resolve parametrized title using combined params
+  const resolvedTitle = project.title
+    ? resolveParametrizedString(project.title, combinedParams)
+    : undefined;
+
+  // Interpolate path parameters using selected root params + project params
+  const interpolatedPath = interpolatePathParametersWithSelected(
+    project.path,
+    project.parameters,
+    selectedRootParams,
+  );
+
+  // Build the preview URL with basePath if configured
+  const previewPath = basePath
+    ? `${basePath}/${interpolatedPath}`
+    : `/${interpolatedPath}`;
+
+  return (
+    <ProjectPathProvider value={project.path}>
+      <li>
+        <a href={interpolatedPath}>
+          <Thumbnail {...project} />
+          <div className="flex flex-col">
+            {resolvedTitle ?? project.path}
+            <pre className="text-sm">{project.path}</pre>
+          </div>
+        </a>
+        <div className={styles.actions}>
+          <MediaButton
+            basePath={basePath}
+            duration={project.duration}
+            productionServerPort={productionServerPort}
+            project={omit(project, ["duration"])}
+            rootParameters={rootParameters}
+            selectedRootParams={selectedRootParams}
+          />
+          <EmbedButton
+            basePath={basePath}
+            productionServerPort={productionServerPort}
+            project={project}
+          />
+          <OpenInFinderButton />
+          <PreviewButton
+            href={`http://localhost:${productionServerPort}${previewPath}`}
+          />
+        </div>
+      </li>
+    </ProjectPathProvider>
+  );
+}
+
+function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
+  return (
+    <div
+      className={styles.thumbnail}
+      style={{
+        aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
+        backgroundSize: "100% 100%",
+        ...(openGraph
+          ? {
+              backgroundImage: `url("/api/liqvid/static/${path}/opengraph-image.png")`,
+            }
+          : {}),
+      }}
+    >
+      {duration && (
+        <TimeDuration className={styles.duration} value={duration} />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Interpolate path parameters (like `[lang]`) using the selected root parameter values.
+ * Project-level parameters override root parameters.
+ * @param path - The path containing parameters (e.g., `/[lang]/gng/1-cg/1-spaces/1-intro`)
+ * @param projectParameters - Parameters defined in the project's project.json (if any)
+ * @param selectedRootParams - Currently selected root parameter values
+ * @returns The interpolated path with parameter values
+ */
+function interpolatePathParametersWithSelected(
+  path: string,
+  projectParameters: Record<string, readonly string[]> | undefined,
+  selectedRootParams: Record<string, string>,
+): string {
+  // Match all path parameters like [lang], [id], etc.
+  return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
+    // First, try project-level parameters (use first value as default)
+    if (projectParameters?.[paramName]?.length) {
+      return projectParameters[paramName][0]!;
+    }
+    // Fall back to selected root parameter value
+    if (selectedRootParams[paramName]) {
+      return selectedRootParams[paramName];
+    }
+    // If no value found, keep the original
+    return match;
+  });
+}

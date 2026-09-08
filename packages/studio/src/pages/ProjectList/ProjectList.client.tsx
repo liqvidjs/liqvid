@@ -6,34 +6,23 @@ import type {
   RootParameters,
   SerializedProjectMeta,
 } from "@liqvid/schemas";
-import { resolveParametrizedString } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
-import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
-import { omit } from "@liqvid/utils";
-import {
-  CaretDownIcon,
-  CaretRightIcon,
-  FolderIcon,
-} from "@phosphor-icons/react";
-import { combine } from "effect/Order";
+import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
-import { useId, useState } from "react";
+import { useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
 import { Switch } from "#_/ui/Switch.js";
-import { TimeDuration } from "#_/ui/Time.js";
 import { TranslationProvider } from "#_/utils/react.js";
 
-import { EmbedButton } from "./EmbedButton.tsx";
-import { MediaButton } from "./MediaDialog.tsx";
-import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
+import { FolderItem, type FolderNode } from "./FolderItem.tsx";
 import {
   getDefaultParams,
   RootParameterSelector,
 } from "./ParameterSelector.tsx";
-import { PreviewButton } from "./ProductionLink.tsx";
+import { ProjectItem } from "./ProjectItem.tsx";
 
 import styles from "./ProjectList.module.css";
 
@@ -55,56 +44,20 @@ export type ProjectListProps = {
   t: T;
 };
 
-interface FolderNode {
-  name: string;
-  projects: Array<[string, ProjectMeta]>;
-  subfolders: Map<string, FolderNode>;
-}
-
-/**
- * Count total projects in a folder including all subfolders.
- */
-function countTotalProjects(folder: FolderNode): number {
-  let count = folder.projects.length;
-  for (const subfolder of folder.subfolders.values()) {
-    count += countTotalProjects(subfolder);
-  }
-  return count;
-}
+const newStyles = stylex.create({
+  // TODO: unclear if this does anything (maybe it does on mobile?)
+  folderList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10rem",
+  },
+});
 
 const cookieOptions = {
   maxAge: Duration.inSeconds({ days: 365 }),
   path: "/",
   sameSite: "lax" as const,
 };
-
-/**
- * Interpolate path parameters (like `[lang]`) using the selected root parameter values.
- * Project-level parameters override root parameters.
- * @param path - The path containing parameters (e.g., `/[lang]/gng/1-cg/1-spaces/1-intro`)
- * @param projectParameters - Parameters defined in the project's project.json (if any)
- * @param selectedRootParams - Currently selected root parameter values
- * @returns The interpolated path with parameter values
- */
-function interpolatePathParametersWithSelected(
-  path: string,
-  projectParameters: Record<string, readonly string[]> | undefined,
-  selectedRootParams: Record<string, string>,
-): string {
-  // Match all path parameters like [lang], [id], etc.
-  return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
-    // First, try project-level parameters (use first value as default)
-    if (projectParameters?.[paramName]?.length) {
-      return projectParameters[paramName][0]!;
-    }
-    // Fall back to selected root parameter value
-    if (selectedRootParams[paramName]) {
-      return selectedRootParams[paramName];
-    }
-    // If no value found, keep the original
-    return match;
-  });
-}
 
 export function ProjectListClient({
   basePath,
@@ -208,7 +161,7 @@ export function ProjectListClient({
       </div>
 
       {folderView ? (
-        <div className={styles.folderList}>
+        <div {...stylex.props(newStyles.folderList)}>
           {Array.from(folderTree.entries())
             .sort(([a], [b]) => {
               // Empty folder name (root projects) should come last
@@ -261,183 +214,6 @@ export function ProjectListClient({
         </ul>
       )}
     </TranslationProvider>
-  );
-}
-
-function FolderItem({
-  basePath,
-  collapsedFolders,
-  folder,
-  folderPath,
-  onToggle,
-  productionServerPort,
-  rootParameters,
-  selectedRootParams,
-}: {
-  basePath: string;
-  collapsedFolders: Set<string>;
-  folder: FolderNode;
-  folderPath: string;
-  rootParameters: RootParameters;
-  selectedRootParams: Record<string, string>;
-  onToggle: (folderPath: string, expanded: boolean) => void;
-  productionServerPort: number;
-}) {
-  const expanded = !collapsedFolders.has(folderPath);
-  const totalCount = countTotalProjects(folder);
-  const sortedSubfolders = Array.from(folder.subfolders.entries()).sort(
-    ([a], [b]) => a.localeCompare(b),
-  );
-
-  const id = useId();
-
-  return (
-    <div className={styles.folder}>
-      {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
-      <button
-        aria-controls={id}
-        aria-expanded={expanded}
-        className={styles.folderHeader}
-        onClick={() => onToggle(folderPath, !expanded)}
-        type="button"
-      >
-        {expanded ? (
-          <CaretDownIcon className={styles.folderChevron} size={16} />
-        ) : (
-          <CaretRightIcon className={styles.folderChevron} size={16} />
-        )}
-        <FolderIcon className={styles.folderIcon} fill="" size={18} />
-        <span className={styles.folderName}>{folderPath}</span>
-        <span className={styles.folderCount}>{totalCount}</span>
-      </button>
-
-      <div hidden={!expanded} id={id}>
-        {/* Render subfolders first */}
-        {sortedSubfolders.map(([subfolderName, subfolder]) => (
-          <FolderItem
-            basePath={basePath}
-            collapsedFolders={collapsedFolders}
-            folder={subfolder}
-            folderPath={`${folderPath}/${subfolderName}`}
-            key={subfolderName}
-            onToggle={onToggle}
-            productionServerPort={productionServerPort}
-            rootParameters={rootParameters}
-            selectedRootParams={selectedRootParams}
-          />
-        ))}
-        {/* Then render projects in this folder */}
-        {folder.projects.length > 0 && (
-          <ul className={styles.projectList}>
-            {folder.projects.map(([key, project]) => (
-              <ProjectItem
-                basePath={basePath}
-                key={key}
-                productionServerPort={productionServerPort}
-                project={project}
-                rootParameters={rootParameters}
-                selectedRootParams={selectedRootParams}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ProjectItem({
-  basePath,
-  productionServerPort,
-  project,
-  rootParameters,
-  selectedRootParams,
-}: {
-  basePath: string;
-  productionServerPort: number;
-  project: ProjectMeta;
-  rootParameters: RootParameters;
-  selectedRootParams: Record<string, string>;
-}) {
-  // Build combined params: root params as base, project params (first value) override
-  const combinedParams = { ...selectedRootParams };
-  if (project.parameters) {
-    for (const [key, values] of Object.entries(project.parameters)) {
-      if (!Object.hasOwn(combinedParams, key) && values.length > 0) {
-        combinedParams[key] = values[0]!;
-      }
-    }
-  }
-
-  // Resolve parametrized title using combined params
-  const resolvedTitle = project.title
-    ? resolveParametrizedString(project.title, combinedParams)
-    : undefined;
-
-  // Interpolate path parameters using selected root params + project params
-  const interpolatedPath = interpolatePathParametersWithSelected(
-    project.path,
-    project.parameters,
-    selectedRootParams,
-  );
-
-  // Build the preview URL with basePath if configured
-  const previewPath = basePath
-    ? `${basePath}/${interpolatedPath}`
-    : `/${interpolatedPath}`;
-
-  return (
-    <ProjectPathProvider value={project.path}>
-      <li>
-        <a href={interpolatedPath}>
-          <Thumbnail {...project} />
-          <div className="flex flex-col">
-            {resolvedTitle ?? project.path}
-            <pre className="text-sm">{project.path}</pre>
-          </div>
-        </a>
-        <div className={styles.actions}>
-          <MediaButton
-            basePath={basePath}
-            duration={project.duration}
-            productionServerPort={productionServerPort}
-            project={omit(project, ["duration"])}
-            rootParameters={rootParameters}
-            selectedRootParams={selectedRootParams}
-          />
-          <EmbedButton
-            basePath={basePath}
-            productionServerPort={productionServerPort}
-            project={project}
-          />
-          <OpenInFinderButton />
-          <PreviewButton
-            href={`http://localhost:${productionServerPort}${previewPath}`}
-          />
-        </div>
-      </li>
-    </ProjectPathProvider>
-  );
-}
-
-function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
-  return (
-    <div
-      className={styles.thumbnail}
-      style={{
-        aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
-        backgroundSize: "100% 100%",
-        ...(openGraph
-          ? {
-              backgroundImage: `url("/api/liqvid/static/${path}/opengraph-image.png")`,
-            }
-          : {}),
-      }}
-    >
-      {duration && (
-        <TimeDuration className={styles.duration} value={duration} />
-      )}
-    </div>
   );
 }
 

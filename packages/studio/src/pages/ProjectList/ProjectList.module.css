@@ -58,13 +58,6 @@
   user-select: none;
 }
 
-/* Folder View */
-.folderList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
 .folderHeader {
   display: flex;
   gap: 0.5rem;
@@ -103,29 +96,6 @@
       background: light-dark(#f9fafb, #1f2937);
     }
   }
-}
-
-.folderChevron {
-  flex-shrink: 0;
-  color: light-dark(#6b7280, #9ca3af);
-}
-
-.folderIcon {
-  flex-shrink: 0;
-  color: var(--accent-solid);
-  fill: var(--accent-solid);
-}
-
-.folderName {
-  flex: 1;
-}
-
-.folderCount {
-  padding: 0.125rem 0.5rem;
-  font-weight: 500;
-  color: light-dark(#374151, #d1d5db);
-  background: light-dark(#e5e7eb, #4b5563);
-  border-radius: 9999px;
 }
 
 .folder .projectList {

@@ -9,6 +9,20 @@ export const colors = stylex.defineVars({
   grayUi: "light-dark(#eff0f3, #222325)",
 });
 
+export const dims = stylex.defineConsts({
+  sep: "1px",
+});
+
+export const padding = stylex.defineConsts({
+  lg: "8px",
+  md: "4px",
+  sm: "2px",
+});
+
+export const radii = stylex.defineConsts({
+  md: "4px",
+});
+
 export const text = stylex.defineVars({
   "2xl": "4rem",
   "3xl": "5rem",

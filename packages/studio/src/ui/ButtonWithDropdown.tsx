@@ -1,7 +1,10 @@
 "use client";
 
 import { CaretDownIcon } from "@phosphor-icons/react";
+import * as stylex from "@stylexjs/stylex";
 import clsx from "clsx";
+
+import { padding, radii } from "#_/design/tokens.stylex.js";
 
 import {
   MenuItem,
@@ -11,6 +14,38 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "./Menu.tsx";
+
+const newStyles = stylex.create({
+  joinButtons: {
+    /* collapse the shared border between the two buttons */
+    borderInlineStart: "none",
+    borderRadius: `0 ${radii.md} ${radii.md} 0`,
+    paddingInline: padding.md,
+  },
+  shared: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": "light-dark(#f0f0f0, #333)",
+      ":enabled:active": "light-dark(#d0d0d0, #333)",
+      ":enabled:hover": "light-dark(#fafafa, #444)",
+      default: "light-dark(#f0f0f0, #333)",
+    },
+    border: "1px solid light-dark(#ccc, #555)",
+    color: {
+      ":disabled": "light-dark(#aaa, #eee)",
+      default: "light-dark(#000, #fff)",
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    gap: "0.25rem",
+    justifyContent: "center",
+    padding: "0.3em 0.5em",
+    transition: "background-color 0.15s",
+  },
+});
 
 import styles from "./ButtonWithDropdown.module.css";
 
@@ -76,8 +111,8 @@ export function ButtonWithDropdown({
       <MenuRoot>
         <MenuTrigger
           aria-label={dropdownLabel}
-          className={styles.dropdownButton}
           disabled={disabled}
+          style={[newStyles.joinButtons, newStyles.shared]}
         >
           <CaretDownIcon />
         </MenuTrigger>

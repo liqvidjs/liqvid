@@ -20,9 +20,10 @@
   "imports": {
     "#_/*.js": {
       "@liqvid/dev": [
-        "./src/*.tsx",
-        "./src/*.ts"
+        "./src/*.ts",
+        "./src/*.tsx"
       ],
+      "default": "./src/*",
       "import": "./dist/esm/*"
     },
     "#_/*.json": {
@@ -36,27 +37,27 @@
   },
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
+      "default": "./src/index.mts",
       "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./next": {
-      "@liqvid/dev": "./src/next/index.mts",
+      "default": "./src/next/index.mts",
       "types": "./dist/types/next/index.d.mts",
       "import": "./dist/esm/next/index.mjs"
     },
     "./next/api": {
-      "@liqvid/dev": "./src/next/api.mts",
+      "default": "./src/next/api.mts",
       "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
     },
     "./next/page": {
-      "@liqvid/dev": "./src/next/page.tsx",
+      "default": "./src/next/page.tsx",
       "types": "./dist/types/next/page.d.ts",
       "import": "./dist/esm/next/page.js"
     },
     "./ui": {
-      "@liqvid/dev": "./src/ui/index.ts",
+      "default": "./src/ui/index.ts",
       "types": "./dist/types/ui/index.d.ts",
       "import": "./dist/esm/ui/index.js"
     }
@@ -128,7 +129,6 @@
     "@typescript/typescript6": "catalog:dev",
     "concurrently": "catalog:dev",
     "csstype": "catalog:",
-    "dev": "catalog:",
     "jest": "catalog:dev",
     "next": "catalog:",
     "next-ws": "catalog:peer",
