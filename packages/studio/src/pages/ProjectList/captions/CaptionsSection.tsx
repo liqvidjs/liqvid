@@ -18,6 +18,7 @@ import {
   DialogTitle,
   useDialogApi,
 } from "#_/ui/Dialog.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -27,11 +28,11 @@ import { CaptionRow } from "./CaptionsRow.tsx";
 
 import type TranslationsJson from "../.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface CaptionsSectionProps {
   /** Selected parameter values for parameterized projects */
-  selectedParams?: Record<string, string>;
+  selectedParams?: Readonly<Record<string, string>>;
 }
 
 export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {

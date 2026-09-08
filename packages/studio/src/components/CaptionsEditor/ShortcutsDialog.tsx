@@ -10,6 +10,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "#_/ui/Dialog.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import {
   defaultShortcuts,
@@ -21,10 +22,12 @@ import { styles } from "./shortcutsDialog.sx.ts";
 
 import type Translations from "./.translations/en.json";
 
+type T = Localized<typeof Translations>;
+
 const sxStyles = stylex.create({
   closeButton: {
-    marginBlock: '0',
-    marginInline: 'auto',
+    marginBlock: "0",
+    marginInline: "auto",
   },
 });
 
@@ -38,13 +41,13 @@ export function ShortcutsDialog({
 }: {
   /** The user-overridden shortcuts, merged over the defaults for display. */
   shortcuts: Partial<Shortcuts>;
-  t: typeof Translations;
+  t: T;
 }) {
   const keys: Shortcuts = { ...defaultShortcuts, ...shortcuts };
 
   return (
     <DialogPortal>
-      <DialogPopup {...stylex.props(styles.popup)} size="medium">
+      <DialogPopup size="medium">
         <DialogTitle>{t.keyboardShortcuts}</DialogTitle>
         <table {...stylex.props(styles.table)}>
           <thead>

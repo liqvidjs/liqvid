@@ -9,13 +9,13 @@ import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
 import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 async function cancelJob(formData: FormData) {
   "use server";

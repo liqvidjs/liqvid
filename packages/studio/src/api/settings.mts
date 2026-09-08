@@ -11,9 +11,20 @@ import { getLocale } from "#_/utils/i18n.mjs";
 
 import { SettingsConfig, WebApi } from "./contract.mts";
 
-/** Shape of the raw `liqvid.json(c)`, with an optional `ui.locale` field. */
+type Theme = "light" | "dark" | "system";
+
+/** Read the current theme from in-memory config, defaulting to `"system"`. */
+function getTheme(): Theme {
+  const { config } = getServerState();
+  return config.pipe(
+    Option.flatMapNullishOr((c) => c.ui?.theme),
+    Option.getOrElse(() => "system" as const),
+  );
+}
+
+/** Shape of the raw `liqvid.json(c)`, with optional `ui.locale` and `ui.theme` fields. */
 type RawConfig = {
-  ui?: { locale?: Locale } & Record<string, unknown>;
+  ui?: { locale?: Locale; theme?: Theme } & Record<string, unknown>;
 } & Record<string, unknown>;
 
 /**
@@ -160,6 +171,31 @@ export const settingsLive = HttpApiBuilder.group(
             }));
 
             return { locale };
+          },
+          (effect) => effect.pipe(Effect.catchTag("PlatformError", Effect.die)),
+        ),
+      )
+      .handle("getTheme", () => Effect.sync(() => ({ theme: getTheme() })))
+      .handle(
+        "setTheme",
+        Effect.fnUntraced(
+          function* ({ payload: { theme } }) {
+            const state = getServerState();
+            const configPath = yield* resolveConfigPath({ cwd: state.cwd });
+
+            // Update the raw config on disk, preserving all other fields and comments.
+            const raw = yield* readRawConfigWithComments(configPath);
+            raw.ui = { ...raw.ui, theme };
+            yield* writeRawConfig(configPath, raw);
+
+            // Update the in-memory config so subsequent renders reflect the change
+            // immediately (the config watcher will also pick this up).
+            state.config = Option.map(state.config, (config) => ({
+              ...config,
+              ui: { ...config.ui, theme },
+            }));
+
+            return { theme };
           },
           (effect) => effect.pipe(Effect.catchTag("PlatformError", Effect.die)),
         ),

@@ -2,10 +2,11 @@
 
 import { Duration } from "@liqvid/duration";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
-import { SpinnerGapIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Spinner } from "#_/components/Spinner.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import {
   publishAction,
@@ -14,6 +15,7 @@ import {
   rebuildAction,
 } from "#_/pages/root-actions.js";
 import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -36,7 +38,7 @@ const styles = stylex.create({
   },
 });
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 /** Publish is offered instead of rebuild within this window after a build. */
 const PUBLISH_WINDOW_MS = Duration.inMilliseconds({ minutes: 5 });
@@ -140,9 +142,9 @@ export function RebuildButtonClient({
       } else {
         makeToast({
           message: (
-            <a href="/jobs" rel="noreferrer">
+            <Link href="./jobs" rel="noreferrer">
               {t.toast.viewLogs}
-            </a>
+            </Link>
           ),
           title: t.toast.failure,
           type: "negative",
@@ -177,7 +179,7 @@ export function RebuildButtonClient({
 
   const label = isBusy ? (
     <span {...stylex.props(styles.label)}>
-      <SpinnerGapIcon aria-hidden {...stylex.props(styles.spinner)} />
+      <Spinner />
       {t.busy}
     </span>
   ) : canPublish ? (

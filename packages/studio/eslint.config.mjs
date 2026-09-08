@@ -40,7 +40,17 @@ export default [
       "@stylexjs/no-unused": "error",
       "@stylexjs/sort-keys": "off",
       "@stylexjs/valid-shorthands": "error",
-      "@stylexjs/valid-styles": "error",
+      "@stylexjs/valid-styles": [
+        "error",
+        {
+          propLimits: {
+            color: {
+              limit: null,
+              reason: "use a color token from `#_/design/tokens.stylex.js`",
+            },
+          },
+        },
+      ],
     },
   },
 ];

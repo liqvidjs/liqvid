@@ -12,6 +12,7 @@ import { updatePackageAction } from "#_/pages/root-actions.js";
 import type { PackageName } from "#_/types/misc.mjs";
 import { Button } from "#_/ui/Button.js";
 import { IconButton } from "#_/ui/IconButton.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -24,14 +25,14 @@ const styles = stylex.create({
     borderStyle: "solid",
     borderWidth: "1px",
     color: "var(--accent-normal)",
+    columnGap: "1rem",
     display: "flex",
     flexWrap: "wrap",
     fontSize: "0.875rem",
-    rowGap: '0.5rem',
-    columnGap: '1rem',
     marginBottom: "1rem",
-    paddingBlock: '0.625rem',
-    paddingInline: '1rem',
+    paddingBlock: "0.625rem",
+    paddingInline: "1rem",
+    rowGap: "0.5rem",
   },
   dismiss: {
     alignItems: "center",
@@ -57,13 +58,13 @@ const styles = stylex.create({
   },
   list: {
     alignItems: "center",
+    columnGap: "1.25rem",
     display: "flex",
     flexWrap: "wrap",
-    rowGap: '0.5rem',
-    columnGap: '1.25rem',
     listStyle: "none",
     margin: 0,
     padding: 0,
+    rowGap: "0.5rem",
   },
   message: {
     fontWeight: 600,
@@ -92,8 +93,8 @@ const styles = stylex.create({
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: '0.25rem',
-    paddingInline: '0.6rem',
+    paddingBlock: "0.25rem",
+    paddingInline: "0.6rem",
     transition: "background-color 0.15s",
   },
   versions: {
@@ -101,7 +102,7 @@ const styles = stylex.create({
   },
 });
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 /** Interpolate `{name}`-style placeholders in a translation string. */
 function format(template: string, values: Record<string, string>): string {

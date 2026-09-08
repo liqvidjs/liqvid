@@ -1,5 +1,9 @@
 "use client";
+
 import * as stylex from "@stylexjs/stylex";
+import Image from "next/image";
+
+import githubLogo from "#_/icons/github.svg";
 
 import { type Providers, styles, type T } from "./client.tsx";
 import { ProviderCard } from "./ProviderCard.tsx";
@@ -17,6 +21,7 @@ export function GitHubPagesProvider({
   return (
     <ProviderCard
       enabled={value !== undefined}
+      icon={<Image alt="" height={24} src={githubLogo} />}
       onToggle={(enabled) =>
         onChange(enabled ? { repository: "", username: "" } : undefined)
       }
@@ -25,12 +30,12 @@ export function GitHubPagesProvider({
       <TextField
         label={t.username}
         onChange={(v) => onChange({ repository: "", ...value, username: v })}
-        value={value?.username ?? ""}
+        value={value?.username}
       />
       <TextField
         label={t.repository}
         onChange={(v) => onChange({ username: "", ...value, repository: v })}
-        value={value?.repository ?? ""}
+        value={value?.repository}
       />
       <label {...stylex.props(styles.checkboxField)}>
         <input

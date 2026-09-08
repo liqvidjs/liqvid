@@ -4,13 +4,14 @@ import { Slot } from "@radix-ui/react-slot";
 import * as stylex from "@stylexjs/stylex";
 
 import { colors } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
 
 const styles = stylex.create({
   base: {
     alignItems: "center",
     backgroundColor: colors.accentSolid,
-    borderStyle: "none",
     borderRadius: "50%",
+    borderStyle: "none",
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
@@ -78,7 +79,7 @@ const variants = stylex.create({
 export interface IconButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** The icon to display */
-  children?: React.ReactNode;
+  children?: LocalizedReactNode;
 
   /**
    * Size of the button.

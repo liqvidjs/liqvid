@@ -33,6 +33,11 @@
     "#_/*.mjs": {
       "default": "./src/*.mts",
       "import": "./dist/esm/*"
+    },
+    "#_/*": {
+      "default": "./src/*",
+      "@liqvid/dev": "./src/*",
+      "import": "./dist/esm/*"
     }
   },
   "exports": {

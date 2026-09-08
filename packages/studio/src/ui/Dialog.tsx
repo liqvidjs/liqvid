@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 
+import { themed } from "#_/design/themed.js";
 import { colors, radii } from "#_/design/tokens.stylex.js";
 
 import { useCommonTranslations } from "../utils/react";
@@ -51,10 +52,10 @@ const styles = stylex.create({
   },
   content: {
     backgroundColor: colors.grayApp,
-    borderWidth: "1px",
-    borderStyle: "solid",
     borderColor: colors.graySep,
     borderRadius: radii.xl,
+    borderStyle: "solid",
+    borderWidth: "1px",
     boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
     color: colors.grayNormal,
     left: "50%",
@@ -216,22 +217,10 @@ export function DialogPopup({
   );
 }
 
-export function DialogPortal(
-  props: React.ComponentProps<typeof Dialog.Portal>,
-) {
-  return <Dialog.Portal {...props} />;
-}
+export const DialogPortal = Dialog.Portal;
 
-export function DialogBackdrop(
-  props: Omit<React.ComponentProps<typeof Dialog.Backdrop>, "className">,
-) {
-  return <Dialog.Backdrop {...props} {...stylex.props(styles.backdrop)} />;
-}
+export const DialogBackdrop = themed(Dialog.Backdrop, styles.backdrop);
 
-export function DialogTitle(
-  props: Omit<React.ComponentProps<typeof Dialog.Title>, "className">,
-) {
-  return <Dialog.Title {...props} {...stylex.props(styles.title)} />;
-}
+export const DialogTitle = themed(Dialog.Title, styles.title);
 
 export const DialogTrigger = Dialog.Trigger;

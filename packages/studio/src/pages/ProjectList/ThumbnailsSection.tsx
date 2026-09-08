@@ -13,13 +13,14 @@ import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
 import { Button } from "#_/ui/Button.js";
 import { useDialogApi } from "#_/ui/Dialog.js";
 import { TimeDuration } from "#_/ui/Time.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface ThumbnailsSectionProps {
   duration: Duration;

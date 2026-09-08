@@ -17,11 +17,11 @@ import {
 } from "#_/cookies.js";
 import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
 import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
 import { ProjectList } from "./ProjectList/ProjectList.tsx";
-import { RebuildButton } from "./RebuildButton/RebuildButton.server.tsx";
+import { RebuildButton } from "./RebuildButton/server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
 import "../stylex.css";
@@ -58,7 +58,7 @@ const styles = stylex.create({
   },
 });
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export async function Homepage() {
   await initializeServer();

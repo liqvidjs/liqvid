@@ -3,9 +3,15 @@
 import * as stylex from "@stylexjs/stylex";
 
 import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
 
 export const styles = stylex.create({
-  label: { alignItems: "center", display: "flex", gap: spacing.md },
+  label: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+    outlineColor: colors.graySep,
+  },
   providerCard: {
     background: colors.graySubtle,
     borderColor: colors.graySep,
@@ -23,8 +29,6 @@ export const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     gap: spacing.xs,
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
   },
 
   providerTitle: {
@@ -36,13 +40,15 @@ export const styles = stylex.create({
 export function ProviderCard({
   children,
   enabled,
+  icon,
   onToggle,
   title,
 }: {
-  children: React.ReactNode;
+  children: LocalizedReactNode;
   enabled: boolean;
+  icon?: React.ReactNode;
   onToggle: (enabled: boolean) => void;
-  title: string;
+  title: LocalizedReactNode;
 }) {
   return (
     <div {...stylex.props(styles.providerCard)}>
@@ -52,6 +58,7 @@ export function ProviderCard({
           onChange={(e) => onToggle(e.target.checked)}
           type="checkbox"
         />
+        {icon}
         <span {...stylex.props(styles.providerTitle)}>{title}</span>
       </label>
       {enabled && (

@@ -1,4 +1,4 @@
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
 import {
   ProjectListClient,
@@ -7,7 +7,7 @@ import {
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export async function ProjectList(props: Omit<ProjectListProps, "t">) {
   const t: T = await getTranslations(import.meta.url);

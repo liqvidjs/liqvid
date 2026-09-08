@@ -1,11 +1,11 @@
 import { getServerState } from "#_/initialize.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
 import { UpdateBannerClient } from "./UpdateBanner.client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 /**
  * Server component that surfaces available updates for `liqvid` and

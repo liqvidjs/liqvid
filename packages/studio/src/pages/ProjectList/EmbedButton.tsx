@@ -6,13 +6,14 @@ import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
 import { Button } from "#_/ui/Button.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface EmbedButtonProps {
   basePath: string;

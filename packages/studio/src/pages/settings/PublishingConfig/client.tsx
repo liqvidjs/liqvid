@@ -12,7 +12,7 @@ import { useState } from "react";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Description } from "#_/design/styles.js";
+import { Description, fonts } from "#_/design/styles.js";
 import {
   breakpoints,
   colors,
@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#_/ui/Select.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import { CopyProvider } from "./CopyProvider.tsx";
 import { GitHubPagesProvider } from "./GitHubPagesProvider.tsx";
@@ -41,9 +42,9 @@ import { LiqvidStudioProvider } from "./LiqvidStudioProvider.tsx";
 import { S3Provider } from "./S3Provider.tsx";
 import { SftpProvider } from "./SftpProvider.tsx";
 
-import type TranslationsJson from "../.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-export type T = typeof TranslationsJson;
+export type T = Localized<typeof TranslationsJson>;
 
 const settingsSpin = stylex.keyframes({
   from: { transform: "rotate(0deg)" },
@@ -405,7 +406,7 @@ function ConfigForm({
       {/* ---------------------------- backend ---------------------------- */}
       <FieldSet>
         <Legend>{t.backend}</Legend>
-        <Description>{t.backendDescription}</Description>
+        <p {...stylex.props(fonts.description)}>{t.backendDescription}</p>
 
         <div {...stylex.props(styles.field)}>
           <span {...stylex.props(styles.fieldLabel)}>{t.contentBackend}</span>

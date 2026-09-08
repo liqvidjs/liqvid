@@ -1,5 +1,10 @@
 {
   "folderView": "文件夹视图",
+  "screenshots": {
+    "colorScheme": {
+      "both": "两都"
+    }
+  },
   "tabs": {
     "captions": "字幕",
     "renders": "渲染",

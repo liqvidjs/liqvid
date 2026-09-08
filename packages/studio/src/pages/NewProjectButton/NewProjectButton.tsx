@@ -1,10 +1,10 @@
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
 import { NewProjectButtonClient } from "./NewProjectButton.client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export async function NewProjectButton() {
   const t = await getTranslations<T>(import.meta.url);

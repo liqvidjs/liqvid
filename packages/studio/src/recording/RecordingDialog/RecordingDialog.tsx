@@ -29,11 +29,11 @@ import Translations from "../.translations/en.json";
 
 const styles = stylex.create({
   configurationTable: {
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#000',
-    marginBlock: '1em',
-    marginInline: 'auto',
+    borderColor: "#000",
+    borderStyle: "solid",
+    borderWidth: "1px",
+    marginBlock: "1em",
+    marginInline: "auto",
     width: "100%",
   },
 
@@ -50,10 +50,10 @@ const styles = stylex.create({
 
   Recordings: {
     backgroundColor: colors.grayUi,
-    borderWidth: "1px",
-    borderStyle: "solid",
     borderColor: colors.graySep,
     borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: "1px",
     margin: `${spacing.md} 0`,
     overflow: "hidden",
   },

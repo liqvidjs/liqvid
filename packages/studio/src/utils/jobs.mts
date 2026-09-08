@@ -71,7 +71,7 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
   const logger = Logger.make(({ date, fiber, logLevel, message }) => {
     const annotations = fiber.getRef(
       References.CurrentLogAnnotations,
-    ) as Record.ReadonlyRecord<string, Schema.Json>;
+    ) as Readonly<Record<string, Schema.Json>>;
     const activeSpans = fiber.getRef(References.CurrentLogSpans);
 
     const timestamp = date.getTime();

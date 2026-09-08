@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "#_/ui/Dialog.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -34,7 +35,7 @@ import { shareStyles } from "../share.sx.ts";
 
 import type TranslationsJson from "../.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface ScreenshotModalProps {
   basePath: string;
@@ -170,14 +171,10 @@ export function ScreenshotModal({
   return (
     <DialogPortal>
       <DialogBackdrop />
-      <DialogPopup
-        aria-describedby={undefined}
-        {...stylex.props(shareStyles.previewDialog)}
-        size="huge"
-      >
-        <div {...stylex.props(shareStyles.previewHeader)}>
+      <DialogPopup aria-describedby={undefined} size="huge">
+        <div>
           <DialogTitle>{t.title}</DialogTitle>
-          <DialogClose {...stylex.props(shareStyles.closeButton)}>
+          <DialogClose>
             <XIcon size={20} />
           </DialogClose>
         </div>
@@ -192,12 +189,7 @@ export function ScreenshotModal({
                 aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
               }}
             >
-              <iframe
-                {...stylex.props(shareStyles.previewIframe)}
-                ref={iframeRef}
-                src={previewUrl}
-                title="Video Preview"
-              />
+              <iframe ref={iframeRef} src={previewUrl} title="Video Preview" />
             </div>
           );
         })()}
@@ -221,15 +213,27 @@ export function ScreenshotModal({
         </div>
 
         <div {...stylex.props(form.formField)}>
-          <span id="color-scheme-label">{t.colorScheme}</span>
+          <span id="color-scheme-label">{t.colorScheme.label}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby="color-scheme-label"
             onValueChange={setColorScheme}
             value={colorScheme}
           >
-            <RadioTabsItem icon={SunIcon} title="Light" value="light" />
-            <RadioTabsItem icon={MoonIcon} title="Dark" value="dark" />
-            <RadioTabsItem icon={YinYangIcon} title="Both" value="both" />
+            <RadioTabsItem
+              icon={SunIcon}
+              title={t.colorScheme.light}
+              value="light"
+            />
+            <RadioTabsItem
+              icon={MoonIcon}
+              title={t.colorScheme.dark}
+              value="dark"
+            />
+            <RadioTabsItem
+              icon={YinYangIcon}
+              title={t.colorScheme.both}
+              value="both"
+            />
           </RadioTabs>
         </div>
 

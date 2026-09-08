@@ -30,13 +30,13 @@ const spin = stylex.keyframes({
 
 const styles = stylex.create({
   actions: {
-    borderBottomWidth: "1px",
-    borderBottomStyle: "solid",
     borderBottomColor: colors.graySep,
+    borderBottomStyle: "solid",
+    borderBottomWidth: "1px",
     display: "flex",
     gap: "8px",
-    paddingBlock: '8px',
-    paddingInline: '12px',
+    paddingBlock: "8px",
+    paddingInline: "12px",
   },
 
   duration: {
@@ -75,10 +75,10 @@ const styles = stylex.create({
       ":hover": colors.grayHover,
       default: colors.grayUi,
     },
-    borderWidth: "1px",
-    borderStyle: "solid",
     borderColor: colors.graySep,
     borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: "1px",
     cursor: "pointer",
     display: "inline-flex",
     fontSize: "12px",

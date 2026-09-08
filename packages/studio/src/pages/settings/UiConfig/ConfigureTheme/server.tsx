@@ -1,28 +1,29 @@
-import { TranslateIcon } from "@phosphor-icons/react/dist/ssr";
+import { PaletteIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { Description } from "#_/design/styles.js";
+import { getConfigSync } from "#_/initialize.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { getLocale, getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
-import { ConfigureLocaleClient } from "./client.tsx";
+import { ConfigureThemeClient } from "./client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
 
 /** @access parent */
-export async function ConfigureLocale() {
+export async function ConfigureTheme() {
   const t = await getTranslations<T>(import.meta.url);
-  const locale = getLocale();
+  const theme = getConfigSync().ui.theme;
 
   return (
     <FieldSet>
       <Legend>
-        <TranslateIcon weight="bold" />
+        <PaletteIcon weight="bold" />
         {t.heading}
       </Legend>
       <Description>{t.description}</Description>
-      <ConfigureLocaleClient locale={locale} />
+      <ConfigureThemeClient theme={theme} />
     </FieldSet>
   );
 }

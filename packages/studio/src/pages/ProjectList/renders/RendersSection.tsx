@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { RenderEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Spinner } from "#_/components/Spinner.js";
 import { openRenderInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -37,6 +38,7 @@ import {
   useDialogApi,
 } from "#_/ui/Dialog.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
+import type { Localized, PlainString } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -46,7 +48,7 @@ import { rendersStyles as styles } from "./renders.sx.ts";
 
 import type TranslationsJson from "../.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
@@ -173,7 +175,7 @@ export function RendersSection({
     switch (status) {
       case "pending":
       case "rendering":
-        return <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />;
+        return <Spinner size={16} />;
       case "completed":
         return (
           <CheckCircleIcon
@@ -448,14 +450,24 @@ function ConfigDialog({
         <DialogTitle>{t.dialog.title}</DialogTitle>
 
         <div {...stylex.props(form.formField)}>
-          <span id="render-color-scheme-label">{t.dialog.colorScheme}</span>
+          <span id="render-color-scheme-label">
+            {t.dialog.colorScheme.label}
+          </span>
           <RadioTabs<ColorScheme>
             aria-labelledby="render-color-scheme-label"
             onValueChange={(v) => setConfig((c) => ({ ...c, colorScheme: v }))}
             value={config.colorScheme}
           >
-            <RadioTabsItem icon={SunIcon} title="Light" value="light" />
-            <RadioTabsItem icon={MoonIcon} title="Dark" value="dark" />
+            <RadioTabsItem
+              icon={SunIcon}
+              title={t.dialog.colorScheme.light}
+              value="light"
+            />
+            <RadioTabsItem
+              icon={MoonIcon}
+              title={t.dialog.colorScheme.dark}
+              value="dark"
+            />
           </RadioTabs>
         </div>
 
@@ -696,7 +708,9 @@ function VideoPlayerDialog({
       <DialogBackdrop />
       <DialogPopup {...stylex.props(styles.videoDialog)}>
         <div {...stylex.props(styles.videoHeader)}>
-          <DialogTitle>{playingRender?.id}</DialogTitle>
+          <DialogTitle>
+            {playingRender?.id as PlainString | undefined}
+          </DialogTitle>
           <DialogClose {...stylex.props(shareStyles.closeButton)}>
             <XIcon size={20} />
           </DialogClose>

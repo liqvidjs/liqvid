@@ -3,13 +3,14 @@
 import { EyeIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export function PreviewButton({ href }: { href: string }) {
   const t = useTranslations<T>();

@@ -23,16 +23,16 @@ import type {
 } from "#_/api/schemas.mjs";
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
+import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import { Button } from "#_/ui/Button.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
 import { ToggleButton } from "#_/ui/ToggleButton.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
-
-import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
+type T = Localized<typeof TranslationsJson>;
 
 const spin = stylex.keyframes({
   from: { transform: "rotate(0deg)" },
@@ -65,8 +65,8 @@ export const styles = stylex.create({
     alignItems: "center",
     display: "flex",
     gap: spacing.xs,
-    marginBlock: '1em',
-    marginInline: '0',
+    marginBlock: "1em",
+    marginInline: "0",
   },
 
   filterActive: {
@@ -83,14 +83,14 @@ export const styles = stylex.create({
       ":hover": colors.grayHover,
       default: "transparent",
     },
+    borderBottomColor: "transparent",
+    borderBottomLeftRadius: "0",
+    borderBottomRightRadius: "0",
+    borderBottomStyle: "solid",
+    borderBottomWidth: "2px",
     borderStyle: "none",
-    borderBottomWidth: '2px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'transparent',
-    borderTopLeftRadius: '4px',
-    borderTopRightRadius: '4px',
-    borderBottomRightRadius: '0',
-    borderBottomLeftRadius: '0',
+    borderTopLeftRadius: "4px",
+    borderTopRightRadius: "4px",
     color: colors.grayNormal,
     cursor: "pointer",
     fontSize: text.base,
@@ -113,14 +113,14 @@ export const styles = stylex.create({
   },
 
   job: {
-    marginBlock: '1em',
-    marginInline: '0',
+    marginBlock: "1em",
+    marginInline: "0",
   },
 
   log: {
     backgroundColor: colors.grayApp,
-    paddingBlock: '0.1em',
-    paddingInline: '0.2em',
+    paddingBlock: "0.1em",
+    paddingInline: "0.2em",
     position: "relative",
     scrollbarWidth: "thin",
     width: "100%",
@@ -135,15 +135,15 @@ export const styles = stylex.create({
   },
 
   logGroup: {
-    borderWidth: "1px",
-    borderStyle: "solid",
     borderColor: colors.graySep,
     borderRadius: "2px",
+    borderStyle: "solid",
+    borderWidth: "1px",
     fontSize: "16px",
   },
   main: {
-    marginBlock: '0',
-    marginInline: 'auto',
+    marginBlock: "0",
+    marginInline: "auto",
     width: "75%",
   },
 
@@ -167,23 +167,23 @@ export const styles = stylex.create({
 
   timestamp: {
     background: colors.grayApp,
-    borderWidth: "1px",
-    borderStyle: "solid",
+    borderBottomLeftRadius: "2px",
+    borderBottomRightRadius: "0",
+    borderBottomStyle: "solid",
     borderColor: colors.graySep,
-    borderTopLeftRadius: '0',
-    borderTopRightRadius: '0',
-    borderBottomRightRadius: '0',
-    borderBottomLeftRadius: '2px',
-    borderTopStyle: 'none',
-    borderRightStyle: 'none',
-    borderBottomStyle: 'solid',
-    borderLeftStyle: 'solid',
+    borderLeftStyle: "solid",
+    borderRightStyle: "none",
+    borderStyle: "solid",
+    borderTopLeftRadius: "0",
+    borderTopRightRadius: "0",
+    borderTopStyle: "none",
+    borderWidth: "1px",
     color: colors.grayDim,
     flexShrink: 0,
     fontSize: "0.6em",
     opacity: 0,
-    paddingBlock: '1px',
-    paddingInline: '4px',
+    paddingBlock: "1px",
+    paddingInline: "4px",
     position: "absolute",
     right: 0,
     top: 0,

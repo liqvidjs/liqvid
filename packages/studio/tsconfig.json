@@ -17,5 +17,5 @@
     "resolveJsonModule": true
   },
   "extends": "../../tsconfig.json",
-  "include": ["./src", "./src/**/.translations/*.json"]
+  "include": ["./src", "./src/**/.translations/*.json", "../icons/*.svg"]
 }

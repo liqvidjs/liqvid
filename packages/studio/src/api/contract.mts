@@ -1,6 +1,7 @@
 import {
   ColorScheme,
   ColorSchemeOption,
+  ColorSchemeSpecifier,
   ImageFormat,
   Locale,
   RecordingMeta,
@@ -450,6 +451,26 @@ const settingsGroup = HttpApiGroup.make("settings")
         locale: Locale,
       }),
     }).annotate(OpenApi.Summary, "Update the UI locale in liqvid.json"),
+  )
+  .add(
+    HttpApiEndpoint.get("getTheme", "/settings/theme", {
+      success: Schema.Struct({
+        /** Current UI theme */
+        theme: ColorSchemeSpecifier,
+      }),
+    }).annotate(OpenApi.Summary, "Get the current UI theme"),
+  )
+  .add(
+    HttpApiEndpoint.post("setTheme", "/settings/theme", {
+      payload: Schema.Struct({
+        /** Theme to set for the Liqvid Studio UI */
+        theme: ColorSchemeSpecifier,
+      }),
+      success: Schema.Struct({
+        /** The theme that was set */
+        theme: ColorSchemeSpecifier,
+      }),
+    }).annotate(OpenApi.Summary, "Update the UI theme in liqvid.json"),
   )
   .add(
     HttpApiEndpoint.get("getConfig", "/settings/config", {

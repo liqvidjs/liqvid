@@ -1,11 +1,11 @@
 import { getServerState } from "#_/initialize.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
 
-import { RebuildButtonClient } from "./RebuildButton.client.tsx";
+import { RebuildButtonClient } from "./client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export async function RebuildButton() {
   const t = await getTranslations<T>(import.meta.url);

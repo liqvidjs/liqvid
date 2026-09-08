@@ -3,7 +3,15 @@ import { isMac } from "@liqvid/utils";
 import * as stylex from "@stylexjs/stylex";
 import { useCallback, useState } from "react";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
@@ -11,15 +19,26 @@ import type Translations from "../.translations/en.json";
 
 type ShortcutKey = keyof NonNullable<RecordingControlProps["shortcuts"]>;
 
-type T = typeof Translations;
-
-const spin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
+type T = Localized<typeof Translations>;
 
 const styles = stylex.create({
-  shortcutInput: {
+  bodyRow: {
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: null,
+    },
+  },
+
+  cell: {
+    borderColor: colors.graySep,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    paddingBlock: "6px",
+    paddingInline: "8px",
+    textAlign: "left",
+  },
+
+  input: {
     "::placeholder": {
       color: colors.grayDim,
       fontStyle: "italic",
@@ -33,7 +52,7 @@ const styles = stylex.create({
     borderStyle: "solid",
     borderWidth: dims.sep,
     cursor: "pointer",
-    fontFamily: "monospace",
+    fontFamily: typeface.mono,
     fontSize: text.sm,
     outline: {
       ":focus": "none",
@@ -44,46 +63,30 @@ const styles = stylex.create({
     width: "100%",
   },
 
-  shortcutInputRecording: {
+  inputRecording: {
     backgroundColor: "light-dark(#fffbe6, #3d3800)",
     borderColor: "light-dark(#d9a600, #665000)",
   },
 
-  shortcutsBodyRow: {
-    backgroundColor: {
-      ":hover": colors.grayHover,
-      default: null,
-    },
-  },
-
-  shortcutsCell: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: colors.graySep,
-    paddingBlock: '6px',
-    paddingInline: '8px',
-    textAlign: "left",
-  },
-
-  shortcutsTable: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: colors.graySep,
+  table: {
     borderCollapse: "collapse",
-    marginBlock: '0.5em',
-    marginInline: '0',
+    borderColor: colors.graySep,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    marginBlock: "0.5em",
+    marginInline: "0",
     width: "100%",
   },
 
-  shortcutsTheadTh: {
+  theadTh: {
     backgroundColor: colors.grayUi,
-    borderWidth: "1px",
-    borderStyle: "solid",
     borderColor: colors.graySep,
+    borderStyle: "solid",
+    borderWidth: "1px",
     fontSize: "12px",
     fontWeight: 600,
-    paddingBlock: '6px',
-    paddingInline: '8px',
+    paddingBlock: "6px",
+    paddingInline: "8px",
     textAlign: "left",
     textTransform: "uppercase",
   },
@@ -107,11 +110,11 @@ export function ShortcutsTable({
   t: T["tabs"]["shortcuts"];
 }) {
   return (
-    <table {...stylex.props(styles.shortcutsTable)}>
+    <table {...stylex.props(styles.table)}>
       <thead>
         <tr>
-          <th {...stylex.props(styles.shortcutsTheadTh)}>{t.command}</th>
-          <th {...stylex.props(styles.shortcutsTheadTh)}>{t.shortcut}</th>
+          <th {...stylex.props(styles.theadTh)}>{t.command}</th>
+          <th {...stylex.props(styles.theadTh)}>{t.shortcut}</th>
         </tr>
       </thead>
       <tbody>
@@ -167,14 +170,11 @@ function ShortcutRow({
   }, []);
 
   return (
-    <tr {...stylex.props(styles.shortcutsBodyRow)}>
-      <td {...stylex.props(styles.shortcutsCell)}>{label}</td>
-      <td {...stylex.props(styles.shortcutsCell)}>
+    <tr {...stylex.props(styles.bodyRow)}>
+      <td {...stylex.props(styles.cell)}>{label}</td>
+      <td {...stylex.props(styles.cell)}>
         <input
-          {...stylex.props(
-            styles.shortcutInput,
-            isRecording && styles.shortcutInputRecording,
-          )}
+          {...stylex.props(styles.input, isRecording && styles.inputRecording)}
           data-recording={isRecording || undefined}
           onBlur={handleBlur}
           onFocus={handleFocus}

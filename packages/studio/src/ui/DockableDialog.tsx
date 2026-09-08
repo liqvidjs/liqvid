@@ -20,14 +20,15 @@ import {
 } from "react";
 
 import { colors, radii, text } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
 
 const styles = stylex.create({
   content: {
     backgroundColor: "light-dark(#e0e0e0, #333)",
     borderRadius: `0 0 ${radii.md} ${radii.md}`,
-    color: "light-dark(#000, #fff)",
-    paddingBlock: '8px',
-    paddingInline: '16px',
+    color: colors.foreground,
+    paddingBlock: "8px",
+    paddingInline: "16px",
   },
   dialog: {
     boxShadow:
@@ -43,8 +44,8 @@ const styles = stylex.create({
     color: colors.white,
     fontSize: text.sm,
     fontWeight: "bold",
-    paddingBlock: '4px',
-    paddingInline: '8px',
+    paddingBlock: "4px",
+    paddingInline: "8px",
     userSelect: "none",
   },
 });
@@ -57,7 +58,7 @@ function Slot({
   children,
   className,
   ...props
-}: { children?: React.ReactNode } & React.HTMLAttributes<HTMLElement>) {
+}: { children?: LocalizedReactNode } & React.HTMLAttributes<HTMLElement>) {
   const child = Children.only(children);
   if (!isValidElement(child)) {
     return null;
@@ -98,7 +99,7 @@ function Root({
   name,
   shortcut,
 }: {
-  children?: React.ReactNode;
+  children?: LocalizedReactNode;
   name?: string;
   shortcut?: ShortcutsSpecifier;
 }) {
@@ -137,7 +138,7 @@ function Trigger({
   children,
 }: {
   asChild?: boolean;
-  children?: React.ReactNode;
+  children?: LocalizedReactNode;
 }) {
   const { toggle } = useDockableDialogState();
   const Component = asChild ? Slot : "button";
@@ -153,6 +154,7 @@ function Content({
   ...props
 }: {
   asChild?: boolean;
+  children?: LocalizedReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
   const Component = asChild ? Slot : "div";
   const sx = stylex.props(styles.content);
@@ -166,6 +168,7 @@ function Header({
   ...props
 }: {
   asChild?: boolean;
+  children?: LocalizedReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
   const { name } = useDockableDialogState();
   const Component = asChild ? Slot : "header";

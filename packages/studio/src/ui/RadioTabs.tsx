@@ -7,6 +7,7 @@ import * as stylex from "@stylexjs/stylex";
 import type { ReactNode } from "react";
 
 import { colors, radii } from "#_/design/tokens.stylex.js";
+import type { LocalizedString } from "#_/utils/i18n.mjs";
 
 const styles = stylex.create({
   radioTabs: {
@@ -20,19 +21,19 @@ const styles = stylex.create({
   radioTabsItem: {
     alignItems: "center",
     backgroundColor: "transparent",
-    borderStyle: "none",
     borderRadius: radii.md,
+    borderStyle: "none",
     color: colors.grayDim,
     cursor: "pointer",
     display: "flex",
     justifyContent: "center",
-    paddingBlock: '6px',
-    paddingInline: '10px',
+    paddingBlock: "6px",
+    paddingInline: "10px",
     transition: "background-color 0.15s, color 0.15s",
   },
   radioTabsItemChecked: {
     backgroundColor: colors.accentSolid,
-    color: "#fff",
+    color: colors.white,
   },
 });
 
@@ -63,6 +64,8 @@ interface RadioTabsItemProps extends React.ComponentProps<typeof Radio.Root> {
 
   /** Icon size (default: 18) */
   iconSize?: number;
+
+  title: LocalizedString;
 }
 
 function RadioTabsItem({

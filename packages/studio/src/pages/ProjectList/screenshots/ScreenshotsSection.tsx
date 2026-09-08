@@ -31,6 +31,7 @@ import {
   useDialogApi,
 } from "#_/ui/Dialog.js";
 import { Time } from "#_/ui/Time.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -143,7 +144,7 @@ const sxStyles = stylex.create({
   },
 });
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface ScreenshotsSectionProps {
   basePath: string;

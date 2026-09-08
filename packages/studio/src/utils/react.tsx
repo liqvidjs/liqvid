@@ -1,3 +1,4 @@
+import type { JSONValue } from "@liqvid/ssr/serde";
 import type { RelativeDir } from "effect-paths";
 import {
   createContext,
@@ -11,7 +12,10 @@ import CommonTranslations from "#_/.translations/en.json";
 import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
 import { getTranslationsFromServer } from "#_/server-actions.js";
 
-import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
+import type {
+  CommonTranslations as CommonTranslationsType,
+  Localized,
+} from "./i18n.mts";
 
 type TranslationJson = {
   [key: string]: string | TranslationJson;
@@ -60,19 +64,24 @@ export function TranslationProvider<T extends TranslationJson>({
  * asynchronously load translations, using default locale until the
  * translations are loaded.
  */
-export function useAsyncTranslations<T>(
+export function useAsyncTranslations<T extends Record<string, JSONValue>>(
   defaultValue: T,
   componentDir: RelativeDir,
-) {
-  const [translations, setTranslations] = useState<T>(defaultValue);
+): Localized<T> {
+  const [translations, setTranslations] = useState<Localized<T>>(
+    defaultValue as Localized<T>,
+  );
 
   useEffect(() => {
-    getTranslationsFromServer<T>(componentDir).then((localized) => {
-      setTranslations({ ...defaultValue, ...localized });
+    getTranslationsFromServer<Localized<T>>(componentDir).then((localized) => {
+      setTranslations({
+        ...(defaultValue as Localized<T>),
+        ...localized,
+      });
     });
   }, [componentDir, defaultValue]);
 
-  return translations;
+  return translations as Localized<T>;
 }
 
 /**
@@ -93,7 +102,7 @@ export function useAsyncTranslations<T>(
  * }
  * ```
  */
-export function useCommonTranslations(): CommonTranslationsType {
+export function useCommonTranslations(): Localized<CommonTranslationsType> {
   return useAsyncTranslations(
     CommonTranslations as CommonTranslationsType,
     COMMON_TRANSLATIONS_DIR,

@@ -2,7 +2,6 @@
 
 import type { RootParameters } from "@liqvid/schemas";
 import * as stylex from "@stylexjs/stylex";
-import type { ReadonlyRecord } from "effect/Record";
 import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
@@ -13,13 +12,13 @@ import { projectListStyles } from "./projectList.sx.ts";
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
-  onParamsChange: (params: ReadonlyRecord<string, string>) => void;
+  onParamsChange: (params: Readonly<Record<string, string>>) => void;
 
   /** Parameter definitions from project.json or liqvid.json */
   parameters: RootParameters;
 
   /** Currently selected parameter values */
-  selectedParams: ReadonlyRecord<string, string>;
+  selectedParams: Readonly<Record<string, string>>;
 }
 
 const styles = stylex.create({
@@ -193,9 +192,9 @@ export function RootParameterSelector({
  * merged with project-level parameter definitions.
  */
 export function useProjectParameterValues(
-  projectParameters?: ReadonlyRecord<string, string[]>,
+  projectParameters?: Readonly<Record<string, readonly string[]>>,
   rootParameters?: RootParameters,
-): ReadonlyRecord<string, readonly string[]> {
+): Readonly<Record<string, readonly string[]>> {
   return useMemo(() => {
     // Start with root parameters as fallback
     const params = { ...rootParameters };
@@ -215,8 +214,8 @@ export function useProjectParameterValues(
  * Get default parameter values (first value of each parameter).
  */
 export function getDefaultParams(
-  parameters: ReadonlyRecord<string, readonly string[]>,
-): ReadonlyRecord<string, string> {
+  parameters: Readonly<Record<string, readonly string[]>>,
+): Readonly<Record<string, string>> {
   const result: Record<string, string> = {};
   for (const [key, values] of Object.entries(parameters)) {
     if (values.length > 0) {

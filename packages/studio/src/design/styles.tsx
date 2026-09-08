@@ -10,6 +10,10 @@ export const fonts = stylex.create({
     fontSize: text.md,
     marginBottom: spacing.lg,
   },
+  filename: {
+    fontFamily: typeface.mono,
+    fontSize: text.sm,
+  },
   ui: {
     fontFamily: typeface.ui,
     fontSize: text.base,

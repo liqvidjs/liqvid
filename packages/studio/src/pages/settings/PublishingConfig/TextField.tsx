@@ -12,7 +12,7 @@ export function TextField({
   label: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  value: string;
+  value: string | undefined;
 }) {
   return (
     <label {...stylex.props(styles.field)}>

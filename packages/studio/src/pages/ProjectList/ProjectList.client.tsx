@@ -15,6 +15,7 @@ import Cookies from "universal-cookie";
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
 import { Switch } from "#_/ui/Switch.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { TranslationProvider } from "#_/utils/react.js";
 
 import { FolderItem, type FolderNode } from "./FolderItem.tsx";
@@ -27,7 +28,7 @@ import { projectListStyles as styles } from "./projectList.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 export type ProjectListProps = {
   basePath: string;

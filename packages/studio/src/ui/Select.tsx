@@ -4,7 +4,7 @@
 import { Select } from "@base-ui/react/select";
 import * as stylex from "@stylexjs/stylex";
 
-import { extensible, themed } from "#_/design/themed.tsx.js";
+import { extensible, themed } from "#_/design/themed.js";
 import { colors, radii } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({

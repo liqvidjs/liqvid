@@ -1,5 +1,9 @@
 "use client";
+
 import * as stylex from "@stylexjs/stylex";
+import Image from "next/image";
+
+import s3Logo from "#_/icons/s3.svg";
 
 import { type Providers, styles, type T } from "./client.tsx";
 import { ProviderCard } from "./ProviderCard.tsx";
@@ -17,6 +21,7 @@ export function S3Provider({
   return (
     <ProviderCard
       enabled={value !== undefined}
+      icon={<Image alt="" height={24} src={s3Logo} />}
       onToggle={(enabled) =>
         onChange(enabled ? { bucket: "", domain: "" } : undefined)
       }

@@ -34,7 +34,12 @@
     },
     "dialog": {
       "action": "Start Render",
-      "colorScheme": "Color Scheme",
+      "colorScheme": {
+        "both": "Both",
+        "dark": "Dark",
+        "label": "Color Scheme",
+        "light": "Light"
+      },
       "fps": "fps",
       "resolution": "Resolution",
       "title": "Render Settings"
@@ -53,7 +58,12 @@
   },
   "screenshots": {
     "action": "Capture",
-    "colorScheme": "Color Scheme",
+    "colorScheme": {
+      "both": "Both",
+      "dark": "Dark",
+      "label": "Color Scheme",
+      "light": "Light"
+    },
     "confirmDialog": {
       "action": "Replace",
       "message": {

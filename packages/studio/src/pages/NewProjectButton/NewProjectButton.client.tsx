@@ -34,12 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#_/ui/Select.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 
 import { form } from "../root.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 /** @package */
 export function NewProjectButtonClient({ t }: { t: T }) {

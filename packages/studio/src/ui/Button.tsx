@@ -1,5 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 
+import type { LocalizedString } from "#_/utils/i18n.mjs";
+
 const styles = stylex.create({
   button: {
     alignItems: "center",
@@ -25,8 +27,8 @@ const styles = stylex.create({
     display: "flex",
     fontSize: ".75rem",
     gap: ".25rem",
-    paddingBlock: '.3em',
-    paddingInline: '.5em',
+    paddingBlock: ".3em",
+    paddingInline: ".5em",
     transition: "background-color 0.15s",
   },
 });
@@ -34,7 +36,9 @@ const styles = stylex.create({
 export function Button({
   className,
   ...props
-}: React.ComponentProps<"button">) {
+}: React.ComponentProps<"button"> & {
+  title?: LocalizedString;
+}) {
   return (
     // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined
     <button type="button" {...props} {...stylex.props(styles.button)} />

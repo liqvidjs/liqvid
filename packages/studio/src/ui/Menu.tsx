@@ -102,7 +102,4 @@ export const MenuRoot = Menu.Root;
 
 export const MenuSeparator = themed(Menu.Separator, styles.separator);
 
-export const MenuTrigger = extensible<stylex.StyleXStyles>()(
-  Menu.Trigger,
-  styles.trigger,
-);
+export const MenuTrigger = extensible()(Menu.Trigger, styles.trigger);

@@ -10,7 +10,6 @@ import {
   ImagesIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
-import type { ReadonlyRecord } from "effect/Record";
 import { useMemo, useState } from "react";
 
 import { colors, radii } from "#_/design/tokens.stylex.js";
@@ -24,6 +23,7 @@ import {
   DialogTrigger,
 } from "#_/ui/Dialog.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
+import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
@@ -35,7 +35,7 @@ import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = typeof TranslationsJson;
+type T = Localized<typeof TranslationsJson>;
 
 interface ShareButtonProps {
   basePath: string;
@@ -47,7 +47,7 @@ interface ShareButtonProps {
   rootParameters?: RootParameters;
 
   /** Currently selected root parameter values */
-  selectedRootParams: ReadonlyRecord<string, string>;
+  selectedRootParams: Readonly<Record<string, string>>;
 }
 
 const rebuildButton = stylex.create({
@@ -68,8 +68,8 @@ const rebuildButton = stylex.create({
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: '0.5rem',
-    paddingInline: '1rem',
+    paddingBlock: "0.5rem",
+    paddingInline: "1rem",
     transition: "background-color 0.15s",
   },
 });
@@ -81,9 +81,9 @@ const rebuildButton = stylex.create({
  * 2. The project has more values for that parameter than the root
  */
 function getProjectOnlyParameters(
-  projectParameters: ReadonlyRecord<string, readonly string[]> | undefined,
+  projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
   rootParameters: RootParameters,
-): ReadonlyRecord<string, readonly string[]> {
+): Readonly<Record<string, readonly string[]>> {
   if (!projectParameters) {
     return {};
   }

@@ -1,3 +1,8 @@
+import {
+  type IconProps,
+  SpinnerGapIcon,
+  SpinnerIcon,
+} from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
 import { colors } from "#_/design/tokens.stylex.js";
@@ -17,3 +22,15 @@ export const styles = stylex.create({
     flexShrink: 0,
   },
 });
+
+export function Spinner({
+  variant = "gap",
+  ...props
+}: { variant?: "solid" | "gap" } & IconProps) {
+  const Component = {
+    gap: SpinnerGapIcon,
+    solid: SpinnerIcon,
+  }[variant];
+
+  return <Component aria-hidden {...stylex.props(styles.spinner)} {...props} />;
+}

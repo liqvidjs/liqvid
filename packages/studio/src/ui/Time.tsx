@@ -1,7 +1,8 @@
 import type { DurationLike } from "@liqvid/duration";
 import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
 
-import { toISODateString } from "../utils/time.mts";
+import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import { toISODateString } from "#_/utils/time.mjs";
 
 type TimeFormat = "long" | "date-and-time";
 type Language = "en-US";
@@ -31,7 +32,7 @@ export function TimeDuration({
   value,
   ...attrs
 }: Omit<React.TimeHTMLAttributes<HTMLTimeElement>, "dateTime"> & {
-  children?: React.ReactNode;
+  children?: LocalizedReactNode;
   /**
    * Example values:
    * - `seconds`: 1:23
