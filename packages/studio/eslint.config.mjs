@@ -44,17 +44,21 @@ export default [
         "error",
         {
           propLimits: {
-            backgroundColor: {
+            "background*Color": {
               limit: null,
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
             },
-            borderColor: {
+            "border*Color": {
               limit: null,
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
             },
-            borderRadius: {
+            "border*Radius": {
               limit: null,
               reason: "use a radii.* token from `#_/design/tokens.stylex.js`",
+            },
+            "border*Width": {
+              limit: null,
+              reason: "use a dims.* token from `#_/design/tokens.stylex.js`",
             },
             boxShadow: {
               limit: null,
@@ -63,6 +67,10 @@ export default [
             color: {
               limit: null,
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            columnGap: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
             fontFamily: {
               limit: null,
@@ -77,31 +85,23 @@ export default [
               limit: null,
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
-            margin: {
+            "margin*": {
               limit: null,
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
-            marginBlock: {
-              limit: null,
-              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
-            },
-            marginInline: {
-              limit: null,
-              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
-            },
-            outlineColor: {
+            "outline*Color": {
               limit: null,
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
             },
-            padding: {
+            "outline*Width": {
+              limit: null,
+              reason: "use a dims.* token from `#_/design/tokens.stylex.js`",
+            },
+            "padding*": {
               limit: null,
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
-            paddingBlock: {
-              limit: null,
-              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
-            },
-            paddingInline: {
+            rowGap: {
               limit: null,
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },

@@ -24,7 +24,7 @@ const styles = stylex.create({
   joinButtons: {
     borderInlineStartStyle: "none",
     /* collapse the shared border between the two buttons */
-    borderInlineStartWidth: 0,
+    borderInlineStartWidth: spacing.zero,
     borderRadius: `0 ${radii.md} ${radii.md} 0`,
     paddingInline: spacing.md,
   },
@@ -45,7 +45,7 @@ const styles = stylex.create({
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
     },
-    columnGap: "0.25rem",
+    columnGap: spacing.md,
     cursor: {
       ":disabled": "default",
       default: "pointer",
@@ -55,7 +55,7 @@ const styles = stylex.create({
     justifyContent: "center",
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
-    rowGap: "0.25rem",
+    rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
   mainButtonPrimary: {
@@ -89,7 +89,7 @@ const styles = stylex.create({
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
     },
-    columnGap: "0.25rem",
+    columnGap: spacing.md,
     cursor: {
       ":disabled": "default",
       default: "pointer",
@@ -98,7 +98,7 @@ const styles = stylex.create({
     justifyContent: "center",
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
-    rowGap: "0.25rem",
+    rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
   sharedPrimary: {

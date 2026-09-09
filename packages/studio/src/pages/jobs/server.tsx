@@ -12,7 +12,7 @@ import { broadcast } from "#_/next/websockets.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
-import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
+import { DEFAULT_LOG_LEVELS, JobsClient } from "./client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 

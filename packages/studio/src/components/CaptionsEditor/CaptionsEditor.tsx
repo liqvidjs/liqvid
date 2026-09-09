@@ -16,6 +16,7 @@ import { useStore } from "zustand";
 
 import { Spinner } from "#_/components/Spinner.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 import type { Transcript } from "#_/types/schemas.mjs";
 import type { Awaitable } from "#_/types.mjs";
 import { Button } from "#_/ui/Button.js";
@@ -49,7 +50,7 @@ import Translations from "./.translations/en.json";
 
 const sxStyles = stylex.create({
   closeButton: {
-    marginLeft: "auto",
+    marginLeft: spacing.auto,
   },
 });
 

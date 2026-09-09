@@ -33,7 +33,12 @@
   "providersDescription": "Configure connection details for each hosting provider.",
   "repository": "Repository",
   "s3Bucket": "Bucket",
-  "s3CredentialsHint": "Credentials must be provided via environment variables in liqvid.json.",
+  "s3CredentialsHint": {
+    "_": "Credentials must be provided via environment variables in {filename}.",
+    "$": {
+      "filename": null
+    }
+  },
   "s3Domain": "Domain",
   "s3Prefix": "Prefix",
   "s3Region": "Region",

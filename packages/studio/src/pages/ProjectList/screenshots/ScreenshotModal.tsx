@@ -17,7 +17,14 @@ import { useEffect, useState } from "react";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
 import { Spinner } from "#_/components/Spinner.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -47,17 +54,17 @@ interface ScreenshotModalProps {
 
 const styles = stylex.create({
   dialogActions: {
-    columnGap: "0.75rem",
+    columnGap: spacing.lg,
     display: "flex",
     justifyContent: "flex-end",
-    marginTop: "0.5rem",
-    rowGap: "0.75rem",
+    marginTop: spacing.lg,
+    rowGap: spacing.lg,
   },
   formField: {
-    columnGap: "0.375rem",
+    columnGap: spacing.lg,
     display: "flex",
     flexDirection: "column",
-    rowGap: "0.375rem",
+    rowGap: spacing.lg,
   },
   previewContainer: {
     backgroundColor: colors.graySubtle,
@@ -79,6 +86,14 @@ const styles = stylex.create({
     paddingBlock: spacing.zero,
     paddingInline: spacing.md,
   },
+
+  seekSlider: {
+    appearance: "none",
+    backgroundColor: colors.graySep,
+    borderRadius: radii.md,
+    flex: "1",
+    height: "6px",
+  },
   submitButton: {
     alignItems: "center",
     backgroundColor: {
@@ -88,7 +103,7 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "none",
     color: colors.white,
-    columnGap: "0.2em",
+    columnGap: spacing.md,
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
@@ -101,8 +116,17 @@ const styles = stylex.create({
     },
     paddingBlock: spacing.md,
     paddingInline: spacing.xl,
-    rowGap: "0.2em",
+    rowGap: spacing.md,
     transition: "background-color 0.15s",
+  },
+
+  timeDisplay: {
+    color: colors.grayDim,
+    fontFamily: typeface.mono,
+    fontSize: text.md,
+    minWidth: "3rem",
+    textAlign: "center",
+    userSelect: "none",
   },
 });
 
@@ -231,17 +255,17 @@ export function ScreenshotModal({
         })()}
 
         <div sx={styles.previewControls}>
-          <span sx={shareStyles.timeDisplay}>{formatTime(previewTime)}</span>
+          <span sx={styles.timeDisplay}>{formatTime(previewTime)}</span>
           <input
             max={Duration.inSeconds(duration) || 60}
             min={0}
             onChange={(e) => setPreviewTime(e.target.valueAsNumber)}
             step={0.1}
-            sx={shareStyles.seekSlider}
+            sx={styles.seekSlider}
             type="range"
             value={previewTime}
           />
-          <span sx={shareStyles.timeDisplay}>{formatTime(duration)}</span>
+          <span sx={styles.timeDisplay}>{formatTime(duration)}</span>
         </div>
 
         <div sx={styles.formField}>

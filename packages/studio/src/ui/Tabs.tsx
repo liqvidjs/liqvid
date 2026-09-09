@@ -14,10 +14,10 @@ const styles = stylex.create({
     outline: "none",
   },
   root: {
-    columnGap: "0.5rem",
+    columnGap: spacing.lg,
     display: "flex",
     flexDirection: "column",
-    rowGap: "0.5rem",
+    rowGap: spacing.lg,
   },
   tabsList: {
     borderRadius: radii.md,
@@ -30,13 +30,13 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.tabTriggerBg,
     color: colors.white,
-    columnGap: "0.2em",
+    columnGap: spacing.md,
     display: "inline-flex",
     fontFamily: typeface.ui,
     fontWeight: 500,
     paddingBlock: spacing.xs,
     paddingInline: spacing.lg,
-    rowGap: "0.2em",
+    rowGap: spacing.md,
   },
   tabsTriggerActive: {
     backgroundColor: colors.accentSolid,

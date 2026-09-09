@@ -5,7 +5,7 @@ import * as stylex from "@stylexjs/stylex";
 import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
 import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
-export const styles = stylex.create({
+const styles = stylex.create({
   label: {
     alignItems: "center",
     display: "flex",
@@ -25,7 +25,7 @@ export const styles = stylex.create({
   providerFields: {
     borderTopColor: colors.graySep,
     borderTopStyle: "solid",
-    borderTopWidth: "1px",
+    borderTopWidth: dims.sep,
     display: "flex",
     flexDirection: "column",
     gap: spacing.xs,

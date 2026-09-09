@@ -4,7 +4,7 @@ import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
+import { colors, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { openInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
@@ -20,7 +20,7 @@ const styles = stylex.create({
       ":hover": colors.grayNormal,
       default: colors.grayDim,
     },
-    marginLeft: "auto",
+    marginLeft: spacing.auto,
     textAlign: "right",
     textDecoration: "none",
     width: "min-content",

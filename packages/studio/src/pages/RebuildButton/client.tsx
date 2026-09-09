@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Spinner } from "#_/components/Spinner.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import {
   publishAction,
@@ -22,9 +23,9 @@ import type TranslationsJson from "./.translations/en.json";
 const styles = stylex.create({
   label: {
     alignItems: "center",
-    columnGap: "0.4em",
+    columnGap: spacing.md,
     display: "inline-flex",
-    rowGap: "0.4em",
+    rowGap: spacing.md,
   },
 });
 

@@ -39,10 +39,10 @@ const styles = stylex.create({
   },
   headerRow: {
     alignItems: "center",
-    columnGap: "1rem",
+    columnGap: spacing.xl,
     display: "flex",
-    marginBottom: "1rem",
-    rowGap: "1rem",
+    marginBottom: spacing.xl,
+    rowGap: spacing.xl,
   },
   main: {
     fontSize: text.base,
@@ -56,7 +56,7 @@ const styles = stylex.create({
   },
 
   settingsLink: {
-    marginLeft: "auto",
+    marginLeft: spacing.auto,
   },
 });
 

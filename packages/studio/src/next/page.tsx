@@ -1,7 +1,7 @@
 import { RelativeDir } from "effect-paths";
 import { notFound } from "next/navigation";
 
-import { Jobs } from "../pages/jobs/jobs.tsx";
+import { Jobs } from "../pages/jobs/server.tsx";
 import { Homepage } from "../pages/root.tsx";
 import { Settings } from "../pages/settings/server.tsx";
 import { getTranslations } from "../utils/i18n.mts";

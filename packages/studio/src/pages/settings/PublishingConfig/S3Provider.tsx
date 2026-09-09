@@ -1,12 +1,35 @@
 "use client";
 
+import { CONFIG_FILE } from "@liqvid/cli/utils";
+import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
+import { useMemo } from "react";
 
+import { fonts } from "#_/design/styles.js";
+import {
+  breakpoints,
+  colors,
+  dims,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
+import { interpolated } from "#_/i18n/shared.mjs";
 import s3Logo from "#_/icons/s3.svg";
 
-import { type Providers, styles, type T } from "./client.tsx";
+import type { Providers, T } from "./client.tsx";
 import { ProviderCard } from "./ProviderCard.tsx";
 import { TextField } from "./TextField.tsx";
+
+const styles = stylex.create({
+
+  hint: {
+    color: colors.grayDim,
+    fontSize: text.sm,
+    margin: `${spacing.md} 0 0`,
+  },
+});
 
 export function S3Provider({
   onChange,
@@ -17,6 +40,8 @@ export function S3Provider({
   t: T;
   value: Providers["s3"];
 }) {
+  const $t = useMemo(() => interpolated(t), [t]);
+
   return (
     <ProviderCard
       enabled={value !== undefined}
@@ -26,7 +51,13 @@ export function S3Provider({
       }
       title={t.providerS3}
     >
-      <p sx={styles.hint}>{t.s3CredentialsHint}</p>
+      <p sx={styles.hint}>
+        {$t.s3CredentialsHint({
+          filename: (
+            <span {...stylex.props(fonts.filename)}>{CONFIG_FILE}</span>
+          ),
+        })}
+      </p>
       <TextField
         label={t.s3Bucket}
         onChange={(v) => onChange({ domain: "", ...value, bucket: v })}

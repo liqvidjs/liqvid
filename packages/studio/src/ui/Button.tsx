@@ -21,7 +21,7 @@ const styles = stylex.create({
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
     },
-    columnGap: ".25rem",
+    columnGap: spacing.md,
     cursor: {
       ":disabled": "default",
       default: "pointer",
@@ -30,7 +30,7 @@ const styles = stylex.create({
     fontSize: text.md,
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
-    rowGap: ".25rem",
+    rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
 });

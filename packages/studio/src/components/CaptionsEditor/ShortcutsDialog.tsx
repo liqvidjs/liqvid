@@ -38,7 +38,7 @@ const styles = stylex.create({
 
   kbd: {
     background: colors.graySubtle,
-    borderBottomWidth: "2px",
+    borderBottomWidth: spacing.sm,
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
@@ -78,7 +78,7 @@ const styles = stylex.create({
   th: {
     borderBottomColor: colors.graySep,
     borderBottomStyle: "solid",
-    borderBottomWidth: "1px",
+    borderBottomWidth: dims.sep,
     fontWeight: 600,
     paddingBlock: spacing.md,
     paddingInline: spacing.md,

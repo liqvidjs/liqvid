@@ -2,9 +2,10 @@
 
 // biome-ignore lint/style/noRestrictedImports: this is the styled version
 import { Select } from "@base-ui/react/select";
-import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react";
+import { CaretUpDownIcon, CheckIcon, IconContext } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
+import { layout } from "#_/design/styles.tsx.js";
 import { extensible, themed } from "#_/design/themed.js";
 import {
   colors,
@@ -14,6 +15,7 @@ import {
   spacing,
   text,
 } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/i18n/shared.mts.js";
 
 const styles = stylex.create({
   icon: {
@@ -54,6 +56,7 @@ const styles = stylex.create({
     backgroundColor: colors.grayApp,
     borderRadius: radii.lg,
     boxShadow: shadows.md,
+    overflow: "hidden",
   },
   trigger: {
     alignItems: "center",
@@ -71,7 +74,7 @@ const styles = stylex.create({
       default: "pointer",
     },
     display: "flex",
-    fontSize: text.base,
+    fontSize: text.md,
     gap: spacing.lg,
     justifyContent: "space-between",
     outline: {
@@ -86,6 +89,9 @@ const styles = stylex.create({
     paddingInline: spacing.md,
     width: "max-content",
   },
+  value: {
+    gap: spacing.md,
+  },
 });
 
 export const SelectBackdrop = Select.Backdrop;
@@ -95,9 +101,27 @@ export const SelectList = themed(Select.List, styles.list);
 export const SelectPopup = themed(Select.Popup, styles.popup);
 export const SelectPortal = Select.Portal;
 export const SelectPositioner = Select.Positioner;
-export const SelectRoot = Select.Root;
+
+export function SelectRoot(props: React.ComponentProps<typeof Select.Root>) {
+  return (
+    <IconContext.Provider value={{ size: 16 }}>
+      <Select.Root {...props} />
+    </IconContext.Provider>
+  );
+}
+
 export const SelectTrigger = extensible()(Select.Trigger, styles.trigger);
-export const SelectValue = Select.Value;
+
+export function SelectValue(
+  props: Omit<React.ComponentProps<typeof Select.Value>, "children"> & {
+    // biome-ignore lint/suspicious/noExplicitAny: variance
+    children?: LocalizedReactNode | ((value?: any) => LocalizedReactNode);
+  },
+) {
+  return (
+    <Select.Value {...props} {...stylex.props(layout.vcenter, styles.value)} />
+  );
+}
 
 export function SelectIcon(
   props: Omit<React.ComponentProps<typeof Select.Icon>, "children">,

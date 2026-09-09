@@ -428,6 +428,7 @@ export const colors = stylex.defineVars({
 });
 
 export const dims = stylex.defineConsts({
+  icon: "24px",
   sep: "1px",
 });
 

@@ -13,7 +13,7 @@ const settingsSpin = stylex.keyframes({
   to: { transform: "rotate(360deg)" },
 });
 
-export const styles = stylex.create({
+const styles = stylex.create({
   spinner: {
     animationDuration: "0.8s",
     animationIterationCount: "infinite",

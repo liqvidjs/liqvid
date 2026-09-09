@@ -39,12 +39,12 @@ const styles = stylex.create({
   actions: {
     borderBottomColor: colors.graySep,
     borderBottomStyle: "solid",
-    borderBottomWidth: "1px",
-    columnGap: "8px",
+    borderBottomWidth: dims.sep,
+    columnGap: spacing.lg,
     display: "flex",
     paddingBlock: spacing.lg,
     paddingInline: spacing.lg,
-    rowGap: "8px",
+    rowGap: spacing.lg,
   },
 
   duration: {
@@ -70,7 +70,7 @@ const styles = stylex.create({
   },
 
   pluginIcons: {
-    marginLeft: "auto",
+    marginLeft: spacing.auto,
   },
 
   recordingName: {
@@ -87,12 +87,12 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    columnGap: "4px",
+    columnGap: spacing.md,
     cursor: "pointer",
     display: "inline-flex",
     fontSize: text.sm,
     padding: `${spacing.md} ${spacing.lg}`,
-    rowGap: "4px",
+    rowGap: spacing.md,
   },
 
   reprocessButtonDisabled: {

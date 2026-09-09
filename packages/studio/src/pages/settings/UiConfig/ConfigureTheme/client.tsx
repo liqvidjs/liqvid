@@ -2,14 +2,12 @@
 
 import type { ColorSchemeSpecifier } from "@liqvid/color-scheme/react";
 import { DesktopIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
-import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
-import { spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import type { Localized, LocalizedReactNode } from "#_/i18n/shared.mjs";
 import {
   SelectIcon,
   SelectItem,
@@ -28,23 +26,9 @@ import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
 
-export const styles = stylex.create({
-  icon: {
-    flexShrink: 0,
-    fontSize: text.lg,
-    lineHeight: 1,
-  },
-
-  optionLabel: {
-    alignItems: "center",
-    display: "flex",
-    gap: spacing.lg,
-  },
-});
-
 const THEMES: {
   value: ColorSchemeSpecifier;
-  icon: React.ReactNode;
+  icon: LocalizedReactNode;
 }[] = [
   {
     icon: <DesktopIcon weight="bold" />,
@@ -114,10 +98,10 @@ export function ConfigureThemeClient({
           {(value: ColorSchemeSpecifier) => {
             const selected = THEMES.find((t) => t.value === value);
             return selected ? (
-              <span sx={styles.optionLabel}>
-                <span sx={styles.icon}>{selected.icon}</span>
+              <>
+                {selected.icon}
                 {t[selected.value]}
-              </span>
+              </>
             ) : null;
           }}
         </SelectValue>
@@ -130,7 +114,7 @@ export function ConfigureThemeClient({
             <SelectList>
               {THEMES.map(({ value: code, icon }) => (
                 <SelectItem key={code} value={code}>
-                  <span sx={styles.icon}>{icon}</span>
+                  <span>{icon}</span>
                   <SelectItemText>{t[code]}</SelectItemText>
                   <SelectItemIndicator />
                 </SelectItem>

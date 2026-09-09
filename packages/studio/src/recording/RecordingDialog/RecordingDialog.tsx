@@ -72,9 +72,9 @@ const styles = stylex.create({
   },
 
   togglePlugins: {
-    columnGap: "0.5em",
+    columnGap: spacing.lg,
     display: "flex",
-    rowGap: "0.5em",
+    rowGap: spacing.lg,
   },
 });
 

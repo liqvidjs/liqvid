@@ -1,4 +1,5 @@
 import { Brand } from "effect";
+import type { AnyPath } from "effect-paths";
 import { createElement } from "react";
 import { Fragment } from "react/jsx-runtime";
 
@@ -65,6 +66,7 @@ export type Localized<T> = T extends string
       };
 export type LocalizedReactNode =
   | React.ReactElement
+  | AnyPath
   | LocalizedString
   | PlainString
   | number

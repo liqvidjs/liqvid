@@ -39,7 +39,7 @@ const spin = stylex.keyframes({
   to: { transform: "rotate(360deg)" },
 });
 
-export const styles = stylex.create({
+const styles = stylex.create({
   annotations: {
     alignItems: "flex-start",
     borderRadius: radii.md,
@@ -83,14 +83,14 @@ export const styles = stylex.create({
       ":hover": colors.grayHover,
       default: "transparent",
     },
-    borderBottomColor: "transparent",
-    borderBottomLeftRadius: "0",
-    borderBottomRightRadius: "0",
+    borderBottomColor: colors.transparent,
+    borderBottomLeftRadius: radii.none,
+    borderBottomRightRadius: radii.none,
     borderBottomStyle: "solid",
-    borderBottomWidth: "2px",
+    borderBottomWidth: spacing.sm,
     borderStyle: "none",
-    borderTopLeftRadius: "4px",
-    borderTopRightRadius: "4px",
+    borderTopLeftRadius: radii.md,
+    borderTopRightRadius: radii.md,
     color: colors.grayNormal,
     cursor: "pointer",
     fontSize: text.base,
@@ -108,9 +108,9 @@ export const styles = stylex.create({
 
   header: {
     alignItems: "center",
-    columnGap: "2px",
+    columnGap: spacing.sm,
     display: "flex",
-    rowGap: "2px",
+    rowGap: spacing.sm,
   },
 
   job: {
@@ -154,9 +154,9 @@ export const styles = stylex.create({
 
   progress: {
     alignItems: "center",
-    columnGap: "0.5em",
+    columnGap: spacing.lg,
     display: "flex",
-    rowGap: "0.5em",
+    rowGap: spacing.lg,
   },
 
   runningIcon: {
@@ -169,15 +169,15 @@ export const styles = stylex.create({
 
   timestamp: {
     background: colors.grayApp,
-    borderBottomLeftRadius: "2px",
-    borderBottomRightRadius: "0",
+    borderBottomLeftRadius: radii.sm,
+    borderBottomRightRadius: radii.none,
     borderBottomStyle: "solid",
     borderColor: colors.graySep,
     borderLeftStyle: "solid",
     borderRightStyle: "none",
     borderStyle: "solid",
-    borderTopLeftRadius: "0",
-    borderTopRightRadius: "0",
+    borderTopLeftRadius: radii.none,
+    borderTopRightRadius: radii.none,
     borderTopStyle: "none",
     borderWidth: dims.sep,
     color: colors.grayDim,

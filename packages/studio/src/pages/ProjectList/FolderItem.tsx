@@ -7,7 +7,15 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useId } from "react";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { layout } from "#_/design/styles.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 
 import { ProjectItem } from "./ProjectItem.tsx";
 
@@ -23,13 +31,17 @@ const styles = stylex.create({
     flexShrink: 0,
   },
   count: {
+    aspectRatio: "square",
     backgroundColor: colors.graySep,
     borderRadius: radii.circle,
     color: colors.grayDim,
     fontSize: text.sm,
     fontWeight: 500,
+    height: dims.icon,
+    justifyContent: "center",
     paddingBlock: spacing.sm,
     paddingInline: spacing.md,
+    width: dims.icon,
   },
   folder: {
     borderColor: colors.folderBorder,
@@ -39,26 +51,25 @@ const styles = stylex.create({
     overflow: "hidden",
   },
   folderHeader: {
-    alignItems: "center",
     backgroundColor: {
       ":hover": colors.folderHeaderBgHover,
       default: colors.folderHeaderBg,
     },
     borderStyle: "none",
     cursor: "pointer",
-    display: "flex",
-    fontWeight: 500,
+    fontFamily: typeface.mono,
+    fontSize: text.md,
     gap: spacing.md,
-    paddingBlock: spacing.md,
+    paddingBlock: spacing.lg,
     paddingInline: spacing.xl,
     textAlign: "left",
     transition: "background-color 0.15s",
     width: "100%",
   },
   folderProjectList: {
-    borderTopColor: "light-dark(#e5e7eb, #374151)",
+    borderColor: colors.folderBorder,
     borderTopStyle: "solid",
-    borderTopWidth: "1px",
+    borderTopWidth: dims.sep,
   },
   icon: {
     color: colors.accentSolid,
@@ -122,7 +133,11 @@ export function FolderItem({
         aria-controls={id}
         aria-expanded={expanded}
         onClick={() => onToggle(folderPath, !expanded)}
-        sx={[styles.folderHeader, nested && styles.nestedFolderHeader]}
+        sx={[
+          layout.vcenter,
+          styles.folderHeader,
+          nested && styles.nestedFolderHeader,
+        ]}
         type="button"
       >
         {expanded ? (
@@ -132,7 +147,7 @@ export function FolderItem({
         )}
         <FolderIcon size={18} {...stylex.props(styles.icon)} />
         <span sx={styles.name}>{folderPath}</span>
-        <span sx={styles.count}>{totalCount}</span>
+        <span sx={[layout.vcenter, styles.count]}>{totalCount}</span>
       </button>
 
       <div hidden={!expanded} id={id}>

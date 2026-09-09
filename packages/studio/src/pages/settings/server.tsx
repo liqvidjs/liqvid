@@ -1,9 +1,10 @@
+import { CONFIG_FILE } from "@liqvid/cli/utils";
 import * as stylex from "@stylexjs/stylex";
 
 import { H, Section } from "#_/components/headings.js";
 import { fonts } from "#_/design/styles.js";
 import { breakpoints, colors, spacing, text } from "#_/design/tokens.stylex.js";
-import { interpolated, type Localized, PlainString } from "#_/i18n/shared.mjs";
+import { interpolated, type Localized } from "#_/i18n/shared.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { PublishingConfig } from "./PublishingConfig/server.tsx";
@@ -13,15 +14,7 @@ import TranslationsJson from "./.translations/en.json" with { type: "json" };
 
 type T = Localized<typeof TranslationsJson>;
 
-export const styles = stylex.create({
-  check: {
-    color: colors.accentSolid,
-  },
-
-  description: {
-    color: colors.grayDim,
-    margin: `${spacing.xs} 0 ${spacing.lg}`,
-  },
+const styles = stylex.create({
 
   main: {
     fontSize: text.base,
@@ -46,9 +39,7 @@ export async function Settings() {
             <H>{t.title}</H>
             <p sx={fonts.description}>
               {t.description({
-                filename: (
-                  <span sx={fonts.filename}>{PlainString("liqvid.json")}</span>
-                ),
+                filename: <span sx={fonts.filename}>{CONFIG_FILE}</span>,
               })}
             </p>
           </header>

@@ -13,10 +13,10 @@ const styles = stylex.create({
   radioTabs: {
     backgroundColor: colors.grayUi,
     borderRadius: radii.lg,
-    columnGap: "2px",
+    columnGap: spacing.sm,
     display: "inline-flex",
     padding: spacing.md,
-    rowGap: "2px",
+    rowGap: spacing.sm,
     width: "max-content",
   },
   radioTabsItem: {

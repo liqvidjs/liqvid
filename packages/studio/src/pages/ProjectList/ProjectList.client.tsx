@@ -32,10 +32,10 @@ type T = Localized<typeof TranslationsJson>;
 
 const styles = stylex.create({
   folderList: {
-    columnGap: "10rem",
+    columnGap: spacing.control,
     display: "flex",
     flexDirection: "column",
-    rowGap: "10rem",
+    rowGap: spacing.control,
   },
   projectList: {
     display: "flex",

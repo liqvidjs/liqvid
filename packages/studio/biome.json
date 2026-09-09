@@ -6,7 +6,7 @@
         "noLabelWithoutControl": {
           "level": "on",
           "options": {
-            "inputComponents": ["Switch"]
+            "inputComponents": ["RadioRoot", "Switch"]
           }
         }
       },
@@ -30,6 +30,7 @@
             "paths": {
               "@base-ui/react/dialog": "import styled versions from \"#_/ui/Dialog.js\"",
               "@base-ui/react/navigation-menu": "import styled versions from \"#_/ui/NavigationMenu.js\"",
+              "@base-ui/react/radio": "import styled versions from \"#_/ui/Radio.js\"",
               "@base-ui/react/select": "import styled versions from \"#_/ui/Select.js\"",
               "@phosphor-icons/react": {
                 "importNames": ["SpinnerIcon"],

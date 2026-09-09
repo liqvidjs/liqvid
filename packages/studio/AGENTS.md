@@ -27,6 +27,8 @@ Docs are at https://stylexjs.com. Use StyleX for new components, although some l
 
 Run `eslint` to check for StyleX usage errors. **This is the only time you should ever run eslint, we use Biome for regular linting.**
 
+Never share `style` objects between files. The only time you are allowed to import externally defined styles is from @src/design/styles.js .
+
 ### Base UI
 
 Use Base UI (`@base-ui/react`) for primitives like dialogs. When building a dialog, the `<Dialog.Popup>` part (Base UI's equivalent of Radix's `<Dialog.Content>`) should be split into a separate file. The consumer is responsible for passing `<DialogRoot>` and `<DialogTrigger>` (since we may want to open the same dialog from multiple different triggers throughout the app).

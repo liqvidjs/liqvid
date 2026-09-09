@@ -43,17 +43,17 @@ type T = Localized<typeof TranslationsJson>;
 
 const styles = stylex.create({
   dialogActions: {
-    columnGap: "0.75rem",
+    columnGap: spacing.lg,
     display: "flex",
     justifyContent: "flex-end",
-    marginTop: "0.5rem",
-    rowGap: "0.75rem",
+    marginTop: spacing.lg,
+    rowGap: spacing.lg,
   },
   dialogForm: {
-    columnGap: "1.25rem",
+    columnGap: spacing.xl,
     display: "flex",
     flexDirection: "column",
-    rowGap: "1.25rem",
+    rowGap: spacing.xl,
   },
   error: {
     backgroundColor: colors.errorSubtle,
@@ -75,10 +75,10 @@ const styles = stylex.create({
     fontSize: text.md,
   },
   formField: {
-    columnGap: "0.375rem",
+    columnGap: spacing.lg,
     display: "flex",
     flexDirection: "column",
-    rowGap: "0.375rem",
+    rowGap: spacing.lg,
   },
   submitButton: {
     alignItems: "center",
@@ -89,7 +89,7 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "none",
     color: colors.white,
-    columnGap: "0.2em",
+    columnGap: spacing.md,
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
@@ -102,7 +102,7 @@ const styles = stylex.create({
     },
     paddingBlock: spacing.md,
     paddingInline: spacing.xl,
-    rowGap: "0.2em",
+    rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
 });

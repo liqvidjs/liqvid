@@ -45,4 +45,11 @@ export const breathing = stylex.create({
   },
 });
 
+export const layout = stylex.create({
+  vcenter: {
+    alignItems: "center",
+    display: "flex",
+  },
+});
+
 export const Description = themed("p", [fonts.description, breathing.lg]);

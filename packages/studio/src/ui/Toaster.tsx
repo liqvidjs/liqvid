@@ -2,6 +2,8 @@ import { useColorScheme } from "@liqvid/color-scheme/react";
 import { HydrateElement } from "@liqvid/hydration";
 import * as stylex from "@stylexjs/stylex";
 
+import { spacing } from "#_/design/tokens.stylex.js";
+
 import { Toast, type ToastProps } from "./Toast.tsx";
 
 const styles = stylex.create({
@@ -11,7 +13,7 @@ const styles = stylex.create({
     flexDirection: "column",
     position: "fixed",
     right: "36px",
-    rowGap: "8px",
+    rowGap: spacing.lg,
     zIndex: 50,
   },
 });

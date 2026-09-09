@@ -24,7 +24,7 @@ const styles = stylex.create({
     },
     borderRadius: radii.sm,
     color: colors.grayNormal,
-    columnGap: "0.5rem",
+    columnGap: spacing.lg,
     cursor: "pointer",
     display: "flex",
     fontSize: text.md,
@@ -34,7 +34,7 @@ const styles = stylex.create({
     },
     paddingBlock: spacing.md,
     paddingInline: spacing.md,
-    rowGap: "0.5rem",
+    rowGap: spacing.lg,
     userSelect: "none",
   },
   popup: {
@@ -68,7 +68,7 @@ const styles = stylex.create({
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.inherit,
-    columnGap: "0.5rem",
+    columnGap: spacing.lg,
     cursor: "pointer",
     display: "flex",
     fontSize: text.md,
@@ -82,7 +82,7 @@ const styles = stylex.create({
     },
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
-    rowGap: "0.5rem",
+    rowGap: spacing.lg,
   },
 });
 

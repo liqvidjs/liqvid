@@ -3,7 +3,7 @@
 import { EyeIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
+import { colors, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
@@ -17,7 +17,7 @@ const styles = stylex.create({
       ":hover": colors.grayNormal,
       default: colors.grayDim,
     },
-    marginLeft: "auto",
+    marginLeft: spacing.auto,
     textAlign: "right",
     textDecoration: "none",
     width: "min-content",

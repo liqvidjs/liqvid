@@ -22,18 +22,11 @@ import {
   SelectValue,
 } from "#_/ui/Select.js";
 
-export const styles = stylex.create({
-  check: {
-    color: colors.accentSolid,
-  },
+const styles = stylex.create({
 
   flag: {
     fontSize: text.lg,
     lineHeight: 1,
-  },
-
-  name: {
-    flex: "1",
   },
 
   optionLabel: {
