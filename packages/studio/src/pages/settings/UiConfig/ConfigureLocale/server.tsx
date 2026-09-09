@@ -1,8 +1,9 @@
 import { TranslateIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { Description } from "#_/design/styles.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { getLocale, getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getLocale, getTranslations } from "#_/utils/i18n.mjs";
 
 import { ConfigureLocaleClient } from "./client.tsx";
 

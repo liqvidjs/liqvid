@@ -1,24 +1,21 @@
 "use client";
 
-import {
-  CaretUpDownIcon,
-  CheckIcon,
-  DesktopIcon,
-  MoonIcon,
-  SpinnerIcon,
-  SunIcon,
-} from "@phosphor-icons/react";
+import type { ColorSchemeSpecifier } from "@liqvid/color-scheme/react";
+import { DesktopIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { Spinner } from "#_/components/Spinner.js";
+import { spacing, text } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import {
   SelectIcon,
   SelectItem,
   SelectItemIndicator,
   SelectItemText,
+  SelectList,
   SelectPopup,
   SelectPortal,
   SelectPositioner,
@@ -27,41 +24,15 @@ import {
   SelectValue,
 } from "#_/ui/Select.js";
 
-type Theme = "light" | "dark" | "system";
+import type TranslationsJson from "./.translations/en.json";
 
-const settingsSpin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
+type T = Localized<typeof TranslationsJson>;
 
 export const styles = stylex.create({
-  check: {
-    color: colors.accentSolid,
-  },
-
   icon: {
     flexShrink: 0,
-    fontSize: "1.125rem",
+    fontSize: text.rem1125,
     lineHeight: 1,
-  },
-
-  item: {
-    alignItems: "center",
-    background: {
-      ":hover": colors.grayHover,
-      default: null,
-    },
-    borderRadius: radii.lg,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    display: "flex",
-    gap: spacing.lg,
-    outline: "none",
-    padding: `${spacing.md} ${spacing.lg}`,
-  },
-
-  name: {
-    flex: "1",
   },
 
   optionLabel: {
@@ -69,50 +40,43 @@ export const styles = stylex.create({
     display: "flex",
     gap: spacing.lg,
   },
-
-  spinner: {
-    animationDuration: "0.8s",
-    animationIterationCount: "infinite",
-    animationName: settingsSpin,
-    animationTimingFunction: "linear",
-    color: colors.grayDim,
-    flexShrink: 0,
-  },
 });
 
-const THEMES: { code: Theme; icon: React.ReactNode; name: string }[] = [
+const THEMES: {
+  value: ColorSchemeSpecifier;
+  icon: React.ReactNode;
+}[] = [
   {
-    code: "system",
     icon: <DesktopIcon weight="bold" />,
-    name: "System",
+    value: "system",
   },
   {
-    code: "light",
     icon: <SunIcon weight="bold" />,
-    name: "Light",
+    value: "light",
   },
   {
-    code: "dark",
     icon: <MoonIcon weight="bold" />,
-    name: "Dark",
+    value: "dark",
   },
 ];
-
-/** Item map for `<SelectRoot items>` (value -> label). */
-const THEMES_ITEMS: Record<string, string> = Object.fromEntries(
-  THEMES.map(({ code, name }) => [code, name]),
-);
 
 /** @package */
 export function ConfigureThemeClient({
   theme: initialTheme,
+  t,
 }: {
-  theme: Theme;
+  theme: ColorSchemeSpecifier;
+  t: T;
 }) {
-  const [theme, setTheme] = useState<Theme>(initialTheme);
-  const [saving, setSaving] = useState<Theme | null>(null);
+  const [theme, setTheme] = useState<ColorSchemeSpecifier>(initialTheme);
+  const [saving, setSaving] = useState<ColorSchemeSpecifier | null>(null);
 
-  async function selectTheme(next: Theme) {
+  /** Item map for `<SelectRoot items>` (value -> label). */
+  const THEMES_ITEMS = Object.fromEntries(
+    THEMES.map(({ value: code }) => [code, t[code]]),
+  );
+
+  async function selectTheme(next: ColorSchemeSpecifier) {
     if (next === theme || saving) return;
 
     setSaving(next);
@@ -130,8 +94,9 @@ export function ConfigureThemeClient({
 
     if (Exit.isSuccess(result)) {
       setTheme(result.value.theme);
-      // Reload so the root layout reflects the new color scheme.
-      window.location.reload();
+
+      document.documentElement.style.colorScheme =
+        result.value.theme === "system" ? "light dark" : result.value.theme;
     } else {
       console.error("Failed to update theme:", result.cause);
     }
@@ -141,48 +106,36 @@ export function ConfigureThemeClient({
     <SelectRoot
       disabled={saving !== null}
       items={THEMES_ITEMS}
-      onValueChange={(value) => selectTheme(value as Theme)}
+      onValueChange={(value) => selectTheme(value as ColorSchemeSpecifier)}
       value={theme}
     >
       <SelectTrigger>
         <SelectValue>
-          {(value: Theme) => {
-            const selected = THEMES.find((t) => t.code === value);
+          {(value: ColorSchemeSpecifier) => {
+            const selected = THEMES.find((t) => t.value === value);
             return selected ? (
-              <span {...stylex.props(styles.optionLabel)}>
-                <span {...stylex.props(styles.icon)}>{selected.icon}</span>
-                {selected.name}
+              <span sx={styles.optionLabel}>
+                <span sx={styles.icon}>{selected.icon}</span>
+                {t[selected.value]}
               </span>
             ) : null;
           }}
         </SelectValue>
-        {saving !== null ? (
-          <SpinnerIcon {...stylex.props(styles.spinner)} weight="bold" />
-        ) : (
-          <SelectIcon>
-            <CaretUpDownIcon />
-          </SelectIcon>
-        )}
+        {saving !== null ? <Spinner /> : <SelectIcon />}
       </SelectTrigger>
 
       <SelectPortal>
         <SelectPositioner alignItemWithTrigger={false} sideOffset={4}>
           <SelectPopup>
-            {THEMES.map(({ code, icon, name }) => (
-              <SelectItem
-                {...stylex.props(styles.item)}
-                key={code}
-                value={code}
-              >
-                <span {...stylex.props(styles.icon)}>{icon}</span>
-                <SelectItemText {...stylex.props(styles.name)}>
-                  {name}
-                </SelectItemText>
-                <SelectItemIndicator {...stylex.props(styles.check)}>
-                  <CheckIcon weight="bold" />
-                </SelectItemIndicator>
-              </SelectItem>
-            ))}
+            <SelectList>
+              {THEMES.map(({ value: code, icon }) => (
+                <SelectItem key={code} value={code}>
+                  <span sx={styles.icon}>{icon}</span>
+                  <SelectItemText>{t[code]}</SelectItemText>
+                  <SelectItemIndicator />
+                </SelectItem>
+              ))}
+            </SelectList>
           </SelectPopup>
         </SelectPositioner>
       </SelectPortal>

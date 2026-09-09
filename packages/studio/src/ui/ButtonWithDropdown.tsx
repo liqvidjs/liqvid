@@ -3,8 +3,8 @@
 import { CaretDownIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode, LocalizedString } from "#_/utils/i18n.mjs";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
 
 import {
   MenuItem,
@@ -32,87 +32,89 @@ const styles = stylex.create({
   mainButton: {
     alignItems: "center",
     backgroundColor: {
-      ":disabled": "light-dark(#f0f0f0, #333)",
-      ":enabled:active": "light-dark(#d0d0d0, #333)",
-      ":enabled:hover": "light-dark(#fafafa, #444)",
-      default: "light-dark(#f0f0f0, #333)",
+      ":disabled": colors.btnBg,
+      ":enabled:active": colors.btnBgActive,
+      ":enabled:hover": colors.btnBgHover,
+      default: colors.btnBg,
     },
-    borderColor: "light-dark(#ccc, #555)",
+    borderColor: colors.btnBorder,
     borderRadius: `${radii.md} 0 0 ${radii.md}`,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: {
-      ":disabled": "light-dark(#aaa, #eee)",
-      default: "light-dark(#000, #fff)",
+      ":disabled": colors.btnColorDisabled,
+      default: colors.btnColor,
     },
+    columnGap: "0.25rem",
     cursor: {
       ":disabled": "default",
       default: "pointer",
     },
     display: "flex",
     fontSize: text.base,
-    gap: "0.25rem",
     justifyContent: "center",
-    paddingBlock: "0.3em",
-    paddingInline: "0.5em",
+    paddingBlock: spacing.em03,
+    paddingInline: spacing.em05,
+    rowGap: "0.25rem",
     transition: "background-color 0.15s",
   },
   mainButtonPrimary: {
     backgroundColor: {
-      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
-      ":enabled:active": "light-dark(#1e40af, #1d4ed8)",
-      ":enabled:hover": "light-dark(#1d4ed8, #2563eb)",
+      ":disabled": colors.btnPrimaryBgDisabled,
+      ":enabled:active": colors.btnPrimaryBgActive,
+      ":enabled:hover": colors.btnPrimaryBgHover,
       default: colors.accentSolid,
     },
     borderColor: {
-      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      ":disabled": colors.btnPrimaryBgDisabled,
       default: colors.accentSolid,
     },
     color: {
-      ":disabled": "light-dark(#e5e7eb, #e5e7eb)",
-      default: "#fff",
+      ":disabled": colors.btnPrimaryColorDisabled,
+      default: colors.white,
     },
   },
   shared: {
     alignItems: "center",
     backgroundColor: {
-      ":disabled": "light-dark(#f0f0f0, #333)",
-      ":enabled:active": "light-dark(#d0d0d0, #333)",
-      ":enabled:hover": "light-dark(#fafafa, #444)",
-      default: "light-dark(#f0f0f0, #333)",
+      ":disabled": colors.btnBg,
+      ":enabled:active": colors.btnBgActive,
+      ":enabled:hover": colors.btnBgHover,
+      default: colors.btnBg,
     },
-    borderColor: "light-dark(#ccc, #555)",
+    borderColor: colors.btnBorder,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: {
-      ":disabled": "light-dark(#aaa, #eee)",
-      default: "light-dark(#000, #fff)",
+      ":disabled": colors.btnColorDisabled,
+      default: colors.btnColor,
     },
+    columnGap: "0.25rem",
     cursor: {
       ":disabled": "default",
       default: "pointer",
     },
     display: "flex",
-    gap: "0.25rem",
     justifyContent: "center",
-    paddingBlock: "0.3em",
-    paddingInline: "0.5em",
+    paddingBlock: spacing.em03,
+    paddingInline: spacing.em05,
+    rowGap: "0.25rem",
     transition: "background-color 0.15s",
   },
   sharedPrimary: {
     backgroundColor: {
-      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
-      ":enabled:active": "light-dark(#1e40af, #1d4ed8)",
-      ":enabled:hover": "light-dark(#1d4ed8, #2563eb)",
+      ":disabled": colors.btnPrimaryBgDisabled,
+      ":enabled:active": colors.btnPrimaryBgActive,
+      ":enabled:hover": colors.btnPrimaryBgHover,
       default: colors.accentSolid,
     },
     borderColor: {
-      ":disabled": "light-dark(#93b4f5, #4b6bb0)",
+      ":disabled": colors.btnPrimaryBgDisabled,
       default: colors.accentSolid,
     },
     color: {
-      ":disabled": "light-dark(#e5e7eb, #e5e7eb)",
-      default: "#fff",
+      ":disabled": colors.btnPrimaryColorDisabled,
+      default: colors.white,
     },
   },
 });
@@ -166,7 +168,7 @@ export function ButtonWithDropdown({
   const isPrimary = variant === "primary";
 
   return (
-    <div {...stylex.props(styles.group)}>
+    <div sx={styles.group}>
       {/** biome-ignore lint/correctness/noRestrictedElements: this is a component */}
       <button
         disabled={disabled}

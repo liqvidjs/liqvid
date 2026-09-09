@@ -1,6 +1,5 @@
 "use client";
 
-import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
 import s3Logo from "#_/icons/s3.svg";
@@ -27,7 +26,7 @@ export function S3Provider({
       }
       title={t.providerS3}
     >
-      <p {...stylex.props(styles.hint)}>{t.s3CredentialsHint}</p>
+      <p sx={styles.hint}>{t.s3CredentialsHint}</p>
       <TextField
         label={t.s3Bucket}
         onChange={(v) => onChange({ domain: "", ...value, bucket: v })}

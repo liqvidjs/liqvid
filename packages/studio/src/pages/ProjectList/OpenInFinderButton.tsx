@@ -4,9 +4,9 @@ import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { FolderOpenIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
+import type { Localized } from "#_/i18n/shared.mjs";
 import { openInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";

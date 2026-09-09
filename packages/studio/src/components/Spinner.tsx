@@ -1,6 +1,7 @@
 import {
   type IconProps,
   SpinnerGapIcon,
+  // biome-ignore lint/style/noRestrictedImports: this is where Spinner is defined
   SpinnerIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";

@@ -6,55 +6,63 @@ import * as stylex from "@stylexjs/stylex";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import type { PackageUpdate } from "#_/jobs/check-updates.mjs";
 import { updatePackageAction } from "#_/pages/root-actions.js";
 import type { PackageName } from "#_/types/misc.mjs";
 import { Button } from "#_/ui/Button.js";
 import { IconButton } from "#_/ui/IconButton.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
 
 const styles = stylex.create({
   banner: {
     alignItems: "center",
-    backgroundColor: "var(--accent-ui)",
-    borderColor: "var(--accent-sep)",
+    backgroundColor: colors.bannerBg,
+    borderColor: colors.bannerBorder,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
-    color: "var(--accent-normal)",
+    borderWidth: dims.sep,
+    color: colors.bannerColor,
     columnGap: "1rem",
     display: "flex",
     flexWrap: "wrap",
-    fontSize: "0.875rem",
-    marginBottom: "1rem",
-    paddingBlock: "0.625rem",
-    paddingInline: "1rem",
+    fontSize: text.rem0875,
+    marginBottom: spacing.rem1,
+    paddingBlock: spacing.rem0625,
+    paddingInline: spacing.rem1,
     rowGap: "0.5rem",
   },
   dismiss: {
     alignItems: "center",
     backgroundColor: {
-      ":hover": "var(--accent-hover)",
-      default: "transparent",
+      ":hover": colors.bannerDismissBgHover,
+      default: colors.transparent,
     },
     borderRadius: radii.md,
     borderStyle: "none",
     color: {
-      ":hover": "var(--accent-normal)",
-      default: "var(--accent-dim)",
+      ":hover": colors.bannerDismissColorHover,
+      default: colors.bannerDismissColor,
     },
     cursor: "pointer",
     display: "inline-flex",
     marginLeft: "auto",
-    padding: "0.25rem",
+    padding: spacing.rem025,
   },
   item: {
     alignItems: "center",
+    columnGap: "0.5rem",
     display: "flex",
-    gap: "0.5rem",
+    rowGap: "0.5rem",
   },
   list: {
     alignItems: "center",
@@ -62,15 +70,15 @@ const styles = stylex.create({
     display: "flex",
     flexWrap: "wrap",
     listStyle: "none",
-    margin: 0,
-    padding: 0,
+    margin: spacing.zero,
+    padding: spacing.zero,
     rowGap: "0.5rem",
   },
   message: {
     fontWeight: 600,
   },
   pkg: {
-    fontFamily: "ui-monospace, monospace",
+    fontFamily: typeface.uiMono,
     fontWeight: 600,
   },
   updateButton: {
@@ -81,24 +89,25 @@ const styles = stylex.create({
     },
     borderRadius: radii.md,
     borderStyle: "none",
-    color: "var(--accent-contrast)",
+    color: colors.bannerContrastColor,
+    columnGap: spacing.em03,
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
     },
     display: "inline-flex",
-    fontSize: "0.8125rem",
+    fontSize: text.rem08125,
     fontWeight: 500,
-    gap: "0.3em",
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: "0.25rem",
-    paddingInline: "0.6rem",
+    paddingBlock: spacing.rem025,
+    paddingInline: spacing.rem06,
+    rowGap: spacing.em03,
     transition: "background-color 0.15s",
   },
   versions: {
-    color: "var(--accent-dim)",
+    color: colors.bannerDismissColor,
   },
 });
 
@@ -153,13 +162,13 @@ export function UpdateBannerClient({
   if (dismissed) return null;
 
   return (
-    <div {...stylex.props(styles.banner)} role="status">
-      <span {...stylex.props(styles.message)}>{t.message}</span>
-      <ul {...stylex.props(styles.list)}>
+    <div role="status" sx={styles.banner}>
+      <span sx={styles.message}>{t.message}</span>
+      <ul sx={styles.list}>
         {updates.map((update) => (
-          <li {...stylex.props(styles.item)} key={update.name}>
-            <code {...stylex.props(styles.pkg)}>{update.name}</code>
-            <span {...stylex.props(styles.versions)}>
+          <li key={update.name} sx={styles.item}>
+            <code sx={styles.pkg}>{update.name}</code>
+            <span sx={styles.versions}>
               {`${update.current} \u2192 ${update.latest}`}
             </span>
             {update.range !== null ? (

@@ -1,6 +1,5 @@
 "use client";
 
-import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
 import githubLogo from "#_/icons/github.svg";
@@ -37,7 +36,7 @@ export function GitHubPagesProvider({
         onChange={(v) => onChange({ username: "", ...value, repository: v })}
         value={value?.repository}
       />
-      <label {...stylex.props(styles.checkboxField)}>
+      <label sx={styles.checkboxField}>
         <input
           checked={value?.root ?? false}
           onChange={(e) =>

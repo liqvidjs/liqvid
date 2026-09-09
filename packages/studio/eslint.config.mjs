@@ -44,9 +44,66 @@ export default [
         "error",
         {
           propLimits: {
+            backgroundColor: {
+              limit: null,
+              reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            borderColor: {
+              limit: null,
+              reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            borderRadius: {
+              limit: null,
+              reason: "use a radii.* token from `#_/design/tokens.stylex.js`",
+            },
+            boxShadow: {
+              limit: null,
+              reason: "use a shadows.* token from `#_/design/tokens.stylex.js`",
+            },
             color: {
               limit: null,
-              reason: "use a color token from `#_/design/tokens.stylex.js`",
+              reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            fontFamily: {
+              limit: null,
+              reason:
+                "use a typeface.* token from `#_/design/tokens.stylex.js`",
+            },
+            fontSize: {
+              limit: null,
+              reason: "use a text.* token from `#_/design/tokens.stylex.js`",
+            },
+            gap: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            margin: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            marginBlock: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            marginInline: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            outlineColor: {
+              limit: null,
+              reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            padding: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            paddingBlock: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
+            },
+            paddingInline: {
+              limit: null,
+              reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
           },
         },

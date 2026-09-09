@@ -1,5 +1,4 @@
 "use client";
-import * as stylex from "@stylexjs/stylex";
 
 import { styles } from "./client.tsx";
 
@@ -15,12 +14,12 @@ export function TextField({
   value: string | undefined;
 }) {
   return (
-    <label {...stylex.props(styles.field)}>
-      <span {...stylex.props(styles.fieldLabel)}>{label}</span>
+    <label sx={styles.field}>
+      <span sx={styles.fieldLabel}>{label}</span>
       <input
-        {...stylex.props(styles.input)}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        sx={styles.input}
         type="text"
         value={value}
       />

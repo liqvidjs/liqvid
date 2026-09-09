@@ -6,7 +6,7 @@ import clsx from "clsx";
 import type { ReactElement } from "react";
 import { Children, cloneElement, isValidElement } from "react";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import { colors, radii, spacing, typeface } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   content: {
@@ -14,27 +14,29 @@ const styles = stylex.create({
     outline: "none",
   },
   root: {
+    columnGap: "0.5rem",
     display: "flex",
     flexDirection: "column",
-    gap: "0.5rem",
+    rowGap: "0.5rem",
   },
   tabsList: {
     borderRadius: radii.md,
     height: "min-content",
-    marginBlock: '0',
-    marginInline: 'auto',
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
     overflow: "hidden",
   },
   tabsTrigger: {
     alignItems: "center",
-    backgroundColor: "#aaa",
-    color: "#fff",
+    backgroundColor: colors.tabTriggerBg,
+    color: colors.white,
+    columnGap: "0.2em",
     display: "inline-flex",
-    fontFamily: '"Inter Variable", sans-serif',
+    fontFamily: typeface.ui,
     fontWeight: 500,
-    gap: "0.2em",
-    paddingBlock: '1px',
-    paddingInline: '8px',
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.lg,
+    rowGap: "0.2em",
   },
   tabsTriggerActive: {
     backgroundColor: colors.accentSolid,

@@ -1,9 +1,8 @@
 "use client";
 
 import { EyeIcon } from "@phosphor-icons/react";
-import * as stylex from "@stylexjs/stylex";
 
-import type { Localized } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";
@@ -17,9 +16,9 @@ export function PreviewButton({ href }: { href: string }) {
 
   return (
     <a
-      {...stylex.props(shareStyles.productionLink)}
       href={href}
       rel="noopener noreferrer"
+      sx={shareStyles.productionLink}
       target="_blank"
       title={t.preview}
     >

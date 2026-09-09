@@ -8,7 +8,6 @@ import {
   FolderOpenIcon,
   PencilSimpleIcon,
   PlusIcon,
-  SpinnerIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
@@ -17,7 +16,9 @@ import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { Spinner } from "#_/components/Spinner.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { openScreenshotInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -31,7 +32,6 @@ import {
   useDialogApi,
 } from "#_/ui/Dialog.js";
 import { Time } from "#_/ui/Time.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -49,18 +49,18 @@ const styles = stylex.create({
   },
   created: {
     color: colors.grayDim,
-    fontSize: "0.625rem",
+    fontSize: text.rem0625,
   },
   dimensions: {
     color: colors.grayDim,
-    fontSize: "0.625rem",
+    fontSize: text.rem0625,
   },
   filename: {
     backgroundColor: colors.graySubtle,
-    borderRadius: "3px",
-    fontSize: "0.8125rem",
-    paddingBlock: "0.125rem",
-    paddingInline: "0.375rem",
+    borderRadius: radii.xs,
+    fontSize: text.rem08125,
+    paddingBlock: spacing.rem0125,
+    paddingInline: spacing.rem0375,
   },
   iconButton: {
     alignItems: "center",
@@ -71,7 +71,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     cursor: "pointer",
     display: "flex",
@@ -80,11 +80,12 @@ const styles = stylex.create({
     transition: "background-color 0.15s",
   },
   info: {
+    columnGap: "0.125rem",
     display: "flex",
     flex: "1",
     flexDirection: "column",
-    gap: "0.125rem",
     minWidth: 0,
+    rowGap: "0.125rem",
   },
   item: {
     alignItems: "center",
@@ -92,7 +93,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     display: "flex",
     gap: spacing.lg,
     padding: spacing.md,
@@ -102,10 +103,10 @@ const styles = stylex.create({
     flexDirection: "column",
     gap: spacing.lg,
     listStyle: "none",
-    margin: 0,
+    margin: spacing.zero,
     maxHeight: "300px",
     overflowY: "auto",
-    padding: 0,
+    padding: spacing.zero,
   },
   previewImage: {
     borderRadius: radii.md,
@@ -120,20 +121,22 @@ const styles = stylex.create({
     width: "80px",
   },
   thumbnailButton: {
-    backgroundColor: "transparent",
+    backgroundColor: colors.transparent,
     borderRadius: radii.md,
     borderStyle: "none",
     cursor: "pointer",
     outline: {
       ":focus-visible": "2px solid var(--accent, #4f8cff)",
+      default: null,
     },
     outlineOffset: {
       ":focus-visible": "2px",
+      default: null,
     },
-    padding: 0,
+    padding: spacing.zero,
   },
   title: {
-    fontSize: "0.8em",
+    fontSize: text.em08,
   },
 });
 
@@ -256,31 +259,31 @@ function ScreenshotItem({
   const src = `/api/liqvid/static/${encodeURIComponent(`/${projectPath}${variant.path}`)}`;
 
   return (
-    <li {...stylex.props(styles.item)}>
+    <li sx={styles.item}>
       <Button
-        {...stylex.props(styles.thumbnailButton)}
         onClick={() => onPreview(src, alt)}
+        sx={styles.thumbnailButton}
         title={t.viewFullSize}
         type="button"
       >
-        <img alt={alt} {...stylex.props(styles.thumbnail)} src={src} />
+        <img alt={alt} src={src} sx={styles.thumbnail} />
       </Button>
-      <div {...stylex.props(styles.info)}>
-        <span {...stylex.props(styles.title)}>
+      <div sx={styles.info}>
+        <span sx={styles.title}>
           {screenshot.id ||
             new Date(screenshot.meta.createdAt).toLocaleString()}
           {variant.label && ` (${variant.label})`}
         </span>
-        <span {...stylex.props(styles.created)}>
+        <span sx={styles.created}>
           <Time format="long" value={screenshot.meta.createdAt} />
         </span>
-        <span {...stylex.props(styles.dimensions)}>
+        <span sx={styles.dimensions}>
           {screenshot.meta.width}
           {" x "}
           {screenshot.meta.height}
         </span>
       </div>
-      <div {...stylex.props(styles.actions)}>
+      <div sx={styles.actions}>
         <Button
           {...stylex.props(shareStyles.copyButton)}
           onClick={() => handleCopyAs("opengraph-image.png")}
@@ -397,9 +400,9 @@ export function ScreenshotsSection({
 
   return (
     <>
-      <div {...stylex.props(shareStyles.section)}>
+      <div sx={shareStyles.section}>
         <DialogRoot>
-          <div {...stylex.props(shareStyles.sectionActions)}>
+          <div sx={shareStyles.sectionActions}>
             <DialogTrigger {...stylex.props(shareStyles.addButton)}>
               <PlusIcon size={16} /> {t.trigger}
             </DialogTrigger>
@@ -415,13 +418,13 @@ export function ScreenshotsSection({
         </DialogRoot>
 
         {isLoading ? (
-          <div {...stylex.props(shareStyles.loading)}>
-            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
+          <div sx={shareStyles.loading}>
+            <Spinner size={24} />
           </div>
         ) : screenshots.length === 0 ? (
-          <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
+          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
         ) : (
-          <ul {...stylex.props(styles.list)}>
+          <ul sx={styles.list}>
             {screenshots.map((screenshot) => {
               const { imagePath } = screenshot;
               const variants =
@@ -500,8 +503,8 @@ export function ScreenshotsSection({
             {previewDialog && (
               <img
                 alt={previewDialog.alt}
-                {...stylex.props(styles.previewImage)}
                 src={previewDialog.src}
+                sx={styles.previewImage}
               />
             )}
           </DialogPopup>
@@ -527,16 +530,12 @@ function ConfirmationDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p {...stylex.props(shareStyles.confirmMessage)}>
+        <p sx={shareStyles.confirmMessage}>
           {t.message({
-            filename: (
-              <code {...stylex.props(styles.filename)}>
-                {confirmDialog?.target}
-              </code>
-            ),
+            filename: <code sx={styles.filename}>{confirmDialog?.target}</code>,
           })}
         </p>
-        <div {...stylex.props(form.dialogActions)}>
+        <div sx={form.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
             className={stylex.props(form.submitButton).className}
@@ -617,7 +616,7 @@ function RenameDialog({
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
-      <div {...stylex.props(form.formField)}>
+      <div sx={form.formField}>
         <label htmlFor={id}>{t.newName}</label>
         <input
           id={id}
@@ -632,11 +631,9 @@ function RenameDialog({
           }}
           value={renameValue}
         />
-        {renameError && (
-          <span {...stylex.props(form.fieldError)}>{renameError}</span>
-        )}
+        {renameError && <span sx={form.fieldError}>{renameError}</span>}
       </div>
-      <div {...stylex.props(form.dialogActions)}>
+      <div sx={form.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
           className={stylex.props(form.submitButton).className}
@@ -691,8 +688,8 @@ function DeleteDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p {...stylex.props(shareStyles.confirmMessage)}>{t.confirm}</p>
-        <div {...stylex.props(form.dialogActions)}>
+        <p sx={shareStyles.confirmMessage}>{t.confirm}</p>
+        <div sx={form.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
             {...stylex.props(shareStyles.deleteConfirmButton)}

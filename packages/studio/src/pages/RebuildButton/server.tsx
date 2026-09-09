@@ -1,5 +1,6 @@
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState } from "#_/initialize.mjs";
-import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { RebuildButtonClient } from "./client.tsx";
 

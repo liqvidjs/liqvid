@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
 import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
 import { projectListStyles } from "./projectList.sx.ts";
 
@@ -29,7 +29,7 @@ const styles = stylex.create({
   },
   parameterLabel: {
     color: colors.grayDim,
-    fontSize: "0.75rem",
+    fontSize: text.rem075,
     fontWeight: 500,
     textTransform: "capitalize",
   },
@@ -41,15 +41,16 @@ const styles = stylex.create({
     },
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     cursor: "pointer",
-    fontSize: "0.8125rem",
+    fontSize: text.rem08125,
     outline: {
       ":focus": "none",
+      default: null,
     },
-    paddingBlock: "0.375rem",
-    paddingInline: "0.625rem",
+    paddingBlock: spacing.rem0375,
+    paddingInline: spacing.rem0625,
   },
 
   parameterSelector: {
@@ -58,7 +59,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     display: "flex",
     flexWrap: "wrap",
     gap: spacing.lg,
@@ -86,18 +87,18 @@ export function ParameterSelector({
   }
 
   return (
-    <div {...stylex.props(styles.parameterSelector)}>
+    <div sx={styles.parameterSelector}>
       {paramEntries.map(([paramName, values]) => (
-        <label {...stylex.props(styles.parameterField)} key={paramName}>
-          <span {...stylex.props(styles.parameterLabel)}>{paramName}</span>
+        <label key={paramName} sx={styles.parameterField}>
+          <span sx={styles.parameterLabel}>{paramName}</span>
           <select
-            {...stylex.props(styles.parameterSelect)}
             onChange={(e) => {
               onParamsChange({
                 ...selectedParams,
                 [paramName]: e.target.value,
               });
             }}
+            sx={styles.parameterSelect}
             value={selectedParams[paramName] ?? values[0]}
           >
             {values.map((value) => (
@@ -158,21 +159,15 @@ export function RootParameterSelector({
   }
 
   return (
-    <div {...stylex.props(projectListStyles.rootParameterSelector)}>
+    <div sx={projectListStyles.rootParameterSelector}>
       {paramEntries.map(([paramName, values]) => (
-        <label
-          key={paramName}
-          {...stylex.props(projectListStyles.rootParameterField)}
-        >
-          <span
-            {...stylex.props(projectListStyles.rootParameterLabel)}
-            key="???"
-          >
+        <label key={paramName} sx={projectListStyles.rootParameterField}>
+          <span key="???" sx={projectListStyles.rootParameterLabel}>
             {paramName}
           </span>
           <select
-            {...stylex.props(projectListStyles.rootParameterSelect)}
             onChange={(e) => handleChange(paramName, e.target.value)}
+            sx={projectListStyles.rootParameterSelect}
             value={selectedRootParams[paramName] ?? values[0]}
           >
             {values.map((value) => (

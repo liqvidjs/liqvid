@@ -1,13 +1,14 @@
 "use client";
 
 import type { Locale } from "@liqvid/schemas";
-import { CaretUpDownIcon, CheckIcon, SpinnerIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { Spinner } from "#_/components/Spinner.js";
+import { colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { PlainString } from "#_/i18n/shared.mjs";
 import {
   SelectIcon,
   SelectItem,
@@ -21,38 +22,14 @@ import {
   SelectValue,
 } from "#_/ui/Select.js";
 
-const settingsSpin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
-
 export const styles = stylex.create({
   check: {
     color: colors.accentSolid,
   },
 
   flag: {
-    fontSize: "1.25rem",
+    fontSize: text.rem125,
     lineHeight: 1,
-  },
-
-  item: {
-    alignItems: "center",
-    background: {
-      ":hover": colors.grayHover,
-      default: null,
-    },
-    borderRadius: radii.lg,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    display: "flex",
-    gap: spacing.lg,
-    outline: "none",
-    padding: `${spacing.md} ${spacing.lg}`,
-  },
-
-  itemSelected: {
-    background: "var(--accent-ui)",
   },
 
   name: {
@@ -64,32 +41,18 @@ export const styles = stylex.create({
     display: "flex",
     gap: spacing.lg,
   },
-
-  spinner: {
-    animationDuration: "0.8s",
-    animationIterationCount: "infinite",
-    animationName: settingsSpin,
-    animationTimingFunction: "linear",
-    color: colors.grayDim,
-    flexShrink: 0,
-  },
-
-  triggerDisabled: {
-    cursor: "default",
-    opacity: 0.6,
-  },
 });
 
 /**
  * Supported UI locales, shown with their native names and a Unicode flag.
  * Names are intentionally left untranslated (displayed in their own language).
  */
-const LOCALES: { code: Locale; flag: string; name: string }[] = [
-  { code: "en", flag: "\u{1F1EC}\u{1F1E7}", name: "English" },
-  { code: "fr", flag: "\u{1F1EB}\u{1F1F7}", name: "Français" },
-  { code: "es", flag: "\u{1F1EA}\u{1F1F8}", name: "Español" },
-  { code: "de", flag: "\u{1F1E9}\u{1F1EA}", name: "Deutsch" },
-  { code: "zh", flag: "\u{1F1E8}\u{1F1F3}", name: "中文" },
+const LOCALES: { code: Locale; flag: string; name: PlainString }[] = [
+  { code: "en", flag: "\u{1F1EC}\u{1F1E7}", name: PlainString("English") },
+  { code: "fr", flag: "\u{1F1EB}\u{1F1F7}", name: PlainString("Français") },
+  { code: "es", flag: "\u{1F1EA}\u{1F1F8}", name: PlainString("Español") },
+  { code: "de", flag: "\u{1F1E9}\u{1F1EA}", name: PlainString("Deutsch") },
+  { code: "zh", flag: "\u{1F1E8}\u{1F1F3}", name: PlainString("中文") },
 ];
 
 /** Item map for `<SelectRoot items>` (value → label). */
@@ -143,8 +106,8 @@ export function ConfigureLocaleClient({
           {(value: Locale) => {
             const selected = LOCALES.find((l) => l.code === value);
             return selected ? (
-              <span {...stylex.props(styles.optionLabel)}>
-                <span aria-hidden {...stylex.props(styles.flag)}>
+              <span sx={styles.optionLabel}>
+                <span aria-hidden sx={styles.flag}>
                   {selected.flag}
                 </span>
                 {selected.name}
@@ -152,33 +115,19 @@ export function ConfigureLocaleClient({
             ) : null;
           }}
         </SelectValue>
-        {saving !== null ? (
-          <SpinnerIcon {...stylex.props(styles.spinner)} weight="bold" />
-        ) : (
-          <SelectIcon>
-            <CaretUpDownIcon />
-          </SelectIcon>
-        )}
+        {saving !== null ? <Spinner /> : <SelectIcon />}
       </SelectTrigger>
 
       <SelectPortal>
         <SelectPositioner alignItemWithTrigger={false} sideOffset={4}>
           <SelectPopup>
             {LOCALES.map(({ code, flag, name }) => (
-              <SelectItem
-                {...stylex.props(styles.item)}
-                key={code}
-                value={code}
-              >
-                <span aria-hidden {...stylex.props(styles.flag)}>
+              <SelectItem key={code} value={code}>
+                <span aria-hidden sx={styles.flag}>
                   {flag}
                 </span>
-                <SelectItemText {...stylex.props(styles.name)}>
-                  {name}
-                </SelectItemText>
-                <SelectItemIndicator {...stylex.props(styles.check)}>
-                  <CheckIcon weight="bold" />
-                </SelectItemIndicator>
+                <SelectItemText>{name}</SelectItemText>
+                <SelectItemIndicator />
               </SelectItem>
             ))}
           </SelectPopup>

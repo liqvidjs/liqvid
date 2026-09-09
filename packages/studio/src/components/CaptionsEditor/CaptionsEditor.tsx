@@ -8,13 +8,13 @@ import {
   DotsThreeIcon,
   FloppyDiskIcon,
   KeyboardIcon,
-  SpinnerIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
+import { Spinner } from "#_/components/Spinner.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import type { Transcript } from "#_/types/schemas.mjs";
 import type { Awaitable } from "#_/types.mjs";
@@ -169,7 +169,7 @@ export function CaptionsEditor({
     return (
       <>
         {before ? `${before} ` : ""}
-        <mark {...stylex.props(styles.activeWord)}>{word}</mark>
+        <mark sx={styles.activeWord}>{word}</mark>
         {after ? ` ${after}` : ""}
       </>
     );
@@ -228,14 +228,10 @@ export function CaptionsEditor({
         <DialogBackdrop />
         <DialogPopup {...stylex.props(styles.CaptionsEditor)}>
           <div data-affords="click">
-            <div {...stylex.props(styles.actions)}>
+            <div sx={styles.actions}>
               {/* save affordance */}
               <Button disabled={saving} onClick={save} type="submit">
-                {saving ? (
-                  <SpinnerIcon {...stylex.props(styles.spinner)} size={16} />
-                ) : (
-                  <FloppyDiskIcon />
-                )}
+                {saving ? <Spinner size={16} /> : <FloppyDiskIcon />}
                 {t.save}
               </Button>
 
@@ -302,7 +298,7 @@ export function CaptionsEditor({
               <DialogClose style={sxStyles.closeButton} title={t.close} />
             </div>
 
-            <div {...stylex.props(styles.time)}>
+            <div sx={styles.time}>
               <TimeDuration
                 format="milliseconds"
                 value={{ ms: transcript[selection.start]![1] }}
@@ -316,16 +312,12 @@ export function CaptionsEditor({
             {/** biome-ignore lint/a11y/noStaticElementInteractions: this is fine */}
             {/** biome-ignore lint/a11y/useKeyWithClickEvents: keyboard shortcuts do exist */}
             <div
-              {...stylex.props(styles.transcript)}
               onClick={onClick}
               onMouseLeave={onMouseLeave}
               onMouseMove={onMouseMove}
+              sx={styles.transcript}
             >
-              <div
-                {...stylex.props(styles.stripes)}
-                data-role="stripes"
-                ref={stripesRef}
-              >
+              <div data-role="stripes" ref={stripesRef} sx={styles.stripes}>
                 {highlight && (
                   <div
                     className={hoverWordSx.className}
@@ -399,7 +391,7 @@ export function CaptionsEditor({
 
                     const captionBreakMarker = hasCaptionBreak && (
                       <>
-                        <span {...stylex.props(styles.captionBreak)} />{" "}
+                        <span sx={styles.captionBreak} />{" "}
                         {coincidingParagraphBreak && <br />}
                       </>
                     );
@@ -419,9 +411,9 @@ export function CaptionsEditor({
                         {hasSelection && (
                           <>
                             <mark
-                              {...stylex.props(styles.selection)}
                               key={selection.start}
                               ref={isAnchorSegment ? selectionRef : undefined}
+                              sx={styles.selection}
                             >
                               {renderRange(markStart, markEnd, skipBreakAt)}
                             </mark>{" "}

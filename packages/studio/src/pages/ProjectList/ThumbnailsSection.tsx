@@ -2,18 +2,19 @@
 
 import type { Duration } from "@liqvid/duration";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
-import { ImagesIcon, SpinnerIcon } from "@phosphor-icons/react";
+import { ImagesIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
 import type { ThumbsData } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Spinner } from "#_/components/Spinner.js";
 import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { useDialogApi } from "#_/ui/Dialog.js";
 import { TimeDuration } from "#_/ui/Time.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";
@@ -171,8 +172,8 @@ export function ThumbnailsSection({
   };
 
   return (
-    <div {...stylex.props(shareStyles.section)}>
-      <div {...stylex.props(shareStyles.sectionActions)}>
+    <div sx={shareStyles.section}>
+      <div sx={shareStyles.sectionActions}>
         <Button
           {...stylex.props(shareStyles.addButton)}
           disabled={isGenerating}
@@ -181,8 +182,7 @@ export function ThumbnailsSection({
         >
           {isGenerating ? (
             <>
-              <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
-              {t.inProgress}
+              <Spinner size={16} /> {t.inProgress}
             </>
           ) : (
             <>
@@ -193,20 +193,18 @@ export function ThumbnailsSection({
       </div>
 
       {isLoading ? (
-        <div {...stylex.props(shareStyles.loading)}>
-          <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
+        <div sx={shareStyles.loading}>
+          <Spinner size={24} />
         </div>
       ) : hasNoThumbs ? (
-        <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
+        <p sx={shareStyles.emptyMessage}>{t.empty}</p>
       ) : thumbInfo ? (
-        <div {...stylex.props(shareStyles.thumbsPreview)}>
-          <div {...stylex.props(shareStyles.thumbsPreviewRow)}>
+        <div sx={shareStyles.thumbsPreview}>
+          <div sx={shareStyles.thumbsPreviewRow}>
             {/* Light thumbnail */}
             {thumbsData.light.length > 0 && (
-              <div {...stylex.props(shareStyles.thumbsPreviewItem)}>
-                <span {...stylex.props(shareStyles.thumbsSchemeLabel)}>
-                  {c.light}
-                </span>
+              <div sx={shareStyles.thumbsPreviewItem}>
+                <span sx={shareStyles.thumbsSchemeLabel}>{c.light}</span>
                 {(() => {
                   const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
                   const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
@@ -238,10 +236,8 @@ export function ThumbnailsSection({
 
             {/* Dark thumbnail */}
             {thumbsData.dark.length > 0 && (
-              <div {...stylex.props(shareStyles.thumbsPreviewItem)}>
-                <span {...stylex.props(shareStyles.thumbsSchemeLabel)}>
-                  {c.dark}
-                </span>
+              <div sx={shareStyles.thumbsPreviewItem}>
+                <span sx={shareStyles.thumbsSchemeLabel}>{c.dark}</span>
                 {(() => {
                   const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
                   const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
@@ -273,7 +269,7 @@ export function ThumbnailsSection({
           </div>
 
           {/* Slider controls */}
-          <div {...stylex.props(shareStyles.thumbsSliderControls)}>
+          <div sx={shareStyles.thumbsSliderControls}>
             <TimeDuration
               {...stylex.props(shareStyles.timeDisplay)}
               value={{ seconds: thumbInfo.time }}

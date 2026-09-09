@@ -11,7 +11,7 @@ import {
   text,
   typeface,
 } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared.mjs";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
@@ -25,6 +25,7 @@ const styles = stylex.create({
   bodyRow: {
     backgroundColor: {
       ":hover": colors.grayHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
   },
@@ -32,9 +33,9 @@ const styles = stylex.create({
   cell: {
     borderColor: colors.graySep,
     borderStyle: "solid",
-    borderWidth: "1px",
-    paddingBlock: "6px",
-    paddingInline: "8px",
+    borderWidth: dims.sep,
+    paddingBlock: spacing.px6,
+    paddingInline: spacing.lg,
     textAlign: "left",
   },
 
@@ -64,17 +65,17 @@ const styles = stylex.create({
   },
 
   inputRecording: {
-    backgroundColor: "light-dark(#fffbe6, #3d3800)",
-    borderColor: "light-dark(#d9a600, #665000)",
+    backgroundColor: colors.recordingInputBg,
+    borderColor: colors.recordingInputBorder,
   },
 
   table: {
     borderCollapse: "collapse",
     borderColor: colors.graySep,
     borderStyle: "solid",
-    borderWidth: "1px",
-    marginBlock: "0.5em",
-    marginInline: "0",
+    borderWidth: dims.sep,
+    marginBlock: spacing.em05,
+    marginInline: spacing.zero,
     width: "100%",
   },
 
@@ -82,11 +83,11 @@ const styles = stylex.create({
     backgroundColor: colors.grayUi,
     borderColor: colors.graySep,
     borderStyle: "solid",
-    borderWidth: "1px",
-    fontSize: "12px",
+    borderWidth: dims.sep,
+    fontSize: text.px12,
     fontWeight: 600,
-    paddingBlock: "6px",
-    paddingInline: "8px",
+    paddingBlock: spacing.px6,
+    paddingInline: spacing.lg,
     textAlign: "left",
     textTransform: "uppercase",
   },
@@ -110,11 +111,11 @@ export function ShortcutsTable({
   t: T["tabs"]["shortcuts"];
 }) {
   return (
-    <table {...stylex.props(styles.table)}>
+    <table sx={styles.table}>
       <thead>
         <tr>
-          <th {...stylex.props(styles.theadTh)}>{t.command}</th>
-          <th {...stylex.props(styles.theadTh)}>{t.shortcut}</th>
+          <th sx={styles.theadTh}>{t.command}</th>
+          <th sx={styles.theadTh}>{t.shortcut}</th>
         </tr>
       </thead>
       <tbody>
@@ -170,17 +171,17 @@ function ShortcutRow({
   }, []);
 
   return (
-    <tr {...stylex.props(styles.bodyRow)}>
-      <td {...stylex.props(styles.cell)}>{label}</td>
-      <td {...stylex.props(styles.cell)}>
+    <tr sx={styles.bodyRow}>
+      <td sx={styles.cell}>{label}</td>
+      <td sx={styles.cell}>
         <input
-          {...stylex.props(styles.input, isRecording && styles.inputRecording)}
           data-recording={isRecording || undefined}
           onBlur={handleBlur}
           onFocus={handleFocus}
           onKeyDown={identifyKey}
           placeholder={isRecording ? "Press a key..." : "Click to record"}
           readOnly
+          sx={[styles.input, isRecording && styles.inputRecording]}
           type="text"
           value={displayValue ? fmtSeq(displayValue) : ""}
         />

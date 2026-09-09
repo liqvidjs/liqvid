@@ -27,6 +27,7 @@ import {
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
 } from "#_/conventions.mjs";
+import type { PlainString } from "#_/i18n/shared.mjs";
 import { getServerState } from "#_/initialize.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
 import type { PackageName } from "#_/types/misc.mjs";
@@ -138,7 +139,7 @@ export interface TemplateInfo {
   id: string;
 
   /** Display name from template.json */
-  name: string;
+  name: PlainString;
 
   /** Full path to the template directory */
   path: AbsoluteDir;
@@ -284,7 +285,7 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
       try {
         const content = await fsp.readFile(templateJsonPath, "utf8");
         const templateJson = JSON.parse(content) as {
-          name: string;
+          name: PlainString;
           default?: boolean;
         };
 

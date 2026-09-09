@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
 export const rendersStyles = stylex.create({
   dimensionInput: {
@@ -11,13 +11,14 @@ export const rendersStyles = stylex.create({
     },
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
-    fontSize: "0.875rem",
+    fontSize: text.rem0875,
     outline: {
       ":focus": "none",
+      default: null,
     },
-    padding: "0.5rem",
+    padding: spacing.rem05,
     textAlign: "center",
     width: "5rem",
   },
@@ -28,7 +29,7 @@ export const rendersStyles = stylex.create({
   },
   dimensionSeparator: {
     color: colors.grayDim,
-    fontSize: "1rem",
+    fontSize: text.rem1,
   },
   lockButton: {
     alignItems: "center",
@@ -39,7 +40,8 @@ export const rendersStyles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
+
     color: colors.grayDim,
     cursor: "pointer",
     display: "flex",
@@ -50,7 +52,7 @@ export const rendersStyles = stylex.create({
   lockButtonActive: {
     backgroundColor: colors.accentSolid,
     borderColor: colors.accentSolid,
-    color: "#fff",
+    color: colors.white,
   },
   videoDialog: {
     maxWidth: "80vw",
@@ -63,7 +65,7 @@ export const rendersStyles = stylex.create({
     marginBottom: spacing.xl,
   },
   videoPlayer: {
-    backgroundColor: "#000",
+    backgroundColor: colors.black,
     borderRadius: radii.lg,
     display: "block",
     maxHeight: "70vh",

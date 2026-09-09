@@ -1,13 +1,15 @@
 "use client";
 
 import { useProjectPath } from "@liqvid/studio-plugin-api";
-import { SpinnerIcon, WaveformIcon } from "@phosphor-icons/react";
+import { WaveformIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
 import type { AudioEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Spinner } from "#_/components/Spinner.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
@@ -18,7 +20,6 @@ import {
   DialogTitle,
   useDialogApi,
 } from "#_/ui/Dialog.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -154,8 +155,8 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
   return (
     <>
-      <div {...stylex.props(shareStyles.section)}>
-        <div {...stylex.props(shareStyles.sectionActions)}>
+      <div sx={shareStyles.section}>
+        <div sx={shareStyles.sectionActions}>
           <Button
             {...stylex.props(shareStyles.addButton)}
             disabled={isGeneratingAudio}
@@ -164,8 +165,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
           >
             {isGeneratingAudio ? (
               <>
-                <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
-                {t.inProgress}
+                <Spinner size={16} /> {t.inProgress}
               </>
             ) : (
               <>
@@ -176,13 +176,13 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
         </div>
 
         {isLoading && audio.length === 0 ? (
-          <div {...stylex.props(shareStyles.loading)}>
-            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
+          <div sx={shareStyles.loading}>
+            <Spinner size={24} />
           </div>
         ) : audio.length === 0 ? (
-          <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
+          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
         ) : (
-          <ul {...stylex.props(shareStyles.renderList)}>
+          <ul sx={shareStyles.renderList}>
             {audio.map((entry) => (
               <CaptionRow
                 entry={entry}
@@ -206,10 +206,9 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
           <DialogBackdrop />
           <DialogPopup>
             <DialogTitle>{t.rename.title}</DialogTitle>
-            <div {...stylex.props(form.formField)}>
+            <div sx={form.formField}>
               <label htmlFor="audio-name">{t.rename.name}</label>
               <input
-                {...stylex.props(shareStyles.textInput)}
                 id="audio-name"
                 onChange={(e) => setRenameValue(e.target.value)}
                 onKeyDown={(e) => {
@@ -217,11 +216,12 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
                     handleRename();
                   }
                 }}
+                sx={shareStyles.textInput}
                 type="text"
                 value={renameValue}
               />
             </div>
-            <div {...stylex.props(form.dialogActions)}>
+            <div sx={form.dialogActions}>
               <DialogClose>{c.cancel}</DialogClose>
               <Button
                 className={stylex.props(form.submitButton).className}
@@ -231,11 +231,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
               >
                 {isRenaming ? (
                   <>
-                    <SpinnerIcon
-                      {...stylex.props(shareStyles.spinner)}
-                      size={16}
-                    />{" "}
-                    {t.rename.inProgress}
+                    <Spinner size={16} /> {t.rename.inProgress}
                   </>
                 ) : (
                   t.rename.action

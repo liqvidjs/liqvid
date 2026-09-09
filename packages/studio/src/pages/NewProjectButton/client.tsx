@@ -1,10 +1,11 @@
 "use client";
 
-import { CaretDownIcon, CheckIcon, PlusIcon } from "@phosphor-icons/react";
+import { PlusIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
+import type { Localized } from "#_/i18n/shared.mjs";
 import {
   createProjectAction,
   loadTemplatesAction,
@@ -34,7 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#_/ui/Select.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import { form } from "../root.sx.ts";
 
@@ -121,8 +121,8 @@ export function NewProjectButtonClient({ t }: { t: T }) {
         <DialogBackdrop />
         <DialogPopup>
           <DialogTitle>{t.dialog.title}</DialogTitle>
-          <form {...stylex.props(form.dialogForm)} onSubmit={handleSubmit}>
-            <div {...stylex.props(form.formField)}>
+          <form onSubmit={handleSubmit} sx={form.dialogForm}>
+            <div sx={form.formField}>
               <label htmlFor={ids.projectName}>{t.dialog.name}</label>
               <input
                 autoComplete="off"
@@ -136,7 +136,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               />
             </div>
 
-            <div {...stylex.props(form.formField)}>
+            <div sx={form.formField}>
               <label htmlFor={ids.projectPath}>{t.dialog.path}</label>
               <input
                 autoComplete="off"
@@ -149,13 +149,13 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 value={projectPath}
               />
               {pathError ? (
-                <span {...stylex.props(form.fieldError)}>{pathError}</span>
+                <span sx={form.fieldError}>{pathError}</span>
               ) : (
-                <span {...stylex.props(form.fieldHint)}>{t.path}</span>
+                <span sx={form.fieldHint}>{t.path}</span>
               )}
             </div>
 
-            <div {...stylex.props(form.formField)}>
+            <div sx={form.formField}>
               <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
               <SelectRoot
                 disabled={isCreating || templates.length === 0}
@@ -164,9 +164,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               >
                 <SelectTrigger id={ids.projectTemplate}>
                   <SelectValue placeholder={t.dialog.selectTemplate} />
-                  <SelectIcon>
-                    <CaretDownIcon />
-                  </SelectIcon>
+                  <SelectIcon />
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectPositioner sideOffset={4}>
@@ -175,9 +173,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                         {templates.map((template) => (
                           <SelectItem key={template.id} value={template.id}>
                             <SelectItemText>{template.name}</SelectItemText>
-                            <SelectItemIndicator>
-                              <CheckIcon />
-                            </SelectItemIndicator>
+                            <SelectItemIndicator />
                           </SelectItem>
                         ))}
                       </SelectList>
@@ -187,9 +183,9 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               </SelectRoot>
             </div>
 
-            {error && <div {...stylex.props(form.error)}>{error}</div>}
+            {error && <div sx={form.error}>{error}</div>}
 
-            <div {...stylex.props(form.dialogActions)}>
+            <div sx={form.dialogActions}>
               <DialogClose
                 disabled={isCreating}
                 // biome-ignore lint/correctness/noRestrictedElements: this is different

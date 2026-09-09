@@ -16,15 +16,20 @@ import {
 } from "react";
 
 import { themed } from "#_/design/themed.js";
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 
 import { useCommonTranslations } from "../utils/react";
 
-const PADDING = "1.5rem";
-
 const styles = stylex.create({
   backdrop: {
-    backgroundColor: "rgb(0 0 0 / 0.5)",
+    backgroundColor: colors.dialogBackdrop,
     inset: 0,
     position: "fixed",
   },
@@ -32,21 +37,21 @@ const styles = stylex.create({
     background: "unset",
     borderRadius: radii.md,
     color: {
-      ":hover:not(:disabled)": "light-dark(#111827, #f9fafb)",
-      default: "light-dark(#374151, #f3f4f6)",
+      ":hover:not(:disabled)": colors.dialogCloseBgHover,
+      default: colors.dialogCloseColor,
     },
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
     },
-    fontSize: "0.875rem",
+    fontSize: text.rem0875,
     opacity: {
       ":disabled": 0.6,
       default: null,
     },
     position: "absolute",
-    right: PADDING,
-    top: PADDING,
+    right: spacing.rem15,
+    top: spacing.rem15,
     transition: "background-color 0.15s",
     width: "max-content",
   },
@@ -55,12 +60,12 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.xl,
     borderStyle: "solid",
-    borderWidth: "1px",
-    boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+    borderWidth: dims.sep,
+    boxShadow: shadows.lg,
     color: colors.grayNormal,
     left: "50%",
     maxWidth: "28rem",
-    padding: PADDING,
+    padding: spacing.rem15,
     position: "fixed",
     top: "50%",
     transform: "translate(-50%, -50%)",
@@ -79,9 +84,9 @@ const styles = stylex.create({
     height: "25vh",
   },
   title: {
-    fontSize: "1.25rem",
+    fontSize: text.rem125,
     fontWeight: 600,
-    margin: 0,
+    margin: spacing.zero,
   },
 });
 

@@ -3,14 +3,14 @@
 import { Slot } from "@radix-ui/react-slot";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import { colors, radii } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   base: {
     alignItems: "center",
     backgroundColor: colors.accentSolid,
-    borderRadius: "50%",
+    borderRadius: radii.circle,
     borderStyle: "none",
     cursor: {
       ":disabled": "not-allowed",
@@ -72,7 +72,7 @@ const variants = stylex.create({
       ":hover:enabled": colors.accentSolidHover,
       default: colors.accentSolid,
     },
-    color: "var(--accent-contrast)",
+    color: colors.accentContrast,
   },
 });
 

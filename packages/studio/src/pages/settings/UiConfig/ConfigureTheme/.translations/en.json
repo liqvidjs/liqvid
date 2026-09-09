@@ -1,4 +1,7 @@
 {
+  "dark": "Dark",
   "description": "Choose the color theme for the Liqvid Studio interface.",
-  "heading": "Theme"
+  "heading": "Theme",
+  "light": "Light",
+  "system": "System"
 }

@@ -9,7 +9,14 @@ import type { RelativeDir } from "effect-paths";
 import { Fragment, useCallback, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import { Button } from "#_/ui/Button.js";
 import { TimeDuration } from "#_/ui/Time.js";
 
@@ -33,15 +40,16 @@ const styles = stylex.create({
     borderBottomColor: colors.graySep,
     borderBottomStyle: "solid",
     borderBottomWidth: "1px",
+    columnGap: "8px",
     display: "flex",
-    gap: "8px",
-    paddingBlock: "8px",
-    paddingInline: "12px",
+    paddingBlock: spacing.lg,
+    paddingInline: spacing.px12,
+    rowGap: "8px",
   },
 
   duration: {
-    fontFamily: "monospace",
-    fontSize: "16px",
+    fontFamily: typeface.mono,
+    fontSize: text.md,
     textAlign: "right",
     width: "4em",
   },
@@ -66,7 +74,7 @@ const styles = stylex.create({
   },
 
   recordingName: {
-    fontFamily: "monospace",
+    fontFamily: typeface.mono,
   },
 
   reprocessButton: {
@@ -78,12 +86,13 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
+    columnGap: "4px",
     cursor: "pointer",
     display: "inline-flex",
-    fontSize: "12px",
-    gap: "4px",
+    fontSize: text.px12,
     padding: `${spacing.md} ${spacing.lg}`,
+    rowGap: "4px",
   },
 
   reprocessButtonDisabled: {
@@ -103,6 +112,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: {
       ":hover": colors.grayHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
     cursor: "pointer",
@@ -160,8 +170,8 @@ export function RecordingRow({
       <Collapsible.Trigger
         {...stylex.props(styles.trigger, expanded && styles.triggerOpen)}
       >
-        <span {...stylex.props(styles.recordingName)}>{r.name}</span>
-        <span {...stylex.props(styles.pluginIcons)}>
+        <span sx={styles.recordingName}>{r.name}</span>
+        <span sx={styles.pluginIcons}>
           {r.plugins.map((p) =>
             Object.hasOwn(plugins, p) ? (
               <Fragment key={p}>{plugins[p]!.icon()}</Fragment>
@@ -177,7 +187,7 @@ export function RecordingRow({
       <Collapsible.Panel
         {...stylex.props(expanded ? styles.expandOpen : styles.expandClosed)}
       >
-        <div {...stylex.props(styles.actions)}>
+        <div sx={styles.actions}>
           <Button
             {...stylex.props(
               styles.reprocessButton,

@@ -3,12 +3,20 @@
   "backend": "Backend",
   "backendDescription": "Choose which providers host your content and media files.",
   "basePath": "Base path",
-  "basePathDescription": "Base path that content is hosted under. Should match the basePath in your framework configuration.",
+  "basePathDescription": {
+    "_": "Base path that content is hosted under. Should match the {var} in your framework configuration.",
+    "$": { "var": null }
+  },
   "configuration": "Configuration",
   "configurationDescription": "Edit hosting and media settings from your liqvid.json.",
   "contentBackend": "Content backend",
   "copyClean": "Clean destination before copying",
   "copyDestination": "Destination",
+  "envVarEnvFile": "File (optional)",
+  "envVarEnvFileHint": "Load from a .env file instead of the system environment.",
+  "envVarMode": "Source",
+  "envVarName": "Variable name",
+  "envVarOption": "Environment variable",
   "githubRoot": "Serve at repository root",
   "language": "Language",
   "languageDescription": "Choose the language for the Liqvid Studio interface.",
@@ -34,5 +42,6 @@
   "sftpHost": "Host",
   "sftpPath": "Path",
   "title": "Settings",
-  "username": "Username"
+  "username": "Username",
+  "valueOption": "Value"
 }

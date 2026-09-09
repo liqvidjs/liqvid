@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
-import { breakpoints, spacing } from "#_/design/tokens.stylex.js";
+import { breakpoints, colors, spacing } from "#_/design/tokens.stylex.js";
 import {
   NavigationMenuContent,
   NavigationMenuItem,
@@ -33,7 +33,7 @@ const styles = stylex.create({
     width: 64,
   },
   link: {
-    backgroundColor: "none",
+    backgroundColor: colors.transparent,
   },
   list: {
     translate: {

@@ -23,6 +23,7 @@ const styles = stylex.create({
   link: {
     backgroundColor: {
       ":hover": colors.grayHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
     display: "block",

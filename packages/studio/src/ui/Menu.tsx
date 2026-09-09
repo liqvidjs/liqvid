@@ -4,7 +4,14 @@ import { Menu } from "@base-ui/react/menu";
 import * as stylex from "@stylexjs/stylex";
 
 import { extensible, themed } from "#_/design/themed.js";
-import { colors, dims, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 
 import { useDialogApi } from "./Dialog";
 
@@ -15,18 +22,19 @@ const styles = stylex.create({
       ":focus": colors.grayHover,
       default: null,
     },
-    borderRadius: "3px",
+    borderRadius: radii.xs,
     color: colors.grayNormal,
+    columnGap: "0.5rem",
     cursor: "pointer",
     display: "flex",
-    fontSize: "0.875rem",
-    gap: "0.5rem",
+    fontSize: text.rem0875,
     outline: {
       ":focus": "none",
       default: null,
     },
-    paddingBlock: "0.5rem",
-    paddingInline: "0.75rem",
+    paddingBlock: spacing.rem05,
+    paddingInline: spacing.rem075,
+    rowGap: "0.5rem",
     userSelect: "none",
   },
   popup: {
@@ -34,12 +42,11 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
-    boxShadow:
-      "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
+    borderWidth: dims.sep,
+    boxShadow: shadows.xl,
     minWidth: "12rem",
     outline: "none",
-    padding: "0.25rem",
+    padding: spacing.rem025,
   },
   positioner: {
     outline: "none",
@@ -47,8 +54,8 @@ const styles = stylex.create({
   separator: {
     background: colors.graySep,
     height: "1px",
-    marginBlock: "0.25rem",
-    marginInline: "0",
+    marginBlock: spacing.rem025,
+    marginInline: spacing.zero,
   },
   trigger: {
     alignItems: "center",
@@ -60,11 +67,11 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    color: "inherit",
+    color: colors.inherit,
+    columnGap: "0.5rem",
     cursor: "pointer",
     display: "flex",
-    fontSize: "0.75rem",
-    gap: "0.5rem",
+    fontSize: text.rem075,
     outline: {
       ":focus": `2px solid ${colors.accentSolid}`,
       default: null,
@@ -73,8 +80,9 @@ const styles = stylex.create({
       ":focus": "1px",
       default: null,
     },
-    paddingBlock: "0.3em",
-    paddingInline: "0.5em",
+    paddingBlock: spacing.em03,
+    paddingInline: spacing.em05,
+    rowGap: "0.5rem",
   },
 });
 

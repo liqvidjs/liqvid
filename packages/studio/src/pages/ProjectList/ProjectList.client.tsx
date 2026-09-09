@@ -7,15 +7,14 @@ import type {
   SerializedProjectMeta,
 } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
-import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Switch } from "#_/ui/Switch.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { TranslationProvider } from "#_/utils/react.js";
 
 import { FolderItem, type FolderNode } from "./FolderItem.tsx";
@@ -141,8 +140,8 @@ export function ProjectListClient({
         />
       )}
 
-      <div {...stylex.props(styles.viewToggle)}>
-        <label {...stylex.props(styles.toggleLabel)}>
+      <div sx={styles.viewToggle}>
+        <label sx={styles.toggleLabel}>
           <span>{t.folderView}</span>
           <Switch
             checked={folderView}
@@ -152,7 +151,7 @@ export function ProjectListClient({
       </div>
 
       {folderView ? (
-        <div {...stylex.props(styles.folderList)}>
+        <div sx={styles.folderList}>
           {Array.from(folderTree.entries())
             .sort(([a], [b]) => {
               // Empty folder name (root projects) should come last
@@ -163,7 +162,7 @@ export function ProjectListClient({
             .map(([folderName, folder]) =>
               folderName === "" ? (
                 // Root-level projects (no folder)
-                <ul {...stylex.props(styles.projectList)} key="__root__">
+                <ul key="__root__" sx={styles.projectList}>
                   {folder.projects.map(([key, project]) => (
                     <ProjectItem
                       basePath={basePath}
@@ -191,7 +190,7 @@ export function ProjectListClient({
             )}
         </div>
       ) : (
-        <ul {...stylex.props(styles.projectList)}>
+        <ul sx={styles.projectList}>
           {sortedProjects.map(([key, project]) => (
             <ProjectItem
               basePath={basePath}

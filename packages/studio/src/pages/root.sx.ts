@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
 /**
  * Shared form/dialog styles used across page components (NewProjectButton,
@@ -9,39 +9,42 @@ import { colors, radii } from "#_/design/tokens.stylex.js";
 
 export const form = stylex.create({
   dialogActions: {
+    columnGap: "0.75rem",
     display: "flex",
-    gap: "0.75rem",
     justifyContent: "flex-end",
     marginTop: "0.5rem",
+    rowGap: "0.75rem",
   },
   dialogForm: {
+    columnGap: "1.25rem",
     display: "flex",
     flexDirection: "column",
-    gap: "1.25rem",
+    rowGap: "1.25rem",
   },
   error: {
     backgroundColor: colors.errorSubtle,
-    borderColor: "light-dark(#fecaca, #7f1d1d)",
+    borderColor: colors.errorBorder,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.errorText,
-    fontSize: "0.875rem",
-    paddingBlock: '0.5rem',
-    paddingInline: '0.75rem',
+    fontSize: text.rem0875,
+    paddingBlock: spacing.rem05,
+    paddingInline: spacing.rem075,
   },
   fieldError: {
     color: colors.errorText,
-    fontSize: "0.75rem",
+    fontSize: text.rem075,
   },
   fieldHint: {
     color: colors.grayDim,
-    fontSize: "0.75rem",
+    fontSize: text.rem075,
   },
   formField: {
+    columnGap: "0.375rem",
     display: "flex",
     flexDirection: "column",
-    gap: "0.375rem",
+    rowGap: "0.375rem",
   },
   submitButton: {
     alignItems: "center",
@@ -51,20 +54,21 @@ export const form = stylex.create({
     },
     borderRadius: radii.md,
     borderStyle: "none",
-    color: "#fff",
+    color: colors.white,
+    columnGap: "0.2em",
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
     },
     display: "flex",
-    fontSize: "0.875rem",
+    fontSize: text.rem0875,
     fontWeight: 500,
-    gap: "0.2em",
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: '0.5rem',
-    paddingInline: '1rem',
+    paddingBlock: spacing.rem05,
+    paddingInline: spacing.rem1,
+    rowGap: "0.2em",
     transition: "background-color 0.15s",
   },
 });

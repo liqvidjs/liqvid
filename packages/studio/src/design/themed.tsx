@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-import type { LocalizedReactNode, LocalizedString } from "#_/utils/i18n.mjs";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
 
 /**
  * Shortcut to apply styles to a base component.
@@ -12,8 +12,15 @@ export const themed =
       preset: stylex.StyleXStyles,
     ) =>
     (
-      props: Omit<React.ComponentProps<C>, "children"> & {
+      props: Omit<
+        React.ComponentProps<C>,
+        "className" | "children" | "style"
+      > & {
+        className?: Error & {
+          __message: "this component does not support customization";
+        };
         children?: LocalizedReactNode;
+        style?: never;
       },
     ) => {
       // biome-ignore lint/suspicious/noExplicitAny: cast needed for generic JSX spread
@@ -33,11 +40,12 @@ export const extensible =
     ...props
   }: Omit<Props, "children" | "style"> & {
     "aria-label"?: LocalizedString;
+    className?: never;
     children?: LocalizedReactNode;
     style?: Style;
   }) => (
     <Component
       {...(props as Props)}
-      {...stylex.props(style ? [preset, style] : style)}
+      {...stylex.props(style ? [preset, style] : preset)}
     />
   );

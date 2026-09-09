@@ -2,8 +2,8 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 export const styles = stylex.create({
   label: {
@@ -17,7 +17,7 @@ export const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     marginTop: spacing.lg,
     padding: spacing.lg,
   },
@@ -51,19 +51,17 @@ export function ProviderCard({
   title: LocalizedReactNode;
 }) {
   return (
-    <div {...stylex.props(styles.providerCard)}>
-      <label {...stylex.props(styles.label)}>
+    <div sx={styles.providerCard}>
+      <label sx={styles.label}>
         <input
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
           type="checkbox"
         />
         {icon}
-        <span {...stylex.props(styles.providerTitle)}>{title}</span>
+        <span sx={styles.providerTitle}>{title}</span>
       </label>
-      {enabled && (
-        <div {...stylex.props(styles.providerFields)}>{children}</div>
-      )}
+      {enabled && <div sx={styles.providerFields}>{children}</div>}
     </div>
   );
 }

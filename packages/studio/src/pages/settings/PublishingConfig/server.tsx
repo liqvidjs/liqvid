@@ -2,8 +2,9 @@ import { GearIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { getSettingsConfig } from "#_/api/settings.mjs";
 import { ConfigSection } from "#_/components/ConfigSection.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
-import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { PublishingConfigClient } from "./client.tsx";
 

@@ -3,6 +3,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { Fragment } from "react";
 
+import { spacing } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
   DialogClose,
@@ -10,7 +12,6 @@ import {
   DialogPortal,
   DialogTitle,
 } from "#_/ui/Dialog.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import {
   defaultShortcuts,
@@ -26,8 +27,8 @@ type T = Localized<typeof Translations>;
 
 const sxStyles = stylex.create({
   closeButton: {
-    marginBlock: "0",
-    marginInline: "auto",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
   },
 });
 
@@ -49,24 +50,22 @@ export function ShortcutsDialog({
     <DialogPortal>
       <DialogPopup size="medium">
         <DialogTitle>{t.keyboardShortcuts}</DialogTitle>
-        <table {...stylex.props(styles.table)}>
+        <table sx={styles.table}>
           <thead>
             <tr>
-              <th {...stylex.props(styles.th)}>{t.shortcutColumnAction}</th>
-              <th {...stylex.props(styles.th)}>{t.shortcutColumnKey}</th>
+              <th sx={styles.th}>{t.shortcutColumnAction}</th>
+              <th sx={styles.th}>{t.shortcutColumnKey}</th>
             </tr>
           </thead>
           <tbody>
             {shortcutList.map(({ key, mod }, i) => (
-              <tr key={key} {...stylex.props(i % 2 === 1 && styles.evenRow)}>
-                <td {...stylex.props(styles.td)}>{t[`shortcut_${key}`]}</td>
-                <td {...stylex.props(styles.td, styles.keys)}>
+              <tr key={key} sx={i % 2 === 1 && styles.evenRow}>
+                <td sx={styles.td}>{t[`shortcut_${key}`]}</td>
+                <td sx={[styles.td, styles.keys]}>
                   {formatShortcut(keys[key], mod).map((token, index) => (
                     <Fragment key={token}>
-                      {index > 0 && (
-                        <span {...stylex.props(styles.plus)}>{" + "}</span>
-                      )}
-                      <kbd {...stylex.props(styles.kbd)}>{token}</kbd>
+                      {index > 0 && <span sx={styles.plus}>{" + "}</span>}
+                      <kbd sx={styles.kbd}>{token}</kbd>
                     </Fragment>
                   ))}
                 </td>

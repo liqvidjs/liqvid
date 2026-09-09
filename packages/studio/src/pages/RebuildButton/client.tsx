@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Spinner } from "#_/components/Spinner.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import {
   publishAction,
   publishContentAction,
@@ -15,26 +16,15 @@ import {
   rebuildAction,
 } from "#_/pages/root-actions.js";
 import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
-
-const spin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
 
 const styles = stylex.create({
   label: {
     alignItems: "center",
+    columnGap: "0.4em",
     display: "inline-flex",
-    gap: "0.4em",
-  },
-  spinner: {
-    animationDuration: "1s",
-    animationIterationCount: "infinite",
-    animationName: spin,
-    animationTimingFunction: "linear",
+    rowGap: "0.4em",
   },
 });
 
@@ -178,7 +168,7 @@ export function RebuildButtonClient({
   );
 
   const label = isBusy ? (
-    <span {...stylex.props(styles.label)}>
+    <span sx={styles.label}>
       <Spinner />
       {t.busy}
     </span>

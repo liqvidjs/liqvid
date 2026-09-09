@@ -1,6 +1,13 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 
 export const styles = stylex.create({
   evenRow: {
@@ -9,19 +16,19 @@ export const styles = stylex.create({
 
   kbd: {
     background: colors.graySubtle,
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: colors.graySep,
     borderBottomWidth: "2px",
+    borderColor: colors.graySep,
     borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     display: "inline-block",
-    fontFamily: "ui-monospace, monospace",
-    fontSize: "0.85em",
+    fontFamily: typeface.uiMono,
+    fontSize: text.em085,
     lineHeight: 1.4,
     minWidth: "1.2em",
-    paddingBlock: '0.1em',
-    paddingInline: '0.45em',
+    paddingBlock: spacing.em01,
+    paddingInline: spacing.em045,
     textAlign: "center",
   },
 
@@ -34,32 +41,33 @@ export const styles = stylex.create({
     color: colors.grayDim,
   },
   popup: {
+    columnGap: "1rem",
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
     maxWidth: "32rem",
     overflow: "auto",
+    rowGap: "1rem",
   },
 
   table: {
     borderCollapse: "collapse",
-    fontSize: "0.875rem",
+    fontSize: text.rem0875,
     width: "100%",
   },
 
   td: {
-    paddingBlock: '0.4rem',
-    paddingInline: '0.6rem',
+    paddingBlock: spacing.rem04,
+    paddingInline: spacing.rem06,
     textAlign: "left",
   },
 
   th: {
-    borderBottomWidth: "1px",
-    borderBottomStyle: "solid",
     borderBottomColor: colors.graySep,
+    borderBottomStyle: "solid",
+    borderBottomWidth: "1px",
     fontWeight: 600,
-    paddingBlock: '0.4rem',
-    paddingInline: '0.6rem',
+    paddingBlock: spacing.rem04,
+    paddingInline: spacing.rem06,
     textAlign: "left",
   },
 });

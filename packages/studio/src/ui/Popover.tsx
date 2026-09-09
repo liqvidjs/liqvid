@@ -4,7 +4,14 @@ import { Popover } from "@base-ui/react/popover";
 import * as stylex from "@stylexjs/stylex";
 
 import { themed } from "#_/design/themed.js";
-import { colors, dims, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 
 import { useDialogApi } from "./Dialog.tsx";
 
@@ -14,12 +21,11 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
-    boxShadow:
-      "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
+    borderWidth: dims.sep,
+    boxShadow: shadows.xl,
     minWidth: "12rem",
     outline: "none",
-    padding: "0.25rem",
+    padding: spacing.rem025,
   },
   positioner: {
     outline: "none",
@@ -34,11 +40,11 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    color: "inherit",
+    color: colors.inherit,
+    columnGap: "0.5rem",
     cursor: "pointer",
     display: "flex",
-    fontSize: "0.75rem",
-    gap: "0.5rem",
+    fontSize: text.rem075,
     outline: {
       ":focus": `2px solid ${colors.accentSolid}`,
       default: null,
@@ -47,8 +53,9 @@ const styles = stylex.create({
       ":focus": "1px",
       default: null,
     },
-    paddingBlock: "0.3em",
-    paddingInline: "0.5em",
+    paddingBlock: spacing.em03,
+    paddingInline: spacing.em05,
+    rowGap: "0.5rem",
   },
 });
 

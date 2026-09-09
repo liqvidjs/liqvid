@@ -23,12 +23,12 @@ import type {
 } from "#_/api/schemas.mjs";
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
-import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
 import { ToggleButton } from "#_/ui/ToggleButton.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -46,8 +46,8 @@ export const styles = stylex.create({
     bottom: "1em",
     boxShadow: `0 0 0 1px ${colors.graySep}`,
     display: "flex",
-    fontSize: "0.7em",
-    padding: "0.4em",
+    fontSize: text.em07,
+    padding: spacing.em04,
     position: "fixed",
     right: "1em",
     verticalAlign: "top",
@@ -65,8 +65,8 @@ export const styles = stylex.create({
     alignItems: "center",
     display: "flex",
     gap: spacing.xs,
-    marginBlock: "1em",
-    marginInline: "0",
+    marginBlock: spacing.em1,
+    marginInline: spacing.zero,
   },
 
   filterActive: {
@@ -108,26 +108,27 @@ export const styles = stylex.create({
 
   header: {
     alignItems: "center",
+    columnGap: "2px",
     display: "flex",
-    gap: "2px",
+    rowGap: "2px",
   },
 
   job: {
-    marginBlock: "1em",
-    marginInline: "0",
+    marginBlock: spacing.em1,
+    marginInline: spacing.zero,
   },
 
   log: {
     backgroundColor: colors.grayApp,
-    paddingBlock: "0.1em",
-    paddingInline: "0.2em",
+    paddingBlock: spacing.em01,
+    paddingInline: spacing.em02,
     position: "relative",
     scrollbarWidth: "thin",
     width: "100%",
   },
 
   logDebug: {
-    color: "purple",
+    color: colors.logDebug,
   },
 
   logError: {
@@ -136,14 +137,14 @@ export const styles = stylex.create({
 
   logGroup: {
     borderColor: colors.graySep,
-    borderRadius: "2px",
+    borderRadius: radii.sm,
     borderStyle: "solid",
-    borderWidth: "1px",
-    fontSize: "16px",
+    borderWidth: dims.sep,
+    fontSize: text.md,
   },
   main: {
-    marginBlock: "0",
-    marginInline: "auto",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
     width: "75%",
   },
 
@@ -153,8 +154,9 @@ export const styles = stylex.create({
 
   progress: {
     alignItems: "center",
+    columnGap: "0.5em",
     display: "flex",
-    gap: "0.5em",
+    rowGap: "0.5em",
   },
 
   runningIcon: {
@@ -177,13 +179,13 @@ export const styles = stylex.create({
     borderTopLeftRadius: "0",
     borderTopRightRadius: "0",
     borderTopStyle: "none",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayDim,
     flexShrink: 0,
-    fontSize: "0.6em",
+    fontSize: text.em06,
     opacity: 0,
-    paddingBlock: "1px",
-    paddingInline: "4px",
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.md,
     position: "absolute",
     right: 0,
     top: 0,
@@ -389,7 +391,7 @@ export function JobsClient({
   );
 
   return (
-    <main {...stylex.props(styles.main)}>
+    <main sx={styles.main}>
       <h1>{t.title}</h1>
 
       <LogLevelFilter levels={levels} onToggle={toggleLevel} t={t} />
@@ -406,8 +408,8 @@ export function JobsClient({
         <TabsContent value="jobs">
           <ul>
             {Object.values(jobs).map((job) => (
-              <li {...stylex.props(styles.job)} key={job.id}>
-                <header {...stylex.props(styles.header)}>
+              <li key={job.id} sx={styles.job}>
+                <header sx={styles.header}>
                   <JobStateIcon state={job.state} t={t} />
                   <pre>{job.path}</pre>
                   {">"}
@@ -436,8 +438,8 @@ export function JobsClient({
         <TabsContent value="services">
           <ul>
             {Object.values(services).map((service) => (
-              <li {...stylex.props(styles.job)} key={service.id}>
-                <header {...stylex.props(styles.header)}>
+              <li key={service.id} sx={styles.job}>
+                <header sx={styles.header}>
                   <ServiceStateIcon state={service.state} t={t} />
                   <span>{service.name}</span>
                 </header>
@@ -454,7 +456,7 @@ export function JobsClient({
       </Tabs>
 
       {meta && (
-        <aside {...stylex.props(styles.annotations)}>
+        <aside sx={styles.annotations}>
           <MetadataTable data={meta.annotations} />
           <table>
             <tbody>
@@ -575,7 +577,7 @@ function LogGroup({
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <ol {...stylex.props(styles.logGroup)}>
+    <ol sx={styles.logGroup}>
       {logs.map((log, i) => {
         if (!levels.has(log.type)) {
           return null;
@@ -585,11 +587,6 @@ function LogGroup({
 
         return (
           <li
-            {...stylex.props(
-              styles.log,
-              log.type === "error" && styles.logError,
-              log.type === "debug" && styles.logDebug,
-            )}
             key={`${log.type}:${log.timestamp.toISOString()}:${i}`}
             onPointerEnter={() => {
               setHoveredIdx(i);
@@ -602,6 +599,11 @@ function LogGroup({
               setHoveredIdx(null);
               onAnnotations(null);
             }}
+            sx={[
+              styles.log,
+              log.type === "error" && styles.logError,
+              log.type === "debug" && styles.logDebug,
+            ]}
           >
             <Time
               {...stylex.props(
@@ -613,12 +615,12 @@ function LogGroup({
             />
             {(() => {
               if (typeof msg === "string" || typeof msg === "number") {
-                return <pre {...stylex.props(styles.message)}>{msg}</pre>;
+                return <pre sx={styles.message}>{msg}</pre>;
               }
 
               if (isProgressEvent(msg)) {
                 return (
-                  <div {...stylex.props(styles.progress)}>
+                  <div sx={styles.progress}>
                     <progress max={msg.total} value={msg.value} />
                     {`${msg.formattedValue} / ${msg.formattedTotal}`}
                   </div>
@@ -626,9 +628,7 @@ function LogGroup({
               }
 
               return (
-                <pre {...stylex.props(styles.message)}>
-                  {JSON.stringify(msg, null, 2)}
-                </pre>
+                <pre sx={styles.message}>{JSON.stringify(msg, null, 2)}</pre>
               );
             })()}
           </li>
@@ -656,7 +656,7 @@ function LogLevelFilter({
   };
 
   return (
-    <div {...stylex.props(styles.filter)}>
+    <div sx={styles.filter}>
       {LOG_LEVELS.map((level) => {
         const active = levels.has(level);
         return (

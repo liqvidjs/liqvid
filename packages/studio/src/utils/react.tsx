@@ -10,12 +10,10 @@ import {
 
 import CommonTranslations from "#_/.translations/en.json";
 import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getTranslationsFromServer } from "#_/server-actions.js";
 
-import type {
-  CommonTranslations as CommonTranslationsType,
-  Localized,
-} from "./i18n.mts";
+import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
 
 type TranslationJson = {
   [key: string]: string | TranslationJson;

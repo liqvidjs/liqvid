@@ -1,11 +1,11 @@
 import * as stylex from "@stylexjs/stylex";
 
 import { themed } from "#_/design/themed.js";
-import { radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { radii, scales, spacing, text } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   fieldset: {
-    backgroundColor: "light-dark(white, red)",
+    backgroundColor: `light-dark(white, ${scales.stone700})`,
     borderRadius: radii.lg,
     display: "flex",
     flexDirection: "column",

@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useStudioPrivateApi } from "#_/components/LiqvidDevToolsProvider.js";
 import { useChannel } from "#_/components/WebSocketProvider.js";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
 import { DockableDialog } from "#_/ui/DockableDialog.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
 import { useAsyncTranslations } from "#_/utils/react.js";
@@ -29,11 +29,11 @@ import Translations from "../.translations/en.json";
 
 const styles = stylex.create({
   configurationTable: {
-    borderColor: "#000",
+    borderColor: colors.black,
     borderStyle: "solid",
-    borderWidth: "1px",
-    marginBlock: "1em",
-    marginInline: "auto",
+    borderWidth: dims.sep,
+    marginBlock: spacing.em1,
+    marginInline: spacing.auto,
     width: "100%",
   },
 
@@ -53,7 +53,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     margin: `${spacing.md} 0`,
     overflow: "hidden",
   },
@@ -68,12 +68,13 @@ const styles = stylex.create({
   },
 
   recordingToggleChecked: {
-    backgroundColor: "red",
+    backgroundColor: colors.recordingActive,
   },
 
   togglePlugins: {
+    columnGap: "0.5em",
     display: "flex",
-    gap: "0.5em",
+    rowGap: "0.5em",
   },
 });
 
@@ -236,7 +237,7 @@ export function RecordingDialog({
               <section>
                 <h3>{t.tabs.configuration.subtitle}</h3>
 
-                <div {...stylex.props(styles.togglePlugins)}>
+                <div sx={styles.togglePlugins}>
                   {Object.values(plugins).map((plugin) => {
                     if (!("recorder" in plugin)) return null;
 
@@ -247,14 +248,14 @@ export function RecordingDialog({
                       // biome-ignore lint/correctness/noRestrictedElements: this is ok
                       <button
                         aria-checked={enabledPlugins[plugin.package]}
-                        {...stylex.props(
-                          styles.recordingToggle,
-                          enabledPlugins[plugin.package] &&
-                            styles.recordingToggleChecked,
-                        )}
                         key={plugin.package}
                         onClick={() => handleTogglePlugin(plugin.package)}
                         role="switch"
+                        sx={[
+                          styles.recordingToggle,
+                          enabledPlugins[plugin.package] &&
+                            styles.recordingToggleChecked,
+                        ]}
                         type="button"
                       >
                         {plugin.icon({ height: 24, width: 24 })}
@@ -262,7 +263,7 @@ export function RecordingDialog({
                     );
                   })}
                 </div>
-                <table {...stylex.props(styles.configurationTable)}>
+                <table sx={styles.configurationTable}>
                   <tbody>
                     {Object.values(plugins).map((plugin) => {
                       if (!("recorder" in plugin)) return null;
@@ -275,13 +276,10 @@ export function RecordingDialog({
 
                       return (
                         <tr key={plugin.package}>
-                          <th
-                            {...stylex.props(styles.configurationTh)}
-                            scope="row"
-                          >
+                          <th scope="row" sx={styles.configurationTh}>
                             {plugin.icon({ height: 36, width: 36 })}
                           </th>
-                          <td {...stylex.props(styles.configurationTd)}>
+                          <td sx={styles.configurationTd}>
                             <ConfigurationComponent
                               instances={instances[plugin.package] ?? new Set()}
                             />
@@ -296,7 +294,7 @@ export function RecordingDialog({
             <TabsContent asChild value={tabs.saved}>
               <section>
                 <h3>{t.tabs.saved.subtitle}</h3>
-                <div {...stylex.props(styles.Recordings)}>
+                <div sx={styles.Recordings}>
                   {recordings.map((r) => (
                     <RecordingRow
                       key={r.name}

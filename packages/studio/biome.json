@@ -31,6 +31,10 @@
               "@base-ui/react/dialog": "import styled versions from \"#_/ui/Dialog.js\"",
               "@base-ui/react/navigation-menu": "import styled versions from \"#_/ui/NavigationMenu.js\"",
               "@base-ui/react/select": "import styled versions from \"#_/ui/Select.js\"",
+              "@phosphor-icons/react": {
+                "importNames": ["SpinnerIcon"],
+                "message": "import the Spinner component from \"#_/components/Spinner.js\""
+              },
               "react-headings": "import SSR-safe versions from \"#_/ui/headings.js\""
             }
           }

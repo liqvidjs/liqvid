@@ -19,20 +19,25 @@ import {
   useRef,
 } from "react";
 
-import { colors, radii, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import {
+  colors,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   content: {
-    backgroundColor: "light-dark(#e0e0e0, #333)",
+    backgroundColor: colors.dockablePanelBg,
     borderRadius: `0 0 ${radii.md} ${radii.md}`,
     color: colors.foreground,
-    paddingBlock: "8px",
-    paddingInline: "16px",
+    paddingBlock: spacing.lg,
+    paddingInline: spacing.xl,
   },
   dialog: {
-    boxShadow:
-      "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    boxShadow: shadows.xxl,
     display: "flex",
     flexDirection: "column",
     position: "absolute",
@@ -44,8 +49,8 @@ const styles = stylex.create({
     color: colors.white,
     fontSize: text.sm,
     fontWeight: "bold",
-    paddingBlock: "4px",
-    paddingInline: "8px",
+    paddingBlock: spacing.md,
+    paddingInline: spacing.lg,
     userSelect: "none",
   },
 });

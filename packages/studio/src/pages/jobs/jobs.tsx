@@ -6,10 +6,11 @@ import { cookies } from "next/headers";
 import type { LoggableJobClient, ServiceClient } from "#_/api/schemas.mjs";
 import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
 import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
-import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { DEFAULT_LOG_LEVELS, JobsClient } from "./jobs.client.tsx";
 

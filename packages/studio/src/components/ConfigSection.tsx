@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { H, Section } from "#_/components/headings.js";
 import { Description } from "#_/design/styles.js";
 import { spacing, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   heading: {
@@ -28,7 +28,7 @@ export function ConfigSection({
   heading: LocalizedReactNode;
 }) {
   return (
-    <section {...stylex.props(styles.section)}>
+    <section sx={styles.section}>
       <Section
         component={
           <header>

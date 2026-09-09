@@ -1,9 +1,10 @@
 import { PaletteIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { Description } from "#_/design/styles.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getConfigSync } from "#_/initialize.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { ConfigureThemeClient } from "./client.tsx";
 
@@ -23,7 +24,7 @@ export async function ConfigureTheme() {
         {t.heading}
       </Legend>
       <Description>{t.description}</Description>
-      <ConfigureThemeClient theme={theme} />
+      <ConfigureThemeClient t={t} theme={theme} />
     </FieldSet>
   );
 }

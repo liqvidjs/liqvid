@@ -3,7 +3,6 @@ import {
   CheckCircleIcon,
   ClosedCaptioningIcon,
   PencilSimpleIcon,
-  SpinnerIcon,
   TrashIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
@@ -14,6 +13,7 @@ import { useState } from "react";
 import type { AudioEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
+import { Spinner } from "#_/components/Spinner.js";
 import { AUDIO_WAV } from "#_/conventions.mjs";
 import { Button } from "#_/ui/Button.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
@@ -26,7 +26,7 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
   switch (status) {
     case "pending":
     case "generating":
-      return <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />;
+      return <Spinner size={16} />;
     case "completed":
       return (
         <CheckCircleIcon
@@ -145,27 +145,27 @@ export function CaptionRow({
   };
 
   return (
-    <li {...stylex.props(shareStyles.renderItem)}>
-      <div {...stylex.props(shareStyles.renderInfo)}>
-        <div {...stylex.props(shareStyles.renderHeader)}>
-          <span {...stylex.props(shareStyles.renderName)}>
+    <li sx={shareStyles.renderItem}>
+      <div sx={shareStyles.renderInfo}>
+        <div sx={shareStyles.renderHeader}>
+          <span sx={shareStyles.renderName}>
             {multiple ? entry.id : AUDIO_WAV}
           </span>
           {entry.captions && (
-            <span {...stylex.props(shareStyles.renderStatus)}>
+            <span sx={shareStyles.renderStatus}>
               {getCaptionsStatusIcon(entry.captions.status)}
               {getCaptionsStatusLabel(entry.captions.status)}
             </span>
           )}
         </div>
-        <div {...stylex.props(shareStyles.renderDetails)}>
+        <div sx={shareStyles.renderDetails}>
           <Time format="date-and-time" value={entry.meta.createdAt} />
           {entry.meta.state === "completed" && (
             <TimeDuration value={{ seconds: entry.meta.duration }} />
           )}
         </div>
       </div>
-      <div {...stylex.props(shareStyles.renderActions)}>
+      <div sx={shareStyles.renderActions}>
         <Button
           disabled={!hasCaptioningConfigured || isGenerating}
           onClick={handleGenerateCaptions}
@@ -179,7 +179,7 @@ export function CaptionRow({
           type="button"
         >
           {isGenerating ? (
-            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />
+            <Spinner size={16} />
           ) : (
             <ClosedCaptioningIcon size={16} />
           )}
@@ -189,7 +189,6 @@ export function CaptionRow({
             {...stylex.props(shareStyles.deleteButton)}
             onClick={handleDeleteCaptions}
             title="Delete captions"
-            type="button"
           >
             <ClosedCaptioningIcon size={16} weight="fill" />
           </Button>
@@ -199,7 +198,6 @@ export function CaptionRow({
             {...stylex.props(shareStyles.renderActionButton)}
             onClick={() => onStartRename(entry)}
             title="Rename audio"
-            type="button"
           >
             <PencilSimpleIcon size={16} />
           </Button>
@@ -208,7 +206,6 @@ export function CaptionRow({
           {...stylex.props(shareStyles.deleteButton)}
           onClick={handleDeleteAudio}
           title="Delete audio (and captions)"
-          type="button"
         >
           <TrashIcon size={16} />
         </Button>

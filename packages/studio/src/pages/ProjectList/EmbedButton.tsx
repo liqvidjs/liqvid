@@ -5,8 +5,8 @@ import { CodeIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { shareStyles } from "./share.sx.ts";

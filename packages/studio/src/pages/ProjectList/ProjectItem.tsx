@@ -58,15 +58,15 @@ export function ProjectItem({
 
   return (
     <ProjectPathProvider value={project.path}>
-      <li {...stylex.props(styles.listItem)}>
-        <a href={interpolatedPath} {...stylex.props(styles.listItemLink)}>
+      <li sx={styles.listItem}>
+        <a href={interpolatedPath} sx={styles.listItemLink}>
           <Thumbnail {...project} />
           <div className="flex flex-col">
             {resolvedTitle ?? project.path}
             <pre className="text-sm">{project.path}</pre>
           </div>
         </a>
-        <div {...stylex.props(styles.actions)}>
+        <div sx={styles.actions}>
           <MediaButton
             basePath={basePath}
             duration={project.duration}

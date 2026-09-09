@@ -6,70 +6,8 @@ export const breakpoints = stylex.defineConsts({
   tablet: "@media (min-width: 641px) and (max-width: 1279px)",
 });
 
-/** semantic color names */
-export const colors = stylex.defineVars({
-  accentSolid: "#af1866",
-  accentSolidHover: "light-dark(#9e0058, #922257)",
-  background: () => `light-dark(${scales.stone50}, ${scales.stone800})`,
-  errorSolid: "light-dark(#dc2626, #ef4444)",
-  errorSolidHover: "light-dark(#b91c1c, #dc2626)",
-  errorSubtle: "light-dark(#fef2f2, #450a0a)",
-  errorText: "light-dark(#dc2626, #fca5a5)",
-
-  /** foreground text color */
-  foreground: "light-dark(#000, #fff)",
-
-  grayActive: "light-dark(#e0e1e6, #303136)",
-  grayApp: "light-dark(#fff, #1f1f1f)",
-  grayDim: "light-dark(#aaa0ab, #999)",
-  grayHover: "light-dark(#e7e8ec, #292a2e)",
-  grayNormal: "light-dark(#333, #eeeef0)",
-  graySep: "light-dark(#e5e5e5, #333)",
-  graySubtle: "light-dark(#f5f5f5, #252525)",
-  grayUi: "light-dark(#eff0f3, #222325)",
-  successSolid: "light-dark(#16a34a, #22c55e)",
-  white: "#fff",
-});
-
-export const dims = stylex.defineConsts({
-  sep: "1px",
-});
-
-export const radii = stylex.defineConsts({
-  full: "100%",
-  lg: "6px",
-  md: "4px",
-  xl: "8px",
-});
-
-export const spacing = stylex.defineConsts({
-  control: "32px",
-  huge: "24px",
-  lg: "8px",
-  md: "4px",
-  sm: "2px",
-  xl: "16px",
-  xs: "1px",
-});
-
-export const text = stylex.defineConsts({
-  base: "16px",
-  huge: "80px",
-  lg: "24px",
-  md: "16px",
-  mega: "100px",
-  sm: "14px",
-  xl: "60px",
-  xs: "10px",
-});
-
-export const typeface = stylex.defineConsts({
-  mono: "monospace",
-  ui: `"Inter Variable", system-ui, sans-serif`,
-});
-
 /** color scales for application (taken from Tailwind) */
-export const scales = stylex.defineConsts({
+export const scales = stylex.defineVars({
   amber50: "oklch(98.7% 0.022 95.277)",
   amber100: "oklch(96.2% 0.059 95.617)",
   amber200: "oklch(92.4% 0.12 95.746)",
@@ -380,4 +318,220 @@ export const scales = stylex.defineConsts({
   zinc800: "oklch(27.4% 0.006 286.033)",
   zinc900: "oklch(21% 0.006 285.885)",
   zinc950: "oklch(14.1% 0.005 285.823)",
+});
+
+/** semantic color names */
+export const colors = stylex.defineVars({
+  /** accent theme CSS variable wrappers */
+  accentContrast: "var(--accent-contrast)",
+  accentDim: "var(--accent-dim)",
+  accentHover: "var(--accent-hover)",
+  accentNormal: "var(--accent-normal)",
+  accentSep: "var(--accent-sep)",
+  accentSolid: "#af1866",
+  accentSolidHover: "light-dark(#9e0058, #922257)",
+  accentUi: "var(--accent-ui)",
+  background: () => `light-dark(${scales.stone50}, ${scales.stone800})`,
+
+  /** update banner colors */
+  bannerBg: "var(--accent-ui)",
+  bannerBorder: "var(--accent-sep)",
+  bannerColor: "var(--accent-normal)",
+  bannerContrastColor: "var(--accent-contrast)",
+  bannerDismissBgHover: "var(--accent-hover)",
+  bannerDismissColor: "var(--accent-dim)",
+  bannerDismissColorHover: "var(--accent-normal)",
+  black: "#000",
+
+  /** base button colors */
+  btnBg: "light-dark(#f0f0f0, #333)",
+  btnBgActive: "light-dark(#d0d0d0, #333)",
+  btnBgHover: "light-dark(#fafafa, #444)",
+  btnBorder: "light-dark(#ccc, #555)",
+  btnColor: "light-dark(#333, #fff)",
+  btnColorDisabled: "light-dark(#aaa, #eee)",
+  btnPrimaryBgActive: "light-dark(#1e40af, #1d4ed8)",
+
+  /** primary button colors */
+  btnPrimaryBgDisabled: "light-dark(#93b4f5, #4b6bb0)",
+  btnPrimaryBgHover: "light-dark(#1d4ed8, #2563eb)",
+  btnPrimaryColorDisabled: "light-dark(#e5e7eb, #e5e7eb)",
+
+  /** copy button colors */
+  copyBtnBg: "light-dark(#e8f4ff, #1e3a5f)",
+  copyBtnBgHover: "light-dark(#d0e8ff, #2a4a7f)",
+  copyBtnBorder: "light-dark(#b3d4ff, #2a5a8f)",
+  copyBtnColor: "light-dark(#0066cc, #66b3ff)",
+
+  /** delete button colors */
+  deleteBtnBgHover: "light-dark(#f9d7d3, #4a2424)",
+  deleteBtnBorder: "light-dark(#f5c6c2, #5a2a2a)",
+
+  /** dialog backdrop */
+  dialogBackdrop: "rgb(0 0 0 / 0.5)",
+
+  /** dialog close button colors */
+  dialogCloseBgHover: "light-dark(#111827, #f9fafb)",
+  dialogCloseColor: "light-dark(#374151, #f3f4f6)",
+
+  /** dockable dialog panel background */
+  dockablePanelBg: "light-dark(#e0e0e0, #333)",
+
+  /** error border for form fields */
+  errorBorder: "light-dark(#fecaca, #7f1d1d)",
+  errorSolid: "light-dark(#dc2626, #ef4444)",
+  errorSolidHover: "light-dark(#b91c1c, #dc2626)",
+  errorSubtle: "light-dark(#fef2f2, #450a0a)",
+  errorText: "light-dark(#dc2626, #fca5a5)",
+
+  /** folder/card colors */
+  folderBorder: "light-dark(#e5e7eb, #374151)",
+  folderHeaderBg: "light-dark(#f9fafb, #1f2937)",
+  folderHeaderBgHover: "light-dark(#f3f4f6, #374151)",
+
+  /** foreground text color */
+  foreground: "light-dark(#000, #fff)",
+
+  /** foreground on both light and dark (black in light, white in dark) */
+  foregroundAuto: "light-dark(#000, #fff)",
+
+  grayActive: "light-dark(#e0e1e6, #303136)",
+  grayApp: "light-dark(#fff, #1f1f1f)",
+  grayDim: "light-dark(#aaa0ab, #999)",
+  grayHover: "light-dark(#e7e8ec, #292a2e)",
+  grayNormal: "light-dark(#333, #eeeef0)",
+  graySep: "light-dark(#e5e5e5, #333)",
+  graySubtle: "light-dark(#f5f5f5, #252525)",
+  grayUi: "light-dark(#eff0f3, #222325)",
+  inherit: "inherit",
+
+  /** log level colors */
+  logDebug: "purple",
+  nestedFolderHeaderBg: "light-dark(#f9fafb, #1f2937)",
+  overlayDark: "#0007",
+
+  /** recording toggle active */
+  recordingActive: "red",
+
+  /** recording state (shortcut input) */
+  recordingInputBg: "light-dark(#fffbe6, #3d3800)",
+  recordingInputBorder: "light-dark(#d9a600, #665000)",
+  successSolid: "light-dark(#16a34a, #22c55e)",
+
+  /** switch unchecked background */
+  switchBg: "light-dark(#aaa0ab, #999)",
+
+  /** tab trigger default background */
+  tabTriggerBg: "#aaa",
+  transparent: "transparent",
+  white: "#fff",
+});
+
+export const dims = stylex.defineConsts({
+  sep: "1px",
+});
+
+export const radii = stylex.defineConsts({
+  circle: "50%",
+  full: "100%",
+  lg: "6px",
+  md: "4px",
+  none: "0",
+  pill: "9999px",
+  sm: "2px",
+  xl: "8px",
+  xs: "3px",
+});
+
+export const shadows = stylex.defineConsts({
+  dialog: "0 8px 24px light-dark(#00000026, #00000066)",
+  lg: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  toast:
+    "0px 1px 2px 0px light-dark(#00000026, #33333326), 0px 3px 7px 0px light-dark(#00000040, #33333340)",
+  xl: "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
+  xxl: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+});
+
+export const spacing = stylex.defineConsts({
+  auto: "auto",
+  control: "32px",
+  em1: "1em",
+
+  /** em-based spacing for fluid/relative contexts */
+  em01: "0.1em",
+  em02: "0.2em",
+  em03: "0.3em",
+  em04: "0.4em",
+  em05: "0.5em",
+  em08: "0.8em",
+  em045: "0.45em",
+  huge: "24px",
+  lg: "8px",
+  md: "4px",
+  negMd: "-4px",
+  negXs: "-1px",
+  px3: "3px",
+  px6: "6px",
+  px10: "10px",
+  px12: "12px",
+  rem1: "1rem",
+  rem2: "2rem",
+  rem04: "0.4rem",
+  rem05: "0.5rem",
+  rem06: "0.6rem",
+  rem15: "1.5rem",
+  rem25: "2.5rem",
+  rem025: "0.25rem",
+  rem075: "0.75rem",
+
+  /** rem-based spacing */
+  rem0125: "0.125rem",
+  rem0375: "0.375rem",
+  rem0625: "0.625rem",
+  sm: "2px",
+  xl: "16px",
+  xs: "1px",
+  zero: "0",
+});
+
+export const text = stylex.defineConsts({
+  base: "16px",
+
+  /** em-based font sizes (relative to parent) */
+  em06: "0.6em",
+  em07: "0.7em",
+  em08: "0.8em",
+  em085: "0.85em",
+  huge: "80px",
+  lg: "24px",
+  md: "16px",
+  mega: "100px",
+
+  /** pixel-based additional sizes */
+  px12: "12px",
+  px16: "16px",
+  rem1: "1rem",
+  rem075: "0.75rem",
+  rem125: "1.25rem",
+
+  /** rem-based font sizes */
+  rem0625: "0.625rem",
+  rem0875: "0.875rem",
+
+  /** rem-based additional sizes */
+  rem1125: "1.125rem",
+  rem06875: "0.6875rem",
+  rem08125: "0.8125rem",
+  sm: "14px",
+  xl: "60px",
+  xs: "10px",
+});
+
+export const typeface = stylex.defineConsts({
+  inter: '"Inter", sans-serif',
+  mono: "monospace",
+  ui: `"Inter Variable", system-ui, sans-serif`,
+  uiMono: "ui-monospace, monospace",
 });

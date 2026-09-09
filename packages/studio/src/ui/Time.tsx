@@ -1,7 +1,7 @@
 import type { DurationLike } from "@liqvid/duration";
 import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
 
-import type { LocalizedReactNode } from "#_/utils/i18n.mjs";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 import { toISODateString } from "#_/utils/time.mjs";
 
 type TimeFormat = "long" | "date-and-time";

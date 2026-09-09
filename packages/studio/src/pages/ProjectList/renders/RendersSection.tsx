@@ -12,7 +12,6 @@ import {
   MoonIcon,
   PencilSimpleIcon,
   PlayIcon,
-  SpinnerIcon,
   SunIcon,
   TrashIcon,
   WarningCircleIcon,
@@ -25,6 +24,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { RenderEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
+import type { Localized, PlainString } from "#_/i18n/shared.mjs";
 import { openRenderInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -38,7 +38,6 @@ import {
   useDialogApi,
 } from "#_/ui/Dialog.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
-import type { Localized, PlainString } from "#_/utils/i18n.mjs";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -210,8 +209,8 @@ export function RendersSection({
 
   return (
     <>
-      <div {...stylex.props(shareStyles.section)}>
-        <div {...stylex.props(shareStyles.sectionActions)}>
+      <div sx={shareStyles.section}>
+        <div sx={shareStyles.sectionActions}>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
             <DialogTrigger
               {...stylex.props(shareStyles.addButton)}
@@ -220,11 +219,7 @@ export function RendersSection({
             >
               {isStarting ? (
                 <>
-                  <SpinnerIcon
-                    {...stylex.props(shareStyles.spinner)}
-                    size={16}
-                  />{" "}
-                  {t.inProgress}
+                  <Spinner /> {t.inProgress}
                 </>
               ) : (
                 <>
@@ -246,26 +241,24 @@ export function RendersSection({
         </div>
 
         {isLoading && renders.length === 0 ? (
-          <div {...stylex.props(shareStyles.loading)}>
-            <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={24} />
+          <div sx={shareStyles.loading}>
+            <Spinner size={24} />
           </div>
         ) : renders.length === 0 ? (
-          <p {...stylex.props(shareStyles.emptyMessage)}>{t.empty}</p>
+          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
         ) : (
-          <ul {...stylex.props(shareStyles.renderList)}>
+          <ul sx={shareStyles.renderList}>
             {renders.map((render) => (
-              <li {...stylex.props(shareStyles.renderItem)} key={render.id}>
-                <div {...stylex.props(shareStyles.renderInfo)}>
-                  <div {...stylex.props(shareStyles.renderHeader)}>
-                    <span {...stylex.props(shareStyles.renderName)}>
-                      {render.id}
-                    </span>
-                    <span {...stylex.props(shareStyles.renderStatus)}>
+              <li key={render.id} sx={shareStyles.renderItem}>
+                <div sx={shareStyles.renderInfo}>
+                  <div sx={shareStyles.renderHeader}>
+                    <span sx={shareStyles.renderName}>{render.id}</span>
+                    <span sx={shareStyles.renderStatus}>
                       {getStatusIcon(render.meta.status)}
                       {getStatusLabel(render.meta.status)}
                     </span>
                   </div>
-                  <div {...stylex.props(shareStyles.renderDetails)}>
+                  <div sx={shareStyles.renderDetails}>
                     <span>{formatDate(render.meta.createdAt)}</span>
                     <span>
                       {render.meta.width}
@@ -279,7 +272,7 @@ export function RendersSection({
                     <span>{render.meta.colorScheme}</span>
                   </div>
                 </div>
-                <div {...stylex.props(shareStyles.renderActions)}>
+                <div sx={shareStyles.renderActions}>
                   {render.meta.status === "completed" && (
                     <>
                       <Button
@@ -449,7 +442,7 @@ function ConfigDialog({
       <DialogPopup>
         <DialogTitle>{t.dialog.title}</DialogTitle>
 
-        <div {...stylex.props(form.formField)}>
+        <div sx={form.formField}>
           <span id="render-color-scheme-label">
             {t.dialog.colorScheme.label}
           </span>
@@ -471,9 +464,9 @@ function ConfigDialog({
           </RadioTabs>
         </div>
 
-        <div {...stylex.props(form.formField)}>
+        <div sx={form.formField}>
           <span>{t.dialog.resolution}</span>
-          <div {...stylex.props(shareStyles.resolutionPresets)}>
+          <div sx={shareStyles.resolutionPresets}>
             {WIDTH_PRESETS.map((width) => (
               <Button
                 {...stylex.props(
@@ -488,23 +481,23 @@ function ConfigDialog({
               </Button>
             ))}
           </div>
-          <div {...stylex.props(styles.dimensionInputs)}>
+          <div sx={styles.dimensionInputs}>
             <input
-              {...stylex.props(styles.dimensionInput)}
               min={1}
               onChange={(e) =>
                 handleWidthChange(Number(e.target.value) || config.width)
               }
+              sx={styles.dimensionInput}
               type="number"
               value={config.width}
             />
-            <span {...stylex.props(styles.dimensionSeparator)}>{"×"}</span>
+            <span sx={styles.dimensionSeparator}>{"×"}</span>
             <input
-              {...stylex.props(styles.dimensionInput)}
               min={1}
               onChange={(e) =>
                 handleHeightChange(Number(e.target.value) || config.height)
               }
+              sx={styles.dimensionInput}
               type="number"
               value={config.height}
             />
@@ -531,7 +524,7 @@ function ConfigDialog({
           </div>
         </div>
 
-        <div {...stylex.props(form.dialogActions)}>
+        <div sx={form.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
             className={stylex.props(form.submitButton).className}
@@ -597,11 +590,9 @@ function RenameDialog({
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
-      <div {...stylex.props(form.formField)}>
+      <div sx={form.formField}>
         <label htmlFor="render-name">{t.name}</label>
         <input
-          // autoFocus
-          {...stylex.props(shareStyles.textInput)}
           id="render-name"
           onChange={(e) => setRenameValue(e.target.value)}
           onKeyDown={(e) => {
@@ -609,11 +600,13 @@ function RenameDialog({
               handleRename();
             }
           }}
+          // autoFocus
+          sx={shareStyles.textInput}
           type="text"
           value={renameValue}
         />
       </div>
-      <div {...stylex.props(form.dialogActions)}>
+      <div sx={form.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
           className={stylex.props(form.submitButton).className}
@@ -623,8 +616,7 @@ function RenameDialog({
         >
           {isRenaming ? (
             <>
-              <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
-              {t.inProgress}
+              <Spinner /> {t.inProgress}
             </>
           ) : (
             t.trigger
@@ -677,8 +669,8 @@ function DeleteDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p {...stylex.props(shareStyles.confirmMessage)}>{t.confirm}</p>
-        <div {...stylex.props(form.dialogActions)}>
+        <p sx={shareStyles.confirmMessage}>{t.confirm}</p>
+        <div sx={form.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
             {...stylex.props(shareStyles.deleteConfirmButton)}
@@ -707,7 +699,7 @@ function VideoPlayerDialog({
     <DialogPortal>
       <DialogBackdrop />
       <DialogPopup {...stylex.props(styles.videoDialog)}>
-        <div {...stylex.props(styles.videoHeader)}>
+        <div sx={styles.videoHeader}>
           <DialogTitle>
             {playingRender?.id as PlainString | undefined}
           </DialogTitle>
@@ -718,9 +710,9 @@ function VideoPlayerDialog({
         {playingRender && (
           <video
             autoPlay
-            {...stylex.props(styles.videoPlayer)}
             controls
             src={getVideoUrl(playingRender)}
+            sx={styles.videoPlayer}
           >
             <track kind="captions" />
           </video>

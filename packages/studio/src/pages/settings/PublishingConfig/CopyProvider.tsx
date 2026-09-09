@@ -1,5 +1,4 @@
 "use client";
-import * as stylex from "@stylexjs/stylex";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
 
@@ -33,7 +32,7 @@ export function CopyProvider({
         placeholder="./dist"
         value={destination}
       />
-      <label {...stylex.props(styles.checkboxField)}>
+      <label sx={styles.checkboxField}>
         <input
           checked={value?.clean ?? false}
           onChange={(e) =>

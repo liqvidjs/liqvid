@@ -16,10 +16,11 @@ import {
   ROOT_PARAMS_COOKIE,
 } from "#_/cookies.js";
 import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
-import { getTranslations, type Localized } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
-import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
+import { NewProjectButton } from "./NewProjectButton/server.tsx";
 import { ProjectList } from "./ProjectList/ProjectList.tsx";
 import { RebuildButton } from "./RebuildButton/server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
@@ -38,14 +39,15 @@ const styles = stylex.create({
   },
   headerRow: {
     alignItems: "center",
+    columnGap: "1rem",
     display: "flex",
-    gap: "1rem",
     marginBottom: "1rem",
+    rowGap: "1rem",
   },
   main: {
     fontSize: text.base,
-    marginBlock: "0",
-    marginInline: "auto",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
     padding: `${spacing.control} 0`,
     width: {
       [breakpoints.desktop]: "48rem",
@@ -100,10 +102,10 @@ export async function Homepage() {
   return (
     <DerivedConfigProvider value={derivedConfig}>
       <WebSocketProvider>
-        <main {...stylex.props(styles.main)}>
+        <main sx={styles.main}>
           <UpdateBanner />
-          <div {...stylex.props(styles.headerRow)}>
-            <h1 {...stylex.props(styles.header)}>{t.title}</h1>
+          <div sx={styles.headerRow}>
+            <h1 sx={styles.header}>{t.title}</h1>
             <NewProjectButton />
             <RebuildButton />
             <Link

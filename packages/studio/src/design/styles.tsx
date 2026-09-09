@@ -1,7 +1,14 @@
 import * as stylex from "@stylexjs/stylex";
 
 import { themed } from "./themed.tsx";
-import { colors, spacing, text, typeface } from "./tokens.stylex.ts";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "./tokens.stylex.ts";
 
 export const fonts = stylex.create({
   description: {
@@ -17,6 +24,18 @@ export const fonts = stylex.create({
   ui: {
     fontFamily: typeface.ui,
     fontSize: text.base,
+  },
+  var: {
+    backgroundColor: colors.graySubtle,
+    borderColor: colors.graySep,
+    borderRadius: radii.xs,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    fontFamily: typeface.mono,
+    fontSize: text.sm,
+    fontStyle: "normal",
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.md,
   },
 });
 

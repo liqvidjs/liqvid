@@ -2,10 +2,18 @@
 
 // biome-ignore lint/style/noRestrictedImports: this is the styled version
 import { Select } from "@base-ui/react/select";
+import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
 import { extensible, themed } from "#_/design/themed.js";
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   icon: {
@@ -14,23 +22,23 @@ const styles = stylex.create({
   },
   item: {
     alignItems: "center",
-    background: {
-      ":focus": colors.grayHover,
+    backgroundColor: {
+      ":focus": colors.grayActive,
+      ":hover": colors.grayHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
-    borderRadius: "3px",
     color: colors.grayNormal,
     cursor: "pointer",
     display: "flex",
-    fontSize: "0.875rem",
-    gap: "0.5rem",
+    fontSize: text.sm,
+    gap: spacing.md,
     outline: {
       ":focus": "none",
       default: null,
     },
-    paddingBlock: "0.5rem",
-    paddingInline: "0.75rem",
-    paddingRight: "2rem",
+    paddingBlock: spacing.md,
+    paddingInline: spacing.lg,
     position: "relative",
     userSelect: "none",
   },
@@ -38,31 +46,33 @@ const styles = stylex.create({
     alignItems: "center",
     display: "flex",
     justifyContent: "center",
-    position: "absolute",
-    right: "0.5rem",
+    marginLeft: spacing.md,
   },
-  list: {
-    padding: "0.25rem",
+  itemText: {},
+  list: {},
+  popup: {
+    backgroundColor: colors.grayApp,
+    borderRadius: radii.lg,
+    boxShadow: shadows.md,
   },
-  popup: {},
   trigger: {
     alignItems: "center",
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderColor: {
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
-    color: "inherit",
+    borderWidth: dims.sep,
+    color: colors.inherit,
     cursor: {
       ":disabled": "not-allowed",
       default: "pointer",
     },
     display: "flex",
-    fontSize: "0.875rem",
-    gap: "0.5rem",
+    fontSize: text.base,
+    gap: spacing.lg,
     justifyContent: "space-between",
     outline: {
       ":focus": `2px solid ${colors.accentSolid}`,
@@ -72,19 +82,15 @@ const styles = stylex.create({
       ":focus": "1px",
       default: null,
     },
-    paddingBlock: "0.5rem",
-    paddingInline: "0.75rem",
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+    width: "max-content",
   },
 });
 
 export const SelectBackdrop = Select.Backdrop;
-export const SelectIcon = themed(Select.Icon, styles.icon);
 export const SelectItem = themed(Select.Item, styles.item);
-export const SelectItemIndicator = extensible()(
-  Select.ItemIndicator,
-  styles.itemIndicator,
-);
-export const SelectItemText = Select.ItemText;
+export const SelectItemText = themed(Select.ItemText, styles.itemText);
 export const SelectList = themed(Select.List, styles.list);
 export const SelectPopup = themed(Select.Popup, styles.popup);
 export const SelectPortal = Select.Portal;
@@ -92,3 +98,23 @@ export const SelectPositioner = Select.Positioner;
 export const SelectRoot = Select.Root;
 export const SelectTrigger = extensible()(Select.Trigger, styles.trigger);
 export const SelectValue = Select.Value;
+
+export function SelectIcon(
+  props: Omit<React.ComponentProps<typeof Select.Icon>, "children">,
+) {
+  return (
+    <Select.Icon {...props} {...stylex.props(styles.icon)}>
+      <CaretUpDownIcon />
+    </Select.Icon>
+  );
+}
+
+export function SelectItemIndicator(
+  props: Omit<React.ComponentProps<typeof Select.ItemIndicator>, "children">,
+) {
+  return (
+    <Select.ItemIndicator {...props} {...stylex.props(styles.itemIndicator)}>
+      <CheckIcon />
+    </Select.ItemIndicator>
+  );
+}

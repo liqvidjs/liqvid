@@ -1,34 +1,36 @@
 import * as stylex from "@stylexjs/stylex";
 
-import type { LocalizedString } from "#_/utils/i18n.mjs";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import type { LocalizedString } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   button: {
     alignItems: "center",
     backgroundColor: {
-      ":active:enabled": "light-dark(#d0d0d0, #333)",
-      ":disabled": "light-dark(#f0f0f0, #333)",
-      ":hover:enabled": "light-dark(#fafafa, #444)",
-      default: "light-dark(#f0f0f0, #333)",
+      ":active:enabled": colors.btnBgActive,
+      ":disabled": colors.btnBg,
+      ":hover:enabled": colors.btnBgHover,
+      default: colors.btnBg,
     },
-    borderColor: "light-dark(#ccc, #555)",
-    borderRadius: "4px",
+    borderColor: colors.btnBorder,
+    borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
 
     color: {
-      ":disabled": "light-dark(#aaa, #eee)",
-      default: "light-dark(#333, #fff)",
+      ":disabled": colors.btnColorDisabled,
+      default: colors.btnColor,
     },
+    columnGap: ".25rem",
     cursor: {
       ":disabled": "default",
       default: "pointer",
     },
     display: "flex",
-    fontSize: ".75rem",
-    gap: ".25rem",
-    paddingBlock: ".3em",
-    paddingInline: ".5em",
+    fontSize: text.rem075,
+    paddingBlock: spacing.em03,
+    paddingInline: spacing.em05,
+    rowGap: ".25rem",
     transition: "background-color 0.15s",
   },
 });
@@ -41,6 +43,6 @@ export function Button({
 }) {
   return (
     // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined
-    <button type="button" {...props} {...stylex.props(styles.button)} />
+    <button type="button" {...props} sx={styles.button} />
   );
 }

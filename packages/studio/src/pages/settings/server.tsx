@@ -3,12 +3,8 @@ import * as stylex from "@stylexjs/stylex";
 import { H, Section } from "#_/components/headings.js";
 import { fonts } from "#_/design/styles.js";
 import { breakpoints, colors, spacing, text } from "#_/design/tokens.stylex.js";
-import {
-  getTranslations,
-  interpolated,
-  type Localized,
-  PlainString,
-} from "#_/utils/i18n.mjs";
+import { interpolated, type Localized, PlainString } from "#_/i18n/shared.mjs";
+import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { PublishingConfig } from "./PublishingConfig/server.tsx";
 import { UiConfig } from "./UiConfig/server.tsx";
@@ -29,8 +25,8 @@ export const styles = stylex.create({
 
   main: {
     fontSize: text.base,
-    marginBlock: "0",
-    marginInline: "auto",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
     padding: `${spacing.control} 0`,
     width: {
       default: null,
@@ -43,17 +39,15 @@ export async function Settings() {
   const t = interpolated(await getTranslations<T>(import.meta.url));
 
   return (
-    <main {...stylex.props(styles.main)}>
+    <main sx={styles.main}>
       <Section
         component={
           <header>
             <H>{t.title}</H>
-            <p {...stylex.props(fonts.description)}>
+            <p sx={fonts.description}>
               {t.description({
                 filename: (
-                  <span {...stylex.props(fonts.filename)}>
-                    {PlainString("liqvid.json")}
-                  </span>
+                  <span sx={fonts.filename}>{PlainString("liqvid.json")}</span>
                 ),
               })}
             </p>

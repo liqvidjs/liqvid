@@ -50,16 +50,13 @@ export function FolderItem({
   const id = useId();
 
   return (
-    <div {...stylex.props(styles.folder, nested && styles.nestedFolder)}>
+    <div sx={[styles.folder, nested && styles.nestedFolder]}>
       {/** biome-ignore lint/correctness/noRestrictedElements: different kind of button */}
       <button
         aria-controls={id}
         aria-expanded={expanded}
-        {...stylex.props(
-          styles.folderHeader,
-          nested && styles.nestedFolderHeader,
-        )}
         onClick={() => onToggle(folderPath, !expanded)}
+        sx={[styles.folderHeader, nested && styles.nestedFolderHeader]}
         type="button"
       >
         {expanded ? (
@@ -74,8 +71,8 @@ export function FolderItem({
           />
         )}
         <FolderIcon size={18} {...stylex.props(folderItemStyles.icon)} />
-        <span {...stylex.props(folderItemStyles.name)}>{folderPath}</span>
-        <span {...stylex.props(folderItemStyles.count)}>{totalCount}</span>
+        <span sx={folderItemStyles.name}>{folderPath}</span>
+        <span sx={folderItemStyles.count}>{totalCount}</span>
       </button>
 
       <div hidden={!expanded} id={id}>
@@ -96,7 +93,7 @@ export function FolderItem({
         ))}
         {/* Then render projects in this folder */}
         {folder.projects.length > 0 && (
-          <ul {...stylex.props(styles.projectList, styles.folderProjectList)}>
+          <ul sx={[styles.projectList, styles.folderProjectList]}>
             {folder.projects.map(([key, project]) => (
               <ProjectItem
                 basePath={basePath}

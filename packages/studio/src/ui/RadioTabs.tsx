@@ -6,29 +6,30 @@ import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import type { ReactNode } from "react";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
-import type { LocalizedString } from "#_/utils/i18n.mjs";
+import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import type { LocalizedString } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   radioTabs: {
     backgroundColor: colors.grayUi,
     borderRadius: radii.lg,
+    columnGap: "2px",
     display: "inline-flex",
-    gap: "2px",
-    padding: "3px",
+    padding: spacing.px3,
+    rowGap: "2px",
     width: "max-content",
   },
   radioTabsItem: {
     alignItems: "center",
-    backgroundColor: "transparent",
+    backgroundColor: colors.transparent,
     borderRadius: radii.md,
     borderStyle: "none",
     color: colors.grayDim,
     cursor: "pointer",
     display: "flex",
     justifyContent: "center",
-    paddingBlock: "6px",
-    paddingInline: "10px",
+    paddingBlock: spacing.px6,
+    paddingInline: spacing.px10,
     transition: "background-color 0.15s, color 0.15s",
   },
   radioTabsItemChecked: {

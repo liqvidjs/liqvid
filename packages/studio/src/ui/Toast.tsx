@@ -4,7 +4,14 @@ import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffect, useRef } from "react";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  radii,
+  shadows,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 
 const ICON_SIZE = "24px";
 const ICON_OFFSET = "8px";
@@ -12,41 +19,40 @@ const ICON_OFFSET = "8px";
 const styles = stylex.create({
   header: {
     color: colors.grayNormal,
-    fontFamily: '"Inter", sans-serif',
-    fontSize: "16px",
+    fontFamily: typeface.inter,
+    fontSize: text.md,
     fontWeight: 500,
-    gridColumnEnd: 'header',
-    gridColumnStart: 'header',
-    gridRowEnd: 'header',
-    gridRowStart: 'header',
+    gridColumnEnd: "header",
+    gridColumnStart: "header",
+    gridRowEnd: "header",
+    gridRowStart: "header",
     lineHeight: ICON_SIZE,
   },
   icon: {
-    gridColumnEnd: 'icon',
-    gridColumnStart: 'icon',
-    gridRowEnd: 'icon',
-    gridRowStart: 'icon',
+    gridColumnEnd: "icon",
+    gridColumnStart: "icon",
+    gridRowEnd: "icon",
+    gridRowStart: "icon",
     height: ICON_SIZE,
     width: ICON_SIZE,
   },
   message: {
     color: colors.grayDim,
-    gridColumnEnd: 'message',
-    gridColumnStart: 'message',
-    gridRowEnd: 'message',
-    gridRowStart: 'message',
+    gridColumnEnd: "message",
+    gridColumnStart: "message",
+    gridRowEnd: "message",
+    gridRowStart: "message",
   },
   toast: {
     backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
     borderRadius: radii.xl,
-    boxShadow:
-      "0px 1px 2px 0px light-dark(#00000026, #33333326), 0px 3px 7px 0px light-dark(#00000040, #33333340)",
-    color: "light-dark(#000, #fff)",
+    boxShadow: shadows.toast,
+    color: colors.foregroundAuto,
     display: "grid",
-    fontSize: "14px",
+    fontSize: text.sm,
     gridTemplate: `"icon header" "icon message" / calc(${ICON_SIZE} + ${ICON_OFFSET}) auto auto`,
-    padding: "8px",
+    padding: spacing.lg,
     position: "relative",
     transitionDuration: "150ms",
     transitionProperty: "background-color, color",
@@ -86,10 +92,10 @@ export function Toast({
   const icon = icons[toastType];
 
   return (
-    <aside {...stylex.props(styles.toast)} ref={combineRefs(ref, elt)}>
-      <div {...stylex.props(styles.icon)}>{icon}</div>
-      <header {...stylex.props(styles.header)}>{title}</header>
-      {message && <div {...stylex.props(styles.message)}>{message}</div>}
+    <aside ref={combineRefs(ref, elt)}>
+      <div sx={styles.icon}>{icon}</div>
+      <header sx={styles.header}>{title}</header>
+      {message && <div sx={styles.message}>{message}</div>}
     </aside>
   );
 }

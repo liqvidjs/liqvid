@@ -12,7 +12,8 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useMemo, useState } from "react";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import {
   DialogBackdrop,
   DialogClose,
@@ -23,7 +24,6 @@ import {
   DialogTrigger,
 } from "#_/ui/Dialog.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
@@ -59,7 +59,7 @@ const rebuildButton = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     cursor: {
       ":disabled": "not-allowed",
@@ -68,8 +68,8 @@ const rebuildButton = stylex.create({
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: "0.5rem",
-    paddingInline: "1rem",
+    paddingBlock: spacing.rem05,
+    paddingInline: spacing.rem1,
     transition: "background-color 0.15s",
   },
 });

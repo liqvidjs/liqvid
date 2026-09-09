@@ -1,25 +1,25 @@
 "use client";
 
-import {
-  CaretUpDownIcon,
-  CheckIcon,
-  FloppyDiskIcon,
-  SpinnerIcon,
-} from "@phosphor-icons/react";
+import { CheckIcon, FloppyDiskIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { Spinner } from "#_/components/Spinner.js";
 import { Description, fonts } from "#_/design/styles.js";
 import {
   breakpoints,
   colors,
+  dims,
   radii,
+  shadows,
   spacing,
   text,
 } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
+import { interpolated, PlainString } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 import {
@@ -34,9 +34,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#_/ui/Select.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 
 import { CopyProvider } from "./CopyProvider.tsx";
+import { EnvVarInput } from "./EnvVarInput.tsx";
 import { GitHubPagesProvider } from "./GitHubPagesProvider.tsx";
 import { LiqvidStudioProvider } from "./LiqvidStudioProvider.tsx";
 import { S3Provider } from "./S3Provider.tsx";
@@ -45,11 +45,6 @@ import { SftpProvider } from "./SftpProvider.tsx";
 import type TranslationsJson from "./.translations/en.json";
 
 export type T = Localized<typeof TranslationsJson>;
-
-const settingsSpin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
 
 export const styles = stylex.create({
   check: {
@@ -99,8 +94,8 @@ export const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.xl,
     borderStyle: "solid",
-    borderWidth: "1px",
-    margin: 0,
+    borderWidth: dims.sep,
+    margin: spacing.zero,
     padding: spacing.xl,
   },
 
@@ -115,7 +110,7 @@ export const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     fontSize: text.base,
     maxWidth: "24rem",
@@ -142,9 +137,9 @@ export const styles = stylex.create({
   },
   main: {
     fontSize: text.base,
-    marginBlock: "0",
-    marginInline: "auto",
-    padding: "8px",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
+    padding: spacing.lg,
     width: {
       default: null,
       [breakpoints.desktop]: "48rem",
@@ -166,8 +161,8 @@ export const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.xl,
     borderStyle: "solid",
-    borderWidth: "1px",
-    boxShadow: "0 8px 24px light-dark(#00000026, #00000066)",
+    borderWidth: dims.sep,
+    boxShadow: shadows.dialog,
     display: "flex",
     flexDirection: "column",
     gap: spacing.lg,
@@ -184,7 +179,7 @@ export const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     marginTop: spacing.lg,
     padding: spacing.lg,
   },
@@ -213,7 +208,7 @@ export const styles = stylex.create({
     },
     borderRadius: radii.lg,
     borderStyle: "none",
-    color: "#fff",
+    color: colors.white,
     cursor: {
       ":disabled": "default",
       default: "pointer",
@@ -228,15 +223,6 @@ export const styles = stylex.create({
     padding: `${spacing.md} ${spacing.xl}`,
   },
 
-  spinner: {
-    animationDuration: "0.8s",
-    animationIterationCount: "infinite",
-    animationName: settingsSpin,
-    animationTimingFunction: "linear",
-    color: colors.grayDim,
-    flexShrink: 0,
-  },
-
   trigger: {
     alignItems: "center",
     background: {
@@ -249,7 +235,7 @@ export const styles = stylex.create({
     },
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     color: colors.grayNormal,
     cursor: {
       ":disabled": "default",
@@ -359,6 +345,7 @@ function ConfigForm({
   t: T;
 }) {
   const [draft, setDraft] = useState<SettingsConfig>(initial);
+  const $t = useMemo(() => interpolated(t), [t]);
 
   function patch(next: Partial<SettingsConfig>) {
     setDraft((d) => ({ ...d, ...next }));
@@ -397,19 +384,19 @@ function ConfigForm({
 
   return (
     <form
-      {...stylex.props(styles.configForm)}
       onSubmit={(e) => {
         e.preventDefault();
         onSave(draft);
       }}
+      sx={styles.configForm}
     >
       {/* ---------------------------- backend ---------------------------- */}
       <FieldSet>
         <Legend>{t.backend}</Legend>
-        <p {...stylex.props(fonts.description)}>{t.backendDescription}</p>
+        <p sx={fonts.description}>{t.backendDescription}</p>
 
-        <div {...stylex.props(styles.field)}>
-          <span {...stylex.props(styles.fieldLabel)}>{t.contentBackend}</span>
+        <div sx={styles.field}>
+          <span sx={styles.fieldLabel}>{t.contentBackend}</span>
           <ProviderSelect
             emptyLabel={t.notConfigured}
             onValueChange={(v) => setBackend("content", v)}
@@ -418,8 +405,8 @@ function ConfigForm({
           />
         </div>
 
-        <div {...stylex.props(styles.field)}>
-          <span {...stylex.props(styles.fieldLabel)}>{t.mediaBackend}</span>
+        <div sx={styles.field}>
+          <span sx={styles.fieldLabel}>{t.mediaBackend}</span>
           <ProviderSelect
             emptyLabel={t.notConfigured}
             onValueChange={(v) => setBackend("media", v)}
@@ -432,18 +419,24 @@ function ConfigForm({
       {/* ---------------------------- basePath ---------------------------- */}
       <FieldSet>
         <Legend>{t.basePath}</Legend>
-        <Description>{t.basePathDescription}</Description>
+        <p sx={fonts.description}>
+          {$t.basePathDescription({
+            var: <var sx={fonts.var}>{PlainString("basePath")}</var>,
+          })}
+        </p>
 
-        <input
-          {...stylex.props(styles.input)}
-          onChange={(e) =>
-            patch({
-              basePath: e.target.value === "" ? undefined : e.target.value,
-            })
-          }
+        <EnvVarInput
+          onChange={(v) => patch({ basePath: v === "" ? undefined : v })}
           placeholder="/my-project"
-          type="text"
-          value={draft.basePath ?? ""}
+          t={{
+            envVarEnvFile: t.envVarEnvFile,
+            envVarEnvFileHint: t.envVarEnvFileHint,
+            envVarMode: t.envVarMode,
+            envVarName: t.envVarName,
+            envVarOption: t.envVarOption,
+            valueOption: t.valueOption,
+          }}
+          value={draft.basePath}
         />
       </FieldSet>
 
@@ -452,7 +445,7 @@ function ConfigForm({
         <Legend>{t.media}</Legend>
         <Description>{t.mediaDescription}</Description>
 
-        <label {...stylex.props(styles.checkboxField)}>
+        <label sx={styles.checkboxField}>
           <input
             checked={draft.media?.audio?.multiple ?? false}
             onChange={(e) => {
@@ -499,20 +492,14 @@ function ConfigForm({
         />
       </FieldSet>
 
-      {saveError && (
-        <p {...stylex.props(styles.error)}>{`${t.saveError}: ${saveError}`}</p>
-      )}
+      {saveError && <p sx={styles.error}>{`${t.saveError}: ${saveError}`}</p>}
 
       <Button
         {...stylex.props(styles.saveButton)}
         disabled={saving}
         type="submit"
       >
-        {saving ? (
-          <SpinnerIcon {...stylex.props(styles.spinner)} weight="bold" />
-        ) : (
-          <FloppyDiskIcon weight="bold" />
-        )}
+        {saving ? <Spinner /> : <FloppyDiskIcon weight="bold" />}
         {t.save}
       </Button>
     </form>
@@ -543,11 +530,9 @@ function ProviderSelect({
       onValueChange={(v) => onValueChange(v as string)}
       value={value}
     >
-      <SelectTrigger {...stylex.props(styles.trigger)}>
+      <SelectTrigger>
         <SelectValue>{(v: string) => items[v] ?? emptyLabel}</SelectValue>
-        <SelectIcon>
-          <CaretUpDownIcon />
-        </SelectIcon>
+        <SelectIcon />
       </SelectTrigger>
 
       <SelectPortal>
@@ -556,7 +541,7 @@ function ProviderSelect({
           {...stylex.props(styles.positioner)}
           sideOffset={4}
         >
-          <SelectPopup {...stylex.props(styles.popup)}>
+          <SelectPopup>
             {Object.entries(items).map(([code, label]) => (
               <SelectItem key={code} value={code}>
                 <SelectItemText {...stylex.props(styles.name)}>

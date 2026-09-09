@@ -6,7 +6,6 @@ import { formatTime } from "@liqvid/utils";
 import {
   CameraIcon,
   MoonIcon,
-  SpinnerIcon,
   SunIcon,
   XIcon,
   YinYangIcon,
@@ -17,7 +16,9 @@ import { useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { Spinner } from "#_/components/Spinner.js";
+import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
@@ -27,7 +28,6 @@ import {
   DialogTitle,
 } from "#_/ui/Dialog.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
-import type { Localized } from "#_/utils/i18n.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { form } from "../../root.sx.ts";
@@ -53,7 +53,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
-    borderWidth: "1px",
+    borderWidth: dims.sep,
     maxHeight: "60vh",
     overflow: "hidden",
     position: "relative",
@@ -65,8 +65,8 @@ const styles = stylex.create({
     display: "flex",
     gap: spacing.lg,
     marginTop: spacing.xl,
-    paddingBlock: "0",
-    paddingInline: "0.25rem",
+    paddingBlock: spacing.zero,
+    paddingInline: spacing.rem025,
   },
 });
 
@@ -194,25 +194,21 @@ export function ScreenshotModal({
           );
         })()}
 
-        <div {...stylex.props(styles.previewControls)}>
-          <span {...stylex.props(shareStyles.timeDisplay)}>
-            {formatTime(previewTime)}
-          </span>
+        <div sx={styles.previewControls}>
+          <span sx={shareStyles.timeDisplay}>{formatTime(previewTime)}</span>
           <input
-            {...stylex.props(shareStyles.seekSlider)}
             max={Duration.inSeconds(duration) || 60}
             min={0}
             onChange={(e) => setPreviewTime(e.target.valueAsNumber)}
             step={0.1}
+            sx={shareStyles.seekSlider}
             type="range"
             value={previewTime}
           />
-          <span {...stylex.props(shareStyles.timeDisplay)}>
-            {formatTime(duration)}
-          </span>
+          <span sx={shareStyles.timeDisplay}>{formatTime(duration)}</span>
         </div>
 
-        <div {...stylex.props(form.formField)}>
+        <div sx={form.formField}>
           <span id="color-scheme-label">{t.colorScheme.label}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby="color-scheme-label"
@@ -237,7 +233,7 @@ export function ScreenshotModal({
           </RadioTabs>
         </div>
 
-        <div {...stylex.props(form.dialogActions)}>
+        <div sx={form.dialogActions}>
           <Button
             className={stylex.props(form.submitButton).className}
             disabled={isCapturing}
@@ -246,8 +242,7 @@ export function ScreenshotModal({
           >
             {isCapturing ? (
               <>
-                <SpinnerIcon {...stylex.props(shareStyles.spinner)} size={16} />{" "}
-                {t.inProgress}
+                <Spinner size={16} /> {t.inProgress}
               </>
             ) : (
               <>
