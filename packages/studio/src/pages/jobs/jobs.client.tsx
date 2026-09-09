@@ -46,8 +46,8 @@ export const styles = stylex.create({
     bottom: "1em",
     boxShadow: `0 0 0 1px ${colors.graySep}`,
     display: "flex",
-    fontSize: text.em07,
-    padding: spacing.em04,
+    fontSize: text.md,
+    padding: spacing.sm,
     position: "fixed",
     right: "1em",
     verticalAlign: "top",
@@ -65,7 +65,7 @@ export const styles = stylex.create({
     alignItems: "center",
     display: "flex",
     gap: spacing.xs,
-    marginBlock: spacing.em1,
+    marginBlock: spacing.sm,
     marginInline: spacing.zero,
   },
 
@@ -114,14 +114,14 @@ export const styles = stylex.create({
   },
 
   job: {
-    marginBlock: spacing.em1,
+    marginBlock: spacing.sm,
     marginInline: spacing.zero,
   },
 
   log: {
     backgroundColor: colors.grayApp,
-    paddingBlock: spacing.em01,
-    paddingInline: spacing.em02,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
     position: "relative",
     scrollbarWidth: "thin",
     width: "100%",
@@ -182,7 +182,7 @@ export const styles = stylex.create({
     borderWidth: dims.sep,
     color: colors.grayDim,
     flexShrink: 0,
-    fontSize: text.em06,
+    fontSize: text.md,
     opacity: 0,
     paddingBlock: spacing.xs,
     paddingInline: spacing.md,

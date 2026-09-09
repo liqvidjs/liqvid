@@ -30,7 +30,6 @@ import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { getDefaultParams, ParameterSelector } from "./ParameterSelector.tsx";
 import { RendersSection } from "./renders/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
-import { shareStyles } from "./share.sx.ts";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
@@ -50,7 +49,7 @@ interface ShareButtonProps {
   selectedRootParams: Readonly<Record<string, string>>;
 }
 
-const rebuildButton = stylex.create({
+const styles = stylex.create({
   base: {
     backgroundColor: {
       ":hover:not(:disabled)": colors.grayHover,
@@ -68,9 +67,12 @@ const rebuildButton = stylex.create({
     opacity: {
       ":disabled": 0.6,
     },
-    paddingBlock: spacing.rem05,
-    paddingInline: spacing.rem1,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
     transition: "background-color 0.15s",
+  },
+  shareDialog: {
+    maxWidth: "36rem",
   },
 });
 
@@ -155,7 +157,7 @@ export function MediaButton({
   return (
     <DialogRoot>
       <DialogTrigger
-        {...stylex.props(rebuildButton.base)}
+        {...stylex.props(styles.base)}
         title={t.trigger}
         type="button"
       >
@@ -165,7 +167,7 @@ export function MediaButton({
         <DialogBackdrop />
         <DialogPopup
           aria-describedby={undefined}
-          {...stylex.props(shareStyles.shareDialog)}
+          {...stylex.props(styles.shareDialog)}
           size="large"
         >
           <DialogTitle>{t.title}</DialogTitle>

@@ -5,11 +5,10 @@ import { CodeIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
+import { colors } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { useTranslations } from "#_/utils/react.js";
-
-import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -20,6 +19,19 @@ interface EmbedButtonProps {
   productionServerPort: number;
   project: Pick<ProjectMeta, "aspectRatio" | "path">;
 }
+
+const styles = stylex.create({
+  productionLink: {
+    color: {
+      ":hover": colors.grayNormal,
+      default: colors.grayDim,
+    },
+    marginLeft: "auto",
+    textAlign: "right",
+    textDecoration: "none",
+    width: "min-content",
+  },
+});
 
 export function EmbedButton({
   basePath,
@@ -39,7 +51,7 @@ export function EmbedButton({
 
   return (
     <Button
-      {...stylex.props(shareStyles.productionLink)}
+      {...stylex.props(styles.productionLink)}
       onClick={handleClick}
       title={t.copyEmbedCode}
     >

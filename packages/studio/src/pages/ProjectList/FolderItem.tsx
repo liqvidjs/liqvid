@@ -7,17 +7,83 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useId } from "react";
 
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+
 import { ProjectItem } from "./ProjectItem.tsx";
-import {
-  folderItemStyles,
-  projectListStyles as styles,
-} from "./projectList.sx.ts";
 
 export type FolderNode = {
   name: string;
   projects: Array<[string, ProjectMeta]>;
   subfolders: Map<string, FolderNode>;
 };
+
+const styles = stylex.create({
+  chevron: {
+    color: colors.grayDim,
+    flexShrink: 0,
+  },
+  count: {
+    backgroundColor: colors.graySep,
+    borderRadius: radii.circle,
+    color: colors.grayDim,
+    fontSize: text.sm,
+    fontWeight: 500,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+  },
+  folder: {
+    borderColor: colors.folderBorder,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    overflow: "hidden",
+  },
+  folderHeader: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.folderHeaderBgHover,
+      default: colors.folderHeaderBg,
+    },
+    borderStyle: "none",
+    cursor: "pointer",
+    display: "flex",
+    fontWeight: 500,
+    gap: spacing.md,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    textAlign: "left",
+    transition: "background-color 0.15s",
+    width: "100%",
+  },
+  folderProjectList: {
+    borderTopColor: "light-dark(#e5e7eb, #374151)",
+    borderTopStyle: "solid",
+    borderTopWidth: "1px",
+  },
+  icon: {
+    color: colors.accentSolid,
+    fill: colors.accentSolid,
+    flexShrink: 0,
+  },
+  name: {
+    flex: "1",
+  },
+  nestedFolder: {
+    borderRadius: radii.none,
+    borderStyle: "none",
+  },
+  nestedFolderHeader: {
+    backgroundColor: {
+      ":hover": colors.nestedFolderHeaderBg,
+      default: colors.transparent,
+    },
+  },
+  projectList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.xl,
+  },
+});
 
 /** @package */
 export function FolderItem({
@@ -60,19 +126,13 @@ export function FolderItem({
         type="button"
       >
         {expanded ? (
-          <CaretDownIcon
-            size={16}
-            {...stylex.props(folderItemStyles.chevron)}
-          />
+          <CaretDownIcon size={16} {...stylex.props(styles.chevron)} />
         ) : (
-          <CaretRightIcon
-            size={16}
-            {...stylex.props(folderItemStyles.chevron)}
-          />
+          <CaretRightIcon size={16} {...stylex.props(styles.chevron)} />
         )}
-        <FolderIcon size={18} {...stylex.props(folderItemStyles.icon)} />
-        <span sx={folderItemStyles.name}>{folderPath}</span>
-        <span sx={folderItemStyles.count}>{totalCount}</span>
+        <FolderIcon size={18} {...stylex.props(styles.icon)} />
+        <span sx={styles.name}>{folderPath}</span>
+        <span sx={styles.count}>{totalCount}</span>
       </button>
 
       <div hidden={!expanded} id={id}>

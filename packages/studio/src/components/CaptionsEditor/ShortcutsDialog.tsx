@@ -3,7 +3,14 @@
 import * as stylex from "@stylexjs/stylex";
 import { Fragment } from "react";
 
-import { spacing } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -19,11 +26,65 @@ import {
   type Shortcuts,
   shortcutList,
 } from "./shortcuts.ts";
-import { styles } from "./shortcutsDialog.sx.ts";
 
 import type Translations from "./.translations/en.json";
 
 type T = Localized<typeof Translations>;
+
+const styles = stylex.create({
+  evenRow: {
+    background: colors.graySubtle,
+  },
+
+  kbd: {
+    background: colors.graySubtle,
+    borderBottomWidth: "2px",
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    display: "inline-block",
+    fontFamily: typeface.uiMono,
+    fontSize: text.md,
+    lineHeight: 1.4,
+    minWidth: "1.2em",
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+    textAlign: "center",
+  },
+
+  keys: {
+    textAlign: "right",
+    whiteSpace: "nowrap",
+  },
+
+  plus: {
+    color: colors.grayDim,
+  },
+
+  table: {
+    borderCollapse: "collapse",
+    fontSize: text.md,
+    width: "100%",
+  },
+
+  td: {
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+    textAlign: "left",
+  },
+
+  th: {
+    borderBottomColor: colors.graySep,
+    borderBottomStyle: "solid",
+    borderBottomWidth: "1px",
+    fontWeight: 600,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+    textAlign: "left",
+  },
+});
 
 const sxStyles = stylex.create({
   closeButton: {

@@ -431,16 +431,15 @@ export const dims = stylex.defineConsts({
   sep: "1px",
 });
 
+// biome-ignore assist/source/useSortedKeys: ascending
 export const radii = stylex.defineConsts({
-  circle: "50%",
-  full: "100%",
-  lg: "6px",
-  md: "4px",
   none: "0",
-  pill: "9999px",
   sm: "2px",
+  md: "4px",
+  lg: "6px",
   xl: "8px",
-  xs: "3px",
+  max: "9999px",
+  circle: "100%",
 });
 
 export const shadows = stylex.defineConsts({
@@ -454,79 +453,31 @@ export const shadows = stylex.defineConsts({
   xxl: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
 });
 
+// biome-ignore assist/source/useSortedKeys: ascending
 export const spacing = stylex.defineConsts({
   auto: "auto",
-  control: "32px",
-  em1: "1em",
-
-  /** em-based spacing for fluid/relative contexts */
-  em01: "0.1em",
-  em02: "0.2em",
-  em03: "0.3em",
-  em04: "0.4em",
-  em05: "0.5em",
-  em08: "0.8em",
-  em045: "0.45em",
-  huge: "24px",
-  lg: "8px",
-  md: "4px",
   negMd: "-4px",
   negXs: "-1px",
-  px3: "3px",
-  px6: "6px",
-  px10: "10px",
-  px12: "12px",
-  rem1: "1rem",
-  rem2: "2rem",
-  rem04: "0.4rem",
-  rem05: "0.5rem",
-  rem06: "0.6rem",
-  rem15: "1.5rem",
-  rem25: "2.5rem",
-  rem025: "0.25rem",
-  rem075: "0.75rem",
-
-  /** rem-based spacing */
-  rem0125: "0.125rem",
-  rem0375: "0.375rem",
-  rem0625: "0.625rem",
-  sm: "2px",
-  xl: "16px",
-  xs: "1px",
   zero: "0",
+  xs: "1px",
+  sm: "2px",
+  md: "4px",
+  lg: "8px",
+  xl: "16px",
+  huge: "24px",
+  control: "32px",
 });
 
+// biome-ignore assist/source/useSortedKeys: ascending order
 export const text = stylex.defineConsts({
-  base: "16px",
-
-  /** em-based font sizes (relative to parent) */
-  em06: "0.6em",
-  em07: "0.7em",
-  em08: "0.8em",
-  em085: "0.85em",
-  huge: "80px",
-  lg: "24px",
-  md: "16px",
-  mega: "100px",
-
-  /** pixel-based additional sizes */
-  px12: "12px",
-  px16: "16px",
-  rem1: "1rem",
-  rem075: "0.75rem",
-  rem125: "1.25rem",
-
-  /** rem-based font sizes */
-  rem0625: "0.625rem",
-  rem0875: "0.875rem",
-
-  /** rem-based additional sizes */
-  rem1125: "1.125rem",
-  rem06875: "0.6875rem",
-  rem08125: "0.8125rem",
-  sm: "14px",
-  xl: "60px",
   xs: "10px",
+  sm: "14px",
+  md: "16px",
+  base: "18px",
+  lg: "24px",
+  xl: "60px",
+  huge: "80px",
+  mega: "100px",
 });
 
 export const typeface = stylex.defineConsts({

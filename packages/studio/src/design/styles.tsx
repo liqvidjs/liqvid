@@ -28,7 +28,7 @@ export const fonts = stylex.create({
   var: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.xs,
+    borderRadius: radii.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontFamily: typeface.mono,

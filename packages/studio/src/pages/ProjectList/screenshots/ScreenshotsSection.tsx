@@ -34,9 +34,6 @@ import {
 import { Time } from "#_/ui/Time.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import { form } from "../../root.sx.ts";
-import { shareStyles } from "../share.sx.ts";
-
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
 import type TranslationsJson from "../.translations/en.json";
@@ -47,20 +44,132 @@ const styles = stylex.create({
     flexShrink: 0,
     gap: spacing.sm,
   },
+  addButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": colors.graySubtle,
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: {
+      ":disabled": colors.grayDim,
+      default: colors.grayNormal,
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  confirmMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    lineHeight: 1.5,
+    marginBlock: spacing.xl,
+    marginInline: spacing.zero,
+  },
+  copyButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.copyBtnBgHover,
+      default: colors.copyBtnBg,
+    },
+    borderColor: colors.copyBtnBorder,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.copyBtnColor,
+    cursor: "pointer",
+    display: "flex",
+    fontSize: text.sm,
+    fontWeight: 500,
+    gap: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+    transition: "background-color 0.15s",
+  },
   created: {
     color: colors.grayDim,
-    fontSize: text.rem0625,
+    fontSize: text.sm,
+  },
+  deleteButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.deleteBtnBgHover,
+      default: colors.errorSubtle,
+    },
+    borderColor: colors.deleteBtnBorder,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.errorText,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  deleteConfirmButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.errorSolidHover,
+      default: colors.errorSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: "pointer",
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
+  },
+  dialogActions: {
+    columnGap: "0.75rem",
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "0.5rem",
+    rowGap: "0.75rem",
   },
   dimensions: {
     color: colors.grayDim,
-    fontSize: text.rem0625,
+    fontSize: text.sm,
+  },
+  emptyMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    padding: spacing.xl,
+    textAlign: "center",
+  },
+  fieldError: {
+    color: colors.errorText,
+    fontSize: text.md,
   },
   filename: {
     backgroundColor: colors.graySubtle,
-    borderRadius: radii.xs,
-    fontSize: text.rem08125,
-    paddingBlock: spacing.rem0125,
-    paddingInline: spacing.rem0375,
+    borderRadius: radii.sm,
+    fontSize: text.md,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+  },
+  formField: {
+    columnGap: "0.375rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "0.375rem",
   },
   iconButton: {
     alignItems: "center",
@@ -108,11 +217,52 @@ const styles = stylex.create({
     overflowY: "auto",
     padding: spacing.zero,
   },
+  loading: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.xl,
+  },
   previewImage: {
     borderRadius: radii.md,
     display: "block",
     height: "auto",
     width: "100%",
+  },
+  section: {
+    marginTop: spacing.xl,
+  },
+  sectionActions: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+    justifyContent: "flex-end",
+    marginBottom: spacing.lg,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.accentSolidHover,
+      default: colors.accentSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
   },
   thumbnail: {
     borderRadius: radii.md,
@@ -136,7 +286,7 @@ const styles = stylex.create({
     padding: spacing.zero,
   },
   title: {
-    fontSize: text.em08,
+    fontSize: text.md,
   },
 });
 
@@ -285,7 +435,7 @@ function ScreenshotItem({
       </div>
       <div sx={styles.actions}>
         <Button
-          {...stylex.props(shareStyles.copyButton)}
+          {...stylex.props(styles.copyButton)}
           onClick={() => handleCopyAs("opengraph-image.png")}
           title={t.useOpenGraph}
         >
@@ -293,7 +443,7 @@ function ScreenshotItem({
           {" OG"}
         </Button>
         <Button
-          {...stylex.props(shareStyles.copyButton)}
+          {...stylex.props(styles.copyButton)}
           onClick={() => handleCopyAs("twitter-image.png")}
           title={t.useTwitter}
         >
@@ -317,7 +467,7 @@ function ScreenshotItem({
               <PencilSimpleIcon size={14} />
             </Button>
             <Button
-              {...stylex.props(shareStyles.deleteButton)}
+              {...stylex.props(styles.deleteButton)}
               onClick={() => onDelete(screenshot.id)}
               title={t.delete}
             >
@@ -400,10 +550,10 @@ export function ScreenshotsSection({
 
   return (
     <>
-      <div sx={shareStyles.section}>
+      <div sx={styles.section}>
         <DialogRoot>
-          <div sx={shareStyles.sectionActions}>
-            <DialogTrigger {...stylex.props(shareStyles.addButton)}>
+          <div sx={styles.sectionActions}>
+            <DialogTrigger {...stylex.props(styles.addButton)}>
               <PlusIcon size={16} /> {t.trigger}
             </DialogTrigger>
           </div>
@@ -418,11 +568,11 @@ export function ScreenshotsSection({
         </DialogRoot>
 
         {isLoading ? (
-          <div sx={shareStyles.loading}>
+          <div sx={styles.loading}>
             <Spinner size={24} />
           </div>
         ) : screenshots.length === 0 ? (
-          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
+          <p sx={styles.emptyMessage}>{t.empty}</p>
         ) : (
           <ul sx={styles.list}>
             {screenshots.map((screenshot) => {
@@ -530,15 +680,15 @@ function ConfirmationDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p sx={shareStyles.confirmMessage}>
+        <p sx={styles.confirmMessage}>
           {t.message({
             filename: <code sx={styles.filename}>{confirmDialog?.target}</code>,
           })}
         </p>
-        <div sx={form.dialogActions}>
+        <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            className={stylex.props(form.submitButton).className}
+            className={stylex.props(styles.submitButton).className}
             onClick={() => {
               if (confirmDialog) {
                 copyScreenshot(
@@ -616,7 +766,7 @@ function RenameDialog({
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
-      <div sx={form.formField}>
+      <div sx={styles.formField}>
         <label htmlFor={id}>{t.newName}</label>
         <input
           id={id}
@@ -631,12 +781,12 @@ function RenameDialog({
           }}
           value={renameValue}
         />
-        {renameError && <span sx={form.fieldError}>{renameError}</span>}
+        {renameError && <span sx={styles.fieldError}>{renameError}</span>}
       </div>
-      <div sx={form.dialogActions}>
+      <div sx={styles.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
-          className={stylex.props(form.submitButton).className}
+          className={stylex.props(styles.submitButton).className}
           onClick={() => performRename()}
         >
           {t.action}
@@ -688,11 +838,11 @@ function DeleteDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p sx={shareStyles.confirmMessage}>{t.confirm}</p>
-        <div sx={form.dialogActions}>
+        <p sx={styles.confirmMessage}>{t.confirm}</p>
+        <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            {...stylex.props(shareStyles.deleteConfirmButton)}
+            {...stylex.props(styles.deleteConfirmButton)}
             onClick={() => performDelete()}
           >
             {t.action}

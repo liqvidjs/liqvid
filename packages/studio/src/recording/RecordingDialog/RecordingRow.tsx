@@ -43,7 +43,7 @@ const styles = stylex.create({
     columnGap: "8px",
     display: "flex",
     paddingBlock: spacing.lg,
-    paddingInline: spacing.px12,
+    paddingInline: spacing.lg,
     rowGap: "8px",
   },
 
@@ -90,7 +90,7 @@ const styles = stylex.create({
     columnGap: "4px",
     cursor: "pointer",
     display: "inline-flex",
-    fontSize: text.px12,
+    fontSize: text.sm,
     padding: `${spacing.md} ${spacing.lg}`,
     rowGap: "4px",
   },

@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { RenderEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized, PlainString } from "#_/i18n/shared.mjs";
 import { openRenderInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
@@ -39,11 +40,6 @@ import {
 } from "#_/ui/Dialog.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
-
-import { form } from "../../root.sx.ts";
-import { shareStyles } from "../share.sx.ts";
-
-import { rendersStyles as styles } from "./renders.sx.ts";
 
 import type TranslationsJson from "../.translations/en.json";
 
@@ -61,6 +57,341 @@ interface RenderConfig {
   height: number;
   width: number;
 }
+
+const styles = stylex.create({
+  addButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": colors.graySubtle,
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: {
+      ":disabled": colors.grayDim,
+      default: colors.grayNormal,
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  closeButton: {
+    backgroundColor: colors.transparent,
+    borderStyle: "none",
+    color: {
+      ":hover": colors.grayNormal,
+      default: colors.grayDim,
+    },
+    cursor: "pointer",
+    padding: spacing.md,
+  },
+  confirmMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    lineHeight: 1.5,
+    marginBlock: spacing.xl,
+    marginInline: spacing.zero,
+  },
+  deleteButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.deleteBtnBgHover,
+      default: colors.errorSubtle,
+    },
+    borderColor: colors.deleteBtnBorder,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.errorText,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  deleteConfirmButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.errorSolidHover,
+      default: colors.errorSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: "pointer",
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
+  },
+  dialogActions: {
+    columnGap: "0.75rem",
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "0.5rem",
+    rowGap: "0.75rem",
+  },
+  dimensionInput: {
+    backgroundColor: colors.grayApp,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    fontSize: text.md,
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    padding: spacing.md,
+    textAlign: "center",
+    width: "5rem",
+  },
+  dimensionInputs: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+  },
+  dimensionSeparator: {
+    color: colors.grayDim,
+    fontSize: text.base,
+  },
+  emptyMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    padding: spacing.xl,
+    textAlign: "center",
+  },
+  formField: {
+    columnGap: "0.375rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "0.375rem",
+  },
+  loading: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.xl,
+  },
+  lockButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+
+    color: colors.grayDim,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
+  },
+  lockButtonActive: {
+    backgroundColor: colors.accentSolid,
+    borderColor: colors.accentSolid,
+    color: colors.white,
+  },
+  presetButton: {
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    cursor: "pointer",
+    fontSize: text.md,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+    transition: "background-color 0.15s, border-color 0.15s",
+  },
+  presetButtonActive: {
+    backgroundColor: colors.accentSolid,
+    borderColor: colors.accentSolid,
+    color: colors.white,
+  },
+  renderActionButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  renderActions: {
+    display: "flex",
+    flexShrink: 0,
+    gap: spacing.sm,
+  },
+  renderDetails: {
+    color: colors.grayDim,
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.lg,
+  },
+  renderHeader: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.lg,
+  },
+  renderInfo: {
+    display: "flex",
+    flex: "1",
+    flexDirection: "column",
+    gap: spacing.xs,
+    minWidth: 0,
+  },
+  renderItem: {
+    alignItems: "center",
+    backgroundColor: colors.grayApp,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    display: "flex",
+    gap: spacing.lg,
+    justifyContent: "space-between",
+    padding: spacing.lg,
+  },
+  renderList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.md,
+    listStyle: "none",
+    margin: spacing.zero,
+    maxHeight: "300px",
+    overflowY: "auto",
+    padding: spacing.zero,
+  },
+  renderName: {
+    color: colors.grayNormal,
+    fontSize: text.md,
+    fontWeight: 500,
+  },
+  renderStatus: {
+    alignItems: "center",
+    color: colors.grayDim,
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+  },
+  resolutionPresets: {
+    display: "flex",
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  section: {
+    marginTop: spacing.xl,
+  },
+  sectionActions: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+    justifyContent: "flex-end",
+    marginBottom: spacing.lg,
+  },
+  statusCompleted: {
+    color: colors.successSolid,
+  },
+  statusFailed: {
+    color: colors.errorSolid,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.accentSolidHover,
+      default: colors.accentSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
+  },
+  textInput: {
+    backgroundColor: colors.grayApp,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    fontSize: text.md,
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+    width: "100%",
+  },
+  videoDialog: {
+    maxWidth: "80vw",
+    width: "auto",
+  },
+  videoHeader: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: spacing.xl,
+  },
+  videoPlayer: {
+    backgroundColor: colors.black,
+    borderRadius: radii.lg,
+    display: "block",
+    maxHeight: "70vh",
+    maxWidth: "100%",
+  },
+});
 
 const DEFAULT_ASPECT_RATIO: AspectRatio = { height: 9, width: 16 };
 
@@ -178,7 +509,7 @@ export function RendersSection({
       case "completed":
         return (
           <CheckCircleIcon
-            {...stylex.props(shareStyles.statusCompleted)}
+            {...stylex.props(styles.statusCompleted)}
             size={16}
             weight="fill"
           />
@@ -186,7 +517,7 @@ export function RendersSection({
       case "failed":
         return (
           <WarningCircleIcon
-            {...stylex.props(shareStyles.statusFailed)}
+            {...stylex.props(styles.statusFailed)}
             size={16}
             weight="fill"
           />
@@ -209,11 +540,11 @@ export function RendersSection({
 
   return (
     <>
-      <div sx={shareStyles.section}>
-        <div sx={shareStyles.sectionActions}>
+      <div sx={styles.section}>
+        <div sx={styles.sectionActions}>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
             <DialogTrigger
-              {...stylex.props(shareStyles.addButton)}
+              {...stylex.props(styles.addButton)}
               disabled={isStarting}
               type="button"
             >
@@ -241,24 +572,24 @@ export function RendersSection({
         </div>
 
         {isLoading && renders.length === 0 ? (
-          <div sx={shareStyles.loading}>
+          <div sx={styles.loading}>
             <Spinner size={24} />
           </div>
         ) : renders.length === 0 ? (
-          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
+          <p sx={styles.emptyMessage}>{t.empty}</p>
         ) : (
-          <ul sx={shareStyles.renderList}>
+          <ul sx={styles.renderList}>
             {renders.map((render) => (
-              <li key={render.id} sx={shareStyles.renderItem}>
-                <div sx={shareStyles.renderInfo}>
-                  <div sx={shareStyles.renderHeader}>
-                    <span sx={shareStyles.renderName}>{render.id}</span>
-                    <span sx={shareStyles.renderStatus}>
+              <li key={render.id} sx={styles.renderItem}>
+                <div sx={styles.renderInfo}>
+                  <div sx={styles.renderHeader}>
+                    <span sx={styles.renderName}>{render.id}</span>
+                    <span sx={styles.renderStatus}>
                       {getStatusIcon(render.meta.status)}
                       {getStatusLabel(render.meta.status)}
                     </span>
                   </div>
-                  <div sx={shareStyles.renderDetails}>
+                  <div sx={styles.renderDetails}>
                     <span>{formatDate(render.meta.createdAt)}</span>
                     <span>
                       {render.meta.width}
@@ -272,18 +603,18 @@ export function RendersSection({
                     <span>{render.meta.colorScheme}</span>
                   </div>
                 </div>
-                <div sx={shareStyles.renderActions}>
+                <div sx={styles.renderActions}>
                   {render.meta.status === "completed" && (
                     <>
                       <Button
-                        {...stylex.props(shareStyles.renderActionButton)}
+                        {...stylex.props(styles.renderActionButton)}
                         onClick={() => setPlayingRender(render)}
                         title={t.play}
                       >
                         <PlayIcon size={16} weight="fill" />
                       </Button>
                       <Button
-                        {...stylex.props(shareStyles.renderActionButton)}
+                        {...stylex.props(styles.renderActionButton)}
                         onClick={() => handleOpenInFinder(render.id)}
                         title={t.openInFinder}
                       >
@@ -292,14 +623,14 @@ export function RendersSection({
                     </>
                   )}
                   <Button
-                    {...stylex.props(shareStyles.renderActionButton)}
+                    {...stylex.props(styles.renderActionButton)}
                     onClick={() => handleStartRename(render)}
                     title={t.rename.trigger}
                   >
                     <PencilSimpleIcon size={16} />
                   </Button>
                   <Button
-                    {...stylex.props(shareStyles.deleteButton)}
+                    {...stylex.props(styles.deleteButton)}
                     onClick={() => setDeleteDialog({ renderId: render.id })}
                     title={t.delete}
                   >
@@ -442,7 +773,7 @@ function ConfigDialog({
       <DialogPopup>
         <DialogTitle>{t.dialog.title}</DialogTitle>
 
-        <div sx={form.formField}>
+        <div sx={styles.formField}>
           <span id="render-color-scheme-label">
             {t.dialog.colorScheme.label}
           </span>
@@ -464,14 +795,14 @@ function ConfigDialog({
           </RadioTabs>
         </div>
 
-        <div sx={form.formField}>
+        <div sx={styles.formField}>
           <span>{t.dialog.resolution}</span>
-          <div sx={shareStyles.resolutionPresets}>
+          <div sx={styles.resolutionPresets}>
             {WIDTH_PRESETS.map((width) => (
               <Button
                 {...stylex.props(
-                  shareStyles.presetButton,
-                  config.width === width && shareStyles.presetButtonActive,
+                  styles.presetButton,
+                  config.width === width && styles.presetButtonActive,
                 )}
                 key={width}
                 onClick={() => handleWidthPreset(width)}
@@ -524,10 +855,10 @@ function ConfigDialog({
           </div>
         </div>
 
-        <div sx={form.dialogActions}>
+        <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            className={stylex.props(form.submitButton).className}
+            className={stylex.props(styles.submitButton).className}
             onClick={handleStartRender}
             type="button"
           >
@@ -590,7 +921,7 @@ function RenameDialog({
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
-      <div sx={form.formField}>
+      <div sx={styles.formField}>
         <label htmlFor="render-name">{t.name}</label>
         <input
           id="render-name"
@@ -601,15 +932,15 @@ function RenameDialog({
             }
           }}
           // autoFocus
-          sx={shareStyles.textInput}
+          sx={styles.textInput}
           type="text"
           value={renameValue}
         />
       </div>
-      <div sx={form.dialogActions}>
+      <div sx={styles.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
-          className={stylex.props(form.submitButton).className}
+          className={stylex.props(styles.submitButton).className}
           disabled={isRenaming || !renameValue.trim()}
           onClick={handleRename}
           type="button"
@@ -669,11 +1000,11 @@ function DeleteDialog({
       <DialogBackdrop />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
-        <p sx={shareStyles.confirmMessage}>{t.confirm}</p>
-        <div sx={form.dialogActions}>
+        <p sx={styles.confirmMessage}>{t.confirm}</p>
+        <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            {...stylex.props(shareStyles.deleteConfirmButton)}
+            {...stylex.props(styles.deleteConfirmButton)}
             onClick={() => performDelete()}
           >
             {t.action}
@@ -703,7 +1034,7 @@ function VideoPlayerDialog({
           <DialogTitle>
             {playingRender?.id as PlainString | undefined}
           </DialogTitle>
-          <DialogClose {...stylex.props(shareStyles.closeButton)}>
+          <DialogClose {...stylex.props(styles.closeButton)}>
             <XIcon size={20} />
           </DialogClose>
         </div>

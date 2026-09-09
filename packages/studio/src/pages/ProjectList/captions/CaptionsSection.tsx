@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { AudioEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -22,9 +23,6 @@ import {
 } from "#_/ui/Dialog.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import { form } from "../../root.sx.ts";
-import { shareStyles } from "../share.sx.ts";
-
 import { CaptionRow } from "./CaptionsRow.tsx";
 
 import type TranslationsJson from "../.translations/en.json";
@@ -35,6 +33,124 @@ interface CaptionsSectionProps {
   /** Selected parameter values for parameterized projects */
   selectedParams?: Readonly<Record<string, string>>;
 }
+
+const styles = stylex.create({
+  addButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": colors.graySubtle,
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: {
+      ":disabled": colors.grayDim,
+      default: colors.grayNormal,
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  dialogActions: {
+    columnGap: "0.75rem",
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "0.5rem",
+    rowGap: "0.75rem",
+  },
+  emptyMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    padding: spacing.xl,
+    textAlign: "center",
+  },
+  formField: {
+    columnGap: "0.375rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "0.375rem",
+  },
+  loading: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.xl,
+  },
+  renderList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.md,
+    listStyle: "none",
+    margin: spacing.zero,
+    maxHeight: "300px",
+    overflowY: "auto",
+    padding: spacing.zero,
+  },
+  section: {
+    marginTop: spacing.xl,
+  },
+  sectionActions: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+    justifyContent: "flex-end",
+    marginBottom: spacing.lg,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.accentSolidHover,
+      default: colors.accentSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
+  },
+  textInput: {
+    backgroundColor: colors.grayApp,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    fontSize: text.md,
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+    width: "100%",
+  },
+});
 
 export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   // const { hasCaptioningConfigured } = useDerivedConfig();
@@ -155,10 +271,10 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
   return (
     <>
-      <div sx={shareStyles.section}>
-        <div sx={shareStyles.sectionActions}>
+      <div sx={styles.section}>
+        <div sx={styles.sectionActions}>
           <Button
-            {...stylex.props(shareStyles.addButton)}
+            {...stylex.props(styles.addButton)}
             disabled={isGeneratingAudio}
             onClick={handleGenerateAudio}
             type="button"
@@ -176,13 +292,13 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
         </div>
 
         {isLoading && audio.length === 0 ? (
-          <div sx={shareStyles.loading}>
+          <div sx={styles.loading}>
             <Spinner size={24} />
           </div>
         ) : audio.length === 0 ? (
-          <p sx={shareStyles.emptyMessage}>{t.empty}</p>
+          <p sx={styles.emptyMessage}>{t.empty}</p>
         ) : (
-          <ul sx={shareStyles.renderList}>
+          <ul sx={styles.renderList}>
             {audio.map((entry) => (
               <CaptionRow
                 entry={entry}
@@ -206,7 +322,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
           <DialogBackdrop />
           <DialogPopup>
             <DialogTitle>{t.rename.title}</DialogTitle>
-            <div sx={form.formField}>
+            <div sx={styles.formField}>
               <label htmlFor="audio-name">{t.rename.name}</label>
               <input
                 id="audio-name"
@@ -216,15 +332,15 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
                     handleRename();
                   }
                 }}
-                sx={shareStyles.textInput}
+                sx={styles.textInput}
                 type="text"
                 value={renameValue}
               />
             </div>
-            <div sx={form.dialogActions}>
+            <div sx={styles.dialogActions}>
               <DialogClose>{c.cancel}</DialogClose>
               <Button
-                className={stylex.props(form.submitButton).className}
+                className={stylex.props(styles.submitButton).className}
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
                 type="button"

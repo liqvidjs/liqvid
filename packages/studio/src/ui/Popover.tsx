@@ -25,7 +25,7 @@ const styles = stylex.create({
     boxShadow: shadows.xl,
     minWidth: "12rem",
     outline: "none",
-    padding: spacing.rem025,
+    padding: spacing.md,
   },
   positioner: {
     outline: "none",
@@ -44,7 +44,7 @@ const styles = stylex.create({
     columnGap: "0.5rem",
     cursor: "pointer",
     display: "flex",
-    fontSize: text.rem075,
+    fontSize: text.md,
     outline: {
       ":focus": `2px solid ${colors.accentSolid}`,
       default: null,
@@ -53,8 +53,8 @@ const styles = stylex.create({
       ":focus": "1px",
       default: null,
     },
-    paddingBlock: spacing.em03,
-    paddingInline: spacing.em05,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
     rowGap: "0.5rem",
   },
 });

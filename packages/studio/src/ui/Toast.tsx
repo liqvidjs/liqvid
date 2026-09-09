@@ -4,17 +4,9 @@ import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffect, useRef } from "react";
 
-import {
-  colors,
-  radii,
-  shadows,
-  spacing,
-  text,
-  typeface,
-} from "#_/design/tokens.stylex.js";
+import { colors, text, typeface } from "#_/design/tokens.stylex.js";
 
 const ICON_SIZE = "24px";
-const ICON_OFFSET = "8px";
 
 const styles = stylex.create({
   header: {
@@ -42,21 +34,6 @@ const styles = stylex.create({
     gridColumnStart: "message",
     gridRowEnd: "message",
     gridRowStart: "message",
-  },
-  toast: {
-    backgroundColor: colors.grayApp,
-    borderColor: colors.graySep,
-    borderRadius: radii.xl,
-    boxShadow: shadows.toast,
-    color: colors.foregroundAuto,
-    display: "grid",
-    fontSize: text.sm,
-    gridTemplate: `"icon header" "icon message" / calc(${ICON_SIZE} + ${ICON_OFFSET}) auto auto`,
-    padding: spacing.lg,
-    position: "relative",
-    transitionDuration: "150ms",
-    transitionProperty: "background-color, color",
-    width: "300px",
   },
 });
 

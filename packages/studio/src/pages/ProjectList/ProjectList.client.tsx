@@ -7,12 +7,14 @@ import type {
   SerializedProjectMeta,
 } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
+import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Switch } from "#_/ui/Switch.js";
 import { TranslationProvider } from "#_/utils/react.js";
@@ -23,11 +25,36 @@ import {
   RootParameterSelector,
 } from "./ParameterSelector.tsx";
 import { ProjectItem } from "./ProjectItem.tsx";
-import { projectListStyles as styles } from "./projectList.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
+
+const styles = stylex.create({
+  folderList: {
+    columnGap: "10rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "10rem",
+  },
+  projectList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.xl,
+  },
+  toggleLabel: {
+    alignItems: "center",
+    cursor: "pointer",
+    display: "flex",
+    gap: spacing.md,
+    userSelect: "none",
+  },
+  viewToggle: {
+    alignItems: "center",
+    display: "flex",
+    marginBottom: spacing.xl,
+  },
+});
 
 export type ProjectListProps = {
   basePath: string;

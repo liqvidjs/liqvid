@@ -115,7 +115,7 @@ const envStyles = stylex.create({
 
   radioIndicator: {
     backgroundColor: colors.accentSolid,
-    borderRadius: radii.circle,
+    borderRadius: radii.full,
     height: "0.5rem",
     width: "0.5rem",
   },
@@ -139,7 +139,7 @@ const envStyles = stylex.create({
     borderColor: {
       default: colors.graySep,
     },
-    borderRadius: radii.circle,
+    borderRadius: radii.full,
     borderStyle: "solid",
     borderWidth: "2px",
     cursor: "pointer",

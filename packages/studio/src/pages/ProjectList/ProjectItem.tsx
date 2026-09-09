@@ -7,13 +7,59 @@ import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
 import * as stylex from "@stylexjs/stylex";
 
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import { TimeDuration } from "#_/ui/Time.js";
 
 import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
-import { projectListStyles as styles } from "./projectList.sx.ts";
+
+const styles = stylex.create({
+  actions: {
+    alignItems: "center",
+    columnGap: "0.2em",
+    display: "flex",
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+  },
+  duration: {
+    backgroundColor: colors.overlayDark,
+    borderBottomLeftRadius: "0",
+    borderBottomRightRadius: "0",
+    borderTopLeftRadius: "2px",
+    borderTopRightRadius: "0",
+    bottom: 0,
+    color: colors.white,
+    fontSize: text.xs,
+    lineHeight: 1,
+    padding: spacing.md,
+    position: "absolute",
+    right: 0,
+  },
+  listItem: {
+    alignItems: "center",
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    display: "flex",
+  },
+  listItemLink: {
+    alignItems: "center",
+    display: "flex",
+    flex: "1",
+    gap: spacing.xl,
+    padding: spacing.md,
+  },
+  thumbnail: {
+    borderRadius: radii.md,
+    display: "flex",
+    position: "relative",
+    width: "9rem",
+  },
+});
 
 /** @package */
 export function ProjectItem({

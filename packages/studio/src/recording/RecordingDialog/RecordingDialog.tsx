@@ -32,7 +32,7 @@ const styles = stylex.create({
     borderColor: colors.black,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    marginBlock: spacing.em1,
+    marginBlock: spacing.sm,
     marginInline: spacing.auto,
     width: "100%",
   },

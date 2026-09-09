@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
 import { Spinner } from "#_/components/Spinner.js";
-import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
@@ -30,9 +30,6 @@ import {
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
 import { useTranslations } from "#_/utils/react.js";
 
-import { form } from "../../root.sx.ts";
-import { shareStyles } from "../share.sx.ts";
-
 import type TranslationsJson from "../.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
@@ -43,11 +40,25 @@ interface ScreenshotModalProps {
   onCaptured: () => void;
   productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
+
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
 }
 
 const styles = stylex.create({
+  dialogActions: {
+    columnGap: "0.75rem",
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "0.5rem",
+    rowGap: "0.75rem",
+  },
+  formField: {
+    columnGap: "0.375rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "0.375rem",
+  },
   previewContainer: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
@@ -66,7 +77,32 @@ const styles = stylex.create({
     gap: spacing.lg,
     marginTop: spacing.xl,
     paddingBlock: spacing.zero,
-    paddingInline: spacing.rem025,
+    paddingInline: spacing.md,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.accentSolidHover,
+      default: colors.accentSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
   },
 });
 
@@ -208,7 +244,7 @@ export function ScreenshotModal({
           <span sx={shareStyles.timeDisplay}>{formatTime(duration)}</span>
         </div>
 
-        <div sx={form.formField}>
+        <div sx={styles.formField}>
           <span id="color-scheme-label">{t.colorScheme.label}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby="color-scheme-label"
@@ -233,9 +269,9 @@ export function ScreenshotModal({
           </RadioTabs>
         </div>
 
-        <div sx={form.dialogActions}>
+        <div sx={styles.dialogActions}>
           <Button
-            className={stylex.props(form.submitButton).className}
+            className={stylex.props(styles.submitButton).className}
             disabled={isCapturing}
             onClick={handleCapture}
             type="button"

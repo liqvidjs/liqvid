@@ -110,7 +110,13 @@ export function SelectIcon(
 }
 
 export function SelectItemIndicator(
-  props: Omit<React.ComponentProps<typeof Select.ItemIndicator>, "children">,
+  props: Omit<
+    React.ComponentProps<typeof Select.ItemIndicator>,
+    "className" | "children" | "style"
+  > & {
+    className?: never;
+    children?: never;
+  },
 ) {
   return (
     <Select.ItemIndicator {...props} {...stylex.props(styles.itemIndicator)}>

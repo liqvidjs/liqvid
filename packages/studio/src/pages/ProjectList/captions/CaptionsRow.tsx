@@ -15,12 +15,101 @@ import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
 import { Spinner } from "#_/components/Spinner.js";
 import { AUDIO_WAV } from "#_/conventions.mjs";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import { Button } from "#_/ui/Button.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
 
-import { shareStyles } from "../share.sx.ts";
-
 type CaptionsStatus = NonNullable<AudioEntry["captions"]>["status"];
+
+const styles = stylex.create({
+  deleteButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.deleteBtnBgHover,
+      default: colors.errorSubtle,
+    },
+    borderColor: colors.deleteBtnBorder,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.errorText,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  renderActionButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  renderActions: {
+    display: "flex",
+    flexShrink: 0,
+    gap: spacing.sm,
+  },
+  renderDetails: {
+    color: colors.grayDim,
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.lg,
+  },
+  renderHeader: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.lg,
+  },
+  renderInfo: {
+    display: "flex",
+    flex: "1",
+    flexDirection: "column",
+    gap: spacing.xs,
+    minWidth: 0,
+  },
+  renderItem: {
+    alignItems: "center",
+    backgroundColor: colors.grayApp,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    display: "flex",
+    gap: spacing.lg,
+    justifyContent: "space-between",
+    padding: spacing.lg,
+  },
+  renderName: {
+    color: colors.grayNormal,
+    fontSize: text.md,
+    fontWeight: 500,
+  },
+  renderStatus: {
+    alignItems: "center",
+    color: colors.grayDim,
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+  },
+  statusCompleted: {
+    color: colors.successSolid,
+  },
+  statusFailed: {
+    color: colors.errorSolid,
+  },
+});
 
 function getCaptionsStatusIcon(status: CaptionsStatus) {
   switch (status) {
@@ -30,7 +119,7 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
     case "completed":
       return (
         <CheckCircleIcon
-          {...stylex.props(shareStyles.statusCompleted)}
+          {...stylex.props(styles.statusCompleted)}
           size={16}
           weight="fill"
         />
@@ -38,7 +127,7 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
     case "failed":
       return (
         <WarningCircleIcon
-          {...stylex.props(shareStyles.statusFailed)}
+          {...stylex.props(styles.statusFailed)}
           size={16}
           weight="fill"
         />
@@ -145,27 +234,25 @@ export function CaptionRow({
   };
 
   return (
-    <li sx={shareStyles.renderItem}>
-      <div sx={shareStyles.renderInfo}>
-        <div sx={shareStyles.renderHeader}>
-          <span sx={shareStyles.renderName}>
-            {multiple ? entry.id : AUDIO_WAV}
-          </span>
+    <li sx={styles.renderItem}>
+      <div sx={styles.renderInfo}>
+        <div sx={styles.renderHeader}>
+          <span sx={styles.renderName}>{multiple ? entry.id : AUDIO_WAV}</span>
           {entry.captions && (
-            <span sx={shareStyles.renderStatus}>
+            <span sx={styles.renderStatus}>
               {getCaptionsStatusIcon(entry.captions.status)}
               {getCaptionsStatusLabel(entry.captions.status)}
             </span>
           )}
         </div>
-        <div sx={shareStyles.renderDetails}>
+        <div sx={styles.renderDetails}>
           <Time format="date-and-time" value={entry.meta.createdAt} />
           {entry.meta.state === "completed" && (
             <TimeDuration value={{ seconds: entry.meta.duration }} />
           )}
         </div>
       </div>
-      <div sx={shareStyles.renderActions}>
+      <div sx={styles.renderActions}>
         <Button
           disabled={!hasCaptioningConfigured || isGenerating}
           onClick={handleGenerateCaptions}
@@ -186,7 +273,7 @@ export function CaptionRow({
         </Button>
         {entry.captions && (
           <Button
-            {...stylex.props(shareStyles.deleteButton)}
+            {...stylex.props(styles.deleteButton)}
             onClick={handleDeleteCaptions}
             title="Delete captions"
           >
@@ -195,7 +282,7 @@ export function CaptionRow({
         )}
         {multiple && (
           <Button
-            {...stylex.props(shareStyles.renderActionButton)}
+            {...stylex.props(styles.renderActionButton)}
             onClick={() => onStartRename(entry)}
             title="Rename audio"
           >
@@ -203,7 +290,7 @@ export function CaptionRow({
           </Button>
         )}
         <Button
-          {...stylex.props(shareStyles.deleteButton)}
+          {...stylex.props(styles.deleteButton)}
           onClick={handleDeleteAudio}
           title="Delete audio (and captions)"
         >

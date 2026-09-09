@@ -11,13 +11,19 @@ import type { ThumbsData } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
 import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { useDialogApi } from "#_/ui/Dialog.js";
 import { TimeDuration } from "#_/ui/Time.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
-
-import { shareStyles } from "./share.sx.ts";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -28,6 +34,113 @@ interface ThumbnailsSectionProps {
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
 }
+
+const styles = stylex.create({
+  addButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":disabled": colors.graySubtle,
+      ":hover": colors.grayHover,
+      default: colors.graySubtle,
+    },
+    borderColor: colors.graySep,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: {
+      ":disabled": colors.grayDim,
+      default: colors.grayNormal,
+    },
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    gap: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+    transition: "background-color 0.15s",
+  },
+  emptyMessage: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    padding: spacing.xl,
+    textAlign: "center",
+  },
+  loading: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "center",
+    padding: spacing.xl,
+  },
+  section: {
+    marginTop: spacing.xl,
+  },
+  sectionActions: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+    justifyContent: "flex-end",
+    marginBottom: spacing.lg,
+  },
+  seekSlider: {
+    appearance: "none",
+    backgroundColor: colors.graySep,
+    borderRadius: radii.md,
+    flex: "1",
+    height: "6px",
+  },
+  thumbsPreview: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.xl,
+  },
+  thumbsPreviewBox: {
+    backgroundColor: colors.graySubtle,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    overflow: "hidden",
+    position: "relative",
+  },
+  thumbsPreviewBoxImg: {
+    position: "absolute",
+  },
+  thumbsPreviewItem: {
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.md,
+  },
+  thumbsPreviewRow: {
+    display: "flex",
+    gap: spacing.lg,
+    justifyContent: "center",
+  },
+  thumbsSchemeLabel: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    fontWeight: 500,
+    textTransform: "uppercase",
+  },
+  thumbsSliderControls: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.lg,
+    paddingBlock: spacing.zero,
+    paddingInline: spacing.md,
+  },
+  timeDisplay: {
+    color: colors.grayDim,
+    fontFamily: typeface.mono,
+    fontSize: text.md,
+    minWidth: "3rem",
+    textAlign: "center",
+    userSelect: "none",
+  },
+});
 
 export function ThumbnailsSection({
   duration,
@@ -172,10 +285,10 @@ export function ThumbnailsSection({
   };
 
   return (
-    <div sx={shareStyles.section}>
-      <div sx={shareStyles.sectionActions}>
+    <div sx={styles.section}>
+      <div sx={styles.sectionActions}>
         <Button
-          {...stylex.props(shareStyles.addButton)}
+          {...stylex.props(styles.addButton)}
           disabled={isGenerating}
           onClick={handleGenerate}
           type="button"
@@ -193,21 +306,21 @@ export function ThumbnailsSection({
       </div>
 
       {isLoading ? (
-        <div sx={shareStyles.loading}>
+        <div sx={styles.loading}>
           <Spinner size={24} />
         </div>
       ) : hasNoThumbs ? (
-        <p sx={shareStyles.emptyMessage}>{t.empty}</p>
+        <p sx={styles.emptyMessage}>{t.empty}</p>
       ) : thumbInfo ? (
-        <div sx={shareStyles.thumbsPreview}>
-          <div sx={shareStyles.thumbsPreviewRow}>
+        <div sx={styles.thumbsPreview}>
+          <div sx={styles.thumbsPreviewRow}>
             {/* Light thumbnail */}
             {thumbsData.light.length > 0 && (
-              <div sx={shareStyles.thumbsPreviewItem}>
-                <span sx={shareStyles.thumbsSchemeLabel}>{c.light}</span>
+              <div sx={styles.thumbsPreviewItem}>
+                <span sx={styles.thumbsSchemeLabel}>{c.light}</span>
                 {(() => {
-                  const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
-                  const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
+                  const boxSx = stylex.props(styles.thumbsPreviewBox);
+                  const imgSx = stylex.props(styles.thumbsPreviewBoxImg);
                   return (
                     <div
                       className={boxSx.className}
@@ -236,11 +349,11 @@ export function ThumbnailsSection({
 
             {/* Dark thumbnail */}
             {thumbsData.dark.length > 0 && (
-              <div sx={shareStyles.thumbsPreviewItem}>
-                <span sx={shareStyles.thumbsSchemeLabel}>{c.dark}</span>
+              <div sx={styles.thumbsPreviewItem}>
+                <span sx={styles.thumbsSchemeLabel}>{c.dark}</span>
                 {(() => {
-                  const boxSx = stylex.props(shareStyles.thumbsPreviewBox);
-                  const imgSx = stylex.props(shareStyles.thumbsPreviewBoxImg);
+                  const boxSx = stylex.props(styles.thumbsPreviewBox);
+                  const imgSx = stylex.props(styles.thumbsPreviewBoxImg);
                   return (
                     <div
                       className={boxSx.className}
@@ -269,13 +382,13 @@ export function ThumbnailsSection({
           </div>
 
           {/* Slider controls */}
-          <div sx={shareStyles.thumbsSliderControls}>
+          <div sx={styles.thumbsSliderControls}>
             <TimeDuration
-              {...stylex.props(shareStyles.timeDisplay)}
+              {...stylex.props(styles.timeDisplay)}
               value={{ seconds: thumbInfo.time }}
             />
             {(() => {
-              const sliderSx = stylex.props(shareStyles.seekSlider);
+              const sliderSx = stylex.props(styles.seekSlider);
               return (
                 <input
                   className={sliderSx.className}
@@ -294,7 +407,7 @@ export function ThumbnailsSection({
               );
             })()}
             <TimeDuration
-              {...stylex.props(shareStyles.timeDisplay)}
+              {...stylex.props(styles.timeDisplay)}
               value={duration}
             />
           </div>

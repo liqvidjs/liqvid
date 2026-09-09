@@ -7,7 +7,7 @@ import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 const styles = stylex.create({
   root: {
     backgroundColor: colors.switchBg,
-    borderRadius: radii.pill,
+    borderRadius: radii.max,
     borderStyle: "none",
     cursor: "pointer",
     height: "1.25rem",
@@ -22,7 +22,7 @@ const styles = stylex.create({
   },
   thumb: {
     backgroundColor: colors.white,
-    borderRadius: radii.full,
+    borderRadius: radii.circle,
     display: "block",
     height: "1rem",
     transform: "translateX(0)",

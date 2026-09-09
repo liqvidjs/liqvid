@@ -8,8 +8,6 @@ import Cookies from "universal-cookie";
 import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
-import { projectListStyles } from "./projectList.sx.ts";
-
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
   onParamsChange: (params: Readonly<Record<string, string>>) => void;
@@ -29,7 +27,7 @@ const styles = stylex.create({
   },
   parameterLabel: {
     color: colors.grayDim,
-    fontSize: text.rem075,
+    fontSize: text.md,
     fontWeight: 500,
     textTransform: "capitalize",
   },
@@ -44,13 +42,13 @@ const styles = stylex.create({
     borderWidth: dims.sep,
     color: colors.grayNormal,
     cursor: "pointer",
-    fontSize: text.rem08125,
+    fontSize: text.md,
     outline: {
       ":focus": "none",
       default: null,
     },
-    paddingBlock: spacing.rem0375,
-    paddingInline: spacing.rem0625,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
   },
 
   parameterSelector: {
@@ -65,6 +63,50 @@ const styles = stylex.create({
     gap: spacing.lg,
     marginBottom: spacing.md,
     padding: spacing.lg,
+  },
+  rootParameterField: {
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.md,
+  },
+  rootParameterLabel: {
+    color: colors.grayDim,
+    fontSize: text.md,
+    fontWeight: 500,
+    textTransform: "capitalize",
+  },
+  rootParameterSelect: {
+    backgroundColor: colors.grayApp,
+    borderColor: {
+      ":focus": colors.accentSolid,
+      default: colors.graySep,
+    },
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.grayNormal,
+    cursor: "pointer",
+    fontSize: text.md,
+    outline: {
+      ":focus": "none",
+      default: null,
+    },
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
+  },
+  rootParameterSelector: {
+    alignItems: "center",
+    backgroundColor: colors.graySubtle,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    display: "flex",
+    flexWrap: "wrap",
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
   },
 });
 
@@ -159,15 +201,15 @@ export function RootParameterSelector({
   }
 
   return (
-    <div sx={projectListStyles.rootParameterSelector}>
+    <div sx={styles.rootParameterSelector}>
       {paramEntries.map(([paramName, values]) => (
-        <label key={paramName} sx={projectListStyles.rootParameterField}>
-          <span key="???" sx={projectListStyles.rootParameterLabel}>
+        <label key={paramName} sx={styles.rootParameterField}>
+          <span key="???" sx={styles.rootParameterLabel}>
             {paramName}
           </span>
           <select
             onChange={(e) => handleChange(paramName, e.target.value)}
-            sx={projectListStyles.rootParameterSelect}
+            sx={styles.rootParameterSelect}
             value={selectedRootParams[paramName] ?? values[0]}
           >
             {values.map((value) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, FloppyDiskIcon } from "@phosphor-icons/react";
+import { FloppyDiskIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useMemo, useState } from "react";
@@ -547,9 +547,7 @@ function ProviderSelect({
                 <SelectItemText {...stylex.props(styles.name)}>
                   {label}
                 </SelectItemText>
-                <SelectItemIndicator {...stylex.props(styles.check)}>
-                  <CheckIcon weight="bold" />
-                </SelectItemIndicator>
+                <SelectItemIndicator />
               </SelectItem>
             ))}
           </SelectPopup>

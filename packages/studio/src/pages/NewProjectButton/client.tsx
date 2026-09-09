@@ -5,6 +5,7 @@ import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import {
   createProjectAction,
@@ -36,11 +37,75 @@ import {
   SelectValue,
 } from "#_/ui/Select.js";
 
-import { form } from "../root.sx.ts";
-
 import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
+
+const styles = stylex.create({
+  dialogActions: {
+    columnGap: "0.75rem",
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "0.5rem",
+    rowGap: "0.75rem",
+  },
+  dialogForm: {
+    columnGap: "1.25rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "1.25rem",
+  },
+  error: {
+    backgroundColor: colors.errorSubtle,
+    borderColor: colors.errorBorder,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    color: colors.errorText,
+    fontSize: text.md,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+  },
+  fieldError: {
+    color: colors.errorText,
+    fontSize: text.md,
+  },
+  fieldHint: {
+    color: colors.grayDim,
+    fontSize: text.md,
+  },
+  formField: {
+    columnGap: "0.375rem",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "0.375rem",
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":hover:not(:disabled)": colors.accentSolidHover,
+      default: colors.accentSolid,
+    },
+    borderRadius: radii.md,
+    borderStyle: "none",
+    color: colors.white,
+    columnGap: "0.2em",
+    cursor: {
+      ":disabled": "not-allowed",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.md,
+    fontWeight: 500,
+    opacity: {
+      ":disabled": 0.6,
+    },
+    paddingBlock: spacing.md,
+    paddingInline: spacing.xl,
+    rowGap: "0.2em",
+    transition: "background-color 0.15s",
+  },
+});
 
 /** @package */
 export function NewProjectButtonClient({ t }: { t: T }) {
@@ -121,8 +186,8 @@ export function NewProjectButtonClient({ t }: { t: T }) {
         <DialogBackdrop />
         <DialogPopup>
           <DialogTitle>{t.dialog.title}</DialogTitle>
-          <form onSubmit={handleSubmit} sx={form.dialogForm}>
-            <div sx={form.formField}>
+          <form onSubmit={handleSubmit} sx={styles.dialogForm}>
+            <div sx={styles.formField}>
               <label htmlFor={ids.projectName}>{t.dialog.name}</label>
               <input
                 autoComplete="off"
@@ -136,7 +201,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               />
             </div>
 
-            <div sx={form.formField}>
+            <div sx={styles.formField}>
               <label htmlFor={ids.projectPath}>{t.dialog.path}</label>
               <input
                 autoComplete="off"
@@ -149,13 +214,13 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 value={projectPath}
               />
               {pathError ? (
-                <span sx={form.fieldError}>{pathError}</span>
+                <span sx={styles.fieldError}>{pathError}</span>
               ) : (
-                <span sx={form.fieldHint}>{t.path}</span>
+                <span sx={styles.fieldHint}>{t.path}</span>
               )}
             </div>
 
-            <div sx={form.formField}>
+            <div sx={styles.formField}>
               <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
               <SelectRoot
                 disabled={isCreating || templates.length === 0}
@@ -183,9 +248,9 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               </SelectRoot>
             </div>
 
-            {error && <div sx={form.error}>{error}</div>}
+            {error && <div sx={styles.error}>{error}</div>}
 
-            <div sx={form.dialogActions}>
+            <div sx={styles.dialogActions}>
               <DialogClose
                 disabled={isCreating}
                 // biome-ignore lint/correctness/noRestrictedElements: this is different
@@ -194,7 +259,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 {t.dialog.cancel}
               </DialogClose>
               <Button
-                className={stylex.props(form.submitButton).className}
+                className={stylex.props(styles.submitButton).className}
                 disabled={
                   isCreating ||
                   !name ||

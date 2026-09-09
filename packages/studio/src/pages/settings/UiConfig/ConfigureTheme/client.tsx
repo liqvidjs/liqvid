@@ -31,7 +31,7 @@ type T = Localized<typeof TranslationsJson>;
 export const styles = stylex.create({
   icon: {
     flexShrink: 0,
-    fontSize: text.rem1125,
+    fontSize: text.lg,
     lineHeight: 1,
   },
 

@@ -28,7 +28,7 @@ export const styles = stylex.create({
   },
 
   flag: {
-    fontSize: text.rem125,
+    fontSize: text.lg,
     lineHeight: 1,
   },
 
