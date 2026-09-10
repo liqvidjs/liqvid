@@ -93,3 +93,13 @@ heavily across `studio` and `cli` for filesystem work.
 ## Pre-existing Errors
 
 Codebase has pre-existing TS/lint errors. Only fix errors related to your changes; ignore others.
+
+## Vendored Repositories
+
+This project vendors external repositories under @repos/
+
+- Use vendored repositories as read-only reference material when working with related libraries
+- Prefer examples and patterns from the vendored source code over generated guesses or web search results
+- **Always look up library APIs, types, and signatures in `repos/` instead of `node_modules/`** — vendored source is more readable and may differ from the installed version
+- Do not edit files under @repos/ unless explicitly asked
+- Do not import from @repos/ - application code should continue importing from normal package dependencies
