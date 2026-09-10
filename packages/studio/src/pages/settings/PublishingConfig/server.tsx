@@ -6,7 +6,11 @@ import type { Localized } from "#_/i18n/shared.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
+import { BackendConfig } from "./BackendConfig/server.tsx";
+import { BasePathConfig } from "./BasePathConfig/server.tsx";
 import { PublishingConfigClient } from "./client.tsx";
+import { MediaConfig } from "./MediaConfig/server.tsx";
+import { ProvidersConfig } from "./ProvidersConfig/server.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -27,7 +31,12 @@ export async function PublishingConfig() {
         </>
       }
     >
-      <PublishingConfigClient config={config} t={t} />
+      <PublishingConfigClient config={config} t={t}>
+        <BackendConfig />
+        <BasePathConfig />
+        <MediaConfig />
+        <ProvidersConfig />
+      </PublishingConfigClient>
     </ConfigSection>
   );
 }

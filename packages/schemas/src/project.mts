@@ -178,7 +178,7 @@ export type SerializedProjectMeta = Omit<ProjectMeta, "duration"> & {
  * Root parameters type for the liqvid.json configuration.
  * Format: `{ parameterName: [value1, value2, ...] }`
  */
-export type RootParameters = Record<string, string[]>;
+export type RootParameters = Readonly<Record<string, readonly string[]>>;
 
 /**
  * Resolve a {@link ParametrizedString} to a plain string given a set of

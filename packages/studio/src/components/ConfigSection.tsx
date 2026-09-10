@@ -14,7 +14,7 @@ const styles = stylex.create({
     marginBottom: spacing.md,
   },
   section: {
-    marginBottom: spacing.huge,
+    marginBottom: spacing.mega,
   },
 });
 

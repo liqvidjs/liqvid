@@ -1,9 +1,4 @@
-import { useEventListener } from "@liqvid/event-emitter/react";
-import { usePlayback } from "@liqvid/playback/react";
 import { isMac } from "@liqvid/utils";
-
-import type { Store } from "./store.ts";
-import { activeWordIndex, apply, redo, undo } from "./utils.ts";
 
 export type Shortcuts = {
   /** Cycle the capitalization of the currently selected word. */
@@ -136,156 +131,6 @@ export function formatShortcut(key: string, mod = false): string[] {
   return tokens;
 }
 
-/** @package Wire up shortcuts for the captions editor */
-export function useCaptionsEditorShortcuts(
-  store: Store,
-  shortcuts: Partial<Shortcuts>,
-  {
-    editWord,
-    save,
-  }: {
-    editWord: () => void;
-    save: () => Promise<void>;
-  },
-) {
-  const keys = { ...defaultShortcuts, ...shortcuts };
-  const playback = usePlayback();
-
-  useEventListener(globalThis?.window, "keydown", (e) => {
-    // Ignore shortcuts while typing in an input/textarea/contenteditable (e.g.
-    // the inline word editor), which handles its own keys.
-    if (isEditableTarget(e.target)) return;
-
-    switch (e.key) {
-      case keys.selectionBackward:
-        store.setState((state) =>
-          apply(state, { action: "selection-backward" }),
-        );
-        break;
-      case keys.selectionForward:
-        store.setState((state) =>
-          apply(state, { action: "selection-forward" }),
-        );
-        break;
-      case keys.startPrevSentence:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-sentence" }),
-        );
-        break;
-      case keys.endNextSentence:
-        store.setState((state) =>
-          apply(state, { action: "end-next-sentence" }),
-        );
-        break;
-      case keys.endNextComma:
-        store.setState((state) => apply(state, { action: "end-next-comma" }));
-        break;
-      case keys.startPrevCaption:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-caption" }),
-        );
-        break;
-      case keys.endNextCaption:
-        store.setState((state) => apply(state, { action: "end-next-caption" }));
-        break;
-      case keys.toggleCaptionBreak:
-        store.setState((state) =>
-          apply(state, { action: "toggle-caption-break" }),
-        );
-        break;
-      case keys.startPrevTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "start-prev-transcript-break" }),
-        );
-        break;
-      case keys.endNextTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "end-next-transcript-break" }),
-        );
-        break;
-      case keys.toggleTranscriptBreak:
-        store.setState((state) =>
-          apply(state, { action: "toggle-transcript-break" }),
-        );
-        break;
-      case keys.seekToSelection: {
-        const { selection, words: transcript } = store.getState();
-        const word = transcript[selection.start];
-        if (word) {
-          playback.currentTime$ = { milliseconds: word[1] };
-        }
-        break;
-      }
-      case keys.selectCurrentWord:
-        store.setState((state) => {
-          const t = playback.currentTime$.inMilliseconds();
-          const index = activeWordIndex(state.words, t);
-          if (index < 0) return state;
-
-          return apply(state, {
-            action: "selection-set",
-            selection: { end: index, start: index },
-          });
-        });
-        break;
-      case keys.deleteWord:
-        store.setState((state) => {
-          if (state.words.length === 0) return state;
-          return apply(state, {
-            action: "delete-word",
-            index: state.selection.start,
-          });
-        });
-        break;
-      case keys.mergeFollowing:
-        store.setState((state) => {
-          const index = state.selection.start;
-          // Nothing to merge if there is no following word.
-          if (index >= state.words.length - 1) return state;
-          return apply(state, { action: "merge-word", index });
-        });
-        break;
-      case keys.cycleCapitalization:
-        store.setState((state) => {
-          const index = state.selection.start;
-          const word = state.words[index]?.[0];
-          if (word === undefined) return state;
-
-          const value = cycleCapitalization(word);
-          if (value === word) return state;
-
-          return apply(state, { action: "change-word", index, value });
-        });
-        break;
-      case keys.editWord:
-        // Prevent the key from being typed into the input we're about to open.
-        e.preventDefault();
-        editWord();
-        break;
-      case "s": {
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-        save();
-        break;
-      }
-
-      case "z":
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-
-        // Shift+Cmd/Ctrl+Z redoes, matching common editor conventions.
-        store.setState((state) => (e.shiftKey ? redo(state) : undo(state)));
-        break;
-      case "y":
-        if (!hasModKey(e)) return;
-        e.preventDefault();
-
-        store.setState((state) => redo(state));
-        break;
-    }
-  });
-}
-
 /**
  * Cycles the capitalization of a word.
  *
@@ -325,12 +170,12 @@ export function cycleCapitalization(word: string): string {
 }
 
 /** Returns true if Cmd on Mac, or Ctrl on other platforms, is pressed. */
-function hasModKey(e: KeyboardEvent) {
+export function hasModKey(e: KeyboardEvent) {
   return isMac ? e.metaKey : e.ctrlKey;
 }
 
 /** Whether the event target is a text-editable element. */
-function isEditableTarget(target: EventTarget | null): boolean {
+export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
   return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;

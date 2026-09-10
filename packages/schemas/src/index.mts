@@ -42,7 +42,8 @@ export {
 } from "./screenshot-meta.mts";
 export {
   ColorScheme,
-  ColorSchemeInputSpecifier,
+  ColorSchemeOrBoth,
+  ColorSchemeSpecifier,
   EnvVar,
   ImageFormat,
   JpegQuality,

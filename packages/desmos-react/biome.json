@@ -1,0 +1,66 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+
+              ":ALIAS:",
+              ":BLANK_LINE:",
+
+              ["../**", "!**/*.css", "!**/*.json"],
+              ":BLANK_LINE:",
+
+              ["./**", "!**/*.css", "!**/*.json"],
+              ":BLANK_LINE:",
+
+              ["**/*.css"],
+              ":BLANK_LINE:",
+
+              "**/*.json"
+            ]
+          }
+        },
+        "useSortedAttributes": "on",
+        "useSortedInterfaceMembers": "on",
+        "useSortedKeys": "on",
+        "useSortedProperties": "on"
+      }
+    }
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!dist", "!examples", "!node_modules"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "error"
+      },
+      "preset": "recommended"
+    }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": false,
+    "useIgnoreFile": false
+  }
+}

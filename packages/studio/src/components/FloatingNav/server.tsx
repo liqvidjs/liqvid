@@ -24,13 +24,11 @@ type T = typeof TranslationsJson;
 
 const styles = stylex.create({
   img: {
-    height: 64,
     scale: {
       ":hover": 1.05,
       default: 1,
     },
     transition: "scale 200ms ease-in-out",
-    width: 64,
   },
   link: {
     backgroundColor: colors.transparent,
@@ -62,7 +60,12 @@ export async function FloatingNav() {
         <NavigationMenuItem value="main">
           <NavigationMenuTrigger style={styles.logo}>
             <NavigationMenuLink href="." style={styles.link} title={t.docs}>
-              <Image alt="" src={logo} {...stylex.props(styles.img)} />
+              <Image
+                alt=""
+                src={logo}
+                {...stylex.props(styles.img)}
+                height={64}
+              />
             </NavigationMenuLink>
           </NavigationMenuTrigger>
           <NavigationMenuContent keepMounted style={styles.list}>

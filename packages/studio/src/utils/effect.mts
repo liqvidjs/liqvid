@@ -18,18 +18,6 @@ import type {
 
 import type { LoggableJob, StructuredLog } from "../api/schemas.mts";
 
-export function safeGetOption<
-  M extends {
-    get(key: string): unknown;
-    has(key: string): boolean;
-  },
->(map: M, key: string): Option.Option<NonNullable<ReturnType<M["get"]>>> {
-  type T = NonNullable<ReturnType<M["get"]>>;
-
-  if (!map.has(key)) return Option.none();
-  return Option.some(map.get(key) as T);
-}
-
 export const readDirWithFileTypes = Effect.fnUntraced(function* (
   dirname: AbsoluteDir,
   {

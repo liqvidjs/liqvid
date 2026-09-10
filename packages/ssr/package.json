@@ -21,6 +21,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
+    "./react": {
+      "@liqvid/dev": "./src/react.ts",
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/esm/react.js"
+    },
     "./serde": {
       "@liqvid/dev": "./src/serde.ts",
       "types": "./dist/types/serde.d.ts",
@@ -47,6 +52,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
+    "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

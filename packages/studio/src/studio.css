@@ -4,8 +4,8 @@
   font-family: "Inter Variable", Arial, Helvetica, sans-serif;
   font-size: 18px;
 
-  /* stone-800 */
-  background: light-dark(#f3f3f3, oklch(26.8% 0.007 34.298));
+  /* stone-750 */
+  background: light-dark(var(--color-zinc-50), var(--color-zinc-900));
 }
 
 @layer reset {

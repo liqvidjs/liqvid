@@ -12,12 +12,16 @@
     "lint:all": "pnpm --workspace-root all lint",
     "toggle:dev": "./toggle-package-dev development",
     "toggle:prod": "./toggle-package-dev production",
-    "tsc:all": "pnpm --workspace-root all lint:tsc"
+    "tsc:all": "pnpm --workspace-root all lint:tsc",
+    "knip": "knip"
   },
   "devDependencies": {
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",
-    "turbo": "^2.10.11"
+    "@types/node": "^26.5.0",
+    "knip": "^6.35.0",
+    "turbo": "^2.10.11",
+    "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@12.3.4"
 }

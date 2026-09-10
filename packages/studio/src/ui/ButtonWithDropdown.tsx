@@ -26,11 +26,9 @@ const styles = stylex.create({
     /* collapse the shared border between the two buttons */
     borderInlineStartWidth: spacing.zero,
     borderRadius: `0 ${radii.md} ${radii.md} 0`,
-    paddingInline: spacing.md,
   },
 
   mainButton: {
-    alignItems: "center",
     backgroundColor: {
       ":disabled": colors.btnBg,
       ":enabled:active": colors.btnBgActive,
@@ -45,34 +43,12 @@ const styles = stylex.create({
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
     },
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
-    },
-    display: "flex",
     fontSize: text.base,
     justifyContent: "center",
     paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
+    paddingInline: spacing.md,
     rowGap: spacing.md,
     transition: "background-color 0.15s",
-  },
-  mainButtonPrimary: {
-    backgroundColor: {
-      ":disabled": colors.btnPrimaryBgDisabled,
-      ":enabled:active": colors.btnPrimaryBgActive,
-      ":enabled:hover": colors.btnPrimaryBgHover,
-      default: colors.accentSolid,
-    },
-    borderColor: {
-      ":disabled": colors.btnPrimaryBgDisabled,
-      default: colors.accentSolid,
-    },
-    color: {
-      ":disabled": colors.btnPrimaryColorDisabled,
-      default: colors.white,
-    },
   },
   shared: {
     alignItems: "center",
@@ -82,7 +58,7 @@ const styles = stylex.create({
       ":enabled:hover": colors.btnBgHover,
       default: colors.btnBg,
     },
-    borderColor: colors.btnBorder,
+    borderColor: colors.sep,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: {
@@ -91,30 +67,29 @@ const styles = stylex.create({
     },
     columnGap: spacing.md,
     cursor: {
-      ":disabled": "default",
+      ":disabled": "not-allowed",
       default: "pointer",
     },
     display: "flex",
     justifyContent: "center",
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
     rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
   sharedPrimary: {
     backgroundColor: {
-      ":disabled": colors.btnPrimaryBgDisabled,
-      ":enabled:active": colors.btnPrimaryBgActive,
-      ":enabled:hover": colors.btnPrimaryBgHover,
+      // ":disabled": colors.accentDisabled,
+      ":enabled:active": colors.accentActive,
+      ":enabled:hover": colors.accentHover,
       default: colors.accentSolid,
     },
-    borderColor: {
-      ":disabled": colors.btnPrimaryBgDisabled,
-      default: colors.accentSolid,
-    },
+    borderColor: colors.accentActive,
     color: {
-      ":disabled": colors.btnPrimaryColorDisabled,
+      // ":disabled": colors.accentActive,
       default: colors.white,
+    },
+    opacity: {
+      ":disabled": 0.4,
+      default: null,
     },
   },
 });
@@ -159,13 +134,14 @@ export interface ButtonWithDropdownProps {
  */
 export function ButtonWithDropdown({
   children,
-  disabled = false,
+  // disabled = false,
   dropdownLabel,
   onClick,
   options,
   variant = "default",
 }: ButtonWithDropdownProps) {
   const isPrimary = variant === "primary";
+  const disabled = true;
 
   return (
     <div sx={styles.group}>
@@ -176,7 +152,8 @@ export function ButtonWithDropdown({
         type="button"
         {...stylex.props(
           styles.mainButton,
-          isPrimary && styles.mainButtonPrimary,
+          styles.shared,
+          (true || isPrimary) && styles.sharedPrimary,
         )}
       >
         {children}
@@ -188,7 +165,7 @@ export function ButtonWithDropdown({
           style={[
             styles.joinButtons,
             styles.shared,
-            isPrimary && styles.sharedPrimary,
+            (true || isPrimary) && styles.sharedPrimary,
           ]}
         >
           <CaretDownIcon />

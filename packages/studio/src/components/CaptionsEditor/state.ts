@@ -24,11 +24,11 @@ export type State = {
 };
 
 /* ------------------------------ actions ------------------------------ */
-export type IdentityAction = {
+type IdentityAction = {
   action: "identity";
 };
 
-export type ChangeWordAction = {
+type ChangeWordAction = {
   action: "change-word";
   index: number;
   value: string;
@@ -38,7 +38,7 @@ export type ChangeWordAction = {
   prevValue?: string;
 };
 
-export type MergeWordAction = {
+type MergeWordAction = {
   action: "merge-word";
   index: number;
 
@@ -52,7 +52,7 @@ export type MergeWordAction = {
   prevParagraphBreaks?: readonly number[];
 };
 
-export type DeleteWordAction = {
+type DeleteWordAction = {
   action: "delete-word";
   index: number;
 
@@ -68,43 +68,43 @@ export type DeleteWordAction = {
   prevParagraphBreaks?: readonly number[];
 };
 
-export type StartPrevSentenceAction = {
+type StartPrevSentenceAction = {
   action: "start-prev-sentence";
 };
 
-export type EndNextSentenceAction = {
+type EndNextSentenceAction = {
   action: "end-next-sentence";
 };
 
-export type EndNextCommaAction = {
+type EndNextCommaAction = {
   action: "end-next-comma";
 };
 
-export type StartPrevCaptionAction = {
+type StartPrevCaptionAction = {
   action: "start-prev-caption";
 };
 
-export type EndNextCaptionAction = {
+type EndNextCaptionAction = {
   action: "end-next-caption";
 };
 
-export type ToggleCaptionBreakAction = {
+type ToggleCaptionBreakAction = {
   action: "toggle-caption-break";
 };
 
-export type StartPrevTranscriptBreakAction = {
+type StartPrevTranscriptBreakAction = {
   action: "start-prev-transcript-break";
 };
 
-export type EndNextTranscriptBreakAction = {
+type EndNextTranscriptBreakAction = {
   action: "end-next-transcript-break";
 };
 
-export type ToggleTranscriptBreakAction = {
+type ToggleTranscriptBreakAction = {
   action: "toggle-transcript-break";
 };
 
-export type SetCaptionBreaksAction = {
+type SetCaptionBreaksAction = {
   action: "set-caption-breaks";
   captionBreaks: readonly number[];
 
@@ -112,7 +112,7 @@ export type SetCaptionBreaksAction = {
   prevCaptionBreaks?: readonly number[];
 };
 
-export type SetTranscriptBreaksAction = {
+type SetTranscriptBreaksAction = {
   action: "set-transcript-breaks";
   transcriptBreaks: readonly number[];
 
@@ -120,7 +120,7 @@ export type SetTranscriptBreaksAction = {
   prevTranscriptBreaks?: readonly number[];
 };
 
-export type InsertWordAction = {
+type InsertWordAction = {
   action: "insert-word";
   index: number;
   value: string;
@@ -144,16 +144,16 @@ export type InsertWordAction = {
   restorePrev?: TranscriptEntry;
 };
 
-export type SelectionBackwardAction = {
+type SelectionBackwardAction = {
   action: "selection-backward";
 };
 
-export type SelectionSetAction = {
+type SelectionSetAction = {
   action: "selection-set";
   selection: TranscriptSelection;
 };
 
-export type SelectionForwardAction = {
+type SelectionForwardAction = {
   action: "selection-forward";
 };
 
@@ -179,7 +179,7 @@ export type Action =
   | ToggleTranscriptBreakAction;
 
 /* ------------------------------ misc types ------------------------------ */
-export type TranscriptSelection = {
+type TranscriptSelection = {
   start: number;
 
   end: number;

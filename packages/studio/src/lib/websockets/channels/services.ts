@@ -3,7 +3,7 @@ import { Schema } from "effect";
 import { ServiceClient, StructuredLog } from "#_/api/schemas.mjs";
 
 /** Message sent when a new service is started */
-export const NewServiceMessage = Schema.Struct({
+const NewServiceMessage = Schema.Struct({
   data: Schema.Struct({
     service: ServiceClient,
   }),
@@ -14,12 +14,12 @@ export const NewServiceMessage = Schema.Struct({
   }),
 );
 
-export type NewServiceMessage = (typeof NewServiceMessage)["Type"];
+// type NewServiceMessage = (typeof NewServiceMessage)["Type"];
 
 /**
  * Message sent when a service's state changes (e.g. it fails or is stopped).
  */
-export const UpdateServiceMessage = Schema.Struct({
+const UpdateServiceMessage = Schema.Struct({
   data: Schema.Struct({
     service: ServiceClient,
   }),
@@ -28,14 +28,14 @@ export const UpdateServiceMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a service is updated" }),
 );
 
-export type UpdateServiceMessage = (typeof UpdateServiceMessage)["Type"];
+// type UpdateServiceMessage = (typeof UpdateServiceMessage)["Type"];
 
 /**
  * Message sent when a new log entry is appended to a running service.
  * Streaming individual entries (rather than the whole service) keeps real-time
  * log updates cheap for verbose services.
  */
-export const AppendServiceLogMessage = Schema.Struct({
+const AppendServiceLogMessage = Schema.Struct({
   data: Schema.Struct({
     /** ID of the service the log belongs to */
     id: Schema.String,
@@ -50,7 +50,7 @@ export const AppendServiceLogMessage = Schema.Struct({
   }),
 );
 
-export type AppendServiceLogMessage = (typeof AppendServiceLogMessage)["Type"];
+// type AppendServiceLogMessage = (typeof AppendServiceLogMessage)["Type"];
 
 /* ------------------------------ export ------------------------------ */
 export const ServiceMessage = Schema.Union([

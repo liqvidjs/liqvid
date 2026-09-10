@@ -20,6 +20,8 @@ import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
 
 import type TranslationsJson from "./.translations/en.json";
 
+type T = Localized<typeof TranslationsJson>;
+
 const styles = stylex.create({
   label: {
     alignItems: "center",
@@ -28,8 +30,6 @@ const styles = stylex.create({
     rowGap: spacing.md,
   },
 });
-
-type T = Localized<typeof TranslationsJson>;
 
 /** Publish is offered instead of rebuild within this window after a build. */
 const PUBLISH_WINDOW_MS = Duration.inMilliseconds({ minutes: 5 });

@@ -72,8 +72,10 @@ catalog:
   "@react-router/serve": ^7.9.6
   "@react-three/drei": ^10.7.8
   "@react-three/fiber": ^9.7.0
+  "@stylexjs/atoms": ^0.19.0
   "@stylexjs/babel-plugin": ^0.19.0
   "@stylexjs/postcss-plugin": ^0.19.0
+  "@stylexjs/stylex": ^0.19.0
   "@svgr/webpack": ^8.1.0
   "@tailwindcss/postcss": ^4.3.3
   "@tailwindcss/vite": ^4.1.12
@@ -84,8 +86,8 @@ catalog:
   "@types/lodash": ^4.17.21
   "@types/lodash.debounce": ^4.0.9
   "@types/pluralize": ^0.0.33
-  "@types/react": ^19.2.18
-  "@types/react-dom": ^19.2.4
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
   "@types/three": ^0.183.1
   "@types/yargs": ^17.0.35
   "@yuri/fp": ^0.0.5
@@ -128,9 +130,10 @@ catalog:
   puppeteer-core: ^25.3.0
   radix-ui: ^1.4.3
   rangetouch: ^2.0.1
-  react: ^19.2.8
+  react: ^19.3.0
   react-cookie: ^8.0.1
-  react-dom: ^19.2.8
+  react-dom: ^19.3.0
+  react-headings: ^3.3.4
   react-router: ^7.9.6
   remix-utils: ^9.0
   serve: ^14.2.6
@@ -181,6 +184,7 @@ catalogs:
     "@effect/tsgo": ^0.36.5
     "@jest/globals": ^30.4.1
     "@lezer/highlight": 1.2.3
+    "@stylexjs/eslint-plugin": ^0.19.0
     "@testing-library/react": ^16.3.2
     "@types/babel__standalone": ^7.1.9
     "@types/cli-progress": ^3.11.6
@@ -190,21 +194,24 @@ catalogs:
     "@types/lodash": ^4.17.21
     "@types/lodash.debounce": ^4.0.9
     "@types/node": ^26.2.0
-    "@types/react": ^19.2.18
-    "@types/react-dom": ^19.2.4
+    "@types/react": ^19.3.0
+    "@types/react-dom": ^19.3.0
     "@types/serve-handler": ^6.1.4
     "@types/three": ">=0.183"
     "@types/ws": ^8.18.1
     "@types/yargs": ^17.0.35
     "@types/yargs-parser": ^21.0.3
+    "@typescript-eslint/parser": ^8.69.0
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.4
     csstype: ^3.2.3
     effect: 4.0.0-rc.112
     "effect-paths": "^1.0.1"
+    eslint: ^10.10.0
     glslx: ^0.3.1
     jest: ^30.4.2
     js-yaml: ^4.1.1
+    knip: ^6.35.0
     next: ^16.3
     nib: ^1.2.0
     no-private-imports: ^0.0.4
@@ -217,6 +224,7 @@ catalogs:
     stylus: ^0.64.0
     tailwindcss: ^4.3.3
     ts-jest: ^29.4.12
+    ts6: npm:typescript@6
     type-fest: ^5.6.0
     typed-css-modules: ^0.9.1
     typedoc: ^0.28.20
@@ -247,8 +255,8 @@ catalogs:
     "@tldraw/tldraw": ^5.4.0
     "@tldraw/tlschema": ^5.4.0
     "@tldraw/validate": ^5.4.0
-    "@types/react": "19.2.18"
-    "@types/react-dom": "19.2.4"
+    "@types/react": "19.3.0"
+    "@types/react-dom": "19.3.0"
     effect: ">=4.0.0-rc.0"
     "effect-paths": "^1.0.1"
     glslx: ^0.3.1
@@ -260,8 +268,8 @@ catalogs:
     next-ws: ^2.2.11
     prettier: ^3.8.1
     prettier-plugin-glsl: ^0.3.1
-    react: ">=19.2.8"
-    react-dom: ">=19.2.8"
+    react: ">=19.3"
+    react-dom: ">=19.3"
     react-inspector: ^9.0.0
     skulpt: ^1.2
     smart-whisper: "^0.8.1"
@@ -289,11 +297,10 @@ overrides:
   "@tldraw/tlschema": 5.4.0
   "@tldraw/utils": 5.4.0
   "@tldraw/validate": 5.4.0
-  "@types/react": 19.2.18
-  "@types/react-dom": 19.2.4
-  "react-dom": 19.2.8
-  react: 19.2.8
-
+  "@types/react": 19.3.0
+  "@types/react-dom": 19.3.0
+  "react-dom": 19.3.0
+  react: 19.3.0
 minimumReleaseAgeExclude:
   - "@biomejs/biome@2.5.7 || 2.5.8"
   - "@biomejs/cli-darwin-arm64@2.5.7 || 2.5.8"

@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { Fragment } from "react/jsx-runtime";
 
 export { Cue, type CueState } from "./Cue.tsx";
-export { Prompt } from "./Prompt.tsx";
+export { Prompt as PromptUnivalent } from "./Prompt.tsx";
 export {
   type PromptsContext,
   type PromptsPersistence,
@@ -11,13 +11,17 @@ export {
   usePromptsApi,
 } from "./PromptsProvider.tsx";
 
-/* ------------------------------ ambidextrous components ------------------------------ */
-const isDevelopment = process.env.NODE_ENV === "development";
+import { devComponent } from "@liqvid/ssr/react";
 
-export const PromptsProvider = isDevelopment
+/* ------------------------------ ambidextrous components ------------------------------ */
+
+export const PromptsProvider = import.meta.env.DEV
   ? lazy(() =>
       import("./PromptsProvider.tsx").then((imports) => ({
         default: imports.PromptsProvider,
       })),
     )
   : Fragment;
+
+import { Prompt as PromptUnivalent } from "./Prompt.tsx";
+export const Prompt = devComponent(PromptUnivalent);

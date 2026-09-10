@@ -2,7 +2,7 @@ import type { DurationLike } from "@liqvid/duration";
 import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
 
 import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
-import { toISODateString } from "#_/utils/time.mjs";
+import { asDate, toISODateString } from "#_/utils/time.mjs";
 
 type TimeFormat = "long" | "date-and-time";
 type Language = "en-US";
@@ -64,9 +64,7 @@ export function Time({
   locale?: Language;
   value: Date | number | string;
 } & Omit<React.ComponentProps<"time">, "dateTime">) {
-  if (!(value instanceof Date)) {
-    value = new Date(value);
-  }
+  value = asDate(value);
 
   const serializer = serializers[format];
   const displayer = new Intl.DateTimeFormat(locale, displayers[format]).format;

@@ -198,10 +198,10 @@
       --accent-sep: oklch(38.2% 0.1401 356.4);
       --accent-focus: oklch(45% 0.1546 356.4);
       --accent-sep-hover: oklch(54.2% 0.1909 356.4);
-      --accent-solid: oklch(50% 0.1909 356.4);
       --accent-solid-hover: oklch(45% 0.1546 356.4);
       --accent-dim: oklch(78.7% 0.1909 356.4);
       --accent-normal: oklch(90.9% 0.0697 356.4);
+      --accent-washed: #c69fb3;
 
       --accent-a1: color(display-p3 0.9608 0 0.0667 / 0.022);
       --accent-a2: color(display-p3 0.9882 0.1922 0.4353 / 0.064);
@@ -220,6 +220,7 @@
       --accent-surface: color(display-p3 0.1725 0.0706 0.1098 / 0.5);
       --accent-indicator: oklch(50% 0.1909 356.4);
       --accent-track: oklch(50% 0.1909 356.4);
+      --accent-solid: oklch(50% 0.1909 356.4);
     }
   }
 }

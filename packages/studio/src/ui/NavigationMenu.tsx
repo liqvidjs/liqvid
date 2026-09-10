@@ -70,11 +70,14 @@ export function NavigationMenuPositioner(
   );
 }
 
+/** @future */
 export const NavigationMenuArrow = NavigationMenu.Arrow;
 export const NavigationMenuContent = extensible()(NavigationMenu.Content, [
   styles.content,
   fonts.ui,
 ]);
+
+/** @future */
 export const NavigationMenuIcon = themed(NavigationMenu.Icon, styles.icon);
 export const NavigationMenuItem = themed(NavigationMenu.Item, styles.item);
 export const NavigationMenuList = themed(NavigationMenu.List, [styles.list]);

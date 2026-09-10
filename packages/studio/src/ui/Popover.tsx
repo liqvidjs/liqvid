@@ -17,7 +17,7 @@ import { useDialogApi } from "./Dialog.tsx";
 
 const styles = stylex.create({
   popup: {
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
@@ -32,7 +32,7 @@ const styles = stylex.create({
   },
   trigger: {
     alignItems: "center",
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderColor: {
       ":focus": colors.accentSolid,
       default: colors.graySep,

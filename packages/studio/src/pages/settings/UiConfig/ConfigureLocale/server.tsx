@@ -1,5 +1,3 @@
-import { TranslateIcon } from "@phosphor-icons/react/dist/ssr";
-
 import { Description } from "#_/design/styles.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
@@ -18,10 +16,7 @@ export async function ConfigureLocale() {
 
   return (
     <FieldSet>
-      <Legend>
-        <TranslateIcon weight="bold" />
-        {t.heading}
-      </Legend>
+      <Legend>{t.heading}</Legend>
       <Description>{t.description}</Description>
       <ConfigureLocaleClient locale={locale} />
     </FieldSet>

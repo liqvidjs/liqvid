@@ -1,15 +1,11 @@
 import { Effect, Schema } from "effect";
 import { SchemaAbsoluteFile } from "effect-paths";
 
-import {
-  ColorSchemeInputSpecifier,
-  ImageFormat,
-  JpegQuality,
-} from "../shared.mts";
+import { ColorSchemeOrBoth, ImageFormat, JpegQuality } from "../shared.mts";
 
 export const ThumbnailsJob = Schema.Struct({
   /** Color scheme */
-  colorScheme: ColorSchemeInputSpecifier,
+  colorScheme: ColorSchemeOrBoth,
 
   /**
    * Number of columns per sheet

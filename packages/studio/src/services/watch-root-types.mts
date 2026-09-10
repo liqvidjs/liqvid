@@ -19,7 +19,7 @@ import { runTemplate } from "./watch-assets.mts";
 /**
  * Generate the root-level .liqvid/types.ts file containing RootParams type.
  */
-export const generateRootTypes = Effect.fnUntraced(
+const generateRootTypes = Effect.fnUntraced(
   function* (state: LiqvidServerState) {
     const fs = yield* FileSystem.FileSystem;
     const { cwd } = getServerState();

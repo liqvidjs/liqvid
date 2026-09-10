@@ -94,5 +94,8 @@
     "react": {
       "optional": true
     }
+  },
+  "overrides": {
+    "@types/react": "$@types/react"
   }
 }

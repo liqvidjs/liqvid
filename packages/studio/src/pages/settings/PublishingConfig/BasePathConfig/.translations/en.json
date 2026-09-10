@@ -1,0 +1,13 @@
+{
+  "description": {
+    "_": "Base path that content is hosted under. Should match the {var} in your framework configuration.",
+    "$": { "var": null }
+  },
+  "envVarEnvFile": "File (optional)",
+  "envVarEnvFileHint": "Load from a .env file instead of the system environment.",
+  "envVarMode": "Source",
+  "envVarName": "Variable name",
+  "envVarOption": "Environment variable",
+  "title": "Base path",
+  "valueOption": "Value"
+}

@@ -68,8 +68,8 @@ const variants = stylex.create({
   },
   primary: {
     backgroundColor: {
-      ":active:enabled": colors.accentSolidHover,
-      ":hover:enabled": colors.accentSolidHover,
+      ":active:enabled": colors.accentHover,
+      ":hover:enabled": colors.accentHover,
       default: colors.accentSolid,
     },
     color: colors.accentContrast,

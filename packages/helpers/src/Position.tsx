@@ -65,12 +65,13 @@ export function Position({
     ourStyles.position = "absolute";
   }
 
+  const combinedStyles = { ...ourStyles, ...style };
+
   return (
     <Slot.Root
-      style={{
-        ...ourStyles,
-        ...style,
-      }}
+      style={
+        Object.keys(combinedStyles).length > 0 ? combinedStyles : undefined
+      }
       {...props}
     />
   );

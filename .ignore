@@ -11,20 +11,63 @@
 #app/_index.tsx
 #
 # **/.liqvid
+#
+
+# ------------------------------ packages ------------------------------
+
+# packages/animation
+# packages/captioning
+#packages/cli
+# packages/codemirror
+# packages/color-scheme
+# # packages/controls
+# # packages/create-liqvid
+# packages/cursor
+# packages/dev-watcher
+# packages/dev-watcher-rs
+# packages/diff
+# packages/docs
+# packages/duration
+# packages/epiplexis
+# packages/event-emitter
+# packages/fp
+# packages/gsap
+# packages/helpers
+# packages/host
+# packages/hydration
+# packages/iframe-api
+# packages/katex
+# packages/keymap
+# packages/livecode
+# packages/lqv-playback
+# packages/lv-captions
+# # packages/main
+# packages/mathjax
+# packages/media
+# packages/playback
+# packages/player
+# packages/polyfills
+# #packages/prompts
+# packages/react
+# packages/react-three
+# # packages/recording
+#packages/renderer
+# packages/schemas
+# #packages/script
+# # packages/ssr
+# # packages/studio
+# #packages/studio-plugin-api
+# #packages/studio-public-api
+# packages/test
+# # packages/tldraw
+# packages/utils
+# packages/xyjax
 
 *.d.json.ts
 
-# hide packages
-#packages/cli
-packages/manim-web
-packages/react-router
-# packages/renderer
-# packages/recording
-# packages/main
-packages/next/test
-#packages/next/app/example-cursor
-
 !packages/react-router/TODO.md
+
+!**/.translations/**/*.json
 
 # XyPic is huge
 **/xypic.js

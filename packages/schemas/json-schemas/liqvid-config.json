@@ -893,6 +893,17 @@
                   "type": "null"
                 }
               ]
+            },
+            "theme": {
+              "anyOf": [
+                {
+                  "enum": ["light", "dark", "system"],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "type": "object"

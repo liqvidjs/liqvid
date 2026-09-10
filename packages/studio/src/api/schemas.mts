@@ -4,7 +4,7 @@ import { type Fiber, Schema, SchemaTransformation } from "effect";
 
 import { CaptionsMeta } from "#_/types/schemas.mjs";
 
-export const SerializedDate = Schema.Struct({
+const SerializedDate = Schema.Struct({
   __deser: Schema.Literal("Date"),
   iso: Schema.String,
 }).pipe(
@@ -20,7 +20,7 @@ export const SerializedDate = Schema.Struct({
   ),
 );
 
-export type SerializedDate = (typeof SerializedDate)["Encoded"];
+type SerializedDate = (typeof SerializedDate)["Encoded"];
 
 /**
  * On-disk metadata for a single audio rendering (`audio-meta.json`).
@@ -164,21 +164,22 @@ export const StructuredLog = Schema.Struct({
   type: StructuredLogType,
 });
 
-export type StructuredLogEncoded = (typeof StructuredLog)["Encoded"] & {
+type StructuredLogEncoded = (typeof StructuredLog)["Encoded"] & {
   readonly annotations: { readonly [key: string]: JSONValue };
   readonly message: readonly JSONValue[];
   readonly timestamp: SerializedDate;
 };
+
 export type StructuredLog = (typeof StructuredLog)["Type"];
 
-export const LoggableJobState = Schema.Literals([
+const LoggableJobState = Schema.Literals([
   "running",
   "completed",
   "cancelled",
   "failed",
 ]);
 
-export type LoggableJobState = (typeof LoggableJobState)["Type"];
+// type LoggableJobState = (typeof LoggableJobState)["Type"];
 
 export const LoggableJobClient = Schema.Struct({
   id: Schema.String,
@@ -217,9 +218,10 @@ export type LoggableJob = (typeof LoggableJob)["Type"];
  * expected to complete: they run for the lifetime of the process, unless they
  * fail or are stopped.
  */
-export const ServiceState = Schema.Literals(["running", "stopped", "failed"]);
+const ServiceState = Schema.Literals(["running", "stopped", "failed"]);
 
-export type ServiceState = (typeof ServiceState)["Type"];
+// biome-ignore lint/correctness/noUnusedVariables: used in comment
+type ServiceState = (typeof ServiceState)["Type"];
 
 /**
  * The client-facing snapshot of a long-running service, broadcast over

@@ -42,42 +42,38 @@
   },
   "exports": {
     ".": {
-      "default": "./src/index.mts",
+      "@liqvid/dev": "./src/index.mts",
       "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./next": {
-      "default": "./src/next/index.mts",
+      "@liqvid/dev": "./src/next/index.mts",
       "types": "./dist/types/next/index.d.mts",
       "import": "./dist/esm/next/index.mjs"
     },
     "./next/api": {
-      "default": "./src/next/api.mts",
+      "@liqvid/dev": "./src/next/api.mts",
       "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
     },
     "./next/layout": {
-      "default": "./src/next/layout.tsx",
+      "@liqvid/dev": "./src/next/layout.tsx",
       "types": "./dist/types/next/layout.d.ts",
       "import": "./dist/esm/next/layout.js"
     },
     "./next/page": {
-      "default": "./src/next/page.tsx",
+      "@liqvid/dev": "./src/next/page.tsx",
       "types": "./dist/types/next/page.d.ts",
       "import": "./dist/esm/next/page.js"
     },
     "./ui": {
-      "default": "./src/ui/index.ts",
+      "@liqvid/dev": "./src/ui/index.ts",
       "types": "./dist/types/ui/index.d.ts",
       "import": "./dist/esm/ui/index.js"
     }
   },
-  "bin": {
-    "liqvid-validate-translations": "liqvid-validate-translations.mjs"
-  },
   "files": [
-    "dist/*",
-    "liqvid-validate-translations.mjs"
+    "dist/*"
   ],
   "scripts": {
     ".build:clean": "rm -rf dist",
@@ -99,18 +95,19 @@
     "lint:stylex": "eslint",
     "lint:tsc": "tsc --noEmit",
     "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
-    "validate-translations": "node liqvid-validate-translations.mjs",
-    "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tcm\" \"pnpm run .watch:tsc\""
+    "validate-translations": "node validate-translations.mts",
+    "watch": "concurrently \"pnpm run .watch:css\" \"pnpm run .watch:hbs\" \"pnpm run .watch:tcm\" \"pnpm run .watch:tsc\"",
+    "knip": "knip"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
     "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
-    "@fontsource-variable/alegreya": "^5.3.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@phosphor-icons/react": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "@radix-ui/react-slot": "catalog:",
+    "@stylexjs/atoms": "^0.19.0",
     "@stylexjs/stylex": "^0.19.0",
     "chalk": "catalog:",
     "clsx": "catalog:",
@@ -120,7 +117,6 @@
     "handlebars": "catalog:",
     "http-status-codes": "catalog:",
     "jsonc.min": "catalog:",
-    "lodash.debounce": "catalog:",
     "react-headings": "catalog:",
     "server-only": "catalog:",
     "ts-morph": "catalog:",
@@ -175,6 +171,7 @@
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.1",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "effect-paths": "catalog:peer",
+    "next": "catalog:peer",
     "next-ws": "catalog:peer",
     "react": "catalog:peer",
     "serve-handler": "^6.1.7",

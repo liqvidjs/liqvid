@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import {
+  accent,
   colors,
   dims,
   radii,
@@ -84,8 +85,8 @@ const styles = stylex.create({
   updateButton: {
     alignItems: "center",
     backgroundColor: {
-      ":hover:not(:disabled)": colors.accentSolidHover,
-      default: colors.accentSolid,
+      ":hover:not(:disabled)": accent.hover,
+      default: accent.base,
     },
     borderRadius: radii.md,
     borderStyle: "none",

@@ -1,4 +1,4 @@
-import type { ProjectMeta, RootParameters } from "@liqvid/schemas";
+import type { ProjectMeta } from "@liqvid/schemas";
 import {
   CaretDownIcon,
   CaretRightIcon,
@@ -7,7 +7,6 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useId } from "react";
 
-import { layout } from "#_/design/styles.js";
 import {
   colors,
   dims,
@@ -27,14 +26,16 @@ export type FolderNode = {
 
 const styles = stylex.create({
   chevron: {
-    color: colors.grayDim,
+    color: colors.softControl,
     flexShrink: 0,
   },
   count: {
+    alignItems: "center",
     aspectRatio: "square",
     backgroundColor: colors.graySep,
     borderRadius: radii.circle,
-    color: colors.grayDim,
+    color: colors.secondary,
+    display: "flex",
     fontSize: text.sm,
     fontWeight: 500,
     height: dims.icon,
@@ -51,12 +52,14 @@ const styles = stylex.create({
     overflow: "hidden",
   },
   folderHeader: {
+    alignItems: "center",
     backgroundColor: {
       ":hover": colors.folderHeaderBgHover,
       default: colors.folderHeaderBg,
     },
     borderStyle: "none",
     cursor: "pointer",
+    display: "flex",
     fontFamily: typeface.mono,
     fontSize: text.md,
     gap: spacing.md,
@@ -103,19 +106,13 @@ export function FolderItem({
   folder,
   folderPath,
   onToggle,
-  productionServerPort,
-  rootParameters,
-  selectedRootParams,
   nested = false,
 }: {
   basePath: string;
   collapsedFolders: Set<string>;
   folder: FolderNode;
   folderPath: string;
-  rootParameters: RootParameters;
-  selectedRootParams: Record<string, string>;
   onToggle: (folderPath: string, expanded: boolean) => void;
-  productionServerPort: number;
   nested?: boolean;
 }) {
   const expanded = !collapsedFolders.has(folderPath);
@@ -133,11 +130,7 @@ export function FolderItem({
         aria-controls={id}
         aria-expanded={expanded}
         onClick={() => onToggle(folderPath, !expanded)}
-        sx={[
-          layout.vcenter,
-          styles.folderHeader,
-          nested && styles.nestedFolderHeader,
-        ]}
+        sx={[styles.folderHeader, nested && styles.nestedFolderHeader]}
         type="button"
       >
         {expanded ? (
@@ -147,7 +140,7 @@ export function FolderItem({
         )}
         <FolderIcon size={18} {...stylex.props(styles.icon)} />
         <span sx={styles.name}>{folderPath}</span>
-        <span sx={[layout.vcenter, styles.count]}>{totalCount}</span>
+        <span sx={styles.count}>{totalCount}</span>
       </button>
 
       <div hidden={!expanded} id={id}>
@@ -161,23 +154,13 @@ export function FolderItem({
             key={subfolderName}
             nested
             onToggle={onToggle}
-            productionServerPort={productionServerPort}
-            rootParameters={rootParameters}
-            selectedRootParams={selectedRootParams}
           />
         ))}
         {/* Then render projects in this folder */}
         {folder.projects.length > 0 && (
           <ul sx={[styles.projectList, styles.folderProjectList]}>
             {folder.projects.map(([key, project]) => (
-              <ProjectItem
-                basePath={basePath}
-                key={key}
-                productionServerPort={productionServerPort}
-                project={project}
-                rootParameters={rootParameters}
-                selectedRootParams={selectedRootParams}
-              />
+              <ProjectItem key={key} project={project} />
             ))}
           </ul>
         )}

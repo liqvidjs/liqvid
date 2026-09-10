@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 
 import { H, Section } from "#_/components/headings.js";
 import { fonts } from "#_/design/styles.js";
-import { breakpoints, colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
 import { interpolated, type Localized } from "#_/i18n/shared.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
@@ -15,7 +15,6 @@ import TranslationsJson from "./.translations/en.json" with { type: "json" };
 type T = Localized<typeof TranslationsJson>;
 
 const styles = stylex.create({
-
   main: {
     fontSize: text.base,
     marginBlock: spacing.zero,
@@ -45,9 +44,8 @@ export async function Settings() {
           </header>
         }
       >
-        <UiConfig />
-
         <PublishingConfig />
+        <UiConfig />
       </Section>
     </main>
   );

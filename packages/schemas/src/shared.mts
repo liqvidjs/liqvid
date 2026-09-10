@@ -5,13 +5,17 @@ import { decodeEnvVar } from "./env-vars.mts";
 /* ------------------------------ color scheme ------------------------------ */
 export const ColorScheme = Schema.Literals(["light", "dark"]);
 
-export const ColorSchemeInputSpecifier = Schema.Union([
+export const ColorSchemeSpecifier = Schema.Union([
+  ColorScheme,
+  Schema.Literal("system"),
+]);
+
+export const ColorSchemeOrBoth = Schema.Union([
   ColorScheme,
   Schema.Literal("both"),
 ]);
 
-export type ColorSchemeInputSpecifier =
-  (typeof ColorSchemeInputSpecifier)["Type"];
+export type ColorSchemeOrBoth = (typeof ColorSchemeOrBoth)["Type"];
 
 /** Reference an environment variable (exact match: `{env:VAR_NAME}`) */
 export const EnvVar = Schema.TemplateLiteral([

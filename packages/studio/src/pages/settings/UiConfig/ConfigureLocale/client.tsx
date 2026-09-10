@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
-import { colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { spacing, text } from "#_/design/tokens.stylex.js";
 import { PlainString } from "#_/i18n/shared.mjs";
 import {
   SelectIcon,
@@ -23,7 +23,6 @@ import {
 } from "#_/ui/Select.js";
 
 const styles = stylex.create({
-
   flag: {
     fontSize: text.lg,
     lineHeight: 1,

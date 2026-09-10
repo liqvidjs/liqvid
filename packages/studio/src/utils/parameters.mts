@@ -3,16 +3,10 @@ import path from "node:path";
 import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
-import { ASSETS_DIR } from "#_/conventions.mjs";
+import { ASSETS_DIR, PARAMS_MARKER_PREFIX } from "#_/conventions.mjs";
 import { getServerState } from "#_/initialize.mjs";
 
 import { readDirWithFileTypes } from "./effect.mts";
-
-/**
- * Filename for the parameter marker file.
- * Format: `.params=lang,locale` where parameters are comma-separated.
- */
-export const PARAMS_MARKER_PREFIX = ".params=";
 
 /**
  * Extract parameter names from a project path.
@@ -24,10 +18,11 @@ export function extractParameterNames(projectPath: string): RelativeDir[] {
 }
 
 /**
+ * @future
  * Parse the .params= marker filename to extract parameter names.
  * e.g., `.params=lang,locale` → `["lang", "locale"]`
  */
-export function parseParamsMarker(filename: string): string[] | null {
+export function parseParamsMarker(filename: RelativeFile): string[] | null {
   if (!filename.startsWith(PARAMS_MARKER_PREFIX)) {
     return null;
   }
@@ -39,14 +34,18 @@ export function parseParamsMarker(filename: string): string[] | null {
 }
 
 /**
+ * @future
  * Generate the .params= marker filename from parameter names.
  * e.g., `["lang", "locale"]` → `.params=lang,locale`
  */
-export function generateParamsMarkerFilename(paramNames: string[]): string {
-  return `${PARAMS_MARKER_PREFIX}${paramNames.join(",")}`;
+export function generateParamsMarkerFilename(
+  paramNames: string[],
+): RelativeFile {
+  return RelativeFile(`${PARAMS_MARKER_PREFIX}${paramNames.join(",")}`);
 }
 
 /**
+ * @future
  * Check if a project has parameters (contains `[paramName]` in path).
  */
 export function hasParameters(projectPath: string): boolean {
@@ -135,6 +134,7 @@ export const ensureParamsMarker = Effect.fnUntraced(function* (
 });
 
 /**
+ * @future
  * Get all existing parameter value combinations for a project by reading
  * the directory structure under .liqvid.
  *

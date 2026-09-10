@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "alwaysStrict": true,
+    "declaration": true,
+    "incremental": true,
+    "jsx": "react-jsx",
+    "lib": ["es2015", "es2016", "es2017", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "pretty": true,
+    "removeComments": true,
+    "rootDir": "./src",
+    "target": "esnext",
+    "types": ["desmos"]
+  },
+  "include": ["./src"]
+}

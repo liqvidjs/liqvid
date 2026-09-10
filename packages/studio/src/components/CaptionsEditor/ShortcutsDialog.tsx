@@ -33,11 +33,11 @@ type T = Localized<typeof Translations>;
 
 const styles = stylex.create({
   evenRow: {
-    background: colors.graySubtle,
+    backgroundColor: colors.graySubtle,
   },
 
   kbd: {
-    background: colors.graySubtle,
+    backgroundColor: colors.graySubtle,
     borderBottomWidth: spacing.sm,
     borderColor: colors.graySep,
     borderRadius: radii.md,

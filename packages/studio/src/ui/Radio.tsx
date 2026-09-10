@@ -3,10 +3,9 @@ import { Radio } from "@base-ui/react/radio";
 import * as stylex from "@stylexjs/stylex";
 
 import { themed } from "#_/design/themed.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
-
   radioIndicator: {
     backgroundColor: colors.accentSolid,
     borderRadius: radii.circle,
@@ -18,7 +17,7 @@ const styles = stylex.create({
   radioRoot: {
     alignItems: "center",
     appearance: "none",
-    borderColor: colors.graySep,
+    borderColor: colors.btnBorder,
     borderRadius: radii.circle,
     borderStyle: "solid",
     borderWidth: spacing.sm,

@@ -1,13 +1,18 @@
-import {
-  type ProjectMeta,
-  type RootParameters,
-  resolveParametrizedString,
-} from "@liqvid/schemas";
+import { type ProjectMeta, resolveParametrizedString } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import { TimeDuration } from "#_/ui/Time.js";
 
 import { EmbedButton } from "./EmbedButton.tsx";
@@ -53,6 +58,14 @@ const styles = stylex.create({
     gap: spacing.xl,
     padding: spacing.md,
   },
+  name: {
+    display: "block",
+  },
+  path: {
+    color: colors.secondary,
+    fontFamily: typeface.mono,
+    fontSize: text.sm,
+  },
   thumbnail: {
     borderRadius: radii.md,
     display: "flex",
@@ -62,19 +75,10 @@ const styles = stylex.create({
 });
 
 /** @package */
-export function ProjectItem({
-  basePath,
-  productionServerPort,
-  project,
-  rootParameters,
-  selectedRootParams,
-}: {
-  basePath: string;
-  productionServerPort: number;
-  project: ProjectMeta;
-  rootParameters: RootParameters;
-  selectedRootParams: Record<string, string>;
-}) {
+export function ProjectItem({ project }: { project: ProjectMeta }) {
+  const { basePath, productionServerPort } = useLiqvidConfig();
+  const selectedRootParams = useSelectedRootParameters();
+
   // Build combined params: root params as base, project params (first value) override
   const combinedParams = { ...selectedRootParams };
   if (project.parameters) {
@@ -107,25 +111,19 @@ export function ProjectItem({
       <li sx={styles.listItem}>
         <a href={interpolatedPath} sx={styles.listItemLink}>
           <Thumbnail {...project} />
-          <div className="flex flex-col">
-            {resolvedTitle ?? project.path}
-            <pre className="text-sm">{project.path}</pre>
+          <div>
+            <span sx={styles.name}>{resolvedTitle ?? project.path}</span>
+            <pre sx={styles.path}>{project.path}</pre>
           </div>
         </a>
         <div sx={styles.actions}>
           <MediaButton
             basePath={basePath}
             duration={project.duration}
-            productionServerPort={productionServerPort}
             project={omit(project, ["duration"])}
-            rootParameters={rootParameters}
             selectedRootParams={selectedRootParams}
           />
-          <EmbedButton
-            basePath={basePath}
-            productionServerPort={productionServerPort}
-            project={project}
-          />
+          <EmbedButton basePath={basePath} project={project} />
           <OpenInFinderButton />
           <PreviewButton
             href={`http://localhost:${productionServerPort}${previewPath}`}

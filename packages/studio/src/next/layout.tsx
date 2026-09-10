@@ -5,6 +5,8 @@ import { getConfigSync, initializeServer } from "#_/initialize.mjs";
 import "../palette.css";
 import "../studio.css";
 import "../stylex.css";
+
+import { DevToggleTheme } from "#_/components/DevToggleTheme.js";
 import { FloatingNav } from "#_/components/FloatingNav/server.js";
 
 export const metadata: Metadata = {
@@ -27,6 +29,7 @@ export default async function RootLayout({
     <html lang={config.ui.locale} style={{ colorScheme }}>
       <head />
       <body>
+        <DevToggleTheme />
         <FloatingNav />
         {children}
       </body>

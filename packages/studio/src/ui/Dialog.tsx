@@ -56,7 +56,7 @@ const styles = stylex.create({
     width: "max-content",
   },
   content: {
-    backgroundColor: colors.grayApp,
+    backgroundColor: colors.surface,
     borderColor: colors.graySep,
     borderRadius: radii.xl,
     borderStyle: "solid",

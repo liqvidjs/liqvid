@@ -302,7 +302,6 @@ type T = Localized<typeof TranslationsJson>;
 interface ScreenshotsSectionProps {
   basePath: string;
   duration: Duration;
-  productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
@@ -483,7 +482,6 @@ function ScreenshotItem({
 export function ScreenshotsSection({
   basePath,
   duration,
-  productionServerPort,
   project,
   selectedParams,
 }: ScreenshotsSectionProps) {
@@ -561,7 +559,6 @@ export function ScreenshotsSection({
             basePath={basePath}
             duration={duration}
             onCaptured={loadScreenshots}
-            productionServerPort={productionServerPort}
             project={project}
             selectedParams={selectedParams}
           />

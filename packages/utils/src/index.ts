@@ -5,7 +5,7 @@ export * from "./interaction.ts";
 export * from "./math.ts";
 export * from "./misc.ts";
 export * from "./platform.ts";
-export * from "./react.tsx";
+export * from "./react.ts";
 export * from "./replay-data.ts";
 export * from "./svg.ts";
 export * from "./time.ts";

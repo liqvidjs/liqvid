@@ -5,7 +5,6 @@ import { Select } from "@base-ui/react/select";
 import { CaretUpDownIcon, CheckIcon, IconContext } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { layout } from "#_/design/styles.tsx.js";
 import { extensible, themed } from "#_/design/themed.js";
 import {
   colors,
@@ -15,7 +14,7 @@ import {
   spacing,
   text,
 } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mts.js";
+import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   icon: {
@@ -25,9 +24,8 @@ const styles = stylex.create({
   item: {
     alignItems: "center",
     backgroundColor: {
-      ":focus": colors.grayActive,
-      ":hover": colors.grayHover,
-      // eslint-disable-next-line @stylexjs/valid-styles
+      ":active": colors.affordanceActive,
+      ":focus": colors.affordanceHover,
       default: null,
     },
     color: colors.grayNormal,
@@ -53,7 +51,7 @@ const styles = stylex.create({
   itemText: {},
   list: {},
   popup: {
-    backgroundColor: colors.grayApp,
+    backgroundColor: colors.affordanceBg,
     borderRadius: radii.lg,
     boxShadow: shadows.md,
     overflow: "hidden",
@@ -90,6 +88,8 @@ const styles = stylex.create({
     width: "max-content",
   },
   value: {
+    alignItems: "center",
+    display: "flex",
     gap: spacing.md,
   },
 });
@@ -118,9 +118,7 @@ export function SelectValue(
     children?: LocalizedReactNode | ((value?: any) => LocalizedReactNode);
   },
 ) {
-  return (
-    <Select.Value {...props} {...stylex.props(layout.vcenter, styles.value)} />
-  );
+  return <Select.Value {...props} {...stylex.props(styles.value)} />;
 }
 
 export function SelectIcon(

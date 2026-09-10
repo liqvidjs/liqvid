@@ -11,7 +11,6 @@ import type { ThumbsData } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
 import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
-import { layout } from "#_/design/styles.tsx.js";
 import {
   colors,
   dims,
@@ -70,6 +69,8 @@ const styles = stylex.create({
     textAlign: "center",
   },
   loading: {
+    alignItems: "center",
+    display: "flex",
     justifyContent: "center",
     padding: spacing.xl,
   },
@@ -305,7 +306,7 @@ export function ThumbnailsSection({
       </div>
 
       {isLoading ? (
-        <div sx={[layout.vcenter, styles.loading]}>
+        <div sx={[styles.loading]}>
           <Spinner size={24} />
         </div>
       ) : hasNoThumbs ? (

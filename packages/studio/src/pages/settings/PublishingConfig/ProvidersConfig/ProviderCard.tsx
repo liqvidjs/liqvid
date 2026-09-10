@@ -13,7 +13,7 @@ const styles = stylex.create({
     outlineColor: colors.graySep,
   },
   providerCard: {
-    background: colors.graySubtle,
+    backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",

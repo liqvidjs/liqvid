@@ -83,6 +83,7 @@ interface AnimationConfig {
 }
 
 /**
+ * @future
  * Animation for hiding a toast notification.
  * @see {@link https://www.figma.com/file/zdML9fFY9V0Oah28S0Msd3?node-id=3384:30299#314140994 Figma discussion}
  */
@@ -101,7 +102,7 @@ export const hideToast: AnimationConfig = {
 /**
  * Animation for showing a toast notification.
  */
-export const appearToast: AnimationConfig = {
+const appearToast: AnimationConfig = {
   keyframes: [
     { opacity: "0", transform: "translateY(calc(100% + 1em))" },
     { opacity: "1", transform: "translateY(0%)" },

@@ -83,7 +83,7 @@ const styles = stylex.create({
   submitButton: {
     alignItems: "center",
     backgroundColor: {
-      ":hover:not(:disabled)": colors.accentSolidHover,
+      ":hover:not(:disabled)": colors.accentHover,
       default: colors.accentSolid,
     },
     borderRadius: radii.md,
@@ -224,7 +224,9 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               <label htmlFor={ids.projectTemplate}>{t.dialog.template}</label>
               <SelectRoot
                 disabled={isCreating || templates.length === 0}
-                onValueChange={(value) => value && setTemplateId(value)}
+                onValueChange={(value) =>
+                  value && setTemplateId(value as string)
+                }
                 value={templateId}
               >
                 <SelectTrigger id={ids.projectTemplate}>

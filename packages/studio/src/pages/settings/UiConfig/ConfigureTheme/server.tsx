@@ -1,5 +1,3 @@
-import { PaletteIcon } from "@phosphor-icons/react/dist/ssr";
-
 import { Description } from "#_/design/styles.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { getConfigSync } from "#_/initialize.mjs";
@@ -19,10 +17,7 @@ export async function ConfigureTheme() {
 
   return (
     <FieldSet>
-      <Legend>
-        <PaletteIcon weight="bold" />
-        {t.heading}
-      </Legend>
+      <Legend>{t.heading}</Legend>
       <Description>{t.description}</Description>
       <ConfigureThemeClient t={t} theme={theme} />
     </FieldSet>

@@ -15,7 +15,7 @@ import {
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
 } from "#_/cookies.js";
-import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
+import { breakpoints, scales, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
@@ -26,6 +26,8 @@ import { RebuildButton } from "./RebuildButton/server.tsx";
 import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
 
 import "../stylex.css";
+
+import { LiqvidConfigProvider } from "#_/contexts/liqvid-config.js";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -67,8 +69,8 @@ export async function Homepage() {
   const {
     basePath,
     config: $config,
-    productionServerPort,
     projects,
+    productionServerPort,
   } = getServerState();
 
   if (Option.isNone($config)) {
@@ -96,7 +98,7 @@ export async function Homepage() {
 
   // Read selected root parameters from cookie
   const rootParamsCookie = cookieStore.get(ROOT_PARAMS_COOKIE);
-  const initialSelectedRootParams: Record<string, string> =
+  const initialSelectedRootParams: Readonly<Record<string, string>> =
     rootParamsCookie?.value ? JSON.parse(rootParamsCookie.value) : {};
 
   return (
@@ -116,17 +118,21 @@ export async function Homepage() {
               <GearIcon size={32} weight="fill" />
             </Link>
           </div>
-          <ProjectList
-            basePath={basePath}
-            initialCollapsedFolders={initialCollapsedFolders}
-            initialFolderView={initialFolderView}
-            initialSelectedRootParams={initialSelectedRootParams}
-            productionServerPort={productionServerPort}
-            projects={serialize(projects)}
-            rootParameters={
-              (config.rootParameters ?? {}) as Record<string, string[]>
-            }
-          />
+          <LiqvidConfigProvider
+            value={{
+              basePath,
+              productionServerPort,
+              rootParameters: config.rootParameters ?? {},
+            }}
+          >
+            <ProjectList
+              basePath={basePath}
+              initialCollapsedFolders={initialCollapsedFolders}
+              initialFolderView={initialFolderView}
+              initialSelectedRootParams={initialSelectedRootParams}
+              projects={serialize(projects)}
+            />
+          </LiqvidConfigProvider>
         </main>
       </WebSocketProvider>
     </DerivedConfigProvider>

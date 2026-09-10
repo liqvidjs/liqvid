@@ -1,8 +1,9 @@
 "use client";
 
-import type { Providers, T } from "./client.tsx";
+import type { Providers, T } from "../client.tsx";
+import { TextField } from "../TextField.tsx";
+
 import { ProviderCard } from "./ProviderCard.tsx";
-import { TextField } from "./TextField.tsx";
 
 export function LiqvidStudioProvider({
   onChange,

@@ -6,32 +6,34 @@ import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   root: {
-    backgroundColor: colors.switchBg,
+    "--pad": spacing.sm,
+    "--thumb": "1rem",
+    backgroundColor: "gray",
     borderRadius: radii.max,
     borderStyle: "none",
     cursor: "pointer",
-    height: "1.25rem",
-    padding: spacing.sm,
+    height: `calc(var(--thumb) + 2 * var(--pad))`,
+    padding: `var(--pad)`,
     position: "relative",
     transitionDuration: "0.2s",
     transitionProperty: "background-color",
-    width: "2.25rem",
+    width: `calc(2 * (var(--thumb) + var(--pad)))`,
   },
   rootChecked: {
     backgroundColor: colors.accentSolid,
   },
   thumb: {
     backgroundColor: colors.white,
-    borderRadius: radii.circle,
+    borderRadius: radii.max,
     display: "block",
-    height: "1rem",
+    height: "var(--thumb)",
     transform: "translateX(0)",
     transitionDuration: "0.2s",
     transitionProperty: "transform",
-    width: "1rem",
+    width: "var(--thumb)",
   },
   thumbChecked: {
-    transform: "translateX(1rem)",
+    transform: "translateX(100%)",
   },
 });
 

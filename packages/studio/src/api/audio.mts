@@ -31,7 +31,7 @@ import { type AudioEntry, AudioMeta } from "./schemas.mts";
 const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 
 /** Id used for the single audio rendering when `audio.multiple` is false. */
-export const SINGLE_AUDIO_ID = RelativeDir("default");
+const SINGLE_AUDIO_ID = RelativeDir("default");
 
 /** Absolute path to the `.liqvid/audio` directory for a project. */
 function getAudioBaseDir(
@@ -77,7 +77,7 @@ function readAudioMeta(audioDir: AbsoluteDir) {
  *
  * Captions metadata lives alongside the audio in the same directory.
  */
-export function readCaptionsMeta(audioDir: AbsoluteDir) {
+function readCaptionsMeta(audioDir: AbsoluteDir) {
   return loadJson(CaptionsMeta, path.join(audioDir, CAPTIONS_META));
 }
 

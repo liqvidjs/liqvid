@@ -26,7 +26,6 @@ Run from a package dir (e.g. `packages/utils`), or from root via `pnpm --filter 
 pnpm build                       # clean + compile (ESM + CJS)
 tsc --noEmit                 # type-check only (fast, no build)
 biome check --fix --reporter=concise  # lint + format with auto-fix
-biome check --reporter=concise        # lint + format (no fix)
 pnpm test                        # all tests (--coverage for coverage)
 jest tests/foo.test.ts       # single file
 jest -t "pattern"            # by name

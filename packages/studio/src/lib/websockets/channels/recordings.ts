@@ -8,7 +8,7 @@ import { Schema } from "effect";
  * `projectPath` the recording dialog is scoped to, so the client can ignore
  * recordings that belong to other projects.
  */
-export const NewRecordingMessage = Schema.Struct({
+const NewRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     recording: RecordingMeta,
     url: Schema.String,
@@ -18,10 +18,10 @@ export const NewRecordingMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a recording is created" }),
 );
 
-export type NewRecordingMessage = (typeof NewRecordingMessage)["Type"];
+// type NewRecordingMessage = (typeof NewRecordingMessage)["Type"];
 
 /** Message sent when an existing recording's metadata changes. */
-export const UpdateRecordingMessage = Schema.Struct({
+const UpdateRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     recording: RecordingMeta,
     url: Schema.String,
@@ -31,10 +31,10 @@ export const UpdateRecordingMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a recording is updated" }),
 );
 
-export type UpdateRecordingMessage = (typeof UpdateRecordingMessage)["Type"];
+// type UpdateRecordingMessage = (typeof UpdateRecordingMessage)["Type"];
 
 /** Message sent when a recording is deleted from disk. */
-export const DeleteRecordingMessage = Schema.Struct({
+const DeleteRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     /** Name (directory) of the recording that was deleted */
     name: Schema.String,
@@ -45,7 +45,7 @@ export const DeleteRecordingMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a recording is deleted" }),
 );
 
-export type DeleteRecordingMessage = (typeof DeleteRecordingMessage)["Type"];
+// type DeleteRecordingMessage = (typeof DeleteRecordingMessage)["Type"];
 
 /* ------------------------------ export ------------------------------ */
 export const RecordingMessage = Schema.Union([

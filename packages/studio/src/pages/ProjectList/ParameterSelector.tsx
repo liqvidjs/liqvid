@@ -3,10 +3,15 @@
 import type { RootParameters } from "@liqvid/schemas";
 import * as stylex from "@stylexjs/stylex";
 import { useMemo } from "react";
-import Cookies from "universal-cookie";
 
-import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  scales,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
@@ -20,6 +25,19 @@ interface ParameterSelectorProps {
 }
 
 const styles = stylex.create({
+  container: {
+    alignItems: "center",
+    backgroundColor: `light-dark(${scales.stone200}, ${scales.stone700})`,
+    borderColor: colors.graySep,
+    borderRadius: radii.lg,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    display: "flex",
+    flexWrap: "wrap",
+    gap: spacing.lg,
+    marginBottom: spacing.md,
+    padding: spacing.lg,
+  },
   parameterField: {
     alignItems: "center",
     display: "flex",
@@ -50,64 +68,6 @@ const styles = stylex.create({
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
   },
-
-  parameterSelector: {
-    alignItems: "center",
-    backgroundColor: colors.graySubtle,
-    borderColor: colors.graySep,
-    borderRadius: radii.lg,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    display: "flex",
-    flexWrap: "wrap",
-    gap: spacing.lg,
-    marginBottom: spacing.md,
-    padding: spacing.lg,
-  },
-  rootParameterField: {
-    alignItems: "center",
-    display: "flex",
-    gap: spacing.md,
-  },
-  rootParameterLabel: {
-    color: colors.grayDim,
-    fontSize: text.md,
-    fontWeight: 500,
-    textTransform: "capitalize",
-  },
-  rootParameterSelect: {
-    backgroundColor: colors.grayApp,
-    borderColor: {
-      ":focus": colors.accentSolid,
-      default: colors.graySep,
-    },
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    fontSize: text.md,
-    outline: {
-      ":focus": "none",
-      default: null,
-    },
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-  },
-  rootParameterSelector: {
-    alignItems: "center",
-    backgroundColor: colors.graySubtle,
-    borderColor: colors.graySep,
-    borderRadius: radii.lg,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    display: "flex",
-    flexWrap: "wrap",
-    gap: spacing.lg,
-    marginBottom: spacing.xl,
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-  },
 });
 
 /**
@@ -129,7 +89,7 @@ export function ParameterSelector({
   }
 
   return (
-    <div sx={styles.parameterSelector}>
+    <div sx={styles.container}>
       {paramEntries.map(([paramName, values]) => (
         <label key={paramName} sx={styles.parameterField}>
           <span sx={styles.parameterLabel}>{paramName}</span>
@@ -142,75 +102,6 @@ export function ParameterSelector({
             }}
             sx={styles.parameterSelect}
             value={selectedParams[paramName] ?? values[0]}
-          >
-            {values.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
-      ))}
-    </div>
-  );
-}
-
-interface RootParameterSelectorProps {
-  /** Callback when root parameter values change */
-  onRootParamsChange: (params: Record<string, string>) => void;
-  /** Root parameter definitions from liqvid.json */
-  rootParameters: RootParameters;
-  /** Currently selected root parameter values */
-  selectedRootParams: Record<string, string>;
-}
-
-const cookieOptions = {
-  maxAge: 365 * 24 * 60 * 60, // 1 year in seconds
-  path: "/",
-  sameSite: "lax" as const,
-};
-
-/**
- * A row of dropdowns for selecting root parameter values.
- * Displayed at the top of the project list page.
- * Persists selection to a server-side cookie.
- */
-export function RootParameterSelector({
-  rootParameters,
-  selectedRootParams,
-  onRootParamsChange,
-}: RootParameterSelectorProps) {
-  "use no memo";
-  const paramEntries = useMemo(
-    () =>
-      Object.entries(rootParameters).filter(([, values]) => values.length > 0),
-    [rootParameters],
-  );
-
-  if (paramEntries.length === 0) {
-    return null;
-  }
-
-  function handleChange(paramName: string, value: string) {
-    const newParams = { ...selectedRootParams, [paramName]: value };
-    onRootParamsChange(newParams);
-
-    // Persist to cookie
-    const cookies = new Cookies();
-    cookies.set(ROOT_PARAMS_COOKIE, JSON.stringify(newParams), cookieOptions);
-  }
-
-  return (
-    <div sx={styles.rootParameterSelector}>
-      {paramEntries.map(([paramName, values]) => (
-        <label key={paramName} sx={styles.rootParameterField}>
-          <span key="???" sx={styles.rootParameterLabel}>
-            {paramName}
-          </span>
-          <select
-            onChange={(e) => handleChange(paramName, e.target.value)}
-            sx={styles.rootParameterSelect}
-            value={selectedRootParams[paramName] ?? values[0]}
           >
             {values.map((value) => (
               <option key={value} value={value}>

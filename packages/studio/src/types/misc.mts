@@ -6,6 +6,7 @@ interface ConstBranded<in out B extends Brand.Brand<string>>
   <const S extends string>(unbranded: S): B & S;
 }
 
+/** @future */
 export type RecordSignificantKeyOrder<K extends keyof any, V> = Record<K, V> &
   Brand.Brand<"RecordSignificantKeyOrder">;
 

@@ -73,7 +73,7 @@ export default [
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
             fontFamily: {
-              limit: null,
+              limit: ["inherit"],
               reason:
                 "use a typeface.* token from `#_/design/tokens.stylex.js`",
             },

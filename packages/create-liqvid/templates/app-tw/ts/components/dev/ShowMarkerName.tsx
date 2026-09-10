@@ -14,7 +14,7 @@ function ShowMarkerNameInner() {
 
   return (
     <span
-      className="inline-flex h-full select-text items-center bg-(--accent-solid) px-[.5em] align-top font-sans"
+      className="inline-flex h-full select-text items-center bg-[#af1866] px-[.5em] align-top font-sans"
       key="show-marker-name"
     >
       {active.name}

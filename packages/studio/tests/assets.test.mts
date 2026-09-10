@@ -1,7 +1,6 @@
 import { expect, test } from "@jest/globals";
 
-import { DirectoryHelper } from "../src/assets.mts";
-import type { FileNames } from "../src/types.mts";
+import { DirectoryHelper, type FileNames } from "../src/assets.mts";
 
 const DIR = {
   src: {

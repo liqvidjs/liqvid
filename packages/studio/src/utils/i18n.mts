@@ -11,7 +11,7 @@ import { getServerState } from "#_/initialize.mjs";
 
 import type CommonTranslationsJson from "../.translations/en.json";
 
-export const DEFAULT_LOCALE = "en";
+const DEFAULT_LOCALE = "en";
 
 /**
  * Translations for commonly-used words like "close", "cancel", etc., shared
@@ -71,6 +71,7 @@ export async function getTranslations<T>(
 }
 
 /**
+ * @future
  * Get translations for commonly-used words like "close", "cancel", etc.,
  * shared across the studio UI. For use in server components.
  *

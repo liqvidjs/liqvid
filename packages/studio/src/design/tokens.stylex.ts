@@ -199,6 +199,7 @@ export const scales = stylex.defineVars({
   purple800: "oklch(43.8% 0.218 303.724)",
   purple900: "oklch(38.1% 0.176 304.987)",
   purple950: "oklch(29.1% 0.149 302.717)",
+
   red50: "oklch(97.1% 0.013 17.38)",
   red100: "oklch(93.6% 0.032 17.717)",
   red200: "oklch(88.5% 0.062 18.334)",
@@ -255,7 +256,9 @@ export const scales = stylex.defineVars({
   stone500: "oklch(55.3% 0.013 58.071)",
   stone600: "oklch(44.4% 0.011 73.639)",
   stone700: "oklch(37.4% 0.01 67.558)",
+  stone750: "oklch(32.10% 0.0085 50.93)",
   stone800: "oklch(26.8% 0.007 34.298)",
+  stone850: "oklch(24.20% 0.0065 45.17)",
   stone900: "oklch(21.6% 0.006 56.043)",
   stone950: "oklch(14.7% 0.004 49.25)",
 
@@ -308,30 +311,43 @@ export const scales = stylex.defineVars({
   yellow950: "oklch(28.6% 0.066 53.813)",
 
   zinc50: "oklch(98.5% 0 0)",
+
   zinc100: "oklch(96.7% 0.001 286.375)",
+  zinc150: "oklch(94.35% 0.0025 286.35)",
   zinc200: "oklch(92% 0.004 286.32)",
+  zinc250: "oklch(89.55% 0.005 286.3)",
   zinc300: "oklch(87.1% 0.006 286.286)",
+  zinc350: "oklch(78.80% 0.0105 286.18)",
   zinc400: "oklch(70.5% 0.015 286.067)",
+  zinc450: "oklch(62.85% 0.0155 286)",
   zinc500: "oklch(55.2% 0.016 285.938)",
+  zinc550: "oklch(49.70% 0.0165 285.86)",
   zinc600: "oklch(44.2% 0.017 285.786)",
+  zinc650: "oklch(40.60% 0.015 285.8)",
   zinc700: "oklch(37% 0.013 285.805)",
+  zinc750: "oklch(32.20% 0.0095 285.92)",
   zinc800: "oklch(27.4% 0.006 286.033)",
+  zinc850: "oklch(24.20% 0.006 285.96)",
   zinc900: "oklch(21% 0.006 285.885)",
   zinc950: "oklch(14.1% 0.005 285.823)",
 });
 
+export const accent = stylex.defineVars({
+  active: "#87124e",
+  base: "#af1866",
+  hover: "#d31d7b",
+  washed: "#C69FB3",
+});
+
 /** semantic color names */
 export const colors = stylex.defineVars({
-  /** accent theme CSS variable wrappers */
-  accentContrast: "var(--accent-contrast)",
-  accentDim: "var(--accent-dim)",
-  accentHover: "var(--accent-hover)",
-  accentNormal: "var(--accent-normal)",
-  accentSep: "var(--accent-sep)",
-  accentSolid: "#af1866",
-  accentSolidHover: "light-dark(#9e0058, #922257)",
-  accentUi: "var(--accent-ui)",
-  background: () => `light-dark(${scales.stone50}, ${scales.stone800})`,
+  accentActive: accent.active,
+  accentContrast: "white",
+  accentHover: accent.hover,
+  accentSolid: accent.base,
+  affordanceActive: `light-dark(${scales.zinc150}, ${scales.zinc700})`,
+  affordanceBg: `light-dark(white, ${scales.zinc750})`,
+  affordanceHover: `light-dark(${scales.zinc100}, ${scales.zinc600})`,
 
   /** update banner colors */
   bannerBg: "var(--accent-ui)",
@@ -344,18 +360,12 @@ export const colors = stylex.defineVars({
   black: "#000",
 
   /** base button colors */
-  btnBg: "light-dark(#f0f0f0, #333)",
-  btnBgActive: "light-dark(#d0d0d0, #333)",
-  btnBgHover: "light-dark(#fafafa, #444)",
-  btnBorder: "light-dark(#ccc, #555)",
-  btnColor: "light-dark(#333, #fff)",
-  btnColorDisabled: "light-dark(#aaa, #eee)",
-  btnPrimaryBgActive: "light-dark(#1e40af, #1d4ed8)",
-
-  /** primary button colors */
-  btnPrimaryBgDisabled: "light-dark(#93b4f5, #4b6bb0)",
-  btnPrimaryBgHover: "light-dark(#1d4ed8, #2563eb)",
-  btnPrimaryColorDisabled: "light-dark(#e5e7eb, #e5e7eb)",
+  btnBg: `light-dark(#f0f0f0, ${scales.stone750})`,
+  btnBgActive: `light-dark(#d0d0d0, ${scales.stone800})`,
+  btnBgHover: `light-dark(#fafafa, ${scales.stone700})`,
+  btnBorder: `light-dark(#ccc, #555)`,
+  btnColor: `light-dark(#333, #fff)`,
+  btnColorDisabled: `light-dark(#aaa, #eee)`,
 
   /** copy button colors */
   copyBtnBg: "light-dark(#e8f4ff, #1e3a5f)",
@@ -366,6 +376,8 @@ export const colors = stylex.defineVars({
   /** delete button colors */
   deleteBtnBgHover: "light-dark(#f9d7d3, #4a2424)",
   deleteBtnBorder: "light-dark(#f5c6c2, #5a2a2a)",
+
+  dialog: `light-dark(white, ${scales.stone800})`,
 
   /** dialog backdrop */
   dialogBackdrop: "rgb(0 0 0 / 0.5)",
@@ -405,6 +417,10 @@ export const colors = stylex.defineVars({
   grayUi: "light-dark(#eff0f3, #222325)",
   inherit: "inherit",
 
+  inputBg: `light-dark(white, ${scales.stone800})`,
+
+  label: `light-dark(black, white)`,
+
   /** log level colors */
   logDebug: "purple",
   nestedFolderHeaderBg: "light-dark(#f9fafb, #1f2937)",
@@ -416,10 +432,16 @@ export const colors = stylex.defineVars({
   /** recording state (shortcut input) */
   recordingInputBg: "light-dark(#fffbe6, #3d3800)",
   recordingInputBorder: "light-dark(#d9a600, #665000)",
+
+  secondary: `light-dark(${scales.zinc400}, ${scales.zinc600})`,
+
+  sep: `light-dark(black, white)`,
+
+  softControl: `light-dark(${scales.zinc400}, ${scales.zinc500})`,
   successSolid: "light-dark(#16a34a, #22c55e)",
 
-  /** switch unchecked background */
-  switchBg: "light-dark(#aaa0ab, #999)",
+  /** background color for raised form areas / "wells" */
+  surface: `light-dark(${scales.zinc150}, ${scales.stone850})`,
 
   /** tab trigger default background */
   tabTriggerBg: "#aaa",
@@ -460,12 +482,13 @@ export const spacing = stylex.defineConsts({
   negMd: "-4px",
   negXs: "-1px",
   zero: "0",
-  xs: "1px",
-  sm: "2px",
-  md: "4px",
-  lg: "8px",
+  xs: "2px",
+  sm: "4px",
+  md: "8px",
+  lg: "12px",
   xl: "16px",
   huge: "24px",
+  mega: "48px",
   control: "32px",
 });
 
@@ -486,4 +509,30 @@ export const typeface = stylex.defineConsts({
   mono: "monospace",
   ui: `"Inter Variable", system-ui, sans-serif`,
   uiMono: "ui-monospace, monospace",
+});
+
+/**
+ * @public
+ * expose CSS variables to browser
+ */
+export const browserScales = stylex.defineVars({
+  "--color-zinc-50": scales.zinc50,
+  "--color-zinc-100": scales.zinc100,
+  "--color-zinc-150": scales.zinc150,
+  "--color-zinc-200": scales.zinc200,
+  "--color-zinc-250": scales.zinc250,
+  "--color-zinc-300": scales.zinc300,
+  "--color-zinc-350": scales.zinc350,
+  "--color-zinc-400": scales.zinc400,
+  "--color-zinc-450": scales.zinc450,
+  "--color-zinc-500": scales.zinc500,
+  "--color-zinc-550": scales.zinc550,
+  "--color-zinc-600": scales.zinc600,
+  "--color-zinc-650": scales.zinc650,
+  "--color-zinc-700": scales.zinc700,
+  "--color-zinc-750": scales.zinc750,
+  "--color-zinc-800": scales.zinc800,
+  "--color-zinc-850": scales.zinc850,
+  "--color-zinc-900": scales.zinc900,
+  "--color-zinc-950": scales.zinc950,
 });

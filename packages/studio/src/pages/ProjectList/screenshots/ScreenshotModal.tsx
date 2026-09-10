@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
 import { Spinner } from "#_/components/Spinner.js";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
 import {
   colors,
   dims,
@@ -45,7 +46,6 @@ interface ScreenshotModalProps {
   basePath: string;
   duration: DurationLike;
   onCaptured: () => void;
-  productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
 
   /** Selected parameter values for parameterized projects */
@@ -133,11 +133,11 @@ const styles = stylex.create({
 export function ScreenshotModal({
   basePath,
   duration,
-  productionServerPort,
   onCaptured,
   project,
   selectedParams,
 }: ScreenshotModalProps) {
+  const { productionServerPort } = useLiqvidConfig();
   const t = useTranslations<T>().screenshots;
 
   const { renderSource } = useDerivedConfig();

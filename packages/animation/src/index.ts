@@ -1,13 +1,17 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { assertType, clamp, lerp, type ReplayData } from "@liqvid/utils";
-import { default as BezierEasing } from "bezier-easing";
+import { default as BezierEasing, type EasingFunction } from "bezier-easing";
 
-interface AnimateOptions<T extends DurationLike | number = number> {
+export type CommonEasingName = keyof typeof easings;
+
+export interface AnimateOptions<
+  T extends DurationLike | number | string = number,
+> {
   /** Duration of animation. */
   duration: T;
 
   /** Easing function. Defaults to the identity function, i.e. linear easing. */
-  easing?: (x: number) => number;
+  easing?: CommonEasingName | EasingFunction;
 
   /**
    * End value for animation.
@@ -63,8 +67,19 @@ export function animate(
     easing = (x: number) => x,
   } = options;
 
+  const effectiveEasing =
+    typeof easing === "string"
+      ? BezierEasing(
+          ...(easings[easing] as readonly [number, number, number, number]),
+        )
+      : easing;
+
   return (t: number) =>
-    lerp(startValue, endValue, easing(clamp(0, (t - startTime) / duration, 1)));
+    lerp(
+      startValue,
+      endValue,
+      effectiveEasing(clamp(0, (t - startTime) / duration, 1)),
+    );
 }
 
 /**
@@ -109,16 +124,25 @@ export function animate$(
     easing = (x: number) => x,
   } = options;
 
+  const effectiveEasing =
+    typeof easing === "string"
+      ? BezierEasing(
+          ...(easings[easing] as readonly [number, number, number, number]),
+        )
+      : easing;
+
   return (t: Duration) =>
     lerp(
       startValue,
       endValue,
-      easing(clamp(0, t.minus(startTime).dividedBy(duration), 1)),
+      effectiveEasing(clamp(0, t.minus(startTime).dividedBy(duration), 1)),
     );
 }
 
 /** Cubic Bezier curve function */
 export const bezier = BezierEasing;
+
+export type { EasingFunction } from "bezier-easing";
 
 /** Parameters for common Bezier curves. */
 export const easings = {

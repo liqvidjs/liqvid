@@ -27,7 +27,7 @@ export type ChannelName = (typeof ChannelName)["Type"];
  * broadcast API and the client `useChannel` callbacks derive their types from
  * this registry.
  */
-export const ChannelMessages = {
+const ChannelMessages = {
   jobs: JobMessage,
   projects: ProjectMessage,
   recordings: RecordingMessage,
@@ -56,12 +56,12 @@ export type Channels = {
  * Every frame on the wire is a JSON envelope tagging the message with its
  * channel, so the client can route it to the right subscribers.
  */
-export const Envelope = Schema.Struct({
+const Envelope = Schema.Struct({
   channel: ChannelName,
   message: Schema.Json,
 });
 
-export type Envelope = (typeof Envelope)["Type"];
+// type Envelope = (typeof Envelope)["Type"];
 
 /** JSON-string codec for the envelope, for encoding/decoding wire frames. */
 export const EnvelopeFromJson = Schema.fromJsonString(Envelope);

@@ -3,22 +3,14 @@
 import * as stylex from "@stylexjs/stylex";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
-import {
-  breakpoints,
-  colors,
-  dims,
-  radii,
-  shadows,
-  spacing,
-  text,
-} from "#_/design/tokens.stylex.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 
-import type { Providers, T } from "./client.tsx";
+import type { Providers, T } from "../client.tsx";
+import { TextField } from "../TextField.tsx";
+
 import { ProviderCard } from "./ProviderCard.tsx";
-import { TextField } from "./TextField.tsx";
 
 const styles = stylex.create({
-
   checkboxField: {
     alignItems: "center",
     cursor: "pointer",

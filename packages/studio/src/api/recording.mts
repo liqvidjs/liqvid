@@ -70,7 +70,7 @@ export default data;`;
 /**
  * Attempt to discover and run post-processing plugins.
  */
-export function runPostProcessing(
+function runPostProcessing(
   recordingDir: AbsoluteDir,
   plugins: SaveRecordingMetadata["plugins"],
   dynamicImports: DynamicImports,

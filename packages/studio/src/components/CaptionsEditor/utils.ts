@@ -1,6 +1,7 @@
 import type { TranscriptEntry } from "@liqvid/schemas";
 
 import type { Action, State, Transcript } from "./state.ts";
+import type { Highlight } from "./types.ts";
 
 /**
  * Returns the index of the word active at time `t` (in ms), or -1 if none.
@@ -390,7 +391,7 @@ function record(action: Action, prev: State, next: State): Action | undefined {
 /**
  * Inverts an action, returning the action that would undo it.
  */
-export function invert(prev: State, action: Action): Action {
+function invert(prev: State, action: Action): Action {
   switch (action.action) {
     case "delete-word": {
       // The recorded action carries the removed entry and the pre-delete break
@@ -522,4 +523,218 @@ export function isSentenceEnd(token: TranscriptEntry): boolean {
   if (token[0].length === 0) return false;
   const last = token[0].at(-1)!;
   return last === "." || last === "!" || last === "?";
+}
+export function join(words: readonly TranscriptEntry[]) {
+  return words.reduce(
+    (acc, curr, index) => acc + (index > 0 ? " " : "") + curr[0],
+    "",
+  );
+}
+
+/**
+ * Returns the box of `wordIndex` in coordinates relative to the `.stripes`
+ * content box (accounting for scroll offset, so the box stays pinned to the
+ * word as the transcript scrolls), or `null` if it cannot be resolved.
+ */
+export function wordRectRelativeToStripes(
+  container: HTMLElement,
+  words: readonly TranscriptEntry[],
+  wordIndex: number,
+): Highlight | null {
+  const rect = wordRect(container, words, wordIndex);
+  if (!rect) return null;
+
+  const base = container.getBoundingClientRect();
+  return {
+    height: rect.height,
+    left: rect.left - base.left + container.scrollLeft,
+    top: rect.top - base.top + container.scrollTop,
+    width: rect.width,
+  };
+}
+
+/**
+ * Maps a caret position inside the `.stripes` container to a word index.
+ *
+ * Word boundaries are not encoded in the DOM (words are joined into shared text
+ * nodes and may themselves contain spaces once the transcript is editable), so
+ * we cannot recover them from whitespace. Instead we walk the DOM text in
+ * document order with a {@link TreeWalker} and greedily consume the `words`
+ * array against it: each word's characters are matched in sequence, and the
+ * single-space separators inserted between words (by `join`) — plus the extra
+ * spaces `{" "}` React emits around ranges, marks, and caption markers — are
+ * skipped as inter-word gaps. Because we consume the real DOM text rather than
+ * a reconstruction, differences in exact spacing between segments cannot throw
+ * the mapping off.
+ *
+ * As we walk, we track the running character offset; once we pass the caret
+ * node/offset, the word currently being consumed is the one that was clicked.
+ * Returns -1 if the caret cannot be resolved to a word.
+ */
+export function wordIndexAtCaret(
+  container: HTMLElement,
+  words: readonly TranscriptEntry[],
+  caret: { node: Node; offset: number },
+): number {
+  // Absolute text offset of the caret within the container.
+  const caretOffset = caretTextOffset(container, caret);
+  if (caretOffset < 0) return -1;
+
+  const { spans } = wordSpans(container, words);
+
+  // Find the word whose span contains the caret. A caret in the whitespace gap
+  // before a word resolves to that following word, so we test against the start
+  // of the *next* word.
+  for (let w = 0; w < spans.length; w++) {
+    const isLast = w === spans.length - 1;
+    const nextStart = isLast ? Number.POSITIVE_INFINITY : spans[w + 1]!.start;
+    if (caretOffset < nextStart) return w;
+  }
+
+  return words.length - 1;
+}
+
+/**
+ * Aligns the `words` array against the container's flat DOM text, returning the
+ * flat text plus the `[start, end)` character span of every word within it.
+ *
+ * Word boundaries are not encoded in the DOM (words share text nodes and may
+ * contain spaces), so we greedily match each word: between words we skip the
+ * inter-word separator whitespace (the single `join` space plus React's extra
+ * `{" "}` around ranges/marks/caption markers), then match the word's exact
+ * characters — including any internal spaces — anchored at that position. This
+ * consumes the real DOM text, so spacing differences between segments cannot
+ * throw the alignment off.
+ */
+function wordSpans(
+  container: HTMLElement,
+  words: readonly TranscriptEntry[],
+): { flat: string; spans: { start: number; end: number }[] } {
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    null,
+  );
+
+  // Concatenate all text nodes into one flat string; `TreeWalker` visits them
+  // in document order, matching offsets measured the same way.
+  let flat = "";
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    flat += node.nodeValue ?? "";
+  }
+
+  const spans: { start: number; end: number }[] = [];
+  let cursor = 0;
+
+  for (let w = 0; w < words.length; w++) {
+    // Skip the inter-word separator whitespace.
+    while (cursor < flat.length && isSpace(flat[cursor]!)) cursor++;
+
+    const word = words[w]![0];
+    const start = cursor;
+    const end = start + word.length;
+
+    spans.push({ end, start });
+    cursor = end;
+  }
+
+  return { flat, spans };
+}
+
+/**
+ * Returns the bounding rectangle of `wordIndex` within `container`, in viewport
+ * coordinates, or `null` if it cannot be resolved. Uses a DOM {@link Range}
+ * over the word's character span so wrapped words still report their union box.
+ */
+function wordRect(
+  container: HTMLElement,
+  words: readonly TranscriptEntry[],
+  wordIndex: number,
+): DOMRect | null {
+  const { spans } = wordSpans(container, words);
+  const span = spans[wordIndex];
+  if (!span) return null;
+
+  const start = offsetToDomPosition(container, span.start);
+  const end = offsetToDomPosition(container, span.end);
+  if (!start || !end) return null;
+
+  const range = document.createRange();
+  try {
+    range.setStart(start.node, start.offset);
+    range.setEnd(end.node, end.offset);
+  } catch {
+    return null;
+  }
+
+  return range.getBoundingClientRect();
+}
+
+/**
+ * Converts an absolute character offset within `container` back into a DOM
+ * position (`{ node, offset }`) by walking text nodes in document order until
+ * the offset falls inside one of them.
+ */
+function offsetToDomPosition(
+  container: HTMLElement,
+  offset: number,
+): { node: Node; offset: number } | null {
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    null,
+  );
+
+  let seen = 0;
+  let last: Node | null = null;
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const len = (node.nodeValue ?? "").length;
+    if (offset <= seen + len) return { node, offset: offset - seen };
+    seen += len;
+    last = node;
+  }
+
+  // Offset past the end: clamp to the end of the last text node.
+  if (last) return { node: last, offset: (last.nodeValue ?? "").length };
+  return null;
+}
+
+/**
+ * Computes the absolute character offset of a caret within `container`, summing
+ * the lengths of all text nodes that precede it in document order (via a
+ * {@link TreeWalker}) plus the caret's own offset within its node.
+ */
+function caretTextOffset(
+  container: HTMLElement,
+  caret: { node: Node; offset: number },
+): number {
+  // Element-offset carets (between child nodes) are normalised to the text
+  // offset at the start of the child they point at.
+  if (caret.node.nodeType !== Node.TEXT_NODE) {
+    const child = caret.node.childNodes[caret.offset] ?? null;
+    const range = document.createRange();
+    range.setStart(container, 0);
+    if (child) range.setEndBefore(child);
+    else range.selectNodeContents(container);
+    return range.toString().length;
+  }
+
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    null,
+  );
+
+  let offset = 0;
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node === caret.node) return offset + caret.offset;
+    offset += (node.nodeValue ?? "").length;
+  }
+
+  return -1;
+}
+
+/** Whether `char` is an ASCII/Unicode whitespace character. */
+function isSpace(char: string): boolean {
+  return /\s/.test(char);
 }

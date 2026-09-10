@@ -6,24 +6,16 @@ import Image from "next/image";
 import { useMemo } from "react";
 
 import { fonts } from "#_/design/styles.js";
-import {
-  breakpoints,
-  colors,
-  dims,
-  radii,
-  shadows,
-  spacing,
-  text,
-} from "#_/design/tokens.stylex.js";
+import { colors, spacing, text } from "#_/design/tokens.stylex.js";
 import { interpolated } from "#_/i18n/shared.mjs";
 import s3Logo from "#_/icons/s3.svg";
 
-import type { Providers, T } from "./client.tsx";
+import type { Providers, T } from "../client.tsx";
+import { TextField } from "../TextField.tsx";
+
 import { ProviderCard } from "./ProviderCard.tsx";
-import { TextField } from "./TextField.tsx";
 
 const styles = stylex.create({
-
   hint: {
     color: colors.grayDim,
     fontSize: text.sm,

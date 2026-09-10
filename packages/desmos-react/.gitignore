@@ -1,0 +1,12 @@
+# OS and program files
+.DS_Store
+*.sublime-*
+
+dist
+
+# ignore node_modules
+/node_modules
+
+# generated files
+index.d.ts
+index.js

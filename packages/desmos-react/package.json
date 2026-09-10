@@ -1,0 +1,60 @@
+{
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
+  "bugs": {
+    "url": "https://github.com/ysulyma/desmos-react/issues"
+  },
+  "dependencies": {
+    "@types/desmos": "^1.11.0"
+  },
+  "description": "React wrapper for Desmos",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "@types/react": "^19",
+    "react": "^19",
+    "typescript": "^7"
+  },
+  "exports": {
+    ".": {
+      "@liqvid/dev": "./src/index.tsx",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "homepage": "https://github.com/ysulyma/desmos-react#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "desmos-react",
+  "peerDependencies": {
+    "react": ">=18",
+    "typescript": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysulyma/desmos-react.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "biome check --fix"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*.d.ts"
+      ]
+    }
+  },
+  "typings": "dist/index.d.ts",
+  "version": "1.2.0"
+}

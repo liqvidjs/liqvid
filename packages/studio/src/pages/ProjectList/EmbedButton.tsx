@@ -5,6 +5,7 @@ import { CodeIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
+import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
 import { colors, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
@@ -16,7 +17,6 @@ type T = Localized<typeof TranslationsJson>;
 
 interface EmbedButtonProps {
   basePath: string;
-  productionServerPort: number;
   project: Pick<ProjectMeta, "aspectRatio" | "path">;
 }
 
@@ -33,12 +33,9 @@ const styles = stylex.create({
   },
 });
 
-export function EmbedButton({
-  basePath,
-  productionServerPort,
-  project,
-}: EmbedButtonProps) {
+export function EmbedButton({ basePath, project }: EmbedButtonProps) {
   const t = useTranslations<T>();
+  const { productionServerPort } = useLiqvidConfig();
   const handleClick = useEffectEvent(async () => {
     const previewPath = basePath
       ? `${basePath}/${project.path}`

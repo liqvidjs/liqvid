@@ -1,15 +1,7 @@
 "use client";
 import * as stylex from "@stylexjs/stylex";
 
-import {
-  breakpoints,
-  colors,
-  dims,
-  radii,
-  shadows,
-  spacing,
-  text,
-} from "#_/design/tokens.stylex.js";
+import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 
 const styles = stylex.create({
   field: {
@@ -25,7 +17,7 @@ const styles = stylex.create({
   },
 
   input: {
-    background: colors.graySubtle,
+    backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",

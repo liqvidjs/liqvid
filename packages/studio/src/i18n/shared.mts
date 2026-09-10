@@ -46,17 +46,20 @@ export function interpolated<T>(t: T): Interpolated<T> {
 
   return deep;
 }
-export type InterpolationConfig<V extends string> = {
+
+type InterpolationConfig<V extends string> = {
   _: LocalizedString;
   $: Record<V, null>;
 };
-export const isInterpolationConfig = (
+
+function isInterpolationConfig(
   value: unknown,
-): value is InterpolationConfig<string> => {
+): value is InterpolationConfig<string> {
   return (
     typeof value === "object" && value !== null && "_" in value && "$" in value
   );
-};
+}
+
 export type Localized<T> = T extends string
   ? LocalizedString
   : T extends bigint | number | boolean | null | undefined

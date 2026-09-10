@@ -1,3 +1,6 @@
+/**
+ * @file This file contains semantic styles, while
+ */
 import * as stylex from "@stylexjs/stylex";
 
 import { themed } from "./themed.tsx";
@@ -39,16 +42,9 @@ export const fonts = stylex.create({
   },
 });
 
-export const breathing = stylex.create({
+const breathing = stylex.create({
   lg: {
     marginBottom: spacing.lg,
-  },
-});
-
-export const layout = stylex.create({
-  vcenter: {
-    alignItems: "center",
-    display: "flex",
   },
 });
 

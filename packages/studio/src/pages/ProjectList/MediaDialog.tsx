@@ -12,6 +12,7 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { useMemo, useState } from "react";
 
+import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
 import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import {
@@ -39,11 +40,7 @@ type T = Localized<typeof TranslationsJson>;
 interface ShareButtonProps {
   basePath: string;
   duration: Duration;
-  productionServerPort: number;
   project: Omit<ProjectMeta, "duration">;
-
-  /** Root parameters from liqvid.json (used as fallback) */
-  rootParameters?: RootParameters;
 
   /** Currently selected root parameter values */
   selectedRootParams: Readonly<Record<string, string>>;
@@ -120,10 +117,9 @@ export function MediaButton({
   basePath,
   duration,
   project,
-  productionServerPort,
-  rootParameters = {},
   selectedRootParams,
 }: ShareButtonProps) {
+  const { rootParameters } = useLiqvidConfig();
   const t = useTranslations<T>().media;
 
   // Get only project-level parameters that differ from root
@@ -203,7 +199,6 @@ export function MediaButton({
               <ScreenshotsSection
                 basePath={basePath}
                 duration={duration}
-                productionServerPort={productionServerPort}
                 project={project}
                 selectedParams={hasAnyParameters ? selectedParams : undefined}
               />

@@ -7,7 +7,12 @@ import { ProviderConfigGitHubPages } from "./providers/hosting/github-pages.mts"
 import { ProviderConfigLiqvidStudio } from "./providers/hosting/liqvid-studio.mts";
 import { ProviderConfigS3 } from "./providers/hosting/s3.mts";
 import { ProviderConfigSFTP } from "./providers/hosting/sftp.mts";
-import { LogLevel, RenderSource, StringWithEnvVars } from "./shared.mts";
+import {
+  ColorSchemeSpecifier,
+  LogLevel,
+  RenderSource,
+  StringWithEnvVars,
+} from "./shared.mts";
 
 /** Supported locales. */
 export const Locale = Schema.Literals(["en", "fr", "es", "de", "zh"] as const);
@@ -226,7 +231,23 @@ export const LiqvidConfig = Schema.Struct({
   ui: Schema.Struct({
     /** Locale for Liqvid Studio user interface. */
     locale: Locale.pipe(Schema.withDecodingDefaultType(Effect.succeed("en"))),
-  }).pipe(Schema.optional),
+
+    /**
+     * Theme for Liqvid Studio user interface.
+     *
+     * This is NOT the same as the color scheme for videos, and has no effect on video content.
+     */
+    theme: ColorSchemeSpecifier.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed("system")),
+    ),
+  }).pipe(
+    Schema.withDecodingDefaultType(
+      Effect.succeed({
+        locale: "en",
+        theme: "system",
+      }),
+    ),
+  ),
 });
 
 export type LiqvidConfigIn = (typeof LiqvidConfig)["Encoded"];

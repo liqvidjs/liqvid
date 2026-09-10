@@ -1,6 +1,6 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 
-import { useStable } from "./react.tsx";
+import { useStable } from "./react.ts";
 
 /**
  * Get a referentially stable {@link Duration} object from a {@link DurationLike} value.

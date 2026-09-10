@@ -1,4 +1,4 @@
 {
-  "$schema": "./node_modules/@liqvid/schemas/json-schemas/liqvid-config.json",
+  "$schema": "https://liqvidjs.org/schemas/latest/liqvid-config.json",
   "providers": { }
 }

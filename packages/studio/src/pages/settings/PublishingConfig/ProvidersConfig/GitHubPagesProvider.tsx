@@ -3,23 +3,15 @@
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
-import {
-  breakpoints,
-  colors,
-  dims,
-  radii,
-  shadows,
-  spacing,
-  text,
-} from "#_/design/tokens.stylex.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 import githubLogo from "#_/icons/github.svg";
 
-import type { Providers, T } from "./client.tsx";
+import type { Providers, T } from "../client.tsx";
+import { TextField } from "../TextField.tsx";
+
 import { ProviderCard } from "./ProviderCard.tsx";
-import { TextField } from "./TextField.tsx";
 
 const styles = stylex.create({
-
   checkboxField: {
     alignItems: "center",
     cursor: "pointer",

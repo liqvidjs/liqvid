@@ -1,0 +1,27 @@
+{
+  "name": "graphing-calculator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "desmos-react": "^1.2.0",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "@types/desmos": "^1.6.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "globals": "^15.14.0",
+    "typescript": "^7",
+    "vite": "^6.0.5"
+  }
+}

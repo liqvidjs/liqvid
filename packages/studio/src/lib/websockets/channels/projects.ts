@@ -3,7 +3,7 @@ import { Schema } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
 
 /** Message sent when a project is created */
-export const NewProjectMessage = Schema.Struct({
+const NewProjectMessage = Schema.Struct({
   data: ProjectMeta,
 
   type: Schema.Literal("newProject"),
@@ -12,7 +12,7 @@ export const NewProjectMessage = Schema.Struct({
 );
 
 /** Message sent when a project is deleted */
-export const DeleteProjectMessage = Schema.Struct({
+const DeleteProjectMessage = Schema.Struct({
   data: Schema.Struct({
     /** ID of the project that was deleted */
     path: SchemaRelativeDir,
@@ -22,9 +22,9 @@ export const DeleteProjectMessage = Schema.Struct({
   Schema.annotate({ description: "Message sent when a project is deleted" }),
 );
 
-export type DeleteProjectMessage = (typeof DeleteProjectMessage)["Type"];
+// type DeleteProjectMessage = (typeof DeleteProjectMessage)["Type"];
 
-export const UpdateProjectMessage = Schema.Struct({
+const UpdateProjectMessage = Schema.Struct({
   data: ProjectMeta,
 
   type: Schema.Literal("updateProject"),

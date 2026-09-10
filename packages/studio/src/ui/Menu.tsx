@@ -18,8 +18,9 @@ import { useDialogApi } from "./Dialog";
 const styles = stylex.create({
   item: {
     alignItems: "center",
-    background: {
-      ":focus": colors.grayHover,
+    backgroundColor: {
+      ":active": colors.affordanceActive,
+      ":focus": colors.affordanceHover,
       default: null,
     },
     borderRadius: radii.sm,
@@ -38,28 +39,26 @@ const styles = stylex.create({
     userSelect: "none",
   },
   popup: {
-    background: colors.grayApp,
+    backgroundColor: colors.affordanceBg,
     borderColor: colors.graySep,
     borderRadius: radii.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     boxShadow: shadows.xl,
     minWidth: "12rem",
-    outline: "none",
-    padding: spacing.md,
   },
   positioner: {
     outline: "none",
   },
   separator: {
-    background: colors.graySep,
-    height: "1px",
+    backgroundColor: colors.graySep,
+    height: dims.sep,
     marginBlock: spacing.md,
     marginInline: spacing.zero,
   },
   trigger: {
     alignItems: "center",
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderColor: {
       ":focus": colors.accentSolid,
       default: colors.graySep,
@@ -108,6 +107,7 @@ export function MenuPositioner(
 
 export const MenuRoot = Menu.Root;
 
+/** @future */
 export const MenuSeparator = themed(Menu.Separator, styles.separator);
 
 export const MenuTrigger = extensible()(Menu.Trigger, styles.trigger);

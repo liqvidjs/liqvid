@@ -82,14 +82,12 @@ export function useFollow(): {
   return { controller, followAuthor, following };
 }
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
 /**
  * In development mode, `<TldrawRecord>` component.
  * In production mode (or preview), a `<TldrawReplay>` component.
  */
 export const TldrawAmbi = lazy(
-  IS_DEV
+  import.meta.env.DEV
     ? async () => ({
         default: function TldrawAmbi(
           props: React.ComponentProps<typeof TldrawReplay>,

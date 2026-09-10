@@ -1,7 +1,7 @@
-import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
+import type { Awaitable } from "@liqvid/utils";
 import { Effect, Option } from "effect";
 import {
   type AbsoluteDir,
@@ -10,9 +10,7 @@ import {
   RelativeFile,
 } from "effect-paths";
 
-import type { Awaitable } from "../types.mts";
-
-export function findUpwards(
+function findUpwards(
   dirname: AbsoluteDir,
   callback: (dir: AbsoluteDir) => boolean | Promise<boolean>,
 ): Promise<Option.Option<AbsoluteDir>> {
@@ -92,28 +90,6 @@ export async function walkDir(
       }
     }),
   );
-}
-
-/** Synchronously walk a directory recursively */
-export function walkDirSync(
-  /** Directory to walk */
-  dir: AbsoluteDir,
-
-  /** Callback to call for each file */
-  callback: (path: AbsoluteFile) => void,
-) {
-  const files = fs.readdirSync(dir);
-
-  for (const file of files) {
-    const qualified = path.join(dir, file);
-    const stats = fs.statSync(qualified);
-
-    if (stats.isDirectory()) {
-      walkDirSync(qualified as AbsoluteDir, callback);
-    } else if (stats.isFile()) {
-      callback(qualified as AbsoluteFile);
-    }
-  }
 }
 
 /**

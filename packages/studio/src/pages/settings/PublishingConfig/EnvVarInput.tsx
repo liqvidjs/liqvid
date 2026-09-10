@@ -4,7 +4,14 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import * as stylex from "@stylexjs/stylex";
 import { useRef, useState } from "react";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
 import type { LocalizedString } from "#_/i18n/shared.mjs";
 import { PlainString } from "#_/i18n/shared.mjs";
 import { RadioIndicator, RadioRoot } from "#_/ui/Radio.js";
@@ -27,7 +34,7 @@ const styles = stylex.create({
   },
 
   envFileHint: {
-    color: colors.grayDim,
+    color: colors.secondary,
     fontSize: text.xs,
     marginTop: spacing.xs,
   },
@@ -35,7 +42,7 @@ const styles = stylex.create({
   envRow: {
     alignItems: "center",
     display: "flex",
-    gap: spacing.md,
+    fontFamily: typeface.mono,
   },
 
   field: {
@@ -46,17 +53,18 @@ const styles = stylex.create({
   },
 
   fieldLabel: {
-    color: colors.grayDim,
+    color: colors.label,
     fontSize: text.sm,
   },
 
   fileInput: {
-    background: colors.graySubtle,
+    backgroundColor: colors.white,
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
+    fontFamily: "inherit",
     fontSize: text.sm,
     maxWidth: "10rem",
     outline: {
@@ -79,12 +87,12 @@ const styles = stylex.create({
   },
 
   input: {
-    background: colors.graySubtle,
+    backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    color: colors.grayNormal,
+    fontFamily: typeface.mono,
     fontSize: text.base,
     maxWidth: "24rem",
     outline: {
@@ -234,7 +242,7 @@ export function EnvVarInput({
               <RadioRoot value="literal">
                 <RadioIndicator />
               </RadioRoot>
-              <span>{t.valueOption}</span>
+              {t.valueOption}
             </label>
 
             {mode === "literal" && (
@@ -250,12 +258,12 @@ export function EnvVarInput({
         )}
 
         <div sx={styles.radioOption}>
-          <span sx={styles.radioLabel}>
+          <label sx={styles.radioLabel}>
             <RadioRoot value="env">
               <RadioIndicator />
             </RadioRoot>
-            <span>{t.envVarOption}</span>
-          </span>
+            {t.envVarOption}
+          </label>
 
           {mode === "env" && (
             <div sx={styles.envFields}>

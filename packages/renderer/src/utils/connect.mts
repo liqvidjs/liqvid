@@ -2,7 +2,7 @@
 
 import { range } from "@liqvid/utils";
 import { Cause, Effect } from "effect";
-import type { AbsoluteFile, AbsolutePath } from "effect-paths";
+import type { AbsoluteFile } from "effect-paths";
 import type * as Puppeteer from "puppeteer-core";
 
 import type { ColorScheme, RenderMode } from "../types.mts";

@@ -165,10 +165,7 @@ function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
 /**
  * Determine whether `latest` is a newer version than `current`.
  */
-export function isNewer(
-  current: VersionString,
-  latest: VersionString,
-): boolean {
+function isNewer(current: VersionString, latest: VersionString): boolean {
   const c = parseVersion(current);
   const l = parseVersion(latest);
   if (!c || !l) return false;
@@ -254,7 +251,7 @@ const getLatestVersion = Effect.fnUntraced(function* (name: PackageName) {
  * server state. Never fails — errors (offline, registry errors, missing
  * `package.json`) leave the previous {@link UpdateInfo} untouched.
  */
-export const checkForUpdates = Effect.fnUntraced(
+const checkForUpdates = Effect.fnUntraced(
   function* () {
     const fs = yield* FileSystem.FileSystem;
     const state = getServerState();

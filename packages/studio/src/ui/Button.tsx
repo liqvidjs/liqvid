@@ -6,6 +6,27 @@ import type { LocalizedString } from "#_/i18n/shared.mjs";
 const styles = stylex.create({
   button: {
     alignItems: "center",
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
+    cursor: {
+      ":disabled": "default",
+      default: "pointer",
+    },
+    display: "flex",
+    fontSize: text.base,
+    gap: spacing.sm,
+    opacity: {
+      ":disabled": 0.3,
+      default: null,
+    },
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+    rowGap: spacing.md,
+    transition: "background-color 0.10s",
+  },
+
+  default: {
     backgroundColor: {
       ":active:enabled": colors.btnBgActive,
       ":disabled": colors.btnBg,
@@ -13,36 +34,44 @@ const styles = stylex.create({
       default: colors.btnBg,
     },
     borderColor: colors.btnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-
     color: {
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
     },
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
+  },
+
+  primary: {
+    backgroundColor: {
+      ":active:enabled": colors.accentActive,
+      ":hover:enabled": colors.accentHover,
+      default: colors.accentSolid,
     },
-    display: "flex",
-    fontSize: text.md,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
+    borderColor: colors.accentActive,
+    color: colors.white,
   },
 });
 
 export function Button({
-  className,
+  kind = "default",
+  style,
   ...props
-}: React.ComponentProps<"button"> & {
+}: Omit<React.ComponentProps<"button">, "className" | "style"> & {
+  kind?: "default" | "primary";
+
+  style?: stylex.StaticStyles<{
+    marginTop?: string | number;
+    marginLeft?: string | number;
+    marginRight?: string | number;
+    marginBottom?: string | number;
+  }>;
   title?: LocalizedString;
 }) {
   return (
     // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined
-    <button type="button" {...props} sx={styles.button} />
+    <button
+      type="button"
+      {...props}
+      sx={[styles.button, styles[kind], style]}
+    />
   );
 }
