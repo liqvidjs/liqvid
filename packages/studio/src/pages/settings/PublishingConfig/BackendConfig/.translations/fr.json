@@ -1,5 +1,7 @@
 {
-  "language": "Langue",
-  "languageDescription": "Choisissez la langue de l'interface de Liqvid Studio.",
-  "title": "Paramètres"
+  "contentBackend": "Backend contenu",
+  "description": "Choisissez les fournisseurs qui hébergeront votre contenu et vos fichiers média.",
+  "mediaBackend": "Backend média",
+  "notConfigured": "Not configured",
+  "title": "Backend"
 }

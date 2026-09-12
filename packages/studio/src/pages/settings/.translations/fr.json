@@ -1,5 +1,7 @@
 {
-  "language": "Langue",
-  "languageDescription": "Choisissez la langue de l'interface de Liqvid Studio.",
+  "description": {
+    "_": "Les changements effectués ici seront enregistrés dans {filename}.",
+    "$": { "filename": null }
+  },
   "title": "Paramètres"
 }

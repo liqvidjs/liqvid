@@ -3,6 +3,7 @@
 import * as stylex from "@stylexjs/stylex";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
+import { fonts } from "#_/design/styles.js";
 import { spacing } from "#_/design/tokens.stylex.js";
 
 import type { Providers, T } from "../client.tsx";
@@ -44,6 +45,7 @@ export function CopyProvider({
         label={t.copyDestination}
         onChange={(v) => onChange({ ...value, destination: v })}
         placeholder="./dist"
+        style={fonts.filenameInput}
         value={destination}
       />
       <label sx={styles.checkboxField}>

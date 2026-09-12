@@ -3,6 +3,7 @@
 :root {
   font-family: "Inter Variable", Arial, Helvetica, sans-serif;
   font-size: 18px;
+  line-height: 1.5;
 
   /* stone-750 */
   background: light-dark(var(--color-zinc-50), var(--color-zinc-900));

@@ -39,6 +39,12 @@ export function interpolated<T>(t: T): Interpolated<T> {
           }),
         );
       }) as Interpolated<T>[typeof key];
+    } else if (
+      typeof value === "object" &&
+      value !== null &&
+      "$$typeof" in value
+    ) {
+      deep[key] = value as Interpolated<T>[typeof key];
     } else {
       deep[key] = interpolated(value) as Interpolated<T>[typeof key];
     }
@@ -52,7 +58,7 @@ type InterpolationConfig<V extends string> = {
   $: Record<V, null>;
 };
 
-function isInterpolationConfig(
+export function isInterpolationConfig(
   value: unknown,
 ): value is InterpolationConfig<string> {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import type { SettingsConfig } from "#_/api/contract.mjs";
-import { Description } from "#_/design/styles.js";
+import { typography } from "#_/design/styles.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 
@@ -37,33 +37,39 @@ export function ProvidersConfigClient({ t }: { t: T }) {
   return (
     <FieldSet>
       <Legend>{t.providers}</Legend>
-      <Description>{t.providersDescription}</Description>
+      <p sx={typography.description}>{t.providersDescription}</p>
 
       <CopyProvider
         onChange={(v) => setProvider("copy", v)}
         t={t}
         value={providers.copy}
       />
-      <GitHubPagesProvider
-        onChange={(v) => setProvider("githubPages", v)}
-        t={t}
-        value={providers.githubPages}
-      />
-      <LiqvidStudioProvider
-        onChange={(v) => setProvider("liqvidStudio", v)}
-        t={t}
-        value={providers.liqvidStudio}
-      />
+      {false && (
+        <GitHubPagesProvider
+          onChange={(v) => setProvider("githubPages", v)}
+          t={t}
+          value={providers.githubPages}
+        />
+      )}
+      {false && (
+        <LiqvidStudioProvider
+          onChange={(v) => setProvider("liqvidStudio", v)}
+          t={t}
+          value={providers.liqvidStudio}
+        />
+      )}
       <S3Provider
         onChange={(v) => setProvider("s3", v)}
         t={t}
         value={providers.s3}
       />
-      <SftpProvider
-        onChange={(v) => setProvider("sftp", v)}
-        t={t}
-        value={providers.sftp}
-      />
+      {false && (
+        <SftpProvider
+          onChange={(v) => setProvider("sftp", v)}
+          t={t}
+          value={providers.sftp}
+        />
+      )}
     </FieldSet>
   );
 }

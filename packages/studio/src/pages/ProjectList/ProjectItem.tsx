@@ -167,18 +167,18 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
  */
 function interpolatePathParametersWithSelected(
   path: string,
-  projectParameters: Record<string, readonly string[]> | undefined,
-  selectedRootParams: Record<string, string>,
+  projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
+  selectedRootParams: Readonly<Record<string, string>>,
 ): string {
   // Match all path parameters like [lang], [id], etc.
   return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
-    // First, try project-level parameters (use first value as default)
-    if (projectParameters?.[paramName]?.length) {
-      return projectParameters[paramName][0]!;
-    }
-    // Fall back to selected root parameter value
+    // Root params
     if (selectedRootParams[paramName]) {
       return selectedRootParams[paramName];
+    }
+    // First value of project params
+    if (projectParameters?.[paramName]?.length) {
+      return projectParameters[paramName][0]!;
     }
     // If no value found, keep the original
     return match;

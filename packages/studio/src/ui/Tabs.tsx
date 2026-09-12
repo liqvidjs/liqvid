@@ -6,7 +6,14 @@ import clsx from "clsx";
 import type { ReactElement } from "react";
 import { Children, cloneElement, isValidElement } from "react";
 
-import { colors, radii, spacing, typeface } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  radii,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex.js";
+import type { NonCustomizable } from "#_/types/misc.mjs";
 
 const styles = stylex.create({
   content: {
@@ -33,9 +40,9 @@ const styles = stylex.create({
     columnGap: spacing.md,
     display: "inline-flex",
     fontFamily: typeface.ui,
-    fontWeight: 500,
-    paddingBlock: spacing.xs,
-    paddingInline: spacing.lg,
+    fontSize: "var(--font-size)",
+    paddingBlock: "var(--padding-block)",
+    paddingInline: "var(--padding-inline)",
     rowGap: spacing.md,
   },
   tabsTriggerActive: {
@@ -47,17 +54,33 @@ const styles = stylex.create({
   },
 });
 
+const sizeVariants = stylex.create({
+  normal: {
+    "--font-size": text.base,
+    "--padding-block": spacing.sm,
+    "--padding-inline": spacing.md,
+  },
+  small: {
+    "--font-size": text.sm,
+    "--padding-block": spacing.xs,
+    "--padding-inline": spacing.sm,
+  },
+});
+
 function Tabs({
-  style: inlineStyle,
+  className: _,
+  size = "normal",
+  style,
   ...props
-}: Omit<React.ComponentProps<typeof TabsPrimitive.Root>, "className">) {
-  const sx = stylex.props(styles.root);
+}: NonCustomizable<React.ComponentProps<typeof TabsPrimitive.Root>> & {
+  size?: "small" | "normal";
+  style?: stylex.StyleXStyles;
+}) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
       {...props}
-      className={sx.className}
-      style={{ ...sx.style, ...(inlineStyle as React.CSSProperties) }}
+      {...stylex.props(styles.root, sizeVariants[size], style)}
     />
   );
 }

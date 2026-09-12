@@ -1,5 +1,7 @@
 "use client";
 
+import * as stylex from "@stylexjs/stylex";
+
 import { fonts } from "#_/design/styles.js";
 import { interpolated, type Localized, PlainString } from "#_/i18n/shared.mjs";
 import { EnvVarInput } from "#_/pages/settings/PublishingConfig/EnvVarInput.js";
@@ -20,7 +22,9 @@ export function BasePathConfigClient({ t }: { t: T }) {
       <Legend>{t.title}</Legend>
       <p sx={fonts.description}>
         {$t.description({
-          var: <var sx={fonts.var}>{PlainString("basePath")}</var>,
+          var: (
+            <var {...stylex.props(fonts.var)}>{PlainString("basePath")}</var>
+          ),
         })}
       </p>
 

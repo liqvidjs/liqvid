@@ -1,26 +1,3 @@
 {
-  "apply": "Appliquer",
-  "back": "Retour",
-  "cancel": "Annuler",
-  "close": "Fermer",
-  "confirm": "Confirmer",
-  "copy": "Copier",
-  "dark": "Sombre",
-  "delete": "Supprimer",
-  "dismiss": "Ignorer",
-  "done": "Terminé",
-  "edit": "Modifier",
-  "error": "Erreur",
-  "light": "Clair",
-  "loading": "Chargement",
-  "next": "Suivant",
-  "no": "Non",
-  "ok": "OK",
-  "open": "Ouvrir",
-  "remove": "Retirer",
-  "reset": "Réinitialiser",
-  "retry": "Réessayer",
-  "save": "Enregistrer",
-  "search": "Rechercher",
-  "yes": "Oui"
+  "close": "Fermer"
 }

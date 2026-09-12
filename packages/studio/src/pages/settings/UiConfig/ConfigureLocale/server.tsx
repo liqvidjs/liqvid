@@ -1,4 +1,4 @@
-import { Description } from "#_/design/styles.js";
+import { typography } from "#_/design/styles.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 import { getLocale, getTranslations } from "#_/utils/i18n.mjs";
@@ -17,7 +17,7 @@ export async function ConfigureLocale() {
   return (
     <FieldSet>
       <Legend>{t.heading}</Legend>
-      <Description>{t.description}</Description>
+      <p sx={typography.description}>{t.description}</p>
       <ConfigureLocaleClient locale={locale} />
     </FieldSet>
   );

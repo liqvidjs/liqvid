@@ -30,7 +30,6 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     gap: spacing.sm,
-    marginTop: spacing.sm,
   },
 
   envFileHint: {
@@ -49,16 +48,16 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     gap: spacing.xs,
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
 
   fieldLabel: {
-    color: colors.label,
+    color: colors.grayDim,
     fontSize: text.sm,
   },
 
   fileInput: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
     borderRadius: radii.lg,
     borderStyle: "solid",

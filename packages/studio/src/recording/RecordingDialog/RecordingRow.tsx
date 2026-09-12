@@ -70,6 +70,7 @@ const styles = stylex.create({
   },
 
   pluginIcons: {
+    backgroundColor: "blue",
     marginLeft: spacing.auto,
   },
 

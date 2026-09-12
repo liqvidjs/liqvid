@@ -380,7 +380,7 @@ export const colors = stylex.defineVars({
   dialog: `light-dark(white, ${scales.stone800})`,
 
   /** dialog backdrop */
-  dialogBackdrop: "rgb(0 0 0 / 0.5)",
+  dialogBackdrop: "rgb(0 0 0 / 0.15)",
 
   /** dialog close button colors */
   dialogCloseBgHover: "light-dark(#111827, #f9fafb)",
@@ -426,12 +426,12 @@ export const colors = stylex.defineVars({
   nestedFolderHeaderBg: "light-dark(#f9fafb, #1f2937)",
   overlayDark: "#0007",
 
-  /** recording toggle active */
-  recordingActive: "red",
-
   /** recording state (shortcut input) */
   recordingInputBg: "light-dark(#fffbe6, #3d3800)",
   recordingInputBorder: "light-dark(#d9a600, #665000)",
+
+  /** recording toggle active */
+  recordingPluginActive: "red",
 
   secondary: `light-dark(${scales.zinc400}, ${scales.zinc600})`,
 
@@ -502,6 +502,10 @@ export const text = stylex.defineConsts({
   xl: "60px",
   huge: "80px",
   mega: "100px",
+});
+
+export const opacity = stylex.defineConsts({
+  disabled: 0.4,
 });
 
 export const typeface = stylex.defineConsts({

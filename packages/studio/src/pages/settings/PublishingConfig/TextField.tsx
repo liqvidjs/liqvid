@@ -42,11 +42,15 @@ export function TextField({
   label,
   onChange,
   placeholder,
+  style,
   value,
 }: {
   label: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  style?: stylex.StyleXStyles<{
+    fontFamily?: string;
+  }>;
   value: string | undefined;
 }) {
   return (
@@ -55,7 +59,7 @@ export function TextField({
       <input
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        sx={styles.input}
+        sx={[styles.input, style]}
         type="text"
         value={value}
       />

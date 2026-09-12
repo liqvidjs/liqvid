@@ -59,16 +59,20 @@ const styles = stylex.create({
   },
 
   recordingToggle: {
-    backgroundColor: colors.grayUi,
+    alignItems: "center",
+    backgroundColor: colors.grayDim,
     borderRadius: radii.md,
     cursor: "pointer",
+    display: "inline-flex",
     height: "36px",
+    justifyContent: "center",
+    textAlign: "center",
     transition: "unset",
     width: "36px",
   },
 
   recordingToggleChecked: {
-    backgroundColor: colors.recordingActive,
+    backgroundColor: colors.recordingPluginActive,
   },
 
   togglePlugins: {
@@ -218,7 +222,7 @@ export function RecordingDialog({
       <DockableDialog.Header>{t.title}</DockableDialog.Header>
       <DockableDialog.Content>
         <div>
-          <Tabs onValueChange={setActiveTab} value={activeTab}>
+          <Tabs onValueChange={setActiveTab} size="small" value={activeTab}>
             <TabsList style={{ fontSize: "16px" }}>
               <TabsTrigger
                 className="lv-recording-tabs"

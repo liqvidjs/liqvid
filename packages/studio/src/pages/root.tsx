@@ -38,12 +38,12 @@ const styles = stylex.create({
       default: text.lg,
     },
     fontWeight: "bold",
+    translate: "0 -.1ex",
   },
   headerRow: {
     alignItems: "center",
     columnGap: spacing.xl,
     display: "flex",
-    marginBottom: spacing.xl,
     rowGap: spacing.xl,
   },
   main: {

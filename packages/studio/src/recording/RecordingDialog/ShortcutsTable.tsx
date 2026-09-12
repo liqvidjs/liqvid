@@ -34,6 +34,7 @@ const styles = stylex.create({
     borderColor: colors.graySep,
     borderStyle: "solid",
     borderWidth: dims.sep,
+    fontSize: text.md,
     paddingBlock: spacing.lg,
     paddingInline: spacing.lg,
     textAlign: "left",
@@ -93,11 +94,11 @@ const styles = stylex.create({
   },
 });
 
-const shortcutCommands: [string, ShortcutKey][] = [
-  ["Toggle panel", "toggle"],
-  ["Start/Stop recording", "startStop"],
-  ["Pause recording", "pause"],
-  ["Discard recording", "discard"],
+const shortcutCommands: ShortcutKey[] = [
+  "toggle",
+  "startStop",
+  "pause",
+  "discard",
 ];
 
 /** @package */
@@ -119,10 +120,10 @@ export function ShortcutsTable({
         </tr>
       </thead>
       <tbody>
-        {shortcutCommands.map(([label, key]) => (
+        {shortcutCommands.map((key) => (
           <ShortcutRow
             key={key}
-            label={label}
+            label={t.values[key]}
             onChange={
               onShortcutChange
                 ? (value) => onShortcutChange(key, value)

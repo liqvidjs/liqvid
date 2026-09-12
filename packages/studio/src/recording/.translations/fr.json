@@ -1,0 +1,24 @@
+{
+  "tabs": {
+    "configuration": {
+      "subtitle": "Plugins",
+      "title": "Configuration"
+    },
+    "saved": {
+      "subtitle": "Sauvegardé",
+      "title": "Enregistrements"
+    },
+    "shortcuts": {
+      "command": "Commande",
+      "shortcut": "Raccourci",
+      "title": "Raccourcis",
+      "values": {
+        "discard": "Abandonner l'enregistrement",
+        "pause": "Pauser l'enregistrement",
+        "startStop": "Démarrer/arrêter l'enregistrement",
+        "toggle": "Basculer le panneau"
+      }
+    }
+  },
+  "title": "Enregistrement"
+}

@@ -1,5 +1,6 @@
 {
-  "language": "Langue",
-  "languageDescription": "Choisissez la langue de l'interface de Liqvid Studio.",
-  "title": "Paramètres"
+  "description": "",
+  "save": "Sauvegarder",
+  "saveError": "Enregistrement échoué",
+  "title": "Publication"
 }

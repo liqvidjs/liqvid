@@ -94,6 +94,19 @@ const styles = stylex.create({
   },
 });
 
+const triggerSizes = stylex.create({
+  normal: {
+    fontSize: text.md,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
+  },
+  small: {
+    fontSize: text.sm,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+  },
+});
+
 export const SelectBackdrop = Select.Backdrop;
 export const SelectItem = themed(Select.Item, styles.item);
 export const SelectItemText = themed(Select.ItemText, styles.itemText);
@@ -102,7 +115,9 @@ export const SelectPopup = themed(Select.Popup, styles.popup);
 export const SelectPortal = Select.Portal;
 export const SelectPositioner = Select.Positioner;
 
-export function SelectRoot(props: React.ComponentProps<typeof Select.Root>) {
+export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
+  props: React.ComponentProps<typeof Select.Root<Value, Multiple>>,
+) {
   return (
     <IconContext.Provider value={{ size: 16 }}>
       <Select.Root {...props} />
@@ -110,7 +125,24 @@ export function SelectRoot(props: React.ComponentProps<typeof Select.Root>) {
   );
 }
 
-export const SelectTrigger = extensible()(Select.Trigger, styles.trigger);
+export const SelectTrigger = function SelectTrigger({
+  className: _,
+  size = "normal",
+  ...props
+}: Omit<React.ComponentProps<typeof Select.Trigger>, "className"> & {
+  className?: {
+    __error: "pass styles via `style` prop instead";
+  };
+  size?: keyof typeof triggerSizes;
+  style?: stylex.StyleXStyles;
+}) {
+  return (
+    <Select.Trigger
+      {...props}
+      {...stylex.props(styles.trigger, triggerSizes[size])}
+    />
+  );
+};
 
 export function SelectValue(
   props: Omit<React.ComponentProps<typeof Select.Value>, "children"> & {

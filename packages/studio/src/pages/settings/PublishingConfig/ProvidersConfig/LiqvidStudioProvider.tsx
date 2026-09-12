@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+
+import logo from "../../../../logo.png";
 import type { Providers, T } from "../client.tsx";
 import { TextField } from "../TextField.tsx";
 
@@ -17,6 +20,7 @@ export function LiqvidStudioProvider({
   return (
     <ProviderCard
       enabled={value !== undefined}
+      icon={<Image alt="" height={24} src={logo} width={24} />}
       onToggle={(enabled) => onChange(enabled ? { username: "" } : undefined)}
       title={t.providerLiqvidStudio}
     >

@@ -3,7 +3,10 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import chalk from "chalk";
+import { Effect, Option } from "effect";
+import { Argument, Command, Flag } from "effect/unstable/cli";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -248,11 +251,10 @@ function printDiscrepancies(
 }
 
 // ---------------------------------------------------------------------------
-// Unused-key detection
+// Unused-key detection (TypeScript-based)
 // ---------------------------------------------------------------------------
 
-/** Source extensions to search when looking for `en.json` consumers. */
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".mts", ".mtsx"]);
+import { type Node, Project, SyntaxKind } from "ts-morph";
 
 /**
  * Collect all leaf key-paths from a JSON value.
@@ -286,337 +288,576 @@ function collectLeafKeyPaths(
   }
 }
 
+/** Lazily created ts-morph project, shared across all `.translations` dirs. */
+let _project: Project | undefined;
+
 /**
- * Collect all intermediate (non-leaf) key-paths from a JSON value.
- * These represent sub-objects that code may access as a whole
- * (e.g. `useTranslations<T>().renders`).
+ * Get or create the ts-morph project for the studio package.
+ * Created lazily and cached for the lifetime of the process.
  */
-function collectBranchKeyPaths(
-  value: Json,
+function getProject(root: AbsoluteDir): Project {
+  if (_project) return _project;
+
+  const tsConfigFilePath = path.join(
+    root,
+    RelativeFile("tsconfig.json"),
+  ) as string;
+
+  _project = new Project({ tsConfigFilePath });
+  return _project;
+}
+
+/**
+ * Resolve the source file of a JSX component by finding its import declaration
+ * in the given source file.
+ */
+function resolveComponentFile(
+  componentName: string,
+  fromFile: import("ts-morph").SourceFile,
+): import("ts-morph").SourceFile | undefined {
+  for (const imp of fromFile.getImportDeclarations()) {
+    for (const ni of imp.getNamedImports()) {
+      if (ni.getName() === componentName) {
+        return imp.getModuleSpecifierSourceFile();
+      }
+    }
+    // Default import
+    const defaultImport = imp.getDefaultImport();
+    if (defaultImport?.getText() === componentName) {
+      return imp.getModuleSpecifierSourceFile();
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Given a variable/parameter declaration node, follow all references to it and
+ * collect the translation key-paths that are accessed.
+ *
+ * @param declNode - The declaration node (VariableDeclaration, BindingElement,
+ *   or Parameter) whose references to follow.
+ * @param prefix - A key-path prefix to prepend to all discovered keys (used
+ *   when the variable holds a sub-object, e.g. `useTranslations<T>().renders`).
+ * @param allLeafKeys - The full set of leaf keys from the JSON, used for
+ *   conservative marking when dynamic access is detected.
+ * @param referenced - Accumulator set for all referenced key-paths.
+ * @param visited - Set of already-visited file paths to prevent cycles.
+ */
+function followReferences(
+  declNode: Node,
   prefix: string,
-  out: Set<string>,
+  allLeafKeys: Set<string>,
+  referenced: Set<string>,
+  visited: Set<string>,
 ): void {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  let refs: Node[];
+  try {
+    refs = declNode.findReferencesAsNodes();
+  } catch {
     return;
   }
 
-  const keys = Object.keys(value);
-  if (keys.some((k) => INTERPOLATION_KEYS.has(k))) return;
+  for (const ref of refs) {
+    const parent = ref.getParent();
+    if (!parent) continue;
 
-  if (prefix) out.add(prefix);
+    const parentKind = parent.getKind();
 
-  for (const key of keys) {
-    const childPath = prefix ? `${prefix}.${key}` : key;
-    collectBranchKeyPaths(value[key]!, childPath, out);
-  }
-}
-
-/**
- * Recursively find all source files (`.ts`, `.tsx`, `.mts`) under a directory,
- * skipping ignored directories.
- */
-async function findSourceFiles(root: AbsoluteDir): Promise<AbsoluteFile[]> {
-  const found: AbsoluteFile[] = [];
-
-  const walk = async (dir: AbsoluteDir): Promise<void> => {
-    let entries: import("node:fs").Dirent[];
-    try {
-      entries = await fsp.readdir(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-
-    await Promise.all(
-      entries.map(async (entry) => {
-        if (entry.isDirectory()) {
-          if (IGNORED_DIRS.has(entry.name)) return;
-          if (entry.name === TRANSLATIONS_DIR) return;
-          await walk(path.join(dir, RelativeDir(entry.name)));
-          return;
-        }
-        if (entry.isFile() && SOURCE_EXTENSIONS.has(path.extname(entry.name))) {
-          found.push(path.join(dir, RelativeFile(entry.name)));
-        }
-      }),
-    );
-  };
-
-  await walk(root);
-  return found;
-}
-
-/**
- * Find source files that import the given `en.json` file by resolving their
- * relative import specifiers.
- *
- * Matches patterns like:
- *   import type TranslationsJson from "./.translations/en.json";
- *   import TranslationsJson from "../.translations/en.json" with { type: "json" };
- *   import TranslationsJson from "#_/.translations/en.json";
- */
-async function findConsumers(
-  enJsonFile: AbsoluteFile,
-  root: AbsoluteDir,
-): Promise<AbsoluteFile[]> {
-  const sourceFiles = await findSourceFiles(root);
-  const consumers: AbsoluteFile[] = [];
-
-  // Regex matches any import (type or value) from a path ending in en.json.
-  const importRe =
-    /import\s+(?:type\s+)?\w+\s+from\s+["']([^"']*\/en\.json)["']/g;
-
-  await Promise.all(
-    sourceFiles.map(async (file) => {
-      let contents: string;
-      try {
-        contents = await fsp.readFile(file, "utf8");
-      } catch {
-        return;
-      }
-
-      for (const match of contents.matchAll(importRe)) {
-        const specifier = match[1]!;
-
-        // Skip subpath imports (e.g. `#_/.translations/en.json`) — these
-        // resolve relative to the package root, not the importing file.
-        // We resolve them against root + the portion after `#_/`.
-        let resolved: string;
-        if (specifier.startsWith("#")) {
-          // Strip the `#_/` prefix (or similar) and resolve from root.
-          const stripped = specifier.replace(/^#[^/]*\//, "");
-          resolved = path.resolve(root as string, stripped);
-        } else {
-          resolved = path.resolve(path.dirname(file), specifier);
-        }
-
-        if (resolved === (enJsonFile as string)) {
-          consumers.push(file);
-          break; // No need to check further imports in the same file.
-        }
-      }
-    }),
-  );
-
-  return consumers;
-}
-
-/**
- * Extract all translation key-paths referenced in a source file.
- *
- * Handles these patterns:
- * 1. `t.foo.bar` — dot-access chains on `t`
- * 2. `t["foo"]` / `t['foo']` — bracket access
- * 3. `useTranslations<T>().renders` — sub-object extraction, then dot access
- * 4. Template-literal bracket access: `t[\`shortcut_${key}\`]` — treated as
- *    a wildcard (marks all top-level keys matching the prefix as used)
- *
- * The function is intentionally generous: it scans for property-access patterns
- * on any identifier named `t`, `c`, or `common` (the conventional names),
- * plus patterns where `useTranslations<T>()` or `getTranslations<T>(...)` is
- * immediately followed by a dot-access chain.
- */
-function extractReferencedKeys(
-  source: string,
-  allLeafKeys: Set<string>,
-  allBranchKeys: Set<string>,
-): Set<string> {
-  const referenced = new Set<string>();
-
-  // --- Step 1: Find sub-object extractions ---
-  // Patterns like `const t = useTranslations<T>().renders.rename;`
-  // or `const t = (await getTranslations<T>(...)).foo;`
-  // These establish that `t` actually refers to a sub-tree.
-  //
-  // We build a map: variable-scope-free prefix → the prefix from the JSON.
-  // For simplicity we track these as a list of prefixes that `t` might resolve
-  // to, then prepend them when we see `t.key`.
-  const prefixes: string[] = [""];
-
-  // Match `useTranslations<T>().a.b.c` or `getTranslations<T>(...)).a.b`
-  const subObjectRe =
-    /(?:useTranslations|getTranslations)\s*<[^>]*>\s*\([^)]*\)\s*\)?\s*((?:\.\w+)+)/g;
-  for (const match of source.matchAll(subObjectRe)) {
-    const chain = match[1]!;
-    const prefix = chain.split(".").filter(Boolean).join(".");
-    if (prefix) {
-      prefixes.push(prefix);
-    }
-  }
-
-  // --- Step 2: Extract property-access chains on `t` / `c` / `common` ---
-  // We look for identifiers followed by `.prop` or `["prop"]` chains.
-  // The identifiers we care about are `t`, `c`, and `common`.
-  //
-  // This regex captures the start of a chain: an identifier followed by a
-  // dot or bracket. We then iteratively extend the chain.
-  const chainStartRe =
-    /\b(t|c|common)\s*(?:\.\s*(\w+)|\[\s*["'](\w+)["']\s*\])/g;
-
-  for (const match of source.matchAll(chainStartRe)) {
-    const firstKey = match[2] ?? match[3]!;
-    let chain = firstKey;
-
-    // Continue extending the chain from the end of this match.
-    let pos = match.index + match[0].length;
-    while (pos < source.length) {
-      // Skip whitespace.
-      while (pos < source.length && /\s/.test(source[pos]!)) pos++;
-
-      if (source[pos] === ".") {
-        pos++;
-        while (pos < source.length && /\s/.test(source[pos]!)) pos++;
-        const propMatch = source.slice(pos).match(/^(\w+)/);
-        if (propMatch) {
-          chain += `.${propMatch[1]}`;
-          pos += propMatch[1]!.length;
+    // --- Property access: t.foo or t.foo.bar ---
+    if (parentKind === SyntaxKind.PropertyAccessExpression) {
+      // Walk up the full chain: t.foo.bar.baz
+      let topAccess = parent;
+      while (
+        topAccess.getParent()?.getKind() === SyntaxKind.PropertyAccessExpression
+      ) {
+        const grandparent = topAccess.getParent()!;
+        // Only continue if we're the expression (left side) of the parent
+        // PropertyAccessExpression, not the name (right side).
+        const parentPAE = grandparent.asKindOrThrow(
+          SyntaxKind.PropertyAccessExpression,
+        );
+        if (parentPAE.getExpression() === topAccess) {
+          topAccess = grandparent;
         } else {
           break;
         }
-      } else if (source[pos] === "[") {
-        const bracketMatch = source
-          .slice(pos)
-          .match(/^\[\s*["'](\w+)["']\s*\]/);
-        if (bracketMatch) {
-          chain += `.${bracketMatch[1]}`;
-          pos += bracketMatch[0].length;
-        } else {
-          break;
+      }
+
+      // Extract the chain of property names from the bottom up
+      const chain: string[] = [];
+      let cur = topAccess;
+      while (cur.getKind() === SyntaxKind.PropertyAccessExpression) {
+        const pae = cur.asKindOrThrow(SyntaxKind.PropertyAccessExpression);
+        chain.unshift(pae.getName());
+        cur = pae.getExpression();
+      }
+
+      if (chain.length > 0) {
+        const fullPath = prefix
+          ? `${prefix}.${chain.join(".")}`
+          : chain.join(".");
+        referenced.add(fullPath);
+
+        // Also mark all ancestor paths as referenced.
+        const parts = fullPath.split(".");
+        for (let i = 1; i < parts.length; i++) {
+          referenced.add(parts.slice(0, i).join("."));
         }
-      } else {
-        break;
       }
+      continue;
     }
 
-    // For each possible prefix, mark the full key path as referenced.
-    for (const prefix of prefixes) {
-      const fullPath = prefix ? `${prefix}.${chain}` : chain;
-      referenced.add(fullPath);
-
-      // Also mark all ancestor paths as referenced (if code accesses
-      // `t.renders`, that implicitly uses the `renders` branch).
-      const parts = fullPath.split(".");
-      for (let i = 1; i < parts.length; i++) {
-        referenced.add(parts.slice(0, i).join("."));
+    // --- Element access with string literal: t["foo"] ---
+    if (parentKind === SyntaxKind.ElementAccessExpression) {
+      const eae = parent.asKindOrThrow(SyntaxKind.ElementAccessExpression);
+      const arg = eae.getArgumentExpression();
+      if (arg?.getKind() === SyntaxKind.StringLiteral) {
+        const key = arg
+          .asKindOrThrow(SyntaxKind.StringLiteral)
+          .getLiteralValue();
+        const fullPath = prefix ? `${prefix}.${key}` : key;
+        referenced.add(fullPath);
+      } else if (arg) {
+        // Dynamic bracket access — conservatively mark all leaf keys under
+        // the current prefix as referenced.
+        for (const key of allLeafKeys) {
+          if (prefix ? key.startsWith(`${prefix}.`) : !key.includes(".")) {
+            referenced.add(key);
+          }
+        }
+        // Also mark all top-level keys without prefix for unprefixed access.
+        if (!prefix) {
+          for (const key of allLeafKeys) {
+            if (!key.includes(".")) referenced.add(key);
+          }
+        }
       }
+      continue;
     }
-  }
 
-  // --- Step 3: Handle dynamic bracket access ---
-  // Patterns like `t[code]` or `t[\`shortcut_${key}\`]` — we cannot know the
-  // exact key at static analysis time, so we conservatively mark all leaf keys
-  // as referenced if we detect dynamic bracket access on `t`.
-  const dynamicBracketRe = /\b(t|c|common)\s*\[\s*(?!["'])/g;
-  if (dynamicBracketRe.test(source)) {
-    // Mark every top-level leaf key as referenced (conservative).
-    for (const key of allLeafKeys) {
-      if (!key.includes(".")) {
-        referenced.add(key);
+    // --- JSX attribute: t={t} or similar prop passing ---
+    if (parentKind === SyntaxKind.JsxExpression) {
+      const jsxExpr = parent;
+      const attr = jsxExpr.getParent();
+      if (attr?.getKind() === SyntaxKind.JsxAttribute) {
+        // Find the JSX element this attribute belongs to.
+        const attrList = attr.getParent();
+        const element = attrList?.getParent();
+        const tagNameNode =
+          element?.getKind() === SyntaxKind.JsxOpeningElement
+            ? element
+                .asKindOrThrow(SyntaxKind.JsxOpeningElement)
+                .getTagNameNode()
+            : element?.getKind() === SyntaxKind.JsxSelfClosingElement
+              ? element
+                  .asKindOrThrow(SyntaxKind.JsxSelfClosingElement)
+                  .getTagNameNode()
+              : null;
+
+        if (tagNameNode) {
+          const componentName = tagNameNode.getText();
+          const sourceFile = ref.getSourceFile();
+          const targetFile = resolveComponentFile(componentName, sourceFile);
+
+          if (targetFile) {
+            const targetPath = targetFile.getFilePath();
+            const visitKey = `${targetPath}:${prefix}`;
+            if (!visited.has(visitKey)) {
+              visited.add(visitKey);
+              // Find the prop parameter in the target component.
+              const propName = attr
+                .asKindOrThrow(SyntaxKind.JsxAttribute)
+                .getNameNode()
+                .getText();
+              followPropsInFile(
+                targetFile,
+                propName,
+                prefix,
+                allLeafKeys,
+                referenced,
+                visited,
+              );
+            }
+          }
+        }
       }
+      continue;
     }
-    // Also check for prefixed dynamic access: `t.tabs[dynamicKey]`
-    const prefixedDynamicRe = /\b(?:t|c|common)((?:\.\w+)+)\s*\[\s*(?!["'])/g;
-    for (const match of source.matchAll(prefixedDynamicRe)) {
-      const prefix = match[1]!.split(".").filter(Boolean).join(".");
-      // Mark all leaves under this prefix as referenced.
+
+    // --- Spread: {...t} ---
+    if (
+      parentKind === SyntaxKind.SpreadAssignment ||
+      parentKind === SyntaxKind.SpreadElement ||
+      parentKind === SyntaxKind.JsxSpreadAttribute
+    ) {
+      // All keys are reachable.
       for (const key of allLeafKeys) {
-        if (key.startsWith(`${prefix}.`)) {
+        if (!prefix || key.startsWith(`${prefix}.`)) {
           referenced.add(key);
         }
       }
+      continue;
+    }
+
+    // --- Shorthand property in object spread into JSX ---
+    // Pattern: <Comp {...{ t, otherProp }} />
+    // `t` is a ShorthandPropertyAssignment inside an ObjectLiteralExpression
+    // inside a JsxSpreadAttribute.
+    if (parentKind === SyntaxKind.ShorthandPropertyAssignment) {
+      const objLiteral = parent.getParent();
+      const spreadAttr = objLiteral?.getParent();
+      if (spreadAttr?.getKind() === SyntaxKind.JsxSpreadAttribute) {
+        const attrList = spreadAttr.getParent();
+        const element = attrList?.getParent();
+        const tagNameNode =
+          element?.getKind() === SyntaxKind.JsxOpeningElement
+            ? element
+                .asKindOrThrow(SyntaxKind.JsxOpeningElement)
+                .getTagNameNode()
+            : element?.getKind() === SyntaxKind.JsxSelfClosingElement
+              ? element
+                  .asKindOrThrow(SyntaxKind.JsxSelfClosingElement)
+                  .getTagNameNode()
+              : null;
+
+        if (tagNameNode) {
+          const componentName = tagNameNode.getText();
+          const sourceFile = ref.getSourceFile();
+          const targetFile = resolveComponentFile(componentName, sourceFile);
+
+          if (targetFile) {
+            const targetPath = targetFile.getFilePath();
+            const propName = parent
+              .asKindOrThrow(SyntaxKind.ShorthandPropertyAssignment)
+              .getName();
+            const visitKey = `${targetPath}:${propName}:${prefix}`;
+            if (!visited.has(visitKey)) {
+              visited.add(visitKey);
+              followPropsInFile(
+                targetFile,
+                propName,
+                prefix,
+                allLeafKeys,
+                referenced,
+                visited,
+              );
+            }
+          }
+        }
+      }
+      continue;
+    }
+
+    // --- Variable assignment: const $t = interpolated(t) ---
+    // When t is passed as a function argument and the result is assigned to
+    // a variable, follow the variable's references too.
+    if (parentKind === SyntaxKind.CallExpression) {
+      const call = parent.asKindOrThrow(SyntaxKind.CallExpression);
+      const grandparent = call.getParent();
+      if (grandparent?.getKind() === SyntaxKind.VariableDeclaration) {
+        const varDecl = grandparent.asKindOrThrow(
+          SyntaxKind.VariableDeclaration,
+        );
+        const visitKey = `${ref.getSourceFile().getFilePath()}:var:${varDecl.getName()}:${prefix}`;
+        if (!visited.has(visitKey)) {
+          visited.add(visitKey);
+          followReferences(varDecl, prefix, allLeafKeys, referenced, visited);
+        }
+      }
+      // Also handle: const $t = useMemo(() => interpolated(t), [t])
+      // where the call is inside an arrow function that's an argument to
+      // another call.
+      if (
+        grandparent?.getKind() === SyntaxKind.ArrowFunction ||
+        grandparent?.getKind() === SyntaxKind.ReturnStatement
+      ) {
+        // Walk up to find the enclosing variable declaration
+        let ancestor = grandparent.getParent();
+        // biome-ignore lint/suspicious/noAssignInExpressions: walking up the AST
+        while (ancestor && (ancestor = ancestor.getParent())) {
+          if (ancestor.getKind() === SyntaxKind.VariableDeclaration) {
+            const varDecl = ancestor.asKindOrThrow(
+              SyntaxKind.VariableDeclaration,
+            );
+            const visitKey = `${ref.getSourceFile().getFilePath()}:var:${varDecl.getName()}:${prefix}`;
+            if (!visited.has(visitKey)) {
+              visited.add(visitKey);
+              followReferences(
+                varDecl,
+                prefix,
+                allLeafKeys,
+                referenced,
+                visited,
+              );
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // --- Function argument (non-call): passed to a function parameter ---
+    // This is handled above via CallExpression for the common case.
+    // For other cases (e.g. `someArray.map(t => ...)`) we don't need to
+    // follow further since the callback parameter shadows the outer `t`.
+  }
+}
+
+/**
+ * Find parameters/bindings named `propName` in component functions within a
+ * file and follow their references to collect accessed keys.
+ */
+function followPropsInFile(
+  file: import("ts-morph").SourceFile,
+  propName: string,
+  prefix: string,
+  allLeafKeys: Set<string>,
+  referenced: Set<string>,
+  visited: Set<string>,
+): void {
+  // Look for destructured props: function Foo({ t, ... }: ...)
+  for (const be of file.getDescendantsOfKind(SyntaxKind.BindingElement)) {
+    if (be.getName() === propName) {
+      followReferences(be, prefix, allLeafKeys, referenced, visited);
     }
   }
 
-  // --- Step 4: Handle spread / whole-object passing ---
-  // If `t` is passed as a prop (`t={t}`) or spread (`{...t}`), or assigned
-  // wholesale, all keys are implicitly reachable.
-  const wholeTRe = /(?:\bt={t}\b|\{\.\.\.t\}|\bt\s+as\b)/;
-  if (wholeTRe.test(source)) {
-    for (const key of allLeafKeys) referenced.add(key);
-  }
-
-  // --- Step 5: Handle wholesale import pass-through ---
-  // If the imported translations object (regardless of name) is passed as an
-  // argument to a function (e.g. `useAsyncTranslations(Translations, ...)`)
-  // or used as a default value / spread, we can't trace further — mark all
-  // keys as used.
-  //
-  // Detect: find the import binding name, then check if it appears in a
-  // function call, spread, or JSX prop context (not just as a type).
-  const importBindingRe =
-    /import\s+(?!type\s)(\w+)\s+from\s+["'][^"']*\/en\.json["']/g;
-  for (const match of source.matchAll(importBindingRe)) {
-    const binding = match[1]!;
-    // If the binding is used as a value (not just in `typeof` / type
-    // positions), conservatively mark all keys as used.
-    const usageRe = new RegExp(
-      `(?:` +
-        // Function argument: `fn(Binding` or `fn(x, Binding`
-        `\\(\\s*(?:\\w+\\s*,\\s*)*${binding}\\b` +
-        `|` +
-        // Spread: `{...Binding}` or `[...Binding]`
-        `\\.\\.\\.${binding}\\b` +
-        `|` +
-        // JSX prop: `prop={Binding}`
-        `=\\{\\s*${binding}\\s*\\}` +
-        `|` +
-        // Assignment: `= Binding;` or `= Binding as`
-        `=\\s*${binding}\\s*(?:as\\b|;)` +
-        `)`,
-    );
-    if (usageRe.test(source)) {
-      for (const key of allLeafKeys) referenced.add(key);
+  // Also look for parameter access: function Foo(props: ...) { props.t }
+  for (const param of file.getDescendantsOfKind(SyntaxKind.Parameter)) {
+    const nameNode = param.getNameNode();
+    if (nameNode.getKind() !== SyntaxKind.Identifier) continue;
+    // Check if this parameter's property `propName` is accessed
+    let paramRefs: Node[];
+    try {
+      paramRefs = param.findReferencesAsNodes();
+    } catch {
+      continue;
+    }
+    for (const ref of paramRefs) {
+      const parent = ref.getParent();
+      if (
+        parent?.getKind() === SyntaxKind.PropertyAccessExpression &&
+        parent.asKindOrThrow(SyntaxKind.PropertyAccessExpression).getName() ===
+          propName
+      ) {
+        // `props.t` — follow this expression's references as if it were `t`
+        const propAccess = parent.asKindOrThrow(
+          SyntaxKind.PropertyAccessExpression,
+        );
+        // Check what happens with props.t — it might be used in further
+        // property accesses or passed to children. We handle this by checking
+        // the parent of the property access.
+        const propParent = propAccess.getParent();
+        if (propParent?.getKind() === SyntaxKind.PropertyAccessExpression) {
+          // props.t.someKey — extract the chain
+          let topAccess = propParent;
+          while (
+            topAccess.getParent()?.getKind() ===
+            SyntaxKind.PropertyAccessExpression
+          ) {
+            const gp = topAccess.getParent()!;
+            const gpPAE = gp.asKindOrThrow(SyntaxKind.PropertyAccessExpression);
+            if (gpPAE.getExpression() === topAccess) {
+              topAccess = gp;
+            } else {
+              break;
+            }
+          }
+          const chain: string[] = [];
+          let cur = topAccess;
+          while (cur.getKind() === SyntaxKind.PropertyAccessExpression) {
+            const pae = cur.asKindOrThrow(SyntaxKind.PropertyAccessExpression);
+            chain.unshift(pae.getName());
+            cur = pae.getExpression();
+          }
+          // Remove the first element (which is the propName itself, e.g. "t")
+          if (chain.length > 1) {
+            chain.shift();
+            const fullPath = prefix
+              ? `${prefix}.${chain.join(".")}`
+              : chain.join(".");
+            referenced.add(fullPath);
+            const parts = fullPath.split(".");
+            for (let i = 1; i < parts.length; i++) {
+              referenced.add(parts.slice(0, i).join("."));
+            }
+          }
+        }
+      }
     }
   }
-
-  return referenced;
 }
 
 /**
  * For a single `.translations` directory, find unused keys in `en.json` by
- * checking which keys are referenced in the source files that import it.
+ * using TypeScript AST analysis to follow translation key references through
+ * imports, prop passing, and variable assignments.
+ *
+ * Uses ts-morph to:
+ * 1. Find all source files that import the `en.json` (via module resolution)
+ * 2. Locate variables that hold the translations object
+ * 3. Follow all references through property accesses, JSX prop passing, and
+ *    derived variables (e.g. `interpolated(t)`)
+ * 4. Report keys that are never accessed
  *
  * @returns the set of unused leaf key-paths, or `null` if no consumers were
  * found (meaning we can't determine usage).
  */
-async function findUnusedKeys(
+function findUnusedKeys(
   translationsDir: AbsoluteDir,
   referenceJson: Json,
   root: AbsoluteDir,
-): Promise<string[] | null> {
-  const enJsonFile = path.join(
+): string[] | null {
+  const project = getProject(root);
+
+  const enJsonPath = path.join(
     translationsDir,
     RelativeFile(`${DEFAULT_LOCALE}.json`),
-  );
+  ) as string;
 
-  const consumers = await findConsumers(enJsonFile, root);
+  // Find all source files that import this en.json.
+  const consumers: import("ts-morph").SourceFile[] = [];
+  for (const sf of project.getSourceFiles()) {
+    if ((sf.getFilePath() as string).includes("node_modules")) continue;
+    for (const imp of sf.getImportDeclarations()) {
+      const moduleSpec = imp.getModuleSpecifierValue();
+      if (!moduleSpec.endsWith("en.json")) continue;
+      const resolved = imp.getModuleSpecifierSourceFile();
+      if (resolved && (resolved.getFilePath() as string) === enJsonPath) {
+        consumers.push(sf);
+        break;
+      }
+    }
+  }
+
   if (consumers.length === 0) return null;
 
   const allLeafKeys = new Set<string>();
   collectLeafKeyPaths(referenceJson, "", allLeafKeys);
 
-  const allBranchKeys = new Set<string>();
-  collectBranchKeyPaths(referenceJson, "", allBranchKeys);
-
   const allReferenced = new Set<string>();
+  const visited = new Set<string>();
 
-  await Promise.all(
-    consumers.map(async (file) => {
-      let source: string;
-      try {
-        source = await fsp.readFile(file, "utf8");
-      } catch {
-        return;
+  for (const consumer of consumers) {
+    const filePath = consumer.getFilePath() as string;
+
+    // --- Handle value imports (useAsyncTranslations pattern) ---
+    // import Translations from "./.translations/en.json";
+    // const t = useAsyncTranslations(Translations, ...)
+    for (const imp of consumer.getImportDeclarations()) {
+      if (!imp.getModuleSpecifierValue().endsWith("en.json")) continue;
+      const resolved = imp.getModuleSpecifierSourceFile();
+      if (!resolved || (resolved.getFilePath() as string) !== enJsonPath) {
+        continue;
       }
 
-      for (const key of extractReferencedKeys(
-        source,
-        allLeafKeys,
-        allBranchKeys,
-      )) {
-        allReferenced.add(key);
+      // Check if this is a value import (not type-only).
+      if (!imp.isTypeOnly()) {
+        const defaultImport = imp.getDefaultImport();
+        if (defaultImport) {
+          // The import binding is used as a value — follow its references.
+          // This handles `useAsyncTranslations(Translations, ...)`.
+          const bindingRefs = defaultImport.findReferencesAsNodes();
+          for (const ref of bindingRefs) {
+            const parent = ref.getParent();
+            if (parent?.getKind() === SyntaxKind.CallExpression) {
+              // Value passed to a function — find the resulting variable
+              const call = parent.asKindOrThrow(SyntaxKind.CallExpression);
+              const gp = call.getParent();
+              if (gp?.getKind() === SyntaxKind.VariableDeclaration) {
+                const varDecl = gp.asKindOrThrow(
+                  SyntaxKind.VariableDeclaration,
+                );
+                const visitKey = `${filePath}:var:${varDecl.getName()}:`;
+                if (!visited.has(visitKey)) {
+                  visited.add(visitKey);
+                  followReferences(
+                    varDecl,
+                    "",
+                    allLeafKeys,
+                    allReferenced,
+                    visited,
+                  );
+                }
+              }
+            } else if (parent?.getKind() === SyntaxKind.JsxExpression) {
+              // Passed directly as a JSX prop — mark all keys as used
+              // (we can't trace further).
+              for (const key of allLeafKeys) allReferenced.add(key);
+            } else if (
+              parent?.getKind() === SyntaxKind.SpreadAssignment ||
+              parent?.getKind() === SyntaxKind.SpreadElement
+            ) {
+              for (const key of allLeafKeys) allReferenced.add(key);
+            }
+          }
+        }
       }
-    }),
-  );
+    }
+
+    // --- Handle getTranslations / useTranslations / useAsyncTranslations ---
+    // Find variable declarations whose initializer calls these functions.
+    for (const varDecl of consumer.getDescendantsOfKind(
+      SyntaxKind.VariableDeclaration,
+    )) {
+      const init = varDecl.getInitializer();
+      if (!init) continue;
+      const initText = init.getText();
+
+      const isTranslationCall =
+        initText.includes("getTranslations") ||
+        initText.includes("useTranslations") ||
+        initText.includes("useAsyncTranslations");
+
+      if (!isTranslationCall) continue;
+
+      // Determine if the call extracts a sub-object:
+      // e.g. `useTranslations<T>().renders.rename`
+      // Walk inward from the outermost PropertyAccessExpression, collecting
+      // property names until we hit the call. For `x().renders.rename`,
+      // the walk goes: rename → renders → x() (stop). Result: "renders.rename".
+      let prefix = "";
+      {
+        const chain: string[] = [];
+        let cur: Node = init;
+        while (cur.getKind() === SyntaxKind.PropertyAccessExpression) {
+          const pae = cur.asKindOrThrow(SyntaxKind.PropertyAccessExpression);
+          chain.push(pae.getName());
+          cur = pae.getExpression();
+        }
+        // `chain` is [outermost, ..., innermost], reverse to get key order.
+        chain.reverse();
+        if (chain.length > 0) {
+          prefix = chain.join(".");
+        }
+      }
+
+      const visitKey = `${filePath}:var:${varDecl.getName()}:${prefix}`;
+      if (!visited.has(visitKey)) {
+        visited.add(visitKey);
+        followReferences(varDecl, prefix, allLeafKeys, allReferenced, visited);
+      }
+    }
+
+    // --- Handle function parameter `t` (e.g. component props) ---
+    // function Foo({ t }: { t: T }) { ... }
+    // This is the entry point when the file is a direct consumer that
+    // receives translations as a prop from a server component.
+    for (const be of consumer.getDescendantsOfKind(SyntaxKind.BindingElement)) {
+      if (be.getName() !== "t") continue;
+
+      // Check if this binding element is in a function parameter
+      // (component prop destructuring).
+      const param = be.getFirstAncestorByKind(SyntaxKind.Parameter);
+      if (!param) continue;
+
+      const visitKey = `${filePath}:param:t:`;
+      if (!visited.has(visitKey)) {
+        visited.add(visitKey);
+        followReferences(be, "", allLeafKeys, allReferenced, visited);
+      }
+    }
+  }
 
   // A leaf key is unused if neither it nor any of its ancestors appear in the
   // referenced set.
@@ -641,6 +882,124 @@ async function findUnusedKeys(
 
   unused.sort();
   return unused;
+}
+
+// ---------------------------------------------------------------------------
+// Fixing unused keys
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a dot-separated key-path from a nested JSON object, cleaning up empty
+ * parent objects left behind. Mutates `obj` in place.
+ */
+function deleteKeyPath(obj: { [key: string]: Json }, keyPath: string): void {
+  const parts = keyPath.split(".");
+  const stack: { parent: { [key: string]: Json }; key: string }[] = [];
+  let current: Json = obj;
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      Array.isArray(current)
+    ) {
+      return;
+    }
+    const key = parts[i]!;
+    stack.push({ key, parent: current });
+    current = current[key]!;
+  }
+
+  if (
+    typeof current !== "object" ||
+    current === null ||
+    Array.isArray(current)
+  ) {
+    return;
+  }
+
+  const leafKey = parts[parts.length - 1]!;
+  delete current[leafKey];
+
+  // Walk back up, removing empty parent objects.
+  for (let i = stack.length - 1; i >= 0; i--) {
+    const { parent, key } = stack[i]!;
+    const child = parent[key];
+    if (
+      typeof child === "object" &&
+      child !== null &&
+      !Array.isArray(child) &&
+      Object.keys(child).length === 0
+    ) {
+      delete parent[key];
+    } else {
+      break;
+    }
+  }
+}
+
+/**
+ * Remove unused keys from all JSON files in a `.translations` directory.
+ *
+ * Unused keys are detected from `en.json`, but when deleting they are removed
+ * from **every** sibling locale file in the same directory.
+ */
+async function removeUnusedKeysFromDir(
+  dir: AbsoluteDir,
+  unusedKeys: string[],
+): Promise<string[]> {
+  const entries = await fsp.readdir(dir, { withFileTypes: true });
+  const jsonFiles = entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => entry.name);
+
+  const fixedFiles: string[] = [];
+
+  for (const fileName of jsonFiles) {
+    const file = path.join(dir, RelativeFile(fileName));
+    let json: Json;
+    try {
+      json = await readJson(file);
+    } catch {
+      continue;
+    }
+
+    if (typeof json !== "object" || json === null || Array.isArray(json)) {
+      continue;
+    }
+
+    let modified = false;
+    for (const keyPath of unusedKeys) {
+      // Check if the key exists in this locale file before deleting.
+      const parts = keyPath.split(".");
+      let current: Json = json;
+      let exists = true;
+      for (const part of parts) {
+        if (
+          typeof current !== "object" ||
+          current === null ||
+          Array.isArray(current) ||
+          !(part in current)
+        ) {
+          exists = false;
+          break;
+        }
+        current = current[part]!;
+      }
+
+      if (exists) {
+        deleteKeyPath(json as { [key: string]: Json }, keyPath);
+        modified = true;
+      }
+    }
+
+    if (modified) {
+      await fsp.writeFile(file, `${JSON.stringify(json, null, 2)}\n`, "utf8");
+      fixedFiles.push(fileName);
+    }
+  }
+
+  return fixedFiles;
 }
 
 // ---------------------------------------------------------------------------
@@ -703,6 +1062,8 @@ function matchGlob(pattern: string, filePath: string): boolean {
  * @param options.glob - Optional glob pattern to limit which `.translations`
  *   directories are checked. Matched against the path relative to `root`.
  * @param options.checkUnused - Whether to check for unused translation keys.
+ * @param options.fix - When `true` (requires `checkUnused`), automatically
+ *   delete unused keys from all sibling translation JSON files.
  *
  * @returns the number of locale files that did not match their reference
  * `en.json` (plus directories missing a reference). `0` means everything is
@@ -710,7 +1071,7 @@ function matchGlob(pattern: string, filePath: string): boolean {
  */
 export async function validateTranslations(
   root: AbsoluteDir = process.cwd() as AbsoluteDir,
-  options: { glob?: string; checkUnused?: boolean } = {},
+  options: { glob?: string; checkUnused?: boolean; fix?: boolean } = {},
 ): Promise<number> {
   let dirs = await findTranslationDirs(root);
 
@@ -758,7 +1119,7 @@ export async function validateTranslations(
         RelativeFile(`${DEFAULT_LOCALE}.json`),
       );
       const referenceJson = await readJson(referenceFile);
-      const unused = await findUnusedKeys(dir, referenceJson, root);
+      const unused = findUnusedKeys(dir, referenceJson, root);
 
       if (unused === null) {
         console.warn(
@@ -767,15 +1128,27 @@ export async function validateTranslations(
           ),
         );
       } else if (unused.length > 0) {
-        console.warn(
-          chalk.cyan(
-            `! ${relativeDir}/${DEFAULT_LOCALE}.json has ${unused.length} potentially unused ${unused.length === 1 ? "key" : "keys"}:`,
-          ),
-        );
-        for (const key of unused) {
-          console.warn(chalk.cyan(`    unused key: ${key}`));
+        if (options.fix) {
+          const fixedFiles = await removeUnusedKeysFromDir(dir, unused);
+          console.log(
+            chalk.green(
+              `✓ ${relativeDir}: removed ${unused.length} unused ${unused.length === 1 ? "key" : "keys"} from ${fixedFiles.length} ${fixedFiles.length === 1 ? "file" : "files"} (${fixedFiles.join(", ")}).`,
+            ),
+          );
+          for (const key of unused) {
+            console.log(chalk.green(`    deleted key: ${key}`));
+          }
+        } else {
+          console.warn(
+            chalk.cyan(
+              `! ${relativeDir}/${DEFAULT_LOCALE}.json has ${unused.length} potentially unused ${unused.length === 1 ? "key" : "keys"}:`,
+            ),
+          );
+          for (const key of unused) {
+            console.warn(chalk.cyan(`    unused key: ${key}`));
+          }
+          problems++;
         }
-        problems++;
       }
     }
   }
@@ -798,34 +1171,73 @@ export async function validateTranslations(
   return problems;
 }
 
-/** CLI entry point. Accepts an optional root directory argument. */
-export async function main(
-  argv: string[] = process.argv.slice(2),
-): Promise<void> {
-  const positional = argv.find((a) => !a.startsWith("-"));
-  const root = (
-    positional ? path.resolve(process.cwd(), positional) : process.cwd()
-  ) as AbsoluteDir;
+// ---------------------------------------------------------------------------
+// CLI definition
+// ---------------------------------------------------------------------------
 
-  const globIdx = argv.indexOf("--glob");
-  const globArg =
-    argv.find((a) => a.startsWith("--glob="))?.slice("--glob=".length) ??
-    (globIdx !== -1 ? argv[globIdx + 1] : undefined);
+const command = Command.make(
+  "validate-translations",
+  {
+    fix: Flag.Boolean("fix").pipe(
+      Flag.withDescription(
+        "Automatically delete unused keys from all sibling translation JSON files. Must be used with --unused.",
+      ),
+      Flag.withDefault(false),
+    ),
+    glob: Flag.String("glob").pipe(
+      Flag.withDescription(
+        "Glob pattern to limit which .translations directories are checked (matched against relative path from root).",
+      ),
+      Flag.withMetavar("PATTERN"),
+      Flag.optional,
+    ),
+    root: Argument.Directory("root").pipe(
+      Argument.withDescription(
+        "Root directory to search for .translations directories.",
+      ),
+      Argument.withDefault("."),
+    ),
+    unused: Flag.Boolean("unused").pipe(
+      Flag.withDescription(
+        "Check for unused translation keys by scanning source files that import each en.json.",
+      ),
+      Flag.withDefault(false),
+    ),
+  },
+  (config) =>
+    Effect.gen(function* () {
+      if (config.fix && !config.unused) {
+        console.error(
+          chalk.red("Error: --fix can only be used together with --unused."),
+        );
+        process.exitCode = 1;
+        return;
+      }
+      const root = path.resolve(process.cwd(), config.root) as AbsoluteDir;
+      const problems = yield* Effect.promise(() =>
+        validateTranslations(root, {
+          checkUnused: config.unused,
+          fix: config.fix,
+          glob: Option.getOrUndefined(config.glob),
+        }),
+      );
+      process.exitCode = problems > 0 ? 1 : 0;
+    }),
+).pipe(
+  Command.withDescription(
+    "Validate translation files: check that every locale matches the en.json reference shape, and optionally detect unused translation keys.",
+  ),
+);
 
-  const checkUnused =
-    argv.includes("--unused") || argv.includes("--check-unused");
-
-  const problems = await validateTranslations(root, {
-    checkUnused,
-    glob: globArg,
-  });
-  process.exitCode = problems > 0 ? 1 : 0;
-}
+/** CLI entry point. */
+export const main = Command.run(command, { version: "0.1.0" }).pipe(
+  Effect.provide(NodeServices.layer),
+);
 
 // Run when executed directly (not when imported).
 if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
 ) {
-  await main();
+  NodeRuntime.runMain(main);
 }

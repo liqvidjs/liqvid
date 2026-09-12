@@ -64,7 +64,7 @@ const styles = stylex.create({
     boxShadow: shadows.lg,
     color: colors.grayNormal,
     left: "50%",
-    maxWidth: "28rem",
+    maxWidth: "720px",
     padding: spacing.lg,
     position: "fixed",
     top: "50%",
@@ -86,7 +86,7 @@ const styles = stylex.create({
   title: {
     fontSize: text.lg,
     fontWeight: 600,
-    margin: spacing.zero,
+    marginBottom: spacing.lg,
   },
 });
 
@@ -194,7 +194,10 @@ export function DialogPopup({
   style,
   size = "auto",
   ...props
-}: Omit<React.ComponentProps<typeof Dialog.Popup>, "style"> & {
+}: Omit<React.ComponentProps<typeof Dialog.Popup>, "className" | "style"> & {
+  className?: {
+    __error: "this component does not support customization";
+  };
   size?: "auto" | "small" | "medium" | "large" | "huge";
   style?: stylex.StyleXStyles;
 }) {

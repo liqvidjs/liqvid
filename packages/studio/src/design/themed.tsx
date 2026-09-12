@@ -16,8 +16,8 @@ export const themed =
         React.ComponentProps<C>,
         "className" | "children" | "style"
       > & {
-        className?: Error & {
-          __message: "this component does not support customization";
+        className?: {
+          __error: "this component does not support customization";
         };
         children?: LocalizedReactNode;
         style?: never;

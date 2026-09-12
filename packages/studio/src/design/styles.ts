@@ -24,6 +24,9 @@ export const fonts = stylex.create({
     fontFamily: typeface.mono,
     fontSize: text.sm,
   },
+  filenameInput: {
+    fontFamily: typeface.mono,
+  },
   ui: {
     fontFamily: typeface.ui,
     fontSize: text.base,
@@ -38,13 +41,31 @@ export const fonts = stylex.create({
     fontSize: text.sm,
     fontStyle: "normal",
     paddingBlock: spacing.xs,
-    paddingInline: spacing.md,
+    paddingInline: spacing.sm,
   },
 });
 
 const breathing = stylex.create({
   lg: {
     marginBottom: spacing.lg,
+  },
+});
+
+export const typography = stylex.create({
+  description: {
+    color: colors.grayDim,
+    fontFamily: typeface.ui,
+    fontSize: text.md,
+  },
+  header1: {
+    marginBottom: spacing.huge,
+  },
+  header3: {
+    marginBottom: spacing.md,
+  },
+  heading1: {
+    fontFamily: typeface.ui,
+    fontSize: text.xl,
   },
 });
 

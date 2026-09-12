@@ -5,19 +5,26 @@ import { fileURLToPath } from "node:url";
 import type { Locale } from "@liqvid/schemas";
 import { Option } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
+import { createElement } from "react";
 
+import { DevTranslation } from "#_/components/DevTranslation.js";
 import { TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import { isInterpolationConfig } from "#_/i18n/shared.mts.js";
 import { getServerState } from "#_/initialize.mjs";
 
 import type CommonTranslationsJson from "../.translations/en.json";
 
 const DEFAULT_LOCALE = "en";
 
+const DEV_TRANSLATIONS = true;
+
 /**
  * Translations for commonly-used words like "close", "cancel", etc., shared
  * across the studio UI.
  */
 export type CommonTranslations = typeof CommonTranslationsJson;
+
+const cache = new Map<string, Map<string, unknown>>();
 
 /**
  * Get translations for the current module.
@@ -33,13 +40,18 @@ export type CommonTranslations = typeof CommonTranslationsJson;
  * }
  * ```
  */
-export async function getTranslations<T>(
+export async function getTranslations<T extends object>(
   /** pass `import.meta.url` here */
   importMetaUrl: string,
 
   relative: RelativeDir = RelativeDir("."),
 ): Promise<T> {
   const locale = getLocale();
+  if (!cache.has(locale)) {
+    cache.set(locale, new Map());
+  }
+  const langCache = cache.get(locale)!;
+
   const __dirname = path.dirname(fileURLToPath(importMetaUrl));
 
   const translationsDir = path.join(__dirname, relative, TRANSLATIONS_DIR);
@@ -49,25 +61,35 @@ export async function getTranslations<T>(
     RelativeFile(`${locale}.json`),
   );
 
-  if (locale === DEFAULT_LOCALE) {
-    return JSON.parse(await fsp.readFile(translationsJson, "utf8")) as T;
+  let value: T;
+
+  if (!DEV_TRANSLATIONS && langCache.has(translationsJson)) {
+    value = (await langCache.get(translationsJson)) as T;
+  } else if (locale === DEFAULT_LOCALE) {
+    const result = JSON.parse(
+      await fsp.readFile(translationsJson, "utf8"),
+    ) as T;
+    value = result;
+  } else {
+    const [translations, fallback] = await Promise.all([
+      fsp
+        .readFile(translationsJson, "utf8")
+        .then((data) => JSON.parse(data))
+        .catch(() => ({})),
+      fsp
+        .readFile(
+          path.join(translationsDir, RelativeFile(`${DEFAULT_LOCALE}.json`)),
+          "utf8",
+        )
+        .then((data) => JSON.parse(data)),
+    ]);
+
+    value = deepMerge(fallback, translations) as T;
   }
 
-  const [translations, fallback] = await Promise.all([
-    fsp
-      .readFile(translationsJson, "utf8")
-      .then((data) => JSON.parse(data))
-      .catch(() => ({})),
-    fsp
-      .readFile(
-        path.join(translationsDir, RelativeFile(`${DEFAULT_LOCALE}.json`)),
-        "utf8",
-      )
-      .then((data) => JSON.parse(data)),
-  ]);
+  langCache.set(translationsJson, value);
 
-  // TODO: deep-merge
-  return deepMerge(fallback, translations) as T;
+  return value;
 }
 
 /**

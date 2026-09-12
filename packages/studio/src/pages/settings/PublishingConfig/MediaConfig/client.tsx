@@ -2,8 +2,8 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { Description } from "#_/design/styles.js";
-import { colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { typography } from "#_/design/styles.js";
+import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 
@@ -29,7 +29,7 @@ export function MediaConfigClient({ t }: { t: T }) {
   return (
     <FieldSet>
       <Legend>{t.media}</Legend>
-      <Description>{t.mediaDescription}</Description>
+      <p sx={typography.description}>{t.mediaDescription}</p>
 
       <label sx={styles.checkboxField}>
         <input

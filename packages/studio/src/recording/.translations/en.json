@@ -11,7 +11,13 @@
     "shortcuts": {
       "command": "Command",
       "shortcut": "Shortcut",
-      "title": "Shortcuts"
+      "title": "Shortcuts",
+      "values": {
+        "discard": "Discard recording",
+        "pause": "Pause recording",
+        "startStop": "Start/Stop recording",
+        "toggle": "Toggle panel"
+      }
     }
   },
   "title": "Recording"

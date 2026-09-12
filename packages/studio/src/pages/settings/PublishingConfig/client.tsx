@@ -9,7 +9,7 @@ import { useState } from "react";
 import type { SettingsConfig } from "#_/api/contract.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
-import { colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { colors, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 
@@ -18,9 +18,6 @@ import type TranslationsJson from "./.translations/en.json";
 export type T = Localized<typeof TranslationsJson>;
 
 const styles = stylex.create({
-
-  /* ---- config form ---- */
-
   configForm: {
     display: "flex",
     flexDirection: "column",

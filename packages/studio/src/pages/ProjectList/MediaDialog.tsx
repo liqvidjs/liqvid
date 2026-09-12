@@ -69,7 +69,7 @@ const styles = stylex.create({
     transition: "background-color 0.15s",
   },
   shareDialog: {
-    maxWidth: "36rem",
+    maxWidth: "75%",
   },
 });
 
@@ -133,10 +133,20 @@ export function MediaButton({
     (key) => projectOnlyParams[key]!.length > 0,
   );
 
-  // State for selected project-only parameter values
+  // State for selected project-only parameter values.
+  // Seed from selectedRootParams for keys that exist there, so the dialog
+  // opens reflecting the same value already chosen at the root level.
   const [selectedProjectParams, setSelectedProjectParams] = useState<
     Record<string, string>
-  >(() => getDefaultParams(projectOnlyParams));
+  >(() => {
+    const defaults = getDefaultParams(projectOnlyParams);
+    for (const key of Object.keys(defaults)) {
+      if (key in selectedRootParams) {
+        defaults[key] = selectedRootParams[key]!;
+      }
+    }
+    return defaults;
+  });
 
   // Combine selected root params with project-specific params for API calls
   // Project params override root params
@@ -161,11 +171,7 @@ export function MediaButton({
       </DialogTrigger>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogPopup
-          aria-describedby={undefined}
-          {...stylex.props(styles.shareDialog)}
-          size="large"
-        >
+        <DialogPopup aria-describedby={undefined} size="large">
           <DialogTitle>{t.title}</DialogTitle>
 
           <DialogClose />
@@ -179,7 +185,7 @@ export function MediaButton({
             />
           )}
 
-          <Tabs defaultValue="screenshots" style={{ marginTop: "1rem" }}>
+          <Tabs defaultValue="screenshots">
             <TabsList style={{ fontSize: "18px" }}>
               <TabsTrigger value="screenshots">
                 <CameraIcon size={14} /> {t.tabs.screenshots}

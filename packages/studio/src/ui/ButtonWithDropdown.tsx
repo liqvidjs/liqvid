@@ -3,7 +3,14 @@
 import { CaretDownIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  opacity,
+  radii,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
 
 import {
@@ -77,18 +84,14 @@ const styles = stylex.create({
   },
   sharedPrimary: {
     backgroundColor: {
-      // ":disabled": colors.accentDisabled,
       ":enabled:active": colors.accentActive,
       ":enabled:hover": colors.accentHover,
       default: colors.accentSolid,
     },
     borderColor: colors.accentActive,
-    color: {
-      // ":disabled": colors.accentActive,
-      default: colors.white,
-    },
+    color: colors.white,
     opacity: {
-      ":disabled": 0.4,
+      ":disabled": opacity.disabled,
       default: null,
     },
   },
@@ -134,14 +137,13 @@ export interface ButtonWithDropdownProps {
  */
 export function ButtonWithDropdown({
   children,
-  // disabled = false,
+  disabled = false,
   dropdownLabel,
   onClick,
   options,
   variant = "default",
 }: ButtonWithDropdownProps) {
   const isPrimary = variant === "primary";
-  const disabled = true;
 
   return (
     <div sx={styles.group}>
@@ -153,7 +155,7 @@ export function ButtonWithDropdown({
         {...stylex.props(
           styles.mainButton,
           styles.shared,
-          (true || isPrimary) && styles.sharedPrimary,
+          isPrimary && styles.sharedPrimary,
         )}
       >
         {children}
@@ -165,7 +167,7 @@ export function ButtonWithDropdown({
           style={[
             styles.joinButtons,
             styles.shared,
-            (true || isPrimary) && styles.sharedPrimary,
+            isPrimary && styles.sharedPrimary,
           ]}
         >
           <CaretDownIcon />

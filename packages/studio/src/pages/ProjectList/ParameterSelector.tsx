@@ -12,6 +12,20 @@ import {
   spacing,
   text,
 } from "#_/design/tokens.stylex.js";
+import { PlainString } from "#_/i18n/shared.mjs";
+import {
+  SelectIcon,
+  SelectItem,
+  SelectItemIndicator,
+  SelectItemText,
+  SelectList,
+  SelectPopup,
+  SelectPortal,
+  SelectPositioner,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+} from "#_/ui/Select.js";
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
@@ -34,9 +48,10 @@ const styles = stylex.create({
     borderWidth: dims.sep,
     display: "flex",
     flexWrap: "wrap",
+    fontSize: text.sm,
     gap: spacing.lg,
-    marginBottom: spacing.md,
-    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
   },
   parameterField: {
     alignItems: "center",
@@ -45,28 +60,8 @@ const styles = stylex.create({
   },
   parameterLabel: {
     color: colors.grayDim,
-    fontSize: text.md,
     fontWeight: 500,
     textTransform: "capitalize",
-  },
-  parameterSelect: {
-    backgroundColor: colors.grayApp,
-    borderColor: {
-      ":focus": colors.accentSolid,
-      default: colors.graySep,
-    },
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    fontSize: text.md,
-    outline: {
-      ":focus": "none",
-      default: null,
-    },
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
   },
 });
 
@@ -91,25 +86,37 @@ export function ParameterSelector({
   return (
     <div sx={styles.container}>
       {paramEntries.map(([paramName, values]) => (
-        <label key={paramName} sx={styles.parameterField}>
+        <div key={paramName} sx={styles.parameterField}>
           <span sx={styles.parameterLabel}>{paramName}</span>
-          <select
-            onChange={(e) => {
+          <SelectRoot
+            onValueChange={(value) => {
               onParamsChange({
                 ...selectedParams,
-                [paramName]: e.target.value,
+                [paramName]: value as string,
               });
             }}
-            sx={styles.parameterSelect}
             value={selectedParams[paramName] ?? values[0]}
           >
-            {values.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
+            <SelectTrigger size="small">
+              <SelectValue />
+              <SelectIcon />
+            </SelectTrigger>
+            <SelectPortal>
+              <SelectPositioner sideOffset={4}>
+                <SelectPopup>
+                  <SelectList>
+                    {values.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        <SelectItemText>{PlainString(value)}</SelectItemText>
+                        <SelectItemIndicator />
+                      </SelectItem>
+                    ))}
+                  </SelectList>
+                </SelectPopup>
+              </SelectPositioner>
+            </SelectPortal>
+          </SelectRoot>
+        </div>
       ))}
     </div>
   );

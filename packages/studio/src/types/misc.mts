@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: variance */
+
 import { Brand } from "effect";
 
 interface ConstBranded<in out B extends Brand.Brand<string>>
@@ -18,3 +19,9 @@ export type PackageName<T extends string = string> = T &
   Brand.Brand<"PackageName">;
 
 export const PackageName = Brand.nominal() as ConstBranded<PackageName>;
+
+export type NonCustomizable<T> = Omit<T, "className" | "style"> & {
+  className?: {
+    __error: "this component does not support customization";
+  };
+};

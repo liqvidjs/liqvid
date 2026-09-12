@@ -1,0 +1,13 @@
+{
+  "description": {
+    "_": "Chemin de base sous lequel votre contenu sera hébergé. Doit correspondre au {var} dans la configuration de votre framework.",
+    "$": { "var": null }
+  },
+  "envVarEnvFile": "Fichier (facultatif)",
+  "envVarEnvFileHint": "Charger à partir d'un fichier au lieu de l'environnement système",
+  "envVarMode": "Source",
+  "envVarName": "Nom du variable",
+  "envVarOption": "Variable d'environnement",
+  "title": "Chemin de base",
+  "valueOption": "Valeur"
+}

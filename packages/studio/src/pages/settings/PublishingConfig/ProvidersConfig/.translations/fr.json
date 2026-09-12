@@ -1,5 +1,11 @@
 {
-  "language": "Langue",
-  "languageDescription": "Choisissez la langue de l'interface de Liqvid Studio.",
-  "title": "Paramètres"
+  "copyClean": "Effacez la destination avant de copier",
+  "copyDestination": "Destination",
+  "providerCopy": "Copier",
+  "providers": "Fournisseurs",
+  "providersDescription": "Configurez les détails de connexion pour chaque fournisseur.",
+  "s3Bucket": "Bucket",
+  "s3Domain": "Domaine",
+  "s3Prefix": "Préfixe",
+  "s3Region": "Région"
 }

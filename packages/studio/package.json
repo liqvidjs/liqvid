@@ -42,32 +42,32 @@
   },
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
+      "default": "./src/index.mts",
       "types": "./dist/types/index.d.mts",
       "import": "./dist/esm/index.mjs"
     },
     "./next": {
-      "@liqvid/dev": "./src/next/index.mts",
+      "default": "./src/next/index.mts",
       "types": "./dist/types/next/index.d.mts",
       "import": "./dist/esm/next/index.mjs"
     },
     "./next/api": {
-      "@liqvid/dev": "./src/next/api.mts",
+      "default": "./src/next/api.mts",
       "types": "./dist/types/next/api.d.mts",
       "import": "./dist/esm/next/api.mjs"
     },
     "./next/layout": {
-      "@liqvid/dev": "./src/next/layout.tsx",
+      "default": "./src/next/layout.tsx",
       "types": "./dist/types/next/layout.d.ts",
       "import": "./dist/esm/next/layout.js"
     },
     "./next/page": {
-      "@liqvid/dev": "./src/next/page.tsx",
+      "default": "./src/next/page.tsx",
       "types": "./dist/types/next/page.d.ts",
       "import": "./dist/esm/next/page.js"
     },
     "./ui": {
-      "@liqvid/dev": "./src/ui/index.ts",
+      "default": "./src/ui/index.ts",
       "types": "./dist/types/ui/index.d.ts",
       "import": "./dist/esm/ui/index.js"
     }

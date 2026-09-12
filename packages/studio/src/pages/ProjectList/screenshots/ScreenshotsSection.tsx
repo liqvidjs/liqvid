@@ -685,7 +685,6 @@ function ConfirmationDialog({
         <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
           <Button
-            className={stylex.props(styles.submitButton).className}
             onClick={() => {
               if (confirmDialog) {
                 copyScreenshot(
@@ -782,12 +781,7 @@ function RenameDialog({
       </div>
       <div sx={styles.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
-        <Button
-          className={stylex.props(styles.submitButton).className}
-          onClick={() => performRename()}
-        >
-          {t.action}
-        </Button>
+        <Button onClick={() => performRename()}>{t.action}</Button>
       </div>
     </DialogPopup>
   );

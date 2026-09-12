@@ -45,12 +45,13 @@ const styles = stylex.create({
   },
   header: {
     backgroundColor: colors.accentSolid,
-    borderRadius: `${radii.md} ${radii.md} 0 0`,
+    borderTopLeftRadius: radii.md,
+    borderTopRadius: radii.md,
     color: colors.white,
-    fontSize: text.sm,
+    fontSize: text.md,
     fontWeight: "bold",
-    paddingBlock: spacing.md,
-    paddingInline: spacing.lg,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
     userSelect: "none",
   },
 });

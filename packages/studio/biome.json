@@ -6,7 +6,7 @@
         "noLabelWithoutControl": {
           "level": "on",
           "options": {
-            "inputComponents": ["RadioRoot", "Switch"]
+            "inputComponents": ["RadioRoot", "SelectRoot", "Switch"]
           }
         }
       },
@@ -16,7 +16,8 @@
           "level": "on",
           "options": {
             "elements": {
-              "button": "use the styled version from ui/Button.tsx"
+              "button": "use the styled version from ui/Button.tsx",
+              "select": "use the styled version from ui/Select.tsx"
             }
           }
         }

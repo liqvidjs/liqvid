@@ -2,7 +2,7 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { fonts } from "#_/design/styles.js";
+import { fonts, typography } from "#_/design/styles.js";
 import { colors, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized, LocalizedReactNode } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
@@ -44,7 +44,6 @@ type MediaProvider = (typeof MEDIA_PROVIDERS)[number];
 const NONE = "__none__";
 
 const styles = stylex.create({
-
   field: {
     display: "flex",
     flexDirection: "column",
@@ -83,8 +82,8 @@ export function BackendConfigClient({ t }: { t: T }) {
   }
   return (
     <FieldSet>
-      <Legend>{t.backend}</Legend>
-      <p sx={fonts.description}>{t.backendDescription}</p>
+      <Legend>{t.title}</Legend>
+      <p sx={typography.description}>{t.description}</p>
 
       <div sx={styles.field}>
         <span sx={styles.fieldLabel}>{t.contentBackend}</span>
