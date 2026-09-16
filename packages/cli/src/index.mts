@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import type { thumbs as captureThumbs, solidify } from "@liqvid/renderer";
+import { Effect } from "effect";
+import { Command } from "effect/unstable/cli";
 import { RelativeFile } from "effect-paths";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
 
 import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
@@ -16,39 +17,45 @@ import { publish } from "./tasks/publish.mts";
 import { pull } from "./tasks/pull.mts";
 import { render } from "./tasks/render.mts";
 import { renderAudioCommand } from "./tasks/render-audio.mts";
+import { screenshotCommand } from "./tasks/screenshot.mts";
 import { thumbs } from "./tasks/thumbs.mts";
 import { transcribeCommand } from "./tasks/transcribe.mts";
 import { UP } from "./utils/effect.mts";
 
-// entry
-export async function main() {
-  // version
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const { version } = JSON.parse(
-    await readFile(
-      path.join(__dirname, UP, UP, RelativeFile("package.json")),
-      "utf8",
-    ),
-  );
+// version
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { version } = JSON.parse(
+  await readFile(
+    path.join(__dirname, UP, UP, RelativeFile("package.json")),
+    "utf8",
+  ),
+);
 
-  return yargs(hideBin(process.argv))
-    .scriptName("liqvid")
-    .strict()
-    .usage("$0 <cmd> [args]")
-    .demandCommand(1, "Must specify a command")
-    .command(build)
-    .command(compress)
-    .command(debugCommand)
-    .command(generateImports)
-    .command(publish)
-    .command(pull)
-    .command(render)
-    .command(renderAudioCommand)
-    .command(thumbs)
-    .command(transcribeCommand)
-    .version(version)
-    .help()
-    .parseAsync();
+const liqvid = Command.make("liqvid").pipe(
+  Command.withDescription("Liqvid command line utility"),
+  Command.withSubcommands([
+    build,
+    compress,
+    debugCommand,
+    generateImports,
+    publish,
+    pull,
+    render,
+    renderAudioCommand,
+    screenshotCommand,
+    thumbs,
+    transcribeCommand,
+  ]),
+);
+
+/** CLI entry point. */
+export const main = Command.run(liqvid, { version }).pipe(
+  Effect.provide(NodeServices.layer),
+);
+
+// entry
+export function runMain() {
+  NodeRuntime.runMain(main);
 }
 
 /**

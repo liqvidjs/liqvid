@@ -1,18 +1,13 @@
+import os from "node:os";
+
 import { NodeFileSystem } from "@effect/platform-node";
 import type { ImageFormat } from "@liqvid/schemas";
 import { parseTime } from "@liqvid/utils";
-import { Console, Effect, Exit } from "effect";
+import { Console, Effect, Exit, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import type { AbsoluteFile } from "effect-paths";
-import type { CommandModule } from "yargs";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";
-
-import {
-  BROWSER_EXECUTABLE,
-  CONCURRENCY,
-  DEFAULT_CONFIG,
-  parseConfig,
-} from "./config.mts";
 
 /**
  * Options for rendering a video.
@@ -153,150 +148,154 @@ export const renderVideo = Effect.fnUntraced(function* (
 });
 
 /** Render to static video. */
-export const render: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .config("config", parseConfig("render"))
-      .default("config", DEFAULT_CONFIG)
-      .example([
-        ["liqvid render"],
-        ["liqvid render -a ./audio/audio.webm -o video.webm"],
-        ["liqvid render -u http://localhost:8080/dist/"],
-      ])
-      // Selection
-      .group(["output", "url"], "What to render")
-      .option("output", {
-        alias: "o",
-        default: "./video.mp4",
-        demandOption: true,
-        desc: "Output filename",
-        normalize: true,
-      })
-      .option("url", {
-        alias: "u",
-        desc: "URL of video to render",
-      })
-      // General configuration
-      .group(
-        ["browser-executable", "concurrency", "config", "help"],
-        "General options",
-      )
-      .option("browser-executable", BROWSER_EXECUTABLE)
-      .option("concurrency", CONCURRENCY)
-      // Input options
-      .group(
-        ["duration", "end", "sequence", "start", "color-scheme"],
-        "Input options",
-      )
-      .option("start", {
-        alias: "s",
-        coerce: coerceTime,
-        default: "00:00",
-        desc: "Start time, specify as [hh:]mm:ss[.ms]",
-        type: "string",
-      })
-      .option("duration", {
-        alias: "d",
-        conflicts: "end",
-        desc: "Duration, specify as [hh:]mm:ss[.ms]",
-        type: "string",
-      })
-      .coerce("duration", coerceTime)
-      .option("end", {
-        alias: "e",
-        desc: "End time, specify as [hh:]mm:ss[.ms]",
-        type: "string",
-      })
-      .coerce("end", coerceTime)
-      .option("sequence", {
-        alias: "S",
-        desc: "Output image sequence instead of video. If this flag is set, --output will be interpreted as a directory.",
-        type: "boolean",
-      })
-      .option("color-scheme", {
-        choices: ["light", "dark"] as const,
-        default: "light" as "light" | "dark",
-        desc: "Color scheme",
-      })
-      // Frames
-      .group(["height", "image-format", "quality", "width"], "Frame formatting")
-      .option("height", {
-        alias: "h",
-        default: 800,
-        desc: "Video height",
-      })
-      .option("image-format", {
-        alias: "F",
-        choices: ["jpeg", "png"] as const,
-        default: "jpeg" as "jpeg" | "png",
-        desc: "Image format for frames",
-      })
-      .option("quality", {
-        alias: "q",
-        default: 80,
-        desc: 'Quality for images. Only applies when --image-format is "jpeg"',
-      })
-      .option("width", {
-        alias: "w",
-        default: 1280,
-        desc: "Video width",
-      })
-      // ffmpeg
-      .group(
-        ["audio-args", "fps", "pixel-format", "video-args"],
-        "Video options",
-      )
-      .option("audio-args", {
-        alias: "A",
-        desc: "Additional flags to pass to ffmpeg, applying to the audio file",
-        type: "string",
-      })
-      .option("fps", {
-        alias: "r",
-        default: 30,
-        desc: "Frames per second",
-      })
-      .option("pixel-format", {
-        alias: "P",
-        default: "yuv420p",
-        desc: "Pixel format for ffmpeg",
-      })
-      .option("video-args", {
-        alias: "V",
-        desc: "Additional flags to pass to ffmpeg, applying to the output video",
-        type: "string",
-      })
-      .version(false),
-  command: "render",
-  describe: "Render static video",
-  handler: async (argv) => {
-    const { solidify } = await import("@liqvid/renderer/solidify");
-
-    const exit = await Effect.runPromiseExit(
-      // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-      solidify(argv as any).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.tapError(Console.error),
-        Effect.provide(defaultCliProgressLayer()),
+export const render = Command.make(
+  "render",
+  {
+    audioArgs: Flag.String("audio-args").pipe(
+      Flag.withAlias("A"),
+      Flag.withDescription(
+        "Additional flags to pass to ffmpeg, applying to the audio file",
       ),
-    );
-
-    if (Exit.isFailure(exit)) {
-      process.exit(1);
-    }
-
-    process.exit(0);
+      Flag.optional,
+    ),
+    browserExecutable: Flag.String("browser-executable").pipe(
+      Flag.withAlias("x"),
+      Flag.withDescription(
+        "Path to a Chrome/ium executable. If not specified and a suitable executable cannot be found, one will be downloaded during rendering.",
+      ),
+      Flag.optional,
+    ),
+    colorScheme: Flag.Literals("color-scheme", ["light", "dark"]).pipe(
+      Flag.withDescription("Color scheme"),
+      Flag.withDefault("light" as const),
+    ),
+    concurrency: Flag.Int("concurrency").pipe(
+      Flag.withAlias("n"),
+      Flag.withDescription("How many threads to use"),
+      Flag.withDefault(Math.floor(os.cpus().length / 2)),
+    ),
+    duration: Flag.String("duration").pipe(
+      Flag.withAlias("d"),
+      Flag.withDescription("Duration, specify as [hh:]mm:ss[.ms]"),
+      Flag.mapTryCatch(
+        (s: string) => parseTime(s),
+        (error) => `Invalid time: ${error}`,
+      ),
+      Flag.optional,
+    ),
+    end: Flag.String("end").pipe(
+      Flag.withAlias("e"),
+      Flag.withDescription("End time, specify as [hh:]mm:ss[.ms]"),
+      Flag.mapTryCatch(
+        (s: string) => parseTime(s),
+        (error) => `Invalid time: ${error}`,
+      ),
+      Flag.optional,
+    ),
+    fps: Flag.Int("fps").pipe(
+      Flag.withAlias("r"),
+      Flag.withDescription("Frames per second"),
+      Flag.withDefault(30),
+    ),
+    height: Flag.Int("height").pipe(
+      Flag.withAlias("h"),
+      Flag.withDescription("Video height"),
+      Flag.withDefault(800),
+    ),
+    imageFormat: Flag.Literals("image-format", ["jpeg", "png"]).pipe(
+      Flag.withAlias("F"),
+      Flag.withDescription("Image format for frames"),
+      Flag.withDefault("jpeg" as const),
+    ),
+    output: Flag.String("output").pipe(
+      Flag.withAlias("o"),
+      Flag.withDescription("Output filename"),
+      Flag.withDefault("./video.mp4"),
+    ),
+    pixelFormat: Flag.String("pixel-format").pipe(
+      Flag.withAlias("P"),
+      Flag.withDescription("Pixel format for ffmpeg"),
+      Flag.withDefault("yuv420p"),
+    ),
+    quality: Flag.Int("quality").pipe(
+      Flag.withAlias("q"),
+      Flag.withDescription(
+        'Quality for images. Only applies when --image-format is "jpeg"',
+      ),
+      Flag.withDefault(80),
+    ),
+    sequence: Flag.Boolean("sequence").pipe(
+      Flag.withAlias("S"),
+      Flag.withDescription(
+        "Output image sequence instead of video. If this flag is set, --output will be interpreted as a directory.",
+      ),
+      Flag.withDefault(false),
+    ),
+    start: Flag.String("start").pipe(
+      Flag.withAlias("s"),
+      Flag.withDescription("Start time, specify as [hh:]mm:ss[.ms]"),
+      Flag.mapTryCatch(
+        (s: string) => parseTime(s),
+        (error) => `Invalid time: ${error}`,
+      ),
+      Flag.withDefault(0),
+    ),
+    url: Flag.String("url").pipe(
+      Flag.withAlias("u"),
+      Flag.withDescription("URL of video to render"),
+      Flag.optional,
+    ),
+    videoArgs: Flag.String("video-args").pipe(
+      Flag.withAlias("V"),
+      Flag.withDescription(
+        "Additional flags to pass to ffmpeg, applying to the output video",
+      ),
+      Flag.optional,
+    ),
+    width: Flag.Int("width").pipe(
+      Flag.withAlias("w"),
+      Flag.withDescription("Video width"),
+      Flag.withDefault(1280),
+    ),
   },
-};
+  (argv) =>
+    Effect.gen(function* () {
+      const { solidify } = yield* Effect.promise(
+        () => import("@liqvid/renderer/solidify"),
+      );
 
-function coerceTime(v: string): number {
-  if (typeof v === "undefined") {
-    return v;
-  }
-  try {
-    return parseTime(v);
-  } catch {
-    console.error(`Invalid time: ${v}. Specify as [hh:]mm:ss[.ms]`);
-    process.exit(1);
-  }
-}
+      const exit = yield* Effect.exit(
+        solidify({
+          audioArgs: Option.getOrUndefined(argv.audioArgs) as string,
+          browserExecutable: Option.getOrUndefined(
+            argv.browserExecutable,
+          ) as AbsoluteFile,
+          colorScheme: argv.colorScheme,
+          concurrency: argv.concurrency,
+          duration: Option.getOrUndefined(argv.duration) as number,
+          end: Option.getOrUndefined(argv.end) as number,
+          fps: argv.fps,
+          height: argv.height,
+          imageFormat: argv.imageFormat,
+          output: argv.output,
+          pixelFormat: argv.pixelFormat,
+          quality: argv.quality,
+          sequence: argv.sequence,
+          start: argv.start,
+          url: Option.getOrUndefined(argv.url) as string,
+          videoArgs: Option.getOrUndefined(argv.videoArgs) as string,
+          width: argv.width,
+        }).pipe(
+          Effect.provide(NodeFileSystem.layer),
+          Effect.tapError(Console.error),
+          Effect.provide(defaultCliProgressLayer()),
+        ),
+      );
+
+      if (Exit.isFailure(exit)) {
+        process.exit(1);
+      }
+
+      process.exit(0);
+    }),
+).pipe(Command.withDescription("Render static video"));

@@ -8,27 +8,16 @@ import type {
   WhisperModelName,
 } from "@liqvid/schemas";
 import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
-import { Effect, FileSystem, Layer } from "effect";
+import { Effect, FileSystem, Layer, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import { type AnyDir, type AnyFile, RelativeFile } from "effect-paths";
 import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
-import type { CommandModule } from "yargs";
 
 import { CAPTIONS_FILE, RICH_TRANSCRIPT } from "#_/conventions.mjs";
 import { writeJSON } from "#_/utils/effect.mjs";
 import { expandTilde } from "#_/utils/paths.mjs";
 import { defaultCliProgressLayer } from "#_/utils/progress.mjs";
 import { Progress } from "#_/utils.mjs";
-
-import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
-
-/**
- * Options from `captioning.nodeWhisperOptions` in the config file.
- */
-interface NodeWhisperOptions {
-  gpu?: boolean;
-  modelName?: string;
-  modelPath?: string;
-}
 
 /**
  * Options for transcribing audio.
@@ -442,90 +431,59 @@ export function transcribe({
   );
 }
 
-/**
- * Transform nodeWhisperOptions from config file to CLI option names.
- */
-function transformNodeWhisperOptions(config: NodeWhisperOptions) {
-  return {
-    gpu: config.gpu,
-    model: config.modelName,
-    "model-path": config.modelPath,
-  };
-}
-
-export const transcribeCommand: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .config(
-        "config",
-        parseConfigWithTransform(
-          ["captioning", "nodeWhisperOptions"],
-          transformNodeWhisperOptions,
-        ),
-      )
-      .default("config", DEFAULT_CONFIG)
-      .example([
-        ["liqvid transcribe -i ./audio.wav -o ./captions"],
-        ["liqvid transcribe -i ./audio.wav -o ./captions --model base.en"],
-      ])
-      .option("input", {
-        alias: "i",
-        demandOption: true,
-        desc: "Path to the audio file to transcribe (mono 16kHz WAV)",
-        normalize: true,
-        type: "string",
-      })
-      .option("output", {
-        alias: "o",
-        demandOption: true,
-        desc: "Output directory for generated files",
-        normalize: true,
-        type: "string",
-      })
-      .option("model", {
-        alias: "m",
-        default: "base.en",
-        desc: "Whisper model to use",
-        type: "string",
-      })
-      .option("model-path", {
-        desc: "Path to a ggml Whisper model file",
-        type: "string",
-      })
-      .option("gpu", {
-        default: false,
-        desc: "Use the GPU for inference",
-        type: "boolean",
-      })
-      .option("translate", {
-        default: false,
-        desc: "Translate to English",
-        type: "boolean",
-      })
-      .version(false),
-  command: "transcribe",
-  describe: "Transcribe audio to captions using Whisper",
-  handler: async (argv) => {
-    const result = await Effect.runPromise(
-      transcribe({
+export const transcribeCommand = Command.make(
+  "transcribe",
+  {
+    gpu: Flag.Boolean("gpu").pipe(
+      Flag.withDescription("Use the GPU for inference"),
+      Flag.withDefault(false),
+    ),
+    input: Flag.File("input").pipe(
+      Flag.withAlias("i"),
+      Flag.withDescription(
+        "Path to the audio file to transcribe (mono 16kHz WAV)",
+      ),
+    ),
+    model: Flag.String("model").pipe(
+      Flag.withAlias("m"),
+      Flag.withDescription("Whisper model to use"),
+      Flag.withDefault("base.en"),
+    ),
+    modelPath: Flag.String("model-path").pipe(
+      Flag.withDescription("Path to a ggml Whisper model file"),
+      Flag.optional,
+    ),
+    output: Flag.Directory("output").pipe(
+      Flag.withAlias("o"),
+      Flag.withDescription("Output directory for generated files"),
+    ),
+    translate: Flag.Boolean("translate").pipe(
+      Flag.withDescription("Translate to English"),
+      Flag.withDefault(false),
+    ),
+  },
+  (argv) =>
+    Effect.gen(function* () {
+      const result = yield* transcribe({
         audioFile: argv.input as AnyFile,
         outputDir: argv.output as AnyDir,
         whisperConfig: {
-          gpu: argv.gpu as boolean,
+          gpu: argv.gpu,
           modelName: argv.model as WhisperModelName,
-          modelPath: argv["model-path"] as AnyFile | undefined,
-          translateToEnglish: argv.translate as boolean,
+          modelPath: Option.getOrUndefined(argv.modelPath) as
+            | AnyFile
+            | undefined,
+          translateToEnglish: argv.translate,
         },
       }).pipe(
         Effect.provide(
           Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
         ),
-      ),
-    );
+      );
 
-    console.log(`Captions written to: ${result.captionsPath}`);
-    console.log(`Transcript written to: ${result.transcriptPath}`);
+      console.log(`Captions written to: ${result.captionsPath}`);
+      console.log(`Transcript written to: ${result.transcriptPath}`);
 
-    process.exit(0);
-  },
-};
+      process.exit(0);
+    }),
+).pipe(Command.withDescription("Transcribe audio to captions using Whisper"));

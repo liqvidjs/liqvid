@@ -2,7 +2,6 @@ import path from "node:path";
 
 import { formatTimeMs } from "@liqvid/utils";
 import { execa } from "execa";
-import parser from "yargs-parser";
 
 /**
   Stitch frames together into a video.
@@ -84,17 +83,57 @@ export function stitch({
   );
 }
 
-function splitArgs(combined: string) {
+/**
+ * Split a combined argument string into individual arguments, handling quoting.
+ *
+ * Supports single quotes, double quotes, and backslash escaping.
+ * e.g. `-c:a copy -vn` -> ["-c:a", "copy", "-vn"]
+ */
+function splitArgs(combined: string): string[] {
   if (!combined) return [];
 
-  const parsed = parser(combined, {
-    configuration: {
-      "short-option-groups": false,
-    },
-  });
-  return Object.keys(parsed).reduce((opts, key) => {
-    if (key === "_") return opts;
-    if (typeof parsed[key] === "boolean") return opts.concat([`-${key}`]);
-    return opts.concat([`-${key}`, parsed[key]]);
-  }, [] as string[]);
+  const args: string[] = [];
+  let current = "";
+  let inSingle = false;
+  let inDouble = false;
+  let escaped = false;
+
+  for (const ch of combined) {
+    if (escaped) {
+      current += ch;
+      escaped = false;
+      continue;
+    }
+
+    if (ch === "\\") {
+      escaped = true;
+      continue;
+    }
+
+    if (ch === "'" && !inDouble) {
+      inSingle = !inSingle;
+      continue;
+    }
+
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+      continue;
+    }
+
+    if (/\s/.test(ch) && !inSingle && !inDouble) {
+      if (current.length > 0) {
+        args.push(current);
+        current = "";
+      }
+      continue;
+    }
+
+    current += ch;
+  }
+
+  if (current.length > 0) {
+    args.push(current);
+  }
+
+  return args;
 }

@@ -3,10 +3,10 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Cause, Effect, FileSystem, Option, References } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";
-import type { CommandModule } from "yargs";
 
 import { CopyProvider } from "#_/providers/hosting/copy.mjs";
 import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
@@ -44,96 +44,89 @@ export type PublishOptions = {
 };
 
 /** Publish content and/or media files to configured hosting providers. */
-export const publish: CommandModule<
-  Record<string, never>,
-  Required<Omit<PublishOptions, "configPath">> & { config?: AbsoluteFile }
-> = {
-  // @ts-expect-error TODO: figure this out
-  builder: (yargs) =>
-    yargs
-      .example([
-        ["liqvid publish"],
-        ["liqvid publish --content"],
-        ["liqvid publish --media"],
-        ["liqvid publish --cwd ./my-project"],
-        ["liqvid publish --base-dir src"],
-        ["liqvid publish --dry-run"],
-      ])
-      .group(
-        ["cwd", "config", "base-dir", "content", "media", "dry-run", "help"],
-        "Options",
-      )
-      .option("cwd", {
-        alias: "C",
-        coerce: path.resolve,
-        default: process.cwd(),
-        desc: "Working directory containing liqvid.jsonc or liqvid.json and media files",
-        normalize: true,
-      })
-      .option("config", {
-        alias: "c",
-        coerce: path.resolve,
-        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
-        normalize: true,
-      })
-      .option("base-dir", {
-        alias: "b",
-        default: "app",
-        desc: "Base directory containing media files (paths are relative to this)",
-        normalize: true,
-      })
-      .option("content", {
-        default: false,
-        desc: "Publish content files (html/css/js) to the hosting provider",
-        type: "boolean",
-      })
-      .option("media", {
-        default: false,
-        desc: "Publish media files to the media hosting provider",
-        type: "boolean",
-      })
-      .option("dry-run", {
-        alias: "n",
-        default: false,
-        desc: "Show what would be uploaded without actually uploading",
-        type: "boolean",
-      })
-      .version(false),
-  command: "publish",
-  describe:
-    "Publish content and/or media files to configured hosting providers",
-  handler: async (argv) => {
-    const cwd = argv.cwd;
-    const baseDir = argv.baseDir;
-    const dryRun = argv.dryRun;
-    const contentFlag = argv.content;
-    const mediaFlag = argv.media;
-
-    // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
-    const configPath =
-      argv.config ??
-      (await Effect.runPromise(
-        resolveConfigPath({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
-      ));
-
-    // If neither --content nor --media is specified, publish both
-    const shouldPublishContent = contentFlag || (!contentFlag && !mediaFlag);
-    const shouldPublishMedia = mediaFlag || (!contentFlag && !mediaFlag);
-
-    // Publish content if requested
-    if (shouldPublishContent) {
-      await publishContent({ baseDir, configPath, cwd, dryRun });
-    }
-
-    // Publish media if requested
-    if (shouldPublishMedia) {
-      await publishMedia({ baseDir, configPath, cwd, dryRun });
-    }
-
-    console.log("\nPublish complete!");
-    process.exit(0);
+export const publish = Command.make(
+  "publish",
+  {
+    baseDir: Flag.String("base-dir").pipe(
+      Flag.withAlias("b"),
+      Flag.withDescription(
+        "Base directory containing media files (paths are relative to this)",
+      ),
+      Flag.withDefault("app"),
+    ),
+    config: Flag.String("config").pipe(
+      Flag.withAlias("c"),
+      Flag.withDescription(
+        `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
+      ),
+      Flag.optional,
+    ),
+    content: Flag.Boolean("content").pipe(
+      Flag.withDescription(
+        "Publish content files (html/css/js) to the hosting provider",
+      ),
+      Flag.withDefault(false),
+    ),
+    cwd: Flag.Directory("cwd").pipe(
+      Flag.withAlias("C"),
+      Flag.withDescription(
+        "Working directory containing liqvid.jsonc or liqvid.json and media files",
+      ),
+      Flag.withDefault(process.cwd()),
+    ),
+    dryRun: Flag.Boolean("dry-run").pipe(
+      Flag.withAlias("n"),
+      Flag.withDescription(
+        "Show what would be uploaded without actually uploading",
+      ),
+      Flag.withDefault(false),
+    ),
+    media: Flag.Boolean("media").pipe(
+      Flag.withDescription("Publish media files to the media hosting provider"),
+      Flag.withDefault(false),
+    ),
   },
-};
+  (argv) =>
+    Effect.gen(function* () {
+      const cwd = path.resolve(argv.cwd) as AbsoluteDir;
+      const baseDir = argv.baseDir as RelativeDir;
+      const dryRun = argv.dryRun;
+      const contentFlag = argv.content;
+      const mediaFlag = argv.media;
+
+      // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
+      const configPath =
+        (Option.getOrUndefined(argv.config) as AbsoluteFile | undefined) ??
+        (yield* resolveConfigPath({ cwd }).pipe(
+          Effect.provide(NodeFileSystem.layer),
+        ));
+
+      // If neither --content nor --media is specified, publish both
+      const shouldPublishContent = contentFlag || (!contentFlag && !mediaFlag);
+      const shouldPublishMedia = mediaFlag || (!contentFlag && !mediaFlag);
+
+      // Publish content if requested
+      if (shouldPublishContent) {
+        yield* Effect.promise(() =>
+          publishContent({ baseDir, configPath, cwd, dryRun }),
+        );
+      }
+
+      // Publish media if requested
+      if (shouldPublishMedia) {
+        yield* Effect.promise(() =>
+          publishMedia({ baseDir, configPath, cwd, dryRun }),
+        );
+      }
+
+      console.log("\nPublish complete!");
+      process.exit(0);
+    }),
+).pipe(
+  Command.withDescription(
+    "Publish content and/or media files to configured hosting providers",
+  ),
+);
 
 /**
  * Load the parsed Liqvid config for the given cwd/configPath.

@@ -135,54 +135,72 @@ export const loadLiqvidConfig = flow(
  * (e.g. `EnvFiles`) surface those requirements to the caller instead of being
  * erased to `unknown`.
  */
-export const loadJson = Effect.fnUntraced(function* <S extends Schema.Top>(
-  parser: S,
+export function loadJson<T, E, RD, RE>(
+  parser: Schema.Codec<T, E, RD, RE>,
   filename: AbsoluteFile,
-) {
-  const fs = yield* FileSystem.FileSystem;
+): Effect.Effect<
+  T,
+  FileDecodeError | PlatformError.PlatformError,
+  FileSystem.FileSystem | RD
+> {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  const file = yield* fs.readFileString(filename, "utf8");
+    const file = yield* fs.readFileString(filename, "utf8");
 
-  return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
-    onExcessProperty: "ignore",
-  })(file).pipe(
-    Effect.mapError(
-      (cause) =>
-        new FileDecodeError({
-          cause,
-          filename,
-        }),
-    ),
-  );
-});
+    return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
+      onExcessProperty: "ignore",
+    })(file).pipe(
+      Effect.mapError(
+        (cause) =>
+          new FileDecodeError({
+            cause,
+            filename,
+          }),
+      ),
+    );
+  }) as Effect.Effect<
+    T,
+    FileDecodeError | PlatformError.PlatformError,
+    FileSystem.FileSystem | RD
+  >;
+}
 
-/**
- * Load a file (supporting JSONC format with comments) and decode its contents
- * with the given schema.
- *
- * Uses jsonc.min to strip comments before parsing.
+/*
+ * Keep this implementation separate from loadJson because JSONC is stripped
+ * before decoding, while both functions expose the same service requirements.
  */
-export const loadJsonc = Effect.fnUntraced(function* <S extends Schema.Top>(
+export function loadJsonc<S extends Schema.Codec<any, any, any, any>>(
   parser: S,
   filename: AbsoluteFile,
-) {
-  const fs = yield* FileSystem.FileSystem;
+): Effect.Effect<
+  S["Type"],
+  FileDecodeError | PlatformError.PlatformError,
+  FileSystem.FileSystem | Schema.Codec.DecodingServices<S>
+> {
+  return Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
 
-  const file = yield* fs.readFileString(filename, "utf8");
-  const minified = JSONC.minify(file);
+    const file = yield* fs.readFileString(filename, "utf8");
+    const minified = JSONC.minify(file);
 
-  return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
-    onExcessProperty: "ignore",
-  })(minified).pipe(
-    Effect.mapError(
-      (cause) =>
-        new FileDecodeError({
-          cause,
-          filename,
-        }),
-    ),
-  );
-});
+    return yield* Schema.decodeEffect(Schema.fromJsonString(parser), {
+      onExcessProperty: "ignore",
+    })(minified).pipe(
+      Effect.mapError(
+        (cause) =>
+          new FileDecodeError({
+            cause,
+            filename,
+          }),
+      ),
+    );
+  }) as Effect.Effect<
+    S["Type"],
+    FileDecodeError | PlatformError.PlatformError,
+    FileSystem.FileSystem | Schema.Codec.DecodingServices<S>
+  >;
+}
 
 /**
  * Parse a .env file and return key-value pairs.

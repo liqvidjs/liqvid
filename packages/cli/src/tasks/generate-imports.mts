@@ -3,6 +3,8 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { Effect, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -10,7 +12,6 @@ import {
   RelativeFile,
 } from "effect-paths";
 import Handlebars from "handlebars";
-import type { CommandModule } from "yargs";
 
 import { UP } from "../utils/effect.mts";
 
@@ -117,43 +118,45 @@ async function generateContent(plugins: string[]): Promise<string> {
 /**
  * Generate dynamic-imports command
  */
-export const generateImports: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .option("cwd", {
-        alias: "C",
-        coerce: path.resolve,
-        default: process.cwd(),
-        desc: "Working directory",
-      })
-      .option("output", {
-        alias: "o",
-        desc: "Output file path",
-        type: "string",
-      }),
-  command: "generate-imports",
-  describe: "Generate dynamic-imports file for server plugins",
-  handler: async (args) => {
-    const cwd = args.cwd as AbsoluteDir;
-    const outputPath =
-      (args.output as AbsoluteFile) ?? path.join(cwd, OUTPUT_FILENAME);
-
-    console.log("Scanning dependencies for server plugins...");
-
-    const plugins = await findPlugins(cwd);
-
-    if (plugins.length === 0) {
-      console.log("No server plugins found in dependencies.");
-    } else {
-      console.log(`Found ${plugins.length} server plugin(s):`);
-      for (const plugin of plugins) {
-        console.log(`  - ${plugin}`);
-      }
-    }
-
-    const content = await generateContent(plugins);
-    await fsp.writeFile(outputPath, content);
-
-    console.log(`Generated ${outputPath}`);
+export const generateImports = Command.make(
+  "generate-imports",
+  {
+    cwd: Flag.Directory("cwd").pipe(
+      Flag.withAlias("C"),
+      Flag.withDescription("Working directory"),
+      Flag.withDefault(process.cwd()),
+    ),
+    output: Flag.String("output").pipe(
+      Flag.withAlias("o"),
+      Flag.withDescription("Output file path"),
+      Flag.optional,
+    ),
   },
-};
+  ({ cwd, output }) =>
+    Effect.gen(function* () {
+      const cwdDir = path.resolve(cwd) as AbsoluteDir;
+      const outputPath =
+        (Option.getOrUndefined(output) as AbsoluteFile | undefined) ??
+        path.join(cwdDir, OUTPUT_FILENAME);
+
+      console.log("Scanning dependencies for server plugins...");
+
+      const plugins = yield* Effect.promise(() => findPlugins(cwdDir));
+
+      if (plugins.length === 0) {
+        console.log("No server plugins found in dependencies.");
+      } else {
+        console.log(`Found ${plugins.length} server plugin(s):`);
+        for (const plugin of plugins) {
+          console.log(`  - ${plugin}`);
+        }
+      }
+
+      const content = yield* Effect.promise(() => generateContent(plugins));
+      yield* Effect.promise(() => fsp.writeFile(outputPath, content));
+
+      console.log(`Generated ${outputPath}`);
+    }),
+).pipe(
+  Command.withDescription("Generate dynamic-imports file for server plugins"),
+);

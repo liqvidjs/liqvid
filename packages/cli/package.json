@@ -122,9 +122,7 @@
     "handlebars": "catalog:",
     "jsonc.min": "catalog:",
     "pluralize": "catalog:",
-    "sharp": "catalog:",
-    "yargs": "catalog:",
-    "yargs-parser": "catalog:"
+    "sharp": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
@@ -132,7 +130,6 @@
     "@effect/tsgo": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
     "@types/pluralize": "catalog:",
-    "@types/yargs": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",

@@ -4,11 +4,11 @@ import * as path from "node:path";
 
 import { Err, Ok, type Result } from "@liqvid/fp";
 import chalk from "chalk";
+import { Effect, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import type { AbsoluteDir, AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
-import type { CommandModule } from "yargs";
 
-import { DEFAULT_CONFIG, parseConfigWithTransform } from "./config.mts";
 import {
   DEFAULT_MEDIA_BASE_DIR,
   DEFAULT_MEDIA_PATTERNS,
@@ -368,103 +368,64 @@ export async function runCompress(
   });
 }
 
-/**
- * Transform compress config from liqvid.json to CLI option names.
- */
-function transformCompressConfig(
-  config: Partial<CompressOptions>,
-): Record<string, unknown> {
-  return {
-    "base-dir": config.baseDir,
-    "batch-size": config.batchSize,
-    "compression-level": config.compressionLevel,
-    "dry-run": config.dryRun,
-    input: config.input,
-    quality: config.quality,
-  };
-}
-
-export const compress: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .config(
-        "config",
-        parseConfigWithTransform(["compress"], transformCompressConfig),
-      )
-      .default("config", DEFAULT_CONFIG)
-      .example([
-        ["liqvid compress", "Compress all media PNGs in app/"],
-        ["liqvid compress --dry-run", "Preview compression savings"],
-        ["liqvid compress -i ./public/images", "Compress PNGs in specific dir"],
-        ["liqvid compress -q 60 -l 9", "Compress with custom quality"],
-      ])
-      .option("input", {
-        alias: "i",
-        desc: "Directory to scan for PNG files (if not specified, uses media patterns in base-dir)",
-        normalize: true,
-        type: "string",
-      })
-      .option("base-dir", {
-        alias: "b",
-        default: DEFAULT_MEDIA_BASE_DIR,
-        desc: "Base directory for media file search when --input is not specified",
-        normalize: true,
-        type: "string",
-      })
-      .option("quality", {
-        alias: "q",
-        default: 80,
-        desc: "PNG quality (0-100, lower = smaller file)",
-        type: "number",
-      })
-      .option("compression-level", {
-        alias: "l",
-        default: 9,
-        desc: "Compression level (0-9, higher = slower but smaller)",
-        type: "number",
-      })
-      .option("batch-size", {
-        alias: "B",
-        default: 5,
-        desc: "Number of files to process in parallel",
-        type: "number",
-      })
-      .option("dry-run", {
-        alias: "d",
-        default: false,
-        desc: "Report savings without modifying files",
-        type: "boolean",
-      })
-      .check((argv) => {
-        if (argv.quality < 0 || argv.quality > 100) {
-          throw new Error("Quality must be between 0 and 100");
-        }
-        if (argv["compression-level"] < 0 || argv["compression-level"] > 9) {
-          throw new Error("Compression level must be between 0 and 9");
-        }
-        if (argv["batch-size"] < 1) {
-          throw new Error("Batch size must be at least 1");
-        }
-        return true;
-      })
-      .version(false),
-  command: "compress",
-  describe: "Compress PNG files in media directories",
-  handler: async (argv) => {
-    const result = await runCompress({
-      baseDir: argv["base-dir"] as RelativeDir | undefined,
-      batchSize: argv["batch-size"] as number,
-      compressionLevel: argv["compression-level"] as number,
-      dryRun: argv["dry-run"] as boolean,
-      input: argv.input as AbsoluteDir | undefined,
-      quality: argv.quality as number,
-    });
-
-    if (result.isErr) {
-      console.error(chalk.red("\nCompression completed with errors."));
-      process.exit(1);
-    }
-
-    process.exit(0);
+export const compress = Command.make(
+  "compress",
+  {
+    baseDir: Flag.String("base-dir").pipe(
+      Flag.withAlias("b"),
+      Flag.withDescription(
+        "Base directory for media file search when --input is not specified",
+      ),
+      Flag.withDefault(DEFAULT_MEDIA_BASE_DIR as string),
+    ),
+    batchSize: Flag.Int("batch-size").pipe(
+      Flag.withAlias("B"),
+      Flag.withDescription("Number of files to process in parallel"),
+      Flag.withDefault(5),
+    ),
+    compressionLevel: Flag.Int("compression-level").pipe(
+      Flag.withAlias("l"),
+      Flag.withDescription(
+        "Compression level (0-9, higher = slower but smaller)",
+      ),
+      Flag.withDefault(9),
+    ),
+    dryRun: Flag.Boolean("dry-run").pipe(
+      Flag.withAlias("d"),
+      Flag.withDescription("Report savings without modifying files"),
+      Flag.withDefault(false),
+    ),
+    input: Flag.Directory("input").pipe(
+      Flag.withAlias("i"),
+      Flag.withDescription(
+        "Directory to scan for PNG files (if not specified, uses media patterns in base-dir)",
+      ),
+      Flag.optional,
+    ),
+    quality: Flag.Int("quality").pipe(
+      Flag.withAlias("q"),
+      Flag.withDescription("PNG quality (0-100, lower = smaller file)"),
+      Flag.withDefault(80),
+    ),
   },
-};
+  ({ baseDir, batchSize, compressionLevel, dryRun, input, quality }) =>
+    Effect.gen(function* () {
+      const result = yield* Effect.promise(() =>
+        runCompress({
+          baseDir: baseDir as RelativeDir | undefined,
+          batchSize,
+          compressionLevel,
+          dryRun,
+          input: Option.getOrUndefined(input) as AbsoluteDir | undefined,
+          quality,
+        }),
+      );
+
+      if (result.isErr) {
+        console.error(chalk.red("\nCompression completed with errors."));
+        process.exit(1);
+      }
+
+      process.exit(0);
+    }),
+).pipe(Command.withDescription("Compress PNG files in media directories"));

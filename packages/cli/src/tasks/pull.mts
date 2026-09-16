@@ -2,10 +2,10 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import type { AbsoluteDir, AbsoluteFile, RelativeDir } from "effect-paths";
 import pluralize from "pluralize";
-import type { CommandModule } from "yargs";
 
 import { S3Provider } from "../providers/hosting/s3.mts";
 import type {
@@ -56,111 +56,108 @@ function isMediaFile(filePath: string): boolean {
 }
 
 /** Pull media files from configured hosting provider. */
-export const pull: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .example([
-        ["liqvid pull"],
-        ["liqvid pull --cwd ./my-project"],
-        ["liqvid pull --base-dir src"],
-        ["liqvid pull --dry-run"],
-      ])
-      .group(["cwd", "config", "base-dir", "dry-run", "help"], "Options")
-      .option("cwd", {
-        alias: "C",
-        default: process.cwd(),
-        desc: "Working directory containing liqvid.jsonc or liqvid.json",
-        normalize: true,
-      })
-      .option("config", {
-        alias: "c",
-        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
-        normalize: true,
-      })
-      .option("base-dir", {
-        alias: "b",
-        default: "app",
-        desc: "Base directory where media files will be saved (paths are relative to this)",
-        normalize: true,
-      })
-      .option("dry-run", {
-        alias: "n",
-        default: false,
-        desc: "Show what would be downloaded without actually downloading",
-        type: "boolean",
-      })
-      .version(false),
-  command: "pull",
-  describe: "Pull media files from configured hosting provider",
-  handler: async (argv) => {
-    const cwd = argv.cwd as AbsoluteDir;
-    const baseDir = argv["base-dir"] as RelativeDir;
-    const dryRun = argv["dry-run"] as boolean;
-
-    // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
-    const configPath =
-      (argv.config as AbsoluteFile | undefined) ??
-      (await Effect.runPromise(
-        resolveConfigPath({ cwd }).pipe(Effect.provide(NodeFileSystem.layer)),
-      ));
-
-    // The base directory is where we save media files
-    // and paths are computed relative to it
-    const targetDir = path.join(cwd, baseDir);
-
-    // Load and parse config
-    const config = await loadConfig(configPath);
-
-    // Create provider based on config
-    const provider = createProvider(config);
-
-    console.log(
-      `Listing remote files from s3://${config.providers.s3?.bucket ?? "bucket"}...`,
-    );
-
-    // List all remote files
-    const remoteFiles = await provider.listRemoteFiles();
-
-    // Filter to only media files
-    const mediaFiles = remoteFiles.filter((f) => isMediaFile(f.key));
-
-    if (mediaFiles.length === 0) {
-      console.log("No media files found on remote. Nothing to pull.");
-      process.exit(0);
-    }
-
-    // Sort for consistent output
-    mediaFiles.sort((a, b) => a.key.localeCompare(b.key));
-
-    console.log(
-      `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} on remote`,
-    );
-    console.log();
-
-    // Check which files need to be downloaded
-    const statuses = await Effect.runPromise(
-      provider
-        .checkRemoteFiles(mediaFiles, targetDir)
-        .pipe(Effect.provide(NodeFileSystem.layer)),
-    );
-
-    if (dryRun) {
-      console.log("Dry run mode - showing what would be downloaded...\n");
-      showDryRunInfo(statuses, targetDir, config, mediaFiles);
-      process.exit(0);
-    }
-
-    // Download files (this never deletes local content)
-    const downloadCount = await Effect.runPromise(
-      provider.downloadMedia(statuses),
-    );
-
-    if (downloadCount > 0) {
-      console.log("\nPull complete!");
-    }
-    process.exit(0);
+export const pull = Command.make(
+  "pull",
+  {
+    baseDir: Flag.String("base-dir").pipe(
+      Flag.withAlias("b"),
+      Flag.withDescription(
+        "Base directory where media files will be saved (paths are relative to this)",
+      ),
+      Flag.withDefault("app"),
+    ),
+    config: Flag.String("config").pipe(
+      Flag.withAlias("c"),
+      Flag.withDescription(
+        `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
+      ),
+      Flag.optional,
+    ),
+    cwd: Flag.Directory("cwd").pipe(
+      Flag.withAlias("C"),
+      Flag.withDescription(
+        "Working directory containing liqvid.jsonc or liqvid.json",
+      ),
+      Flag.withDefault(process.cwd()),
+    ),
+    dryRun: Flag.Boolean("dry-run").pipe(
+      Flag.withAlias("n"),
+      Flag.withDescription(
+        "Show what would be downloaded without actually downloading",
+      ),
+      Flag.withDefault(false),
+    ),
   },
-};
+  (argv) =>
+    Effect.gen(function* () {
+      const cwd = argv.cwd as AbsoluteDir;
+      const baseDir = argv.baseDir as RelativeDir;
+      const dryRun = argv.dryRun;
+
+      // Resolve config path: use explicit --config if provided, otherwise find liqvid.jsonc or liqvid.json
+      const configPath =
+        (Option.getOrUndefined(argv.config) as AbsoluteFile | undefined) ??
+        (yield* resolveConfigPath({ cwd }).pipe(
+          Effect.provide(NodeFileSystem.layer),
+        ));
+
+      // The base directory is where we save media files
+      // and paths are computed relative to it
+      const targetDir = path.join(cwd, baseDir);
+
+      // Load and parse config
+      const config = yield* Effect.promise(() => loadConfig(configPath));
+
+      // Create provider based on config
+      const provider = createProvider(config);
+
+      console.log(
+        `Listing remote files from s3://${config.providers.s3?.bucket ?? "bucket"}...`,
+      );
+
+      // List all remote files
+      const remoteFiles = yield* Effect.promise(() =>
+        provider.listRemoteFiles(),
+      );
+
+      // Filter to only media files
+      const mediaFiles = remoteFiles.filter((f) => isMediaFile(f.key));
+
+      if (mediaFiles.length === 0) {
+        console.log("No media files found on remote. Nothing to pull.");
+        process.exit(0);
+      }
+
+      // Sort for consistent output
+      mediaFiles.sort((a, b) => a.key.localeCompare(b.key));
+
+      console.log(
+        `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} on remote`,
+      );
+      console.log();
+
+      // Check which files need to be downloaded
+      const statuses = yield* provider
+        .checkRemoteFiles(mediaFiles, targetDir)
+        .pipe(Effect.provide(NodeFileSystem.layer));
+
+      if (dryRun) {
+        console.log("Dry run mode - showing what would be downloaded...\n");
+        showDryRunInfo(statuses, targetDir, config, mediaFiles);
+        process.exit(0);
+      }
+
+      // Download files (this never deletes local content)
+      const downloadCount = yield* provider.downloadMedia(statuses);
+
+      if (downloadCount > 0) {
+        console.log("\nPull complete!");
+      }
+      process.exit(0);
+    }),
+).pipe(
+  Command.withDescription("Pull media files from configured hosting provider"),
+);
 
 /**
  * Load and validate the liqvid.json config file

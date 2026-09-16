@@ -1,12 +1,10 @@
 import { NodeFileSystem } from "@effect/platform-node";
 import type { ScreenshotOptions } from "@liqvid/renderer/screenshot";
-import { Console, Effect, Exit } from "effect";
+import { Console, Effect, Exit, Option } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import type { AbsoluteFile } from "effect-paths";
-import type { CommandModule } from "yargs";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";
-
-import { BROWSER_EXECUTABLE, DEFAULT_CONFIG, parseConfig } from "./config.mts";
 
 /**
  * Result of screenshot capture.
@@ -50,88 +48,87 @@ export const screenshot = Effect.fnUntraced(function* (
 });
 
 /** Capture a screenshot. */
-export const screenshotCommand: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .config("config", parseConfig("screenshot"))
-      .default("config", DEFAULT_CONFIG)
-      .example([
-        ["liqvid screenshot -u http://localhost:3000 -o screenshot.png"],
-        ["liqvid screenshot -u http://localhost:3000 -o screenshot.png -t 5"],
-      ])
-      // Selection
-      .group(["output", "url", "time"], "What to capture")
-      .option("output", {
-        alias: "o",
-        default: "./screenshot.png",
-        demandOption: true,
-        desc: "Output filename",
-        normalize: true,
-      })
-      .option("url", {
-        alias: "u",
-        desc: "URL of video to capture",
-      })
-      .option("time", {
-        alias: "t",
-        default: 0,
-        desc: "Time in seconds to capture",
-        type: "number",
-      })
-      // General configuration
-      .group(["browser-executable", "config", "help"], "General options")
-      .option("browser-executable", BROWSER_EXECUTABLE)
-      // Frame formatting
-      .group(
-        ["color-scheme", "height", "image-format", "quality", "width"],
-        "Frame formatting",
-      )
-      .option("color-scheme", {
-        choices: ["light", "dark"] as const,
-        default: "light" as "light" | "dark",
-        desc: "Color scheme",
-      })
-      .option("height", {
-        alias: "h",
-        default: 720,
-        desc: "Screenshot height",
-      })
-      .option("image-format", {
-        alias: "F",
-        choices: ["jpeg", "png"] as const,
-        default: "png" as "jpeg" | "png",
-        desc: "Image format for screenshot",
-      })
-      .option("quality", {
-        alias: "q",
-        default: 80,
-        desc: 'Quality for images. Only applies when --image-format is "jpeg"',
-      })
-      .option("width", {
-        alias: "w",
-        default: 1280,
-        desc: "Screenshot width",
-      })
-      .version(false),
-  command: "screenshot",
-  describe: "Capture a screenshot from a Liqvid video",
-  handler: async (argv) => {
-    const { screenshot: renderScreenshot } = await import(
-      "@liqvid/renderer/screenshot"
-    );
-    const exit = await Effect.runPromiseExit(
-      // biome-ignore lint/suspicious/noExplicitAny: argv is properly typed by yargs builder
-      renderScreenshot(argv as any).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.tapError(Console.error),
-        Effect.provide(defaultCliProgressLayer()),
+export const screenshotCommand = Command.make(
+  "screenshot",
+  {
+    browserExecutable: Flag.String("browser-executable").pipe(
+      Flag.withAlias("x"),
+      Flag.withDescription(
+        "Path to a Chrome/ium executable. If not specified and a suitable executable cannot be found, one will be downloaded during rendering.",
       ),
-    );
-
-    if (Exit.isFailure(exit)) {
-      process.exit(1);
-    }
-
-    process.exit(0);
+      Flag.optional,
+    ),
+    colorScheme: Flag.Literals("color-scheme", ["light", "dark"]).pipe(
+      Flag.withDescription("Color scheme"),
+      Flag.withDefault("light" as const),
+    ),
+    height: Flag.Int("height").pipe(
+      Flag.withAlias("h"),
+      Flag.withDescription("Screenshot height"),
+      Flag.withDefault(720),
+    ),
+    imageFormat: Flag.Literals("image-format", ["jpeg", "png"]).pipe(
+      Flag.withAlias("F"),
+      Flag.withDescription("Image format for screenshot"),
+      Flag.withDefault("png" as const),
+    ),
+    output: Flag.String("output").pipe(
+      Flag.withAlias("o"),
+      Flag.withDescription("Output filename"),
+      Flag.withDefault("./screenshot.png"),
+    ),
+    quality: Flag.Int("quality").pipe(
+      Flag.withAlias("q"),
+      Flag.withDescription(
+        'Quality for images. Only applies when --image-format is "jpeg"',
+      ),
+      Flag.withDefault(80),
+    ),
+    time: Flag.Finite("time").pipe(
+      Flag.withAlias("t"),
+      Flag.withDescription("Time in seconds to capture"),
+      Flag.withDefault(0),
+    ),
+    url: Flag.String("url").pipe(
+      Flag.withAlias("u"),
+      Flag.withDescription("URL of video to capture"),
+      Flag.optional,
+    ),
+    width: Flag.Int("width").pipe(
+      Flag.withAlias("w"),
+      Flag.withDescription("Screenshot width"),
+      Flag.withDefault(1280),
+    ),
   },
-};
+  (argv) =>
+    Effect.gen(function* () {
+      const { screenshot: renderScreenshot } = yield* Effect.promise(
+        () => import("@liqvid/renderer/screenshot"),
+      );
+      const exit = yield* Effect.exit(
+        renderScreenshot({
+          browserExecutable: Option.getOrUndefined(
+            argv.browserExecutable,
+          ) as AbsoluteFile,
+          colorScheme: argv.colorScheme,
+          height: argv.height,
+          imageFormat: argv.imageFormat,
+          output: argv.output,
+          quality: argv.quality,
+          time: argv.time,
+          url: Option.getOrUndefined(argv.url) as string,
+          width: argv.width,
+        } as ScreenshotOptions).pipe(
+          Effect.provide(NodeFileSystem.layer),
+          Effect.tapError(Console.error),
+          Effect.provide(defaultCliProgressLayer()),
+        ),
+      );
+
+      if (Exit.isFailure(exit)) {
+        process.exit(1);
+      }
+
+      process.exit(0);
+    }),
+).pipe(Command.withDescription("Capture a screenshot from a Liqvid video"));

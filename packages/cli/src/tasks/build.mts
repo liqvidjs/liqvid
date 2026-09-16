@@ -3,9 +3,9 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Effect, Option, References } from "effect";
+import { Command, Flag } from "effect/unstable/cli";
 import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
-import type { CommandModule } from "yargs";
 
 import { CopyProvider } from "#_/providers/hosting/copy.mjs";
 import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
@@ -23,37 +23,34 @@ import { CONFIG_FILE, CONFIG_FILE_JSONC } from "./conventions.mts";
 /**
  * Build project
  */
-export const build: CommandModule = {
-  builder: (yargs) =>
-    yargs
-      .option("cwd", {
-        alias: "C",
-        coerce: path.resolve,
-        default: process.cwd(),
-        desc: "Working directory",
-      })
-      .option("config", {
-        alias: "c",
-        desc: `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
-        normalize: true,
-      }),
-  command: "build",
-  describe: "Build project",
-  handler: async (args) => {
-    const cwd = args.cwd as AbsoluteDir;
-    await Effect.runPromise(
-      Effect.gen(function* () {
-        const configPath =
-          (args.config as AbsoluteFile | undefined) ??
-          (yield* resolveConfigPath({ cwd }));
-        yield* runNextBuild({ configPath, cwd });
-      }).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(References.MinimumLogLevel, "Debug"),
+export const build = Command.make(
+  "build",
+  {
+    config: Flag.String("config").pipe(
+      Flag.withAlias("c"),
+      Flag.withDescription(
+        `Path to config file (default: ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} in cwd)`,
       ),
-    );
+      Flag.optional,
+    ),
+    cwd: Flag.Directory("cwd").pipe(
+      Flag.withAlias("C"),
+      Flag.withDescription("Working directory"),
+      Flag.withDefault(process.cwd()),
+    ),
   },
-};
+  ({ config, cwd }) =>
+    Effect.gen(function* () {
+      const cwdDir = path.resolve(cwd) as AbsoluteDir;
+      const configPath =
+        (Option.getOrUndefined(config) as AbsoluteFile | undefined) ??
+        (yield* resolveConfigPath({ cwd: cwdDir }));
+      yield* runNextBuild({ configPath, cwd: cwdDir });
+    }).pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(References.MinimumLogLevel, "Debug"),
+    ),
+).pipe(Command.withDescription("Build project"));
 
 export interface BuildOptions {
   /** Path to liqvid.json config file */

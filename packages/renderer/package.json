@@ -79,8 +79,7 @@
     "effect": "catalog:",
     "execa": "catalog:",
     "jimp": "catalog:",
-    "puppeteer-core": "catalog:",
-    "yargs-parser": "catalog:"
+    "puppeteer-core": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
@@ -88,7 +87,6 @@
     "@effect/tsgo": "catalog:dev",
     "@types/cli-progress": "catalog:dev",
     "@types/node": "catalog:dev",
-    "@types/yargs-parser": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
