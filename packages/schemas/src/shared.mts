@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Effect, Schema, SchemaTransformation } from "effect";
 
 import { decodeEnvVar } from "./env-vars.mts";
 
@@ -17,23 +17,20 @@ export const ColorSchemeOrBoth = Schema.Union([
 
 export type ColorSchemeOrBoth = (typeof ColorSchemeOrBoth)["Type"];
 
+/* ------------------------------ env vars ------------------------------ */
 /** Reference an environment variable (exact match: `{env:VAR_NAME}`) */
 export const EnvVar = Schema.TemplateLiteral([
   "{env:",
   Schema.String,
   "}",
-]).pipe(decodeEnvVar);
-export type EnvVar = (typeof EnvVar)["Encoded"];
-
-/** Recognized image formats. */
-export const ImageFormat = Schema.Literals(["jpeg", "png"]);
-
-export type ImageFormat = (typeof ImageFormat)["Type"];
-
-/** Quality parameter for JPEG images, from 1 to 100. Defaults to 80. */
-export const JpegQuality = Schema.Number.pipe(
-  Schema.withDecodingDefaultType(Effect.succeed(80)),
+]).pipe(
+  decodeEnvVar,
+  Schema.annotate({
+    description:
+      "Reference an environment variable (exact match: {env:VAR_NAME})",
+  }),
 );
+export type EnvVar = (typeof EnvVar)["Encoded"];
 
 /**
  * A string that may contain embedded environment variable references.
@@ -45,9 +42,31 @@ export const JpegQuality = Schema.Number.pipe(
 export const StringWithEnvVars = Schema.String.pipe(
   Schema.brand("StringWithEnvVars"),
   decodeEnvVar,
+  Schema.annotate({
+    description:
+      'A string that may contain embedded environment variable references. E.g. "https://{env:ACCOUNT_ID}.example.com". At runtime, all {env:VAR_NAME} patterns will be replaced with the corresponding environment variable values.',
+  }),
 );
 export type StringWithEnvVars = (typeof StringWithEnvVars)["Type"];
 
+/* ------------------------------ image formats ------------------------------ */
+/** Recognized image formats. */
+export const ImageFormat = Schema.Literals(["jpeg", "png"]).pipe(
+  Schema.annotate({ description: "Recognized image formats." }),
+);
+
+export type ImageFormat = (typeof ImageFormat)["Type"];
+
+/** Quality parameter for JPEG images, from 1 to 100. Defaults to 80. */
+export const JpegQuality = Schema.Number.pipe(
+  Schema.withDecodingDefaultType(Effect.succeed(80)),
+  Schema.annotate({
+    default: 80,
+    description: "Quality parameter for JPEG images, from 1 to 100.",
+  }),
+);
+
+/* ------------------------------ transcripts ------------------------------ */
 /**
  * Transcript entry with word and timing information.
  * Format: [word, startTimeMs, endTimeMs]
@@ -69,22 +88,47 @@ export type TranscriptEntry = (typeof TranscriptEntry)["Type"];
  */
 export const RichTranscript = Schema.Struct({
   /** Array of indices indicating where caption breaks occur */
-  captionBreaks: Schema.Array(Schema.Number),
+  captionBreaks: Schema.Array(Schema.Number).pipe(
+    Schema.annotate({
+      description: "Array of indices indicating where caption breaks occur",
+    }),
+  ),
 
   /** Array of indices indicating where paragraph breaks occur */
-  paragraphBreaks: Schema.Array(Schema.Number),
+  paragraphBreaks: Schema.Array(Schema.Number).pipe(
+    Schema.annotate({
+      description: "Array of indices indicating where paragraph breaks occur",
+    }),
+  ),
 
   /** Array of transcript entries with word and timing information */
-  words: Schema.Array(TranscriptEntry),
+  words: Schema.Array(TranscriptEntry).pipe(
+    Schema.annotate({
+      description:
+        "Array of transcript entries with word and timing information",
+    }),
+  ),
 });
 
 export type RichTranscript = (typeof RichTranscript)["Type"];
 
+/* ------------------------------ logging ------------------------------ */
 export const LogLevel = Schema.Literals(["debug", "info"]);
 
 export type LogLevel = (typeof LogLevel)["Type"];
 
+/* ------------------------------ rendering ------------------------------ */
 /** whether to render from development preview or production build */
-export const RenderSource = Schema.Literals(["preview", "production"]);
+export const RenderSource = Schema.Literals(["preview", "production"]).pipe(
+  Schema.annotate({
+    description:
+      "Whether to render from development preview or production build",
+  }),
+);
 
 export type RenderSource = (typeof RenderSource)["Type"];
+
+export const SchemaUrl = Schema.String.pipe(
+  Schema.annotate({ format: "uri" }),
+  Schema.decodeTo(Schema.URL, SchemaTransformation.urlFromString),
+);

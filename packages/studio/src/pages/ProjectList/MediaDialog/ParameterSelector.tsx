@@ -144,18 +144,3 @@ export function useProjectParameterValues(
     return params;
   }, [projectParameters, rootParameters]);
 }
-
-/**
- * Get default parameter values (first value of each parameter).
- */
-export function getDefaultParams(
-  parameters: Readonly<Record<string, readonly string[]>>,
-): Readonly<Record<string, string>> {
-  const result: Record<string, string> = {};
-  for (const [key, values] of Object.entries(parameters)) {
-    if (values.length > 0) {
-      result[key] = values[0]!;
-    }
-  }
-  return result;
-}

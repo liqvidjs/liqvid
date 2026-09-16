@@ -34,6 +34,7 @@ import type { PackageName } from "#_/types/misc.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { createJob } from "#_/utils/jobs.mjs";
 import { getRoutesDir } from "#_/utils/misc.mjs";
+import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
 
 export interface RebuildActionResult {
   /** ID of the created job, so the client can link to it. */
@@ -218,16 +219,20 @@ export async function openRenderInFinderAction(
 export async function openScreenshotInFinderAction(
   projectPath: RelativeDir,
   screenshotId: string,
+  params?: Readonly<Record<string, string>>,
 ): Promise<{ success: boolean }> {
   try {
     // Validate paths to prevent directory traversal
     if (projectPath.includes("..") || screenshotId.includes("..")) {
       return { success: false };
     }
-    const fullPath = path.join(
+    const assetsDir = getParameterizedAssetsDir(
       getRoutesDir(),
       projectPath,
-      ASSETS_DIR,
+      params,
+    );
+    const fullPath = path.join(
+      assetsDir,
       SCREENSHOTS_DIR,
       RelativeDir(screenshotId),
     );

@@ -18,44 +18,15 @@ import { AUDIO_WAV } from "#_/conventions.mjs";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import { Button } from "#_/ui/Button.js";
 import { Time, TimeDuration } from "#_/ui/Time.js";
+import { useTranslations } from "#_/utils/react.js";
 
 type CaptionsStatus = NonNullable<AudioEntry["captions"]>["status"];
 
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
 const styles = stylex.create({
-  deleteButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.deleteBtnBgHover,
-      default: colors.errorSubtle,
-    },
-    borderColor: colors.deleteBtnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.errorText,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
-  },
-  renderActionButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
-  },
   renderActions: {
     display: "flex",
     flexShrink: 0,
@@ -162,6 +133,7 @@ export function CaptionRow({
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
 }) {
+  const { captions: t } = useTranslations<{ captions: T }>();
   const projectPath = useProjectPath();
   const { hasCaptioningConfigured } = useDerivedConfig();
 
@@ -259,9 +231,9 @@ export function CaptionRow({
           title={
             hasCaptioningConfigured
               ? entry.captions
-                ? "Regenerate captions"
-                : "Generate captions"
-              : "Captioning is not configured"
+                ? t.regenerate
+                : t.generateCaptions
+              : t.notConfigured
           }
           type="button"
         >
@@ -272,28 +244,16 @@ export function CaptionRow({
           )}
         </Button>
         {entry.captions && (
-          <Button
-            {...stylex.props(styles.deleteButton)}
-            onClick={handleDeleteCaptions}
-            title="Delete captions"
-          >
+          <Button onClick={handleDeleteCaptions} title={t.delete}>
             <ClosedCaptioningIcon size={16} weight="fill" />
           </Button>
         )}
         {multiple && (
-          <Button
-            {...stylex.props(styles.renderActionButton)}
-            onClick={() => onStartRename(entry)}
-            title="Rename audio"
-          >
+          <Button onClick={() => onStartRename(entry)} title={t.renameAudio}>
             <PencilSimpleIcon size={16} />
           </Button>
         )}
-        <Button
-          {...stylex.props(styles.deleteButton)}
-          onClick={handleDeleteAudio}
-          title="Delete audio (and captions)"
-        >
+        <Button onClick={handleDeleteAudio} title={t.deleteBoth}>
           <TrashIcon size={16} />
         </Button>
       </div>

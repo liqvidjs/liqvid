@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -58,7 +58,7 @@
               "type": "array"
             },
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "height": {
                   "anyOf": [
@@ -125,7 +125,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Description of the project. Supports parametrized form."
     },
     "draft": {
       "anyOf": [
@@ -152,7 +153,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Static parameters for this project. Note: \"value\" is not permitted as a parameter name."
     },
     "title": {
       "anyOf": [
@@ -179,7 +181,8 @@
           },
           "type": "array"
         }
-      ]
+      ],
+      "description": "Name of the project"
     }
   },
   "required": ["title"],

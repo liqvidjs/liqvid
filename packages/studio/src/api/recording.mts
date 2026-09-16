@@ -7,7 +7,10 @@ import {
   type LiqvidStudioServerPlugin,
   packageNameToDirName,
 } from "@liqvid/studio-plugin-api";
-import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
+import {
+  inlineTypeDeclaration,
+  writeTypedJson,
+} from "@liqvid/studio-plugin-api/server";
 import { compare } from "@liqvid/utils";
 import {
   Cause,
@@ -62,10 +65,9 @@ export type DynamicImports = Record<
  */
 export const DynamicImports = Context.Service<DynamicImports>("DynamicImports");
 
-const recordingMetaDeclaration = `import type { RecordingMeta } from "@liqvid/schemas";
-
-declare const data: RecordingMeta;
-export default data;`;
+const recordingMetaDeclaration = inlineTypeDeclaration(
+  `import("@liqvid/schemas").RecordingMeta`,
+);
 
 /**
  * Attempt to discover and run post-processing plugins.

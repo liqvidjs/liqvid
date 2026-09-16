@@ -32,8 +32,8 @@ import type Translations from "./.translations/en.json";
 type T = Localized<typeof Translations>;
 
 const styles = stylex.create({
-  evenRow: {
-    backgroundColor: colors.graySubtle,
+  closeButton: {
+    marginLeft: spacing.auto,
   },
 
   kbd: {
@@ -63,9 +63,29 @@ const styles = stylex.create({
     color: colors.grayDim,
   },
 
+  popup: {
+    paddingInline: spacing.huge,
+  },
+
+  row: {
+    backgroundColor: {
+      ":nth-of-type(even)": colors.stripeEven,
+      ":nth-of-type(odd)": colors.stripeOdd,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+  },
+
   table: {
     borderCollapse: "collapse",
+    borderColor: colors.sepSurface,
+    borderRadius: radii.md,
+    borderStyle: "solid",
+    borderWidth: dims.sep,
     fontSize: text.md,
+    marginBottom: spacing.lg,
+    marginInline: "auto",
+    overflow: "hidden",
     width: "100%",
   },
 
@@ -86,13 +106,6 @@ const styles = stylex.create({
   },
 });
 
-const sxStyles = stylex.create({
-  closeButton: {
-    marginBlock: spacing.zero,
-    marginInline: spacing.auto,
-  },
-});
-
 /**
  * The popup body listing every configured keyboard shortcut in a table. The
  * consumer supplies `<DialogRoot>` / `<DialogTrigger>` (see the AGENTS guide).
@@ -109,18 +122,18 @@ export function ShortcutsDialog({
 
   return (
     <DialogPortal>
-      <DialogPopup size="medium">
+      <DialogPopup size="medium" style={styles.popup}>
         <DialogTitle>{t.keyboardShortcuts}</DialogTitle>
         <table sx={styles.table}>
           <thead>
             <tr>
               <th sx={styles.th}>{t.shortcutColumnAction}</th>
-              <th sx={styles.th}>{t.shortcutColumnKey}</th>
+              <th sx={[styles.th, styles.keys]}>{t.shortcutColumnKey}</th>
             </tr>
           </thead>
           <tbody>
-            {shortcutList.map(({ key, mod }, i) => (
-              <tr key={key} sx={i % 2 === 1 && styles.evenRow}>
+            {shortcutList.map(({ key, mod }) => (
+              <tr key={key} sx={styles.row}>
                 <td sx={styles.td}>{t[`shortcut_${key}`]}</td>
                 <td sx={[styles.td, styles.keys]}>
                   {formatShortcut(keys[key], mod).map((token, index) => (
@@ -134,7 +147,7 @@ export function ShortcutsDialog({
             ))}
           </tbody>
         </table>
-        <DialogClose render={<Button />} style={sxStyles.closeButton}>
+        <DialogClose render={<Button style={styles.closeButton} />}>
           {t.close}
         </DialogClose>
       </DialogPopup>

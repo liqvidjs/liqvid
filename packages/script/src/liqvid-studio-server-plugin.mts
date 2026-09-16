@@ -2,6 +2,7 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
+import { inlineTypeDeclaration } from "@liqvid/studio-plugin-api/server";
 import type { AbsoluteDir, RelativeFile } from "effect-paths";
 
 const RAW_JSON = "raw.json" as RelativeFile;
@@ -18,7 +19,7 @@ function generateTimingsDeclaration(timings: Array<[string, string]>): string {
     )
     .join("\n");
 
-  return `declare const data: {\n${entries}\n};\nexport default data;\n`;
+  return inlineTypeDeclaration(`{\n${entries}\n}`);
 }
 
 /**

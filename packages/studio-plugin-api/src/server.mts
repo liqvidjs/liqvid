@@ -35,11 +35,18 @@ export const writeTypedJson = Effect.fnUntraced(function* ({
     RelativeFile(filename.replace(/\.json$/, ".d.json.ts")),
   );
 
-  yield* Effect.all([
-    fs.writeFileString(
-      jsonPath,
-      JSON.stringify(data, null, pretty ? 2 : undefined),
-    ),
-    fs.writeFileString(dtsPath, declaration),
-  ]);
+  yield* Effect.all(
+    [
+      fs.writeFileString(
+        jsonPath,
+        JSON.stringify(data, null, pretty ? 2 : undefined),
+      ),
+      fs.writeFileString(dtsPath, declaration),
+    ],
+    { concurrency: "unbounded" },
+  );
 });
+
+export function inlineTypeDeclaration(declaration: string) {
+  return `declare const data: ${declaration};\nexport default data;`;
+}

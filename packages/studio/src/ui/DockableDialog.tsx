@@ -46,7 +46,7 @@ const styles = stylex.create({
   header: {
     backgroundColor: colors.accentSolid,
     borderTopLeftRadius: radii.md,
-    borderTopRadius: radii.md,
+    borderTopRightRadius: radii.md,
     color: colors.white,
     fontSize: text.md,
     fontWeight: "bold",

@@ -31,7 +31,7 @@ export function Animate<M extends string>({
       throw new Error();
     }
 
-    const marker = script.markers.get(at);
+    const marker = script.get(at);
 
     if (!marker) {
       throw new Error(`could not find marker ${at}`);

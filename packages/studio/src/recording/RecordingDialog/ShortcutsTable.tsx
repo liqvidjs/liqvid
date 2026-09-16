@@ -1,7 +1,7 @@
 import { Keymap } from "@liqvid/keymap";
 import { isMac } from "@liqvid/utils";
 import * as stylex from "@stylexjs/stylex";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
 
 import {
   colors,
@@ -11,7 +11,7 @@ import {
   text,
   typeface,
 } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import type { Localized, LocalizedString } from "#_/i18n/shared.mjs";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
@@ -142,10 +142,11 @@ function ShortcutRow({
   shortcut,
   onChange,
 }: {
-  label: string;
+  label: LocalizedString;
   shortcut?: string;
   onChange?: (value: string) => void;
 }) {
+  const id = useId();
   const [isRecording, setIsRecording] = useState(false);
   const [localValue, setLocalValue] = useState<string | undefined>(undefined);
 
@@ -173,10 +174,15 @@ function ShortcutRow({
 
   return (
     <tr sx={styles.bodyRow}>
-      <td sx={styles.cell}>{label}</td>
       <td sx={styles.cell}>
+        <label htmlFor={id}>{label}</label>
+      </td>
+      <td sx={styles.cell}>
+        {/** TODO: use as much of `<TextField>` as we can */}
+        {/** biome-ignore lint/correctness/noRestrictedElements: custom... for now */}
         <input
           data-recording={isRecording || undefined}
+          id={id}
           onBlur={handleBlur}
           onFocus={handleFocus}
           onKeyDown={identifyKey}

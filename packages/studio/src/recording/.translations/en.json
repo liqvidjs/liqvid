@@ -5,6 +5,9 @@
       "title": "Configuration"
     },
     "saved": {
+      "reprocess": "Reprocess",
+      "reprocessing": "Reprocessing...",
+      "rerun": "Re-run post-processing plugins",
       "subtitle": "Saved",
       "title": "Recordings"
     },

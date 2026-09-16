@@ -12,11 +12,10 @@ import type { LocalizedString } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   radioTabs: {
-    backgroundColor: colors.grayUi,
+    backgroundColor: colors.graySubtle,
     borderRadius: radii.lg,
     columnGap: spacing.sm,
     display: "inline-flex",
-    padding: spacing.md,
     rowGap: spacing.sm,
     width: "max-content",
   },

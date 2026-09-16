@@ -250,7 +250,9 @@ export const scales = stylex.defineVars({
 
   stone50: "oklch(98.5% 0.001 106.423)",
   stone100: "oklch(97% 0.001 106.424)",
+  stone150: "oklch(94.65% 0.002 77.57)",
   stone200: "oklch(92.3% 0.003 48.717)",
+  stone250: "oklch(89.60% 0.004 52.54)",
   stone300: "oklch(86.9% 0.005 56.366)",
   stone400: "oklch(70.9% 0.01 56.259)",
   stone500: "oklch(55.3% 0.013 58.071)",
@@ -367,20 +369,19 @@ export const colors = stylex.defineVars({
   btnColor: `light-dark(#333, #fff)`,
   btnColorDisabled: `light-dark(#aaa, #eee)`,
 
-  /** copy button colors */
-  copyBtnBg: "light-dark(#e8f4ff, #1e3a5f)",
-  copyBtnBgHover: "light-dark(#d0e8ff, #2a4a7f)",
-  copyBtnBorder: "light-dark(#b3d4ff, #2a5a8f)",
-  copyBtnColor: "light-dark(#0066cc, #66b3ff)",
+  captionsEditorSelectedWord: `light-dark(${scales.blue200}, ${scales.sky700})`,
 
   /** delete button colors */
   deleteBtnBgHover: "light-dark(#f9d7d3, #4a2424)",
   deleteBtnBorder: "light-dark(#f5c6c2, #5a2a2a)",
 
-  dialog: `light-dark(white, ${scales.stone800})`,
+  destroy: `light-dark(${scales.red700}, ${scales.red600})`,
+  destroyActive: `light-dark(${scales.red800}, ${scales.red700})`,
+  destroyBorder: `${scales.red950}`,
+  destroyHover: `light-dark(${scales.red600}, ${scales.red500})`,
 
   /** dialog backdrop */
-  dialogBackdrop: "rgb(0 0 0 / 0.15)",
+  dialogBackdrop: "rgb(0 0 0 / 0.5)",
 
   /** dialog close button colors */
   dialogCloseBgHover: "light-dark(#111827, #f9fafb)",
@@ -404,9 +405,6 @@ export const colors = stylex.defineVars({
   /** foreground text color */
   foreground: "light-dark(#000, #fff)",
 
-  /** foreground on both light and dark (black in light, white in dark) */
-  foregroundAuto: "light-dark(#000, #fff)",
-
   grayActive: "light-dark(#e0e1e6, #303136)",
   grayApp: "light-dark(#fff, #1f1f1f)",
   grayDim: "light-dark(#aaa0ab, #999)",
@@ -416,10 +414,6 @@ export const colors = stylex.defineVars({
   graySubtle: "light-dark(#f5f5f5, #252525)",
   grayUi: "light-dark(#eff0f3, #222325)",
   inherit: "inherit",
-
-  inputBg: `light-dark(white, ${scales.stone800})`,
-
-  label: `light-dark(black, white)`,
 
   /** log level colors */
   logDebug: "purple",
@@ -437,7 +431,19 @@ export const colors = stylex.defineVars({
 
   sep: `light-dark(black, white)`,
 
+  sepSurface: `light-dark(${scales.stone300}, ${scales.stone700})`,
+
   softControl: `light-dark(${scales.zinc400}, ${scales.zinc500})`,
+
+  /** even-numbered rows of stripe effect (for making tables legible) */
+  stripeEven: `light-dark(${scales.stone150}, ${scales.zinc750})`,
+
+  /** odd-numbered rows of stripe effect (for making tables legible) */
+  stripeOdd: `light-dark(${scales.stone50}, ${scales.zinc800})`,
+
+  /** separator between rows of stripe effect (optional) */
+  stripeSep: `light-dark(${scales.stone250}, ${scales.zinc650})`,
+
   successSolid: "light-dark(#16a34a, #22c55e)",
 
   /** background color for raised form areas / "wells" */
@@ -479,8 +485,9 @@ export const shadows = stylex.defineConsts({
 // biome-ignore assist/source/useSortedKeys: ascending
 export const spacing = stylex.defineConsts({
   auto: "auto",
-  negMd: "-4px",
-  negXs: "-1px",
+  negMd: "-8px",
+  negSm: "-4px",
+  negXs: "-2px",
   zero: "0",
   xs: "2px",
   sm: "4px",
@@ -509,8 +516,8 @@ export const opacity = stylex.defineConsts({
 });
 
 export const typeface = stylex.defineConsts({
-  inter: '"Inter", sans-serif',
   mono: "monospace",
+  serif: '"Georgia", serif',
   ui: `"Inter Variable", system-ui, sans-serif`,
   uiMono: "ui-monospace, monospace",
 });

@@ -1,3 +1,6 @@
 {
-  "close": "Close"
+  "cancel": "Cancel",
+  "close": "Close",
+  "dark": "Dark",
+  "light": "Light"
 }

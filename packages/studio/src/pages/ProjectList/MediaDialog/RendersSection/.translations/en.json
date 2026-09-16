@@ -1,0 +1,31 @@
+{
+  "delete": "Delete render",
+  "deleteDialog": {
+    "action": "Delete",
+    "confirm": "Are you sure you want to delete this render? This action cannot be undone.",
+    "title": "Delete Render"
+  },
+  "dialog": {
+    "action": "Start Render",
+    "colorScheme": {
+      "both": "Both",
+      "dark": "Dark",
+      "label": "Color Scheme",
+      "light": "Light"
+    },
+    "fps": "fps",
+    "resolution": "Resolution",
+    "title": "Render Settings"
+  },
+  "empty": "No renders yet. Click \"Render\" to create a video.",
+  "inProgress": "Starting...",
+  "openInFinder": "Open in Finder",
+  "play": "Play video",
+  "rename": {
+    "inProgress": "Renaming...",
+    "name": "Name",
+    "title": "Rename Render",
+    "trigger": "Rename"
+  },
+  "render": "Render"
+}

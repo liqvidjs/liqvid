@@ -2,8 +2,8 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { fonts, typography } from "#_/design/styles.js";
-import { colors, spacing, text } from "#_/design/tokens.stylex.js";
+import { typography } from "#_/design/styles.js";
+import { spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized, LocalizedReactNode } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 import {

@@ -37,19 +37,36 @@ export const WhisperOptions = Schema.Struct({
    */
   language: Schema.String.pipe(
     Schema.withDecodingDefaultType(Effect.succeed("auto")),
+    Schema.annotate({
+      default: "auto",
+      description:
+        'Spoken language code (e.g. "en", "de"). Use "auto" to detect.',
+    }),
   ),
 
   /**
    * Maximum segment length in characters (`0` = no limit).
    * @default 0
    */
-  maxLen: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(0))),
+  maxLen: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(0)),
+    Schema.annotate({
+      default: 0,
+      description: "Maximum segment length in characters (0 = no limit).",
+    }),
+  ),
 
   /**
    * Number of threads to use for inference.
    * If omitted, `smart-whisper` picks a sensible default.
    */
-  nThreads: Schema.Number.pipe(Schema.optional),
+  nThreads: Schema.Number.pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Number of threads to use for inference. If omitted, smart-whisper picks a sensible default.",
+    }),
+  ),
 
   /**
    * Split segments on word rather than on token boundaries.
@@ -57,6 +74,10 @@ export const WhisperOptions = Schema.Struct({
    */
   splitOnWord: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
+    Schema.annotate({
+      default: false,
+      description: "Split segments on word rather than on token boundaries.",
+    }),
   ),
 
   /**
@@ -65,11 +86,19 @@ export const WhisperOptions = Schema.Struct({
    */
   tokenTimestamps: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(true)),
+    Schema.annotate({
+      default: true,
+      description:
+        "Emit per-token timestamps (required for word-level timing).",
+    }),
   ),
 
   /** Translate from the source language to English. */
   translate: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
+    Schema.annotate({
+      description: "Translate from the source language to English.",
+    }),
   ),
 });
 
@@ -85,6 +114,11 @@ export const WhisperConfig = Schema.Struct({
    */
   gpu: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
+    Schema.annotate({
+      default: false,
+      description:
+        "Use the GPU for inference (Metal on macOS; BYOL elsewhere).",
+    }),
   ),
 
   /**
@@ -94,13 +128,24 @@ export const WhisperConfig = Schema.Struct({
    */
   modelName: WhisperModelName.pipe(
     Schema.withDecodingDefaultType(Effect.succeed("base.en")),
+    Schema.annotate({
+      default: "base.en",
+      description:
+        "Name of the Whisper model to use. When set (and modelPath is not), smart-whisper downloads it on demand into its managed directory.",
+    }),
   ),
 
   /**
    * Explicit path to a ggml Whisper model file. When set, this takes
    * precedence over {@link WhisperConfig.modelName} and no download occurs.
    */
-  modelPath: SchemaAnyFile.pipe(Schema.optional),
+  modelPath: SchemaAnyFile.pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Explicit path to a ggml Whisper model file. When set, this takes precedence over modelName and no download occurs.",
+    }),
+  ),
 
   /**
    * Whether to translate to English.
@@ -108,6 +153,10 @@ export const WhisperConfig = Schema.Struct({
    */
   translateToEnglish: Schema.Boolean.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(false)),
+    Schema.annotate({
+      default: false,
+      description: "Whether to translate to English.",
+    }),
   ),
 
   whisperOptions: WhisperOptions.pipe(Schema.optional),

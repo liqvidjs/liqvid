@@ -2,6 +2,6 @@
   "contentBackend": "Backend contenu",
   "description": "Choisissez les fournisseurs qui hébergeront votre contenu et vos fichiers média.",
   "mediaBackend": "Backend média",
-  "notConfigured": "Not configured",
+  "notConfigured": "Non configuré",
   "title": "Backend"
 }

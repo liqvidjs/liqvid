@@ -36,7 +36,6 @@ import {
 } from "#_/conventions.mjs";
 import { getServerState } from "#_/initialize.mjs";
 import { withLogLevel } from "#_/server-runtime.mjs";
-import type { Directory } from "#_/types/assets.mjs";
 import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { getBiomePath } from "#_/utils/fs.mjs";
 import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
@@ -189,11 +188,83 @@ const findProjectDirectory = Effect.fnUntraced(function* (
   return Option.none();
 });
 
+type DirectoryTypes = {
+  [key: string]: DirectoryTypes | string | false;
+};
+
+type DirectoryStructure = {
+  [key: string]: DirectoryStructure | null;
+};
+
+const getJsonType = Effect.fnUntraced(function* (jsonPath: AbsoluteFile) {
+  const fs = yield* FileSystem.FileSystem;
+
+  if (!jsonPath.endsWith(".json")) return null;
+
+  const declarationPath = path.join(
+    path.dirname(jsonPath),
+    RelativeFile(path.basename(jsonPath).replace(/\.json$/, ".d.json.ts")),
+  );
+
+  if (!(yield* fs.exists(declarationPath))) return null;
+
+  const declaration = yield* fs.readFileString(declarationPath, "utf8");
+  if (/(?:^|[;\n])\s*import\s*(?!\()/m.test(declaration)) return null;
+
+  const defaultName = declaration.match(
+    /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/,
+  )?.[1];
+
+  if (!defaultName) return null;
+
+  return (
+    declaration
+      .match(
+        new RegExp(
+          `declare\\s+const\\s+${defaultName}\\s*:\\s*([\\s\\S]*?)\\s*;\\s*export\\s+default\\s+${defaultName}\\s*;`,
+        ),
+      )?.[1]
+      ?.trim() ?? null
+  );
+});
+
+const getDirectoryTypes = Effect.fnUntraced(function* (
+  currentDir: AbsoluteDir,
+  directory: DirectoryStructure,
+): Effect.fn.Return<
+  DirectoryTypes,
+  PlatformError.PlatformError,
+  FileSystem.FileSystem
+> {
+  const result: DirectoryTypes = {};
+
+  for (const [basename, value] of Object.entries(directory)) {
+    if (value === null) {
+      result[basename] =
+        (yield* getJsonType(path.join(currentDir, RelativeFile(basename)))) ??
+        false;
+    } else {
+      const child = yield* getDirectoryTypes(
+        path.join(currentDir, RelativeDir(basename)),
+        value,
+      );
+
+      if (Object.keys(child).length > 0) result[basename] = child;
+    }
+  }
+
+  return result;
+});
+
 export const watchAssets = Effect.fnUntraced(
   function* () {
     Handlebars.registerHelper("json", (obj) => {
       return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
     });
+    Handlebars.registerHelper(
+      "isDirectory",
+      (value) => typeof value === "object" && value !== null,
+    );
 
     const TARGET_DIR = getRoutesDir();
 
@@ -306,6 +377,10 @@ const generateProjectTypes = Effect.fnUntraced(
     );
 
     const directoryStructure = yield* listProjectDir(projectDir);
+    const directoryTypes = yield* getDirectoryTypes(
+      projectDir,
+      directoryStructure,
+    );
     const assetsDir = path.join(projectDir, ASSETS_DIR);
 
     // Read project.json to extract parameters
@@ -353,7 +428,7 @@ const generateProjectTypes = Effect.fnUntraced(
           ),
           runTemplate({
             biomePath,
-            data: { parameters },
+            data: { directoryTypes, parameters },
             out: path.join(assetsDir, TYPES_AUTOGEN),
             template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
           }),
@@ -428,7 +503,7 @@ const listProjectDir = Effect.fnUntraced(function* (
   currentDir: AbsoluteDir = projectDir,
   relativePath: RelativeDir = RelativeDir(""),
 ): Effect.fn.Return<
-  Directory,
+  DirectoryStructure,
   PlatformError.PlatformError,
   FileSystem.FileSystem
 > {
@@ -480,5 +555,5 @@ const listProjectDir = Effect.fnUntraced(function* (
     acc[basename] = value;
 
     return acc;
-  }, {} as Directory);
+  }, {} as DirectoryStructure);
 });

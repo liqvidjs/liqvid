@@ -2,7 +2,7 @@ import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState } from "#_/initialize.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
-import { UpdateBannerClient } from "./UpdateBanner.client.tsx";
+import { UpdateBannerClient } from "./client.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 

@@ -1,18 +1,24 @@
 "use client";
-import type { Providers, T } from "../client.tsx";
-import { TextField } from "../TextField.tsx";
+import { TextField } from "#_/ui/TextField.js";
+import { useTranslations } from "#_/utils/react.js";
+
+import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";
 
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
 export function SftpProvider({
   onChange,
-  t,
   value,
 }: {
   onChange: (value: Providers["sftp"] | undefined) => void;
-  t: T;
   value: Providers["sftp"];
 }) {
+  const t = useTranslations<T>();
+
   return (
     <ProviderCard
       enabled={value !== undefined}

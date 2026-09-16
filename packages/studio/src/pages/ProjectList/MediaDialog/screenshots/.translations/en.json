@@ -1,0 +1,43 @@
+{
+  "action": "Capture",
+  "colorScheme": {
+    "both": "Both",
+    "dark": "Dark",
+    "label": "Color Scheme",
+    "light": "Light"
+  },
+  "confirmDialog": {
+    "action": "Replace",
+    "message": {
+      "_": "The file {filename} already exists. Do you want to replace it?",
+      "$": {
+        "filename": null
+      }
+    },
+    "title": "Confirm Overwrite"
+  },
+  "deleteDialog": {
+    "action": "Delete",
+    "confirm": "Are you sure you want to delete this screenshot? This action cannot be undone.",
+    "title": "Delete Screenshot"
+  },
+  "empty": "No screenshots yet. Click \"Add\" to capture one.",
+  "inProgress": "Capturing...",
+  "item": {
+    "delete": "Delete screenshot",
+    "openInFinder": "Open in Finder",
+    "rename": "Rename screenshot",
+    "useOpenGraph": "Use as OpenGraph image",
+    "useTwitter": "Use as Twitter image",
+    "viewFullSize": "View full size"
+  },
+  "preview": "Screenshot preview",
+  "renameDialog": {
+    "action": "Rename",
+    "newName": "New name",
+    "title": "Rename Screenshot"
+  },
+  "timeLabel": "Selected time (mm:ss.ms)",
+  "title": "Capture Screenshot",
+  "trigger": "Add"
+}

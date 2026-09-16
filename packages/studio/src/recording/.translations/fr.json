@@ -5,6 +5,9 @@
       "title": "Configuration"
     },
     "saved": {
+      "reprocess": "Retraiter",
+      "reprocessing": "Retraitement en cours...",
+      "rerun": "Réexécuter les plugins de post-traitement",
       "subtitle": "Sauvegardé",
       "title": "Enregistrements"
     },

@@ -21,11 +21,11 @@ import {
 } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
-import { useDialogApi } from "#_/ui/Dialog.js";
+import { useDialogApi } from "#_/ui/dialogs-shared.js";
 import { TimeDuration } from "#_/ui/Time.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import type TranslationsJson from "./.translations/en.json";
+import type TranslationsJson from "../.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
 
@@ -142,6 +142,7 @@ const styles = stylex.create({
   },
 });
 
+/** @pacakge */
 export function ThumbnailsSection({
   duration,
   selectedParams,

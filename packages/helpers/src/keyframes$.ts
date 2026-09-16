@@ -109,7 +109,7 @@ function resolveKeyframes<M extends string, T extends AnyElement>(
             "keyframes$: marker name used in `at` but no Script is available",
           );
         }
-        const marker = script.markers.get(kf.at as M);
+        const marker = script.get(kf.at as M);
         if (!marker) {
           throw new Error(
             `keyframes$: could not find marker "${kf.at as string}"`,

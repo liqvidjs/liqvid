@@ -1,0 +1,10 @@
+{
+  "tabs": {
+    "captions": "Sous-titres",
+    "renders": "Rendus",
+    "screenshots": "Captures d'écran",
+    "thumbnails": "Vignettes"
+  },
+  "title": "Médias",
+  "trigger": "Médias statiques (captures d'écran, vignettes, rendus, sous-titres)"
+}

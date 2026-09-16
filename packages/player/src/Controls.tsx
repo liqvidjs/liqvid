@@ -4,8 +4,10 @@ import { Duration, type DurationLike } from "@liqvid/duration";
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import clsx from "clsx";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
+import { usePlayer } from "./hooks.ts";
+import { usePrivatePlayerApi } from "./private-api.ts";
 import { isInteractiveElement } from "./utils.ts";
 
 /** Container for the player controls */
@@ -18,8 +20,10 @@ export function Controls({
   /** If specified, controls will auto-hide after this duration. */
   hideAfter?: DurationLike;
 }) {
+  const { renderMode } = usePlayer();
+  const { setControls } = usePrivatePlayerApi();
+
   const playback = usePlayback();
-  const [visible, setVisible] = useState(true);
 
   const timer = useRef(0);
 
@@ -45,13 +49,13 @@ export function Controls({
       if (timer.current !== undefined) clearTimeout(timer.current);
 
       timer.current = window.setTimeout(
-        () => setVisible(false),
+        () => setControls((prev) => ({ ...prev, visible: false })),
         Duration.inMilliseconds(hideAfter),
       );
 
-      setVisible(true);
+      setControls((prev) => ({ ...prev, visible: true }));
     },
-    [playback, hideAfter],
+    [playback, hideAfter, setControls],
   );
 
   /* ------------------------- subscriptions ------------------------- */
@@ -59,30 +63,32 @@ export function Controls({
 
   useEventListener(globalThis.document?.body, "touchstart", resetTimer);
   useEventListener(globalThis.document?.body, "mousemove", resetTimer);
-  useEventListener(globalThis.document?.body, "mouseleave", () => {
-    if (playback.paused || !hideAfter) return;
-    setVisible(false);
-  });
+  useEventListener(globalThis.document?.body, "mouseleave", resetTimer);
 
   usePlaybackEvent("play", resetTimer);
   usePlaybackEvent("pause", () => {
     clearTimeout(timer.current);
-    setVisible(true);
+    setControls((prev) => ({ ...prev, visible: true }));
   });
   usePlaybackEvent("stop", () => {
     clearTimeout(timer.current);
-    setVisible(true);
+    setControls((prev) => ({ ...prev, visible: true }));
   });
 
+  useEffect(() => {
+    if (renderMode !== "web") return;
+
+    setControls((prev) => ({ ...prev, mounted: true, visible: true }));
+
+    return () => {
+      setControls((prev) => ({ ...prev, mounted: false, visible: false }));
+    };
+  }, [setControls, renderMode]);
+
+  if (renderMode !== "web") return;
+
   return (
-    <div
-      className={clsx(
-        "lv-controls",
-        visible || "lv-controls-hidden",
-        className,
-      )}
-      {...props}
-    >
+    <div className={clsx("lv-controls", className)} {...props}>
       {children}
     </div>
   );

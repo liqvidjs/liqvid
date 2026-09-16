@@ -99,15 +99,14 @@ export const interpolateEnvVars = Effect.fnUntraced(function* (str: string) {
 
 export const decodeEnvVar = Schema.decodeTo(
   Schema.String,
-  SchemaTransformation.transformOrFail({
-    decode: (s: unknown) => {
-      return interpolateEnvVars(s as string).pipe(
+  SchemaTransformation.transformEffect({
+    decode: (s: unknown) =>
+      interpolateEnvVars(s as string).pipe(
         Effect.mapError(
           (e) => new SchemaIssue.InvalidValue({ message: e.toString() }, s),
         ),
-      );
-    },
-    encode: (s) =>
+      ),
+    encode: (s: string) =>
       Effect.fail(
         new SchemaIssue.Forbidden(
           {

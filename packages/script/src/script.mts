@@ -25,12 +25,13 @@ export class Script<M extends string = string> extends EventEmitter<
   private __map: Map<M, Marker<M>>;
 
   /* public properties */
+
   /** The array of markers, in the form [name, startTime, endTime]. */
   markers: Marker<M>[] & {
-    /** Get a marker by name. */
+    /** @deprecated use `script.get()` instead */
     get(name: M): Marker<M>;
 
-    /** Check whether a marker exists. */
+    /** @deprecated use `script.has()` instead */
     has(name: string): name is M;
   };
 
@@ -56,8 +57,10 @@ export class Script<M extends string = string> extends EventEmitter<
     super();
 
     // bind methods
+    bind(this, ["back", "forward", "get", "has"]);
+
     // biome-ignore lint/suspicious/noExplicitAny: need to do this since __updateMarker is private
-    bind(this as any, ["back", "forward", "__updateMarker"]);
+    bind(this as any, ["__updateMarker"]);
 
     // parse times
     let time = new Duration();
@@ -143,6 +146,16 @@ export class Script<M extends string = string> extends EventEmitter<
     );
     const nextMarker = this.markers[clampedNextIndex]!;
     this.playback.currentTime$ = nextMarker.start;
+  }
+
+  /** Get a marker by name. */
+  get(name: M): Marker<M> {
+    return this.__map.get(name)!;
+  }
+
+  /** Check whether a marker exists. */
+  has(name: string): name is M {
+    return (this.__map as Map<string, Marker>).has(name);
   }
 
   /** Update marker */

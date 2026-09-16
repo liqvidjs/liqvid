@@ -6,9 +6,11 @@ import * as stylex from "@stylexjs/stylex";
 import { useEffectEvent } from "react";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
 import { colors, spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
+import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import type TranslationsJson from "./.translations/en.json";
@@ -35,12 +37,23 @@ const styles = stylex.create({
 
 export function EmbedButton({ basePath, project }: EmbedButtonProps) {
   const t = useTranslations<T>();
-  const { productionServerPort } = useLiqvidConfig();
+
+  const { domain } = useLiqvidConfig();
+
+  const selectedRootParams = useSelectedRootParameters();
+
+  // Interpolate path parameters using selected root params + project params
+  const interpolatedPath = interpolatePathParametersWithSelected(
+    project.path,
+    undefined,
+    selectedRootParams,
+  );
+
   const handleClick = useEffectEvent(async () => {
     const previewPath = basePath
-      ? `${basePath}/${project.path}`
-      : `/${project.path}`;
-    const src = `http://localhost:${productionServerPort}${previewPath}`;
+      ? `${basePath}/${interpolatedPath}`
+      : `/${interpolatedPath}`;
+    const src = domain + previewPath;
     const embedCode = `<iframe src="${src}" style="aspect-ratio: ${project.aspectRatio.width} / ${project.aspectRatio.height}; width: 100%;"></iframe>`;
 
     await navigator.clipboard.writeText(embedCode);

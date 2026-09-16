@@ -2,21 +2,27 @@
 
 import Image from "next/image";
 
+import { TextField } from "#_/ui/TextField.js";
+import { useTranslations } from "#_/utils/react.js";
+
 import logo from "../../../../logo.png";
-import type { Providers, T } from "../client.tsx";
-import { TextField } from "../TextField.tsx";
+import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";
 
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
 export function LiqvidStudioProvider({
   onChange,
-  t,
   value,
 }: {
   onChange: (value: Providers["liqvidStudio"] | undefined) => void;
-  t: T;
   value: Providers["liqvidStudio"];
 }) {
+  const t = useTranslations<T>();
+
   return (
     <ProviderCard
       enabled={value !== undefined}

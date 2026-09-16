@@ -13,7 +13,7 @@ import {
   text,
 } from "#_/design/tokens.stylex.js";
 
-import { useDialogApi } from "./Dialog.tsx";
+import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
   popup: {

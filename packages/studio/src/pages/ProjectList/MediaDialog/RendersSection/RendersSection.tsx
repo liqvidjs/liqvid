@@ -36,14 +36,16 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-  useDialogApi,
 } from "#_/ui/Dialog.js";
+import { useDialogApi } from "#_/ui/dialogs-shared.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import type TranslationsJson from "../.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
+
+export type { T as TranslationsRendersSection };
 
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
@@ -333,7 +335,7 @@ const styles = stylex.create({
   submitButton: {
     alignItems: "center",
     backgroundColor: {
-      ":hover:not(:disabled)": colors.accentSolidHover,
+      ":hover:not(:disabled)": colors.accentHover,
       default: colors.accentSolid,
     },
     borderRadius: radii.md,
@@ -417,7 +419,7 @@ export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
   selectedParams,
 }: RendersSectionProps) {
-  const t = useTranslations<T>().renders;
+  const { renders: t } = useTranslations<{ renders: T }>();
   const projectPath = useProjectPath();
 
   const { isOpen } = useDialogApi();

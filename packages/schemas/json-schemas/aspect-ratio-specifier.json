@@ -43,7 +43,7 @@
       "type": "array"
     },
     {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "height": {
           "anyOf": [

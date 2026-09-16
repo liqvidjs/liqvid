@@ -1,0 +1,31 @@
+{
+  "delete": "Supprimer le rendu",
+  "deleteDialog": {
+    "action": "Supprimer",
+    "confirm": "Vous êtes sûr de vouloir supprimer ce rendu? Cette action est irréversible.",
+    "title": "Supprimer"
+  },
+  "dialog": {
+    "action": "Démarrer le rendu",
+    "colorScheme": {
+      "both": "Les deux",
+      "dark": "Sombre",
+      "label": "Thème",
+      "light": "Clair"
+    },
+    "fps": "fps",
+    "resolution": "Résolution",
+    "title": "Paramètres de rendu"
+  },
+  "empty": "Aucun rendu au moment. Cliquez sur \"Rendre\" pour rendre un vidéo statique.",
+  "inProgress": "Starting...",
+  "openInFinder": "Ouvrir dans Finder",
+  "play": "Lire la vidéo",
+  "rename": {
+    "inProgress": "Renommage en cours...",
+    "name": "Nom",
+    "title": "Renommer le rendu",
+    "trigger": "Renommer"
+  },
+  "render": "Rendre"
+}

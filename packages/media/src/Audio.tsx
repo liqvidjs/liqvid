@@ -3,6 +3,7 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { AudioSourceRegistration } from "@liqvid/playback";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import { useScriptOptional } from "@liqvid/script/react";
 import { isSafari } from "@liqvid/utils";
 import {
   Children,
@@ -13,14 +14,14 @@ import {
   useRef,
 } from "react";
 
-export type AudioProps = {
+export type AudioProps<M extends string = string> = {
   children?: React.ReactNode;
 
   /** URL to the audio file. If not provided, will search children for <source> elements. */
   src?: string;
 
   /** Offset in seconds at which to start the audio file */
-  start?: number | DurationLike;
+  start?: number | DurationLike | M;
 };
 
 /**
@@ -65,8 +66,13 @@ function findSupportedSource(children: React.ReactNode): string | undefined {
  * Play audio synced up to the playback using Web Audio API.
  * Routes audio through the playback's audioContext for synchronized playback.
  */
-export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
+export function Audio<M extends string = string>({
+  children,
+  src: srcProp,
+  start = 0,
+}: AudioProps<M>) {
   const playback = usePlayback();
+  const script = useScriptOptional();
 
   // Resolve the audio source URL
   const src = useMemo(() => {
@@ -74,8 +80,25 @@ export function Audio({ children, src: srcProp, start = 0 }: AudioProps) {
     return findSupportedSource(children);
   }, [srcProp, children]);
 
-  const startInSeconds =
-    typeof start === "number" ? start : Duration.inSeconds(start);
+  const startInSeconds = (() => {
+    if (typeof start === "number") {
+      return start;
+    } else if (typeof start === "string") {
+      if (!script) {
+        throw new Error(
+          "Audio start time is a string, but no script is available to resolve it.",
+        );
+      } else if (!script.has(start)) {
+        throw new Error(
+          `Audio start time "${start}" is not a valid marker in the script.`,
+        );
+      } else {
+        return Duration.inSeconds(script.get(start).start);
+      }
+    } else {
+      return Duration.inSeconds(start);
+    }
+  })();
 
   // Store the fetched array buffer (before decoding)
   const arrayBufferRef = useRef<ArrayBuffer | null>(null);

@@ -1,10 +1,12 @@
-import { type ProjectMeta, resolveParametrizedString } from "@liqvid/schemas";
+import type { ProjectMeta } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
 import * as stylex from "@stylexjs/stylex";
+import { useMemo } from "react";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
 import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
+import { ASSETS_DIR, SOCIALS_DIR } from "#_/conventions.mjs";
 import {
   colors,
   dims,
@@ -14,9 +16,13 @@ import {
   typeface,
 } from "#_/design/tokens.stylex.js";
 import { TimeDuration } from "#_/ui/Time.js";
+import {
+  interpolatePathParametersWithSelected,
+  resolveParametrized,
+} from "#_/utils/parameters-client.mjs";
 
 import { EmbedButton } from "./EmbedButton.tsx";
-import { MediaButton } from "./MediaDialog.tsx";
+import { MediaButton } from "./MediaDialog/client.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
 
@@ -91,7 +97,7 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
 
   // Resolve parametrized title using combined params
   const resolvedTitle = project.title
-    ? resolveParametrizedString(project.title, combinedParams)
+    ? resolveParametrized(project.title, combinedParams)
     : undefined;
 
   // Interpolate path parameters using selected root params + project params
@@ -134,8 +140,28 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
   );
 }
 
-function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
+function Thumbnail({ aspectRatio, duration, path, socials }: ProjectMeta) {
   const thumbnailSx = stylex.props(styles.thumbnail);
+  const rootParameters = useSelectedRootParameters();
+
+  const previewImage = useMemo(() => {
+    if (resolveParametrized(socials.liqvidStudio, rootParameters)) {
+      const interpolatedPath = [
+        path,
+        ASSETS_DIR,
+        ...Object.values(rootParameters),
+        SOCIALS_DIR,
+      ].join("/");
+      return `light-dark(
+  url("/api/liqvid/static/${interpolatedPath}/liqvid-studio-light.png"),
+  url("/api/liqvid/static/${interpolatedPath}/liqvid-studio-dark.png")
+)`;
+    }
+    if (socials.openGraph) {
+      return `url("/api/liqvid/static/${path}/opengraph-image.png")`;
+    }
+  }, [path, socials, rootParameters]);
+
   return (
     <div
       className={thumbnailSx.className}
@@ -143,9 +169,9 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
         ...thumbnailSx.style,
         aspectRatio: `${aspectRatio.width} / ${aspectRatio.height}`,
         backgroundSize: "100% 100%",
-        ...(openGraph
+        ...(previewImage
           ? {
-              backgroundImage: `url("/api/liqvid/static/${path}/opengraph-image.png")`,
+              backgroundImage: previewImage,
             }
           : {}),
       }}
@@ -155,32 +181,4 @@ function Thumbnail({ aspectRatio, duration, path, openGraph }: ProjectMeta) {
       )}
     </div>
   );
-}
-
-/**
- * Interpolate path parameters (like `[lang]`) using the selected root parameter values.
- * Project-level parameters override root parameters.
- * @param path - The path containing parameters (e.g., `/[lang]/gng/1-cg/1-spaces/1-intro`)
- * @param projectParameters - Parameters defined in the project's project.json (if any)
- * @param selectedRootParams - Currently selected root parameter values
- * @returns The interpolated path with parameter values
- */
-function interpolatePathParametersWithSelected(
-  path: string,
-  projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
-  selectedRootParams: Readonly<Record<string, string>>,
-): string {
-  // Match all path parameters like [lang], [id], etc.
-  return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
-    // Root params
-    if (selectedRootParams[paramName]) {
-      return selectedRootParams[paramName];
-    }
-    // First value of project params
-    if (projectParameters?.[paramName]?.length) {
-      return projectParameters[paramName][0]!;
-    }
-    // If no value found, keep the original
-    return match;
-  });
 }

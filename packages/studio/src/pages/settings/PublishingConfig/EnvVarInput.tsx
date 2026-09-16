@@ -15,6 +15,7 @@ import {
 import type { LocalizedString } from "#_/i18n/shared.mjs";
 import { PlainString } from "#_/i18n/shared.mjs";
 import { RadioIndicator, RadioRoot } from "#_/ui/Radio.js";
+import { TextField } from "#_/ui/TextField.js";
 
 type Mode = "literal" | "env";
 
@@ -174,7 +175,7 @@ export function EnvVarInput({
 }: {
   disallowLiteral?: boolean;
   onChange: (value: string) => void;
-  placeholder?: string;
+  placeholder?: LocalizedString | PlainString;
   t: {
     envVarEnvFile: LocalizedString;
     envVarEnvFileHint: LocalizedString;
@@ -245,8 +246,8 @@ export function EnvVarInput({
             </label>
 
             {mode === "literal" && (
-              <input
-                onChange={(e) => handleLiteralChange(e.target.value)}
+              <TextField
+                onChange={(value) => handleLiteralChange(value)}
                 placeholder={placeholder}
                 sx={styles.input}
                 type="text"
@@ -266,24 +267,23 @@ export function EnvVarInput({
 
           {mode === "env" && (
             <div sx={styles.envFields}>
-              <label sx={styles.field}>
-                <span sx={styles.fieldLabel}>{t.envVarName}</span>
-                <input
-                  onChange={(e) => handleVarNameChange(e.target.value)}
-                  placeholder="MY_VAR"
-                  sx={styles.input}
-                  type="text"
-                  value={varName}
-                />
-              </label>
+              <TextField
+                label={t.envVarName}
+                onChange={(value) => handleVarNameChange(value)}
+                placeholder={PlainString("MY_VAR")}
+                sx={styles.input}
+                type="text"
+                value={varName}
+              />
 
               <label sx={styles.field}>
                 <span sx={styles.fieldLabel}>{t.envVarEnvFile}</span>
                 <div sx={styles.envRow}>
                   <span sx={styles.filePrefix}>{PlainString(".env.")}</span>
+                  {/** biome-ignore lint/correctness/noRestrictedElements: this is special */}
                   <input
                     onChange={(e) => handleEnvironmentChange(e.target.value)}
-                    placeholder="production"
+                    placeholder={PlainString("production")}
                     sx={styles.fileInput}
                     type="text"
                     value={environment}

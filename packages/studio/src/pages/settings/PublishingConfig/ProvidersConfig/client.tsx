@@ -4,6 +4,7 @@ import type { SettingsConfig } from "#_/api/contract.mjs";
 import { typography } from "#_/design/styles.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import { usePublishingConfigClient } from "../client.tsx";
 
@@ -17,7 +18,8 @@ import { LiqvidStudioProvider } from "./LiqvidStudioProvider.tsx";
 import { S3Provider } from "./S3Provider.tsx";
 import { SftpProvider } from "./SftpProvider.tsx";
 
-export function ProvidersConfigClient({ t }: { t: T }) {
+export function ProvidersConfigClient() {
+  const t = useTranslations<T>();
   const { draft, patch } = usePublishingConfigClient();
 
   const providers = draft.providers ?? {};
@@ -41,32 +43,24 @@ export function ProvidersConfigClient({ t }: { t: T }) {
 
       <CopyProvider
         onChange={(v) => setProvider("copy", v)}
-        t={t}
         value={providers.copy}
       />
       {false && (
         <GitHubPagesProvider
           onChange={(v) => setProvider("githubPages", v)}
-          t={t}
           value={providers.githubPages}
         />
       )}
       {false && (
         <LiqvidStudioProvider
           onChange={(v) => setProvider("liqvidStudio", v)}
-          t={t}
           value={providers.liqvidStudio}
         />
       )}
-      <S3Provider
-        onChange={(v) => setProvider("s3", v)}
-        t={t}
-        value={providers.s3}
-      />
+      <S3Provider onChange={(v) => setProvider("s3", v)} value={providers.s3} />
       {false && (
         <SftpProvider
           onChange={(v) => setProvider("sftp", v)}
-          t={t}
           value={providers.sftp}
         />
       )}

@@ -6,6 +6,14 @@ import { useContext } from "react";
 
 import type { RenderMode } from "./render-mode.ts";
 
+export type ControlsState = {
+  /** whether the `<Controls>` component has been mounted in the DOM */
+  mounted: boolean;
+
+  /** whether controls are currently visible */
+  visible: boolean;
+};
+
 export type RenderingTask = {
   /** whether this is currently onscreen */
   visible: boolean;
@@ -13,6 +21,8 @@ export type RenderingTask = {
 
 export type PlayerContext = {
   aspectRatio: AspectRatio;
+
+  controls: ControlsState;
 
   /** the DOM element of the player root */
   domElement: HTMLElement | null;
@@ -33,6 +43,7 @@ export const PlayerContext = createUniqueContext<PlayerContext>(
   "@liqvid/player",
   {
     aspectRatio: { height: 9, width: 16 },
+    controls: { mounted: false, visible: false },
     domElement: null,
     registerRenderingTask: () => () => {},
     renderingTasks: new Set(),

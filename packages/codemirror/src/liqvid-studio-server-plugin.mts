@@ -2,7 +2,10 @@ import * as path from "node:path";
 
 import { compress } from "@liqvid/recording/utils";
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
-import { writeTypedJson } from "@liqvid/studio-plugin-api/server";
+import {
+  inlineTypeDeclaration,
+  writeTypedJson,
+} from "@liqvid/studio-plugin-api/server";
 import { Effect, FileSystem } from "effect";
 import type { AbsoluteDir } from "effect-paths";
 import { RelativeFile } from "effect-paths";
@@ -11,12 +14,11 @@ const RAW_JSON = RelativeFile("raw.json");
 const RAW_DTS = RelativeFile("raw.d.json.ts");
 
 /** TypeScript declaration for JSON files */
-const declaration = `import type { RecordingData } from "@liqvid/recording";
-import type { Action, CMState } from "@lqv/codemirror";
-
-declare const data: RecordingData<Action, CMState>;
-export default data;
-`;
+const declaration =
+  inlineTypeDeclaration(`import("@liqvid/recording").RecordingData<
+  import("@lqv/codemirror").Action,
+  import("@lqv/codemirror").CMState,
+>`);
 
 /**
  * Post-process @lqv/codemirror recording data.

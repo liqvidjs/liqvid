@@ -1,49 +1,31 @@
+"use client";
+
 import type { JSONValue } from "@liqvid/ssr/serde";
 import type { RelativeDir } from "effect-paths";
-import {
-  createContext,
-  Fragment,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import CommonTranslations from "#_/.translations/en.json";
 import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
-import type { Localized } from "#_/i18n/shared.mjs";
+import {
+  type Interpolated,
+  interpolated,
+  type Localized,
+} from "#_/i18n/shared.mjs";
 import { getTranslationsFromServer } from "#_/server-actions.js";
 
 import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
 
-type TranslationJson = {
-  [key: string]: string | TranslationJson;
-};
-
 /* ------------------------------ translations ------------------------------ */
 
-const translationContext = createContext<TranslationJson>({});
+// biome-ignore lint/suspicious/noExplicitAny: context holds any translation shape
+const translationContext = createContext<any>({});
 translationContext.displayName = "Translation";
 
-type TranslationInterpolation<T> = {
-  [K in keyof T]: T[K] extends string
-    ? T[K]
-    : T[K] extends { readonly __template: string }
-      ? (
-          interpolations: Record<
-            Exclude<keyof T[K], "__template">,
-            React.ReactNode
-          >,
-        ) => React.ReactNode
-      : TranslationInterpolation<T[K]>;
-};
-
-export function useTranslations<
-  T extends TranslationJson,
->(): TranslationInterpolation<T> {
-  return makeInterpolator(useContext(translationContext) as T);
+export function useTranslations<T>(): Interpolated<Localized<T>> {
+  return interpolated(useContext(translationContext) as Localized<T>);
 }
 
-export function TranslationProvider<T extends TranslationJson>({
+export function TranslationProvider<T>({
   children,
   t,
 }: {
@@ -105,35 +87,4 @@ export function useCommonTranslations(): Localized<CommonTranslationsType> {
     CommonTranslations as CommonTranslationsType,
     COMMON_TRANSLATIONS_DIR,
   );
-}
-
-function makeInterpolator<T extends TranslationJson>(
-  translations: T,
-): TranslationInterpolation<T> {
-  // biome-ignore lint/suspicious/noExplicitAny: this is ok
-  const interpolated: any = {};
-
-  for (const key in translations) {
-    const value = translations[key];
-
-    if (typeof value === "string") {
-      interpolated[key] = value;
-    } else if (typeof value === "object") {
-      if ("__template" in value && typeof value.__template === "string") {
-        interpolated[key] = (
-          interpolations: Record<string, React.ReactNode>,
-        ) => {
-          return (value.__template as string)
-            .split(/\$\{([^}]+)\}/g)
-            .map((s, i) => (
-              <Fragment key={i}>{i % 2 === 0 ? s : interpolations[s]}</Fragment>
-            ));
-        };
-      } else {
-        interpolated[key] = makeInterpolator(value);
-      }
-    }
-  }
-
-  return interpolated;
 }

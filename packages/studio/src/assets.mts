@@ -1,4 +1,6 @@
-import type { Directory } from "./types/assets.mts";
+export type Directory = {
+  [key: string]: Directory | (() => unknown);
+};
 
 export interface ProjectFile {
   filename: string;
@@ -6,56 +8,122 @@ export interface ProjectFile {
   version?: string;
 }
 
-export type FileNames<D extends Directory> = {
+declare const directorySource: unique symbol;
+
+type FileNamesOf<D extends Directory> = {
   [key in string & keyof D]: D[key] extends Directory
-    ? `${key}/` | `${key}/${FileNames<D[key]>}`
+    ? `${key}/` | `${key}/${FileNamesOf<D[key]>}`
     : key;
 }[string & keyof D];
 
+/** File paths associated with their source directory type. */
+export type FileNames<D extends Directory> = FileNamesOf<D> & {
+  readonly [directorySource]?: D;
+};
+
 type Files<T extends string> = T extends `${string}/` ? never : T;
+
+type DirectoryLike = Directory | string;
+
+type SourceDirectory<D> = D extends {
+  readonly [directorySource]?: infer Source extends Directory;
+}
+  ? Source
+  : never;
+
+type FilePaths<D extends DirectoryLike> = D extends string
+  ? D
+  : FileNamesOf<Extract<D, Directory>>;
+
+type FileType<
+  D extends Directory,
+  P extends string,
+> = P extends `${infer Head}/${infer Tail}`
+  ? D[Head] extends Directory
+    ? FileType<D[Head], Tail>
+    : unknown
+  : P extends keyof D
+    ? D[P] extends () => infer T
+      ? T
+      : unknown
+    : unknown;
+
+type FetchType<D extends DirectoryLike, P extends string> = D extends Directory
+  ? FileType<D, P>
+  : FileType<SourceDirectory<D>, P>;
 
 type Dirs<T extends string> = T extends `${infer Head}/${infer Tail}`
   ? Head | `${Head}/${Dirs<Tail>}`
   : never;
 
-type StripPrefix<
-  T extends string,
-  S extends string,
-> = T extends `${S}${infer Tail}` ? Tail : never;
+type ChildDirectory<
+  D extends DirectoryLike,
+  P extends string,
+> = D extends string
+  ? Resolve<SourceDirectory<D>, P>
+  : D extends Directory
+    ? Resolve<D, P>
+    : never;
 
 const globalFetchCache = new Map<string, unknown>();
 
 export class DirectoryHelper<
-  DS extends string,
+  DS extends DirectoryLike,
   TemplateVars extends string = string,
 > {
-  private dirname: string;
+  private readonly dirname: string;
 
   constructor(dirname = "") {
     this.dirname = dirname.replace(/\/$/, "");
   }
 
   /** get a new DirectoryHelper for a subdirectory */
-  dir<D extends Dirs<DS>>(
+  dir<D extends Dirs<FilePaths<DS>>>(
     dirname: D,
-  ): DirectoryHelper<Exclude<StripPrefix<DS, `${D}/`>, "">, TemplateVars> {
+  ): DirectoryHelper<ChildDirectory<DS, D>, TemplateVars> {
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
   }
 
   /** fetch a JSON file */
-  async fetch<T>(
-    filename: Files<DS>,
+  async fetch<F extends Files<FilePaths<DS>>>(
+    filename: F,
     options?: {
       /** @default json */
-      type: "blob" | "json" | "raw" | "text";
+      type?: "json";
 
       /** optional version string */
       v?: string;
     },
-  ): Promise<T> {
+  ): Promise<FetchType<DS, F>>;
+  async fetch<F extends Files<FilePaths<DS>>>(
+    filename: F,
+    options: { type: "blob"; v?: string },
+  ): Promise<ArrayBuffer>;
+  async fetch<F extends Files<FilePaths<DS>>>(
+    filename: F,
+    options: { type: "raw"; v?: string },
+  ): Promise<Response>;
+  async fetch<F extends Files<FilePaths<DS>>>(
+    filename: F,
+    options: { type: "text"; v?: string },
+  ): Promise<string>;
+  async fetch<T>(
+    filename: Files<FilePaths<DS>>,
+    options?: {
+      type: "blob" | "json" | "raw" | "text";
+      v?: string;
+    },
+  ): Promise<T>;
+  async fetch(
+    filename: Files<FilePaths<DS>>,
+    options?: {
+      type?: "blob" | "json" | "raw" | "text";
+      v?: string;
+    },
+  ): Promise<unknown> {
     // TODO: maybe support RSC here
     if (import.meta.env.SSR) {
-      return null as T;
+      return null;
     }
 
     const url = this.file(filename, options?.v);
@@ -66,7 +134,7 @@ export class DirectoryHelper<
         fetch(url).then((res) => {
           switch (options?.type) {
             case "blob":
-              return res.arrayBuffer;
+              return res.arrayBuffer();
             case "raw":
               return res;
             case "text":
@@ -78,14 +146,14 @@ export class DirectoryHelper<
       );
     }
 
-    return globalFetchCache.get(url) as Promise<T>;
+    return globalFetchCache.get(url) as Promise<unknown>;
   }
 
   /**
    * get the fully qualified name of a file
    * TODO: support versioning
    */
-  file(filename: Files<DS>, _version?: string) {
+  file(filename: Files<FilePaths<DS>>, _version?: string) {
     return `${this.dirname}/${filename}`;
   }
 
@@ -123,7 +191,7 @@ type Resolve<
     : never;
 
 export class ServerDirectoryHelper<D extends Directory> {
-  #files: D;
+  readonly #files: D;
 
   constructor(files: D) {
     this.#files = files;
@@ -138,7 +206,7 @@ export class ServerDirectoryHelper<D extends Directory> {
       if (child === undefined || typeof child !== "object" || child === null) {
         throw new Error(`Directory "${dirname}" does not exist`);
       }
-      return child;
+      return child as Directory;
     }, this.#files as Directory) as Resolve<D, Dir>;
 
     return new ServerDirectoryHelper(newFiles);

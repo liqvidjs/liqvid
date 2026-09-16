@@ -5,11 +5,9 @@ import { fileURLToPath } from "node:url";
 import type { Locale } from "@liqvid/schemas";
 import { Option } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
-import { createElement } from "react";
 
-import { DevTranslation } from "#_/components/DevTranslation.js";
 import { TRANSLATIONS_DIR } from "#_/conventions.mjs";
-import { isInterpolationConfig } from "#_/i18n/shared.mts.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState } from "#_/initialize.mjs";
 
 import type CommonTranslationsJson from "../.translations/en.json";
@@ -45,7 +43,7 @@ export async function getTranslations<T extends object>(
   importMetaUrl: string,
 
   relative: RelativeDir = RelativeDir("."),
-): Promise<T> {
+): Promise<Localized<T>> {
   const locale = getLocale();
   if (!cache.has(locale)) {
     cache.set(locale, new Map());
@@ -89,7 +87,7 @@ export async function getTranslations<T extends object>(
 
   langCache.set(translationsJson, value);
 
-  return value;
+  return value as Localized<T>;
 }
 
 /**

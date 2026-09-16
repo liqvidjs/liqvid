@@ -1,4 +1,6 @@
 "use client";
+
+import { useColorScheme } from "@liqvid/color-scheme/react";
 import { KeymapProvider, useKeyboardShortcut } from "@liqvid/keymap/react";
 
 export function DevToggleTheme() {
@@ -10,11 +12,16 @@ export function DevToggleTheme() {
 }
 
 function Toggle() {
+  const { setColorScheme } = useColorScheme();
+
   useKeyboardShortcut("Meta+'", () => {
     const { colorScheme } = document.documentElement.style;
 
-    document.documentElement.style.colorScheme =
-      colorScheme === "light" ? "dark" : "light";
+    const next = colorScheme === "light" ? "dark" : "light";
+
+    document.documentElement.style.colorScheme = next;
+
+    setColorScheme(next);
   });
   return null;
 }

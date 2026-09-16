@@ -1,6 +1,9 @@
 "use client";
 
-import type { ColorSchemeSpecifier } from "@liqvid/color-scheme/react";
+import {
+  type ColorSchemeSpecifier,
+  useColorScheme,
+} from "@liqvid/color-scheme/react";
 import { DesktopIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
@@ -54,6 +57,7 @@ export function ConfigureThemeClient({
 }) {
   const [theme, setTheme] = useState<ColorSchemeSpecifier>(initialTheme);
   const [saving, setSaving] = useState<ColorSchemeSpecifier | null>(null);
+  const { setColorScheme } = useColorScheme();
 
   /** Item map for `<SelectRoot items>` (value -> label). */
   const THEMES_ITEMS = Object.fromEntries(
@@ -68,6 +72,9 @@ export function ConfigureThemeClient({
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
+        if (next !== "system") {
+          setColorScheme(next);
+        }
         return yield* client.settings.setTheme({
           payload: { theme: next },
         });

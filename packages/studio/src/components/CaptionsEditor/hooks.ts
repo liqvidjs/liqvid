@@ -2,15 +2,14 @@ import { useEventListener } from "@liqvid/event-emitter/react";
 import { usePlayback } from "@liqvid/playback/react";
 import { useRef, useState } from "react";
 
+import { caretPositionFromPoint } from "./CaptionsEditor.tsx";
 import {
   cycleCapitalization,
   defaultShortcuts,
   hasModKey,
   isEditableTarget,
   type Shortcuts,
-} from "#_/components/CaptionsEditor/shortcuts.ts.js";
-
-import { caretPositionFromPoint } from "./CaptionsEditor.tsx";
+} from "./shortcuts.ts";
 import type { Store } from "./store.ts";
 import type { Highlight } from "./types.ts";
 import {

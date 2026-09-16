@@ -8,6 +8,7 @@ import {
   type FileSystem,
   Layer,
   Logger,
+  Option,
   References,
 } from "effect";
 import { Etag } from "effect/unstable/http";
@@ -163,11 +164,41 @@ async function runEffect<A, E>(
   );
 
   return Exit.match(result, {
-    onFailure: () =>
-      Response.json(
-        { error: "Internal Server Error" },
-        { status: StatusCodes.INTERNAL_SERVER_ERROR },
-      ),
+    onFailure: (cause) => {
+      const error = Cause.findErrorOption(cause);
+
+      return Option.match(error, {
+        onNone: () =>
+          Response.json(
+            { error: "Internal Server Error" },
+            { status: StatusCodes.INTERNAL_SERVER_ERROR },
+          ),
+        onSome: (value) => {
+          if (typeof value !== "object" || value === null) {
+            return Response.json(
+              { error: "Internal Server Error" },
+              { status: StatusCodes.INTERNAL_SERVER_ERROR },
+            );
+          }
+
+          const annotations = (
+            value.constructor as {
+              ast?: { annotations?: { httpApiStatus?: unknown } };
+            }
+          ).ast?.annotations;
+          const status = annotations?.httpApiStatus;
+
+          if (typeof status !== "number") {
+            return Response.json(
+              { error: "Internal Server Error" },
+              { status: StatusCodes.INTERNAL_SERVER_ERROR },
+            );
+          }
+
+          return Response.json(value, { status });
+        },
+      });
+    },
     onSuccess: (v) => {
       if (v instanceof Response) {
         return v;

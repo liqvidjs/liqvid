@@ -124,6 +124,7 @@ function CaptionsToggle({
 function CaptionsDisplay(props: Omit<React.ComponentProps<"div">, "children">) {
   const playback = usePlayback();
   const [captions, setCaptions] = useState<string[]>([]);
+  const { renderMode } = usePlayer();
 
   const updateCaptions = useCallback(() => {
     const activeCaptions: string[] = [];
@@ -186,6 +187,10 @@ function CaptionsDisplay(props: Omit<React.ComponentProps<"div">, "children">) {
   playback.textTracks.addEventListener("removetrack", handleTrackListChange);
 
   if (captions.length === 0) {
+    return null;
+  }
+
+  if (renderMode !== "web") {
     return null;
   }
 

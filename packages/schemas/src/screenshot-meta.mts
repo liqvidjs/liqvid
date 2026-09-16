@@ -13,16 +13,24 @@ export type ColorSchemeOption = (typeof ColorSchemeOption)["Type"];
  */
 export const ScreenshotMeta = Schema.Struct({
   /** Color scheme used for the screenshot */
-  colorScheme: ColorSchemeOption,
+  colorScheme: ColorSchemeOption.pipe(
+    Schema.annotate({ description: "Color scheme used for the screenshot" }),
+  ),
 
   /** ISO datetime of creation */
-  createdAt: Schema.String,
+  createdAt: Schema.String.pipe(
+    Schema.annotate({ description: "ISO datetime of creation" }),
+  ),
 
   /** Height of screenshot */
-  height: Schema.Number,
+  height: Schema.Number.pipe(
+    Schema.annotate({ description: "Height of screenshot" }),
+  ),
 
   /** Width of screenshot */
-  width: Schema.Number,
+  width: Schema.Number.pipe(
+    Schema.annotate({ description: "Width of screenshot" }),
+  ),
 });
 
 export type ScreenshotMeta = (typeof ScreenshotMeta)["Type"];
@@ -32,7 +40,9 @@ export type ScreenshotMeta = (typeof ScreenshotMeta)["Type"];
  */
 export const ScreenshotEntry = Schema.Struct({
   /** Folder name (datetime-based) */
-  id: SchemaRelativeDir,
+  id: SchemaRelativeDir.pipe(
+    Schema.annotate({ description: "Folder name (datetime-based)" }),
+  ),
 
   /**
    * Path to the screenshot image.
@@ -44,10 +54,15 @@ export const ScreenshotEntry = Schema.Struct({
       dark: SchemaRelativeFile,
       light: SchemaRelativeFile,
     }),
-  ]),
+  ]).pipe(
+    Schema.annotate({
+      description:
+        'Path to the screenshot image. For "both" mode, this will be an object with light and dark paths.',
+    }),
+  ),
 
   /** Metadata */
-  meta: ScreenshotMeta,
+  meta: ScreenshotMeta.pipe(Schema.annotate({ description: "Metadata" })),
 });
 
 export type ScreenshotEntry = (typeof ScreenshotEntry)["Type"];

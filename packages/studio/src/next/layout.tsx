@@ -6,10 +6,7 @@ import "../palette.css";
 import "../studio.css";
 import "../stylex.css";
 
-import {
-  type ColorScheme,
-  ColorSchemeProvider,
-} from "@liqvid/color-scheme/react";
+import { ColorSchemeProvider } from "@liqvid/color-scheme/react";
 
 import { DevToggleTheme } from "#_/components/DevToggleTheme.js";
 import { FloatingNav } from "#_/components/FloatingNav/server.js";
@@ -34,8 +31,9 @@ export default async function RootLayout({
     <html lang={config.ui.locale} style={{ colorScheme }}>
       <head />
       <body>
-        {/* TODO: fix the types here */}
-        <ColorSchemeProvider value={colorScheme as ColorScheme}>
+        <ColorSchemeProvider
+          initialValue={colorScheme === "light dark" ? undefined : colorScheme}
+        >
           <DevToggleTheme />
           <FloatingNav />
           {children}

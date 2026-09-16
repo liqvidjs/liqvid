@@ -62,7 +62,7 @@ const getOrigin = Effect.fnUntraced(function* () {
  */
 function interpolatePathParams(
   urlPath: string,
-  params?: Record<string, string>,
+  params?: Readonly<Record<string, string>>,
 ): string {
   if (!params) return urlPath;
   return urlPath.replace(/\[([^\]]+)\]/g, (match, paramName: string) => {
@@ -73,7 +73,7 @@ function interpolatePathParams(
 export const getRenderUrl = Effect.fnUntraced(function* (
   renderSource: RenderSource,
   projectPath: RelativeDir,
-  params?: Record<string, string>,
+  params?: Readonly<Record<string, string>>,
 ) {
   const origin = yield* getOrigin();
 
@@ -93,7 +93,9 @@ export const getRenderUrl = Effect.fnUntraced(function* (
 /**
  * Generate cartesian product of possible parameter values.
  */
-export function cartesianProduct<T extends Record<string, readonly string[]>>(
+export function cartesianProduct<
+  T extends Readonly<Record<string, readonly string[]>>,
+>(
   parameters: T,
 ): Array<{
   [K in keyof T]: T[K][number];

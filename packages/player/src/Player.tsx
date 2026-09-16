@@ -14,8 +14,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalizeAspectRatio } from "./aspect-ratio.ts";
 import { Canvas } from "./Canvas.tsx";
 import { Controls } from "./Controls.tsx";
-import { PlayerContext, type RenderingTask } from "./hooks.ts";
+import {
+  type ControlsState,
+  PlayerContext,
+  type RenderingTask,
+} from "./hooks.ts";
 import { playerApiDeclaration } from "./iframe-api.ts";
+import { PrivatePlayerContext } from "./private-api.ts";
 import type { RenderMode } from "./render-mode.ts";
 
 const API_SYMBOL = Symbol.for("@liqvid/player/api");
@@ -69,9 +74,15 @@ export function Root({
     };
   }, []);
 
+  const [controls, setControls] = useState<ControlsState>({
+    mounted: false,
+    visible: false,
+  });
+
   const context = useMemo(
     (): PlayerContext => ({
       aspectRatio,
+      controls,
       get domElement() {
         return ref.current;
       },
@@ -79,7 +90,7 @@ export function Root({
       renderingTasks,
       renderMode,
     }),
-    [aspectRatio, renderingTasks, registerRenderingTask, renderMode],
+    [aspectRatio, renderingTasks, registerRenderingTask, renderMode, controls],
   );
 
   const { colorScheme, persistence, setColorScheme } = useColorScheme();
@@ -144,6 +155,7 @@ export function Root({
         {
           ...style,
           "--lv-aspect-ratio": `calc(${aspectRatio.width} / ${aspectRatio.height})`,
+          "--lv-controls-visible": context.controls.visible ? "1" : "0",
           colorScheme,
         } as React.CSSProperties
       }
@@ -153,35 +165,39 @@ export function Root({
     </div>
   );
 
+  const privateApi = useMemo(() => ({ setControls }), []);
+
   return (
     <KeymapProvider>
-      <PlayerContext.Provider value={context}>
-        {persistence ? (
-          <HydrateElement
-            from={[persistence]}
-            hydrationFn={(node, colorScheme) => {
-              const style = node.getAttribute("style");
-              if (style?.includes("color-scheme:")) {
-                node.setAttribute(
-                  "style",
-                  style.replace(
-                    /color-scheme:[^;]+/,
-                    `color-scheme:${colorScheme}`,
-                  ),
-                );
-              } else {
-                node.setAttribute("style", `color-scheme:${colorScheme}`);
-              }
+      <PrivatePlayerContext value={privateApi}>
+        <PlayerContext.Provider value={context}>
+          {persistence ? (
+            <HydrateElement
+              from={[persistence]}
+              hydrationFn={(node, colorScheme) => {
+                const style = node.getAttribute("style");
+                if (style?.includes("color-scheme:")) {
+                  node.setAttribute(
+                    "style",
+                    style.replace(
+                      /color-scheme:[^;]+/,
+                      `color-scheme:${colorScheme}`,
+                    ),
+                  );
+                } else {
+                  node.setAttribute("style", `color-scheme:${colorScheme}`);
+                }
 
-              node.dataset.colorScheme = colorScheme;
-            }}
-          >
-            {inner}
-          </HydrateElement>
-        ) : (
-          inner
-        )}
-      </PlayerContext.Provider>
+                node.dataset.colorScheme = colorScheme;
+              }}
+            >
+              {inner}
+            </HydrateElement>
+          ) : (
+            inner
+          )}
+        </PlayerContext.Provider>
+      </PrivatePlayerContext>
     </KeymapProvider>
   );
 }

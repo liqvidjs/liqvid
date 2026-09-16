@@ -1,3 +1,5 @@
+import { Duration, type DurationLike } from "@liqvid/duration";
+
 /**
  * Type representing recorded data
  */
@@ -8,21 +10,31 @@ export type ReplayData<K> = [number, K][];
  * @param args [ReplayData, delay] objects to join
  * @returns Concatenated replay data
  */
-export function concat<T>(
-  head: [ReplayData<T>, number],
-  ...tail: [ReplayData<T>, number][]
+export function concatenateReplayData<T>(
+  head: readonly [ReplayData<T>, DurationLike | number],
+  ...tail: ReadonlyArray<readonly [ReplayData<T>, DurationLike | number]>
 ) {
   const ret: ReplayData<T> = [...head[0]];
-  let ptr = head[1] + length(head[0]);
+  let ptr =
+    (typeof head[1] === "number" ? head[1] : Duration.inMilliseconds(head[1])) +
+    length(head[0]);
 
   for (const [data, start] of tail) {
     const copy = data.slice();
-    copy[0]![0] += start - ptr;
+    copy[0] = copy[0]!.slice() as [number, T];
+
+    copy[0]![0] +=
+      (typeof start === "number" ? start : Duration.inMilliseconds(start)) -
+      ptr;
+    console.debug("offset", copy[0][0]);
     ret.push(...copy);
     ptr += length(copy);
   }
   return ret;
 }
+
+/** @deprecated */
+export const concat = concatenateReplayData;
 
 /**
  * Get the total duration of replay data.

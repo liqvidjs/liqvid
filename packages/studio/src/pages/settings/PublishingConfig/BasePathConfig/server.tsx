@@ -1,5 +1,6 @@
 import type { Localized } from "#_/i18n/shared.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
+import { TranslationProvider } from "#_/utils/react.js";
 
 import { BasePathConfigClient } from "./client.tsx";
 
@@ -13,5 +14,9 @@ type T = Localized<typeof TranslationsJson>;
  */
 export async function BasePathConfig() {
   const t = await getTranslations<T>(import.meta.url);
-  return <BasePathConfigClient t={t} />;
+  return (
+    <TranslationProvider t={t}>
+      <BasePathConfigClient />
+    </TranslationProvider>
+  );
 }

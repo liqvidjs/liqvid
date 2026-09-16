@@ -1,9 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "duration": {
-      "additionalProperties": false,
+      "additionalProperties": true,
+      "description": "Duration of project",
       "properties": {
         "d": {
           "anyOf": [

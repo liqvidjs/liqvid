@@ -10,6 +10,7 @@ export const themed =
     <C extends keyof React.JSX.IntrinsicElements | React.FC<any>>(
       Component: C,
       preset: stylex.StyleXStyles,
+      finder?: string,
     ) =>
     (
       props: Omit<
@@ -25,7 +26,7 @@ export const themed =
     ) => {
       // biome-ignore lint/suspicious/noExplicitAny: cast needed for generic JSX spread
       const Comp = Component as any;
-      return <Comp {...props} {...stylex.props(preset)} />;
+      return <Comp data-id={finder} {...props} {...stylex.props(preset)} />;
     };
 
 /**

@@ -29,15 +29,17 @@ const colorSchemeContext = makeContext<ColorSchemeContext>({
 /** provide color scheme to descendants */
 export function ColorSchemeProvider({
   children,
+  initialValue,
   persistence,
   value,
 }: {
   children?: React.ReactNode;
   persistence?: StringValueConfig<ColorScheme>;
+  initialValue?: ColorScheme;
   value?: ColorScheme;
 }) {
   const [colorScheme, setColorScheme] = usePersistentState(persistence!, {
-    default: value ?? "light",
+    default: value ?? initialValue ?? "light",
     disabled: !persistence,
   });
 

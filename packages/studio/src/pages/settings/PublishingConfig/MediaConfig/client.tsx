@@ -5,6 +5,7 @@ import * as stylex from "@stylexjs/stylex";
 import { typography } from "#_/design/styles.js";
 import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
+import { Checkbox } from "#_/ui/Checkbox.js";
 import { FieldSet, Legend } from "#_/ui/Fieldset.js";
 
 import { usePublishingConfigClient } from "../client.tsx";
@@ -32,7 +33,7 @@ export function MediaConfigClient({ t }: { t: T }) {
       <p sx={typography.description}>{t.mediaDescription}</p>
 
       <label sx={styles.checkboxField}>
-        <input
+        <Checkbox
           checked={draft.media?.audio?.multiple ?? false}
           onChange={(e) => {
             const multiple = e.target.checked;
@@ -40,7 +41,6 @@ export function MediaConfigClient({ t }: { t: T }) {
               media: multiple ? { audio: { multiple } } : undefined,
             });
           }}
-          type="checkbox"
         />
         <span>{t.audioMultiple}</span>
       </label>

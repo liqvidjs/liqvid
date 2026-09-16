@@ -19,15 +19,17 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTitle,
-  useDialogApi,
 } from "#_/ui/Dialog.js";
-import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
+import { useDialogApi } from "#_/ui/dialogs-shared.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionRow } from "./CaptionsRow.tsx";
 
-import type TranslationsJson from "../.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
+
+export type { T as TranslationsCaptionsSection };
 
 interface CaptionsSectionProps {
   /** Selected parameter values for parameterized projects */
@@ -35,32 +37,6 @@ interface CaptionsSectionProps {
 }
 
 const styles = stylex.create({
-  addButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":disabled": colors.graySubtle,
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: {
-      ":disabled": colors.grayDim,
-      default: colors.grayNormal,
-    },
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    gap: spacing.xs,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    transition: "background-color 0.15s",
-  },
   dialogActions: {
     columnGap: spacing.lg,
     display: "flex",
@@ -106,31 +82,6 @@ const styles = stylex.create({
     justifyContent: "flex-end",
     marginBottom: spacing.lg,
   },
-  submitButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover:not(:disabled)": colors.accentSolidHover,
-      default: colors.accentSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    opacity: {
-      ":disabled": 0.6,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
-  },
   textInput: {
     backgroundColor: colors.grayApp,
     borderColor: {
@@ -154,8 +105,7 @@ const styles = stylex.create({
 
 export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   // const { hasCaptioningConfigured } = useDerivedConfig();
-  const t = useTranslations<T>().captions;
-  const c = useCommonTranslations();
+  const { captions: t } = useTranslations<{ captions: T }>();
 
   const projectPath = useProjectPath();
 
@@ -274,7 +224,6 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
       <div sx={styles.section}>
         <div sx={styles.sectionActions}>
           <Button
-            {...stylex.props(styles.addButton)}
             disabled={isGeneratingAudio}
             onClick={handleGenerateAudio}
             type="button"
@@ -338,9 +287,8 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
               />
             </div>
             <div sx={styles.dialogActions}>
-              <DialogClose>{c.cancel}</DialogClose>
+              <DialogClose />
               <Button
-                className={stylex.props(styles.submitButton).className}
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
                 type="button"

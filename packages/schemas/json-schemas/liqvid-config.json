@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -10,16 +10,19 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "JSON schema path"
     },
     "backend": {
       "anyOf": [
         {
-          "additionalProperties": false,
+          "additionalProperties": true,
+          "description": "Configure your hosting backends",
           "properties": {
             "content": {
               "anyOf": [
                 {
+                  "description": "Provider hosting your content files (html/css/js)",
                   "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
                   "type": "string"
                 },
@@ -31,6 +34,7 @@
             "media": {
               "anyOf": [
                 {
+                  "description": "Provider hosting your media files (audio, video, and thumbnails)",
                   "enum": ["copy", "liqvidStudio", "s3", "sftp"],
                   "type": "string"
                 },
@@ -60,7 +64,8 @@
     "logging": {
       "anyOf": [
         {
-          "additionalProperties": false,
+          "additionalProperties": true,
+          "description": "Logging configuration",
           "properties": {
             "level": {
               "anyOf": [
@@ -84,12 +89,13 @@
     "media": {
       "anyOf": [
         {
-          "additionalProperties": false,
+          "additionalProperties": true,
+          "description": "Media config",
           "properties": {
             "audio": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "multiple": {
                       "anyOf": [
@@ -102,6 +108,7 @@
                       ]
                     },
                     "source": {
+                      "description": "Whether to render from development preview or production build",
                       "enum": ["preview", "production"],
                       "type": "string"
                     }
@@ -116,12 +123,13 @@
             "captioning": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
+                  "description": "Captioning configuration",
                   "properties": {
                     "smartWhisperOptions": {
                       "anyOf": [
                         {
-                          "additionalProperties": false,
+                          "additionalProperties": true,
                           "properties": {
                             "gpu": {
                               "anyOf": [
@@ -172,7 +180,8 @@
                                 {
                                   "type": "null"
                                 }
-                              ]
+                              ],
+                              "description": "Explicit path to a ggml Whisper model file. When set, this takes precedence over modelName and no download occurs."
                             },
                             "translateToEnglish": {
                               "anyOf": [
@@ -187,7 +196,7 @@
                             "whisperOptions": {
                               "anyOf": [
                                 {
-                                  "additionalProperties": false,
+                                  "additionalProperties": true,
                                   "properties": {
                                     "language": {
                                       "anyOf": [
@@ -241,7 +250,8 @@
                                         {
                                           "type": "null"
                                         }
-                                      ]
+                                      ],
+                                      "description": "Number of threads to use for inference. If omitted, smart-whisper picks a sensible default."
                                     },
                                     "splitOnWord": {
                                       "anyOf": [
@@ -300,9 +310,10 @@
             "renders": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "source": {
+                      "description": "Whether to render from development preview or production build",
                       "enum": ["preview", "production"],
                       "type": "string"
                     }
@@ -317,9 +328,10 @@
             "screenshots": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "source": {
+                      "description": "Whether to render from development preview or production build",
                       "enum": ["preview", "production"],
                       "type": "string"
                     }
@@ -334,10 +346,12 @@
             "thumbnails": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
+                  "description": "Thumbnail generation configuration",
                   "properties": {
                     "defaults": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
+                      "description": "Configuration for a thumbnail generation job",
                       "properties": {
                         "browserExecutable": {
                           "anyOf": [
@@ -347,7 +361,8 @@
                             {
                               "type": "null"
                             }
-                          ]
+                          ],
+                          "description": "Path to browser executable (optional, will auto-detect)"
                         },
                         "browserHeight": {
                           "anyOf": [
@@ -471,6 +486,7 @@
                         "imageFormat": {
                           "anyOf": [
                             {
+                              "description": "Recognized image formats.",
                               "enum": ["jpeg", "png"],
                               "type": "string"
                             },
@@ -537,6 +553,7 @@
                       "type": "object"
                     },
                     "source": {
+                      "description": "Whether to render from development preview or production build",
                       "enum": ["preview", "production"],
                       "type": "string"
                     }
@@ -558,12 +575,12 @@
       ]
     },
     "providers": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "copy": {
           "anyOf": [
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "clean": {
                   "anyOf": [
@@ -588,7 +605,7 @@
                       ]
                     },
                     {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "hosting": {
                           "anyOf": [
@@ -614,7 +631,20 @@
                       "required": ["hosting", "media"],
                       "type": "object"
                     }
-                  ]
+                  ],
+                  "description": "The destination to copy to. Can be either a directory path, or an object with separate paths for hosting vs media."
+                },
+                "domain": {
+                  "anyOf": [
+                    {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Domain content will be hosted at. Currently, this is only used for the \"copy embed code\" button."
                 }
               },
               "required": ["destination"],
@@ -628,7 +658,7 @@
         "githubPages": {
           "anyOf": [
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "repository": {
                   "type": "string"
@@ -658,7 +688,7 @@
         "liqvidStudio": {
           "anyOf": [
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "username": {
                   "type": "string"
@@ -675,12 +705,14 @@
         "s3": {
           "anyOf": [
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
+              "description": "Configuration for AWS S3 (or other compatible provider)",
               "properties": {
                 "auth": {
                   "anyOf": [
                     {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
+                      "description": "Authentication via AWS profile",
                       "properties": {
                         "profile": {
                           "type": "string"
@@ -694,7 +726,8 @@
                       "type": "object"
                     },
                     {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
+                      "description": "Explicit S3 credentials authentication",
                       "properties": {
                         "accessKeyId": {
                           "anyOf": [
@@ -746,12 +779,15 @@
                       "required": ["type"],
                       "type": "object"
                     }
-                  ]
+                  ],
+                  "description": "S3 authentication config - discriminated union"
                 },
                 "bucket": {
+                  "description": "Bucket name",
                   "type": "string"
                 },
                 "domain": {
+                  "format": "uri",
                   "type": "string"
                 },
                 "prefix": {
@@ -762,7 +798,8 @@
                     {
                       "type": "null"
                     }
-                  ]
+                  ],
+                  "description": "Prefix to apply to all content from this project"
                 },
                 "region": {
                   "anyOf": [
@@ -786,8 +823,20 @@
         "sftp": {
           "anyOf": [
             {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
+                "domain": {
+                  "anyOf": [
+                    {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Domain content will be hosted at. Currently, this is only used for the \"copy embed code\" button."
+                },
                 "host": {
                   "type": "string"
                 },
@@ -809,7 +858,8 @@
     "publishing": {
       "anyOf": [
         {
-          "additionalProperties": false,
+          "additionalProperties": true,
+          "description": "Publishing configuration",
           "properties": {
             "delete": {
               "anyOf": [
@@ -824,7 +874,8 @@
             "include": {
               "anyOf": [
                 {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
+                  "description": "Glob patterns of files to include when publishing",
                   "properties": {
                     "media": {
                       "anyOf": [
@@ -871,6 +922,7 @@
             },
             "type": "array"
           },
+          "description": "Root-level static parameters that apply to all projects. These are used as fallbacks when a project does not define its own parameters. Format: `{ parameterName: [value1, value2, ...] }`. Note: \"value\" is not permitted as a parameter name.",
           "type": "object"
         },
         {
@@ -881,7 +933,7 @@
     "ui": {
       "anyOf": [
         {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "locale": {
               "anyOf": [

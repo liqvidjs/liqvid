@@ -2,8 +2,11 @@
 
 import path from "node:path";
 
-import { writeJSON } from "@liqvid/cli/utils";
 import type { RichTranscript } from "@liqvid/schemas";
+import {
+  inlineTypeDeclaration,
+  writeTypedJson,
+} from "@liqvid/studio-plugin-api/server";
 import { formatVttTimestamp } from "@liqvid/utils";
 import chalk from "chalk";
 import { Cause, Effect, Exit, FileSystem } from "effect";
@@ -43,10 +46,14 @@ export async function saveCaptions({
               vtt,
             )
             .pipe(Effect.tap(() => Effect.logDebug("saved captions"))),
-          writeJSON(
-            path.join(projectDir, ASSETS_DIR, AUDIO_DIR, RICH_TRANSCRIPT),
-            transcript,
-          ).pipe(Effect.tap(() => Effect.logDebug("saved rich transcript"))),
+          writeTypedJson({
+            data: transcript,
+            declaration: inlineTypeDeclaration(
+              `import("@liqvid/schemas").RichTranscript`,
+            ),
+            dirname: path.join(projectDir, ASSETS_DIR, AUDIO_DIR),
+            filename: RICH_TRANSCRIPT,
+          }).pipe(Effect.tap(() => Effect.logDebug("saved rich transcript"))),
         ],
         { concurrency: "unbounded" },
       );

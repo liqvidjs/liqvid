@@ -15,15 +15,15 @@ import {
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
 } from "#_/cookies.js";
-import { breakpoints, scales, spacing, text } from "#_/design/tokens.stylex.js";
+import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
 
 import { NewProjectButton } from "./NewProjectButton/server.tsx";
-import { ProjectList } from "./ProjectList/ProjectList.tsx";
+import { ProjectList } from "./ProjectList/server.tsx";
 import { RebuildButton } from "./RebuildButton/server.tsx";
-import { UpdateBanner } from "./UpdateBanner/UpdateBanner.server.tsx";
+import { UpdateBanner } from "./UpdateBanner/server.tsx";
 
 import "../stylex.css";
 
@@ -101,6 +101,19 @@ export async function Homepage() {
   const initialSelectedRootParams: Readonly<Record<string, string>> =
     rootParamsCookie?.value ? JSON.parse(rootParamsCookie.value) : {};
 
+  const domain = (() => {
+    const DEFAULT = new URL("http://localhost:4000");
+    switch (config.backend?.content) {
+      case "copy":
+        return config.providers.copy?.domain ?? DEFAULT;
+      case "s3":
+        return config.providers.s3?.domain ?? DEFAULT;
+      case "sftp":
+        return config.providers.sftp?.domain ?? DEFAULT;
+    }
+    return DEFAULT;
+  })();
+
   return (
     <DerivedConfigProvider value={derivedConfig}>
       <WebSocketProvider>
@@ -121,6 +134,7 @@ export async function Homepage() {
           <LiqvidConfigProvider
             value={{
               basePath,
+              domain: domain.origin,
               productionServerPort,
               rootParameters: config.rootParameters ?? {},
             }}

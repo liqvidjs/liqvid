@@ -1,0 +1,44 @@
+{
+  "action": "Capturer",
+  "colorScheme": {
+    "both": "Les deux",
+    "dark": "Sombre",
+    "label": "Thème",
+    "light": "Clair"
+  },
+  "confirmDialog": {
+    "action": "Remplacer",
+    "message": {
+      "_": "Le fichier {filename} existe dèja. Voulez-vous le remplacer?",
+      "$": {
+        "filename": null
+      }
+    },
+    "title": "Confirmer le remplacement"
+  },
+  "deleteDialog": {
+    "action": "Supprimer",
+    "confirm": "Vous êtes sûr de vouloir supprimer cette capture d'écran? Cette action est irréversible.",
+    "title": "Supprimer la capture d'écran"
+  },
+  "empty": "Aucune capture d'écran pour le moment. Cliquez sur \"Ajouter\" pour en capturer une.",
+  "inProgress": "Capture en cours...",
+  "item": {
+    "delete": "Supprimer",
+    "openInFinder": "Ouvrir dans Finder",
+    "rename": "Renommer",
+    "useOpenGraph": "Utiliser comme image OpenGraph",
+    "useTwitter": "Utiliser comme image Twitter",
+    "viewFullSize": "Voir en taille réelle"
+  },
+  "preview": "Aperçu de la capture d'écran",
+  "renameDialog": {
+    "action": "Renommer",
+    "newName": "Nouveau nom",
+    "title": "Renommer la capture d'écran"
+  },
+
+  "timeLabel": "Temps sélectionné (mm:ss.ms)",
+  "title": "Capturer l'écran",
+  "trigger": "Ajouter"
+}

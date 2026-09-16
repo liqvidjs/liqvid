@@ -64,10 +64,8 @@ export function Segment<M extends string>({
     if (typeof during === "string") {
       return (script: Script<M>) => script.active.name.startsWith(during);
     }
-    const fromIndex =
-      typeof from === "string" ? script.markers.get(from).index : null;
-    const toIndex =
-      typeof to === "string" ? script.markers.get(to).index : null;
+    const fromIndex = typeof from === "string" ? script.get(from).index : null;
+    const toIndex = typeof to === "string" ? script.get(to).index : null;
 
     return (script: Script<M>) => {
       let valid = true;

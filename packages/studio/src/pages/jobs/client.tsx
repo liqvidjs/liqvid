@@ -168,7 +168,7 @@ const styles = stylex.create({
   },
 
   timestamp: {
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderBottomLeftRadius: radii.sm,
     borderBottomRightRadius: radii.none,
     borderBottomStyle: "solid",

@@ -5,13 +5,21 @@ import { ColorSchemeOrBoth, ImageFormat, JpegQuality } from "../shared.mts";
 
 export const ThumbnailsJob = Schema.Struct({
   /** Color scheme */
-  colorScheme: ColorSchemeOrBoth,
+  colorScheme: ColorSchemeOrBoth.pipe(
+    Schema.annotate({ description: "Color scheme" }),
+  ),
 
   /**
    * Number of columns per sheet
    * @default 5
    */
-  cols: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+  cols: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(5)),
+    Schema.annotate({
+      default: 5,
+      description: "Number of columns per sheet.",
+    }),
+  ),
 
   /**
    * Seconds between screenshots
@@ -19,6 +27,10 @@ export const ThumbnailsJob = Schema.Struct({
    */
   frequency: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(1)),
+    Schema.annotate({
+      default: 1,
+      description: "Seconds between screenshots.",
+    }),
   ),
 
   /**
@@ -27,24 +39,38 @@ export const ThumbnailsJob = Schema.Struct({
    */
   height: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(90)),
+    Schema.annotate({ default: 90, description: "Height of each thumbnail." }),
   ),
 
   /** Image format: jpeg or png */
   imageFormat: ImageFormat.pipe(
     Schema.withDecodingDefaultType(Effect.succeed("jpeg")),
+    Schema.annotate({
+      default: "jpeg",
+      description: "Image format: jpeg or png",
+    }),
   ),
 
   /**
    * Quality for JPEG images (0-100)
    * @default 80
    */
-  quality: JpegQuality.pipe(Schema.withDecodingDefaultType(Effect.succeed(80))),
+  quality: JpegQuality.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(80)),
+    Schema.annotate({
+      default: 80,
+      description: "Quality for JPEG images (0-100).",
+    }),
+  ),
 
   /**
    * Number of rows per sheet
    * @default 5
    */
-  rows: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+  rows: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(5)),
+    Schema.annotate({ default: 5, description: "Number of rows per sheet." }),
+  ),
 
   /**
    * Width of each thumbnail
@@ -52,6 +78,7 @@ export const ThumbnailsJob = Schema.Struct({
    */
   width: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(160)),
+    Schema.annotate({ default: 160, description: "Width of each thumbnail." }),
   ),
 });
 
@@ -61,7 +88,12 @@ export type ThumbnailsJob = (typeof ThumbnailsJob)["Type"];
 /** Configuration for a thumbnail generation job */
 export const ThumbnailOptions = Schema.Struct({
   /** Path to browser executable (optional, will auto-detect) */
-  browserExecutable: SchemaAbsoluteFile.pipe(Schema.optional),
+  browserExecutable: SchemaAbsoluteFile.pipe(
+    Schema.optional,
+    Schema.annotate({
+      description: "Path to browser executable (optional, will auto-detect)",
+    }),
+  ),
 
   /**
    * Height of screenshot before resizing
@@ -69,6 +101,10 @@ export const ThumbnailOptions = Schema.Struct({
    */
   browserHeight: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(450)),
+    Schema.annotate({
+      default: 450,
+      description: "Height of screenshot before resizing.",
+    }),
   ),
 
   /**
@@ -77,6 +113,10 @@ export const ThumbnailOptions = Schema.Struct({
    */
   browserWidth: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(800)),
+    Schema.annotate({
+      default: 800,
+      description: "Width of screenshot before resizing.",
+    }),
   ),
 
   /**
@@ -85,13 +125,20 @@ export const ThumbnailOptions = Schema.Struct({
    */
   colorScheme: Schema.Literals(["light", "dark"]).pipe(
     Schema.withDecodingDefaultType(Effect.succeed("light")),
+    Schema.annotate({ default: "light", description: "Color scheme." }),
   ),
 
   /**
    * Number of columns per sheet
    * @default 5
    */
-  cols: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+  cols: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(5)),
+    Schema.annotate({
+      default: 5,
+      description: "Number of columns per sheet.",
+    }),
+  ),
 
   /**
    * Number of concurrent browser instances
@@ -99,6 +146,10 @@ export const ThumbnailOptions = Schema.Struct({
    */
   concurrency: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(1)),
+    Schema.annotate({
+      default: 1,
+      description: "Number of concurrent browser instances.",
+    }),
   ),
 
   /**
@@ -107,6 +158,10 @@ export const ThumbnailOptions = Schema.Struct({
    */
   frequency: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(4)),
+    Schema.annotate({
+      default: 4,
+      description: "Seconds between screenshots.",
+    }),
   ),
 
   /**
@@ -115,6 +170,7 @@ export const ThumbnailOptions = Schema.Struct({
    */
   height: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(90)),
+    Schema.annotate({ default: 90, description: "Height of each thumbnail." }),
   ),
 
   /**
@@ -123,16 +179,25 @@ export const ThumbnailOptions = Schema.Struct({
    */
   imageFormat: ImageFormat.pipe(
     Schema.withDecodingDefaultType(Effect.succeed("png")),
+    Schema.annotate({
+      default: "png",
+      description: "Image format: jpeg or png.",
+    }),
   ),
 
   /** Quality for JPEG images (0-100) */
-  quality: JpegQuality,
+  quality: JpegQuality.pipe(
+    Schema.annotate({ description: "Quality for JPEG images (0-100)" }),
+  ),
 
   /**
    * Number of rows per sheet
    * @default 5
    */
-  rows: Schema.Number.pipe(Schema.withDecodingDefaultType(Effect.succeed(5))),
+  rows: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.succeed(5)),
+    Schema.annotate({ default: 5, description: "Number of rows per sheet." }),
+  ),
 
   /**
    * Width of each thumbnail
@@ -140,8 +205,13 @@ export const ThumbnailOptions = Schema.Struct({
    */
   width: Schema.Number.pipe(
     Schema.withDecodingDefaultType(Effect.succeed(160)),
+    Schema.annotate({ default: 160, description: "Width of each thumbnail." }),
   ),
-});
+}).pipe(
+  Schema.annotate({
+    description: "Configuration for a thumbnail generation job",
+  }),
+);
 
 export type ThumbnailOptionsIn = (typeof ThumbnailOptions)["Encoded"];
 

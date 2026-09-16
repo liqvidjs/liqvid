@@ -20,7 +20,9 @@ export type Locale = (typeof Locale)["Type"];
 
 export const LiqvidConfig = Schema.Struct({
   /** JSON schema path */
-  $schema: Schema.optional(Schema.String),
+  $schema: Schema.optional(Schema.String).pipe(
+    Schema.annotate({ description: "JSON schema path" }),
+  ),
 
   /** Configure your hosting backends */
   backend: Schema.Struct({
@@ -33,20 +35,38 @@ export const LiqvidConfig = Schema.Struct({
       "liqvidStudio",
       "s3",
       "sftp",
-    ]).pipe(Schema.optional),
+    ]).pipe(
+      Schema.annotate({
+        description: "Provider hosting your content files (html/css/js)",
+      }),
+      Schema.optional,
+    ),
 
     /**
      * Provider hosting your media files (audio, video, and thumbnails)
      */
     media: Schema.Literals(["copy", "liqvidStudio", "s3", "sftp"]).pipe(
+      Schema.annotate({
+        description:
+          "Provider hosting your media files (audio, video, and thumbnails)",
+      }),
       Schema.optional,
     ),
-  }).pipe(Schema.optional),
+  }).pipe(
+    Schema.annotate({ description: "Configure your hosting backends" }),
+    Schema.optional,
+  ),
 
   /**
    * Base path that content is hosted under. Should match the basePath in your framework configuration.
    */
-  basePath: StringWithEnvVars.pipe(Schema.optional),
+  basePath: StringWithEnvVars.pipe(
+    Schema.annotate({
+      description:
+        "Base path that content is hosted under. Should match the basePath in your framework configuration.",
+    }),
+    Schema.optional,
+  ),
 
   /** Logging configuration */
   logging: Schema.Struct({
@@ -56,8 +76,14 @@ export const LiqvidConfig = Schema.Struct({
      */
     level: LogLevel.pipe(
       Schema.withDecodingDefaultType(Effect.succeed("info")),
+      Schema.annotate({ default: "info", description: "Logging level." }),
     ),
-  }).pipe(Schema.optional),
+  }).pipe(
+    Schema.annotate({
+      description: "Logging configuration",
+    }),
+    Schema.optional,
+  ),
 
   /** Media config */
   media: Schema.Struct({
@@ -70,6 +96,11 @@ export const LiqvidConfig = Schema.Struct({
        */
       multiple: Schema.Boolean.pipe(
         Schema.withDecodingDefaultType(Effect.succeed(false)),
+        Schema.annotate({
+          default: false,
+          description:
+            "Whether to enable capturing multiple audio tracks. If false, the audio track will be overwritten each time it is regenerated.",
+        }),
       ),
 
       /**
@@ -78,17 +109,26 @@ export const LiqvidConfig = Schema.Struct({
        */
       source: RenderSource.pipe(
         Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+        Schema.annotate({
+          default: "preview",
+          description:
+            "Whether to render from the development preview or the production build.",
+        }),
       ),
     }).pipe(
       Schema.withDecodingDefaultType(
         Effect.succeed({ multiple: false, source: "preview" }),
       ),
+      Schema.annotate({ description: "Audio configuration" }),
     ),
 
     /** Captioning configuration */
     captioning: Schema.Struct({
       smartWhisperOptions: WhisperConfig.pipe(Schema.optional),
-    }).pipe(Schema.optional),
+    }).pipe(
+      Schema.annotate({ description: "Captioning configuration" }),
+      Schema.optional,
+    ),
 
     /** static rendering configuration */
     renders: Schema.Struct({
@@ -98,9 +138,15 @@ export const LiqvidConfig = Schema.Struct({
        */
       source: RenderSource.pipe(
         Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+        Schema.annotate({
+          default: "preview",
+          description:
+            "Whether to render from the development preview or the production build.",
+        }),
       ),
     }).pipe(
       Schema.withDecodingDefaultType(Effect.succeed({ source: "preview" })),
+      Schema.annotate({ description: "Static rendering configuration" }),
     ),
 
     /** screenshots configuration */
@@ -111,9 +157,15 @@ export const LiqvidConfig = Schema.Struct({
        */
       source: RenderSource.pipe(
         Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+        Schema.annotate({
+          default: "preview",
+          description:
+            "Whether to render from the development preview or the production build.",
+        }),
       ),
     }).pipe(
       Schema.withDecodingDefaultType(Effect.succeed({ source: "preview" })),
+      Schema.annotate({ description: "Screenshots configuration" }),
     ),
 
     /** Thumbnail generation configuration */
@@ -126,9 +178,17 @@ export const LiqvidConfig = Schema.Struct({
        */
       source: RenderSource.pipe(
         Schema.withDecodingDefaultTypeKey(Effect.succeed("preview")),
+        Schema.annotate({
+          default: "preview",
+          description:
+            "Whether to render from the development preview or the production build.",
+        }),
       ),
-    }).pipe(Schema.optional),
-  }).pipe(Schema.optional),
+    }).pipe(
+      Schema.annotate({ description: "Thumbnail generation configuration" }),
+      Schema.optional,
+    ),
+  }).pipe(Schema.annotate({ description: "Media config" }), Schema.optional),
 
   providers: Schema.Struct({
     // hosting
@@ -150,6 +210,11 @@ export const LiqvidConfig = Schema.Struct({
      */
     delete: Schema.Boolean.pipe(
       Schema.withDecodingDefaultType(Effect.succeed(false)),
+      Schema.annotate({
+        default: false,
+        description:
+          "If true, delete remote files that are not in the local publish set. Similar to rsync's --delete flag. Only applies to content under the configured bucket prefix.",
+      }),
     ),
 
     /** Glob patterns of files to include when publishing */
@@ -210,9 +275,21 @@ export const LiqvidConfig = Schema.Struct({
             "!**/.liqvid/**/thumbs/thumbnails-job.json",
           ]),
         ),
+        Schema.annotate({
+          description:
+            "Glob patterns of media files to include when publishing media",
+        }),
       ),
-    }).pipe(Schema.optional),
-  }).pipe(Schema.optional),
+    }).pipe(
+      Schema.annotate({
+        description: "Glob patterns of files to include when publishing",
+      }),
+      Schema.optional,
+    ),
+  }).pipe(
+    Schema.annotate({ description: "Publishing configuration" }),
+    Schema.optional,
+  ),
 
   /**
    * Root-level static parameters that apply to all projects.
@@ -226,11 +303,23 @@ export const LiqvidConfig = Schema.Struct({
   rootParameters: Schema.Record(
     Schema.String,
     Schema.Array(Schema.String),
-  ).pipe(Schema.optional),
+  ).pipe(
+    Schema.annotate({
+      description:
+        'Root-level static parameters that apply to all projects. These are used as fallbacks when a project does not define its own parameters. Format: `{ parameterName: [value1, value2, ...] }`. Note: "value" is not permitted as a parameter name.',
+    }),
+    Schema.optional,
+  ),
 
   ui: Schema.Struct({
     /** Locale for Liqvid Studio user interface. */
-    locale: Locale.pipe(Schema.withDecodingDefaultType(Effect.succeed("en"))),
+    locale: Locale.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed("en")),
+      Schema.annotate({
+        default: "en",
+        description: "Locale for Liqvid Studio user interface.",
+      }),
+    ),
 
     /**
      * Theme for Liqvid Studio user interface.
@@ -239,6 +328,11 @@ export const LiqvidConfig = Schema.Struct({
      */
     theme: ColorSchemeSpecifier.pipe(
       Schema.withDecodingDefaultType(Effect.succeed("system")),
+      Schema.annotate({
+        default: "system",
+        description:
+          "Theme for Liqvid Studio user interface. This is NOT the same as the color scheme for videos, and has no effect on video content.",
+      }),
     ),
   }).pipe(
     Schema.withDecodingDefaultType(

@@ -1,0 +1,10 @@
+{
+  "tabs": {
+    "captions": "Captions",
+    "renders": "Renders",
+    "screenshots": "Screenshots",
+    "thumbnails": "Thumbnails"
+  },
+  "title": "Media",
+  "trigger": "Static media (screenshots, thumbnails, renders, captions)"
+}

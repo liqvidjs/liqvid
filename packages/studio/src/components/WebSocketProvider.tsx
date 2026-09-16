@@ -179,9 +179,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
  *   newJob: (data) => { console.log(data.job.name); },
  * });
  * ```
- *
- * @scope ..
- * @scopeException ../../app
  */
 export function useChannel<C extends ChannelName>(
   channel: C,

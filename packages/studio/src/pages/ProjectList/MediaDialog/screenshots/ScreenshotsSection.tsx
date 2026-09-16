@@ -13,13 +13,21 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import { PlainString } from "#_/i18n/shared.mjs";
 import { openScreenshotInFinderAction } from "#_/pages/root-actions.js";
+import {
+  AlertDialogBackdrop,
+  AlertDialogClose,
+  AlertDialogPopup,
+  AlertDialogPortal,
+  AlertDialogRoot,
+  AlertDialogTitle,
+} from "#_/ui/AlertDialog.js";
 import { Button } from "#_/ui/Button.js";
 import {
   DialogBackdrop,
@@ -29,14 +37,37 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-  useDialogApi,
 } from "#_/ui/Dialog.js";
+import { useDialogApi } from "#_/ui/dialogs-shared.js";
+import { TextField } from "#_/ui/TextField.js";
 import { Time } from "#_/ui/Time.js";
-import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
+import { useTranslations } from "#_/utils/react.js";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
-import type TranslationsJson from "../.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
+export type { T as TranslationsScreenshotsSection };
+
+interface ScreenshotsSectionProps {
+  basePath: string;
+  duration: Duration;
+  project: Omit<ProjectMeta, "duration">;
+
+  /** Selected parameter values for parameterized projects */
+  selectedParams?: Readonly<Record<string, string>>;
+}
+
+type ConfirmState = {
+  screenshotId: string;
+  target: CopyTarget;
+  variant?: VariantLabel;
+};
+
+type CopyTarget = "opengraph-image.png" | "twitter-image.png";
+type VariantLabel = "Light" | "Dark" | null;
 
 const styles = stylex.create({
   actions: {
@@ -73,69 +104,12 @@ const styles = stylex.create({
   confirmMessage: {
     color: colors.grayDim,
     fontSize: text.md,
-    lineHeight: 1.5,
     marginBlock: spacing.xl,
     marginInline: spacing.zero,
-  },
-  copyButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.copyBtnBgHover,
-      default: colors.copyBtnBg,
-    },
-    borderColor: colors.copyBtnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.copyBtnColor,
-    cursor: "pointer",
-    display: "flex",
-    fontSize: text.sm,
-    fontWeight: 500,
-    gap: spacing.xs,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.md,
-    transition: "background-color 0.15s",
   },
   created: {
     color: colors.grayDim,
     fontSize: text.sm,
-  },
-  deleteButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.deleteBtnBgHover,
-      default: colors.errorSubtle,
-    },
-    borderColor: colors.deleteBtnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.errorText,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
-  },
-  deleteConfirmButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.errorSolidHover,
-      default: colors.errorSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: "pointer",
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
   },
   dialogActions: {
     columnGap: spacing.lg,
@@ -170,23 +144,6 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     rowGap: spacing.lg,
-  },
-  iconButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
   },
   info: {
     columnGap: spacing.sm,
@@ -239,31 +196,6 @@ const styles = stylex.create({
     justifyContent: "flex-end",
     marginBottom: spacing.lg,
   },
-  submitButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover:not(:disabled)": colors.accentSolidHover,
-      default: colors.accentSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    opacity: {
-      ":disabled": 0.6,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
-  },
   thumbnail: {
     borderRadius: radii.md,
     height: "48px",
@@ -297,31 +229,12 @@ const sxStyles = stylex.create({
   },
 });
 
-type T = Localized<typeof TranslationsJson>;
-
-interface ScreenshotsSectionProps {
-  basePath: string;
-  duration: Duration;
-  project: Omit<ProjectMeta, "duration">;
-  /** Selected parameter values for parameterized projects */
-  selectedParams?: Record<string, string>;
-}
-
-type ConfirmState = {
-  screenshotId: string;
-  target: CopyTarget;
-  variant?: VariantLabel;
-};
-
-type CopyTarget = "opengraph-image.png" | "twitter-image.png";
-type VariantLabel = "Light" | "Dark" | null;
-
 async function copyScreenshot(
   projectPath: RelativeDir,
   screenshotId: string,
   target: CopyTarget,
   variant?: VariantLabel,
-  params?: Record<string, string>,
+  params?: string,
 ) {
   try {
     await clientRuntime.runPromise(
@@ -337,7 +250,7 @@ async function copyScreenshot(
             targetFilename: target,
           },
           query: {
-            params: params ? JSON.stringify(params) : undefined,
+            params,
             projectPath,
           },
         });
@@ -361,6 +274,8 @@ interface ScreenshotItemProps {
   /** Open a full-size preview of the given image src */
   onPreview: (src: string, alt: string) => void;
   onRename: (screenshotId: string) => void;
+  params?: string;
+  parameterValues?: Readonly<Record<string, string>>;
   screenshot: ScreenshotEntry;
   variant: { label: VariantLabel; path: string };
 }
@@ -373,8 +288,10 @@ function ScreenshotItem({
   onRename,
   onDelete,
   onPreview,
+  params,
+  parameterValues,
 }: ScreenshotItemProps) {
-  const t = useTranslations<T>().screenshots.item;
+  const t = useTranslations<{ screenshots: T }>().screenshots.item;
   const projectPath = useProjectPath();
 
   const handleCopyAs = async (target: CopyTarget) => {
@@ -397,26 +314,37 @@ function ScreenshotItem({
       console.error("Failed to check image existence:", e);
     }
 
-    await copyScreenshot(projectPath, screenshot.id, target, variant.label);
+    await copyScreenshot(
+      projectPath,
+      screenshot.id,
+      target,
+      variant.label,
+      params,
+    );
   };
 
   const handleOpenInFinder = async () => {
-    await openScreenshotInFinderAction(projectPath, screenshot.id);
+    await openScreenshotInFinderAction(
+      projectPath,
+      screenshot.id,
+      parameterValues,
+    );
   };
 
   const alt = `Screenshot from ${screenshot.meta.createdAt}${variant.label ? ` (${variant.label})` : ""}`;
-  const src = `/api/liqvid/static/${encodeURIComponent(`/${projectPath}${variant.path}`)}`;
+  const src = `/api/liqvid/static/${`/${projectPath}/${variant.path}`}`;
 
   return (
     <li sx={styles.item}>
-      <Button
+      {/** biome-ignore lint/correctness/noRestrictedElements: only a button for accessibililty purposes */}
+      <button
         onClick={() => onPreview(src, alt)}
         sx={styles.thumbnailButton}
         title={t.viewFullSize}
         type="button"
       >
         <img alt={alt} src={src} sx={styles.thumbnail} />
-      </Button>
+      </button>
       <div sx={styles.info}>
         <span sx={styles.title}>
           {screenshot.id ||
@@ -434,42 +362,28 @@ function ScreenshotItem({
       </div>
       <div sx={styles.actions}>
         <Button
-          {...stylex.props(styles.copyButton)}
           onClick={() => handleCopyAs("opengraph-image.png")}
           title={t.useOpenGraph}
         >
           <CopyIcon size={14} />
-          {" OG"}
+          {PlainString(" OG")}
         </Button>
         <Button
-          {...stylex.props(styles.copyButton)}
           onClick={() => handleCopyAs("twitter-image.png")}
           title={t.useTwitter}
         >
           <CopyIcon size={14} />
-          {" Twitter"}
+          {PlainString(" Twitter")}
         </Button>
         {isPrimary && (
           <>
-            <Button
-              {...stylex.props(styles.iconButton)}
-              onClick={handleOpenInFinder}
-              title={t.openInFinder}
-            >
+            <Button onClick={handleOpenInFinder} title={t.openInFinder}>
               <FolderOpenIcon size={14} />
             </Button>
-            <Button
-              {...stylex.props(styles.iconButton)}
-              onClick={() => onRename(screenshot.id)}
-              title={t.rename}
-            >
+            <Button onClick={() => onRename(screenshot.id)} title={t.rename}>
               <PencilSimpleIcon size={14} />
             </Button>
-            <Button
-              {...stylex.props(styles.deleteButton)}
-              onClick={() => onDelete(screenshot.id)}
-              title={t.delete}
-            >
+            <Button onClick={() => onDelete(screenshot.id)} title={t.delete}>
               <TrashIcon size={14} />
             </Button>
           </>
@@ -485,7 +399,7 @@ export function ScreenshotsSection({
   project,
   selectedParams,
 }: ScreenshotsSectionProps) {
-  const t = useTranslations<T>().screenshots;
+  const { screenshots: t } = useTranslations<{ screenshots: T }>();
   const { isOpen } = useDialogApi();
 
   const [screenshots, setScreenshots] = useState<readonly ScreenshotEntry[]>(
@@ -592,6 +506,8 @@ export function ScreenshotsSection({
                   onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
                   onPreview={(src, alt) => setPreviewDialog({ alt, src })}
                   onRename={openRenameDialog}
+                  params={paramsJson}
+                  parameterValues={selectedParams}
                   screenshot={screenshot}
                   variant={variant}
                 />
@@ -602,12 +518,14 @@ export function ScreenshotsSection({
       </div>
 
       {/* Confirmation Dialog */}
-      <DialogRoot
+      <AlertDialogRoot
         onOpenChange={(open) => !open && setConfirmDialog(null)}
         open={!!confirmDialog}
       >
-        <ConfirmationDialog {...{ confirmDialog, setConfirmDialog }} />
-      </DialogRoot>
+        <ConfirmationDialog
+          {...{ confirmDialog, params: paramsJson, setConfirmDialog }}
+        />
+      </AlertDialogRoot>
 
       {/* Rename Dialog */}
       <DialogRoot
@@ -615,10 +533,11 @@ export function ScreenshotsSection({
         open={!!renameDialog}
       >
         <DialogPortal>
-          <DialogBackdrop />
+          <DialogBackdrop forceRender />
           <RenameDialog
             {...{
               loadScreenshots,
+              params: paramsJson,
               renameDialog,
               renameError,
               renameValue,
@@ -631,12 +550,19 @@ export function ScreenshotsSection({
       </DialogRoot>
 
       {/* Delete Dialog */}
-      <DialogRoot
+      <AlertDialogRoot
         onOpenChange={(open) => !open && setDeleteDialog(null)}
         open={!!deleteDialog}
       >
-        <DeleteDialog {...{ deleteDialog, loadScreenshots, setDeleteDialog }} />
-      </DialogRoot>
+        <DeleteDialog
+          {...{
+            deleteDialog,
+            loadScreenshots,
+            params: paramsJson,
+            setDeleteDialog,
+          }}
+        />
+      </AlertDialogRoot>
 
       {/* Preview Dialog */}
       <DialogRoot
@@ -645,7 +571,7 @@ export function ScreenshotsSection({
       >
         <DialogPortal>
           <DialogBackdrop />
-          <DialogPopup {...stylex.props(sxStyles.previewPopup)}>
+          <DialogPopup style={sxStyles.previewPopup}>
             <DialogClose />
             {previewDialog && (
               <img
@@ -663,27 +589,28 @@ export function ScreenshotsSection({
 
 function ConfirmationDialog({
   confirmDialog,
+  params,
   setConfirmDialog,
 }: {
   confirmDialog: ConfirmState | null;
+  params?: string;
   setConfirmDialog: React.Dispatch<React.SetStateAction<ConfirmState | null>>;
 }) {
-  const t = useTranslations<T>().screenshots.confirmDialog;
-  const c = useCommonTranslations();
+  const t = useTranslations<{ screenshots: T }>().screenshots.confirmDialog;
   const projectPath = useProjectPath();
 
   return (
-    <DialogPortal>
-      <DialogBackdrop />
-      <DialogPopup>
-        <DialogTitle>{t.title}</DialogTitle>
+    <AlertDialogPortal>
+      <AlertDialogBackdrop forceRender />
+      <AlertDialogPopup>
+        <AlertDialogTitle>{t.title}</AlertDialogTitle>
         <p sx={styles.confirmMessage}>
           {t.message({
             filename: <code sx={styles.filename}>{confirmDialog?.target}</code>,
           })}
         </p>
         <div sx={styles.dialogActions}>
-          <DialogClose>{c.cancel}</DialogClose>
+          <AlertDialogClose />
           <Button
             onClick={() => {
               if (confirmDialog) {
@@ -692,6 +619,7 @@ function ConfirmationDialog({
                   confirmDialog.screenshotId,
                   confirmDialog.target,
                   confirmDialog.variant,
+                  params,
                 );
                 setConfirmDialog(null);
               }
@@ -700,13 +628,14 @@ function ConfirmationDialog({
             {t.action}
           </Button>
         </div>
-      </DialogPopup>
-    </DialogPortal>
+      </AlertDialogPopup>
+    </AlertDialogPortal>
   );
 }
 
 function RenameDialog({
   loadScreenshots,
+  params,
   renameDialog,
   renameError,
   renameValue,
@@ -715,6 +644,7 @@ function RenameDialog({
   setRenameValue,
 }: {
   loadScreenshots: () => Promise<void>;
+  params?: string;
   renameDialog: { screenshotId: string } | null;
   renameError: string | null;
   renameValue: string;
@@ -724,8 +654,7 @@ function RenameDialog({
   setRenameError: React.Dispatch<React.SetStateAction<string | null>>;
   setRenameValue: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const t = useTranslations<T>().screenshots.renameDialog;
-  const c = useCommonTranslations();
+  const t = useTranslations<{ screenshots: T }>().screenshots.renameDialog;
   const projectPath = useProjectPath();
 
   const performRename = async () => {
@@ -744,7 +673,7 @@ function RenameDialog({
 
           yield* client.screenshots.rename({
             payload: { newName, screenshotId: renameDialog.screenshotId },
-            query: { projectPath },
+            query: { params, projectPath },
           });
         }),
       );
@@ -757,17 +686,14 @@ function RenameDialog({
     }
   };
 
-  const id = useId();
-
   return (
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
       <div sx={styles.formField}>
-        <label htmlFor={id}>{t.newName}</label>
-        <input
-          id={id}
-          onChange={(e) => {
-            setRenameValue(e.target.value);
+        <TextField
+          label={t.newName}
+          onChange={(value) => {
+            setRenameValue(value);
             setRenameError(null);
           }}
           onKeyDown={(e) => {
@@ -780,7 +706,7 @@ function RenameDialog({
         {renameError && <span sx={styles.fieldError}>{renameError}</span>}
       </div>
       <div sx={styles.dialogActions}>
-        <DialogClose>{c.cancel}</DialogClose>
+        <DialogClose />
         <Button onClick={() => performRename()}>{t.action}</Button>
       </div>
     </DialogPopup>
@@ -790,16 +716,17 @@ function RenameDialog({
 function DeleteDialog({
   deleteDialog,
   loadScreenshots,
+  params,
   setDeleteDialog,
 }: {
   deleteDialog: { screenshotId: string } | null;
   loadScreenshots: () => Promise<void>;
+  params?: string;
   setDeleteDialog: React.Dispatch<
     React.SetStateAction<{ screenshotId: string } | null>
   >;
 }) {
-  const t = useTranslations<T>().screenshots.deleteDialog;
-  const c = useCommonTranslations();
+  const t = useTranslations<{ screenshots: T }>().screenshots.deleteDialog;
   const projectPath = useProjectPath();
 
   const performDelete = async () => {
@@ -812,7 +739,7 @@ function DeleteDialog({
 
           yield* client.screenshots.delete({
             payload: { screenshotId: deleteDialog.screenshotId },
-            query: { projectPath },
+            query: { params, projectPath },
           });
         }),
       );
@@ -825,21 +752,18 @@ function DeleteDialog({
   };
 
   return (
-    <DialogPortal>
-      <DialogBackdrop />
-      <DialogPopup>
-        <DialogTitle>{t.title}</DialogTitle>
+    <AlertDialogPortal>
+      <AlertDialogBackdrop forceRender />
+      <AlertDialogPopup>
+        <AlertDialogTitle>{t.title}</AlertDialogTitle>
         <p sx={styles.confirmMessage}>{t.confirm}</p>
         <div sx={styles.dialogActions}>
-          <DialogClose>{c.cancel}</DialogClose>
-          <Button
-            {...stylex.props(styles.deleteConfirmButton)}
-            onClick={() => performDelete()}
-          >
+          <AlertDialogClose />
+          <Button kind="destructive" onClick={() => performDelete()}>
             {t.action}
           </Button>
         </div>
-      </DialogPopup>
-    </DialogPortal>
+      </AlertDialogPopup>
+    </AlertDialogPortal>
   );
 }

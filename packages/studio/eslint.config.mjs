@@ -86,7 +86,7 @@ export default [
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
             "margin*": {
-              limit: null,
+              limit: "auto",
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
             "outline*Color": {

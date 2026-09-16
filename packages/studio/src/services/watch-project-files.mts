@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -7,6 +6,7 @@ import { Duration } from "@liqvid/duration";
 import {
   type AspectRatio,
   AutoGenProjectMeta,
+  type ParametrizedValueEntry,
   ProjectJson,
   type ProjectMeta,
 } from "@liqvid/schemas";
@@ -39,12 +39,13 @@ import {
   PROJECT_PATH,
   RECORDING_META_FILE,
   RECORDINGS_DIR,
+  SOCIALS_DIR,
 } from "#_/conventions.mjs";
 import { broadcast } from "#_/next/websockets.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
 import { existenceOptional } from "#_/utils/effect.mjs";
 import { walkDir } from "#_/utils/fs.mjs";
-import { getRoutesDir } from "#_/utils/misc.mjs";
+import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
 import {
   extractParameterNames,
   getDefaultParameterValues,
@@ -317,9 +318,11 @@ const handleWatchEvent = Effect.fnUntraced(
       default: {
         // Handle opengraph-image and twitter-image changes
         if (isOpenGraphImage(basename)) {
-          handleOpenGraphImage({ ...event, projects });
+          yield* handleOpenGraphImage({ ...event, projects });
         } else if (isTwitterImage(basename)) {
-          handleTwitterImage({ ...event, projects });
+          yield* handleTwitterImage({ ...event, projects });
+        } else if (isLiqvidStudioImage(basename)) {
+          yield* handleLiqvidStudioImage({ ...event, projects });
         }
       }
     }
@@ -362,17 +365,22 @@ const handleProjectJson = Effect.fnUntraced(
 
     const projectPath = path.dirname(relative);
 
+    const socials = yield* Effect.all({
+      liqvidStudio: hasLiqvidStudioImages(dirname, project.parameters),
+      openGraph: hasOpenGraphImage(dirname),
+      twitter: hasTwitterImage(dirname),
+    });
+
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
       description: project.description,
       duration:
         projects[projectPath]?.duration ?? new Duration({ seconds: 1000 }),
-      openGraph: hasOpenGraphImage(dirname),
       parameters: project.parameters,
       path: projectPath,
+      socials,
       title: project.title,
-      twitter: hasTwitterImage(dirname),
     };
 
     yield* Effect.logDebug("got project meta", meta);
@@ -440,40 +448,49 @@ const createProject = Effect.fnUntraced(
       }
     }
 
-    // read duration - try parameterized location first, fall back to base assets dir
-    const duration = (yield* loadJson(
-      AutoGenProjectMeta,
-      path.join(assetsDir, PROJECT_META_FILE),
-    ).pipe(
-      Effect.map((meta) => new Duration(meta.duration)),
-      existenceOptional,
-      // If parameterized location doesn't exist, try base assets dir
-      Effect.flatMap((opt) => {
-        if (Option.isSome(opt)) return Effect.succeed(opt);
-        if (assetsDir !== path.join(dirname, ASSETS_DIR)) {
-          return loadJson(
-            AutoGenProjectMeta,
-            path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
-          ).pipe(
-            Effect.map((meta) => Option.some(new Duration(meta.duration))),
-            existenceOptional,
-            Effect.map(Option.flatten),
-          );
-        }
-        return Effect.succeed(Option.none<Duration>());
-      }),
-    )).pipe(Option.getOrElse(() => new Duration({ seconds: 1000 })));
+    // do filesystem operations in parallel
+    const { duration: $duration, ...socials } = yield* Effect.all({
+      // read duration - try parameterized location first, fall back to base assets dir
+      duration: loadJson(
+        AutoGenProjectMeta,
+        path.join(assetsDir, PROJECT_META_FILE),
+      ).pipe(
+        Effect.map((meta) => new Duration(meta.duration)),
+        existenceOptional,
+        // If parameterized location doesn't exist, try base assets dir
+        Effect.flatMap((opt) => {
+          if (Option.isSome(opt)) return Effect.succeed(opt);
+          if (assetsDir !== path.join(dirname, ASSETS_DIR)) {
+            return loadJson(
+              AutoGenProjectMeta,
+              path.join(dirname, ASSETS_DIR, PROJECT_META_FILE),
+            ).pipe(
+              Effect.map((meta) => Option.some(new Duration(meta.duration))),
+              existenceOptional,
+              Effect.map(Option.flatten),
+            );
+          }
+          return Effect.succeed(Option.none<Duration>());
+        }),
+      ),
+      liqvidStudio: hasLiqvidStudioImages(dirname, project.parameters),
+      openGraph: hasOpenGraphImage(dirname),
+      twitter: hasTwitterImage(dirname),
+    });
+
+    const duration = $duration.pipe(
+      Option.getOrElse(() => new Duration({ seconds: 1000 })),
+    );
 
     const meta: ProjectMeta = {
       ...project,
       aspectRatio: parseAspectRatio(project.aspectRatio),
       description: project.description,
       duration,
-      openGraph: hasOpenGraphImage(dirname),
       parameters: project.parameters,
       path: projectPath,
+      socials,
       title: project.title,
-      twitter: hasTwitterImage(dirname),
     };
 
     projects[meta.path] = meta;
@@ -626,18 +643,34 @@ const handleRecordingMeta = Effect.fnUntraced(
     effect.pipe(Effect.annotateLogs({ _op: "handleRecordingMeta", filename })),
 );
 
+/* ------------------------------ we order by most common first to speed up checks ------------------------------ */
+
+const LIQVID_STUDIO_FILENAMES_DARK = [
+  "liqvid-studio-dark.png",
+  "liqvid-studio-dark.jpg",
+  "liqvid-studio-dark.jpeg",
+  "liqvid-studio-dark.gif",
+] as RelativeFile[];
+
+const LIQVID_STUDIO_FILENAMES_LIGHT = [
+  "liqvid-studio-light.png",
+  "liqvid-studio-light.jpg",
+  "liqvid-studio-light.jpeg",
+  "liqvid-studio-light.gif",
+] as RelativeFile[];
+
 const OPENGRAPH_IMAGE_FILENAMES = [
-  "opengraph-image.gif",
-  "opengraph-image.jpeg",
-  "opengraph-image.jpg",
   "opengraph-image.png",
+  "opengraph-image.jpg",
+  "opengraph-image.jpeg",
+  "opengraph-image.gif",
 ] as RelativeFile[];
 
 const TWITTER_IMAGE_FILENAMES = [
-  "twitter-image.gif",
-  "twitter-image.jpeg",
-  "twitter-image.jpg",
   "twitter-image.png",
+  "twitter-image.jpg",
+  "twitter-image.jpeg",
+  "twitter-image.gif",
 ] as RelativeFile[];
 
 /**
@@ -655,44 +688,145 @@ function isTwitterImage(basename: RelativeFile) {
 }
 
 /**
- * Whether a project has an Open Graph image defined.
+ * Whether a filename is a Liqvid Studio image.
  */
-function hasOpenGraphImage(dirname: AbsoluteDir) {
-  return OPENGRAPH_IMAGE_FILENAMES.some((f) =>
-    fs.existsSync(path.join(dirname, f)),
+function isLiqvidStudioImage(basename: RelativeFile) {
+  return (
+    LIQVID_STUDIO_FILENAMES_DARK.includes(basename) ||
+    LIQVID_STUDIO_FILENAMES_LIGHT.includes(basename)
   );
 }
+
+/**
+ * Whether a project has an Open Graph image defined.
+ */
+const hasOpenGraphImage = Effect.fnUntraced(function* (dirname: AbsoluteDir) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const exists = yield* Effect.findFirst(OPENGRAPH_IMAGE_FILENAMES, (f) =>
+    fs.exists(path.join(dirname, f)),
+  );
+
+  return Option.isSome(exists);
+});
+
+/**
+ * Whether a proejct has Liqvid Studio images defined.
+ */
+const hasLiqvidStudioImages = Effect.fnUntraced(function* (
+  dirname: AbsoluteDir,
+  parameters: Readonly<Record<string, readonly string[]>> | undefined,
+) {
+  const fs = yield* FileSystem.FileSystem;
+
+  if (parameters && Object.keys(parameters).length > 0) {
+    return yield* Effect.all(
+      cartesianProduct(parameters).map((combination) =>
+        Effect.gen(function* () {
+          const parameterizedDirname = path.join(
+            dirname,
+            ASSETS_DIR,
+            ...(Object.values(combination) as RelativeDir[]),
+            SOCIALS_DIR,
+          );
+
+          const { dark, light } = yield* Effect.all(
+            {
+              dark: Effect.findFirst(LIQVID_STUDIO_FILENAMES_DARK, (f) =>
+                fs.exists(path.join(parameterizedDirname, f)),
+              ),
+              light: Effect.findFirst(LIQVID_STUDIO_FILENAMES_LIGHT, (f) =>
+                fs.exists(path.join(parameterizedDirname, f)),
+              ),
+            },
+            { concurrency: "unbounded" },
+          );
+
+          const value = Option.isSome(light) && Option.isSome(dark);
+
+          return { ...combination, value } as ParametrizedValueEntry<boolean>;
+        }),
+      ),
+      { concurrency: "unbounded" },
+    );
+  }
+
+  const { dark, light } = yield* Effect.all(
+    {
+      dark: Effect.findFirst(LIQVID_STUDIO_FILENAMES_DARK, (f) =>
+        fs.exists(path.join(dirname, f)),
+      ),
+      light: Effect.findFirst(LIQVID_STUDIO_FILENAMES_LIGHT, (f) =>
+        fs.exists(path.join(dirname, f)),
+      ),
+    },
+    { concurrency: "unbounded" },
+  );
+
+  return Option.isSome(light) && Option.isSome(dark);
+});
 
 /**
  * Whether a project has a Twitter image defined.
  */
-function hasTwitterImage(dirname: AbsoluteDir) {
-  return TWITTER_IMAGE_FILENAMES.some((f) =>
-    fs.existsSync(path.join(dirname, f)),
+const hasTwitterImage = Effect.fnUntraced(function* (dirname: AbsoluteDir) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const exists = yield* Effect.findFirst(TWITTER_IMAGE_FILENAMES, (f) =>
+    fs.exists(path.join(dirname, f)),
   );
-}
+
+  return Option.isSome(exists);
+});
 
 /**
  * Handle opengraph-image file creation or deletion.
  */
-function handleOpenGraphImage({ dirname, projects, relative }: Context) {
+const handleOpenGraphImage = Effect.fnUntraced(function* ({
+  dirname,
+  projects,
+  relative,
+}: Context) {
   const projectPath = path.dirname(relative);
   const project = projects[projectPath];
   if (!project) return;
 
-  project.openGraph = hasOpenGraphImage(dirname);
-}
+  project.socials.openGraph = yield* hasOpenGraphImage(dirname);
+});
 
 /**
  * Handle twitter-image file creation or deletion.
  */
-function handleTwitterImage({ dirname, relative, projects }: Context) {
+const handleTwitterImage = Effect.fnUntraced(function* ({
+  dirname,
+  relative,
+  projects,
+}: Context) {
   const projectPath = path.dirname(relative);
   const project = projects[projectPath];
   if (!project) return;
 
-  project.twitter = hasTwitterImage(dirname);
-}
+  project.socials.twitter = yield* hasTwitterImage(dirname);
+});
+
+/**
+ * Handle Liqvid Studio image file creation or deletion.
+ */
+const handleLiqvidStudioImage = Effect.fnUntraced(function* ({
+  dirname,
+  relative,
+  projects,
+}: Context) {
+  const projectPath = path.dirname(relative);
+  const project = projects[projectPath];
+  if (!project) return;
+
+  // TODO: inefficient, could do granular updates instead
+  project.socials.liqvidStudio = yield* hasLiqvidStudioImages(
+    dirname,
+    project.parameters,
+  );
+});
 
 function parseAspectRatio(value: unknown): AspectRatio {
   const defaultValue = { height: 9, width: 16 } as const satisfies AspectRatio;

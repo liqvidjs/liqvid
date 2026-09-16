@@ -6,7 +6,7 @@
         "noLabelWithoutControl": {
           "level": "on",
           "options": {
-            "inputComponents": ["RadioRoot", "SelectRoot", "Switch"]
+            "inputComponents": ["Checkbox", "RadioRoot", "SelectRoot", "Switch"]
           }
         }
       },
@@ -16,8 +16,9 @@
           "level": "on",
           "options": {
             "elements": {
-              "button": "use the styled version from ui/Button.tsx",
-              "select": "use the styled version from ui/Select.tsx"
+              "button": "use the styled version from #_/ui/Button.tsx",
+              "input": "use the styled version from #_/ui/TextField.tsx (text), #_/ui/Checkbox.tsx (checkbox), or #_/ui/Radio.tsx (radio)",
+              "select": "use the styled version from #_/ui/Select.tsx"
             }
           }
         }
@@ -29,6 +30,8 @@
           "level": "error",
           "options": {
             "paths": {
+              "@base-ui/react/alert-dialog": "import styled versions from \"#_/ui/AlertDialog.js\"",
+              "@base-ui/react/checkbox": "import styled versions from \"#_/ui/Checkbox.js\"",
               "@base-ui/react/dialog": "import styled versions from \"#_/ui/Dialog.js\"",
               "@base-ui/react/navigation-menu": "import styled versions from \"#_/ui/NavigationMenu.js\"",
               "@base-ui/react/radio": "import styled versions from \"#_/ui/Radio.js\"",

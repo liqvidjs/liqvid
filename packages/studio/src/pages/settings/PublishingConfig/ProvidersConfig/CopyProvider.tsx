@@ -5,11 +5,18 @@ import * as stylex from "@stylexjs/stylex";
 import type { SettingsConfig } from "#_/api/contract.mjs";
 import { fonts } from "#_/design/styles.js";
 import { spacing } from "#_/design/tokens.stylex.js";
+import { PlainString } from "#_/i18n/shared.mjs";
+import { Checkbox } from "#_/ui/Checkbox.js";
+import { TextField } from "#_/ui/TextField.js";
+import { useTranslations } from "#_/utils/react.js";
 
-import type { Providers, T } from "../client.tsx";
-import { TextField } from "../TextField.tsx";
+import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";
+
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
 
 const styles = stylex.create({
   checkboxField: {
@@ -23,13 +30,12 @@ const styles = stylex.create({
 
 export function CopyProvider({
   onChange,
-  t,
   value,
 }: {
   onChange: (value: Providers["copy"] | undefined) => void;
-  t: T;
   value: NonNullable<SettingsConfig["providers"]>["copy"];
 }) {
+  const t = useTranslations<T>();
   const destination =
     typeof value?.destination === "string" ? value.destination : "";
 
@@ -44,12 +50,12 @@ export function CopyProvider({
       <TextField
         label={t.copyDestination}
         onChange={(v) => onChange({ ...value, destination: v })}
-        placeholder="./dist"
+        placeholder={PlainString("./dist")}
         style={fonts.filenameInput}
         value={destination}
       />
       <label sx={styles.checkboxField}>
-        <input
+        <Checkbox
           checked={value?.clean ?? false}
           onChange={(e) =>
             onChange({
@@ -58,7 +64,6 @@ export function CopyProvider({
               clean: e.target.checked,
             })
           }
-          type="checkbox"
         />
         <span>{t.copyClean}</span>
       </label>

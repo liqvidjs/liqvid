@@ -1,7 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedString } from "#_/i18n/shared.mjs";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
+import type { NonCustomizable } from "#_/types/misc.mjs";
 
 const styles = stylex.create({
   button: {
@@ -40,6 +41,16 @@ const styles = stylex.create({
     },
   },
 
+  destructive: {
+    backgroundColor: {
+      ":active:enabled": colors.destroyActive,
+      ":hover:enabled": colors.destroyHover,
+      default: colors.destroy,
+    },
+    borderColor: colors.destroyBorder,
+    color: colors.white,
+  },
+
   primary: {
     backgroundColor: {
       ":active:enabled": colors.accentActive,
@@ -55,8 +66,12 @@ export function Button({
   kind = "default",
   style,
   ...props
-}: Omit<React.ComponentProps<"button">, "className" | "style"> & {
-  kind?: "default" | "primary";
+}: NonCustomizable<Omit<React.ComponentProps<"button">, "children">> & {
+  className?: {
+    __error: "";
+  };
+  children?: LocalizedReactNode;
+  kind?: "default" | "destructive" | "primary";
 
   style?: stylex.StaticStyles<{
     marginTop?: string | number;

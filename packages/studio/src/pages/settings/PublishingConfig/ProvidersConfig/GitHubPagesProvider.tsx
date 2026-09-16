@@ -3,11 +3,17 @@
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
+
 import { spacing } from "#_/design/tokens.stylex.js";
 import githubLogo from "#_/icons/github.svg";
+import { Checkbox } from "#_/ui/Checkbox.js";
+import { TextField } from "#_/ui/TextField.js";
+import { useTranslations } from "#_/utils/react.js";
 
-import type { Providers, T } from "../client.tsx";
-import { TextField } from "../TextField.tsx";
+import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";
 
@@ -23,13 +29,13 @@ const styles = stylex.create({
 
 export function GitHubPagesProvider({
   onChange,
-  t,
   value,
 }: {
   onChange: (value: Providers["githubPages"] | undefined) => void;
-  t: T;
   value: Providers["githubPages"];
 }) {
+  const t = useTranslations<T>();
+
   return (
     <ProviderCard
       enabled={value !== undefined}
@@ -50,7 +56,7 @@ export function GitHubPagesProvider({
         value={value?.repository}
       />
       <label sx={styles.checkboxField}>
-        <input
+        <Checkbox
           checked={value?.root ?? false}
           onChange={(e) =>
             onChange({
@@ -60,7 +66,6 @@ export function GitHubPagesProvider({
               root: e.target.checked,
             })
           }
-          type="checkbox"
         />
         <span>{t.githubRoot}</span>
       </label>

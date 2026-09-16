@@ -12,13 +12,19 @@ import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import {
   colors,
   dims,
-  radii,
+  scales,
   spacing,
   text,
   typeface,
 } from "#_/design/tokens.stylex.js";
+import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { TimeDuration } from "#_/ui/Time.js";
+import { useTranslations } from "#_/utils/react.js";
+
+import type Translations from "../.translations/en.json";
+
+type T = Localized<typeof Translations>;
 
 const slideDown = stylex.keyframes({
   from: { height: "0" },
@@ -70,7 +76,7 @@ const styles = stylex.create({
   },
 
   pluginIcons: {
-    backgroundColor: "blue",
+    backgroundColor: scales.blue500,
     marginLeft: spacing.auto,
   },
 
@@ -78,28 +84,19 @@ const styles = stylex.create({
     fontFamily: typeface.mono,
   },
 
-  reprocessButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.grayHover,
-      default: colors.grayUi,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    columnGap: spacing.md,
-    cursor: "pointer",
-    display: "inline-flex",
-    fontSize: text.sm,
-    padding: `${spacing.md} ${spacing.lg}`,
-    rowGap: spacing.md,
-  },
-
   reprocessButtonDisabled: {
     backgroundColor: colors.grayUi,
     cursor: "not-allowed",
     opacity: 0.6,
+  },
+
+  row: {
+    backgroundColor: {
+      ":nth-of-type(even)": colors.stripeEven,
+      ":nth-of-type(odd)": colors.stripeOdd,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
   },
 
   spinning: {
@@ -133,10 +130,14 @@ export function RecordingRow({
   projectPath,
   recording: r,
 }: {
-  projectParams: Record<string, string>;
+  projectParams: Readonly<Record<string, string>>;
   projectPath: RelativeDir;
   recording: RecordingMeta;
 }) {
+  const {
+    tabs: { saved: t },
+  } = useTranslations<T>();
+
   const { value: expanded, set: setExpanded } = useToggle();
   const [isReprocessing, setIsReprocessing] = useState(false);
 
@@ -167,7 +168,11 @@ export function RecordingRow({
   }, [projectParams, projectPath, r.name]);
 
   return (
-    <Collapsible.Root onOpenChange={setExpanded} open={expanded}>
+    <Collapsible.Root
+      onOpenChange={setExpanded}
+      open={expanded}
+      {...stylex.props(styles.row)}
+    >
       <Collapsible.Trigger
         {...stylex.props(styles.trigger, expanded && styles.triggerOpen)}
       >
@@ -190,19 +195,15 @@ export function RecordingRow({
       >
         <div sx={styles.actions}>
           <Button
-            {...stylex.props(
-              styles.reprocessButton,
-              isReprocessing && styles.reprocessButtonDisabled,
-            )}
             disabled={isReprocessing}
             onClick={handleReprocess}
-            title="Re-run post-processing plugins"
+            title={t.rerun}
           >
             <ArrowsClockwiseIcon
               {...stylex.props(isReprocessing && styles.spinning)}
               size={16}
             />
-            {isReprocessing ? "Reprocessing..." : "Reprocess"}
+            {isReprocessing ? t.reprocessing : t.reprocess}
           </Button>
         </div>
         {r.plugins.map((p) => {

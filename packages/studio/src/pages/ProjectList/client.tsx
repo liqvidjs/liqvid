@@ -14,9 +14,9 @@ import { SelectedRootParametersProvider } from "#_/contexts/selected-root-parame
 import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
 import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
-import { getDefaultParams } from "#_/pages/ProjectList/ParameterSelector.js";
 import { Switch } from "#_/ui/Switch.js";
-import { TranslationProvider } from "#_/utils/react.js";
+import { getDefaultParams } from "#_/utils/parameters-client.mjs";
+import { useTranslations } from "#_/utils/react.js";
 
 import { FolderItem, type FolderNode } from "./FolderItem.tsx";
 import { ProjectItem } from "./ProjectItem.tsx";
@@ -60,8 +60,7 @@ export type ProjectListProps = {
   /** Initial selected root parameter values (from cookie) */
   initialSelectedRootParams: Readonly<Record<string, string>>;
 
-  projects: Record<RelativeDir, SerializedProjectMeta>;
-  t: T;
+  projects: Readonly<Record<RelativeDir, SerializedProjectMeta>>;
 };
 
 const cookieOptions = {
@@ -76,8 +75,9 @@ export function ProjectListClient({
   initialFolderView,
   initialSelectedRootParams,
   projects: dehydratedProjects,
-  t,
 }: ProjectListProps) {
+  const t = useTranslations<T>();
+
   const { rootParameters } = useLiqvidConfig();
   const [projects, setProjects] = useState(
     (): Record<RelativeDir, ProjectMeta> =>
@@ -150,61 +150,59 @@ export function ProjectListClient({
   const folderTree = buildFolderTree(projects);
 
   return (
-    <TranslationProvider t={t}>
-      <SelectedRootParametersProvider value={selectedRootParams}>
-        {/* Root parameter selector at top of project list */}
-        {hasRootParameters && (
-          <RootParameterSelector onRootParamsChange={setSelectedRootParams} />
-        )}
+    <SelectedRootParametersProvider value={selectedRootParams}>
+      {/* Root parameter selector at top of project list */}
+      {hasRootParameters && (
+        <RootParameterSelector onRootParamsChange={setSelectedRootParams} />
+      )}
 
-        <div sx={styles.viewToggle}>
-          <label sx={styles.toggleLabel}>
-            <span>{t.folderView}</span>
-            <Switch
-              checked={folderView}
-              onClick={() => handleFolderViewChange(!folderView)}
-            />
-          </label>
+      <div sx={styles.viewToggle}>
+        <label sx={styles.toggleLabel}>
+          <span>{t.folderView}</span>
+          <Switch
+            checked={folderView}
+            onClick={() => handleFolderViewChange(!folderView)}
+          />
+        </label>
+      </div>
+
+      {folderView ? (
+        <div sx={styles.folderList}>
+          {Array.from(folderTree.entries())
+            .sort(([a], [b]) => {
+              // Empty folder name (root projects) should come last
+              if (a === "") return 1;
+              if (b === "") return -1;
+              return a.localeCompare(b);
+            })
+            .map(([folderName, folder]) =>
+              folderName === "" ? (
+                // Root-level projects (no folder)
+                <ul key="__root__" sx={styles.projectList}>
+                  {folder.projects.map(([key, project]) => (
+                    <ProjectItem key={key} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <FolderItem
+                  basePath={basePath}
+                  collapsedFolders={collapsedFolders}
+                  folder={folder}
+                  folderPath={folderName}
+                  key={folderName}
+                  onToggle={handleFolderToggle}
+                />
+              ),
+            )}
         </div>
-
-        {folderView ? (
-          <div sx={styles.folderList}>
-            {Array.from(folderTree.entries())
-              .sort(([a], [b]) => {
-                // Empty folder name (root projects) should come last
-                if (a === "") return 1;
-                if (b === "") return -1;
-                return a.localeCompare(b);
-              })
-              .map(([folderName, folder]) =>
-                folderName === "" ? (
-                  // Root-level projects (no folder)
-                  <ul key="__root__" sx={styles.projectList}>
-                    {folder.projects.map(([key, project]) => (
-                      <ProjectItem key={key} project={project} />
-                    ))}
-                  </ul>
-                ) : (
-                  <FolderItem
-                    basePath={basePath}
-                    collapsedFolders={collapsedFolders}
-                    folder={folder}
-                    folderPath={folderName}
-                    key={folderName}
-                    onToggle={handleFolderToggle}
-                  />
-                ),
-              )}
-          </div>
-        ) : (
-          <ul sx={styles.projectList}>
-            {sortedProjects.map(([key, project]) => (
-              <ProjectItem key={key} project={project} />
-            ))}
-          </ul>
-        )}
-      </SelectedRootParametersProvider>
-    </TranslationProvider>
+      ) : (
+        <ul sx={styles.projectList}>
+          {sortedProjects.map(([key, project]) => (
+            <ProjectItem key={key} project={project} />
+          ))}
+        </ul>
+      )}
+    </SelectedRootParametersProvider>
   );
 }
 
@@ -213,7 +211,7 @@ export function ProjectListClient({
  * Projects are grouped by their path prefix (directory structure).
  */
 function buildFolderTree(
-  projects: Record<string, ProjectMeta>,
+  projects: Readonly<Record<string, ProjectMeta>>,
 ): Map<string, FolderNode> {
   const root = new Map<string, FolderNode>();
 

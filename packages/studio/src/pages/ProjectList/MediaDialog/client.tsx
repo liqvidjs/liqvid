@@ -25,17 +25,20 @@ import {
   DialogTrigger,
 } from "#_/ui/Dialog.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
+import { getDefaultParams } from "#_/utils/parameters-client.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
-import { getDefaultParams, ParameterSelector } from "./ParameterSelector.tsx";
-import { RendersSection } from "./renders/RendersSection.tsx";
+import { ParameterSelector } from "./ParameterSelector.tsx";
+import { RendersSection } from "./RendersSection/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
 import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
 type T = Localized<typeof TranslationsJson>;
+
+export type { T as TranslationsMediaDialog };
 
 interface ShareButtonProps {
   basePath: string;
@@ -67,9 +70,6 @@ const styles = stylex.create({
     paddingBlock: spacing.md,
     paddingInline: spacing.xl,
     transition: "background-color 0.15s",
-  },
-  shareDialog: {
-    maxWidth: "75%",
   },
 });
 
@@ -120,7 +120,7 @@ export function MediaButton({
   selectedRootParams,
 }: ShareButtonProps) {
   const { rootParameters } = useLiqvidConfig();
-  const t = useTranslations<T>().media;
+  const t = useTranslations<{ media: T }>().media;
 
   // Get only project-level parameters that differ from root
   const projectOnlyParams = useMemo(

@@ -57,6 +57,7 @@ const styles = stylex.create({
     rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
+
   shared: {
     alignItems: "center",
     backgroundColor: {
@@ -82,6 +83,7 @@ const styles = stylex.create({
     rowGap: spacing.md,
     transition: "background-color 0.15s",
   },
+
   sharedPrimary: {
     backgroundColor: {
       ":enabled:active": colors.accentActive,

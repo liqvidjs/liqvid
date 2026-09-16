@@ -72,10 +72,10 @@ export function TargetDescendants<M extends string = string>({
       const m = omit(t, ["from", "to"]) as IndexedTransform;
 
       if (t.from) {
-        m.fromIndex = script.markers.get(t.from).index;
+        m.fromIndex = script.get(t.from).index;
       }
       if (t.to) {
-        m.toIndex = script.markers.get(t.to).index;
+        m.toIndex = script.get(t.to).index;
       }
 
       return m as IndexedTransform;

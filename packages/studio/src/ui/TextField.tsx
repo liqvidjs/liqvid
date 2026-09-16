@@ -1,7 +1,9 @@
 "use client";
+
 import * as stylex from "@stylexjs/stylex";
 
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import type { LocalizedString, PlainString } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
   field: {
@@ -40,29 +42,53 @@ const styles = stylex.create({
 
 export function TextField({
   label,
+  labelProps,
   onChange,
   placeholder,
   style,
   value,
+  ...props
 }: {
-  label: string;
+  label?: LocalizedString;
+  labelProps?: React.ComponentProps<"span">;
   onChange: (value: string) => void;
-  placeholder?: string;
+  placeholder?: LocalizedString | PlainString;
   style?: stylex.StyleXStyles<{
     fontFamily?: string;
   }>;
   value: string | undefined;
-}) {
+} & Omit<
+  React.ComponentProps<"input">,
+  "className" | "children" | "style" | "onChange"
+>) {
+  if (label) {
+    return (
+      <label sx={styles.field}>
+        <span sx={styles.fieldLabel} {...labelProps}>
+          {label}
+        </span>
+        {/** biome-ignore lint/correctness/noRestrictedElements: this is the styled version */}
+        <input
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          sx={[styles.input, style]}
+          type="text"
+          value={value}
+          {...props}
+        />
+      </label>
+    );
+  }
+
   return (
-    <label sx={styles.field}>
-      <span sx={styles.fieldLabel}>{label}</span>
-      <input
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        sx={[styles.input, style]}
-        type="text"
-        value={value}
-      />
-    </label>
+    /** biome-ignore lint/correctness/noRestrictedElements: this is the styled version */
+    <input
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      sx={[styles.input, style]}
+      type="text"
+      value={value}
+      {...props}
+    />
   );
 }

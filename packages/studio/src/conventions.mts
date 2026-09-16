@@ -102,3 +102,8 @@ export const TEMPLATE_FILE = RelativeFile("template.json");
 export const RENDER_META_FILE = RelativeFile("render-meta.json");
 
 export const RENDERS_DIR = RelativeDir("renders");
+
+/* ------------------------------ social images ------------------------------ */
+
+/** directory for social share images */
+export const SOCIALS_DIR = RelativeDir("social");

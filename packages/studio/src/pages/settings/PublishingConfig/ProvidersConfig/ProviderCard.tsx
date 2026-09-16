@@ -4,6 +4,7 @@ import * as stylex from "@stylexjs/stylex";
 
 import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
 import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
+import { Checkbox } from "#_/ui/Checkbox.js";
 
 const styles = stylex.create({
   label: {
@@ -53,10 +54,9 @@ export function ProviderCard({
   return (
     <div sx={styles.providerCard}>
       <label sx={styles.label}>
-        <input
+        <Checkbox
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
-          type="checkbox"
         />
         {icon}
         <span sx={styles.providerTitle}>{title}</span>

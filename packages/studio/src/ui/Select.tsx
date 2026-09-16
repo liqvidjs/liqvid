@@ -5,7 +5,7 @@ import { Select } from "@base-ui/react/select";
 import { CaretUpDownIcon, CheckIcon, IconContext } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { extensible, themed } from "#_/design/themed.js";
+import { themed } from "#_/design/themed.js";
 import {
   colors,
   dims,
@@ -26,6 +26,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":active": colors.affordanceActive,
       ":focus": colors.affordanceHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
     color: colors.grayNormal,
@@ -33,7 +34,7 @@ const styles = stylex.create({
     display: "flex",
     fontSize: text.sm,
     gap: spacing.md,
-    outline: {
+    outlineStyle: {
       ":focus": "none",
       default: null,
     },

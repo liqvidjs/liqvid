@@ -64,13 +64,13 @@ import Translations from "./.translations/en.json";
 const styles = stylex.create({
   actions: {
     alignItems: "center",
-    columnGap: "0.5em",
+    columnGap: spacing.lg,
     display: "flex",
-    rowGap: "0.5em",
+    rowGap: spacing.lg,
   },
 
   activeWord: {
-    background: "transparent",
+    backgroundColor: colors.transparent,
     borderRadius: radii.sm,
     color: colors.accentSolid,
   },
@@ -82,7 +82,7 @@ const styles = stylex.create({
 
   captionBreak: {
     "::after": {
-      background: "gray",
+      backgroundColor: colors.grayDim,
       content: '""',
       display: "inline-block",
       height: "1em",
@@ -92,7 +92,7 @@ const styles = stylex.create({
     position: "relative",
   },
   closeButton: {
-    marginLeft: spacing.auto,
+    marginLeft: "auto",
   },
 
   hoverWord: {
@@ -109,22 +109,22 @@ const styles = stylex.create({
 
   selection: {
     "::before": {
-      background: "light-dark(#acf, #79e)",
+      backgroundColor: colors.captionsEditorSelectedWord,
       borderRadius: radii.sm,
       boxSizing: "content-box",
       content: '""',
       height: "100%",
       left: 0,
       marginBlock: spacing.negXs,
-      marginInline: spacing.negMd,
+      marginInline: spacing.negXs,
       paddingBlock: spacing.xs,
-      paddingInline: spacing.md,
+      paddingInline: spacing.xs,
       position: "absolute",
       top: 0,
       width: "100%",
       zIndex: -1,
     },
-    background: "light-dark(#acf, #79e)",
+    backgroundColor: colors.captionsEditorSelectedWord,
     color: colors.inherit,
     position: "relative",
     zIndex: 0,
@@ -132,14 +132,14 @@ const styles = stylex.create({
 
   stripes: {
     backgroundImage: `repeating-linear-gradient(
-      light-dark(#f6f6f6, #333) 0,
-      light-dark(#f6f6f6, #333) calc(1.5em - 1px),
-      light-dark(#ddd, #4a4a4a) calc(1.5em - 1px),
-      light-dark(#ddd, #4a4a4a) calc(1.5em),
-      light-dark(#e8e8e8, #3f3f3f) calc(1.5em),
-      light-dark(#e8e8e8, #3f3f3f) calc(3em - 1px),
-      light-dark(#ddd, #4a4a4a) calc(3em - 1px),
-      light-dark(#ddd, #4a4a4a) calc(3em)
+      ${colors.stripeOdd} 0,
+      ${colors.stripeOdd} calc(1.5em - 1px),
+      ${colors.stripeSep} calc(1.5em - 1px),
+      ${colors.stripeSep} calc(1.5em),
+      ${colors.stripeEven} calc(1.5em),
+      ${colors.stripeEven} calc(3em - 1px),
+      ${colors.stripeSep} calc(3em - 1px),
+      ${colors.stripeSep} calc(3em)
     )`,
     cursor: "pointer",
     paddingBlock: spacing.zero,
@@ -160,6 +160,7 @@ const styles = stylex.create({
     borderRadius: radii.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
+    fontFamily: typeface.serif,
     height: "50vh",
     lineHeight: 1.5,
     marginBlock: spacing.md,
@@ -169,7 +170,7 @@ const styles = stylex.create({
   },
 
   wordInput: {
-    background: colors.grayApp,
+    backgroundColor: colors.grayApp,
     borderColor: colors.accentSolid,
     borderRadius: radii.sm,
     borderStyle: "solid",
@@ -359,11 +360,16 @@ export function CaptionsEditor({
     <DialogRoot {...props}>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogPopup {...stylex.props(styles.CaptionsEditor)}>
+        <DialogPopup style={styles.CaptionsEditor}>
           <div data-affords="click">
             <div sx={styles.actions}>
               {/* save affordance */}
-              <Button disabled={saving} onClick={save} type="submit">
+              <Button
+                disabled={saving}
+                kind="primary"
+                onClick={save}
+                type="submit"
+              >
                 {saving ? <Spinner size={16} /> : <FloppyDiskIcon />}
                 {t.save}
               </Button>

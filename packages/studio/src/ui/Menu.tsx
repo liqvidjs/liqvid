@@ -11,9 +11,10 @@ import {
   shadows,
   spacing,
   text,
+  typeface,
 } from "#_/design/tokens.stylex.js";
 
-import { useDialogApi } from "./Dialog";
+import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
   item: {
@@ -21,6 +22,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":active": colors.affordanceActive,
       ":focus": colors.affordanceHover,
+      // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
     borderRadius: radii.sm,
@@ -38,6 +40,7 @@ const styles = stylex.create({
     rowGap: spacing.lg,
     userSelect: "none",
   },
+
   popup: {
     backgroundColor: colors.affordanceBg,
     borderColor: colors.graySep,
@@ -45,24 +48,30 @@ const styles = stylex.create({
     borderStyle: "solid",
     borderWidth: dims.sep,
     boxShadow: shadows.xl,
+    fontFamily: typeface.ui,
     minWidth: "12rem",
   },
+
   positioner: {
     outline: "none",
   },
+
   separator: {
     backgroundColor: colors.graySep,
     height: dims.sep,
     marginBlock: spacing.md,
     marginInline: spacing.zero,
   },
+
   trigger: {
     alignItems: "center",
-    backgroundColor: colors.grayApp,
-    borderColor: {
-      ":focus": colors.accentSolid,
-      default: colors.graySep,
+    backgroundColor: {
+      ":active:enabled": colors.btnBgActive,
+      ":disabled": colors.btnBg,
+      ":hover:enabled": colors.btnBgHover,
+      default: colors.btnBg,
     },
+    borderColor: colors.btnBorder,
     borderRadius: radii.md,
     borderStyle: "solid",
     borderWidth: dims.sep,

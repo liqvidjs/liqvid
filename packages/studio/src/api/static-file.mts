@@ -73,6 +73,7 @@ export const serveStaticFile = Effect.fnUntraced(function* (
 
   // Check if file exists
   if (!(yield* fs.exists(absolutePath))) {
+    yield* Effect.logDebug(`File not found: ${absolutePath}`);
     return yield* new NotFoundError({
       message: "file not found",
     });

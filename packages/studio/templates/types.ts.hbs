@@ -1,9 +1,23 @@
 /** This file is automatically @generated. */
 import type { FileNames } from "@liqvid/studio";
 
-import type PROJECT_DIRECTORY_STRUCTURE from "./project-files.json";
-
-export type ProjectStructure = typeof PROJECT_DIRECTORY_STRUCTURE;
+export type ProjectStructure =
+{{#*inline "directoryTypes"}}
+{
+{{#each this}}
+  {{json @key}}:
+  {{#if (isDirectory this)}}
+    {{> directoryTypes this}}
+  {{else if this}}
+    (() => {{{this}}})
+  {{else}}
+    (() => unknown)
+  {{/if}}
+  {{#unless @last}},{{/unless}}
+{{/each}}
+}
+{{/inline}}
+{{> directoryTypes directoryTypes}};
 
 export type ProjectDir = FileNames<ProjectStructure>;
 

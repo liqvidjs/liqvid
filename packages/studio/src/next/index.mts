@@ -3,22 +3,23 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
-import { ProjectJson, resolveParametrizedString } from "@liqvid/schemas";
+import { ProjectJson } from "@liqvid/schemas";
 import { Effect, Exit, Layer, Logger } from "effect";
 import type { RelativeDir } from "effect-paths";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { createElement } from "react";
 
+import type { Directory } from "#_/assets.mjs";
 import {
   ASSETS_DIR,
   PROJECT_FILE,
   PROJECT_FILES_AUTOGEN,
 } from "#_/conventions.mjs";
 import { withLogLevel } from "#_/server-runtime.mjs";
-import type { Directory } from "#_/types/assets.mjs";
 import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
 import { extractParameterNames } from "#_/utils/parameters.mjs";
+import { resolveParametrized } from "#_/utils/parameters-client.mjs";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 
@@ -226,10 +227,10 @@ export function liqvidGenerateProjectMetadata(importMetaUrl: string) {
 
     const params = await props.params;
 
-    const title = resolveParametrizedString(project.title, params);
+    const title = resolveParametrized(project.title, params);
 
     const description = project.description
-      ? resolveParametrizedString(project.description, params)
+      ? resolveParametrized(project.description, params)
       : undefined;
 
     return {

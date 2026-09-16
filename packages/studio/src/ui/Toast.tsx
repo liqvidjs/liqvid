@@ -11,7 +11,7 @@ const ICON_SIZE = "24px";
 const styles = stylex.create({
   header: {
     color: colors.grayNormal,
-    fontFamily: typeface.inter,
+    fontFamily: typeface.ui,
     fontSize: text.md,
     fontWeight: 500,
     gridColumnEnd: "header",

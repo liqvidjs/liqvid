@@ -1,0 +1,17 @@
+{
+  "delete": "Delete captions",
+  "deleteBoth": "Delete audio (and captions)",
+  "empty": "No audio yet. Click \"Capture audio\" to capture the audio track, then generate captions from it.",
+  "generate": "Capture audio",
+  "generateCaptions": "Generate captions",
+  "inProgress": "Capturing audio...",
+  "notConfigured": "Captioning is not configured",
+  "regenerate": "Regenerate captions",
+  "rename": {
+    "action": "Rename",
+    "inProgress": "Renaming...",
+    "name": "Name",
+    "title": "Rename Audio"
+  },
+  "renameAudio": "Rename audio"
+}

@@ -55,7 +55,7 @@ export function interpolated<T>(t: T): Interpolated<T> {
 
 type InterpolationConfig<V extends string> = {
   _: LocalizedString;
-  $: Record<V, null>;
+  $: Readonly<Record<V, null>>;
 };
 
 export function isInterpolationConfig(

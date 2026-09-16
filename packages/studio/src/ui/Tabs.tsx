@@ -40,8 +40,11 @@ const styles = stylex.create({
     columnGap: spacing.md,
     display: "inline-flex",
     fontFamily: typeface.ui,
+    // eslint-disable-next-line @stylexjs/valid-styles
     fontSize: "var(--font-size)",
+    // eslint-disable-next-line @stylexjs/valid-styles
     paddingBlock: "var(--padding-block)",
+    // eslint-disable-next-line @stylexjs/valid-styles
     paddingInline: "var(--padding-inline)",
     rowGap: spacing.md,
   },

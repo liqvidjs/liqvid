@@ -3,17 +3,21 @@
 import { CONFIG_FILE } from "@liqvid/cli/utils";
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
-import { useMemo } from "react";
 
 import { fonts } from "#_/design/styles.js";
 import { colors, spacing, text } from "#_/design/tokens.stylex.js";
-import { interpolated } from "#_/i18n/shared.mjs";
+import type { Localized } from "#_/i18n/shared.mjs";
 import s3Logo from "#_/icons/s3.svg";
+import { TextField } from "#_/ui/TextField.js";
+import { useTranslations } from "#_/utils/react.js";
 
-import type { Providers, T } from "../client.tsx";
-import { TextField } from "../TextField.tsx";
+import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";
+
+import type Translations from "./.translations/en.json";
+
+type T = Localized<typeof Translations>;
 
 const styles = stylex.create({
   hint: {
@@ -25,14 +29,12 @@ const styles = stylex.create({
 
 export function S3Provider({
   onChange,
-  t,
   value,
 }: {
   onChange: (value: Providers["s3"] | undefined) => void;
-  t: T;
   value: Providers["s3"];
 }) {
-  const $t = useMemo(() => interpolated(t), [t]);
+  const t = useTranslations<T>();
 
   return (
     <ProviderCard
@@ -44,7 +46,7 @@ export function S3Provider({
       title={t.providerS3}
     >
       <p sx={styles.hint}>
-        {$t.s3CredentialsHint({
+        {t.s3CredentialsHint({
           filename: (
             <span {...stylex.props(fonts.filename)}>{CONFIG_FILE}</span>
           ),

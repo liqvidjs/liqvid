@@ -18,7 +18,7 @@ import { useChannel } from "#_/components/WebSocketProvider.js";
 import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
 import { DockableDialog } from "#_/ui/DockableDialog.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
-import { useAsyncTranslations } from "#_/utils/react.js";
+import { TranslationProvider, useAsyncTranslations } from "#_/utils/react.js";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
@@ -73,6 +73,9 @@ const styles = stylex.create({
 
   recordingToggleChecked: {
     backgroundColor: colors.recordingPluginActive,
+  },
+  subtitle: {
+    marginBottom: spacing.md,
   },
 
   togglePlugins: {
@@ -218,112 +221,119 @@ export function RecordingDialog({
   if (isPreview) return;
 
   return (
-    <DockableDialog.Dialog>
-      <DockableDialog.Header>{t.title}</DockableDialog.Header>
-      <DockableDialog.Content>
-        <div>
-          <Tabs onValueChange={setActiveTab} size="small" value={activeTab}>
-            <TabsList style={{ fontSize: "16px" }}>
-              <TabsTrigger
-                className="lv-recording-tabs"
-                value={tabs.configuration}
-              >
-                {t.tabs.configuration.title}
-              </TabsTrigger>
-              <TabsTrigger className="lv-recording-tabs" value={tabs.saved}>
-                {t.tabs.saved.title}
-              </TabsTrigger>
-              <TabsTrigger className="lv-recording-tabs" value={tabs.shortcuts}>
-                {t.tabs.shortcuts.title}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent asChild keepMounted value={tabs.configuration}>
-              <section>
-                <h3>{t.tabs.configuration.subtitle}</h3>
+    <TranslationProvider t={t}>
+      <DockableDialog.Dialog>
+        <DockableDialog.Header>{t.title}</DockableDialog.Header>
+        <DockableDialog.Content>
+          <div>
+            <Tabs onValueChange={setActiveTab} size="small" value={activeTab}>
+              <TabsList style={{ fontSize: "16px" }}>
+                <TabsTrigger
+                  className="lv-recording-tabs"
+                  value={tabs.configuration}
+                >
+                  {t.tabs.configuration.title}
+                </TabsTrigger>
+                <TabsTrigger className="lv-recording-tabs" value={tabs.saved}>
+                  {t.tabs.saved.title}
+                </TabsTrigger>
+                <TabsTrigger
+                  className="lv-recording-tabs"
+                  value={tabs.shortcuts}
+                >
+                  {t.tabs.shortcuts.title}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent asChild keepMounted value={tabs.configuration}>
+                <section>
+                  <h3 sx={styles.subtitle}>{t.tabs.configuration.subtitle}</h3>
 
-                <div sx={styles.togglePlugins}>
-                  {Object.values(plugins).map((plugin) => {
-                    if (!("recorder" in plugin)) return null;
-
-                    const studioPlugin = plugins[plugin.package];
-                    if (!studioPlugin) return null;
-
-                    return (
-                      // biome-ignore lint/correctness/noRestrictedElements: this is ok
-                      <button
-                        aria-checked={enabledPlugins[plugin.package]}
-                        key={plugin.package}
-                        onClick={() => handleTogglePlugin(plugin.package)}
-                        role="switch"
-                        sx={[
-                          styles.recordingToggle,
-                          enabledPlugins[plugin.package] &&
-                            styles.recordingToggleChecked,
-                        ]}
-                        type="button"
-                      >
-                        {plugin.icon({ height: 24, width: 24 })}
-                      </button>
-                    );
-                  })}
-                </div>
-                <table sx={styles.configurationTable}>
-                  <tbody>
+                  <div sx={styles.togglePlugins}>
                     {Object.values(plugins).map((plugin) => {
                       if (!("recorder" in plugin)) return null;
-                      if (!enabledPlugins[plugin.package]) return null;
 
-                      const ConfigurationComponent =
-                        plugin.configurationComponent;
-
-                      if (!ConfigurationComponent) return null;
+                      const studioPlugin = plugins[plugin.package];
+                      if (!studioPlugin) return null;
 
                       return (
-                        <tr key={plugin.package}>
-                          <th scope="row" sx={styles.configurationTh}>
-                            {plugin.icon({ height: 36, width: 36 })}
-                          </th>
-                          <td sx={styles.configurationTd}>
-                            <ConfigurationComponent
-                              instances={instances[plugin.package] ?? new Set()}
-                            />
-                          </td>
-                        </tr>
+                        // biome-ignore lint/correctness/noRestrictedElements: this is ok
+                        <button
+                          aria-checked={enabledPlugins[plugin.package]}
+                          key={plugin.package}
+                          onClick={() => handleTogglePlugin(plugin.package)}
+                          role="switch"
+                          sx={[
+                            styles.recordingToggle,
+                            enabledPlugins[plugin.package] &&
+                              styles.recordingToggleChecked,
+                          ]}
+                          type="button"
+                        >
+                          {plugin.icon({ height: 24, width: 24 })}
+                        </button>
                       );
                     })}
-                  </tbody>
-                </table>
-              </section>
-            </TabsContent>
-            <TabsContent asChild value={tabs.saved}>
-              <section>
-                <h3>{t.tabs.saved.subtitle}</h3>
-                <div sx={styles.Recordings}>
-                  {recordings.map((r) => (
-                    <RecordingRow
-                      key={r.name}
-                      projectParams={projectParams}
-                      projectPath={projectPath}
-                      recording={r}
-                    />
-                  ))}
-                </div>
-              </section>
-            </TabsContent>
-            <TabsContent asChild value={tabs.shortcuts}>
-              <section>
-                <h3>{t.tabs.shortcuts.title}</h3>
-                <ShortcutsTable
-                  onShortcutChange={onShortcutChange}
-                  shortcuts={shortcuts}
-                  t={t.tabs.shortcuts}
-                />
-              </section>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </DockableDialog.Content>
-    </DockableDialog.Dialog>
+                  </div>
+                  <table sx={styles.configurationTable}>
+                    <tbody>
+                      {Object.values(plugins).map((plugin) => {
+                        if (!("recorder" in plugin)) return null;
+                        if (!enabledPlugins[plugin.package]) return null;
+
+                        const ConfigurationComponent =
+                          plugin.configurationComponent;
+
+                        if (!ConfigurationComponent) return null;
+
+                        return (
+                          <tr key={plugin.package}>
+                            <th scope="row" sx={styles.configurationTh}>
+                              {plugin.icon({ height: 36, width: 36 })}
+                            </th>
+                            <td sx={styles.configurationTd}>
+                              <ConfigurationComponent
+                                instances={
+                                  instances[plugin.package] ?? new Set()
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </section>
+              </TabsContent>
+              <TabsContent asChild value={tabs.saved}>
+                <section>
+                  <h3 sx={styles.subtitle}>{t.tabs.saved.subtitle}</h3>
+                  <div sx={styles.Recordings}>
+                    {recordings.map((r) => (
+                      <RecordingRow
+                        key={r.name}
+                        projectParams={projectParams}
+                        projectPath={projectPath}
+                        recording={r}
+                      />
+                    ))}
+                  </div>
+                </section>
+              </TabsContent>
+              <TabsContent asChild value={tabs.shortcuts}>
+                <section>
+                  <h3 sx={styles.subtitle}>{t.tabs.shortcuts.title}</h3>
+                  <ShortcutsTable
+                    onShortcutChange={onShortcutChange}
+                    shortcuts={shortcuts}
+                    t={t.tabs.shortcuts}
+                  />
+                </section>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </DockableDialog.Content>
+      </DockableDialog.Dialog>
+    </TranslationProvider>
   );
 }
 

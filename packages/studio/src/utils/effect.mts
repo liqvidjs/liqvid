@@ -103,7 +103,7 @@ export const jobProgressLayer = (
 ): Context.Service.Shape<typeof Progress> => ({
   SingleBar: class SingleBar {
     #message: ProgressMessage | undefined;
-    #formatValue: (value: number) => string;
+    readonly #formatValue: (value: number) => string;
 
     constructor({ formatValue }: SingleBarOptions = {}) {
       this.#formatValue = formatValue ?? String;

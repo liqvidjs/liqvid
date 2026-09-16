@@ -9,7 +9,7 @@ import { fonts } from "#_/design/styles.js";
 import { extensible, themed } from "#_/design/themed.js";
 import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
 
-import { useDialogApi } from "./Dialog";
+import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
   content: {

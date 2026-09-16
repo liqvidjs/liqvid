@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import {
-  accent,
   colors,
   dims,
   radii,
@@ -82,31 +81,6 @@ const styles = stylex.create({
     fontFamily: typeface.uiMono,
     fontWeight: 600,
   },
-  updateButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover:not(:disabled)": accent.hover,
-      default: accent.base,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.bannerContrastColor,
-    columnGap: spacing.sm,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    display: "inline-flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    opacity: {
-      ":disabled": 0.6,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.md,
-    rowGap: spacing.sm,
-    transition: "background-color 0.15s",
-  },
   versions: {
     color: colors.bannerDismissColor,
   },
@@ -174,7 +148,6 @@ export function UpdateBannerClient({
             </span>
             {update.range !== null ? (
               <Button
-                className={stylex.props(styles.updateButton).className}
                 disabled={busy !== null}
                 onClick={() => handleUpdate(update.name)}
               >
