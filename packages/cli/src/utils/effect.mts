@@ -7,7 +7,7 @@ import {
   Effect,
   FileSystem,
   flow,
-  type Layer,
+  Layer,
   type PlatformError,
   Schema,
 } from "effect";
@@ -27,17 +27,18 @@ import { FileDecodeError } from "../errors.mts";
 /**
  * Get the file-system layer appropriate to the execution environment (Node, Bun, etc.)
  */
-export async function agnosticFileSystem(): Promise<{
-  layer: Layer.Layer<FileSystem.FileSystem>;
-}> {
-  if (process.versions.bun) {
-    const mod = await import("@effect/platform-bun");
-    return mod.BunFileSystem;
-  }
+export const agnosticFileSystem: Layer.Layer<FileSystem.FileSystem> =
+  Layer.unwrap(
+    Effect.promise(async () => {
+      if (process.versions.bun) {
+        const mod = await import("@effect/platform-bun");
+        return mod.BunFileSystem.layer;
+      }
 
-  const mod = await import("@effect/platform-node");
-  return mod.NodeFileSystem;
-}
+      const mod = await import("@effect/platform-node");
+      return mod.NodeFileSystem.layer;
+    }),
+  );
 
 /**
  * Load all environment files (.env, .env.development, .env.production).

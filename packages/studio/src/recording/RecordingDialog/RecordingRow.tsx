@@ -3,6 +3,7 @@ import type { RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { useToggle } from "@liqvid/utils";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import x from "@stylexjs/atoms";
 import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
@@ -75,9 +76,16 @@ const styles = stylex.create({
     overflow: "hidden",
   },
 
+  pluginIcon: {
+    backgroundColor: colors.grayDim,
+    color: colors.white,
+    height: "16px",
+  },
+
   pluginIcons: {
-    backgroundColor: scales.blue500,
-    marginLeft: spacing.auto,
+    display: "flex",
+    gap: spacing.xs,
+    width: "max-content",
   },
 
   recordingName: {
@@ -176,14 +184,22 @@ export function RecordingRow({
       <Collapsible.Trigger
         {...stylex.props(styles.trigger, expanded && styles.triggerOpen)}
       >
-        <span sx={styles.recordingName}>{r.name}</span>
-        <span sx={styles.pluginIcons}>
-          {r.plugins.map((p) =>
-            Object.hasOwn(plugins, p) ? (
-              <Fragment key={p}>{plugins[p]!.icon()}</Fragment>
-            ) : null,
-          )}
-        </span>
+        <div
+          sx={[x.display.flex, x.flexDirection.column, x.alignItems.flexStart]}
+        >
+          <span sx={styles.recordingName}>{r.name}</span>
+          <span sx={styles.pluginIcons}>
+            {r.plugins.map((p) =>
+              Object.hasOwn(plugins, p) ? (
+                <Fragment key={p}>
+                  {plugins[p]!.icon({
+                    ...stylex.props(styles.pluginIcon),
+                  })}
+                </Fragment>
+              ) : null,
+            )}
+          </span>
+        </div>
         {/* <time style={{ fontSize: "12px" }}> */}
         {/*   {new Intl.DateTimeFormat("en-US").format(new Date(r.created))} */}
         {/* </time> */}

@@ -25,7 +25,7 @@ const CHECK_CONCURRENCY = 50;
  * Implements both HostingProvider and MediaHostingProvider.
  */
 export class CopyProvider implements HostingProvider, MediaHostingProvider {
-  #config: ProviderConfigCopy;
+  readonly #config: ProviderConfigCopy;
 
   constructor(config: ProviderConfigCopy) {
     this.#config = config;
@@ -178,7 +178,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     );
   }
 
-  #getDownloadStatus = Effect.fnUntraced(
+  readonly #getDownloadStatus = Effect.fnUntraced(
     function* (
       remoteFile: RemoteFileInfo,
       localPath: AbsoluteFile,

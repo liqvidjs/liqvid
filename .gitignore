@@ -9,6 +9,9 @@ coverage
 tsconfig.tsbuildinfo
 *.log
 
+# ESLint
+.eslintcache
+
 # Turbopack
 .turbo
 

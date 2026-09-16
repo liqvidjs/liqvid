@@ -24,7 +24,7 @@ export function useProjectParamsOptional<
  * Returns an empty object if not in a parameterized project.
  */
 export function useProjectParams<
-  PP extends Record<string, string> = Record<string, string>,
+  PP extends Record<string, string> = Readonly<Record<string, string>>,
 >(): PP {
   const value = useProjectParamsOptional<PP>();
   return value ?? ({} as PP);

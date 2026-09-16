@@ -1,8 +1,3 @@
-const isDevelopment = process.env.NODE_ENV === "development";
-
-export { DockableDialog } from "./ui/DockableDialog.tsx";
-export * from "./ui/Tabs.tsx";
-
 import { Fragment, lazy } from "react";
 
 export {
@@ -16,6 +11,8 @@ export {
 
 export * from "./assets.mts";
 export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
+export { DockableDialog } from "./ui/DockableDialog.tsx";
+export * from "./ui/Tabs.tsx";
 
 /* ------------------------- ambidextrous components ------------------------- */
 
@@ -25,7 +22,7 @@ export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
  * Only operates in development. If you want this in production,
  * use {@link LiqvidDevToolsProviderProd} instead.
  */
-export const LiqvidDevToolsProvider = isDevelopment
+export const LiqvidDevToolsProvider = import.meta.env.DEV
   ? lazy(() =>
       import("./components/LiqvidDevToolsProvider.tsx").then((imports) => ({
         default: imports.LiqvidDevToolsProvider,
@@ -42,7 +39,7 @@ export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./com
  * Only renders in development. If you want this in production,
  * use {@link RecordingControlUnivalent} instead.
  */
-export const RecordingControl = isDevelopment
+export const RecordingControl = import.meta.env.DEV
   ? lazy(() =>
       import("./recording/RecordingControl.tsx").then((imports) => ({
         default: imports.RecordingControl,

@@ -120,8 +120,7 @@ export async function publishAction(): Promise<PublishActionResult> {
   const { cwd } = getServerState();
 
   try {
-    await publishContent({ cwd });
-    await publishMedia({ cwd });
+    await Promise.all([publishContent({ cwd }), publishMedia({ cwd })]);
     getServerState().lastBuildTime = Date.now();
     return { success: true };
   } catch (e) {

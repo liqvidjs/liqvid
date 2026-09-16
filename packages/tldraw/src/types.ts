@@ -10,6 +10,8 @@ import type {
   VecModel,
 } from "@tldraw/editor";
 
+import type { VERSION } from "./version";
+
 export type Point3 = [x: number, y: number, z?: number];
 
 /** A pointer position in tldraw canvas coordinates (decoded, in memory). */
@@ -70,8 +72,9 @@ export type TldrawEvent =
   | ShapeRemove
   | ShapeUpdate
   | ViewportEvent;
+
 export type TldrawData = {
-  version: "1.0";
+  version: typeof VERSION;
   initialState: ReplayState;
   data: ReplayData<TldrawEvent>;
 };

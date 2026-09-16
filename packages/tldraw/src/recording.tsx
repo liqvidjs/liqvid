@@ -29,6 +29,7 @@ import {
   encodeDiffPaths,
   encodePointer,
 } from "./utils.ts";
+import { PACKAGE, VERSION } from "./version.ts";
 import { extractSegmentAppend, isSegmentAppend } from "./zsa.ts";
 
 type TldrawState = {
@@ -62,8 +63,8 @@ export class TldrawRecorder extends ReplayDataRecorder<
    */
   #pointer: Pointer = [0, 0];
 
-  readonly package = "@lqv/tldraw";
-  readonly version = "1.0.0";
+  readonly package = PACKAGE;
+  readonly version = VERSION;
 
   constructor() {
     super();
@@ -302,7 +303,7 @@ export class TldrawRecorder extends ReplayDataRecorder<
 }
 
 const icon = (props: React.ComponentProps<"svg">) => (
-  <svg height="1000" viewBox="0 0 1000 1000" {...props}>
+  <svg viewBox="0 0 1000 1000" {...props}>
     <path
       clipRule="evenodd"
       d="M 0,130 C 0,58 58.000027,0 129.99963,0 h 740 c 72,0 130.00297,58 130.00297,130 v 740 c 0,72 -58.00297,130 -130.00297,130 h -740 C 58.000027,1000 0,942 0,870 Z m 589.99963,170 c 0,50 -40,90 -90,90 -50,0 -90,-40 -90,-90 0,-50 40,-90 90,-90 50,0 90,40 90,90 z m -120,510 c 43,0 84,-59 99,-91 19,-41 30,-114 11,-157 -13,-30 -43,-52 -83,-52 -48,0 -87,39 -87,87 0,43 31,77 71,84 2,0 4,3 4,5 -4,25 -15,57 -32,73 -21,20 -15,51 17,51 z"
@@ -319,7 +320,7 @@ export const TldrawRecording: RecordingPlugin<
 > = {
   icon,
   name: "Tldraw",
-  package: "@lqv/tldraw",
+  package: PACKAGE,
   recorder: new TldrawRecorder(),
   title: "Record Tldraw",
 };

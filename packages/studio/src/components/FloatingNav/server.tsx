@@ -2,6 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
 import { breakpoints, colors, spacing } from "#_/design/tokens.stylex.js";
+import logo from "#_/logo.png";
 import {
   NavigationMenuContent,
   NavigationMenuItem,
@@ -15,8 +16,6 @@ import {
   NavigationMenuViewport,
 } from "#_/ui/NavigationMenu.js";
 import { getTranslations } from "#_/utils/i18n.mjs";
-
-import logo from "../../logo.png";
 
 import type TranslationsJson from "./.translations/en.json";
 

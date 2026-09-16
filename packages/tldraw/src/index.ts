@@ -47,6 +47,7 @@ import {
 import { segmentAppend } from "./zsa.ts";
 
 export { FollowController } from "./follow.ts";
+export { joinTldrawRecordings } from "./join.ts";
 export type {
   ReplayState,
   TldrawAction,

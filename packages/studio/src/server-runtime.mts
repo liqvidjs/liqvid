@@ -1,4 +1,4 @@
-import { NodeFileSystem } from "@effect/platform-node";
+import { agnosticFileSystem } from "@liqvid/cli/utils";
 import { Effect, Layer, Logger, ManagedRuntime, References } from "effect";
 
 import { getLogLevel } from "#_/utils/misc.mjs";
@@ -8,7 +8,7 @@ import { getLogLevel } from "#_/utils/misc.mjs";
  * Node filesystem and a pretty-printed console logger.
  */
 export const ServerLayer = Layer.mergeAll(
-  NodeFileSystem.layer,
+  agnosticFileSystem,
   Logger.layer([Logger.consolePretty()]),
 );
 

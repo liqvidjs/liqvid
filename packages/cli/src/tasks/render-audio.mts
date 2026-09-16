@@ -79,9 +79,7 @@ export const renderAudioCommand = Command.make(
           ) as AbsoluteFile,
           output: argv.output as AbsoluteFile,
           url: Option.getOrUndefined(argv.url) as string,
-        }).pipe(
-          Effect.provide((yield* Effect.promise(agnosticFileSystem)).layer),
-        ),
+        }).pipe(Effect.provide(agnosticFileSystem)),
       );
 
       if (Exit.isFailure(exit)) {

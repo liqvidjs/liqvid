@@ -37,6 +37,7 @@ import {
 import { CanvasLayer } from "./react/CanvasLayer.tsx";
 import { CursorImage } from "./react/CursorImage.tsx";
 import { TldrawRecording } from "./recording.tsx";
+import { TLDRAW_SYMBOL } from "./symbols.ts";
 import type { TldrawData } from "./types.ts";
 
 /**
@@ -280,6 +281,13 @@ function AttachEditor() {
   if (!isPreview) {
     TldrawRecording.recorder.provideEditor(editor);
   }
+
+  // TODO: temporary hack to make the helper thing work
+  useEffect(() => {
+    (editor.getContainer() as unknown as { [sym: symbol]: Editor })[
+      TLDRAW_SYMBOL
+    ] = editor;
+  }, [editor]);
 
   return null;
 }

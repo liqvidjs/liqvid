@@ -15,14 +15,11 @@ const styles = stylex.create({
       default: "pointer",
     },
     display: "flex",
-    fontSize: text.base,
     gap: spacing.sm,
     opacity: {
       ":disabled": 0.3,
       default: null,
     },
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.md,
     rowGap: spacing.md,
     transition: "background-color 0.10s",
   },
@@ -62,8 +59,22 @@ const styles = stylex.create({
   },
 });
 
+const sizeVariants = stylex.create({
+  normal: {
+    fontSize: text.base,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+  },
+  small: {
+    fontSize: text.sm,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.sm,
+  },
+});
+
 export function Button({
   kind = "default",
+  size = "normal",
   style,
   ...props
 }: NonCustomizable<Omit<React.ComponentProps<"button">, "children">> & {
@@ -73,12 +84,17 @@ export function Button({
   children?: LocalizedReactNode;
   kind?: "default" | "destructive" | "primary";
 
-  style?: stylex.StaticStyles<{
-    marginTop?: string | number;
-    marginLeft?: string | number;
-    marginRight?: string | number;
-    marginBottom?: string | number;
-  }>;
+  size?: "normal" | "small";
+
+  style?: stylex.StaticStyles<
+    {
+      display?: "flex" | "inline-flex";
+    } & Pick<
+      stylex.CSSProperties,
+      "float" | "marginBottom" | "marginLeft" | "marginRight" | "marginTop"
+    >
+  >;
+
   title?: LocalizedString;
 }) {
   return (
@@ -86,7 +102,7 @@ export function Button({
     <button
       type="button"
       {...props}
-      sx={[styles.button, styles[kind], style]}
+      sx={[styles.button, styles[kind], sizeVariants[size], style]}
     />
   );
 }

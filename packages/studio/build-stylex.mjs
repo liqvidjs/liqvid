@@ -20,6 +20,8 @@ const SRC_DIR = path.resolve("src");
 const DIST_DIR = path.resolve("dist/esm");
 const OUTPUT_CSS = path.join(DIST_DIR, "stylex.css");
 
+const classNamePrefix = "lvs";
+
 /** Recursively collect all .js and .mjs files under a directory. */
 function collectFiles(dir, ext = [".js", ".mjs"]) {
   const results = [];
@@ -76,6 +78,7 @@ async function main() {
               aliases: {
                 "#_/*": ["/ROOT/*"],
               },
+              classNamePrefix,
               dev: false,
               runtimeInjection: false,
               // Use the dist directory as root so class names are stable
@@ -131,6 +134,7 @@ async function main() {
             stylexBabelPlugin,
             {
               aliases: { "#_/*": ["/ROOT/*"] },
+              classNamePrefix,
               dev: false,
               runtimeInjection: false,
               unstable_moduleResolution: {

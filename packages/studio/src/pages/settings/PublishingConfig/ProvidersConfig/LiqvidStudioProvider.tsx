@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 
+import logo from "#_/logo.png";
 import { TextField } from "#_/ui/TextField.js";
 import { useTranslations } from "#_/utils/react.js";
 
-import logo from "../../../../logo.png";
 import type { Providers } from "../client.tsx";
 
 import { ProviderCard } from "./ProviderCard.tsx";

@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
+    "./liqvid-studio": {
+      "@liqvid/dev": "./src/liqvid-studio.tsx",
+      "types": "./dist/types/liqvid-studio.d.ts",
+      "import": "./dist/esm/liqvid-studio.js"
+    },
     "./liqvid-studio-server-plugin": {
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
       "types": "./dist/types/recording.d.ts",
@@ -60,6 +65,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@stylexjs/babel-plugin": "catalog:dev",
+    "@stylexjs/eslint-plugin": "catalog:dev",
+    "@stylexjs/postcss-plugin": "catalog:dev",
     "@tldraw/editor": "catalog:peer",
     "@tldraw/store": "catalog:peer",
     "@tldraw/tlschema": "catalog:peer",
@@ -79,8 +87,11 @@
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.2",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
+    "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "@stylexjs/atoms": "catalog:",
+    "@stylexjs/stylex": "catalog:",
     "@tldraw/editor": "catalog:peer",
     "@tldraw/store": "catalog:peer",
     "@tldraw/tlschema": "catalog:peer",
@@ -92,6 +103,9 @@
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "@liqvid/studio": {
       "optional": true
     }
   },

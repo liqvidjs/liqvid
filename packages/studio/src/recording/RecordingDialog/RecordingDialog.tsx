@@ -74,6 +74,7 @@ const styles = stylex.create({
   recordingToggleChecked: {
     backgroundColor: colors.recordingPluginActive,
   },
+
   subtitle: {
     marginBottom: spacing.md,
   },

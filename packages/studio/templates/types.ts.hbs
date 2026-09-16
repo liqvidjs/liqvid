@@ -24,9 +24,9 @@ export type ProjectDir = FileNames<ProjectStructure>;
 {{#if parameters.length}}
 export type ProjectParams = {
 {{#each parameters}}
-  {{this.name}}: {{#each this.values}}{{#unless @first}} | {{/unless}}"{{this}}"{{/each}};
+  readonly {{this.name}}: {{#each this.values}}{{#unless @first}} | {{/unless}}"{{this}}"{{/each}};
 {{/each}}
 };
 {{else}}
-export type ProjectParams = Record<string, never>;
+export type ProjectParams = Readonly<Record<string, never>>;
 {{/if}}

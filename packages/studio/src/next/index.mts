@@ -102,7 +102,7 @@ export function liqvidProject<
           Effect.provide(
             Layer.mergeAll(
               Logger.layer([Logger.consolePretty()]),
-              (await agnosticFileSystem()).layer,
+              agnosticFileSystem,
             ),
           ),
         ),
@@ -171,7 +171,7 @@ export function liqvidProject<
 
     const $project = await Effect.runPromiseExit(
       loadJson(ProjectJson, path.join(__dirname, PROJECT_FILE)).pipe(
-        Effect.provide((await agnosticFileSystem()).layer),
+        Effect.provide(agnosticFileSystem),
       ),
     );
 

@@ -274,7 +274,6 @@ export const DockableDialog = {
   Content,
   Dialog,
   Header,
-  Portal,
   Root,
   Trigger,
 };
