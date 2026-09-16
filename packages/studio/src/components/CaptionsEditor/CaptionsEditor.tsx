@@ -216,7 +216,7 @@ export function CaptionsEditor({
         store.setState({
           captionBreaks,
           paragraphBreaks,
-          words: words,
+          words,
         });
       },
     );
@@ -251,7 +251,7 @@ export function CaptionsEditor({
         transcript: {
           captionBreaks,
           paragraphBreaks,
-          words: words,
+          words,
         },
       });
     } finally {

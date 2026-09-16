@@ -258,9 +258,10 @@ const getDirectoryTypes = Effect.fnUntraced(function* (
 
 export const watchAssets = Effect.fnUntraced(
   function* () {
-    Handlebars.registerHelper("json", (obj) => {
-      return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
-    });
+    Handlebars.registerHelper(
+      "json",
+      (obj) => new Handlebars.SafeString(JSON.stringify(obj, null, 2)),
+    );
     Handlebars.registerHelper(
       "isDirectory",
       (value) => typeof value === "object" && value !== null,

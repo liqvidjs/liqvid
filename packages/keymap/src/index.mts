@@ -44,7 +44,7 @@ const useCode = ["Backspace", "Enter", "Space", "Tab"];
 
 /** Maps keyboard shortcuts to actions */
 export class Keymap {
-  private __bindings: Bindings;
+  private readonly __bindings: Bindings;
 
   constructor() {
     this.__bindings = {};

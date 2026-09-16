@@ -129,9 +129,7 @@ export function Root({
 
   // Initialize iframe API for postMessage communication
   // and also symbol API for renderer
-  useEffect(() => {
-    return provideIframeApi(playerApiDeclaration, api);
-  }, [api]);
+  useEffect(() => provideIframeApi(playerApiDeclaration, api), [api]);
 
   useEffect(() => {
     if (!ref.current) return;

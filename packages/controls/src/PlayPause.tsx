@@ -34,9 +34,10 @@ export function PlayPause({
   usePlaybackEvent("stop", forceUpdate);
 
   // keyboard controls
-  const toggle = useCallback(() => {
-    return playback[playback.paused ? "play" : "pause"]();
-  }, [playback]);
+  const toggle = useCallback(
+    () => playback[playback.paused ? "play" : "pause"](),
+    [playback],
+  );
 
   useKeyboardShortcut(shortcuts, toggle);
 

@@ -169,17 +169,13 @@ async function readJson(file: AbsoluteFile): Promise<Json> {
   try {
     contents = await fsp.readFile(file, "utf8");
   } catch (error) {
-    throw new Error(
-      `Could not read ${file}: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    throw new Error(`Could not read ${file}`, { cause: error });
   }
 
   try {
     return JSON.parse(contents) as Json;
   } catch (error) {
-    throw new Error(
-      `Invalid JSON in ${file}: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    throw new Error(`Invalid JSON in ${file}`, { cause: error });
   }
 }
 

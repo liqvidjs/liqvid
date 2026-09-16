@@ -46,8 +46,8 @@ export class TldrawRecorder extends ReplayDataRecorder<
   #editor: Editor | undefined;
   #unlisten: (() => void) | undefined;
   #unlistenPointer: (() => void) | undefined;
-  #shapeCache: Map<string, DecodedTLShape> = new Map();
-  #pageCache: Map<string, TLPage> = new Map();
+  readonly #shapeCache: Map<string, DecodedTLShape> = new Map();
+  readonly #pageCache: Map<string, TLPage> = new Map();
 
   /**
    * The author's last-recorded viewport, so that changes can be diffed and

@@ -32,28 +32,30 @@ export function LiveCode({
 
   const [store] = useState(() => makeStore());
 
-  useEffect(() => {
-    return registerInstance<CodeMirrorInstance>("@lqv/codemirror", {
-      name,
-      provideRecorder(recorder) {
-        store.setState((prev) => ({ ...prev, recorder }));
-        recorder?.configure({
-          getActiveFile() {
-            const { activeGroup, groups } = store.getState();
-            if (!activeGroup) {
-              return undefined;
-            }
+  useEffect(
+    () =>
+      registerInstance<CodeMirrorInstance>("@lqv/codemirror", {
+        name,
+        provideRecorder(recorder) {
+          store.setState((prev) => ({ ...prev, recorder }));
+          recorder?.configure({
+            getActiveFile() {
+              const { activeGroup, groups } = store.getState();
+              if (!activeGroup) {
+                return undefined;
+              }
 
-            return groups[activeGroup]?.activeFile;
-          },
-          views: new Proxy(store, storeProxyHandler) as unknown as Record<
-            string,
-            EditorView
-          >,
-        });
-      },
-    });
-  }, [name, registerInstance, store]);
+              return groups[activeGroup]?.activeFile;
+            },
+            views: new Proxy(store, storeProxyHandler) as unknown as Record<
+              string,
+              EditorView
+            >,
+          });
+        },
+      }),
+    [name, registerInstance, store],
+  );
 
   const stateClassNames = useStore(store, (state) => state.classNames);
 

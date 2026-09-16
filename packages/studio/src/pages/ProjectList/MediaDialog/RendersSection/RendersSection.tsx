@@ -499,9 +499,7 @@ export function RendersSection({
     setRenameValue(render.id);
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString();
-  };
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString();
 
   const getStatusIcon = (status: RenderEntry["meta"]["status"]) => {
     switch (status) {
@@ -1024,9 +1022,8 @@ function VideoPlayerDialog({
 }) {
   const projectPath = useProjectPath();
 
-  const getVideoUrl = (render: RenderEntry) => {
-    return `/api/liqvid/static/${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
-  };
+  const getVideoUrl = (render: RenderEntry) =>
+    `/api/liqvid/static/${encodeURIComponent(`${projectPath}/.liqvid/renders/${render.id}/${render.meta.output}`)}`;
 
   return (
     <DialogPortal>

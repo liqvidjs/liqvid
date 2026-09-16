@@ -39,9 +39,7 @@ export const exitFullScreen = fullscreenEnabled
 
 export const isFullScreen = fullscreenEnabled
   ? $isFullScreen
-  : (): boolean => {
-      return __isFullScreen;
-    };
+  : (): boolean => __isFullScreen;
 
 export const onFullScreenChange = fullscreenEnabled
   ? $onFullScreenChange

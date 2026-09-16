@@ -6,8 +6,8 @@ import type { ComparisonVariant, StringVariant } from "./types.ts";
 
 // type Joinable = boolean | undefined | null | string | Joinable[];
 
-export const iife = (...lines: (boolean | undefined | null | string)[]) => {
-  return `(()=>{${lines
+export const iife = (...lines: (boolean | undefined | null | string)[]) =>
+  `(()=>{${lines
     .reduce<string[]>((acc, curr) => {
       if (!curr) return acc;
 
@@ -20,7 +20,6 @@ export const iife = (...lines: (boolean | undefined | null | string)[]) => {
       return acc;
     }, [])
     .join(";\n")}})()`;
-};
 
 export function matches<T extends string | number>(
   value: T,

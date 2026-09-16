@@ -98,8 +98,8 @@ const booleanScript = (id: string) =>
     `}`,
   ].join("");
 
-const numberScript = (id: string, options: NumericVariant[]) => {
-  return golf.join(
+const numberScript = (id: string, options: NumericVariant[]) =>
+  golf.join(
     `(${golf.value})=>{`,
     ...options.map((o, index) =>
       golf.join(
@@ -113,10 +113,9 @@ const numberScript = (id: string, options: NumericVariant[]) => {
     ),
     `}`,
   );
-};
 
-const stringScript = (id: string, options: StringVariant[]) => {
-  return golf.join(
+const stringScript = (id: string, options: StringVariant[]) =>
+  golf.join(
     `(${golf.value})=>{`,
     ...options.map((o, index) =>
       golf.join(
@@ -130,4 +129,3 @@ const stringScript = (id: string, options: StringVariant[]) => {
     ),
     `}`,
   );
-};

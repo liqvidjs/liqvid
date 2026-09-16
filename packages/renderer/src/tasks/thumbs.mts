@@ -138,9 +138,7 @@ export function thumbs({
 
     // calculate how many thumbs
     const durationSeconds = yield* Effect.promise(() =>
-      pages[0]!.evaluate(() => {
-        return player.playback.duration;
-      }),
+      pages[0]!.evaluate(() => player.playback.duration),
     );
 
     const numThumbs = Math.ceil(durationSeconds / frequency);

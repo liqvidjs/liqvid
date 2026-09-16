@@ -65,9 +65,10 @@ function interpolatePathParams(
   params?: Readonly<Record<string, string>>,
 ): string {
   if (!params) return urlPath;
-  return urlPath.replace(/\[([^\]]+)\]/g, (match, paramName: string) => {
-    return params[paramName] ?? match;
-  });
+  return urlPath.replace(
+    /\[([^\]]+)\]/g,
+    (match, paramName: string) => params[paramName] ?? match,
+  );
 }
 
 export const getRenderUrl = Effect.fnUntraced(function* (

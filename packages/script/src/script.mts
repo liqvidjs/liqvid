@@ -22,7 +22,7 @@ export class Script<M extends string = string> extends EventEmitter<
 > {
   /* private properties */
   private __index: number;
-  private __map: Map<M, Marker<M>>;
+  private readonly __map: Map<M, Marker<M>>;
 
   /* public properties */
 

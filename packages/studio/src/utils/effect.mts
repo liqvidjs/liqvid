@@ -53,8 +53,8 @@ export const readDirWithFileTypes = Effect.fnUntraced(function* (
  */
 export const existenceOptional = <A, E, R>(
   effect: Effect.Effect<A, E, R>,
-): Effect.Effect<Option.Option<A>, E, R> => {
-  return effect.pipe(
+): Effect.Effect<Option.Option<A>, E, R> =>
+  effect.pipe(
     Effect.map(Option.some),
     Effect.catch((error) => {
       if (isPlatformError(error) && error.reason._tag === "NotFound") {
@@ -63,7 +63,6 @@ export const existenceOptional = <A, E, R>(
       return Effect.fail(error);
     }),
   );
-};
 
 function isPlatformError(error: unknown): error is PlatformError.PlatformError {
   return (

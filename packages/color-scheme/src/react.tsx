@@ -51,7 +51,7 @@ export function ColorSchemeProvider({
   const context = useMemo(
     () => ({
       colorScheme: value ?? colorScheme,
-      persistence: persistence,
+      persistence,
       setColorScheme,
       toggleColorScheme,
     }),

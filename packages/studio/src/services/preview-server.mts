@@ -45,8 +45,8 @@ export const startProductionServer = Effect.fnUntraced(function* (
     ) || DEFAULT_PRODUCTION_SERVER_PORT;
   state.productionServerPort = port;
 
-  const server = http.createServer((request, response) => {
-    return handler(request, response, {
+  const server = http.createServer((request, response) =>
+    handler(request, response, {
       headers: [
         {
           headers: [
@@ -59,8 +59,8 @@ export const startProductionServer = Effect.fnUntraced(function* (
       ],
       public: previewDir,
       trailingSlash: true,
-    });
-  });
+    }),
+  );
 
   yield* Effect.callback<void>((resume) => {
     server.listen(port, () => {

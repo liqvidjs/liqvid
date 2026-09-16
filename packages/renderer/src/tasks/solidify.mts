@@ -112,9 +112,7 @@ export function solidify({
 
         // get duration
         const totalDuration = yield* Effect.promise(() =>
-          pages[0]!.evaluate(() => {
-            return player.playback.duration;
-          }),
+          pages[0]!.evaluate(() => player.playback.duration),
         );
 
         if (start >= totalDuration) {

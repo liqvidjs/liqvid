@@ -34,9 +34,7 @@ export type ParametrizedValueEntry<T> = ReturnType<
  *
  * **Note:** `"value"` is reserved and must not be used as a parameter name.
  */
-export const Parametrized = <T, E, RD, RE>(
-  value: Schema.Codec<T, E, RD, RE>,
-) =>
+export const Parametrized = <T, E, RD, RE>(value: Schema.Codec<T, E, RD, RE>) =>
   Schema.Union([value, Schema.Array(ParametrizedValueEntry(value))]);
 
 export type Parametrized<T> = ReturnType<

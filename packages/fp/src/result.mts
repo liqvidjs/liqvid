@@ -51,9 +51,9 @@ export type Result<T, E> = ResultMethods<T, E> &
 
 // implementation
 class internalResult<Val, Err> {
-  private isOk: boolean;
-  private value: Val | undefined;
-  private error: Err | undefined;
+  private readonly isOk: boolean;
+  private readonly value: Val | undefined;
+  private readonly error: Err | undefined;
 
   constructor(isOk: boolean, value: Val | undefined, error: Err | undefined) {
     this.isOk = isOk;

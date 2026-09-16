@@ -140,7 +140,7 @@ export function liqvidProject<
       });
 
       return createElement(ProjectPathHelperComponent, {
-        children: children,
+        children,
         isPreview: searchParams.preview !== undefined,
         projectParams: paramNames.length > 0 ? projectParams : undefined,
         projectPath,

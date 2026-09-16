@@ -13,7 +13,6 @@ import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import {
   colors,
   dims,
-  scales,
   spacing,
   text,
   typeface,

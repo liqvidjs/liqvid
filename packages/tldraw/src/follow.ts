@@ -44,7 +44,7 @@ export class FollowController {
    */
   #expected: Viewport | undefined;
 
-  #subscribers = new Set<() => void>();
+  readonly #subscribers = new Set<() => void>();
 
   /**
    * Timestamp (ms) of the last genuine viewer input (pointer / wheel / pinch /

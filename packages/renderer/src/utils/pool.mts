@@ -1,6 +1,6 @@
 export class Pool<T> {
-  private instances: T[];
-  private queue: ((free: T) => void)[];
+  private readonly instances: T[];
+  private readonly queue: ((free: T) => void)[];
 
   constructor(instances: T[]) {
     this.instances = instances;

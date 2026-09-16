@@ -9,8 +9,8 @@ export function useEager(callback: () => void, playback: Playback | undefined) {
   const id = useId();
   const global = globalThis as { [sym: symbol]: Map<string, Set<Playback>> };
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (!playback) return;
 
       const globalInstances = global[sym]!;
@@ -20,8 +20,9 @@ export function useEager(callback: () => void, playback: Playback | undefined) {
       if (componentInstances?.size === 0) {
         globalInstances?.delete(id);
       }
-    };
-  }, [id, playback]);
+    },
+    [id, playback],
+  );
 
   if (IS_CLIENT && playback) {
     global[sym] ??= new Map();

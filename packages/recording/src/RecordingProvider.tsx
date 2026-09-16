@@ -172,7 +172,7 @@ export function RecordingProvider({
         }
       },
       togglePlugin(pluginId: string, enabled?: boolean) {
-        dispatch({ enabled, kind: "toggle", pluginId: pluginId });
+        dispatch({ enabled, kind: "toggle", pluginId });
       },
     }),
     [manager, state],

@@ -10,7 +10,7 @@ import type {
   VecModel,
 } from "@tldraw/editor";
 
-import type { VERSION } from "./version";
+import type { VERSION } from "./version.ts";
 
 export type Point3 = [x: number, y: number, z?: number];
 

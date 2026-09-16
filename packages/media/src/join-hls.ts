@@ -1,6 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import {
   type AbsoluteDir,
@@ -108,6 +107,9 @@ export async function experimental_joinHls(
   }
 
   const outputDirectory = resolve(outputMasterPath, RelativeDir(".."));
+
+  await mkdir(outputDirectory, { recursive: true });
+
   const outputVariants = await Promise.all(
     firstVariants.map(async (variant, index) => {
       const playlists = await Promise.all(

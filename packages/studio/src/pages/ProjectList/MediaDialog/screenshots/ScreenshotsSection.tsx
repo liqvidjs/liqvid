@@ -274,8 +274,8 @@ interface ScreenshotItemProps {
   /** Open a full-size preview of the given image src */
   onPreview: (src: string, alt: string) => void;
   onRename: (screenshotId: string) => void;
-  params?: string;
   parameterValues?: Readonly<Record<string, string>>;
+  params?: string;
   screenshot: ScreenshotEntry;
   variant: { label: VariantLabel; path: string };
 }
@@ -506,8 +506,8 @@ export function ScreenshotsSection({
                   onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
                   onPreview={(src, alt) => setPreviewDialog({ alt, src })}
                   onRename={openRenameDialog}
-                  params={paramsJson}
                   parameterValues={selectedParams}
+                  params={paramsJson}
                   screenshot={screenshot}
                   variant={variant}
                 />

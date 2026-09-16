@@ -124,24 +124,22 @@ export function Editor({
 
     return () => {
       view.destroy();
-      store.setState((prev) => {
-        return {
-          ...prev,
-          groups: {
-            ...prev.groups,
-            ...(prev.groups[groupId]
-              ? {
-                  [groupId]: {
-                    ...prev.groups[groupId],
-                    files: prev.groups[groupId].files.filter(
-                      (file) => file.filename !== filename,
-                    ),
-                  },
-                }
-              : {}),
-          },
-        };
-      });
+      store.setState((prev) => ({
+        ...prev,
+        groups: {
+          ...prev.groups,
+          ...(prev.groups[groupId]
+            ? {
+                [groupId]: {
+                  ...prev.groups[groupId],
+                  files: prev.groups[groupId].files.filter(
+                    (file) => file.filename !== filename,
+                  ),
+                },
+              }
+            : {}),
+        },
+      }));
     };
   }, [store.setState]);
 

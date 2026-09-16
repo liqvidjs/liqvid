@@ -38,14 +38,14 @@ type KeyframeEffectOptionsWithDurations = Omit<
 
 /** Extended {@link CorePlayback Playback} supporting rich durations and the Web Animation API */
 export class Playback extends CorePlayback {
-  private __animations: Animation[] = [];
-  private __committed: CommittedAnimation[] = [];
-  private __delays = new WeakMap<AnimationEffect, number>();
+  private readonly __animations: Animation[] = [];
+  private readonly __committed: CommittedAnimation[] = [];
+  private readonly __delays = new WeakMap<AnimationEffect, number>();
 
-  private __readyStateItems: Set<ReadyStateItem> = new Set();
+  private readonly __readyStateItems: Set<ReadyStateItem> = new Set();
 
-  private __$currentTime: Duration;
-  private __$duration: Duration;
+  private readonly __$currentTime: Duration;
+  private readonly __$duration: Duration;
 
   /** {@link DocumentTimeline} synced up to this playback */
   timeline: DocumentTimeline | undefined;

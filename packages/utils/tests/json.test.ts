@@ -44,9 +44,7 @@ describe("json/*", () => {
   });
 
   test("async preload", () => {
-    const promise = loadAllJSON().then(() => {
-      return [getJSON("A"), getJSON("B")];
-    });
+    const promise = loadAllJSON().then(() => [getJSON("A"), getJSON("B")]);
     expect(promise).resolves.toEqual([
       { value: "http://localhost/A.json" },
       { value: "http://localhost/B.json" },

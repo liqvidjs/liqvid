@@ -26,19 +26,18 @@ export function interpolated<T>(t: T): Interpolated<T> {
     if (typeof value === "string") {
       deep[key] = value as Interpolated<T>[typeof key];
     } else if (isInterpolationConfig(value)) {
-      deep[key] = ((vars: Record<string, LocalizedReactNode>) => {
-        return createElement(
+      deep[key] = ((vars: Record<string, LocalizedReactNode>) =>
+        createElement(
           Fragment,
           null,
-          value._.split(/\{([^}]+)\}/g).map((str, index) => {
-            return createElement(
+          value._.split(/\{([^}]+)\}/g).map((str, index) =>
+            createElement(
               Fragment,
               { key: index },
               index % 2 === 0 ? str : vars[str],
-            );
-          }),
-        );
-      }) as Interpolated<T>[typeof key];
+            ),
+          ),
+        )) as Interpolated<T>[typeof key];
     } else if (
       typeof value === "object" &&
       value !== null &&

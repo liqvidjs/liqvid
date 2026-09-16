@@ -33,7 +33,7 @@ export type Maybe<T> = Maybe.Some<T> | Maybe.None;
 // implementation
 class internalMaybe<T> implements MaybeMethods<T> {
   public isSome: boolean;
-  private value: T | undefined;
+  private readonly value: T | undefined;
 
   constructor(isSome: boolean, value?: T) {
     this.isSome = isSome;

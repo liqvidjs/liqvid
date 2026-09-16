@@ -70,10 +70,10 @@ function getContentType(filePath: string): string {
 
 /** AWS S3, or other compatible provider */
 export class S3Provider implements MediaHostingProvider {
-  private client: S3Client;
-  private bucket: string;
-  private prefix: string;
-  private config: ProviderConfigS3;
+  private readonly client: S3Client;
+  private readonly bucket: string;
+  private readonly prefix: string;
+  private readonly config: ProviderConfigS3;
 
   constructor(config: ProviderConfigS3) {
     this.config = config;
@@ -242,7 +242,7 @@ export class S3Provider implements MediaHostingProvider {
    * Get the download status for a single file.
    * Never marks a file for download if the local version is newer.
    */
-  private getDownloadStatus = Effect.fnUntraced(
+  private readonly getDownloadStatus = Effect.fnUntraced(
     function* (remoteFile: RemoteFileInfo, localPath: AbsoluteFile) {
       const fs = yield* FileSystem.FileSystem;
 
@@ -318,7 +318,7 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Get the upload status for a single file.
    */
-  private getUploadStatus = Effect.fn("getUploadStatus")(
+  private readonly getUploadStatus = Effect.fn("getUploadStatus")(
     { self: this },
     function* (this: S3Provider, filePath: AbsoluteFile, key: RelativeFile) {
       const fs = yield* FileSystem.FileSystem;
@@ -402,7 +402,7 @@ export class S3Provider implements MediaHostingProvider {
   /**
    * Upload a single file to S3 using multipart upload for large files
    */
-  private uploadFile = Effect.fn("uploadFile")(
+  private readonly uploadFile = Effect.fn("uploadFile")(
     { self: this },
     function* (this: S3Provider, filePath: AbsoluteFile, key: string) {
       const fs = yield* FileSystem.FileSystem;

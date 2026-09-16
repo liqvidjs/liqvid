@@ -261,8 +261,8 @@ export async function callPlayerApi(
   args: unknown[],
 ): Promise<unknown> {
   return page.evaluate(
-    ({ args, method, namespace }) => {
-      return new Promise((resolve, reject) => {
+    ({ args, method, namespace }) =>
+      new Promise((resolve, reject) => {
         const requestId = Math.random();
 
         const handleMessage = (event: MessageEvent) => {
@@ -297,8 +297,7 @@ export async function callPlayerApi(
           },
           "*",
         );
-      });
-    },
+      }),
     { args, method, namespace: PLAYER_API_NAMESPACE },
   );
 }

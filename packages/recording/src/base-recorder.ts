@@ -16,7 +16,7 @@ export abstract class BaseRecorder<
   private lastPauseTime: number = 0;
 
   /** Total duration that recording has been paused. */
-  private pauseTime: Duration;
+  private readonly pauseTime: Duration;
 
   /** Whether recording is currently in progress. */
   protected active = false;
@@ -24,7 +24,7 @@ export abstract class BaseRecorder<
   /** Whether recording is currently paused. */
   protected paused = false;
 
-  #setPauseTime: DurationSetter;
+  readonly #setPauseTime: DurationSetter;
 
   constructor() {
     {

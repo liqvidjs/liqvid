@@ -1,10 +1,10 @@
 import { expect, test } from "@jest/globals";
 
 import {
-  DirectoryHelper,
-  ServerDirectoryHelper,
   type Directory,
+  DirectoryHelper,
   type FileNames,
+  ServerDirectoryHelper,
 } from "../src/assets.mts";
 
 const DIR = {

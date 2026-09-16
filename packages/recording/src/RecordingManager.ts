@@ -57,10 +57,10 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
   private lastPauseTime: number = 0;
 
   /** Total duration that recording has been paused. */
-  private pauseTime: Duration;
+  private readonly pauseTime: Duration;
 
-  #setDuration: DurationSetter;
-  #setPauseTime: DurationSetter;
+  readonly #setDuration: DurationSetter;
+  readonly #setPauseTime: DurationSetter;
 
   /* ------------------------------ public methods ------------------------------ */
   constructor() {

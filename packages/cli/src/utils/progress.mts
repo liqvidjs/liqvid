@@ -10,7 +10,7 @@ export const cliProgressLayer = (
     Effect.gen(function* () {
       return {
         SingleBar: class SingleBar {
-          #bar: cliProgress.SingleBar;
+          readonly #bar: cliProgress.SingleBar;
 
           constructor({ formatValue }: SingleBarOptions = {}) {
             const [barOptions, ...rest] = options;

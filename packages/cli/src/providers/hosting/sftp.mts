@@ -12,8 +12,8 @@ import type {
 } from "../types.mts";
 
 export class SFTPProvider implements MediaHostingProvider {
-  #host: string;
-  #path: string;
+  readonly #host: string;
+  readonly #path: string;
 
   constructor(options: ProviderConfigSFTP) {
     this.#host = options.host;

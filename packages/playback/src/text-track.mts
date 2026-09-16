@@ -84,7 +84,7 @@ export class SyntheticVTTCue extends EventEmitter<TextTrackCueEventMap> {
  * A list of VTTCues, implementing array-like behavior.
  */
 export class SyntheticTextTrackCueList {
-  private __cues: SyntheticVTTCue[] = [];
+  private readonly __cues: SyntheticVTTCue[] = [];
 
   get length(): number {
     return this.__cues.length;
@@ -251,7 +251,7 @@ export class SyntheticTextTrack extends EventEmitter<TextTrackEventMap> {
  * A list of TextTracks, implementing array-like behavior.
  */
 export class SyntheticTextTrackList extends EventEmitter<TextTrackListEventMap> {
-  private __tracks: SyntheticTextTrack[] = [];
+  private readonly __tracks: SyntheticTextTrack[] = [];
 
   get length(): number {
     return this.__tracks.length;

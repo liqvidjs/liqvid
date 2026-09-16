@@ -35,9 +35,8 @@ export function FullScreen({
 }: FullScreenControlProps) {
   const forceUpdate = useForceUpdate();
 
-  const toggleFullScreen = () => {
-    return isFullScreen() ? exitFullScreen() : requestFullScreen(options);
-  };
+  const toggleFullScreen = () =>
+    isFullScreen() ? exitFullScreen() : requestFullScreen(options);
 
   const events = onClickReact(toggleFullScreen);
 

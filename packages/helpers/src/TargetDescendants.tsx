@@ -67,20 +67,22 @@ export function TargetDescendants<M extends string = string>({
 
   const script = useScript();
 
-  const indexedTransforms: IndexedTransform[] = useMemo(() => {
-    return transforms.map((t) => {
-      const m = omit(t, ["from", "to"]) as IndexedTransform;
+  const indexedTransforms: IndexedTransform[] = useMemo(
+    () =>
+      transforms.map((t) => {
+        const m = omit(t, ["from", "to"]) as IndexedTransform;
 
-      if (t.from) {
-        m.fromIndex = script.get(t.from).index;
-      }
-      if (t.to) {
-        m.toIndex = script.get(t.to).index;
-      }
+        if (t.from) {
+          m.fromIndex = script.get(t.from).index;
+        }
+        if (t.to) {
+          m.toIndex = script.get(t.to).index;
+        }
 
-      return m as IndexedTransform;
-    });
-  }, [script, transforms]);
+        return m as IndexedTransform;
+      }),
+    [script, transforms],
+  );
 
   /** Apply transformations to descendants */
   const update = useCallback(() => {

@@ -44,17 +44,15 @@ export class CursorRecorder extends ReplayDataRecorder<[number, number]> {
 
 const CursorSaveComponent: React.FC<{ data: ReplayData<[number, number]> }> = (
   props,
-) => {
-  return (
-    <>
-      {props.data ? (
-        <textarea readOnly value={JSON.stringify(props.data)}></textarea>
-      ) : (
-        "Cursor data not yet available."
-      )}
-    </>
-  );
-};
+) => (
+  <>
+    {props.data ? (
+      <textarea readOnly value={JSON.stringify(props.data)}></textarea>
+    ) : (
+      "Cursor data not yet available."
+    )}
+  </>
+);
 
 const icon = (
   <g>
