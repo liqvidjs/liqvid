@@ -168,8 +168,11 @@ export function mergeArrayDiffs<T>(
 export function mergeDiffs<T>(
   a: ObjectDiff<T>,
   b: ObjectDiff<T>,
+
+  /** If true, a will be mutated in-place. Important for hot loops. */
+  inPlace = false,
 ): ObjectDiff<T> {
-  const ret: ObjectDiff<T> = {};
+  const ret: ObjectDiff<T> = inPlace ? a : {};
 
   // `consume` deletes keys from `a` as it walks it, so operate on a shallow
   // copy — otherwise merging would destructively empty the caller's diff.
@@ -177,7 +180,9 @@ export function mergeDiffs<T>(
   // `mergeArrayDiffs` calls, which each copy their own level; and `applyDiff`
   // clones values on insertion, so the references carried over from `a`/`b`
   // stay immutable once the merged diff is later applied.
-  a = { ...a };
+  if (!inPlace) {
+    a = { ...a };
+  }
 
   for (const rKeyB of objectKeys(b)) {
     matchRunes(b, rKeyB, {
@@ -261,6 +266,7 @@ export function mergeDiffs<T>(
             Object.assign(ret, changeDiff(key, applyDiff(valueA, valueB)));
           },
           // create(a) * object(b) = object(a*b)
+          // NOTE: in practice, this is the hottest path
           create(valueA) {
             assertType<T>(valueA);
             Object.assign(ret, creationDiff(key, applyDiff(valueA, valueB)));
@@ -273,11 +279,18 @@ export function mergeDiffs<T>(
           },
           // object(a) * object(b) = object(a*b)
           object(valueA) {
-            Object.assign(ret, objectDiff(key, mergeDiffs(valueA, valueB)));
+            Object.assign(
+              ret,
+              objectDiff(key, mergeDiffs(valueA, valueB, inPlace)),
+            );
           },
         });
       },
     });
+  }
+
+  if (inPlace) {
+    return a;
   }
 
   // add anything remaining from a

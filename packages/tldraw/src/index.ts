@@ -16,6 +16,7 @@ import type {
   TLDrawShape,
   TLPage,
   TLPageId,
+  TLShape,
   TLShapeId,
   TLStoreSnapshot,
 } from "tldraw";
@@ -134,13 +135,18 @@ export const tldrawReplay = makeReplayPlugin<
           // state diffs
           if (action.diff) {
             const runedKeys = objectKeys(action.diff ?? {});
+
+            /** we batch new object creations for performance */
+            const newShapes: TLShape[] = [];
+
             for (const runedKey of runedKeys) {
               matchRunes(action.diff, runedKey, {
                 create(key, value) {
                   if (isShape(key)) {
                     assertType<DecodedTLShape>(value);
-                    // tldraw expects base64-encoded vectors
-                    editor.createShape({
+
+                    newShapes.push({
+                      // tldraw expects base64-encoded vectors
                       ...encodeShape(value),
                       isLocked: true,
                     });
@@ -204,6 +210,8 @@ export const tldrawReplay = makeReplayPlugin<
                 },
               });
             }
+
+            editor.createShapes(newShapes);
           }
         },
         { ignoreShapeLock: true },
@@ -422,16 +430,19 @@ export const tldrawReplay = makeReplayPlugin<
 
   // merge
   merge(...actions) {
-    return actions.reduce((acc, curr) => {
-      const diff = mergeDiffs(acc.diff ?? {}, curr.diff ?? {});
-      const viewport =
-        acc.viewport || curr.viewport
-          ? { ...acc.viewport, ...curr.viewport }
-          : undefined;
-      Object.assign(acc, curr);
-      acc.diff = diff;
-      if (viewport) acc.viewport = viewport;
-      return acc;
-    }, {});
+    return actions.reduce<TldrawAction>(
+      (acc, curr) => {
+        const diff = mergeDiffs(acc.diff!, curr.diff ?? {}, true);
+        const viewport =
+          acc.viewport || curr.viewport
+            ? { ...acc.viewport, ...curr.viewport }
+            : undefined;
+        Object.assign(acc, curr);
+        acc.diff = diff;
+        if (viewport) acc.viewport = viewport;
+        return acc;
+      },
+      { diff: {} },
+    );
   },
 });
