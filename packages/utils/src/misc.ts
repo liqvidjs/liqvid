@@ -119,22 +119,22 @@ export function wait(
   });
 }
 
-/** Returns a Promise that resolves once `callback` returns true. */
-export function waitFor(
-  callback: () => boolean,
+/** Returns a Promise that resolves once `callback` returns truthy. */
+export function waitFor<T>(
+  callback: () => T,
   interval: DurationLike | number = 10,
-): Promise<void> {
+): Promise<Exclude<T, false | undefined | null>> {
+  if (typeof interval !== "number") {
+    interval = Duration.inMilliseconds(interval);
+  }
+
   return new Promise((resolve) => {
     const checkCondition = () => {
-      if (callback()) {
-        resolve();
+      const value = callback();
+      if (value) {
+        resolve(value as Exclude<T, false | undefined | null>);
       } else {
-        setTimeout(
-          checkCondition,
-          typeof interval === "number"
-            ? interval
-            : Duration.inMilliseconds(interval),
-        );
+        setTimeout(checkCondition, interval);
       }
     };
 
