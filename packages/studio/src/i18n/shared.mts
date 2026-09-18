@@ -3,6 +3,10 @@ import type { AnyPath } from "effect-paths";
 import { createElement } from "react";
 import { Fragment } from "react/jsx-runtime";
 
+const INTERPOLATION_IDEMPOTENT = Symbol(
+  "indicates that the object has already had client-side functionization applied",
+);
+
 /** A localized string. */
 export type LocalizedString = string & Brand.Brand<"LocalizedString">;
 
@@ -14,11 +18,24 @@ export type Interpolated<T> = T extends LocalizedString
   ? T
   : {
       [key in keyof T]: T[key] extends InterpolationConfig<infer V>
-        ? (vars: Record<V, LocalizedReactNode>) => LocalizedReactNode
+        ? {
+            (vars: Record<V, LocalizedString | number>): LocalizedString;
+            (vars: Record<V, LocalizedReactNode>): LocalizedReactNode;
+          }
         : Interpolated<T[key]>;
     };
 export function interpolated<T>(t: T): Interpolated<T> {
-  const deep = {} as Interpolated<T>;
+  if (
+    (t as unknown as { [key: symbol]: boolean | undefined })[
+      INTERPOLATION_IDEMPOTENT
+    ]
+  ) {
+    return t as Interpolated<T>;
+  }
+
+  const deep = {
+    [INTERPOLATION_IDEMPOTENT]: true,
+  } as unknown as Interpolated<T>;
 
   for (const key in t) {
     const value = t[key];
@@ -26,18 +43,29 @@ export function interpolated<T>(t: T): Interpolated<T> {
     if (typeof value === "string") {
       deep[key] = value as Interpolated<T>[typeof key];
     } else if (isInterpolationConfig(value)) {
-      deep[key] = ((vars: Record<string, LocalizedReactNode>) =>
-        createElement(
-          Fragment,
-          null,
-          value._.split(/\{([^}]+)\}/g).map((str, index) =>
-            createElement(
-              Fragment,
-              { key: index },
-              index % 2 === 0 ? str : vars[str],
+      deep[key] = ((vars: Record<string, LocalizedReactNode>) => {
+        const isPlain = Object.values(vars).every((v) => typeof v !== "object");
+
+        const parts = value._.split(/\{([^}]+)\}/g);
+
+        if (isPlain) {
+          return parts
+            .map((str, index) => (index % 2 === 0 ? str : String(vars[str])))
+            .join("");
+        } else {
+          return createElement(
+            Fragment,
+            null,
+            parts.map((str, index) =>
+              createElement(
+                Fragment,
+                { key: index },
+                index % 2 === 0 ? str : vars[str],
+              ),
             ),
-          ),
-        )) as Interpolated<T>[typeof key];
+          );
+        }
+      }) as Interpolated<T>[typeof key];
     } else if (
       typeof value === "object" &&
       value !== null &&
@@ -74,6 +102,7 @@ export type Localized<T> = T extends string
       };
 export type LocalizedReactNode =
   | React.ReactElement
+  | " "
   | AnyPath
   | LocalizedString
   | PlainString
