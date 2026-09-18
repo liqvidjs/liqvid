@@ -25,10 +25,11 @@ import type { RenderEntry } from "#_/api/schemas.mjs";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized, PlainString } from "#_/i18n/shared.mjs";
+import type { PlainString } from "#_/i18n/shared.mjs";
 import { openRenderInFinderAction } from "#_/pages/root-actions.js";
 import { Button } from "#_/ui/Button.js";
 import {
+  DialogActions,
   DialogBackdrop,
   DialogClose,
   DialogPopup,
@@ -38,12 +39,19 @@ import {
   DialogTrigger,
 } from "#_/ui/Dialog.js";
 import { useDialogApi } from "#_/ui/dialogs-shared.js";
+import { NumericInput } from "#_/ui/NumericInput.js";
 import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
-import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
+import { TextField } from "#_/ui/TextField.js";
+import { Time } from "#_/ui/Time.js";
+import {
+  TranslationProvider,
+  useCommonTranslations,
+  useTranslations,
+} from "#_/utils/react.js";
 
 import type TranslationsJson from "./.translations/en.json";
 
-type T = Localized<typeof TranslationsJson>;
+type T = typeof TranslationsJson;
 
 export type { T as TranslationsRendersSection };
 
@@ -61,32 +69,6 @@ interface RenderConfig {
 }
 
 const styles = stylex.create({
-  addButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":disabled": colors.graySubtle,
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: {
-      ":disabled": colors.grayDim,
-      default: colors.grayNormal,
-    },
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    gap: spacing.xs,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    transition: "background-color 0.15s",
-  },
   closeButton: {
     backgroundColor: colors.transparent,
     borderStyle: "none",
@@ -103,42 +85,6 @@ const styles = stylex.create({
     lineHeight: 1.5,
     marginBlock: spacing.xl,
     marginInline: spacing.zero,
-  },
-  deleteButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.deleteBtnBgHover,
-      default: colors.errorSubtle,
-    },
-    borderColor: colors.deleteBtnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.errorText,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
-  },
-  deleteConfirmButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.errorSolidHover,
-      default: colors.errorSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: "pointer",
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
   },
   dialogActions: {
     columnGap: spacing.lg,
@@ -158,7 +104,7 @@ const styles = stylex.create({
     borderWidth: dims.sep,
     color: colors.grayNormal,
     fontSize: text.md,
-    outline: {
+    outlineStyle: {
       ":focus": "none",
       default: null,
     },
@@ -236,23 +182,6 @@ const styles = stylex.create({
     backgroundColor: colors.accentSolid,
     borderColor: colors.accentSolid,
     color: colors.white,
-  },
-  renderActionButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    padding: spacing.sm,
-    transition: "background-color 0.15s",
   },
   renderActions: {
     display: "flex",
@@ -332,31 +261,6 @@ const styles = stylex.create({
   statusFailed: {
     color: colors.errorSolid,
   },
-  submitButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover:not(:disabled)": colors.accentHover,
-      default: colors.accentSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    opacity: {
-      ":disabled": 0.6,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
-  },
   textInput: {
     backgroundColor: colors.grayApp,
     borderColor: {
@@ -368,10 +272,7 @@ const styles = stylex.create({
     borderWidth: dims.sep,
     color: colors.grayNormal,
     fontSize: text.md,
-    outline: {
-      ":focus": "none",
-      default: null,
-    },
+    outlineStyle: "none",
     paddingBlock: spacing.md,
     paddingInline: spacing.md,
     width: "100%",
@@ -491,15 +392,13 @@ export function RendersSection({
   }, [isOpen, renders, loadRenders]);
 
   const handleOpenInFinder = async (renderId: string) => {
-    await openRenderInFinderAction(projectPath, renderId);
+    await openRenderInFinderAction(projectPath, renderId, selectedParams);
   };
 
   const handleStartRename = (render: RenderEntry) => {
     setRenamingRender(render);
     setRenameValue(render.id);
   };
-
-  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString();
 
   const getStatusIcon = (status: RenderEntry["meta"]["status"]) => {
     switch (status) {
@@ -539,15 +438,11 @@ export function RendersSection({
   };
 
   return (
-    <>
+    <TranslationProvider t={t}>
       <div sx={styles.section}>
         <div sx={styles.sectionActions}>
           <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
-            <DialogTrigger
-              {...stylex.props(styles.addButton)}
-              disabled={isStarting}
-              type="button"
-            >
+            <DialogTrigger disabled={isStarting}>
               {isStarting ? (
                 <>
                   <Spinner /> {t.inProgress}
@@ -563,6 +458,7 @@ export function RendersSection({
                 aspectRatio,
                 config,
                 loadRenders,
+                selectedParams,
                 setConfig,
                 setConfigOpen,
                 setIsStarting,
@@ -576,7 +472,7 @@ export function RendersSection({
             <Spinner size={24} />
           </div>
         ) : renders.length === 0 ? (
-          <p sx={styles.emptyMessage}>{t.empty}</p>
+          <p sx={styles.emptyMessage}>{t.empty({ label: t.render })}</p>
         ) : (
           <ul sx={styles.renderList}>
             {renders.map((render) => (
@@ -590,7 +486,10 @@ export function RendersSection({
                     </span>
                   </div>
                   <div sx={styles.renderDetails}>
-                    <span>{formatDate(render.meta.createdAt)}</span>
+                    <Time
+                      format="date-and-time"
+                      value={render.meta.createdAt}
+                    />
                     <span>
                       {render.meta.width}
                       {"x"}
@@ -607,14 +506,12 @@ export function RendersSection({
                   {render.meta.status === "completed" && (
                     <>
                       <Button
-                        {...stylex.props(styles.renderActionButton)}
                         onClick={() => setPlayingRender(render)}
                         title={t.play}
                       >
                         <PlayIcon size={16} weight="fill" />
                       </Button>
                       <Button
-                        {...stylex.props(styles.renderActionButton)}
                         onClick={() => handleOpenInFinder(render.id)}
                         title={t.openInFinder}
                       >
@@ -623,14 +520,12 @@ export function RendersSection({
                     </>
                   )}
                   <Button
-                    {...stylex.props(styles.renderActionButton)}
                     onClick={() => handleStartRename(render)}
                     title={t.rename.trigger}
                   >
                     <PencilSimpleIcon size={16} />
                   </Button>
                   <Button
-                    {...stylex.props(styles.deleteButton)}
                     onClick={() => setDeleteDialog({ renderId: render.id })}
                     title={t.delete}
                   >
@@ -657,7 +552,7 @@ export function RendersSection({
         open={!!renamingRender}
       >
         <DialogPortal>
-          <DialogBackdrop />
+          <DialogBackdrop forceRender />
           <RenameDialog
             {...{
               loadRenders,
@@ -677,7 +572,7 @@ export function RendersSection({
       >
         <DeleteDialog {...{ deleteDialog, loadRenders, setDeleteDialog }} />
       </DialogRoot>
-    </>
+    </TranslationProvider>
   );
 }
 
@@ -685,6 +580,7 @@ function ConfigDialog({
   aspectRatio,
   config,
   loadRenders,
+  selectedParams,
   setConfig,
   setConfigOpen,
   setIsStarting,
@@ -692,12 +588,12 @@ function ConfigDialog({
   aspectRatio: AspectRatio;
   config: RenderConfig;
   loadRenders: () => Promise<void>;
+  selectedParams?: Record<string, string>;
   setConfig: React.Dispatch<React.SetStateAction<RenderConfig>>;
   setConfigOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsStarting: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const t = useTranslations<T>().renders;
-  const c = useCommonTranslations();
+  const { dialog: t } = useTranslations<T>();
   const projectPath = useProjectPath();
 
   const [lockAspectRatio, setLockAspectRatio] = useState(true);
@@ -713,6 +609,7 @@ function ConfigDialog({
           payload: {
             colorScheme: config.colorScheme,
             height: config.height,
+            params: selectedParams,
             width: config.width,
           },
           query: { projectPath },
@@ -769,14 +666,12 @@ function ConfigDialog({
 
   return (
     <DialogPortal>
-      <DialogBackdrop />
+      <DialogBackdrop forceRender />
       <DialogPopup>
-        <DialogTitle>{t.dialog.title}</DialogTitle>
+        <DialogTitle>{t.title}</DialogTitle>
 
         <div sx={styles.formField}>
-          <span id="render-color-scheme-label">
-            {t.dialog.colorScheme.label}
-          </span>
+          <span id="render-color-scheme-label">{t.colorScheme.label}</span>
           <RadioTabs<ColorScheme>
             aria-labelledby="render-color-scheme-label"
             onValueChange={(v) => setConfig((c) => ({ ...c, colorScheme: v }))}
@@ -784,19 +679,19 @@ function ConfigDialog({
           >
             <RadioTabsItem
               icon={SunIcon}
-              title={t.dialog.colorScheme.light}
+              title={t.colorScheme.light}
               value="light"
             />
             <RadioTabsItem
               icon={MoonIcon}
-              title={t.dialog.colorScheme.dark}
+              title={t.colorScheme.dark}
               value="dark"
             />
           </RadioTabs>
         </div>
 
         <div sx={styles.formField}>
-          <span>{t.dialog.resolution}</span>
+          <span>{t.resolution}</span>
           <div sx={styles.resolutionPresets}>
             {WIDTH_PRESETS.map((width) => (
               <Button
@@ -813,23 +708,17 @@ function ConfigDialog({
             ))}
           </div>
           <div sx={styles.dimensionInputs}>
-            <input
+            <NumericInput
               min={1}
-              onChange={(e) =>
-                handleWidthChange(Number(e.target.value) || config.width)
-              }
+              onChange={(value) => handleWidthChange(value || config.width)}
               sx={styles.dimensionInput}
-              type="number"
               value={config.width}
             />
             <span sx={styles.dimensionSeparator}>{"×"}</span>
-            <input
+            <NumericInput
               min={1}
-              onChange={(e) =>
-                handleHeightChange(Number(e.target.value) || config.height)
-              }
+              onChange={(value) => handleHeightChange(value || config.height)}
               sx={styles.dimensionInput}
-              type="number"
               value={config.height}
             />
             <Button
@@ -840,9 +729,7 @@ function ConfigDialog({
               )}
               onClick={handleToggleLock}
               title={
-                lockAspectRatio
-                  ? `Unlock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
-                  : `Lock aspect ratio (${aspectRatio.width}:${aspectRatio.height})`
+                lockAspectRatio ? t.unlock(aspectRatio) : t.lock(aspectRatio)
               }
               type="button"
             >
@@ -854,17 +741,15 @@ function ConfigDialog({
             </Button>
           </div>
         </div>
+        <DialogClose />
 
-        <div sx={styles.dialogActions}>
-          <DialogClose>{c.cancel}</DialogClose>
-          <Button
-            className={stylex.props(styles.submitButton).className}
-            onClick={handleStartRender}
-            type="button"
-          >
-            <FilmStripIcon size={16} /> {t.dialog.action}
+        <DialogActions>
+          <Button kind="primary" onClick={handleStartRender}>
+            <FilmStripIcon size={16} />
+            {" " as const}
+            {t.action}
           </Button>
-        </div>
+        </DialogActions>
       </DialogPopup>
     </DialogPortal>
   );
@@ -883,7 +768,7 @@ function RenameDialog({
   setRenameValue: React.Dispatch<React.SetStateAction<string>>;
   setRenamingRender: React.Dispatch<React.SetStateAction<RenderEntry | null>>;
 }) {
-  const t = useTranslations<T>().renders.rename;
+  const t = useTranslations<T>().rename;
   const c = useCommonTranslations();
 
   const projectPath = useProjectPath();
@@ -922,10 +807,9 @@ function RenameDialog({
     <DialogPopup>
       <DialogTitle>{t.title}</DialogTitle>
       <div sx={styles.formField}>
-        <label htmlFor="render-name">{t.name}</label>
-        <input
-          id="render-name"
-          onChange={(e) => setRenameValue(e.target.value)}
+        <TextField
+          label={t.name}
+          onChange={setRenameValue}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !isRenaming) {
               handleRename();
@@ -940,10 +824,8 @@ function RenameDialog({
       <div sx={styles.dialogActions}>
         <DialogClose>{c.cancel}</DialogClose>
         <Button
-          className={stylex.props(styles.submitButton).className}
           disabled={isRenaming || !renameValue.trim()}
           onClick={handleRename}
-          type="button"
         >
           {isRenaming ? (
             <>
@@ -969,7 +851,7 @@ function DeleteDialog({
     React.SetStateAction<{ renderId: string } | null>
   >;
 }) {
-  const t = useTranslations<T>().renders.deleteDialog;
+  const t = useTranslations<T>().deleteDialog;
   const c = useCommonTranslations();
   const projectPath = useProjectPath();
 
@@ -997,16 +879,13 @@ function DeleteDialog({
 
   return (
     <DialogPortal>
-      <DialogBackdrop />
+      <DialogBackdrop forceRender />
       <DialogPopup>
         <DialogTitle>{t.title}</DialogTitle>
         <p sx={styles.confirmMessage}>{t.confirm}</p>
         <div sx={styles.dialogActions}>
           <DialogClose>{c.cancel}</DialogClose>
-          <Button
-            {...stylex.props(styles.deleteConfirmButton)}
-            onClick={() => performDelete()}
-          >
+          <Button kind="destructive" onClick={performDelete}>
             {t.action}
           </Button>
         </div>

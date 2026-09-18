@@ -94,14 +94,17 @@ const styles = stylex.create({
     color: colors.grayNormal,
     cursor: "pointer",
     fontSize: text.base,
-    outline: {
-      ":focus-visible": `2px solid ${colors.accentSolid}`,
-      default: null,
-    },
+    outlineColor: colors.accentSolid,
     outlineOffset: {
       ":focus-visible": "1px",
       default: null,
     },
+    outlineStyle: {
+      ":focus-visible": "solid",
+
+      default: null,
+    },
+    outlineWidth: dims.ring,
     padding: `${spacing.xs} 0.6rem`,
     transition: "background-color 0.15s, color 0.15s, border-color 0.15s",
   },
@@ -247,17 +250,17 @@ export function JobsClient({
 }: {
   cancelJob: (formData: FormData) => Promise<void>;
   deleteJob: (formData: FormData) => Promise<void>;
-  initialLogLevels: string[];
+  initialLogLevels: readonly string[];
   initialTab: TabValue;
-  jobs: Record<string, LoggableJobClientEncoded>;
-  services: Record<string, ServiceClientEncoded>;
+  jobs: Readonly<Record<string, LoggableJobClientEncoded>>;
+  services: Readonly<Record<string, ServiceClientEncoded>>;
   t: T;
 }) {
   const [jobs, setJobs] = useState<Record<string, LoggableJobClient>>(() =>
-    deserialize(initialJobs),
+    deserialize(initialJobs, { "@liqvid/duration": Duration.fromJSON }),
   );
   const [services, setServices] = useState<Record<string, ServiceClient>>(() =>
-    deserialize(initialServices),
+    deserialize(initialServices, { "@liqvid/duration": Duration.fromJSON }),
   );
   const [levels, setLevels] = useState<ReadonlySet<LogLevel>>(
     () => new Set(initialLogLevels as LogLevel[]),
@@ -476,7 +479,7 @@ export function JobsClient({
   );
 }
 
-function MetadataTable({ data }: { data: Record<string, unknown> }) {
+function MetadataTable({ data }: { data: Readonly<Record<string, unknown>> }) {
   return (
     <table>
       <tbody>
@@ -677,12 +680,14 @@ function LogLevelFilter({
   );
 }
 
-function isProgressEvent(msg: unknown): msg is {
+type JobProgressEvent = Readonly<{
   value: number;
   total: number;
   formattedValue: string;
   formattedTotal: string;
-} {
+}>;
+
+function isProgressEvent(msg: unknown): msg is JobProgressEvent {
   return (
     typeof msg === "object" &&
     msg !== null &&

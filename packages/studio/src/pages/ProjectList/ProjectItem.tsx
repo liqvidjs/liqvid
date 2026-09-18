@@ -1,6 +1,7 @@
 import type { ProjectMeta } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
+import { FileDashedIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useMemo } from "react";
 
@@ -20,11 +21,16 @@ import {
   interpolatePathParametersWithSelected,
   resolveParametrized,
 } from "#_/utils/parameters-client.mjs";
+import { useTranslations } from "#_/utils/react.js";
 
 import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog/client.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
+
+import type TranslationsJson from "./.translations/en.json";
+
+type T = typeof TranslationsJson;
 
 const styles = stylex.create({
   actions: {
@@ -37,15 +43,12 @@ const styles = stylex.create({
   },
   duration: {
     backgroundColor: colors.overlayDark,
-    borderBottomLeftRadius: radii.none,
-    borderBottomRightRadius: radii.none,
     borderTopLeftRadius: radii.sm,
-    borderTopRightRadius: radii.none,
     bottom: 0,
     color: colors.white,
     fontSize: text.xs,
     lineHeight: 1,
-    padding: spacing.md,
+    padding: spacing.sm,
     position: "absolute",
     right: 0,
   },
@@ -65,7 +68,9 @@ const styles = stylex.create({
     padding: spacing.md,
   },
   name: {
-    display: "block",
+    alignItems: "center",
+    display: "flex",
+    gap: spacing.sm,
   },
   path: {
     color: colors.secondary,
@@ -82,6 +87,7 @@ const styles = stylex.create({
 
 /** @package */
 export function ProjectItem({ project }: { project: ProjectMeta }) {
+  const t = useTranslations<T>();
   const { basePath, productionServerPort } = useLiqvidConfig();
   const selectedRootParams = useSelectedRootParameters();
 
@@ -118,7 +124,14 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
         <a href={interpolatedPath} sx={styles.listItemLink}>
           <Thumbnail {...project} />
           <div>
-            <span sx={styles.name}>{resolvedTitle ?? project.path}</span>
+            <span sx={styles.name}>
+              {resolvedTitle ?? project.path}
+              {project.draft && (
+                <FileDashedIcon>
+                  <title>{t.draft}</title>
+                </FileDashedIcon>
+              )}
+            </span>
             <pre sx={styles.path}>{project.path}</pre>
           </div>
         </a>

@@ -19,15 +19,17 @@ import {
   text,
   typeface,
 } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import { useDialogApi } from "#_/ui/dialogs-shared.js";
+import { Range } from "#_/ui/Range.js";
 import { TimeDuration } from "#_/ui/Time.js";
 import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
 
-import type TranslationsJson from "../.translations/en.json";
+import type TranslationsJson from "./.translations/en.json";
 
-type T = Localized<typeof TranslationsJson>;
+type T = typeof TranslationsJson;
+
+export type { T as TranslationsThumbnailsSection };
 
 interface ThumbnailsSectionProps {
   duration: Duration;
@@ -36,32 +38,6 @@ interface ThumbnailsSectionProps {
 }
 
 const styles = stylex.create({
-  addButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":disabled": colors.graySubtle,
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: {
-      ":disabled": colors.grayDim,
-      default: colors.grayNormal,
-    },
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    gap: spacing.xs,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    transition: "background-color 0.15s",
-  },
   emptyMessage: {
     color: colors.grayDim,
     fontSize: text.md,
@@ -148,7 +124,7 @@ export function ThumbnailsSection({
   selectedParams,
 }: ThumbnailsSectionProps) {
   const projectPath = useProjectPath();
-  const t = useTranslations<T>().thumbs;
+  const { thumbs: t } = useTranslations<{ thumbs: T }>();
   const c = useCommonTranslations();
   const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -288,12 +264,7 @@ export function ThumbnailsSection({
   return (
     <div sx={styles.section}>
       <div sx={styles.sectionActions}>
-        <Button
-          {...stylex.props(styles.addButton)}
-          disabled={isGenerating}
-          onClick={handleGenerate}
-          type="button"
-        >
+        <Button disabled={isGenerating} onClick={handleGenerate}>
           {isGenerating ? (
             <>
               <Spinner size={16} /> {t.inProgress}
@@ -322,6 +293,7 @@ export function ThumbnailsSection({
                 {(() => {
                   const boxSx = stylex.props(styles.thumbsPreviewBox);
                   const imgSx = stylex.props(styles.thumbsPreviewBoxImg);
+
                   return (
                     <div
                       className={boxSx.className}
@@ -332,7 +304,7 @@ export function ThumbnailsSection({
                       }}
                     >
                       <img
-                        alt="Light thumbnail"
+                        alt={t.altLight}
                         className={imgSx.className}
                         src={getSheetUrl("light")}
                         style={{
@@ -365,7 +337,7 @@ export function ThumbnailsSection({
                       }}
                     >
                       <img
-                        alt="Dark thumbnail"
+                        alt={t.altDark}
                         className={imgSx.className}
                         src={getSheetUrl("dark")}
                         style={{
@@ -388,25 +360,14 @@ export function ThumbnailsSection({
               {...stylex.props(styles.timeDisplay)}
               value={{ seconds: thumbInfo.time }}
             />
-            {(() => {
-              const sliderSx = stylex.props(styles.seekSlider);
-              return (
-                <input
-                  className={sliderSx.className}
-                  max={100}
-                  min={0}
-                  onChange={(e) => setSliderValue(Number(e.target.value))}
-                  step={0.1}
-                  style={{
-                    ...sliderSx.style,
-                    // biome-ignore lint/suspicious/noExplicitAny: vendor-prefixed slider thumb styling not supported in StyleX
-                    ["--slider-thumb-bg" as any]: "var(--accent-solid)",
-                  }}
-                  type="range"
-                  value={sliderValue}
-                />
-              );
-            })()}
+            <Range
+              max={100}
+              min={0}
+              onChange={setSliderValue}
+              step={0.1}
+              {...stylex.props(styles.seekSlider)}
+              value={sliderValue}
+            />
             <TimeDuration
               {...stylex.props(styles.timeDisplay)}
               value={duration}

@@ -1,7 +1,12 @@
 {
   "delete": "Delete captions",
   "deleteBoth": "Delete audio (and captions)",
-  "empty": "No audio yet. Click \"Capture audio\" to capture the audio track, then generate captions from it.",
+  "empty": {
+    "_": "No audio yet. Click \"{label}\" to capture the audio track, then generate captions from it.",
+    "$": {
+      "label": null
+    }
+  },
   "generate": "Capture audio",
   "generateCaptions": "Generate captions",
   "inProgress": "Capturing audio...",
@@ -13,5 +18,11 @@
     "name": "Name",
     "title": "Rename Audio"
   },
-  "renameAudio": "Rename audio"
+  "renameAudio": "Rename audio",
+  "statusLabel": {
+    "completed": "Captioned",
+    "failed": "Captioning failed",
+    "generating": "Captioning...",
+    "pending": "Captions pending"
+  }
 }

@@ -106,19 +106,6 @@ function getCaptionsStatusIcon(status: CaptionsStatus) {
   }
 }
 
-function getCaptionsStatusLabel(status: CaptionsStatus) {
-  switch (status) {
-    case "pending":
-      return "Captions pending";
-    case "generating":
-      return "Captioning...";
-    case "completed":
-      return "Captioned";
-    case "failed":
-      return "Captioning failed";
-  }
-}
-
 export function CaptionRow({
   entry,
   multiple,
@@ -213,7 +200,7 @@ export function CaptionRow({
           {entry.captions && (
             <span sx={styles.renderStatus}>
               {getCaptionsStatusIcon(entry.captions.status)}
-              {getCaptionsStatusLabel(entry.captions.status)}
+              {t.statusLabel[entry.captions.status]}
             </span>
           )}
         </div>
@@ -235,7 +222,6 @@ export function CaptionRow({
                 : t.generateCaptions
               : t.notConfigured
           }
-          type="button"
         >
           {isGenerating ? (
             <Spinner size={16} />

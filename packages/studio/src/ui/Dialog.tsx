@@ -1,7 +1,10 @@
 "use client";
 
-// biome-ignore lint/style/noRestrictedImports: this is the styled version
-import { Dialog } from "@base-ui/react/dialog";
+import {
+  Dialog,
+  type DialogRootChangeEventDetails,
+  // biome-ignore lint/style/noRestrictedImports: this is the styled version
+} from "@base-ui/react/dialog";
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { XIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
@@ -20,19 +23,15 @@ import {
   useDialogApi,
 } from "./dialogs-shared.ts";
 
-interface DialogRootProps {
-  children?: ReactNode;
-  defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  open?: boolean;
-}
-
 export function DialogRoot({
   children,
   defaultOpen = false,
   onOpenChange,
   open: controlledOpen,
-}: DialogRootProps) {
+  ...props
+}: React.ComponentProps<typeof Dialog.Root> & {
+  children?: ReactNode;
+}) {
   // open state
   const [open, setOpen] = useState(defaultOpen);
 
@@ -40,8 +39,12 @@ export function DialogRoot({
 
   /** setOpen() wrapper which updates ancestor dropdown */
   const wrappedOnOpenChange = useCallback(
-    (newOpen: boolean) => {
-      (onOpenChange ?? setOpen)(newOpen);
+    (newOpen: boolean, details: DialogRootChangeEventDetails) => {
+      if (onOpenChange) {
+        onOpenChange(newOpen, details);
+      } else {
+        setOpen(newOpen);
+      }
     },
     [onOpenChange],
   );
@@ -66,6 +69,7 @@ export function DialogRoot({
       modal
       onOpenChange={wrappedOnOpenChange}
       open={controlledOpen ?? open}
+      {...props}
     >
       <DialogApiContext.Provider value={dialogApi}>
         {children}

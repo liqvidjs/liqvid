@@ -191,16 +191,20 @@ export async function openInFinderAction(
 export async function openRenderInFinderAction(
   projectPath: RelativeDir,
   renderId: string,
+  params?: Readonly<Record<string, string>>,
 ): Promise<{ success: boolean }> {
   try {
     // Validate paths to prevent directory traversal
     if (projectPath.includes("..") || renderId.includes("..")) {
       return { success: false };
     }
-    const fullPath = path.join(
+    const assetsDir = getParameterizedAssetsDir(
       getRoutesDir(),
       projectPath,
-      ASSETS_DIR,
+      params,
+    );
+    const fullPath = path.join(
+      assetsDir,
       RelativeDir("renders"),
       RelativeDir(renderId),
     );

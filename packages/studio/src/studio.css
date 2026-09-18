@@ -1,12 +1,11 @@
 @import "@fontsource-variable/inter";
 
 :root {
+  --surface: light-dark(var(--color-zinc-50), var(--color-zinc-900));
   font-family: "Inter Variable", Arial, Helvetica, sans-serif;
   font-size: 18px;
   line-height: 1.5;
-
-  /* stone-750 */
-  background: light-dark(var(--color-zinc-50), var(--color-zinc-900));
+  background-color: var(--surface);
 }
 
 @layer reset {
@@ -33,6 +32,11 @@
 
   pre {
     display: inline;
+  }
+
+  :focus-visible {
+    outline-style: none;
+    box-shadow: var(--shadow-focus);
   }
 }
 

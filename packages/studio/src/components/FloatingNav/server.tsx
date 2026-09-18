@@ -1,7 +1,13 @@
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
-import { breakpoints, colors, spacing } from "#_/design/tokens.stylex.js";
+import {
+  breakpoints,
+  colors,
+  dims,
+  radii,
+  spacing,
+} from "#_/design/tokens.stylex.js";
 import logo from "#_/logo.png";
 import {
   NavigationMenuContent,
@@ -22,6 +28,13 @@ import type TranslationsJson from "./.translations/en.json";
 type T = typeof TranslationsJson;
 
 const styles = stylex.create({
+  content: {
+    overflow: "visible",
+    translate: {
+      default: null,
+      [breakpoints.desktop]: `0 ${spacing.lg}`,
+    },
+  },
   img: {
     scale: {
       ":hover": 1.05,
@@ -29,15 +42,12 @@ const styles = stylex.create({
     },
     transition: "scale 200ms ease-in-out",
   },
+
   link: {
     backgroundColor: colors.transparent,
+    borderRadius: radii.circle,
   },
-  list: {
-    translate: {
-      default: null,
-      [breakpoints.desktop]: `0 ${spacing.lg}`,
-    },
-  },
+
   logo: {
     borderStyle: "none",
     cursor: "pointer",
@@ -67,7 +77,7 @@ export async function FloatingNav() {
               />
             </NavigationMenuLink>
           </NavigationMenuTrigger>
-          <NavigationMenuContent keepMounted style={styles.list}>
+          <NavigationMenuContent keepMounted style={styles.content}>
             <ul>
               <li>
                 <NavigationMenuLink href="https://liqvidjs.org/docs/">

@@ -9,6 +9,7 @@ import type { TranslationsCaptionsSection } from "./MediaDialog/captions/Caption
 import type { TranslationsMediaDialog } from "./MediaDialog/client.tsx";
 import type { TranslationsRendersSection } from "./MediaDialog/RendersSection/RendersSection.tsx";
 import type { TranslationsScreenshotsSection } from "./MediaDialog/screenshots/ScreenshotsSection.tsx";
+import type { TranslationsThumbnailsSection } from "./MediaDialog/ThumbnailsSection/ThumbnailsSection.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -17,11 +18,12 @@ type T = {
   media: TranslationsMediaDialog;
   renders: TranslationsRendersSection;
   screenshots: TranslationsScreenshotsSection;
+  thumbs: TranslationsThumbnailsSection;
 } & typeof TranslationsJson;
 
 export async function ProjectList(props: Omit<ProjectListProps, "t">) {
-  const { base, captions, media, renders, screenshots } = await promiseAllKeyed(
-    {
+  const { base, captions, media, renders, screenshots, thumbs } =
+    await promiseAllKeyed({
       base: getTranslations<typeof TranslationsJson>(import.meta.url),
       captions: getTranslations<TranslationsCaptionsSection>(
         import.meta.url,
@@ -39,10 +41,13 @@ export async function ProjectList(props: Omit<ProjectListProps, "t">) {
         import.meta.url,
         RelativeDir("./MediaDialog/screenshots"),
       ),
-    },
-  );
+      thumbs: getTranslations<TranslationsThumbnailsSection>(
+        import.meta.url,
+        RelativeDir("./MediaDialog/ThumbnailsSection"),
+      ),
+    });
 
-  const t: T = { captions, media, renders, screenshots, ...base };
+  const t: T = { captions, media, renders, screenshots, thumbs, ...base };
 
   return (
     <TranslationProvider t={t}>

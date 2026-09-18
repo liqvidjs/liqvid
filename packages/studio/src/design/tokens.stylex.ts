@@ -397,6 +397,8 @@ export const colors = stylex.defineVars({
   errorSubtle: "light-dark(#fef2f2, #450a0a)",
   errorText: "light-dark(#dc2626, #fca5a5)",
 
+  focus: (): string => colors.accentSolid,
+
   /** folder/card colors */
   folderBorder: "light-dark(#e5e7eb, #374151)",
   folderHeaderBg: "light-dark(#f9fafb, #1f2937)",
@@ -457,6 +459,10 @@ export const colors = stylex.defineVars({
 
 export const dims = stylex.defineConsts({
   icon: "24px",
+
+  /** size of ring around focused elements */
+  ring: "2px",
+
   sep: "1px",
 });
 
@@ -472,12 +478,14 @@ export const radii = stylex.defineConsts({
 });
 
 export const shadows = stylex.defineConsts({
-  dialog: "0 8px 24px light-dark(#00000026, #00000066)",
+  /** ring around focused UI elements */
+  focus: `
+        0 0 0 2px oklch(from var(--surface) l c h),
+        0 0 0 4px oklch(from ${colors.accentSolid} l c h / 0.8)
+      `,
   lg: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
   md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
   sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-  toast:
-    "0px 1px 2px 0px light-dark(#00000026, #33333326), 0px 3px 7px 0px light-dark(#00000040, #33333340)",
   xl: "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
   xxl: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
 });
@@ -546,4 +554,13 @@ export const browserScales = stylex.defineVars({
   "--color-zinc-850": scales.zinc850,
   "--color-zinc-900": scales.zinc900,
   "--color-zinc-950": scales.zinc950,
+});
+
+export const nullHack = stylex.defineVars({
+  null: null,
+});
+
+/** @public */
+export const browserShadows = stylex.defineVars({
+  "--shadow-focus": shadows.focus,
 });

@@ -14,10 +14,29 @@
       "light": "Light"
     },
     "fps": "fps",
+    "lock": {
+      "_": "Lock aspect ratio ({width}:{height})",
+      "$": {
+        "height": null,
+        "width": null
+      }
+    },
     "resolution": "Resolution",
-    "title": "Render Settings"
+    "title": "Render Settings",
+    "unlock": {
+      "_": "Unlock aspect ratio ({width}:{height})",
+      "$": {
+        "height": null,
+        "width": null
+      }
+    }
   },
-  "empty": "No renders yet. Click \"Render\" to create a video.",
+  "empty": {
+    "_": "No renders yet. Click \"{label}\" to create a video.",
+    "$": {
+      "label": null
+    }
+  },
   "inProgress": "Starting...",
   "openInFinder": "Open in Finder",
   "play": "Play video",

@@ -29,6 +29,7 @@ const styles = stylex.create({
     color: colors.softControl,
     flexShrink: 0,
   },
+
   count: {
     alignItems: "center",
     aspectRatio: "square",
@@ -44,54 +45,70 @@ const styles = stylex.create({
     paddingInline: spacing.md,
     width: dims.icon,
   },
+
   folder: {
     borderColor: colors.folderBorder,
     borderRadius: radii.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
-    overflow: "hidden",
+    overflow: "visible",
   },
+
   folderHeader: {
     alignItems: "center",
     backgroundColor: {
       ":hover": colors.folderHeaderBgHover,
       default: colors.folderHeaderBg,
     },
+    borderRadius: radii.sm,
     borderStyle: "none",
+    boxShadow: "none",
     cursor: "pointer",
     display: "flex",
     fontFamily: typeface.mono,
     fontSize: text.md,
     gap: spacing.md,
+    outlineColor: {
+      ":focus-visible": colors.accentSolid,
+      default: colors.transparent,
+    },
+    outlineStyle: "solid",
+    outlineWidth: dims.ring,
     paddingBlock: spacing.lg,
     paddingInline: spacing.xl,
     textAlign: "left",
     transition: "background-color 0.15s",
     width: "100%",
   },
+
   folderProjectList: {
     borderColor: colors.folderBorder,
     borderTopStyle: "solid",
     borderTopWidth: dims.sep,
   },
+
   icon: {
     color: colors.accentSolid,
     fill: colors.accentSolid,
     flexShrink: 0,
   },
+
   name: {
     flex: "1",
   },
+
   nestedFolder: {
     borderRadius: radii.none,
     borderStyle: "none",
   },
+
   nestedFolderHeader: {
     backgroundColor: {
       ":hover": colors.nestedFolderHeaderBg,
       default: colors.transparent,
     },
   },
+
   projectList: {
     display: "flex",
     flexDirection: "column",

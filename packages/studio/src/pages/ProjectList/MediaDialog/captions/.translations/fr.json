@@ -1,0 +1,29 @@
+{
+  "delete": "Supprimer les sous-titres",
+  "deleteBoth": "Supprimer l'audio (et les sous-titres)",
+  "empty": {
+    "_": "Pas d'audio au moment. Cliquez sur \"{label}\" pour capturer la piste audio, puis générez les sous-titres à partir de celle-ci.",
+    "$": {
+      "label": null
+    }
+  },
+  "generate": "Capturer l'audio",
+  "generateCaptions": "Générer les sous-titres",
+  "inProgress": "Capture audio en cours...",
+  "notConfigured": "Le sous-titrage n'est pas configuré",
+  "regenerate": "Regénérer les sous-titres",
+  "rename": {
+    "action": "Renommer",
+    "inProgress": "Renommage en cours...",
+    "name": "Nom",
+    "title": "Renommer l'audio"
+  },
+  "renameAudio": "Renommer l'audio",
+
+  "statusLabel": {
+    "completed": "Sous-titré",
+    "failed": "Sous-titrage échoué",
+    "generating": "Sous-titrage en cours...",
+    "pending": "Sous-titres en attente"
+  }
+}

@@ -86,8 +86,7 @@ export const getRenderUrl = Effect.fnUntraced(function* (
   if (renderSource === "preview") {
     return `${origin}/${interpolatedPath}?preview`;
   } else {
-    const previewPath = `${basePath || ""}/${interpolatedPath}/`;
-    return `http://localhost:${productionServerPort}${previewPath}`;
+    return `http://localhost:${productionServerPort}${basePath || ""}/${interpolatedPath}/`;
   }
 });
 

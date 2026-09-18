@@ -2,7 +2,7 @@
 
 import type { JSONValue } from "@liqvid/ssr/serde";
 import type { RelativeDir } from "effect-paths";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import CommonTranslations from "#_/.translations/en.json";
 import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
@@ -22,7 +22,8 @@ const translationContext = createContext<any>({});
 translationContext.displayName = "Translation";
 
 export function useTranslations<T>(): Interpolated<Localized<T>> {
-  return interpolated(useContext(translationContext) as Localized<T>);
+  const context = useContext(translationContext) as Localized<T>;
+  return useMemo(() => interpolated(context), [context]);
 }
 
 export function TranslationProvider<T>({

@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "#_/ui/Dialog.js";
 import { useDialogApi } from "#_/ui/dialogs-shared.js";
+import { TextField } from "#_/ui/TextField.js";
 import { useTranslations } from "#_/utils/react.js";
 
 import { CaptionRow } from "./CaptionsRow.tsx";
@@ -48,7 +49,6 @@ const styles = stylex.create({
     color: colors.grayDim,
     fontSize: text.md,
     padding: spacing.xl,
-    textAlign: "center",
   },
   formField: {
     columnGap: spacing.lg,
@@ -93,10 +93,7 @@ const styles = stylex.create({
     borderWidth: dims.sep,
     color: colors.grayNormal,
     fontSize: text.md,
-    outline: {
-      ":focus": "none",
-      default: null,
-    },
+    outlineStyle: "none",
     paddingBlock: spacing.md,
     paddingInline: spacing.md,
     width: "100%",
@@ -223,11 +220,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
     <>
       <div sx={styles.section}>
         <div sx={styles.sectionActions}>
-          <Button
-            disabled={isGeneratingAudio}
-            onClick={handleGenerateAudio}
-            type="button"
-          >
+          <Button disabled={isGeneratingAudio} onClick={handleGenerateAudio}>
             {isGeneratingAudio ? (
               <>
                 <Spinner size={16} /> {t.inProgress}
@@ -245,7 +238,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
             <Spinner size={24} />
           </div>
         ) : audio.length === 0 ? (
-          <p sx={styles.emptyMessage}>{t.empty}</p>
+          <p sx={styles.emptyMessage}>{t.empty({ label: t.generate })}</p>
         ) : (
           <ul sx={styles.renderList}>
             {audio.map((entry) => (
@@ -268,21 +261,19 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
         open={!!renaming}
       >
         <DialogPortal>
-          <DialogBackdrop />
+          <DialogBackdrop forceRender />
           <DialogPopup>
             <DialogTitle>{t.rename.title}</DialogTitle>
             <div sx={styles.formField}>
-              <label htmlFor="audio-name">{t.rename.name}</label>
-              <input
-                id="audio-name"
-                onChange={(e) => setRenameValue(e.target.value)}
+              <TextField
+                label={t.rename.name}
+                onChange={(value) => setRenameValue(value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isRenaming) {
                     handleRename();
                   }
                 }}
                 sx={styles.textInput}
-                type="text"
                 value={renameValue}
               />
             </div>
@@ -291,7 +282,6 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
               <Button
                 disabled={isRenaming || !renameValue.trim()}
                 onClick={handleRename}
-                type="button"
               >
                 {isRenaming ? (
                   <>

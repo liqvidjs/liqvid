@@ -17,7 +17,12 @@
     "resolution": "Résolution",
     "title": "Paramètres de rendu"
   },
-  "empty": "Aucun rendu au moment. Cliquez sur \"Rendre\" pour rendre un vidéo statique.",
+  "empty": {
+    "_": "Aucun rendu au moment. Cliquez sur \"{label}\" pour rendre un vidéo statique.",
+    "$": {
+      "label": null
+    }
+  },
   "inProgress": "Starting...",
   "openInFinder": "Ouvrir dans Finder",
   "play": "Lire la vidéo",
