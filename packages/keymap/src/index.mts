@@ -53,7 +53,7 @@ export class Keymap {
   /** Given a KeyboardEvent, returns a shortcut sequence matching that event. */
   static identify(e: KeyboardEvent) {
     const parts: string[] = [];
-    for (const modifier in modifierMap) {
+    for (const modifier of modifierOrder) {
       if (e.getModifierState(modifier)) {
         parts.push(modifierMap[modifier as keyof typeof modifierMap]);
       }

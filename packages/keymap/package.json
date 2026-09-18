@@ -1,6 +1,6 @@
 {
   "name": "@liqvid/keymap",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "Key binding for Liqvid",
   "homepage": "https://github.com/liqvidjs/liqvid/tree/main/packages/keymap#readme",
   "bugs": {
