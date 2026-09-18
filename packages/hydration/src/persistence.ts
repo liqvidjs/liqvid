@@ -12,13 +12,13 @@ import type {
   SimpleSourceConfig,
 } from "./types.ts";
 
-export type PersistentConfig<T> = {
+export type PersistentConfig<T> = Readonly<{
   /** initial value to use when persistence is disabled */
   default?: T;
 
   /** whether to disable persistence */
   disabled?: boolean;
-};
+}>;
 
 export function usePersist<C extends LocalValueConfig>(
   storage: C,

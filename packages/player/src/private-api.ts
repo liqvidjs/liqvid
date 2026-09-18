@@ -5,9 +5,9 @@ import { useContext } from "react";
 
 import type { ControlsState } from "./hooks";
 
-export type PrivatePlayerContext = {
+export type PrivatePlayerContext = Readonly<{
   setControls: React.Dispatch<React.SetStateAction<ControlsState>>;
-};
+}>;
 
 export const PrivatePlayerContext = createUniqueContext<PrivatePlayerContext>(
   "@liqvid/player/private-api",

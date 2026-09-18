@@ -89,7 +89,10 @@ const styles = stylex.create({
 type T = Localized<typeof TranslationsJson>;
 
 /** Interpolate `{name}`-style placeholders in a translation string. */
-function format(template: string, values: Record<string, string>): string {
+function format(
+  template: string,
+  values: Readonly<Record<string, string>>,
+): string {
   return template.replace(/\{(\w+)\}/g, (_match, key: string) =>
     key in values ? values[key]! : `{${key}}`,
   );

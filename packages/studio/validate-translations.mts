@@ -914,7 +914,7 @@ function deleteKeyPath(obj: { [key: string]: Json }, keyPath: string): void {
     return;
   }
 
-  const leafKey = parts[parts.length - 1]!;
+  const leafKey = parts.at(-1)!;
   delete current[leafKey];
 
   // Walk back up, removing empty parent objects.

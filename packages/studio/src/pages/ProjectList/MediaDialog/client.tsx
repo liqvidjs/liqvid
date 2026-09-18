@@ -13,7 +13,13 @@ import * as stylex from "@stylexjs/stylex";
 import { useMemo, useState } from "react";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  opacity,
+  radii,
+  spacing,
+} from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import {
   DialogBackdrop,
@@ -32,7 +38,7 @@ import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { ParameterSelector } from "./ParameterSelector.tsx";
 import { RendersSection } from "./RendersSection/RendersSection.tsx";
 import { ScreenshotsSection } from "./screenshots/ScreenshotsSection.tsx";
-import { ThumbnailsSection } from "./ThumbnailsSection.tsx";
+import { ThumbnailsSection } from "./ThumbnailsSection/ThumbnailsSection.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -65,7 +71,7 @@ const styles = stylex.create({
       default: "pointer",
     },
     opacity: {
-      ":disabled": 0.6,
+      ":disabled": opacity.disabled,
     },
     paddingBlock: spacing.md,
     paddingInline: spacing.xl,

@@ -152,8 +152,8 @@ const setupPreviewSymlinks = Effect.fnUntraced(function* (
  */
 function getEnvVar(
   name: string,
-  envFile: Record<string, string>,
-  _envFiles: Record<string, unknown>,
+  envFile: Readonly<Record<string, string>>,
+  _envFiles: Readonly<Record<string, unknown>>,
 ): string | undefined {
   return envFile[name] ?? process.env[name];
 }

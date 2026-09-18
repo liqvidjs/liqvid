@@ -6,7 +6,7 @@ import type {
   ColorSchemeOption,
   ProjectMeta,
 } from "@liqvid/schemas";
-import { formatTime, parseTime, timeRegexp } from "@liqvid/utils";
+import { formatTimeMs, parseTime$, timeRegexp } from "@liqvid/utils";
 import {
   CameraIcon,
   MoonIcon,
@@ -127,18 +127,6 @@ const styles = stylex.create({
   },
 });
 
-function formatExactTime(time: number): string {
-  const milliseconds = Math.round(time * 1000);
-  const minutes = Math.floor(milliseconds / 60_000);
-  const seconds = Math.floor(milliseconds / 1_000) % 60;
-  const remainder = milliseconds % 1_000;
-
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-    2,
-    "0",
-  )}.${String(remainder).padStart(3, "0")}`;
-}
-
 export function ScreenshotModal({
   basePath,
   duration,
@@ -150,14 +138,13 @@ export function ScreenshotModal({
   const { screenshots: t } = useTranslations<{ screenshots: T }>();
 
   const { renderSource } = useDerivedConfig();
-  const [previewTime, setPreviewTime] = useState(0);
-  const [timeInput, setTimeInput] = useState(formatExactTime(0));
+  const [previewTime, setPreviewTime] = useState(Duration.zero);
+  const [timeInput, setTimeInput] = useState(formatTimeMs(0));
   const [isCapturing, setIsCapturing] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorSchemeOption>("both");
 
   const { aspectRatio, path: projectPath } = project;
   const durationSeconds = Duration.inSeconds(duration);
-  const durationMilliseconds = Duration.inMilliseconds(duration);
   const interpolatedProjectPath = interpolatePathParametersWithSelected(
     projectPath,
     undefined,
@@ -196,8 +183,8 @@ export function ScreenshotModal({
 
   // Seek when preview time changes
   useEffect(() => {
-    api?.seekTo(previewTime).catch(console.error);
-    setTimeInput(formatExactTime(previewTime));
+    api?.seekTo(previewTime.inSeconds()).catch(console.error);
+    setTimeInput(formatTimeMs(previewTime));
   }, [previewTime, api]);
 
   // Update color scheme in iframe (only for light/dark, not "both")
@@ -225,7 +212,7 @@ export function ScreenshotModal({
               colorScheme,
               height,
               params: selectedParams,
-              time: previewTime,
+              time: previewTime.inSeconds(),
               width,
             },
             query: { projectPath },
@@ -246,9 +233,9 @@ export function ScreenshotModal({
       return;
     }
 
-    const parsedTime = parseTime(timeInput);
-    if (parsedTime <= durationMilliseconds) {
-      setPreviewTime(parsedTime / 1000);
+    const parsedTime = parseTime$(timeInput);
+    if (parsedTime.lessThanOrEqual(duration)) {
+      setPreviewTime(parsedTime);
     }
   };
 
@@ -274,7 +261,7 @@ export function ScreenshotModal({
           {/** biome-ignore lint/correctness/noRestrictedElements: this is special */}
           <input
             aria-label={t.timeLabel}
-            onBlur={() => setTimeInput(formatExactTime(previewTime))}
+            onBlur={() => setTimeInput(formatTimeMs(previewTime))}
             onChange={(e) => setTimeInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -290,11 +277,13 @@ export function ScreenshotModal({
           <input
             max={durationSeconds || 60}
             min={0}
-            onChange={(e) => setPreviewTime(e.target.valueAsNumber)}
+            onChange={(e) =>
+              setPreviewTime(Duration.from({ seconds: e.target.valueAsNumber }))
+            }
             step={0.1}
             sx={styles.seekSlider}
             type="range"
-            value={previewTime}
+            value={previewTime.inSeconds()}
           />
           <TimeDuration
             {...stylex.props(styles.timeDisplay)}
@@ -328,12 +317,7 @@ export function ScreenshotModal({
         </div>
 
         <div sx={styles.dialogActions}>
-          <Button
-            disabled={isCapturing}
-            kind="primary"
-            onClick={handleCapture}
-            type="button"
-          >
+          <Button disabled={isCapturing} kind="primary" onClick={handleCapture}>
             {isCapturing ? (
               <>
                 <Spinner size={16} /> {t.inProgress}

@@ -9,6 +9,7 @@ export type ShortcutsSpecifier = string | string[];
  */
 export type ShortcutHandler = (
   e: KeyboardEvent,
+
   /**
    * Information about the keyboard shortcut assigned to this action.
    * For example, when a text field is focused, you may wish to suspend

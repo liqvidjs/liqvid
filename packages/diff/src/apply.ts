@@ -39,7 +39,7 @@ export function applyDiff<T>(a: T, b: ObjectDiff<T>, inPlace = false): T {
           throw new TypeError("Expected array");
         }
 
-        applyArrayDiff(target, item, true);
+        applyArrayDiff(target as any[], item, true);
       },
       change(key, item) {
         copy[key] = cloneValue(item) as any;
@@ -83,18 +83,10 @@ export function applyArrayDiff<T>(
   for (const diff of itemDiffs) {
     matchItemDiff(diff, {
       array(offset, item) {
-        applyArrayDiff(
-          copy[copy.length - offset] as unknown[],
-          item,
-          true,
-        ) as T;
+        applyArrayDiff(copy.at(-offset) as unknown[], item, true) as T;
       },
       object(offset, item) {
-        applyDiff(
-          copy[copy.length - offset] as T[string & keyof T],
-          item,
-          true,
-        ) as T;
+        applyDiff(copy.at(-offset) as T[string & keyof T], item, true) as T;
       },
       set(offset, item) {
         copy[copy.length - offset] = cloneValue(item) as T;

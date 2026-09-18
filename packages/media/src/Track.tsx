@@ -6,7 +6,7 @@ import {
   type TextTrackKind,
 } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
-import { assertType } from "@liqvid/utils";
+import { parseTime } from "@liqvid/utils";
 import { useEffect, useRef } from "react";
 
 export interface TrackProps {
@@ -30,36 +30,6 @@ export interface TrackProps {
 
   /** The BCP 47 language tag for the track (e.g., "en", "es", "fr"). */
   srcLang?: string;
-}
-
-/**
- * Parse a WebVTT timestamp to seconds.
- * Supports formats: "HH:MM:SS.mmm", "MM:SS.mmm", "SS.mmm"
- */
-function parseVTTTimestamp(timestamp: string): number {
-  const parts = timestamp.trim().split(":");
-
-  if (parts.length === 3) {
-    assertType<[string, string, string]>(parts);
-
-    // HH:MM:SS.mmm
-    const hours = Number.parseFloat(parts[0]);
-    const minutes = Number.parseFloat(parts[1]);
-    const seconds = Number.parseFloat(parts[2]);
-    return hours * 3600 + minutes * 60 + seconds;
-  } else if (parts.length === 2) {
-    assertType<[string, string, string]>(parts);
-
-    // MM:SS.mmm
-    const minutes = Number.parseFloat(parts[0]);
-    const seconds = Number.parseFloat(parts[1]);
-    return minutes * 60 + seconds;
-  } else {
-    assertType<[string]>(parts);
-
-    // SS.mmm
-    return Number.parseFloat(parts[0]);
-  }
 }
 
 /**
@@ -145,10 +115,10 @@ function parseVTT(content: string): Array<{
       continue;
     }
 
-    const startTime = parseVTTTimestamp(timingMatch[1]);
+    const startTime = parseTime(timingMatch[1]) / 1000;
     // Extract end time (may have settings after it)
     const endPart = timingMatch[2].split(/\s/)[0]!;
-    const endTime = parseVTTTimestamp(endPart);
+    const endTime = parseTime(endPart) / 1000;
 
     i++;
 

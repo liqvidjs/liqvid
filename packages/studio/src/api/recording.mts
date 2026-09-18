@@ -252,8 +252,9 @@ export const recordingsLive = HttpApiBuilder.group(
 
             return recordings;
           },
-          (effect) =>
+          (effect, { query: { projectPath, params } }) =>
             effect.pipe(
+              Effect.annotateLogs({ params, projectPath }),
               Effect.catchTag("PlatformError", Effect.orDie),
               Effect.withLogSpan("recordings.list"),
             ),

@@ -108,6 +108,7 @@
         "useUniqueElementIds": "off"
       },
       "nursery": {
+        "useReactAsyncServerFunction": "error",
         "useReactCompiler": {
           "level": "on",
           "options": {
@@ -135,6 +136,11 @@
             }
           }
         },
+        "useAtIndex": "error",
+        "useConsistentArrayType": "warn",
+        "useConsistentObjectDefinitions": "off",
+        "useErrorCause": "error",
+        "useGroupedAccessorPairs": "error",
         "useReadonlyClassProperties": "error",
         "useTemplate": "off"
       },

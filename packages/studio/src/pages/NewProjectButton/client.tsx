@@ -6,7 +6,7 @@ import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import { type Localized, PlainString } from "#_/i18n/shared.mjs";
 import {
   createProjectAction,
   loadTemplatesAction,
@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#_/ui/Select.js";
+import { TextField } from "#_/ui/TextField.js";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -79,31 +80,6 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     rowGap: spacing.lg,
-  },
-  submitButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":hover:not(:disabled)": colors.accentHover,
-      default: colors.accentSolid,
-    },
-    borderRadius: radii.md,
-    borderStyle: "none",
-    color: colors.white,
-    columnGap: spacing.md,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    fontWeight: 500,
-    opacity: {
-      ":disabled": 0.6,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    rowGap: spacing.md,
-    transition: "background-color 0.15s",
   },
 });
 
@@ -188,29 +164,27 @@ export function NewProjectButtonClient({ t }: { t: T }) {
           <DialogTitle>{t.dialog.title}</DialogTitle>
           <form onSubmit={handleSubmit} sx={styles.dialogForm}>
             <div sx={styles.formField}>
-              <label htmlFor={ids.projectName}>{t.dialog.name}</label>
-              <input
+              <TextField
                 autoComplete="off"
                 disabled={isCreating}
                 id={ids.projectName}
-                onChange={(e) => setName(e.target.value)}
+                label={t.dialog.name}
+                onChange={setName}
                 placeholder={t.dialog.namePlaceholder}
                 required
-                type="text"
                 value={name}
               />
             </div>
 
             <div sx={styles.formField}>
-              <label htmlFor={ids.projectPath}>{t.dialog.path}</label>
-              <input
+              <TextField
                 autoComplete="off"
                 disabled={isCreating}
                 id={ids.projectPath}
-                onChange={(e) => setProjectPath(RelativeDir(e.target.value))}
-                placeholder="category/project-slug"
+                label={t.dialog.path}
+                onChange={(value) => setProjectPath(RelativeDir(value))}
+                placeholder={PlainString("category/project-slug")}
                 required
-                type="text"
                 value={projectPath}
               />
               {pathError ? (
@@ -261,7 +235,6 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 {t.dialog.cancel}
               </DialogClose>
               <Button
-                className={stylex.props(styles.submitButton).className}
                 disabled={
                   isCreating ||
                   !name ||

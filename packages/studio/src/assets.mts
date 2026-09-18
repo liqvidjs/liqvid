@@ -132,15 +132,15 @@ export class DirectoryHelper<
       globalFetchCache.set(
         url,
         fetch(url).then((res) => {
-          switch (options?.type) {
+          switch (options?.type ?? "json") {
+            case "json":
+              return res.json();
             case "blob":
               return res.arrayBuffer();
             case "raw":
               return res;
             case "text":
               return res.text();
-            default:
-              return res.json();
           }
         }),
       );

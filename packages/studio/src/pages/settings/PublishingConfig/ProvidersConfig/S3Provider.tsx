@@ -6,7 +6,7 @@ import Image from "next/image";
 
 import { fonts } from "#_/design/styles.js";
 import { colors, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import { type Localized, PlainString } from "#_/i18n/shared.mjs";
 import s3Logo from "#_/icons/s3.svg";
 import { TextField } from "#_/ui/TextField.js";
 import { useTranslations } from "#_/utils/react.js";
@@ -72,7 +72,7 @@ export function S3Provider({
             region: v === "" ? undefined : v,
           })
         }
-        placeholder="us-east-1"
+        placeholder={PlainString("us-east-1")}
         value={value?.region ?? ""}
       />
       <TextField

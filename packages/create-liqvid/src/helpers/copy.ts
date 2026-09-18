@@ -7,8 +7,8 @@ import fastglob from "fast-glob";
 
 interface CopyOption {
   cwd?: string;
-  rename?: (basename: string) => string;
   parents?: boolean;
+  rename?: (basename: string) => string;
 }
 
 const identity = (x: string) => x;

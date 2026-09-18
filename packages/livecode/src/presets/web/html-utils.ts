@@ -31,9 +31,9 @@ export function render({
   esm = {},
   html,
 }: {
-  css?: Record<string, string>;
-  js?: Record<string, string>;
-  esm?: Record<string, string>;
+  css?: Readonly<Record<string, string>>;
+  js?: Readonly<Record<string, string>>;
+  esm?: Readonly<Record<string, string>>;
   html: string;
 }) {
   const doc = new DOMParser().parseFromString(html, "text/html");

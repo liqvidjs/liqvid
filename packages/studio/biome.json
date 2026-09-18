@@ -17,7 +17,7 @@
           "options": {
             "elements": {
               "button": "use the styled version from #_/ui/Button.tsx",
-              "input": "use the styled version from #_/ui/TextField.tsx (text), #_/ui/Checkbox.tsx (checkbox), or #_/ui/Radio.tsx (radio)",
+              "input": "use the styled version:\n• checkbox -> #_/ui/Checkbox.tsx\n• number -> #_/ui/NumericInput.tsx\n• radio -> #_/ui/Radio.tsx\n• range -> #_/ui/Range.tsx\n• text -> #_/ui/TextField.tsx",
               "select": "use the styled version from #_/ui/Select.tsx"
             }
           }

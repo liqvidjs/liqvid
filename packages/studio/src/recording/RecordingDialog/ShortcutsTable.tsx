@@ -56,10 +56,7 @@ const styles = stylex.create({
     cursor: "pointer",
     fontFamily: typeface.mono,
     fontSize: text.sm,
-    outline: {
-      ":focus": "none",
-      default: null,
-    },
+    outlineStyle: "none",
     padding: `${spacing.md} ${spacing.lg}`,
     textAlign: "center",
     width: "100%",

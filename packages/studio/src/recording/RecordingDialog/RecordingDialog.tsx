@@ -107,6 +107,7 @@ export function RecordingDialog({
   const t = useAsyncTranslations(Translations, "src/recording" as RelativeDir);
 
   const { instances, projectPath } = useStudioPrivateApi();
+
   const { enabledPlugins, togglePlugin } = useRecordingApi();
   const { plugins } = usePluginApi();
   const isPreview = useIsPreview();
@@ -229,19 +230,13 @@ export function RecordingDialog({
           <div>
             <Tabs onValueChange={setActiveTab} size="small" value={activeTab}>
               <TabsList style={{ fontSize: "16px" }}>
-                <TabsTrigger
-                  className="lv-recording-tabs"
-                  value={tabs.configuration}
-                >
+                <TabsTrigger value={tabs.configuration}>
                   {t.tabs.configuration.title}
                 </TabsTrigger>
-                <TabsTrigger className="lv-recording-tabs" value={tabs.saved}>
+                <TabsTrigger value={tabs.saved}>
                   {t.tabs.saved.title}
                 </TabsTrigger>
-                <TabsTrigger
-                  className="lv-recording-tabs"
-                  value={tabs.shortcuts}
-                >
+                <TabsTrigger value={tabs.shortcuts}>
                   {t.tabs.shortcuts.title}
                 </TabsTrigger>
               </TabsList>

@@ -232,7 +232,7 @@ export function replay<K>({
     }
   }
 
-  if (typeof end === "undefined") end = start + times[times.length - 1]!;
+  if (typeof end === "undefined") end = start + times.at(-1)!;
 
   let lastTime = 0,
     i = 0,

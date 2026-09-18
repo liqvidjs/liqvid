@@ -7,7 +7,7 @@
  * injectGlobal({ playback });
  * // can now use `playback` in the browser console
  */
-export function injectGlobal(obj: Record<string, unknown>) {
+export function injectGlobal(obj: Readonly<Record<string, unknown>>) {
   if (globalThis?.window) {
     Object.assign(globalThis?.window, obj);
   }

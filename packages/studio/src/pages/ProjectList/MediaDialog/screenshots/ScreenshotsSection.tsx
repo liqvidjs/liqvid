@@ -207,14 +207,16 @@ const styles = stylex.create({
     borderRadius: radii.md,
     borderStyle: "none",
     cursor: "pointer",
-    outline: {
-      ":focus-visible": "2px solid var(--accent, #4f8cff)",
-      default: null,
-    },
+    outlineColor: colors.accentSolid,
     outlineOffset: {
       ":focus-visible": "2px",
       default: null,
     },
+    outlineStyle: {
+      ":focus-visible": "solid",
+      default: null,
+    },
+    outlineWidth: dims.ring,
     padding: spacing.zero,
   },
   title: {
@@ -465,7 +467,7 @@ export function ScreenshotsSection({
       <div sx={styles.section}>
         <DialogRoot>
           <div sx={styles.sectionActions}>
-            <DialogTrigger {...stylex.props(styles.addButton)}>
+            <DialogTrigger>
               <PlusIcon size={16} /> {t.trigger}
             </DialogTrigger>
           </div>

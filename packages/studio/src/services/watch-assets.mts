@@ -107,7 +107,7 @@ const initializeParameterizedDirs = Effect.fnUntraced(
   function* (
     assetsDir: AbsoluteDir,
     projectPath: RelativeDir,
-    projectParameters: Record<string, readonly string[]> | undefined,
+    projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
   ) {
     const fs = yield* FileSystem.FileSystem;
 

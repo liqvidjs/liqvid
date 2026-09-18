@@ -26,7 +26,6 @@ export function concatenateReplayData<T>(
     copy[0]![0] +=
       (typeof start === "number" ? start : Duration.inMilliseconds(start)) -
       ptr;
-    console.debug("offset", copy[0][0]);
     ret.push(...copy);
     ptr += length(copy);
   }

@@ -91,12 +91,6 @@ const styles = stylex.create({
     fontFamily: typeface.mono,
   },
 
-  reprocessButtonDisabled: {
-    backgroundColor: colors.grayUi,
-    cursor: "not-allowed",
-    opacity: 0.6,
-  },
-
   row: {
     backgroundColor: {
       ":nth-of-type(even)": colors.stripeEven,

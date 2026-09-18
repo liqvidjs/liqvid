@@ -15,6 +15,8 @@ export type AlignmentString =
   | "top left"
   | "top right";
 
+type AlignmentPair = readonly [x: number, y: number];
+
 /**
  * Move an image along a recorder cursor path.
  */
@@ -26,7 +28,7 @@ export function cursorReplay(opts: {
    * @default "center"
    * @returns An unsubscription function.
    */
-  align?: AlignmentString | [x: number, y: number];
+  align?: AlignmentString | AlignmentPair;
 
   /** Cursor data to replay. */
   data: ReplayData<[number, number]>;
@@ -133,7 +135,7 @@ export function cursorReplay(opts: {
  * Parse human-friendly alignment strings into percentage pairs.
  * @param align Alignment string like "top"
  */
-function parseAlignment(align: AlignmentString): [number, number] {
+function parseAlignment(align: AlignmentString): AlignmentPair {
   let x = 0,
     y = 0;
 

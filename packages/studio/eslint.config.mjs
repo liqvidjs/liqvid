@@ -61,7 +61,7 @@ export default [
               reason: "use a dims.* token from `#_/design/tokens.stylex.js`",
             },
             boxShadow: {
-              limit: null,
+              limit: "none",
               reason: "use a shadows.* token from `#_/design/tokens.stylex.js`",
             },
             color: {
@@ -89,9 +89,18 @@ export default [
               limit: "auto",
               reason: "use a spacing.* token from `#_/design/tokens.stylex.js`",
             },
+            opacity: {
+              limit: [0, 1],
+              reason:
+                "use an opacity.* token from `#_/design/tokens.stylex.js`",
+            },
             "outline*Color": {
               limit: null,
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
+            },
+            "outline*Style": {
+              limit: ["none", "solid"],
+              reason: "don't use weird outline styles",
             },
             "outline*Width": {
               limit: null,

@@ -29,7 +29,7 @@ import {
   DEFAULT_MEDIA_PATTERNS,
 } from "./conventions.mts";
 
-export type PublishOptions = {
+export type PublishOptions = Readonly<{
   /** Base directory containing media files (relative to cwd). Defaults to "app". */
   baseDir?: RelativeDir;
 
@@ -41,7 +41,7 @@ export type PublishOptions = {
 
   /** Show what would be uploaded without actually uploading */
   dryRun?: boolean;
-};
+}>;
 
 /** Publish content and/or media files to configured hosting providers. */
 export const publish = Command.make(

@@ -250,7 +250,6 @@ export function EnvVarInput({
                 onChange={(value) => handleLiteralChange(value)}
                 placeholder={placeholder}
                 sx={styles.input}
-                type="text"
                 value={literal}
               />
             )}
@@ -272,7 +271,6 @@ export function EnvVarInput({
                 onChange={(value) => handleVarNameChange(value)}
                 placeholder={PlainString("MY_VAR")}
                 sx={styles.input}
-                type="text"
                 value={varName}
               />
 
