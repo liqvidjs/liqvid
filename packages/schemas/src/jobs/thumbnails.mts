@@ -1,3 +1,5 @@
+import os from "node:os";
+
 import { Effect, Schema } from "effect";
 import { SchemaAbsoluteFile } from "effect-paths";
 
@@ -141,11 +143,12 @@ export const ThumbnailOptions = Schema.Struct({
   ),
 
   /**
-   * Number of concurrent browser instances
-   * @default 1
+   * Number of concurrent browser instances. Defaults to half the number of available CPUs.
    */
   concurrency: Schema.Number.pipe(
-    Schema.withDecodingDefaultType(Effect.succeed(1)),
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => Math.floor(os.cpus().length / 2)),
+    ),
     Schema.annotate({
       default: 1,
       description: "Number of concurrent browser instances.",
