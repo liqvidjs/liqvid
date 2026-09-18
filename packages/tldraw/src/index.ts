@@ -432,7 +432,7 @@ export const tldrawReplay = makeReplayPlugin<
   merge(...actions) {
     return actions.reduce<TldrawAction>(
       (acc, curr) => {
-        const diff = mergeDiffs(acc.diff!, curr.diff ?? {}, true);
+        const diff = mergeDiffs(acc.diff!, curr.diff ?? {}, false);
         const viewport =
           acc.viewport || curr.viewport
             ? { ...acc.viewport, ...curr.viewport }

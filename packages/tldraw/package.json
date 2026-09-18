@@ -48,8 +48,8 @@
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "build": "pnpm .build:clean; pnpm build:js; pnpm .build:postclean",
-    "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
+    ".build:stylex": "node build-stylex.mjs",
+    "build": "pnpm .build:clean; pnpm build:js; pnpm .build:stylex; pnpm .build:postclean",
     "build:js": "tsc",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -64,6 +64,7 @@
     "@liqvid/utils": "workspace:^"
   },
   "devDependencies": {
+    "@babel/core": "catalog:dev",
     "@biomejs/biome": "catalog:dev",
     "@stylexjs/babel-plugin": "catalog:dev",
     "@stylexjs/eslint-plugin": "catalog:dev",

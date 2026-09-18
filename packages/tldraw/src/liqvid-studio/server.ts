@@ -25,16 +25,19 @@ export async function saveSnapshot(
   projectPath: RelativeDir,
   params: Readonly<Record<string, string>>,
   snapshot: TLEditorSnapshot,
+  index: number,
 ): Promise<SavedState> {
   const pluginDir = getPluginDir(projectPath, params);
 
   const createdAt = new Date().toISOString();
 
+  const name = `capture${index + 1}`;
+
   return await serverRuntime.runPromise(
     Effect.gen(function* () {
       const newSaved = {
         createdAt,
-        name: createdAt,
+        name,
         snapshot,
       };
 
@@ -49,10 +52,50 @@ export async function saveSnapshot(
   snapshot: import("tldraw").TLEditorSnapshot;
 }`),
         dirname: pluginDir,
-        filename: RelativeFile(`${createdAt}.json`),
+        filename: RelativeFile(`${name}.json`),
       });
 
       return newSaved;
+    }),
+  );
+}
+
+export async function renameSnapshot(
+  projectPath: RelativeDir,
+  params: Readonly<Record<string, string>>,
+  name: string,
+  newName: string,
+): Promise<void> {
+  validateName(name);
+  validateName(newName);
+
+  const pluginDir = getPluginDir(projectPath, params);
+
+  await serverRuntime.runPromise(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const destination = snapshotPath(pluginDir, newName);
+
+      if (yield* fs.exists(destination)) {
+        throw new Error(`A saved state named ${newName} already exists`);
+      }
+
+      yield* fs.rename(snapshotPath(pluginDir, name), destination);
+    }),
+  );
+}
+
+export async function deleteSnapshot(
+  projectPath: RelativeDir,
+  params: Readonly<Record<string, string>>,
+  name: string,
+): Promise<void> {
+  validateName(name);
+
+  await serverRuntime.runPromise(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      yield* fs.remove(snapshotPath(getPluginDir(projectPath, params), name));
     }),
   );
 }
@@ -108,6 +151,19 @@ export async function listSaved(
   }
 
   return exit.value;
+}
+
+function snapshotPath(
+  pluginDir: ReturnType<typeof getPluginDir>,
+  name: string,
+) {
+  return path.join(pluginDir, RelativeFile(`${name}.json`));
+}
+
+function validateName(name: string): void {
+  if (!name || name === "." || name === ".." || /[\\/]/.test(name)) {
+    throw new Error("Saved state names must be a single path segment");
+  }
 }
 
 function getPluginDir(

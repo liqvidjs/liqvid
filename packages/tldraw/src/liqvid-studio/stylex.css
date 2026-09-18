@@ -1,0 +1,7 @@
+/*
+ * In development, this file is empty — StyleX CSS is injected via the
+ * @stylex PostCSS directive in the consuming application.
+ *
+ * In production builds, build-stylex.mjs overwrites dist/esm/stylex.css
+ * with the extracted atomic CSS rules.
+ */

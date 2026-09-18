@@ -302,7 +302,7 @@ export class TldrawRecorder extends ReplayDataRecorder<
   }
 }
 
-const icon = (props: React.ComponentProps<"svg">) => (
+export const icon = (props: React.ComponentProps<"svg">) => (
   <svg viewBox="0 0 1000 1000" {...props}>
     <path
       clipRule="evenodd"
