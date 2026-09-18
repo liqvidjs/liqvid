@@ -75,7 +75,8 @@ const handleConnection = (client: WebSocket) =>
       Effect.succeed(client as unknown as globalThis.WebSocket),
     );
 
-    const write = yield* socket.writer;
+    const writer = yield* socket.writer;
+    const write = (frame: string) => writer.write(frame);
     yield* Effect.logDebug("new WebSocket connection");
     wsConnections.add(write);
 
@@ -88,13 +89,20 @@ const handleConnection = (client: WebSocket) =>
     // Run the read loop. Incoming frames are decoded envelopes; the server
     // currently does not act on client-sent messages, but decoding validates
     // the wire format and surfaces malformed frames.
-    yield* socket.runString((data) =>
-      Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
-        Effect.catchTag("SchemaError", (error) =>
-          Effect.logWarning("Received malformed WebSocket frame", error),
-        ),
-      ),
-    );
+    const pull = yield* Socket.readerString(socket);
+    while (true) {
+      const frames = yield* pull;
+      yield* Effect.forEach(
+        frames,
+        (data) =>
+          Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
+            Effect.catchTag("SchemaError", (error) =>
+              Effect.logWarning("Received malformed WebSocket frame", error),
+            ),
+          ),
+        { discard: true },
+      );
+    }
   }).pipe(Effect.scoped);
 
 /**

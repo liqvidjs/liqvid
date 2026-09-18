@@ -41,28 +41,39 @@ class WebSocketClient {
       Effect.gen({ self: this }, function* () {
         const socket = yield* Socket.makeWebSocket(toAbsoluteUrl(url));
 
-        this.#write = yield* socket.writer;
+        const writer = yield* socket.writer;
+        this.#write = (frame) => writer.write(frame);
 
-        yield* socket.runString((data) =>
-          Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
-            Effect.andThen(({ channel, message }) => {
-              const subscribers = this.subscribers.get(channel);
-              if (!subscribers) return Effect.void;
+        const pull = yield* Socket.readerString(socket);
+        while (true) {
+          const frames = yield* pull;
+          yield* Effect.forEach(
+            frames,
+            (data) =>
+              Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
+                Effect.andThen(({ channel, message }) => {
+                  const subscribers = this.subscribers.get(channel);
+                  if (!subscribers) return Effect.void;
 
-              message = deserialize(message as JSONValue, {
-                "@liqvid/duration": Duration.fromJSON,
-              });
+                  message = deserialize(message as JSONValue, {
+                    "@liqvid/duration": Duration.fromJSON,
+                  });
 
-              for (const cb of subscribers) {
-                cb(message as ChannelMessage<ChannelName>);
-              }
-              return Effect.void;
-            }),
-            Effect.catchTag("SchemaError", (error) =>
-              Effect.logWarning("Received malformed WebSocket frame", error),
-            ),
-          ),
-        );
+                  for (const cb of subscribers) {
+                    cb(message as ChannelMessage<ChannelName>);
+                  }
+                  return Effect.void;
+                }),
+                Effect.catchTag("SchemaError", (error) =>
+                  Effect.logWarning(
+                    "Received malformed WebSocket frame",
+                    error,
+                  ),
+                ),
+              ),
+            { discard: true },
+          );
+        }
       }).pipe(
         Effect.scoped,
         Effect.catchCause((cause) =>
