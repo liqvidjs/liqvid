@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 import {
   colors,
   dims,
+  opacity,
   radii,
   shadows,
   spacing,
@@ -40,14 +41,28 @@ export function useDialogApi() {
 
 /** @package */
 export const dialogStyles = stylex.create({
+  actions: {
+    display: "flex",
+    gap: spacing.sm,
+    justifyContent: "flex-end",
+    marginTop: spacing.lg,
+  },
+
   backdrop: {
     backgroundColor: colors.dialogBackdrop,
     inset: 0,
     position: "fixed",
   },
+
   close: {
     background: "unset",
     borderRadius: radii.md,
+
+    boxShadow: {
+      ":focus": shadows.focus,
+      default: null,
+    },
+
     color: {
       ":hover:not(:disabled)": colors.dialogCloseBgHover,
       default: colors.dialogCloseColor,
@@ -58,7 +73,7 @@ export const dialogStyles = stylex.create({
     },
     fontSize: text.md,
     opacity: {
-      ":disabled": 0.6,
+      ":disabled": opacity.disabled,
       default: null,
     },
     position: "absolute",
@@ -69,6 +84,7 @@ export const dialogStyles = stylex.create({
   },
 
   content: {
+    "--surface": colors.surface,
     backgroundColor: colors.surface,
     borderColor: colors.graySep,
     borderRadius: radii.xl,
@@ -86,21 +102,28 @@ export const dialogStyles = stylex.create({
     transform: "translate(-50%, -50%)",
     width: "calc(100% - 2rem)",
   },
+
   huge: {
     height: "90vh",
   },
+
   large: {
     height: "75vh",
   },
+
   medium: {
     height: "50vh",
   },
+
   small: {
     height: "25vh",
   },
+
   title: {
     fontSize: text.lg,
     fontWeight: 600,
     marginBottom: spacing.lg,
   },
+
+  trigger: {},
 });

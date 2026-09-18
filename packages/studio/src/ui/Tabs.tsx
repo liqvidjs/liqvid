@@ -8,6 +8,8 @@ import { Children, cloneElement, isValidElement } from "react";
 
 import {
   colors,
+  dims,
+  opacity,
   radii,
   spacing,
   text,
@@ -20,40 +22,98 @@ const styles = stylex.create({
     flex: "1",
     outline: "none",
   },
+
+  list: {
+    backgroundColor: colors.tabTriggerBg,
+    borderRadius: radii.md,
+    height: "min-content",
+    marginBlock: spacing.zero,
+    marginInline: spacing.auto,
+    overflow: "visible",
+    position: "relative",
+  },
+
   root: {
     columnGap: spacing.lg,
     display: "flex",
     flexDirection: "column",
     rowGap: spacing.lg,
   },
-  tabsList: {
-    borderRadius: radii.md,
-    height: "min-content",
-    marginBlock: spacing.zero,
-    marginInline: spacing.auto,
-    overflow: "hidden",
-  },
-  tabsTrigger: {
-    alignItems: "center",
-    backgroundColor: colors.tabTriggerBg,
+
+  trigger: {
+    backgroundColor: {
+      "[aria-selected='true']": colors.accentSolid,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+
+    borderBottomLeftRadius: {
+      ":first-child": radii.md,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+
+    borderBottomRightRadius: {
+      ":last-child": radii.md,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+
+    borderTopLeftRadius: {
+      ":first-child": radii.md,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+
+    borderTopRightRadius: {
+      ":last-child": radii.md,
+      // eslint-disable-next-line @stylexjs/valid-styles
+      default: null,
+    },
+
+    boxShadow: "none",
     color: colors.white,
-    columnGap: spacing.md,
-    display: "inline-flex",
     fontFamily: typeface.ui,
     // eslint-disable-next-line @stylexjs/valid-styles
     fontSize: "var(--font-size)",
+
+    opacity: {
+      "[aria-disabled='true']": opacity.disabled,
+      default: null,
+    },
+
+    pointerEvents: {
+      "[aria-disabled='true']": "none",
+      default: null,
+    },
+
+    zIndex: {
+      ":focus-visible": 1,
+      default: null,
+    },
+  },
+
+  triggerWrap: {
+    alignItems: "center",
+
+    borderRadius: radii.md,
+    columnGap: spacing.md,
+
+    display: "inline-flex",
+
+    outlineColor: colors.focus,
+
+    outlineStyle: {
+      [stylex.when.ancestor(":focus")]: "solid",
+      default: null,
+    },
+
+    outlineWidth: dims.ring,
+
     // eslint-disable-next-line @stylexjs/valid-styles
     paddingBlock: "var(--padding-block)",
     // eslint-disable-next-line @stylexjs/valid-styles
     paddingInline: "var(--padding-inline)",
-    rowGap: spacing.md,
-  },
-  tabsTriggerActive: {
-    backgroundColor: colors.accentSolid,
-  },
-  tabsTriggerDisabled: {
-    opacity: 0.5,
-    pointerEvents: "none",
   },
 });
 
@@ -92,7 +152,7 @@ function TabsList({
   style: inlineStyle,
   ...props
 }: Omit<React.ComponentProps<typeof TabsPrimitive.List>, "className">) {
-  const sx = stylex.props(styles.tabsList);
+  const sx = stylex.props(styles.list);
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -104,22 +164,20 @@ function TabsList({
 }
 
 function TabsTrigger({
-  className,
+  children,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Tab>) {
+}: Omit<
+  React.ComponentProps<typeof TabsPrimitive.Tab>,
+  "className" | "style"
+>) {
   return (
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
       {...props}
-      className={(state) => {
-        const sx = stylex.props(
-          styles.tabsTrigger,
-          state.active && styles.tabsTriggerActive,
-          state.disabled && styles.tabsTriggerDisabled,
-        );
-        return clsx(sx.className, className);
-      }}
-    />
+      {...stylex.props([styles.trigger, stylex.defaultMarker()])}
+    >
+      <span sx={styles.triggerWrap}>{children}</span>
+    </TabsPrimitive.Tab>
   );
 }
 

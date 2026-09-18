@@ -34,10 +34,7 @@ const styles = stylex.create({
     display: "flex",
     fontSize: text.sm,
     gap: spacing.md,
-    outlineStyle: {
-      ":focus": "none",
-      default: null,
-    },
+    outlineStyle: "none",
     paddingBlock: spacing.md,
     paddingInline: spacing.lg,
     position: "relative",

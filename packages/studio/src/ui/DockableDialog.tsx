@@ -102,16 +102,27 @@ const positionKey = `lv-dockable-dialog-position.`;
 
 function Root({
   children,
+  closeOnEscape,
   name,
   shortcut,
 }: {
   children?: LocalizedReactNode;
+  closeOnEscape?: boolean;
   name?: string;
   shortcut?: ShortcutsSpecifier;
 }) {
   const { value: open, set: setOpen, toggle } = useToggle();
 
-  useKeyboardShortcut(shortcut, toggle);
+  useKeyboardShortcut(shortcut, (e) => {
+    e.preventDefault();
+    toggle();
+  });
+
+  useKeyboardShortcut("Escape", (e) => {
+    if (!closeOnEscape) return;
+    e.preventDefault();
+    setOpen(false);
+  });
 
   // persist open state
   useEffect(() => {

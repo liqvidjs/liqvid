@@ -13,8 +13,8 @@ import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
   content: {
-    backgroundColor: colors.graySubtle,
-    borderRadius: radii.md,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
     color: colors.grayNormal,
     overflow: "hidden",
   },
@@ -26,8 +26,14 @@ const styles = stylex.create({
       // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
+    borderRadius: radii.md,
+    boxShadow: {
+      ":focus-visible": null,
+      default: null,
+    },
     display: "block",
     padding: `${spacing.lg} ${spacing.xl}`,
+    width: "100%",
   },
   list: {},
   popup: {},

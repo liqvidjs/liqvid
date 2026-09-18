@@ -1,6 +1,15 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  dims,
+  opacity,
+  radii,
+  scales,
+  shadows,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex.js";
 import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
 import type { NonCustomizable } from "#_/types/misc.mjs";
 
@@ -17,7 +26,7 @@ const styles = stylex.create({
     display: "flex",
     gap: spacing.sm,
     opacity: {
-      ":disabled": 0.3,
+      ":disabled": opacity.disabled,
       default: null,
     },
     rowGap: spacing.md,
@@ -32,6 +41,10 @@ const styles = stylex.create({
       default: colors.btnBg,
     },
     borderColor: colors.btnBorder,
+    boxShadow: {
+      ":focus": shadows.focus,
+      default: null,
+    },
     color: {
       ":disabled": colors.btnColorDisabled,
       default: colors.btnColor,
@@ -45,6 +58,13 @@ const styles = stylex.create({
       default: colors.destroy,
     },
     borderColor: colors.destroyBorder,
+    boxShadow: {
+      ":focus": `
+        0 0 0 2px oklch(from var(--surface) l c h),
+        0 0 0 4px oklch(from ${scales.red700} l c h / 0.8)
+      `,
+      default: null,
+    },
     color: colors.white,
   },
 
@@ -77,7 +97,9 @@ export function Button({
   size = "normal",
   style,
   ...props
-}: NonCustomizable<Omit<React.ComponentProps<"button">, "children">> & {
+}: NonCustomizable<
+  Omit<React.ComponentProps<"button">, "children" | "type">
+> & {
   className?: {
     __error: "";
   };
@@ -96,6 +118,8 @@ export function Button({
   >;
 
   title?: LocalizedString;
+
+  type?: "submit";
 }) {
   return (
     // biome-ignore lint/correctness/noRestrictedElements: this is where it's defined

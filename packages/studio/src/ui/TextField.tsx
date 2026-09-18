@@ -59,7 +59,7 @@ export function TextField({
   value: string | undefined;
 } & Omit<
   React.ComponentProps<"input">,
-  "className" | "children" | "style" | "onChange"
+  "className" | "children" | "style" | "type" | "onChange"
 >) {
   if (label) {
     return (

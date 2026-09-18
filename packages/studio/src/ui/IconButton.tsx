@@ -3,7 +3,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii } from "#_/design/tokens.stylex.js";
+import { colors, opacity, radii } from "#_/design/tokens.stylex.js";
 import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
 
 const styles = stylex.create({
@@ -19,7 +19,7 @@ const styles = stylex.create({
     display: "flex",
     justifyContent: "center",
     opacity: {
-      ":disabled": 0.5,
+      ":disabled": opacity.disabled,
     },
     transition: "background-color 0.15s, opacity 0.15s",
   },

@@ -140,3 +140,5 @@ export const AlertDialogBackdrop = themed(
 export const AlertDialogTitle = themed(AlertDialog.Title, styles.title);
 
 export const AlertDialogTrigger = AlertDialog.Trigger;
+
+export const AlertDialogActions = themed("div", styles.actions);

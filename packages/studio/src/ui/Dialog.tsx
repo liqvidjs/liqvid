@@ -10,8 +10,10 @@ import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 
 import { themed } from "#_/design/themed.js";
+import type { NonCustomizable } from "#_/types/misc.mjs";
 import { useCommonTranslations } from "#_/utils/react.js";
 
+import { Button } from "./Button.tsx";
 import {
   DialogApiContext,
   dialogStyles as styles,
@@ -133,4 +135,11 @@ export const DialogBackdrop = themed(Dialog.Backdrop, styles.backdrop);
 
 export const DialogTitle = themed(Dialog.Title, styles.title);
 
-export const DialogTrigger = Dialog.Trigger;
+export function DialogTrigger({
+  className: _,
+  ...props
+}: NonCustomizable<React.ComponentProps<typeof Dialog.Trigger>>) {
+  return <Dialog.Trigger render={<Button />} {...props} />;
+}
+
+export const DialogActions = themed("div", styles.actions);
