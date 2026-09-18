@@ -20,10 +20,10 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
-    "./greenscreen": {
-      "@liqvid/dev": "./src/greenscreen.ts",
-      "types": "./dist/types/greenscreen.d.ts",
-      "import": "./dist/esm/greenscreen.js"
+    "./extras": {
+      "@liqvid/dev": "./src/extras/index.ts",
+      "types": "./dist/types/extras/index.d.ts",
+      "import": "./dist/esm/extras/index.js"
     },
     "./liqvid-studio-server-plugin": {
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",

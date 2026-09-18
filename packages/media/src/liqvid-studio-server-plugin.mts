@@ -21,8 +21,6 @@ const VIDEO_WEBM = RelativeFile("video.webm");
 
 const HLS_DIR = RelativeDir("hls");
 
-export { experimental_joinHls } from "./join-hls.ts";
-
 /**
  * Check if ffmpeg is available.
  */

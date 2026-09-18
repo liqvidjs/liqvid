@@ -4,13 +4,13 @@ import { useEffect, useEffectEvent, useRef } from "react";
 
 export type HexColor = `#${string}`;
 
-export type GreenScreenConfig = {
+export type GreenScreenConfig = Readonly<{
   /** Greenscreen color in hex format (default "#00FF00") */
   color?: HexColor;
 
   /** Tolerance for greenscreen color matching (0-255, default 50) */
   tolerance?: number;
-};
+}>;
 
 /** Apply greenscreen effect to a `<video>` */
 export function useGreenScreen({
@@ -129,7 +129,7 @@ function supDistance(color1: RGB, color2: RGB) {
   );
 }
 
-type RGB = { r: number; g: number; b: number };
+type RGB = Readonly<{ r: number; g: number; b: number }>;
 
 /** Parse a hex color string to RGB values */
 function parseHexColor(hex: string): RGB {
