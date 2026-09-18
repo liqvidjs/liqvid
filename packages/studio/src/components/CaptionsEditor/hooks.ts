@@ -177,73 +177,128 @@ export function useCaptionsEditorShortcuts(
   shortcuts: Partial<Shortcuts>,
   {
     editWord,
+    enabled,
     save,
+    scrollSelection,
   }: {
     editWord: () => void;
+    enabled: boolean;
     save: () => Promise<void>;
+    scrollSelection: (block: ScrollLogicalPosition) => void;
   },
 ) {
   const keys = { ...defaultShortcuts, ...shortcuts };
   const playback = usePlayback();
+  const pendingKey = useRef<string | null>(null);
+  const scrollBlocks: Record<string, ScrollLogicalPosition> = {
+    [keys.scrollToBottom]: "end",
+    [keys.scrollToMiddle]: "center",
+    [keys.scrollToTop]: "start",
+  };
 
   useEventListener(globalThis?.window, "keydown", (e) => {
+    // only handle shortcuts when editor is open
+    if (!enabled) {
+      pendingKey.current = null;
+      return;
+    }
+
     // Ignore shortcuts while typing in an input/textarea/contenteditable (e.g.
     // the inline word editor), which handles its own keys.
     if (isEditableTarget(e.target)) return;
 
+    if (pendingKey.current) {
+      const shortcut = pendingKey.current + e.key;
+      pendingKey.current = null;
+      const block = hasModKey(e) ? undefined : scrollBlocks[shortcut];
+
+      if (block) {
+        e.stopPropagation();
+        e.preventDefault();
+        scrollSelection(block);
+        return;
+      }
+    }
+
+    // These are the only multi-key shortcuts for now. Keep the first key from
+    // reaching the page while waiting for the second one.
+    if (
+      !hasModKey(e) &&
+      (keys.scrollToMiddle.startsWith(e.key) ||
+        keys.scrollToTop.startsWith(e.key) ||
+        keys.scrollToBottom.startsWith(e.key))
+    ) {
+      pendingKey.current = e.key;
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
     switch (e.key) {
       case keys.selectionBackward:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "selection-backward" }),
         );
         break;
       case keys.selectionForward:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "selection-forward" }),
         );
         break;
       case keys.startPrevSentence:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "start-prev-sentence" }),
         );
         break;
       case keys.endNextSentence:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "end-next-sentence" }),
         );
         break;
       case keys.endNextComma:
+        e.stopPropagation();
         store.setState((state) => apply(state, { action: "end-next-comma" }));
         break;
       case keys.startPrevCaption:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "start-prev-caption" }),
         );
         break;
       case keys.endNextCaption:
+        e.stopPropagation();
         store.setState((state) => apply(state, { action: "end-next-caption" }));
         break;
       case keys.toggleCaptionBreak:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "toggle-caption-break" }),
         );
         break;
       case keys.startPrevTranscriptBreak:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "start-prev-transcript-break" }),
         );
         break;
       case keys.endNextTranscriptBreak:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "end-next-transcript-break" }),
         );
         break;
       case keys.toggleTranscriptBreak:
+        e.stopPropagation();
         store.setState((state) =>
           apply(state, { action: "toggle-transcript-break" }),
         );
         break;
       case keys.seekToSelection: {
+        e.stopPropagation();
         const { selection, words: transcript } = store.getState();
         const word = transcript[selection.start];
         if (word) {
@@ -252,6 +307,7 @@ export function useCaptionsEditorShortcuts(
         break;
       }
       case keys.selectCurrentWord:
+        e.stopPropagation();
         store.setState((state) => {
           const t = playback.currentTime$.inMilliseconds();
           const index = activeWordIndex(state.words, t);
@@ -264,6 +320,7 @@ export function useCaptionsEditorShortcuts(
         });
         break;
       case keys.deleteWord:
+        e.stopPropagation();
         store.setState((state) => {
           if (state.words.length === 0) return state;
           return apply(state, {
@@ -273,6 +330,7 @@ export function useCaptionsEditorShortcuts(
         });
         break;
       case keys.mergeFollowing:
+        e.stopPropagation();
         store.setState((state) => {
           const index = state.selection.start;
           // Nothing to merge if there is no following word.
@@ -281,6 +339,7 @@ export function useCaptionsEditorShortcuts(
         });
         break;
       case keys.cycleCapitalization:
+        e.stopPropagation();
         store.setState((state) => {
           const index = state.selection.start;
           const word = state.words[index]?.[0];
@@ -293,12 +352,43 @@ export function useCaptionsEditorShortcuts(
         });
         break;
       case keys.editWord:
+        e.stopPropagation();
         // Prevent the key from being typed into the input we're about to open.
         e.preventDefault();
         editWord();
         break;
+
+      case keys.lowercase:
+        e.stopPropagation();
+        store.setState((state) => {
+          const index = state.selection.start;
+          const word = state.words[index]?.[0];
+          if (word === undefined) return state;
+
+          const value = word.toLocaleLowerCase();
+          if (value === word) return state;
+
+          return apply(state, { action: "change-word", index, value });
+        });
+        break;
+
+      case keys.uppercase:
+        e.stopPropagation();
+        store.setState((state) => {
+          const index = state.selection.start;
+          const word = state.words[index]?.[0];
+          if (word === undefined) return state;
+
+          const value = word.toLocaleUpperCase();
+          if (value === word) return state;
+
+          return apply(state, { action: "change-word", index, value });
+        });
+        break;
+
       case "s": {
         if (!hasModKey(e)) return;
+        e.stopPropagation();
         e.preventDefault();
         save();
         break;
@@ -306,6 +396,7 @@ export function useCaptionsEditorShortcuts(
 
       case "z":
         if (!hasModKey(e)) return;
+        e.stopPropagation();
         e.preventDefault();
 
         // Shift+Cmd/Ctrl+Z redoes, matching common editor conventions.
@@ -313,10 +404,13 @@ export function useCaptionsEditorShortcuts(
         break;
       case "y":
         if (!hasModKey(e)) return;
+        e.stopPropagation();
         e.preventDefault();
 
         store.setState((state) => redo(state));
         break;
+      default:
+        return;
     }
   });
 }

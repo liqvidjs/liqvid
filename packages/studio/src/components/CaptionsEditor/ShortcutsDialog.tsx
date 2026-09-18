@@ -14,6 +14,7 @@ import {
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Button } from "#_/ui/Button.js";
 import {
+  DialogBackdrop,
   DialogClose,
   DialogPopup,
   DialogPortal,
@@ -122,7 +123,8 @@ export function ShortcutsDialog({
 
   return (
     <DialogPortal>
-      <DialogPopup size="medium" style={styles.popup}>
+      <DialogBackdrop forceRender />
+      <DialogPopup initialFocus={false} size="medium" style={styles.popup}>
         <DialogTitle>{t.keyboardShortcuts}</DialogTitle>
         <table sx={styles.table}>
           <thead>
@@ -147,7 +149,10 @@ export function ShortcutsDialog({
             ))}
           </tbody>
         </table>
-        <DialogClose render={<Button style={styles.closeButton} />}>
+        <DialogClose
+          autoFocus={false}
+          render={<Button style={styles.closeButton} />}
+        >
           {t.close}
         </DialogClose>
       </DialogPopup>

@@ -12,25 +12,26 @@ import chalk from "chalk";
 import { Cause, Effect, Exit, FileSystem } from "effect";
 import type { RelativeDir } from "effect-paths";
 
-import {
-  ASSETS_DIR,
-  AUDIO_DIR,
-  CAPTIONS_FILE,
-  RICH_TRANSCRIPT,
-} from "#_/conventions.mjs";
+import { AUDIO_DIR, CAPTIONS_FILE, RICH_TRANSCRIPT } from "#_/conventions.mjs";
 import { serverRuntime } from "#_/server-runtime.mjs";
 import { getRoutesDir } from "#_/utils/misc.mjs";
+import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
 
 import type { Transcript } from "./state.ts";
 
 export async function saveCaptions({
+  params,
   projectPath,
   transcript,
 }: {
+  params?: Readonly<Record<string, string>>;
   projectPath: RelativeDir;
   transcript: RichTranscript;
 }) {
-  const projectDir = path.join(getRoutesDir(), projectPath);
+  const audioDir = path.join(
+    getParameterizedAssetsDir(getRoutesDir(), projectPath, params),
+    AUDIO_DIR,
+  );
 
   const exit = await serverRuntime.runPromiseExit(
     Effect.gen(function* () {
@@ -41,17 +42,14 @@ export async function saveCaptions({
       yield* Effect.all(
         [
           fs
-            .writeFileString(
-              path.join(projectDir, ASSETS_DIR, AUDIO_DIR, CAPTIONS_FILE),
-              vtt,
-            )
+            .writeFileString(path.join(audioDir, CAPTIONS_FILE), vtt)
             .pipe(Effect.tap(() => Effect.logDebug("saved captions"))),
           writeTypedJson({
             data: transcript,
             declaration: inlineTypeDeclaration(
               `import("@liqvid/schemas").RichTranscript`,
             ),
-            dirname: path.join(projectDir, ASSETS_DIR, AUDIO_DIR),
+            dirname: audioDir,
             filename: RICH_TRANSCRIPT,
           }).pipe(Effect.tap(() => Effect.logDebug("saved rich transcript"))),
         ],
@@ -78,7 +76,7 @@ function generateVtt(captionBreaks: readonly number[], transcript: Transcript) {
 
     const end =
       i === captionBreaks.length
-        ? transcript[transcript.length - 1]![2]
+        ? transcript.at(-1)![2]
         : transcript[captionBreaks[i]! + 1]![1];
 
     file +=

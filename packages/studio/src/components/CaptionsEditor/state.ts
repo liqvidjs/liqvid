@@ -1,8 +1,11 @@
 import type { TranscriptEntry } from "@liqvid/schemas";
 
 /* ------------------------------ state ------------------------------ */
-export type State = {
+export type State = Readonly<{
   captionBreaks: readonly number[];
+
+  /** whether the captions editor is open */
+  open: boolean;
 
   /** Indices where a transcript break (`<br>`) is rendered. Independent of
    * caption breaks. */
@@ -21,14 +24,14 @@ export type State = {
    * but after editing they could contain whitespace.
    */
   words: readonly TranscriptEntry[];
-};
+}>;
 
 /* ------------------------------ actions ------------------------------ */
-type IdentityAction = {
+type IdentityAction = Readonly<{
   action: "identity";
-};
+}>;
 
-type ChangeWordAction = {
+type ChangeWordAction = Readonly<{
   action: "change-word";
   index: number;
   value: string;
@@ -36,9 +39,9 @@ type ChangeWordAction = {
   /** The word's previous text, captured at record time so undo can restore it
    * (by undo, `prev` already holds the changed value). */
   prevValue?: string;
-};
+}>;
 
-type MergeWordAction = {
+type MergeWordAction = Readonly<{
   action: "merge-word";
   index: number;
 
@@ -50,9 +53,9 @@ type MergeWordAction = {
   prevEntries?: readonly [TranscriptEntry, TranscriptEntry];
   prevCaptionBreaks?: readonly number[];
   prevParagraphBreaks?: readonly number[];
-};
+}>;
 
-type DeleteWordAction = {
+type DeleteWordAction = Readonly<{
   action: "delete-word";
   index: number;
 
@@ -66,61 +69,61 @@ type DeleteWordAction = {
    */
   prevCaptionBreaks?: readonly number[];
   prevParagraphBreaks?: readonly number[];
-};
+}>;
 
-type StartPrevSentenceAction = {
+type StartPrevSentenceAction = Readonly<{
   action: "start-prev-sentence";
-};
+}>;
 
-type EndNextSentenceAction = {
+type EndNextSentenceAction = Readonly<{
   action: "end-next-sentence";
-};
+}>;
 
-type EndNextCommaAction = {
+type EndNextCommaAction = Readonly<{
   action: "end-next-comma";
-};
+}>;
 
-type StartPrevCaptionAction = {
+type StartPrevCaptionAction = Readonly<{
   action: "start-prev-caption";
-};
+}>;
 
-type EndNextCaptionAction = {
+type EndNextCaptionAction = Readonly<{
   action: "end-next-caption";
-};
+}>;
 
-type ToggleCaptionBreakAction = {
+type ToggleCaptionBreakAction = Readonly<{
   action: "toggle-caption-break";
-};
+}>;
 
-type StartPrevTranscriptBreakAction = {
+type StartPrevTranscriptBreakAction = Readonly<{
   action: "start-prev-transcript-break";
-};
+}>;
 
-type EndNextTranscriptBreakAction = {
+type EndNextTranscriptBreakAction = Readonly<{
   action: "end-next-transcript-break";
-};
+}>;
 
-type ToggleTranscriptBreakAction = {
+type ToggleTranscriptBreakAction = Readonly<{
   action: "toggle-transcript-break";
-};
+}>;
 
-type SetCaptionBreaksAction = {
+type SetCaptionBreaksAction = Readonly<{
   action: "set-caption-breaks";
   captionBreaks: readonly number[];
 
   /** The array before applying, captured at record time for undo. */
   prevCaptionBreaks?: readonly number[];
-};
+}>;
 
-type SetTranscriptBreaksAction = {
+type SetTranscriptBreaksAction = Readonly<{
   action: "set-transcript-breaks";
   transcriptBreaks: readonly number[];
 
   /** The array before applying, captured at record time for undo. */
   prevTranscriptBreaks?: readonly number[];
-};
+}>;
 
-type InsertWordAction = {
+type InsertWordAction = Readonly<{
   action: "insert-word";
   index: number;
   value: string;
@@ -142,20 +145,20 @@ type InsertWordAction = {
    * to split the merged word back into its two originals.
    */
   restorePrev?: TranscriptEntry;
-};
+}>;
 
-type SelectionBackwardAction = {
+type SelectionBackwardAction = Readonly<{
   action: "selection-backward";
-};
+}>;
 
-type SelectionSetAction = {
+type SelectionSetAction = Readonly<{
   action: "selection-set";
   selection: TranscriptSelection;
-};
+}>;
 
-type SelectionForwardAction = {
+type SelectionForwardAction = Readonly<{
   action: "selection-forward";
-};
+}>;
 
 export type Action =
   | ChangeWordAction
@@ -179,10 +182,10 @@ export type Action =
   | ToggleTranscriptBreakAction;
 
 /* ------------------------------ misc types ------------------------------ */
-type TranscriptSelection = {
+type TranscriptSelection = Readonly<{
   start: number;
 
   end: number;
-};
+}>;
 
 export type Transcript = readonly TranscriptEntry[];

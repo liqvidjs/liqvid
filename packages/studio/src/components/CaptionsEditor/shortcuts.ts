@@ -22,11 +22,23 @@ export type Shortcuts = {
   /** Move the cursor to the end of the next transcript break. */
   endNextTranscriptBreak: string;
 
+  /** Lowercase currently selected word. */
+  lowercase: string;
+
   /** Merge the following word into the currently selected word. */
   mergeFollowing: string;
 
   /** Save the current captions and transcript. */
   save: string;
+
+  /** Scroll the selected word to the middle of the transcript. */
+  scrollToMiddle: string;
+
+  /** Scroll the selected word to the bottom of the transcript. */
+  scrollToBottom: string;
+
+  /** Scroll the selected word to the top of the transcript. */
+  scrollToTop: string;
 
   /** Seek playback to the start time of the currently selected word. */
   seekToSelection: string;
@@ -54,6 +66,9 @@ export type Shortcuts = {
 
   /** Toggle a transcript break at the current cursor position. */
   toggleTranscriptBreak: string;
+
+  /** Uppercase currently selected word. */
+  uppercase: string;
 };
 
 export const defaultShortcuts: Shortcuts = {
@@ -64,8 +79,12 @@ export const defaultShortcuts: Shortcuts = {
   endNextComma: ",",
   endNextSentence: ")",
   endNextTranscriptBreak: "}",
+  lowercase: "u",
   mergeFollowing: "M",
   save: "s",
+  scrollToBottom: "zb",
+  scrollToMiddle: "zz",
+  scrollToTop: "zt",
   seekToSelection: "g",
   selectCurrentWord: "h",
   selectionBackward: "w",
@@ -75,6 +94,7 @@ export const defaultShortcuts: Shortcuts = {
   startPrevTranscriptBreak: "{",
   toggleCaptionBreak: "\\",
   toggleTranscriptBreak: "|",
+  uppercase: "U",
 };
 
 /**
@@ -98,6 +118,9 @@ export const shortcutList: { key: keyof Shortcuts; mod?: boolean }[] = [
   { key: "editWord" },
   { key: "deleteWord" },
   { key: "mergeFollowing" },
+  { key: "scrollToMiddle" },
+  { key: "scrollToTop" },
+  { key: "scrollToBottom" },
   { key: "cycleCapitalization" },
   { key: "save", mod: true },
 ];
@@ -127,7 +150,15 @@ export function formatShortcut(key: string, mod = false): string[] {
   // A single uppercase letter is only produced by holding Shift.
   if (key.length === 1 && key >= "A" && key <= "Z") tokens.push("Shift");
 
-  tokens.push(KEY_LABELS[key] ?? (key.length === 1 ? key.toUpperCase() : key));
+  if (KEY_LABELS[key]) {
+    tokens.push(KEY_LABELS[key]);
+  } else {
+    tokens.push(
+      ...(key.length === 1
+        ? [key.toUpperCase()]
+        : [...key].map((character) => character.toUpperCase())),
+    );
+  }
   return tokens;
 }
 

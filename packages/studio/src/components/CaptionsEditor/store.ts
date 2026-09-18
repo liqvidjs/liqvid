@@ -9,6 +9,7 @@ export const makeStore = () =>
       () =>
         ({
           captionBreaks: [],
+          open: false,
           paragraphBreaks: [],
           redoStack: [],
           selection: { end: 0, start: 0 },

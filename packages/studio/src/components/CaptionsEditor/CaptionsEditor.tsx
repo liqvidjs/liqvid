@@ -2,7 +2,7 @@
 
 import { useTime } from "@liqvid/playback/react";
 import type { RichTranscript } from "@liqvid/schemas";
-import { useProjectPath } from "@liqvid/studio-plugin-api";
+import { useProjectParams, useProjectPath } from "@liqvid/studio-plugin-api";
 import type { Awaitable } from "@liqvid/utils";
 import { between } from "@liqvid/utils";
 import {
@@ -91,6 +91,7 @@ const styles = stylex.create({
     },
     position: "relative",
   },
+
   closeButton: {
     marginLeft: "auto",
   },
@@ -191,14 +192,16 @@ export function CaptionsEditor({
   displayProps = {},
   shortcuts = {},
   transcript: propTranscript,
+  onOpenChange,
   ...props
 }: {
   className?: string;
   displayProps?: React.HTMLAttributes<HTMLDivElement>;
   shortcuts?: Partial<Shortcuts>;
   transcript: Awaitable<RichTranscript>;
-}) {
+} & React.ComponentProps<typeof DialogRoot> & { open: boolean }) {
   const [store] = useState(() => makeStore());
+  const projectParams = useProjectParams();
   const projectPath = useProjectPath();
 
   useChannel("jobs", {
@@ -229,6 +232,7 @@ export function CaptionsEditor({
     store,
     stripesRef,
   );
+
   const {
     begin: beginEdit,
     cancel: cancelEdit,
@@ -236,6 +240,9 @@ export function CaptionsEditor({
     editing,
     setValue: setEditValue,
   } = useWordEditor(store, stripesRef);
+
+  // Scroll the current selection into view whenever it changes.
+  const selectionRef = useRef<HTMLElement>(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -247,6 +254,7 @@ export function CaptionsEditor({
     setSaving(true);
     try {
       await saveCaptions({
+        params: projectParams,
         projectPath,
         transcript: {
           captionBreaks,
@@ -261,7 +269,9 @@ export function CaptionsEditor({
 
   useCaptionsEditorShortcuts(store, shortcuts, {
     editWord: () => beginEdit(store.getState().selection.start),
+    enabled: props.open ?? false,
     save,
+    scrollSelection: (block) => selectionRef.current?.scrollIntoView({ block }),
   });
 
   const {
@@ -277,9 +287,6 @@ export function CaptionsEditor({
     (t) => activeWordIndex(transcript, t * 1000),
     (index) => setActiveWord(index),
   );
-
-  // Scroll the current selection into view whenever it changes.
-  const selectionRef = useRef<HTMLElement>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-run when the selection changes to scroll the new mark into view
   useEffect(() => {
@@ -357,7 +364,17 @@ export function CaptionsEditor({
   const wordInputSx = stylex.props(styles.wordInput);
 
   return (
-    <DialogRoot {...props}>
+    <DialogRoot
+      onOpenChange={(open, eventDetails) => {
+        // when editing a word, Escape should close the word input but not the whole editor
+        if (eventDetails.reason === "escape-key" && editing) {
+          eventDetails.cancel();
+          return;
+        }
+        onOpenChange?.(open, eventDetails);
+      }}
+      {...props}
+    >
       <DialogPortal>
         <DialogBackdrop />
         <DialogPopup style={styles.CaptionsEditor}>
@@ -470,6 +487,7 @@ export function CaptionsEditor({
                   />
                 )}
                 {editing && (
+                  // biome-ignore lint/correctness/noRestrictedElements: this is special
                   <input
                     // biome-ignore lint/a11y/noAutofocus: focus is the point of the inline editor
                     autoFocus
@@ -642,21 +660,13 @@ export function caretPositionFromPoint(
   x: number,
   y: number,
 ): { node: Node; offset: number } | null {
-  const doc = document as Document & {
-    caretPositionFromPoint?: (
-      x: number,
-      y: number,
-    ) => { offsetNode: Node; offset: number } | null;
-    caretRangeFromPoint?: (x: number, y: number) => Range | null;
-  };
-
-  if (doc.caretPositionFromPoint) {
-    const pos = doc.caretPositionFromPoint(x, y);
+  if (document.caretPositionFromPoint) {
+    const pos = document.caretPositionFromPoint(x, y);
     return pos ? { node: pos.offsetNode, offset: pos.offset } : null;
   }
 
-  if (doc.caretRangeFromPoint) {
-    const range = doc.caretRangeFromPoint(x, y);
+  if (document.caretRangeFromPoint) {
+    const range = document.caretRangeFromPoint(x, y);
     return range
       ? { node: range.startContainer, offset: range.startOffset }
       : null;

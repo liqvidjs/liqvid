@@ -1,6 +1,9 @@
 "use client";
+
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import { usePlayer } from "@liqvid/player";
 import type { CleanUpFn } from "@liqvid/utils";
+import { Portal } from "@radix-ui/react-portal";
 import { useEffect, useRef, useState } from "react";
 
 import type { Store } from "./store.ts";
@@ -10,20 +13,23 @@ export function CaptionsPreview({
   store,
   ...props
 }: { store: Store } & React.HTMLAttributes<HTMLElement>) {
-  const { captionBreaks } = store.getState();
+  const { domElement } = usePlayer();
 
   const playback = usePlayback();
 
   const captionIndex = useRef(0);
-
-  const cappedCaptionStart = (index: number) =>
-    index === 0 ? 0 : captionBreaks[index - 1]! + 1;
 
   const getCurrentCaption = () => {
     const { captionBreaks, words: transcript } = store.getState();
     const t = playback.currentTime$.inMilliseconds();
 
     if (transcript.length === 0) return "";
+
+    // There is one more caption than there are breaks: the final caption has
+    // no corresponding entry in captionBreaks.
+    const cappedCaptionStart = (index: number) =>
+      index === 0 ? 0 : captionBreaks[index - 1]! + 1;
+    captionIndex.current = Math.min(captionIndex.current, captionBreaks.length);
 
     if (transcript[cappedCaptionStart(captionIndex.current)]![1] > t) {
       captionIndex.current = Math.max(0, captionIndex.current - 1);
@@ -34,7 +40,10 @@ export function CaptionsPreview({
       ) {
         captionIndex.current = i;
       }
-    } else if (transcript[captionBreaks[captionIndex.current]!]![2] < t) {
+    } else if (
+      captionIndex.current < captionBreaks.length &&
+      transcript[captionBreaks[captionIndex.current]!]![2] < t
+    ) {
       captionIndex.current++;
       for (
         let i = captionIndex.current;
@@ -48,7 +57,9 @@ export function CaptionsPreview({
     return join(
       transcript.slice(
         cappedCaptionStart(captionIndex.current),
-        captionBreaks[captionIndex.current]! + 1,
+        captionIndex.current < captionBreaks.length
+          ? captionBreaks[captionIndex.current]! + 1
+          : transcript.length,
       ),
     );
   };
@@ -82,5 +93,9 @@ export function CaptionsPreview({
     };
   });
 
-  return <div {...props}>{caption}</div>;
+  return (
+    <Portal container={domElement}>
+      <div {...props}>{caption}</div>
+    </Portal>
+  );
 }
