@@ -14,8 +14,9 @@ import {
   COLLAPSED_FOLDERS_COOKIE,
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
+  SHOW_HIDDEN_PROJECTS_COOKIE,
 } from "#_/cookies.js";
-import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
+import { breakpoints, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { getServerState, initializeServer } from "#_/initialize.mjs";
 import { getTranslations } from "#_/utils/i18n.mjs";
@@ -58,6 +59,9 @@ const styles = stylex.create({
   },
 
   settingsLink: {
+    aspectRatio: "1 / 1",
+    borderRadius: radii.circle,
+    height: 32,
     marginLeft: spacing.auto,
   },
 });
@@ -90,6 +94,9 @@ export async function Homepage() {
   const cookieStore = await cookies();
   const folderViewCookie = cookieStore.get(FOLDER_VIEW_COOKIE);
   const initialFolderView = folderViewCookie?.value !== "false";
+
+  const showHiddenProjectsCookie = cookieStore.get(SHOW_HIDDEN_PROJECTS_COOKIE);
+  const initialShowHiddenProjects = showHiddenProjectsCookie?.value === "true";
 
   const collapsedFoldersCookie = cookieStore.get(COLLAPSED_FOLDERS_COOKIE);
   const initialCollapsedFolders: string[] = collapsedFoldersCookie?.value
@@ -128,13 +135,14 @@ export async function Homepage() {
               title={t.settings}
               {...stylex.props(styles.settingsLink)}
             >
-              <GearIcon size={32} weight="fill" />
+              <GearIcon size="100%" weight="fill" />
             </Link>
           </div>
           <LiqvidConfigProvider
             value={{
               basePath,
               domain: domain.origin,
+              hideProjects: config.ui.hideProjects,
               productionServerPort,
               rootParameters: config.rootParameters ?? {},
             }}
@@ -144,6 +152,7 @@ export async function Homepage() {
               initialCollapsedFolders={initialCollapsedFolders}
               initialFolderView={initialFolderView}
               initialSelectedRootParams={initialSelectedRootParams}
+              initialShowHiddenProjects={initialShowHiddenProjects}
               projects={serialize(projects)}
             />
           </LiqvidConfigProvider>

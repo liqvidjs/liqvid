@@ -1,7 +1,7 @@
 import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
-import { Effect, Schema, SchemaTransformation } from "effect";
+import { Effect, Schema, SchemaTransformation, Struct } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
 
 /**
@@ -86,9 +86,7 @@ export const AspectRatioSpecifier = Schema.Union([
 );
 export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Encoded"];
 
-/**
- * project.json files
- */
+/** project.json files */
 export const ProjectJson = Schema.Struct({
   $schema: Schema.String.pipe(Schema.optional),
 
@@ -159,48 +157,30 @@ export const AutoGenProjectMeta = Schema.Struct({
 });
 export type AutoGenProjectMeta = (typeof AutoGenProjectMeta)["Type"];
 
-export const ProjectMeta = Schema.Struct({
-  aspectRatio: AspectRatio,
-
-  /** Description of the project. Supports parametrized form. */
-  description: Parametrized(Schema.String).pipe(
-    Schema.optional,
-    Schema.annotate({
-      description: "Description of the project. Supports parametrized form.",
+export const ProjectMeta = ProjectJson.mapFields(Struct.map(Schema.toType))
+  .mapFields(Struct.omit(["$schema"]))
+  .mapFields(
+    Struct.evolve({
+      draft: (field) =>
+        field.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
+      title: (field) => Schema.optional(field),
     }),
-  ),
+  )
+  .pipe(
+    Schema.fieldsAssign({
+      duration: DurationOptions.pipe(
+        Schema.decodeTo(Schema.instanceOf(Duration)),
+      ),
 
-  duration: DurationOptions.pipe(Schema.decodeTo(Schema.instanceOf(Duration))),
+      path: SchemaRelativeDir,
 
-  /**
-   * Static parameters for this project. Used to interpolate path parameters
-   * when linking to projects. Format: `{ parameterName: [value1, value2, ...] }`
-   */
-  parameters: Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
-    Schema.optional,
-    Schema.annotate({
-      description:
-        "Static parameters for this project. Used to interpolate path parameters when linking to projects. Format: { parameterName: [value1, value2, ...] }",
+      socials: Schema.Struct({
+        liqvidStudio: Parametrized(Schema.Boolean).pipe(Schema.mutableKey),
+        openGraph: Schema.Boolean.pipe(Schema.mutableKey),
+        twitter: Schema.Boolean.pipe(Schema.mutableKey),
+      }),
     }),
-  ),
-
-  path: SchemaRelativeDir,
-
-  socials: Schema.Struct({
-    liqvidStudio: Parametrized(Schema.Boolean).pipe(Schema.mutableKey),
-    openGraph: Schema.Boolean.pipe(Schema.mutableKey),
-    twitter: Schema.Boolean.pipe(Schema.mutableKey),
-  }),
-
-  /** Title of the project. Supports parametrized form. Falls back to `name` if not specified. */
-  title: Parametrized(Schema.String).pipe(
-    Schema.optional,
-    Schema.annotate({
-      description:
-        'Title of the project. Supports parametrized form. Falls back to "name" if not specified.',
-    }),
-  ),
-});
+  );
 
 export type ProjectMeta = (typeof ProjectMeta)["Type"];
 

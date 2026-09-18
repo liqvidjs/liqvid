@@ -5,13 +5,18 @@ import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
 import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
+import picomatch from "picomatch";
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider.js";
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
 import { SelectedRootParametersProvider } from "#_/contexts/selected-root-parameters.js";
-import { COLLAPSED_FOLDERS_COOKIE, FOLDER_VIEW_COOKIE } from "#_/cookies.js";
+import {
+  COLLAPSED_FOLDERS_COOKIE,
+  FOLDER_VIEW_COOKIE,
+  SHOW_HIDDEN_PROJECTS_COOKIE,
+} from "#_/cookies.js";
 import { spacing } from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import { Switch } from "#_/ui/Switch.js";
@@ -47,6 +52,7 @@ const styles = stylex.create({
   },
   viewToggle: {
     alignItems: "center",
+    columnGap: spacing.xl,
     display: "flex",
     marginBottom: spacing.xl,
   },
@@ -54,8 +60,9 @@ const styles = stylex.create({
 
 export type ProjectListProps = {
   basePath: string;
-  initialCollapsedFolders: string[];
+  initialCollapsedFolders: readonly string[];
   initialFolderView: boolean;
+  initialShowHiddenProjects: boolean;
 
   /** Initial selected root parameter values (from cookie) */
   initialSelectedRootParams: Readonly<Record<string, string>>;
@@ -73,12 +80,13 @@ export function ProjectListClient({
   basePath,
   initialCollapsedFolders,
   initialFolderView,
+  initialShowHiddenProjects,
   initialSelectedRootParams,
   projects: dehydratedProjects,
 }: ProjectListProps) {
   const t = useTranslations<T>();
 
-  const { rootParameters } = useLiqvidConfig();
+  const { hideProjects, rootParameters } = useLiqvidConfig();
   const [projects, setProjects] = useState(
     (): Record<RelativeDir, ProjectMeta> =>
       deserialize(dehydratedProjects, {
@@ -86,6 +94,9 @@ export function ProjectListClient({
       }),
   );
   const [folderView, setFolderView] = useState(initialFolderView);
+  const [showHiddenProjects, setShowHiddenProjects] = useState(
+    initialShowHiddenProjects,
+  );
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
     () => new Set(initialCollapsedFolders),
   );
@@ -125,6 +136,12 @@ export function ProjectListClient({
     cookies.set(FOLDER_VIEW_COOKIE, enabled, cookieOptions);
   }
 
+  function handleShowHiddenProjectsChange(enabled: boolean) {
+    setShowHiddenProjects(enabled);
+    const cookies = new Cookies();
+    cookies.set(SHOW_HIDDEN_PROJECTS_COOKIE, enabled, cookieOptions);
+  }
+
   function handleFolderToggle(folderName: string, expanded: boolean) {
     setCollapsedFolders((prev) => {
       const next = new Set(prev);
@@ -147,7 +164,9 @@ export function ProjectListClient({
     a.path.localeCompare(b.path),
   );
 
-  const folderTree = buildFolderTree(projects);
+  const folderTree = buildFolderTree(
+    showHiddenProjects ? projects : omitHiddenProjects(projects, hideProjects),
+  );
 
   return (
     <SelectedRootParametersProvider value={selectedRootParams}>
@@ -164,6 +183,17 @@ export function ProjectListClient({
             onClick={() => handleFolderViewChange(!folderView)}
           />
         </label>
+        {hideProjects.length > 0 && (
+          <label sx={styles.toggleLabel}>
+            <span>{t.showHiddenProjects}</span>
+            <Switch
+              checked={showHiddenProjects}
+              onClick={() =>
+                handleShowHiddenProjectsChange(!showHiddenProjects)
+              }
+            />
+          </label>
+        )}
       </div>
 
       {folderView ? (
@@ -203,6 +233,18 @@ export function ProjectListClient({
         </ul>
       )}
     </SelectedRootParametersProvider>
+  );
+}
+
+function omitHiddenProjects(
+  projects: Readonly<Record<RelativeDir, ProjectMeta>>,
+  patterns: readonly string[],
+): Readonly<Record<RelativeDir, ProjectMeta>> {
+  const matchers = patterns.map((pattern) => picomatch(pattern));
+  return Object.fromEntries(
+    Object.entries(projects).filter(
+      ([, project]) => !matchers.some((matches) => matches(project.path)),
+    ),
   );
 }
 
@@ -260,5 +302,33 @@ function buildFolderTree(
     }
   }
 
-  return root;
+  return collapseSingleChildFolders(root);
+}
+
+/**
+ * Collapse directory chains that do not contain projects of their own.
+ * For example, `a/b/c` and `a/b/d` become `a/b` with `c` and `d` below it.
+ */
+function collapseSingleChildFolders(
+  folders: Map<string, FolderNode>,
+): Map<string, FolderNode> {
+  const collapsed = new Map<string, FolderNode>();
+
+  for (const [folderName, folder] of folders) {
+    let name = folderName;
+    let current: FolderNode = {
+      ...folder,
+      subfolders: collapseSingleChildFolders(folder.subfolders),
+    };
+
+    while (current.projects.length === 0 && current.subfolders.size === 1) {
+      const [childName, child] = current.subfolders.entries().next().value!;
+      name = `${name}/${childName}`;
+      current = child;
+    }
+
+    collapsed.set(name, { ...current, name });
+  }
+
+  return collapsed;
 }

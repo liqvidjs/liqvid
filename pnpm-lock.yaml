@@ -233,6 +233,9 @@ catalogs:
     next:
       specifier: ^16.3.2
       version: 16.3.4
+    picomatch:
+      specifier: ^4.0.7
+      version: 4.0.7
     pluralize:
       specifier: ^8.0.0
       version: 8.0.0
@@ -323,7 +326,7 @@ catalogs:
       version: 0.19.0
     '@stylexjs/eslint-plugin':
       specifier: ^0.19.0
-      version: 0.19.0
+      version: 0.19.1
     '@stylexjs/postcss-plugin':
       specifier: ^0.19.0
       version: 0.19.0
@@ -348,6 +351,9 @@ catalogs:
     '@types/node':
       specifier: ^26.6.1
       version: 26.6.1
+    '@types/picomatch':
+      specifier: ^4.0.3
+      version: 4.0.3
     '@types/serve-handler':
       specifier: ^6.1.4
       version: 6.1.4
@@ -3396,6 +3402,9 @@ importers:
       mediabunny:
         specifier: 'catalog:'
         version: 1.56.2
+      picomatch:
+        specifier: 'catalog:'
+        version: 4.0.7
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -3438,7 +3447,7 @@ importers:
         version: 0.19.0(supports-color@10.2.2)
       '@stylexjs/eslint-plugin':
         specifier: catalog:dev
-        version: 0.19.0
+        version: 0.19.1
       '@stylexjs/postcss-plugin':
         specifier: catalog:dev
         version: 0.19.0(supports-color@10.2.2)
@@ -3448,6 +3457,9 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 26.6.1
+      '@types/picomatch':
+        specifier: catalog:dev
+        version: 4.0.3
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -3797,6 +3809,9 @@ importers:
         specifier: 19.3.0
         version: 19.3.0
     devDependencies:
+      '@babel/core':
+        specifier: catalog:dev
+        version: 7.29.7(supports-color@10.2.2)
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.5.13
@@ -3805,7 +3820,7 @@ importers:
         version: 0.19.0(supports-color@10.2.2)
       '@stylexjs/eslint-plugin':
         specifier: catalog:dev
-        version: 0.19.0
+        version: 0.19.1
       '@stylexjs/postcss-plugin':
         specifier: catalog:dev
         version: 0.19.0(supports-color@10.2.2)
@@ -9271,14 +9286,17 @@ packages:
   '@stylexjs/babel-plugin@0.19.0':
     resolution: {integrity: sha512-2SnVZIl047TtqKW0nRTn7Irz0kmoot1bxdGDE/HwfwfF7dJYHqwkIFg92s87v3hj7zxJobrHWwDx1p3qvQXW4g==}
 
-  '@stylexjs/eslint-plugin@0.19.0':
-    resolution: {integrity: sha512-zZ6bCYcciaj2YYO0cG2nyCfjX5rclmW+WkcW/84gx4wCtpLvfr9+zYd3oqESr48suFlr8p6hrxGwnjYSLTDD4g==}
+  '@stylexjs/eslint-plugin@0.19.1':
+    resolution: {integrity: sha512-875KpR4M71F5rTSTfDoGWbs09u8atZvVGWBN5bWt3svIEmuNwTMRZGdY8iHiaPrL+W49/tifc6pouKcn3t8d+A==}
 
   '@stylexjs/postcss-plugin@0.19.0':
     resolution: {integrity: sha512-veURheoAg6LcAOZ7ik9CaBwCRS3dl1AHRYq6X5DnknYjF+vS9HhH3NZDw+dMgdFY0FYWUOwnKKAdi9m/4+2bLQ==}
 
   '@stylexjs/shared@0.19.0':
     resolution: {integrity: sha512-7Yym70cQH5sPzJHgzJX3FkL9ZCptbC3IbiRijN9YLYU/5OywB/3c519Xv1DOzvxqjv8urSxh98/9HxLaPG7sDg==}
+
+  '@stylexjs/shared@0.19.1':
+    resolution: {integrity: sha512-oFBtW0NPNLJOT1gLweWRNKrIJHjJMwOmSV7fgd6ewok4fwb/Nh95PEaYGKu+ZONk0nNghjLFfOwiIsxJdvh3TQ==}
 
   '@stylexjs/stylex@0.19.0':
     resolution: {integrity: sha512-CnUFp7YMaDLDeemsWOfJgoC/gKM5P/yBNMcpJaE6ChJmXr7s0DJwSeGTTlHJcqqwN9OW1qGtmARWLFhGZN1pTA==}
@@ -10161,6 +10179,9 @@ packages:
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
+
+  '@types/picomatch@4.0.3':
+    resolution: {integrity: sha512-iG0T6+nYJ9FAPmx9SsUlnwcq1ZVRuCXcVEvWnntoPlrOpwtSTKNDC9uVAxTsC3PUvJ+99n4RpAcNgBbHX3JSnQ==}
 
   '@types/pluralize@0.0.33':
     resolution: {integrity: sha512-JOqsl+ZoCpP4e8TDke9W79FDcSgPAR0l6pixx2JHkhnRjvShyYiAYw2LVsnA7K08Y6DeOnaU6ujmENO4os/cYg==}
@@ -24947,10 +24968,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@stylexjs/eslint-plugin@0.19.0':
+  '@stylexjs/eslint-plugin@0.19.1':
     dependencies:
       '@csstools/css-tokenizer': 3.0.4
-      '@stylexjs/shared': 0.19.0
+      '@stylexjs/shared': 0.19.1
       micromatch: 4.0.8
       postcss-value-parser: 4.2.0
 
@@ -24966,6 +24987,8 @@ snapshots:
       - supports-color
 
   '@stylexjs/shared@0.19.0': {}
+
+  '@stylexjs/shared@0.19.1': {}
 
   '@stylexjs/stylex@0.19.0':
     dependencies:
@@ -25909,6 +25932,8 @@ snapshots:
       undici-types: 8.9.0
 
   '@types/offscreencanvas@2019.7.3': {}
+
+  '@types/picomatch@4.0.3': {}
 
   '@types/pluralize@0.0.33': {}
 

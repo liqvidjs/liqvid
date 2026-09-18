@@ -312,6 +312,15 @@ export const LiqvidConfig = Schema.Struct({
   ),
 
   ui: Schema.Struct({
+    /** Array of glob patterns of projects to hide in the UI */
+    hideProjects: Schema.Array(Schema.String).pipe(
+      Schema.withDecodingDefaultType(Effect.succeed([])),
+      Schema.annotate({
+        default: [],
+        description: "Array of glob patterns of projects to hide in the UI",
+      }),
+    ),
+
     /** Locale for Liqvid Studio user interface. */
     locale: Locale.pipe(
       Schema.withDecodingDefaultType(Effect.succeed("en")),
@@ -337,6 +346,7 @@ export const LiqvidConfig = Schema.Struct({
   }).pipe(
     Schema.withDecodingDefaultType(
       Effect.succeed({
+        hideProjects: [],
         locale: "en",
         theme: "system",
       }),
