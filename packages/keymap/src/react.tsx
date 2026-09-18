@@ -33,10 +33,18 @@ export function useKeyboardShortcut(
 
   /** Callback to handle the shortcut */
   callback: ShortcutHandler,
+
+  options?: { preventDefault?: boolean; stopPropagation?: boolean },
 ) {
   const keymap = useKeymap();
 
   const listener = useEffectEvent<ShortcutHandler>((...args) => {
+    if (options?.preventDefault) {
+      args[0]?.preventDefault?.();
+    }
+    if (options?.stopPropagation) {
+      args[0]?.stopPropagation?.();
+    }
     callback(...args);
   });
 
