@@ -209,42 +209,38 @@ export async function publishMedia(options: PublishOptions = {}) {
 /**
  * Publish content files (html/css/js) to the hosting provider.
  */
-const publishContentFiles = Effect.fnUntraced(
-  function* (
-    config: LiqvidConfig,
-    cwd: AbsoluteDir,
-    dryRun: boolean,
-    force: boolean,
-  ) {
-    const fs = yield* FileSystem.FileSystem;
+const publishContentFiles = Effect.fnUntraced(function* (
+  config: LiqvidConfig,
+  cwd: AbsoluteDir,
+  dryRun: boolean,
+  force: boolean,
+) {
+  const fs = yield* FileSystem.FileSystem;
 
-    // Next.js builds to the 'out' directory by default for static export
-    const outDir = path.join(cwd, RelativeDir("out"));
+  // Next.js builds to the 'out' directory by default for static export
+  const outDir = path.join(cwd, RelativeDir("out"));
 
-    // Check if the out directory exists
-    if (!(yield* fs.exists(outDir))) {
-      return yield* Effect.die(
-        new Error(
-          "No 'out' directory found. Run 'next build' with static export first.",
-        ),
-      );
-    }
+  // Check if the out directory exists
+  if (!(yield* fs.exists(outDir))) {
+    return yield* Effect.die(
+      new Error(
+        "No 'out' directory found. Run 'next build' with static export first.",
+      ),
+    );
+  }
 
-    yield* Effect.log("Publishing content files...");
+  yield* Effect.log("Publishing content files...");
 
-    const hostingProvider = createHostingProvider(config);
+  const hostingProvider = createHostingProvider(config);
 
-    if (dryRun) {
-      yield* Effect.log(`Dry run: would publish content from ${outDir}`);
-      return;
-    }
+  if (dryRun) {
+    yield* Effect.log(`Dry run: would publish content from ${outDir}`);
+    return;
+  }
 
-    yield* hostingProvider.publishContent(outDir, force);
-    yield* Effect.log("Content publishing complete.");
-  },
-  (effect, _config, cwd, dryRun, force) =>
-    effect.pipe(Effect.annotateLogs({ cwd, dryRun, force })),
-);
+  yield* hostingProvider.publishContent(outDir, force);
+  yield* Effect.log("Content publishing complete.");
+});
 
 /**
  * Publish media files to the media hosting provider.

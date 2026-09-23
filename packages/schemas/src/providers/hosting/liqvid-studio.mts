@@ -19,7 +19,6 @@ export const ProviderConfigLiqvidStudio = Schema.Struct({
     }),
   ),
 
-  /** Access token obtained from https://liqvid.studio/settings/tokens */
   workspace: StringWithEnvVars.pipe(
     Schema.optional,
     Schema.annotate({

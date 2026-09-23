@@ -12,7 +12,8 @@ import { RelativeDir, RelativeFile } from "effect-paths";
 import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 // Import schemas
 import { LiqvidConfig } from "../src/liqvid-config.mts";
-import { LiqvidStudioProjectMeta } from "../src/liqvid-studio-meta.mts";
+import { LiqvidStudioProjectMeta } from "../src/liqvid-studio-project-meta.mts";
+import { WorkspaceMeta } from "../src/liqvid-studio-workspace-meta.mts";
 import {
   AspectRatio,
   AspectRatioSpecifier,
@@ -20,7 +21,6 @@ import {
   ProjectJson,
 } from "../src/project.mts";
 import { RecordingMeta, RecordingMetaFile } from "../src/recording-meta.mts";
-import { WorkspaceMeta } from "../src/workspace-meta.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(
@@ -37,7 +37,6 @@ interface SchemaEntry {
 const schemas: SchemaEntry[] = [
   // liqvid-config
   { name: "liqvid-config", schema: LiqvidConfig },
-  { name: "liqvid-studio-project-meta", schema: LiqvidStudioProjectMeta },
 
   // project
   { name: "aspect-ratio", schema: AspectRatio },
@@ -45,10 +44,13 @@ const schemas: SchemaEntry[] = [
   { name: "project-json", schema: ProjectJson },
   { name: "project-meta-autogen", schema: AutoGenProjectMeta },
 
+  // Liqvid Studio
+  { name: "liqvid-studio-project-meta", schema: LiqvidStudioProjectMeta },
+  { name: "liqvid-studio-workspace-meta", schema: WorkspaceMeta },
+
   // recording-meta
   { name: "recording-meta-file", schema: RecordingMetaFile },
   { name: "recording-meta", schema: RecordingMeta },
-  { name: "workspace-meta", schema: WorkspaceMeta },
 
   // thumbnails-job
   { name: "thumbnails-job", schema: ThumbnailsJob },

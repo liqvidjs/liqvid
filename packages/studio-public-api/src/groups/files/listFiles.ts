@@ -15,7 +15,7 @@ export const ListFilesResponse = Schema.Struct({
   truncated: Schema.Boolean,
 });
 
-export const listFiles = HttpApiEndpoint.get("list", "/api/v1/files", {
+export const listFiles = HttpApiEndpoint.get("list", "/files", {
   error: [Unauthorized, InternalServerError],
   query: {
     cursor: Schema.optional(Schema.String),

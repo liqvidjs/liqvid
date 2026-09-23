@@ -27,7 +27,7 @@ export const UploadResponse = Schema.Struct({
   uploads: Schema.Array(Upload),
 });
 
-export const uploadFiles = HttpApiEndpoint.post("upload", "/api/v1/files", {
+export const uploadFiles = HttpApiEndpoint.post("upload", "/files", {
   error: [Unauthorized, InternalServerError],
   payload: UploadRequest,
   success: UploadResponse,

@@ -184,6 +184,7 @@ const rendersGroup = HttpApiGroup.make("renders")
       payload: Schema.Struct({
         /** New name for the render */
         newName: Schema.String,
+
         /** Current render ID */
         renderId: Schema.String,
       }),
@@ -215,14 +216,14 @@ const rendersGroup = HttpApiGroup.make("renders")
 
 const recordingsGroup = HttpApiGroup.make("recordings")
   .add(
-    HttpApiEndpoint.get("list", "/recordings", {
+    HttpApiEndpoint.get("list", "/", {
       error: InvalidProjectStructure,
       query: projectPathWithParamsQuery,
       success: Schema.Array(RecordingMeta),
     }),
   )
   .add(
-    HttpApiEndpoint.post("save", "/recordings", {
+    HttpApiEndpoint.post("save", "/", {
       // Multipart payload: metadata JSON + plugin data (blobs or JSON strings)
       // We use handleRaw in the implementation since plugin keys are dynamic
       payload: Schema.Struct({
@@ -236,7 +237,7 @@ const recordingsGroup = HttpApiGroup.make("recordings")
     }).annotate(OpenApi.Summary, "Save a new recording"),
   )
   .add(
-    HttpApiEndpoint.post("reprocess", "/recordings/reprocess", {
+    HttpApiEndpoint.post("reprocess", "/reprocess", {
       payload: Schema.Struct({
         /** Recording name (ISO timestamp format, e.g., "2024-01-15T12-30-00-000Z") */
         recordingName: Schema.String,
@@ -247,7 +248,8 @@ const recordingsGroup = HttpApiGroup.make("recordings")
       OpenApi.Summary,
       "Re-run post-processing plugins for a recording",
     ),
-  );
+  )
+  .prefix("/recordings");
 
 /* ------------------------------ screenshots ------------------------------ */
 const targetFilename = Schema.Literals([
@@ -257,13 +259,13 @@ const targetFilename = Schema.Literals([
 
 const screenshotsGroup = HttpApiGroup.make("screenshots")
   .add(
-    HttpApiEndpoint.get("list", "/screenshots", {
+    HttpApiEndpoint.get("list", "/", {
       query: projectPathWithParamsQuery,
       success: Schema.Array(ScreenshotEntry),
     }).annotate(OpenApi.Summary, "List screenshots for a project"),
   )
   .add(
-    HttpApiEndpoint.post("capture", "/screenshots/capture", {
+    HttpApiEndpoint.post("capture", "/capture", {
       payload: Schema.Struct({
         /** Color scheme: light, dark, or both */
         colorScheme: Schema.optional(ColorSchemeOption),
@@ -284,7 +286,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     }).annotate(OpenApi.Summary, "Capture a screenshot"),
   )
   .add(
-    HttpApiEndpoint.post("copy", "/screenshots/copy", {
+    HttpApiEndpoint.post("copy", "/copy", {
       payload: Schema.Struct({
         /** Screenshot folder id */
         screenshotId: Schema.String,
@@ -302,7 +304,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     }).annotate(OpenApi.Summary, "Copy a screenshot to the project root"),
   )
   .add(
-    HttpApiEndpoint.post("rename", "/screenshots/rename", {
+    HttpApiEndpoint.post("rename", "/rename", {
       error: [InvalidError, NotFoundError, ConflictError],
       payload: Schema.Struct({
         /** New name for the screenshot */
@@ -318,7 +320,7 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     }).annotate(OpenApi.Summary, "Rename a screenshot"),
   )
   .add(
-    HttpApiEndpoint.delete("delete", "/screenshots/delete", {
+    HttpApiEndpoint.delete("delete", "/delete", {
       error: NotFoundError,
       payload: Schema.Struct({
         /** Screenshot folder id to delete */
@@ -329,14 +331,16 @@ const screenshotsGroup = HttpApiGroup.make("screenshots")
     }).annotate(OpenApi.Summary, "Delete a screenshot"),
   )
   .add(
-    HttpApiEndpoint.get("checkExists", "/screenshots/check-exists", {
+    HttpApiEndpoint.get("checkExists", "/check-exists", {
       query: Schema.Struct({
         filename: targetFilename,
         projectPath: SchemaRelativeDir,
       }),
       success: Schema.Struct({ exists: Schema.Boolean }),
     }).annotate(OpenApi.Summary, "Check whether a project image exists"),
-  );
+  )
+  .prefix("/screenshots")
+  .annotate(OpenApi.Title, "Screenshots");
 
 /* ------------------------------ settings ------------------------------ */
 
@@ -433,7 +437,7 @@ export type SettingsConfig = (typeof SettingsConfig)["Type"];
 
 const settingsGroup = HttpApiGroup.make("settings")
   .add(
-    HttpApiEndpoint.get("getLocale", "/settings/locale", {
+    HttpApiEndpoint.get("getLocale", "/locale", {
       success: Schema.Struct({
         /** Current UI locale */
         locale: Locale,
@@ -441,7 +445,7 @@ const settingsGroup = HttpApiGroup.make("settings")
     }).annotate(OpenApi.Summary, "Get the current UI locale"),
   )
   .add(
-    HttpApiEndpoint.post("setLocale", "/settings/locale", {
+    HttpApiEndpoint.post("setLocale", "/locale", {
       payload: Schema.Struct({
         /** Locale to set for the Liqvid Studio UI */
         locale: Locale,
@@ -453,7 +457,7 @@ const settingsGroup = HttpApiGroup.make("settings")
     }).annotate(OpenApi.Summary, "Update the UI locale in liqvid.json"),
   )
   .add(
-    HttpApiEndpoint.get("getTheme", "/settings/theme", {
+    HttpApiEndpoint.get("getTheme", "/theme", {
       success: Schema.Struct({
         /** Current UI theme */
         theme: ColorSchemeSpecifier,
@@ -461,7 +465,7 @@ const settingsGroup = HttpApiGroup.make("settings")
     }).annotate(OpenApi.Summary, "Get the current UI theme"),
   )
   .add(
-    HttpApiEndpoint.post("setTheme", "/settings/theme", {
+    HttpApiEndpoint.post("setTheme", "/theme", {
       payload: Schema.Struct({
         /** Theme to set for the Liqvid Studio UI */
         theme: ColorSchemeSpecifier,
@@ -473,7 +477,7 @@ const settingsGroup = HttpApiGroup.make("settings")
     }).annotate(OpenApi.Summary, "Update the UI theme in liqvid.json"),
   )
   .add(
-    HttpApiEndpoint.get("getConfig", "/settings/config", {
+    HttpApiEndpoint.get("getConfig", "/config", {
       success: SettingsConfig,
     }).annotate(
       OpenApi.Summary,
@@ -481,7 +485,7 @@ const settingsGroup = HttpApiGroup.make("settings")
     ),
   )
   .add(
-    HttpApiEndpoint.post("setConfig", "/settings/config", {
+    HttpApiEndpoint.post("setConfig", "/config", {
       payload: SettingsConfig,
       success: SettingsConfig,
     }).annotate(
@@ -489,65 +493,69 @@ const settingsGroup = HttpApiGroup.make("settings")
       "Update editable liqvid.json settings (backend, basePath, media, providers)",
     ),
   )
+  .prefix("/settings")
   .annotate(OpenApi.Title, "Settings");
 
 /* ------------------------------ thumbnails ------------------------------ */
-const thumbsGroup = HttpApiGroup.make("thumbs").add(
-  HttpApiEndpoint.get("list", "/thumbs", {
-    error: [NotFoundError],
-    query: projectPathWithParamsQuery,
-    success: ThumbsData,
-  }),
-
-  HttpApiEndpoint.post("generate", "/thumbs/generate", {
-    payload: Schema.optional(
-      Schema.Struct({
-        /** Color scheme: light, dark, or both */
-        colorScheme: Schema.optional(ColorSchemeOption),
-
-        /** Number of columns per sheet */
-        cols: Schema.optional(Schema.Number),
-
-        /** Seconds between screenshots */
-        frequency: Schema.optional(Schema.Number),
-
-        /** Height of each thumbnail */
-        height: Schema.optional(Schema.Number),
-
-        /** Image format: jpeg or png */
-        imageFormat: Schema.optional(ImageFormat),
-
-        /**
-         * Parameter values for parameterized projects.
-         * e.g., `{ lang: "en", locale: "US" }`
-         */
-        params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
-
-        /** Quality for JPEG images (0-100) */
-        quality: Schema.optional(Schema.Number),
-
-        /** Number of rows per sheet */
-        rows: Schema.optional(Schema.Number),
-
-        /** Width of each thumbnail */
-        width: Schema.optional(Schema.Number),
-      }),
-    ),
-
-    query: projectPathQuery,
-
-    success: Schema.Struct({
-      /** Thumbnail sheets for dark mode (if colorScheme is "dark" or "both") */
-      dark: Schema.optional(Schema.Array(Schema.String)),
-
-      /** Thumbnail sheets for light mode (if colorScheme is "light" or "both") */
-      light: Schema.optional(Schema.Array(Schema.String)),
-
-      /** Number of thumbnail sheets generated per color scheme */
-      numSheets: Schema.Number,
+const thumbsGroup = HttpApiGroup.make("thumbs")
+  .add(
+    HttpApiEndpoint.get("list", "/", {
+      error: [NotFoundError],
+      query: projectPathWithParamsQuery,
+      success: ThumbsData,
     }),
-  }),
-);
+
+    HttpApiEndpoint.post("generate", "/generate", {
+      payload: Schema.optional(
+        Schema.Struct({
+          /** Color scheme: light, dark, or both */
+          colorScheme: Schema.optional(ColorSchemeOption),
+
+          /** Number of columns per sheet */
+          cols: Schema.optional(Schema.Number),
+
+          /** Seconds between screenshots */
+          frequency: Schema.optional(Schema.Number),
+
+          /** Height of each thumbnail */
+          height: Schema.optional(Schema.Number),
+
+          /** Image format: jpeg or png */
+          imageFormat: Schema.optional(ImageFormat),
+
+          /**
+           * Parameter values for parameterized projects.
+           * e.g., `{ lang: "en", locale: "US" }`
+           */
+          params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+
+          /** Quality for JPEG images (0-100) */
+          quality: Schema.optional(Schema.Number),
+
+          /** Number of rows per sheet */
+          rows: Schema.optional(Schema.Number),
+
+          /** Width of each thumbnail */
+          width: Schema.optional(Schema.Number),
+        }),
+      ),
+
+      query: projectPathQuery,
+
+      success: Schema.Struct({
+        /** Thumbnail sheets for dark mode (if colorScheme is "dark" or "both") */
+        dark: Schema.optional(Schema.Array(Schema.String)),
+
+        /** Thumbnail sheets for light mode (if colorScheme is "light" or "both") */
+        light: Schema.optional(Schema.Array(Schema.String)),
+
+        /** Number of thumbnail sheets generated per color scheme */
+        numSheets: Schema.Number,
+      }),
+    }),
+  )
+  .prefix("/thumbs")
+  .annotate(OpenApi.Title, "Thumbnails");
 
 /** Liqvid Studio web API */
 export const WebApi = HttpApi.make("LiqvidStudioWebApi")

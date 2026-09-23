@@ -3,7 +3,7 @@ import * as path from "node:path";
 
 import { runNextBuild } from "@liqvid/cli/build";
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
-import { Effect, FileSystem } from "effect";
+import { Effect, FileSystem, Match } from "effect";
 import { type AbsoluteDir, RelativeDir, type RelativePath } from "effect-paths";
 import handler from "serve-handler";
 
@@ -32,7 +32,11 @@ export const startProductionServer = Effect.fnUntraced(function* (
 
   // Load liqvid.jsonc or liqvid.json config
   const config = yield* loadLiqvidConfig();
-  const basePath = config?.basePath ?? "";
+  const basePath = Match.value(config?.backend?.content).pipe(
+    Match.when("copy", () => config.providers.copy?.basePath ?? ""),
+    Match.when("sftp", () => config.providers.sftp?.basePath ?? ""),
+    Match.orElse(() => ""),
+  );
   state.basePath = basePath;
 
   // Setup symlinks for basePath if configured

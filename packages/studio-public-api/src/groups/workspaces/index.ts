@@ -20,10 +20,11 @@ export const WorkspaceResponse = Schema.Struct({
 
 export class Workspaces extends HttpApiGroup.make("workspaces")
   .add(
-    HttpApiEndpoint.post("create", "/api/v1/workspaces", {
+    HttpApiEndpoint.post("create", "/", {
       error: [Unauthorized, InternalServerError],
       payload: WorkspaceRequest,
       success: WorkspaceResponse.pipe(HttpApiSchema.status(201)),
     }).annotate(OpenApi.Summary, "Create a workspace"),
   )
+  .prefix("/workspaces")
   .middleware(Authorization) {}

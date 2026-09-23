@@ -11,6 +11,15 @@ export const SchemaProjectId = Schema.String.pipe(
   Schema.fromBrand("ProjectId", ProjectId),
 );
 
+// ------------------------------ UserId ------------------------------
+export type UserId = string & Brand.Brand<"UserId">;
+
+export const UserId = Brand.nominal<UserId>();
+
+export const SchemaUserId = Schema.String.pipe(
+  Schema.fromBrand("UserId", UserId),
+);
+
 // ------------------------------ WorkspaceId ------------------------------
 /** ID of a Liqvid workspace */
 export type WorkspaceId = string & Brand.Brand<"WorkspaceId">;

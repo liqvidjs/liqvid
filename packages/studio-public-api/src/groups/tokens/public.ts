@@ -1,1 +1,1 @@
-export { RequestTokenResponse } from "./index.js";
+export { RequestTokenResponse } from "./index.ts";

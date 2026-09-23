@@ -1,8 +1,19 @@
 import { Schema } from "effect";
 
-import { SchemaUrl } from "../../shared.mts";
+import { SchemaUrl, StringWithEnvVars } from "../../shared.mts";
 
 export const ProviderConfigSFTP = Schema.Struct({
+  /**
+   * Base path that content is hosted under. Should match the basePath in your framework configuration.
+   */
+  basePath: StringWithEnvVars.pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Base path that content is hosted under. Should match the basePath in your framework configuration.",
+    }),
+  ),
+
   /**
    * Domain content will be hosted at.
    * Currently, this is only used for the "copy embed code" button.

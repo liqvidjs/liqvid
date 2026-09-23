@@ -20,7 +20,7 @@ export const DeleteResponse = Schema.Struct({
   ),
 });
 
-export const deleteFiles = HttpApiEndpoint.delete("delete", "/api/v1/files", {
+export const deleteFiles = HttpApiEndpoint.delete("delete", "/files", {
   error: [Unauthorized, InternalServerError],
   payload: DeleteRequest,
   success: DeleteResponse,

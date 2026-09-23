@@ -16,7 +16,7 @@ export const RequestTokenResponse = Schema.Struct({
 export type RequestTokenResponse = typeof RequestTokenResponse.Type;
 
 export class Tokens extends HttpApiGroup.make("tokens").add(
-  HttpApiEndpoint.post("create", "/api/v1/tokens", {
+  HttpApiEndpoint.post("create", "/tokens", {
     error: InternalServerError,
     success: RequestTokenResponse.pipe(HttpApiSchema.status(201)),
   }),

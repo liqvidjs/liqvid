@@ -62,16 +62,6 @@
         }
       ]
     },
-    "basePath": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "logging": {
       "anyOf": [
         {
@@ -652,6 +642,17 @@
             {
               "type": "object",
               "properties": {
+                "basePath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Base path that content is hosted under. Should match the basePath in your framework configuration."
+                },
                 "clean": {
                   "anyOf": [
                     {
@@ -936,6 +937,17 @@
             {
               "type": "object",
               "properties": {
+                "basePath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Base path that content is hosted under. Should match the basePath in your framework configuration."
+                },
                 "domain": {
                   "anyOf": [
                     {

@@ -81,14 +81,7 @@
                             "type": "string"
                           },
                           "lastModified": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "size": {
                             "anyOf": [
@@ -261,10 +254,15 @@
                     },
                     "minItems": 1,
                     "maxItems": 1000
+                  },
+                  "workspaceId": {
+                    "type": "string",
+                    "description": "ID of the workspace the file will be uploaded to."
                   }
                 },
                 "required": [
-                  "keys"
+                  "keys",
+                  "workspaceId"
                 ],
                 "additionalProperties": false
               }
@@ -381,6 +379,85 @@
         }
       }
     },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "operationId": "health.check",
+        "parameters": [],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity": {
+      "get": {
+        "tags": [
+          "identity"
+        ],
+        "operationId": "identity.get",
+        "parameters": [],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedEncoded"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects": {
       "post": {
         "tags": [
@@ -401,12 +478,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
+                    "projectId": {
                       "type": "string"
                     }
                   },
                   "required": [
-                    "id"
+                    "projectId"
                   ],
                   "additionalProperties": false
                 }
@@ -441,6 +518,46 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aspectRatio": {
+                    "type": "object",
+                    "properties": {
+                      "height": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
+                          }
+                        ]
+                      },
+                      "width": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "height",
+                      "width"
+                    ],
+                    "additionalProperties": false
+                  },
                   "description": {
                     "anyOf": [
                       {},
@@ -449,7 +566,9 @@
                       }
                     ]
                   },
-                  "name": {},
+                  "name": {
+                    "type": "string"
+                  },
                   "parameters": {
                     "anyOf": [
                       {
@@ -469,26 +588,16 @@
                   "path": {
                     "type": "string"
                   },
-                  "workspace": {
-                    "anyOf": [
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "string",
-                        "enum": [
-                          "Infinity",
-                          "-Infinity",
-                          "NaN"
-                        ]
-                      }
-                    ]
+                  "workspaceId": {
+                    "type": "string",
+                    "description": "ID of the Liqvid workspace to associate with this project"
                   }
                 },
                 "required": [
+                  "aspectRatio",
                   "name",
                   "path",
-                  "workspace"
+                  "workspaceId"
                 ],
                 "additionalProperties": false
               }
@@ -498,7 +607,7 @@
         }
       }
     },
-    "/api/v1/projects/{id}": {
+    "/api/v1/projects/{projectId}": {
       "put": {
         "tags": [
           "projects"
@@ -506,7 +615,7 @@
         "operationId": "projects.sync",
         "parameters": [
           {
-            "name": "id",
+            "name": "projectId",
             "in": "path",
             "schema": {
               "type": "string"
@@ -527,12 +636,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
+                    "projectId": {
                       "type": "string"
                     }
                   },
                   "required": [
-                    "id"
+                    "projectId"
                   ],
                   "additionalProperties": false
                 }
@@ -577,6 +686,46 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aspectRatio": {
+                    "type": "object",
+                    "properties": {
+                      "height": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
+                          }
+                        ]
+                      },
+                      "width": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "height",
+                      "width"
+                    ],
+                    "additionalProperties": false
+                  },
                   "description": {
                     "anyOf": [
                       {},
@@ -585,7 +734,9 @@
                       }
                     ]
                   },
-                  "name": {},
+                  "name": {
+                    "type": "string"
+                  },
                   "parameters": {
                     "anyOf": [
                       {
@@ -605,26 +756,16 @@
                   "path": {
                     "type": "string"
                   },
-                  "workspace": {
-                    "anyOf": [
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "string",
-                        "enum": [
-                          "Infinity",
-                          "-Infinity",
-                          "NaN"
-                        ]
-                      }
-                    ]
+                  "workspaceId": {
+                    "type": "string",
+                    "description": "ID of the Liqvid workspace to associate with this project"
                   }
                 },
                 "required": [
+                  "aspectRatio",
                   "name",
                   "path",
-                  "workspace"
+                  "workspaceId"
                 ],
                 "additionalProperties": false
               }
@@ -703,24 +844,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string",
-                          "enum": [
-                            "Infinity",
-                            "-Infinity",
-                            "NaN"
-                          ]
-                        }
-                      ]
+                    "workspaceId": {
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "id"
+                    "workspaceId"
                   ],
                   "additionalProperties": false
                 }
@@ -866,6 +995,12 @@
   "tags": [
     {
       "name": "files"
+    },
+    {
+      "name": "health"
+    },
+    {
+      "name": "identity"
     },
     {
       "name": "projects"

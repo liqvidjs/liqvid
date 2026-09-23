@@ -1,7 +1,7 @@
+import type { UserId } from "@liqvid/schemas";
 import { Context } from "effect";
 import { HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
 
-import type { UserId } from "./branded.ts";
 import { Unauthorized } from "./errors.ts";
 
 export type ApiUser = Readonly<{

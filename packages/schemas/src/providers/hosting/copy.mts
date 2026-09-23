@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
 import { SchemaAnyDir } from "effect-paths";
 
-import { SchemaUrl } from "../../shared.mts";
+import { SchemaUrl, StringWithEnvVars } from "../../shared.mts";
 
 /**
  * Destination for the copy provider.
@@ -21,6 +21,17 @@ export type CopyDestination = (typeof CopyDestination)["Type"];
  * Copies the output directory to another location on disk.
  */
 export const ProviderConfigCopy = Schema.Struct({
+  /**
+   * Base path that content is hosted under. Should match the basePath in your framework configuration.
+   */
+  basePath: StringWithEnvVars.pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Base path that content is hosted under. Should match the basePath in your framework configuration.",
+    }),
+  ),
+
   /**
    * Whether to clean the destination directory before copying.
    * @default false

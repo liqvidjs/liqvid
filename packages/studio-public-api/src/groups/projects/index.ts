@@ -16,11 +16,15 @@ import { InternalServerError, NotFound, Unauthorized } from "../../errors.ts";
 
 export const ProjectRequest = Schema.Struct({
   aspectRatio: AspectRatio,
-  description: Schema.optional(Schema.Unknown),
+
+  description: Schema.String.pipe(Schema.optional),
+
   name: Schema.String,
+
   parameters: Schema.optional(
     Schema.Record(Schema.String, Schema.Array(Schema.String)),
   ),
+
   path: Schema.String,
 
   /** ID of the Liqvid workspace to associate with this project */
@@ -41,16 +45,18 @@ export type ProjectResponse = typeof ProjectResponse.Type;
 
 export class Projects extends HttpApiGroup.make("projects")
   .add(
-    HttpApiEndpoint.post("create", "/api/v1/projects", {
+    HttpApiEndpoint.post("create", "/", {
       error: [Unauthorized, InternalServerError],
       payload: ProjectRequest,
       success: ProjectResponse.pipe(HttpApiSchema.status(201)),
     }).annotate(OpenApi.Summary, "Create a project"),
-    HttpApiEndpoint.put("sync", "/api/v1/projects/:projectId", {
+    HttpApiEndpoint.put("sync", "/:projectId", {
       error: [Unauthorized, NotFound, InternalServerError],
       params: { projectId: SchemaProjectId },
       payload: ProjectRequest,
       success: ProjectResponse,
     }).annotate(OpenApi.Summary, "Sync an existing project"),
   )
+  .prefix("/projects")
+  .annotate(OpenApi.Title, "Projects")
   .middleware(Authorization) {}

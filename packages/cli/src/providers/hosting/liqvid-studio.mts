@@ -61,8 +61,8 @@ const CONTENT_DOMAIN =
   process.env.LIQVID_STUDIO_CUSTOM_CONTENT_DOMAIN ?? "liqvidstudio.com";
 
 const SCHEMAS = "https://liqvidjs.org/schemas/latest";
-const STUDIO_META_SCHEMA = `${SCHEMAS}/liqvid-studio-meta.json`;
-const WORKSPACE_META_SCHEMA = `${SCHEMAS}/workspace-meta.json`;
+const STUDIO_META_SCHEMA = `${SCHEMAS}/liqvid-studio-project-meta.json`;
+const WORKSPACE_META_SCHEMA = `${SCHEMAS}/liqvid-studio-workspace-meta.json`;
 
 const PROJECT_FILE = RelativeFile("project.json");
 
@@ -162,7 +162,7 @@ export class LiqvidStudioProvider
       return yield* Effect.all(
         files.map((filePath) =>
           Effect.gen({ self: this }, function* () {
-             const key = this.#relativeKey(path.relative(rootDir, filePath));
+            const key = this.#relativeKey(path.relative(rootDir, filePath));
             const remote = remoteByKey.get(key);
             if (!remote) {
               return {
@@ -532,6 +532,11 @@ export class LiqvidStudioProvider
                     }
                     let countedBytes = 0;
                     const response = yield* Effect.tryPromise({
+                      catch: (cause) =>
+                        new LiqvidStudioError({
+                          cause,
+                          message: `Upload request failed for ${key}`,
+                        }),
                       try: () => {
                         const stream = nodeFs.createReadStream(filePath).pipe(
                           new Transform({
@@ -557,11 +562,6 @@ export class LiqvidStudioProvider
                           method: "PUT",
                         } as StudioRequestInit);
                       },
-                      catch: (cause) =>
-                        new LiqvidStudioError({
-                          cause,
-                          message: `Upload request failed for ${key}`,
-                        }),
                     }).pipe(Effect.retry({ times: 2 }), Effect.orDie);
                     if (!response.ok) {
                       const resText = yield* Effect.promise(() =>

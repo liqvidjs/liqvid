@@ -11,7 +11,6 @@ import {
   ColorSchemeSpecifier,
   LogLevel,
   RenderSource,
-  StringWithEnvVars,
 } from "./shared.mts";
 
 /** Supported locales. */
@@ -54,17 +53,6 @@ export const LiqvidConfig = Schema.Struct({
     ),
   }).pipe(
     Schema.annotate({ description: "Configure your hosting backends" }),
-    Schema.optional,
-  ),
-
-  /**
-   * Base path that content is hosted under. Should match the basePath in your framework configuration.
-   */
-  basePath: StringWithEnvVars.pipe(
-    Schema.annotate({
-      description:
-        "Base path that content is hosted under. Should match the basePath in your framework configuration.",
-    }),
     Schema.optional,
   ),
 
