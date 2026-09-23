@@ -13,6 +13,8 @@ import {
 } from "effect-paths";
 import Handlebars from "handlebars";
 
+import { PACKAGE_JSON } from "#_/conventions.js";
+
 import { UP } from "../utils/effect.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -50,7 +52,7 @@ async function hasServerPlugin(
     nodeModulesDir,
     ...(packageName.split("/") as RelativeDir[]),
   );
-  const packageJsonPath = path.join(packageDir, RelativeFile("package.json"));
+  const packageJsonPath = path.join(packageDir, PACKAGE_JSON);
 
   if (!fs.existsSync(packageJsonPath)) {
     return false;
@@ -75,7 +77,7 @@ async function hasServerPlugin(
  * Find all dependencies with liqvid-studio-server-plugin exports.
  */
 async function findPlugins(cwd: AbsoluteDir): Promise<string[]> {
-  const packageJsonPath = path.join(cwd, RelativeFile("package.json"));
+  const packageJsonPath = path.join(cwd, PACKAGE_JSON);
 
   if (!fs.existsSync(packageJsonPath)) {
     throw new Error(`No package.json found in ${cwd}`);

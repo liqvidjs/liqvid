@@ -2,26 +2,25 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Cause, Effect, FileSystem, Option, References } from "effect";
+import { Cause, Effect, FileSystem, Layer, Option, References } from "effect";
 import { Command, Flag } from "effect/unstable/cli";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";
 
-import { CopyProvider } from "#_/providers/hosting/copy.mjs";
-import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
-import { S3Provider } from "#_/providers/hosting/s3.mjs";
-import { SFTPProvider } from "#_/providers/hosting/sftp.mjs";
-import type {
-  HostingProvider,
-  MediaHostingProvider,
-} from "#_/providers/types.mjs";
+import { CopyProvider } from "#_/providers/hosting/copy";
+import { GitHubPagesProvider } from "#_/providers/hosting/github-pages";
+import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio";
+import { S3Provider } from "#_/providers/hosting/s3";
+import { SFTPProvider } from "#_/providers/hosting/sftp";
+import type { HostingProvider, MediaHostingProvider } from "#_/providers/types";
 import {
   loadEnvFiles,
   loadLiqvidConfig,
   resolveConfigPath,
-} from "#_/utils/effect.mjs";
-import { getLogLevel } from "#_/utils/misc.mjs";
+} from "#_/utils/effect";
+import { getLogLevel } from "#_/utils/misc";
+import { defaultCliProgressLayer } from "#_/utils/progress.mjs";
 
 import {
   CONFIG_FILE,
@@ -41,6 +40,9 @@ export type PublishOptions = Readonly<{
 
   /** Show what would be uploaded without actually uploading */
   dryRun?: boolean;
+
+  /** Upload files even when they are unchanged */
+  force?: boolean;
 }>;
 
 /** Publish content and/or media files to configured hosting providers. */
@@ -81,6 +83,10 @@ export const publish = Command.make(
       ),
       Flag.withDefault(false),
     ),
+    force: Flag.Boolean("force").pipe(
+      Flag.withDescription("Upload files even when they are unchanged"),
+      Flag.withDefault(false),
+    ),
     media: Flag.Boolean("media").pipe(
       Flag.withDescription("Publish media files to the media hosting provider"),
       Flag.withDefault(false),
@@ -91,6 +97,7 @@ export const publish = Command.make(
       const cwd = path.resolve(argv.cwd) as AbsoluteDir;
       const baseDir = argv.baseDir as RelativeDir;
       const dryRun = argv.dryRun;
+      const force = argv.force;
       const contentFlag = argv.content;
       const mediaFlag = argv.media;
 
@@ -108,14 +115,14 @@ export const publish = Command.make(
       // Publish content if requested
       if (shouldPublishContent) {
         yield* Effect.promise(() =>
-          publishContent({ baseDir, configPath, cwd, dryRun }),
+          publishContent({ baseDir, configPath, cwd, dryRun, force }),
         );
       }
 
       // Publish media if requested
       if (shouldPublishMedia) {
         yield* Effect.promise(() =>
-          publishMedia({ baseDir, configPath, cwd, dryRun }),
+          publishMedia({ baseDir, configPath, cwd, dryRun, force }),
         );
       }
 
@@ -153,12 +160,15 @@ export async function publishContent(
   const cwd = options.cwd ?? process.cwd();
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
   const dryRun = options.dryRun ?? false;
+  const force = options.force ?? false;
 
   const config = await loadConfig(cwd, configPath);
 
   await Effect.runPromise(
-    publishContentFiles(config, cwd, dryRun).pipe(
-      Effect.provide(NodeFileSystem.layer),
+    publishContentFiles(config, cwd, dryRun, force).pipe(
+      Effect.provide(
+        Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+      ),
     ),
   );
 }
@@ -173,6 +183,7 @@ export async function publishMedia(options: PublishOptions = {}) {
   const baseDir = options.baseDir ?? RelativeDir("app");
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
   const dryRun = options.dryRun ?? false;
+  const force = options.force ?? false;
 
   // The base directory is where we search for media files
   // and paths are computed relative to it
@@ -181,12 +192,14 @@ export async function publishMedia(options: PublishOptions = {}) {
   const config = await loadConfig(cwd, configPath);
 
   await Effect.runPromise(
-    publishMediaFiles(config, searchDir, baseDir, dryRun).pipe(
+    publishMediaFiles(config, searchDir, baseDir, dryRun, force).pipe(
       Effect.provideService(
         References.MinimumLogLevel,
         getLogLevel(Option.some(config)),
       ),
-      Effect.provide(NodeFileSystem.layer),
+      Effect.provide(
+        Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+      ),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
       Effect.catch(Effect.die),
     ),
@@ -197,7 +210,12 @@ export async function publishMedia(options: PublishOptions = {}) {
  * Publish content files (html/css/js) to the hosting provider.
  */
 const publishContentFiles = Effect.fnUntraced(
-  function* (config: LiqvidConfig, cwd: AbsoluteDir, dryRun: boolean) {
+  function* (
+    config: LiqvidConfig,
+    cwd: AbsoluteDir,
+    dryRun: boolean,
+    force: boolean,
+  ) {
     const fs = yield* FileSystem.FileSystem;
 
     // Next.js builds to the 'out' directory by default for static export
@@ -221,10 +239,11 @@ const publishContentFiles = Effect.fnUntraced(
       return;
     }
 
-    yield* Effect.promise(() => hostingProvider.publishContent(outDir));
+    yield* hostingProvider.publishContent(outDir, force);
     yield* Effect.log("Content publishing complete.");
   },
-  (effect, cwd, dryRun) => effect.pipe(Effect.annotateLogs({ cwd, dryRun })),
+  (effect, _config, cwd, dryRun, force) =>
+    effect.pipe(Effect.annotateLogs({ cwd, dryRun, force })),
 );
 
 /**
@@ -235,6 +254,7 @@ const publishMediaFiles = Effect.fnUntraced(function* (
   searchDir: AbsoluteDir,
   baseDir: RelativeDir,
   dryRun: boolean,
+  force: boolean,
 ) {
   // Get glob patterns from config, with sensible defaults
   const patterns = config.publishing?.include?.media ?? DEFAULT_MEDIA_PATTERNS;
@@ -269,12 +289,12 @@ const publishMediaFiles = Effect.fnUntraced(function* (
 
   if (dryRun) {
     yield* Effect.log("Dry run mode - checking remote state...\n");
-    yield* showDryRunInfo(provider, mediaFiles, searchDir, config);
+    yield* showDryRunInfo(provider, mediaFiles, searchDir, config, force);
     return;
   }
 
   // Publish all media files (paths relative to searchDir)
-  yield* provider.publishMedia(mediaFiles, searchDir);
+  yield* provider.publishMedia(mediaFiles, searchDir, force);
   yield* Effect.log("Media publishing complete.");
 });
 
@@ -306,7 +326,10 @@ function createMediaProvider(config: LiqvidConfig): MediaHostingProvider {
           "liqvidStudio is configured as media backend but no liqvidStudio provider configuration found",
         );
       }
-      return new LiqvidStudioProvider(liqvidStudioConfig);
+      return new LiqvidStudioProvider(
+        liqvidStudioConfig,
+        config.publishing?.delete ?? false,
+      );
     }
     case "s3": {
       const s3Config = config.providers.s3;
@@ -348,7 +371,13 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
       return new CopyProvider(copyConfig);
     }
     case "githubPages": {
-      throw new Error("GitHub Pages hosting provider is not yet implemented");
+      const githubPagesConfig = config.providers.githubPages;
+      if (!githubPagesConfig) {
+        throw new Error(
+          "githubPages is configured as content backend but no githubPages provider configuration found",
+        );
+      }
+      return new GitHubPagesProvider(githubPagesConfig);
     }
     case "liqvidStudio": {
       const liqvidStudioConfig = config.providers.liqvidStudio;
@@ -357,7 +386,10 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
           "liqvidStudio is configured as content backend but no liqvidStudio provider configuration found",
         );
       }
-      return new LiqvidStudioProvider(liqvidStudioConfig);
+      return new LiqvidStudioProvider(
+        liqvidStudioConfig,
+        config.publishing?.delete ?? false,
+      );
     }
     case "sftp": {
       const sftpConfig = config.providers.sftp;
@@ -378,24 +410,30 @@ function createHostingProvider(config: LiqvidConfig): HostingProvider {
  */
 const showDryRunInfo = Effect.fnUntraced(function* (
   provider: MediaHostingProvider,
-  mediaFiles: AbsoluteFile[],
+  mediaFiles: readonly AbsoluteFile[],
   rootDir: AbsoluteDir,
   _config: LiqvidConfig,
+  force: boolean,
 ) {
   const fs = yield* FileSystem.FileSystem;
 
   // Check which files need to be uploaded
   const statuses = yield* provider.checkFiles(mediaFiles, rootDir);
 
-  const toUpload = statuses.filter((s) => s.needsUpload);
-  const unchanged = statuses.filter((s) => !s.needsUpload);
+  const toUpload = force ? statuses : statuses.filter((s) => s.needsUpload);
+  const unchanged = force ? [] : statuses.filter((s) => !s.needsUpload);
 
   if (toUpload.length > 0) {
     yield* Effect.log("Files that would be uploaded:\n");
     for (const { filePath, key, reason } of toUpload) {
       const stats = yield* fs.stat(filePath);
       const sizeStr = formatFileSize(stats.size);
-      const reasonStr = reason === "new" ? "(new)" : "(modified)";
+      const reasonStr =
+        reason === "new"
+          ? "(new)"
+          : reason === "modified"
+            ? "(modified)"
+            : "(unchanged, forced)";
       yield* Effect.log(
         `  ${path.relative(rootDir, filePath)} → ${key} (${sizeStr}) ${reasonStr}`,
       );

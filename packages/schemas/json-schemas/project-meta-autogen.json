@@ -1,10 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "type": "object",
   "properties": {
     "duration": {
-      "additionalProperties": true,
-      "description": "Duration of project",
+      "type": "object",
       "properties": {
         "d": {
           "anyOf": [
@@ -14,8 +13,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -32,8 +35,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -50,8 +57,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -68,8 +79,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -86,26 +101,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "milliseconds": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -122,8 +123,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -140,8 +145,34 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "milliseconds": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -158,8 +189,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -176,8 +211,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -194,8 +233,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -212,8 +255,12 @@
                   "type": "number"
                 },
                 {
-                  "enum": ["Infinity", "-Infinity", "NaN"],
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "Infinity",
+                    "-Infinity",
+                    "NaN"
+                  ]
                 }
               ]
             },
@@ -223,9 +270,12 @@
           ]
         }
       },
-      "type": "object"
+      "additionalProperties": true,
+      "description": "Duration of project"
     }
   },
-  "required": ["duration"],
-  "type": "object"
+  "required": [
+    "duration"
+  ],
+  "additionalProperties": true
 }

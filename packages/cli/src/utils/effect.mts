@@ -11,18 +11,49 @@ import {
   type PlatformError,
   Schema,
 } from "effect";
+import type { Concurrency } from "effect/Types";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
   type AbsolutePath,
   RelativeDir,
   RelativeFile,
+  type RelativePath,
 } from "effect-paths";
 import { JSONC } from "jsonc.min";
 
 import { CONFIG_FILE, CONFIG_FILE_JSONC } from "#_/tasks/conventions.mjs";
 
 import { FileDecodeError } from "../errors.mts";
+
+export const readDirWithFileTypes = Effect.fnUntraced(function* (
+  dirname: AbsoluteDir,
+  {
+    concurrency,
+    recursive,
+  }: { concurrency?: Concurrency; recursive?: boolean } = {},
+) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const files = (yield* fs.readDirectory(dirname, {
+    recursive,
+  })) as RelativePath[];
+
+  return yield* Effect.all(
+    files.map((basename) =>
+      Effect.gen(function* () {
+        const stats = yield* fs.stat(
+          path.join(dirname, basename as RelativePath),
+        );
+        return [basename, stats.type] as
+          | [RelativeFile, "File"]
+          | [RelativeDir, "Directory"]
+          | [RelativePath, "SymbolicLink"];
+      }),
+    ),
+    { concurrency },
+  );
+});
 
 /**
  * Get the file-system layer appropriate to the execution environment (Node, Bun, etc.)

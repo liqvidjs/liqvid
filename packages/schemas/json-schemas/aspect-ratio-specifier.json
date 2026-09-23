@@ -2,20 +2,23 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "anyOf": [
     {
-      "enum": ["square"],
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "square"
+      ]
     },
     {
-      "enum": ["video"],
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "video"
+      ]
     },
     {
-      "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$",
-      "type": "string"
+      "type": "string",
+      "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$"
     },
     {
-      "maxItems": 2,
-      "minItems": 2,
+      "type": "array",
       "prefixItems": [
         {
           "anyOf": [
@@ -23,8 +26,12 @@
               "type": "number"
             },
             {
-              "enum": ["Infinity", "-Infinity", "NaN"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
             }
           ]
         },
@@ -34,16 +41,21 @@
               "type": "number"
             },
             {
-              "enum": ["Infinity", "-Infinity", "NaN"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
             }
           ]
         }
       ],
-      "type": "array"
+      "maxItems": 2,
+      "minItems": 2
     },
     {
-      "additionalProperties": true,
+      "type": "object",
       "properties": {
         "height": {
           "anyOf": [
@@ -51,8 +63,12 @@
               "type": "number"
             },
             {
-              "enum": ["Infinity", "-Infinity", "NaN"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
             }
           ]
         },
@@ -62,14 +78,21 @@
               "type": "number"
             },
             {
-              "enum": ["Infinity", "-Infinity", "NaN"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
             }
           ]
         }
       },
-      "required": ["height", "width"],
-      "type": "object"
+      "required": [
+        "height",
+        "width"
+      ],
+      "additionalProperties": true
     }
   ]
 }

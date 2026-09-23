@@ -3,6 +3,7 @@ import * as child_process from "node:child_process";
 import chalk from "chalk";
 
 export interface RsyncOptions {
+  force?: boolean;
   host: string;
   localDir: string;
   password?: string; // Optional: SSH password (not recommended)
@@ -18,6 +19,7 @@ export async function rsyncRemoteDirectory(
   const {
     localDir,
     remoteDir,
+    force = false,
     host,
     username,
     password,
@@ -39,6 +41,7 @@ export async function rsyncRemoteDirectory(
     "--verbose", // -v: verbose mode
     "--compress", // -z: compress data during transfer
     "--progress",
+    ...(force ? ["--ignore-times"] : []),
     `--rsh=${sshRsh}`, // Use SSH as the transport with optional port
     `"${localDir}"/`, // Source directory (note the trailing slash!)
     `"${username ? `${username}@` : ""}${host}:${remoteDir}"`, // Destination directory
@@ -55,7 +58,8 @@ export async function rsyncRemoteDirectory(
     );
 
     const portOption = port ? `-p ${port}` : "";
-    const sshCommand = `ssh ${username}@${host} ${portOption} -tt 'rsync --archive --verbose --compress --progress "${localDir}/" "${host}:${remoteDir}" && echo "rsync completed successfully"'`;
+    const forceOption = force ? " --ignore-times" : "";
+    const sshCommand = `ssh ${username}@${host} ${portOption} -tt 'rsync --archive --verbose --compress --progress${forceOption} "${localDir}/" "${host}:${remoteDir}" && echo "rsync completed successfully"'`;
 
     return new Promise<void>((resolve, reject) => {
       child_process.exec(

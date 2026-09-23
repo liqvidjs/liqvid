@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "type": "object",
   "properties": {
     "$schema": {
       "anyOf": [
@@ -17,20 +17,23 @@
         {
           "anyOf": [
             {
-              "enum": ["square"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "square"
+              ]
             },
             {
-              "enum": ["video"],
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "video"
+              ]
             },
             {
-              "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$",
-              "type": "string"
+              "type": "string",
+              "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$"
             },
             {
-              "maxItems": 2,
-              "minItems": 2,
+              "type": "array",
               "prefixItems": [
                 {
                   "anyOf": [
@@ -38,8 +41,12 @@
                       "type": "number"
                     },
                     {
-                      "enum": ["Infinity", "-Infinity", "NaN"],
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "Infinity",
+                        "-Infinity",
+                        "NaN"
+                      ]
                     }
                   ]
                 },
@@ -49,16 +56,21 @@
                       "type": "number"
                     },
                     {
-                      "enum": ["Infinity", "-Infinity", "NaN"],
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "Infinity",
+                        "-Infinity",
+                        "NaN"
+                      ]
                     }
                   ]
                 }
               ],
-              "type": "array"
+              "maxItems": 2,
+              "minItems": 2
             },
             {
-              "additionalProperties": true,
+              "type": "object",
               "properties": {
                 "height": {
                   "anyOf": [
@@ -66,8 +78,12 @@
                       "type": "number"
                     },
                     {
-                      "enum": ["Infinity", "-Infinity", "NaN"],
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "Infinity",
+                        "-Infinity",
+                        "NaN"
+                      ]
                     }
                   ]
                 },
@@ -77,14 +93,21 @@
                       "type": "number"
                     },
                     {
-                      "enum": ["Infinity", "-Infinity", "NaN"],
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "Infinity",
+                        "-Infinity",
+                        "NaN"
+                      ]
                     }
                   ]
                 }
               },
-              "required": ["height", "width"],
-              "type": "object"
+              "required": [
+                "height",
+                "width"
+              ],
+              "additionalProperties": true
             }
           ]
         },
@@ -101,24 +124,26 @@
               "type": "string"
             },
             {
+              "type": "array",
               "items": {
-                "allOf": [
-                  {
-                    "additionalProperties": {
-                      "type": "string"
-                    },
-                    "type": "object"
-                  }
-                ],
+                "type": "object",
                 "properties": {
                   "value": {
                     "type": "string"
                   }
                 },
-                "required": ["value"],
-                "type": "object"
-              },
-              "type": "array"
+                "required": [
+                  "value"
+                ],
+                "allOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
             }
           ]
         },
@@ -142,13 +167,13 @@
     "parameters": {
       "anyOf": [
         {
+          "type": "object",
           "additionalProperties": {
+            "type": "array",
             "items": {
               "type": "string"
-            },
-            "type": "array"
-          },
-          "type": "object"
+            }
+          }
         },
         {
           "type": "null"
@@ -162,29 +187,33 @@
           "type": "string"
         },
         {
+          "type": "array",
           "items": {
-            "allOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              }
-            ],
+            "type": "object",
             "properties": {
               "value": {
                 "type": "string"
               }
             },
-            "required": ["value"],
-            "type": "object"
-          },
-          "type": "array"
+            "required": [
+              "value"
+            ],
+            "allOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
         }
       ],
       "description": "Name of the project"
     }
   },
-  "required": ["title"],
-  "type": "object"
+  "required": [
+    "title"
+  ],
+  "additionalProperties": true
 }

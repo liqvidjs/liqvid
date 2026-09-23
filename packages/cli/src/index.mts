@@ -6,8 +6,8 @@ import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import type { thumbs as captureThumbs, solidify } from "@liqvid/renderer";
 import { Effect } from "effect";
 import { Command } from "effect/unstable/cli";
-import { RelativeFile } from "effect-paths";
 
+import { PACKAGE_JSON } from "./conventions.mts";
 import type { runNextBuild } from "./tasks/build.mts";
 import { build } from "./tasks/build.mts";
 import { compress } from "./tasks/compress.mts";
@@ -25,10 +25,7 @@ import { UP } from "./utils/effect.mts";
 // version
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(
-  await readFile(
-    path.join(__dirname, UP, UP, RelativeFile("package.json")),
-    "utf8",
-  ),
+  await readFile(path.join(__dirname, UP, UP, PACKAGE_JSON), "utf8"),
 );
 
 const liqvid = Command.make("liqvid").pipe(

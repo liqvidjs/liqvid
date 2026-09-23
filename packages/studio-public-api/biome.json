@@ -1,3 +1,15 @@
 {
-  "extends": ["../../biome.json"]
+  "extends": ["../../biome.json"],
+  "overrides": [
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/*"]
+    }
+  ]
 }

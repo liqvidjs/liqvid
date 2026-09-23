@@ -106,7 +106,7 @@ export const pull = Command.make(
       const targetDir = path.join(cwd, baseDir);
 
       // Load and parse config
-      const config = yield* Effect.promise(() => loadConfig(configPath));
+      const config = yield* loadConfig(configPath);
 
       // Create provider based on config
       const provider = createProvider(config);
@@ -116,9 +116,7 @@ export const pull = Command.make(
       );
 
       // List all remote files
-      const remoteFiles = yield* Effect.promise(() =>
-        provider.listRemoteFiles(),
-      );
+      const remoteFiles = yield* provider.listRemoteFiles();
 
       // Filter to only media files
       const mediaFiles = remoteFiles.filter((f) => isMediaFile(f.key));
@@ -131,10 +129,9 @@ export const pull = Command.make(
       // Sort for consistent output
       mediaFiles.sort((a, b) => a.key.localeCompare(b.key));
 
-      console.log(
-        `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} on remote`,
+      yield* Effect.logInfo(
+        `Found ${mediaFiles.length} media ${pluralize("file", mediaFiles.length)} on remote\n`,
       );
-      console.log();
 
       // Check which files need to be downloaded
       const statuses = yield* provider
@@ -142,7 +139,9 @@ export const pull = Command.make(
         .pipe(Effect.provide(NodeFileSystem.layer));
 
       if (dryRun) {
-        console.log("Dry run mode - showing what would be downloaded...\n");
+        yield* Effect.logInfo(
+          "Dry run mode - showing what would be downloaded...\n",
+        );
         showDryRunInfo(statuses, targetDir, config, mediaFiles);
         process.exit(0);
       }
@@ -151,7 +150,7 @@ export const pull = Command.make(
       const downloadCount = yield* provider.downloadMedia(statuses);
 
       if (downloadCount > 0) {
-        console.log("\nPull complete!");
+        yield* Effect.logInfo("\nPull complete!");
       }
       process.exit(0);
     }),
@@ -162,55 +161,53 @@ export const pull = Command.make(
 /**
  * Load and validate the liqvid.json config file
  */
-async function loadConfig(configPath: AbsoluteFile): Promise<LiqvidConfig> {
-  const cwd = path.dirname(configPath);
-  const envFiles = loadEnvFiles(cwd);
+const loadConfig: (configPath: AbsoluteFile) => Effect.Effect<LiqvidConfig> =
+  Effect.fnUntraced(function* (configPath: AbsoluteFile) {
+    const cwd = path.dirname(configPath);
+    const envFiles = loadEnvFiles(cwd);
 
-  try {
-    return await Effect.runPromise(
-      loadLiqvidConfig({ configPath }).pipe(
-        Effect.provide(NodeFileSystem.layer),
-        Effect.provideService(EnvFiles, envFiles),
-      ),
-    );
-  } catch (err) {
-    const cause = err instanceof Error ? err.message : String(err);
+    return yield* loadLiqvidConfig({ configPath }).pipe(
+      Effect.provide(NodeFileSystem.layer),
+      Effect.provideService(EnvFiles, envFiles),
+      Effect.catch((err): Effect.Effect<never> => {
+        const cause = err instanceof Error ? err.message : String(err);
 
-    if (cause.includes("ENOENT") || cause.includes("NotFound")) {
-      console.error(`Config file not found: ${configPath}`);
-      console.error(
-        `\nCreate a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file with your media hosting configuration.`,
-      );
-      console.error("Example:\n");
-      console.error(
-        JSON.stringify(
-          {
-            $schema: "https://liqvidjs.org/schemas/liqvid-config.json",
-            backend: {
-              content: "s3",
-              media: "s3",
-            },
-            providers: {
-              s3: {
-                auth: { profile: "default" },
-                bucket: "my-bucket",
-                prefix: "media",
-                region: "us-east-1",
+        if (cause.includes("ENOENT") || cause.includes("NotFound")) {
+          console.error(`Config file not found: ${configPath}`);
+          console.error(
+            `\nCreate a ${CONFIG_FILE_JSONC} or ${CONFIG_FILE} file with your media hosting configuration.`,
+          );
+          console.error("Example:\n");
+          console.error(
+            JSON.stringify(
+              {
+                $schema: "https://liqvidjs.org/schemas/liqvid-config.json",
+                backend: {
+                  content: "s3",
+                  media: "s3",
+                },
+                providers: {
+                  s3: {
+                    auth: { profile: "default" },
+                    bucket: "my-bucket",
+                    prefix: "media",
+                    region: "us-east-1",
+                  },
+                },
               },
-            },
-          },
-          null,
-          2,
-        ),
-      );
-      process.exit(1);
-    }
+              null,
+              2,
+            ),
+          );
+          process.exit(1);
+        }
 
-    console.error("Invalid config file:");
-    console.error(cause);
-    process.exit(1);
-  }
-}
+        console.error("Invalid config file:");
+        console.error(cause);
+        process.exit(1);
+      }),
+    );
+  });
 
 /**
  * Create the appropriate provider based on config
@@ -243,10 +240,10 @@ function createProvider(config: LiqvidConfig): S3Provider {
  * Show what would be downloaded in dry-run mode
  */
 function showDryRunInfo(
-  statuses: FileDownloadStatus[],
+  statuses: readonly FileDownloadStatus[],
   targetDir: string,
   config: LiqvidConfig,
-  remoteFiles: RemoteFileInfo[],
+  remoteFiles: readonly RemoteFileInfo[],
 ) {
   const bucket = config.providers.s3?.bucket ?? "bucket";
 

@@ -15,16 +15,22 @@
   "sideEffects": false,
   "imports": {
     "#_/*.js": {
-      "@liqvid/dev": [
+      "default": [
         "./src/*.mts",
-        "./src/*.ts",
-        "./src/*.tsx"
+        "./src/*.ts"
       ],
       "import": "./src/*"
     },
     "#_/*.mjs": {
       "default": "./src/*.mts",
       "import": "./src/*"
+    },
+    "#_/*": {
+      "default": [
+        "./src/*.mts",
+        "./src/*.ts"
+      ],
+      "import": "./dist/*"
     }
   },
   "exports": {
@@ -112,7 +118,9 @@
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",
     "@liqvid/schemas": "workspace:^",
+    "@liqvid/studio-public-api": "workspace:^",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
+    "@octokit/rest": "catalog:",
     "@types/node": "catalog:dev",
     "chalk": "catalog:",
     "cli-progress": "catalog:",
@@ -122,7 +130,8 @@
     "handlebars": "catalog:",
     "jsonc.min": "catalog:",
     "pluralize": "catalog:",
-    "sharp": "catalog:"
+    "sharp": "catalog:",
+    "undici": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "type": "object",
   "properties": {
     "height": {
       "anyOf": [
@@ -8,8 +8,12 @@
           "type": "number"
         },
         {
-          "enum": ["Infinity", "-Infinity", "NaN"],
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "Infinity",
+            "-Infinity",
+            "NaN"
+          ]
         }
       ]
     },
@@ -19,12 +23,19 @@
           "type": "number"
         },
         {
-          "enum": ["Infinity", "-Infinity", "NaN"],
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "Infinity",
+            "-Infinity",
+            "NaN"
+          ]
         }
       ]
     }
   },
-  "required": ["height", "width"],
-  "type": "object"
+  "required": [
+    "height",
+    "width"
+  ],
+  "additionalProperties": true
 }

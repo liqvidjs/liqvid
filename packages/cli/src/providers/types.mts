@@ -1,11 +1,25 @@
+import type { Progress } from "@liqvid/renderer";
 import type { Effect, FileSystem, PlatformError } from "effect";
 import type { AbsoluteDir, AbsoluteFile, RelativeFile } from "effect-paths";
 
+export type ProgressService = typeof Progress extends {
+  readonly Service: infer Service;
+}
+  ? Service
+  : never;
+
 export interface HostingProvider {
-  publishContent(localDir: string): Promise<void>;
+  publishContent(
+    localDir: AbsoluteDir,
+    force?: boolean,
+  ): Effect.Effect<
+    void,
+    PlatformError.PlatformError,
+    FileSystem.FileSystem | ProgressService
+  >;
 }
 
-export interface FileUploadStatus {
+export type FileUploadStatus = Readonly<{
   /** Absolute path to the local file */
   filePath: AbsoluteFile;
 
@@ -17,9 +31,9 @@ export interface FileUploadStatus {
 
   /** Reason for the upload status */
   reason: "new" | "modified" | "unchanged";
-}
+}>;
 
-export interface RemoteFileInfo {
+export type RemoteFileInfo = Readonly<{
   /** Remote key/path (relative to prefix) */
   key: RelativeFile;
 
@@ -28,9 +42,9 @@ export interface RemoteFileInfo {
 
   /** Size in bytes */
   size: number;
-}
+}>;
 
-export interface FileDownloadStatus {
+export type FileDownloadStatus = Readonly<{
   /** Remote key/path */
   key: RelativeFile;
 
@@ -42,7 +56,7 @@ export interface FileDownloadStatus {
 
   /** Reason for the download status */
   reason: "new" | "modified" | "unchanged";
-}
+}>;
 
 export interface MediaHostingProvider {
   /**
@@ -52,7 +66,7 @@ export interface MediaHostingProvider {
    * @returns Upload status for each file
    */
   checkFiles(
-    files: AbsoluteFile[],
+    files: readonly AbsoluteFile[],
     rootDir: AbsoluteDir,
   ): Effect.Effect<FileUploadStatus[], unknown, FileSystem.FileSystem>;
 
@@ -63,7 +77,7 @@ export interface MediaHostingProvider {
    * @returns Download status for each file
    */
   checkRemoteFiles(
-    remoteFiles: RemoteFileInfo[],
+    remoteFiles: readonly RemoteFileInfo[],
     rootDir: AbsoluteDir,
   ): Effect.Effect<FileDownloadStatus[], unknown, FileSystem.FileSystem>;
 
@@ -72,7 +86,9 @@ export interface MediaHostingProvider {
    * @param files - Download statuses for files to download
    * @returns Number of files downloaded
    */
-  downloadMedia(files: FileDownloadStatus[]): Effect.Effect<number>;
+  downloadMedia(
+    files: readonly FileDownloadStatus[],
+  ): Effect.Effect<number, PlatformError.PlatformError, FileSystem.FileSystem>;
 
   /** Get the value of the `NEXT_PUBLIC_LIQVID_MEDIA_BASE` environment variable. */
   getBaseUrl(): string;
@@ -81,7 +97,11 @@ export interface MediaHostingProvider {
    * List all remote files under the configured prefix.
    * @returns List of remote file info
    */
-  listRemoteFiles(): Promise<RemoteFileInfo[]>;
+  listRemoteFiles(): Effect.Effect<
+    RemoteFileInfo[],
+    PlatformError.PlatformError,
+    FileSystem.FileSystem
+  >;
 
   /**
    * Publish media files to the hosting provider.
@@ -89,7 +109,12 @@ export interface MediaHostingProvider {
    * @param rootDir - The root directory (for computing relative paths)
    */
   publishMedia(
-    files: AbsoluteFile[],
+    files: readonly AbsoluteFile[],
     rootDir: AbsoluteDir,
-  ): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>;
+    force?: boolean,
+  ): Effect.Effect<
+    void,
+    PlatformError.PlatformError,
+    FileSystem.FileSystem | ProgressService
+  >;
 }

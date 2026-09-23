@@ -1,8 +1,7 @@
-import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 
 import type { ProviderConfigCopy } from "@liqvid/schemas";
-import { Effect, FileSystem, Option } from "effect";
+import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -10,6 +9,7 @@ import {
   type RelativeFile,
 } from "effect-paths";
 
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
 import { expandTilde } from "#_/utils/paths.mjs";
 
 import type {
@@ -50,65 +50,74 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
   /**
    * Clean a directory by removing all its contents.
    */
-  async #cleanDirectory(dir: string): Promise<void> {
-    try {
-      await fsp.rm(dir, { force: true, recursive: true });
-    } catch (err) {
-      // Ignore if directory doesn't exist
-      if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw err;
-      }
-    }
-  }
+  readonly #cleanDirectory = Effect.fnUntraced(function* (dir: AbsoluteDir) {
+    const fs = yield* FileSystem.FileSystem;
+
+    yield* fs.remove(dir, { force: true, recursive: true });
+  });
 
   /**
    * Copy a directory recursively.
    */
-  async #copyDirectory(src: string, dest: string): Promise<void> {
-    // Ensure destination exists
-    await fsp.mkdir(dest, { recursive: true });
+  #copyDirectory(
+    src: AbsoluteDir,
+    dest: AbsoluteDir,
+  ): Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem> {
+    return Effect.gen({ self: this }, function* (this: CopyProvider) {
+      const fs = yield* FileSystem.FileSystem;
 
-    const entries = await fsp.readdir(src, { withFileTypes: true });
+      // Ensure destination exists
+      yield* fs.makeDirectory(dest, { recursive: true });
 
-    for (const entry of entries) {
-      const srcPath = path.join(src, entry.name);
-      const destPath = path.join(dest, entry.name);
+      const entries = yield* readDirWithFileTypes(src);
 
-      if (entry.isDirectory()) {
-        await this.#copyDirectory(srcPath, destPath);
-      } else {
-        await fsp.copyFile(srcPath, destPath);
+      for (const [name, kind] of entries) {
+        if (kind === "Directory") {
+          const srcPath = path.join(src, name);
+          const destPath = path.join(dest, name);
+          yield* this.#copyDirectory(srcPath, destPath);
+        } else if (kind === "File") {
+          const srcPath = path.join(src, name);
+          const destPath = path.join(dest, name);
+          yield* fs.copyFile(srcPath, destPath);
+        }
       }
-    }
+    });
   }
 
   /**
    * Copy a single file, creating parent directories as needed.
    */
-  async #copyFile(srcPath: string, destPath: string): Promise<void> {
+  readonly #copyFile = Effect.fnUntraced(function* (
+    srcPath: AbsoluteFile,
+    destPath: AbsoluteFile,
+  ) {
+    const fs = yield* FileSystem.FileSystem;
     const destDir = path.dirname(destPath);
-    await fsp.mkdir(destDir, { recursive: true });
-    await fsp.copyFile(srcPath, destPath);
-  }
+    yield* fs.makeDirectory(destDir, { recursive: true });
+    yield* fs.copyFile(srcPath, destPath);
+  });
 
   // HostingProvider implementation
 
-  async publishContent(localDir: string): Promise<void> {
-    const destination = this.#getDestination("hosting");
+  publishContent(localDir: AbsoluteDir, _force = false) {
+    return Effect.gen({ self: this }, function* (this: CopyProvider) {
+      const destination = this.#getDestination("hosting");
 
-    if (this.#config.clean) {
-      console.log(`Cleaning destination directory: ${destination}`);
-      await this.#cleanDirectory(destination);
-    }
+      if (this.#config.clean) {
+        console.log(`Cleaning destination directory: ${destination}`);
+        yield* this.#cleanDirectory(destination);
+      }
 
-    console.log(`Copying content from ${localDir} to ${destination}`);
-    await this.#copyDirectory(localDir, destination);
-    console.log("Copy complete.");
+      console.log(`Copying content from ${localDir} to ${destination}`);
+      yield* this.#copyDirectory(localDir, destination);
+      console.log("Copy complete.");
+    });
   }
 
   // MediaHostingProvider implementation
 
-  checkFiles(files: AbsoluteFile[], rootDir: AbsoluteDir) {
+  checkFiles(files: readonly AbsoluteFile[], rootDir: AbsoluteDir) {
     const destination = this.#getDestination("media");
 
     return Effect.all(
@@ -165,7 +174,10 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     );
   }
 
-  checkRemoteFiles(remoteFiles: RemoteFileInfo[], rootDir: AbsoluteDir) {
+  checkRemoteFiles(
+    remoteFiles: readonly RemoteFileInfo[],
+    rootDir: AbsoluteDir,
+  ) {
     const destination = this.#getDestination("media");
 
     return Effect.all(
@@ -244,7 +256,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
       for (const { key, localPath } of toDownload) {
         const srcPath = path.join(destination, key);
-        yield* Effect.promise(() => this.#copyFile(srcPath, localPath));
+        yield* this.#copyFile(srcPath, localPath);
         yield* Effect.log(`  Copied: ${key}`);
       }
 
@@ -257,58 +269,64 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     // For local copy, return a file:// URL or empty string
     // since this is primarily for local development/testing
     const destination = this.#getDestination("media");
-    return `file://${path.resolve(destination)}`;
+    return `file: //${path.resolve(destination)}`;
   }
 
-  async listRemoteFiles(): Promise<RemoteFileInfo[]> {
-    const destination = this.#getDestination("media");
-    const results: RemoteFileInfo[] = [];
-
-    await this.#listFilesRecursive(destination, RelativeDir(""), results);
-
-    return results;
+  listRemoteFiles(): Effect.Effect<
+    RemoteFileInfo[],
+    PlatformError.PlatformError,
+    FileSystem.FileSystem
+  > {
+    return this.#listFilesRecursive(
+      this.#getDestination("media"),
+      RelativeDir(""),
+    );
   }
 
-  async #listFilesRecursive(
+  #listFilesRecursive(
     baseDir: AbsoluteDir,
     relativePath: RelativeDir,
-    results: RemoteFileInfo[],
-  ): Promise<void> {
-    const currentDir = path.join(baseDir, relativePath);
+    results: RemoteFileInfo[] = [],
+  ): Effect.Effect<
+    RemoteFileInfo[],
+    PlatformError.PlatformError,
+    FileSystem.FileSystem
+  > {
+    return Effect.gen({ self: this }, function* (this: CopyProvider) {
+      const fs = yield* FileSystem.FileSystem;
+      const currentDir = path.join(baseDir, relativePath);
+      const entries = yield* readDirWithFileTypes(currentDir).pipe(
+        Effect.catchReason("PlatformError", "NotFound", () =>
+          Effect.succeed([] as readonly [RelativeFile, "File"][]),
+        ),
+      );
 
-    try {
-      const entries = await fsp.readdir(currentDir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const entryRelativePath = path.join(relativePath, entry.name);
-          await this.#listFilesRecursive(baseDir, entryRelativePath, results);
-        } else if (entry.isFile()) {
-          const fullPath = path.join(currentDir, entry.name);
-          const stats = await fsp.stat(fullPath);
-          const entryRelativePath = path.join(relativePath, entry.name);
-
+      for (const [name, kind] of entries) {
+        if (kind === "Directory") {
+          const entryRelativePath = path.join(relativePath, name);
+          yield* this.#listFilesRecursive(baseDir, entryRelativePath, results);
+        } else if (kind === "File") {
+          const entryPath = path.join(currentDir, name);
+          const entryRelativePath = path.join(relativePath, name);
+          const stats = yield* fs.stat(entryPath);
           results.push({
             key: entryRelativePath,
-            lastModified: stats.mtime,
-            size: stats.size,
+            lastModified: stats.mtime.pipe(Option.getOrElse(() => new Date())),
+            size: Number(stats.size),
           });
         }
       }
-    } catch (err) {
-      // If directory doesn't exist, return empty results
-      if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw err;
-      }
-    }
+      return results;
+    });
   }
 
   publishMedia = Effect.fn("publishMedia")(
     { self: this },
     function* (
       this: CopyProvider,
-      files: AbsoluteFile[],
+      files: readonly AbsoluteFile[],
       rootDir: AbsoluteDir,
+      force = false,
     ) {
       const destination = this.#getDestination("media");
       if (files.length === 0) {
@@ -318,13 +336,13 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
       if (this.#config.clean) {
         yield* Effect.log(`Cleaning destination directory: ${destination}`);
-        yield* Effect.promise(() => this.#cleanDirectory(destination));
+        yield* this.#cleanDirectory(destination);
       }
 
       yield* Effect.log(`Checking ${files.length} files...`);
 
       const statuses = yield* this.checkFiles(files, rootDir);
-      const toCopy = statuses.filter((s) => s.needsUpload);
+      const toCopy = force ? statuses : statuses.filter((s) => s.needsUpload);
 
       if (toCopy.length === 0) {
         yield* Effect.log("All files are up to date. Nothing to copy.");
@@ -337,7 +355,7 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
 
       for (const { filePath, key } of toCopy) {
         const destPath = path.join(destination, key);
-        yield* Effect.promise(() => this.#copyFile(filePath, destPath));
+        yield* this.#copyFile(filePath, destPath);
         yield* Effect.log(`  Copied: ${key}`);
       }
 

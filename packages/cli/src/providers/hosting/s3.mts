@@ -115,7 +115,7 @@ export class S3Provider implements MediaHostingProvider {
     }
   }
 
-  checkFiles(files: AbsoluteFile[], rootDir: AbsoluteDir) {
+  checkFiles(files: readonly AbsoluteFile[], rootDir: AbsoluteDir) {
     return Effect.all(
       files.map((filePath) => {
         const relativeFromRoot = path.relative(rootDir, filePath);
@@ -132,7 +132,12 @@ export class S3Provider implements MediaHostingProvider {
 
   publishMedia = Effect.fn("publishMedia")(
     { self: this },
-    function* (this: S3Provider, files: AbsoluteFile[], rootDir: AbsoluteDir) {
+    function* (
+      this: S3Provider,
+      files: readonly AbsoluteFile[],
+      rootDir: AbsoluteDir,
+      force = false,
+    ) {
       if (files.length === 0) {
         yield* Effect.log("No media files to upload.");
         return;
@@ -143,7 +148,7 @@ export class S3Provider implements MediaHostingProvider {
       );
 
       const statuses = yield* this.checkFiles(files, rootDir);
-      const toUpload = statuses.filter((s) => s.needsUpload);
+      const toUpload = force ? statuses : statuses.filter((s) => s.needsUpload);
 
       if (toUpload.length === 0) {
         yield* Effect.log("All files are up to date. Nothing to upload.");
@@ -163,46 +168,53 @@ export class S3Provider implements MediaHostingProvider {
     },
   );
 
-  async listRemoteFiles(): Promise<RemoteFileInfo[]> {
+  listRemoteFiles() {
     const results: RemoteFileInfo[] = [];
     let continuationToken: string | undefined;
 
-    do {
-      const response = await this.client.send(
-        new ListObjectsV2Command({
-          Bucket: this.bucket,
-          ContinuationToken: continuationToken,
-          Prefix: this.prefix ? `${this.prefix}/` : undefined,
-        }),
-      );
+    return Effect.gen({ self: this }, function* () {
+      do {
+        const response = yield* Effect.promise(() =>
+          this.client.send(
+            new ListObjectsV2Command({
+              Bucket: this.bucket,
+              ContinuationToken: continuationToken,
+              Prefix: this.prefix ? `${this.prefix}/` : undefined,
+            }),
+          ),
+        );
 
-      if (response.Contents) {
-        for (const obj of response.Contents) {
-          if (obj.Key && obj.Size !== undefined && obj.LastModified) {
-            // Remove prefix from key to get relative path
-            let relativeKey = RelativeFile(obj.Key);
-            if (this.prefix && relativeKey.startsWith(`${this.prefix}/`)) {
-              relativeKey = relativeKey.slice(
-                this.prefix.length + 1,
-              ) as RelativeFile;
+        if (response.Contents) {
+          for (const obj of response.Contents) {
+            if (obj.Key && obj.Size !== undefined && obj.LastModified) {
+              // Remove prefix from key to get relative path
+              let relativeKey = RelativeFile(obj.Key);
+              if (this.prefix && relativeKey.startsWith(`${this.prefix}/`)) {
+                relativeKey = relativeKey.slice(
+                  this.prefix.length + 1,
+                ) as RelativeFile;
+              }
+
+              results.push({
+                key: relativeKey,
+                lastModified: obj.LastModified,
+                size: obj.Size,
+              });
             }
-
-            results.push({
-              key: relativeKey,
-              lastModified: obj.LastModified,
-              size: obj.Size,
-            });
           }
         }
-      }
 
-      continuationToken = response.NextContinuationToken;
-    } while (continuationToken);
+        continuationToken = response.NextContinuationToken;
+      } while (continuationToken);
 
-    return results;
+      return results;
+    });
   }
 
-  checkRemoteFiles(remoteFiles: RemoteFileInfo[], rootDir: AbsoluteDir) {
+  checkRemoteFiles(
+    remoteFiles: readonly RemoteFileInfo[],
+    rootDir: AbsoluteDir,
+  ) {
     return Effect.all(
       remoteFiles.map((remoteFile) => {
         const localPath = path.join(rootDir, remoteFile.key);

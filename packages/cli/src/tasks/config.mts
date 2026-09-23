@@ -33,7 +33,7 @@ export function parseConfig(...keys: string[]) {
  * @param transform - Function to transform config values to CLI option names
  */
 export function parseConfigWithTransform<T extends object>(
-  keys: string[],
+  keys: readonly string[],
   transform: (config: T) => Record<string, unknown>,
 ) {
   return (configPath: string): object => {

@@ -16,19 +16,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "types": "./dist/types/index.d.mts",
-      "import": "./dist/esm/index.mjs"
+      "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
     }
   },
   "files": [
-    "dist/*",
-    "json-schemas/*"
+    "dist/*"
   ],
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm -f dist/tsconfig.tsbuildinfo",
-    "build": "tsc",
+    "build": "tsc && pnpm generate:openapi && cp openapi.json dist/openapi.json",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -40,15 +39,13 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
     "@types/node": "catalog:dev",
-    "@types/js-yaml": "catalog:dev",
-    "js-yaml": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
-    "@liqvid/duration": "workspace:^1.4.0",
-    "zod": "catalog:peer"
+    "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
+    "effect": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@liqvid/duration": {

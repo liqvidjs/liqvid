@@ -146,7 +146,7 @@ function decodeWav(buffer: Uint8Array): Float32Array {
  * the segment text is split into words with time distributed evenly.
  */
 function buildTranscript(
-  segments: TranscribeDetailedResult<boolean>[],
+  segments: readonly TranscribeDetailedResult<boolean>[],
 ): RichTranscript {
   const entries: TranscriptEntry[] = [];
 
@@ -218,7 +218,7 @@ function buildTranscript(
  * which are the non-empty segments).
  */
 function captionBreaksFromSegments(
-  segments: TranscribeDetailedResult<boolean>[],
+  segments: readonly TranscribeDetailedResult<boolean>[],
   entries: readonly TranscriptEntry[],
 ): number[] {
   const captionBreaks: number[] = [];
