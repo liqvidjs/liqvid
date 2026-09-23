@@ -24,11 +24,13 @@ export class SFTPProvider implements HostingProvider, MediaHostingProvider {
   readonly #host: string;
   readonly #path: string;
   readonly #domain: string | undefined;
+  readonly #basePath: string | undefined;
 
   constructor(options: ProviderConfigSFTP) {
     this.#host = options.host;
     this.#path = options.path;
     this.#domain = options.domain?.toString();
+    this.#basePath = options.basePath;
   }
 
   checkFiles(files: readonly AbsoluteFile[], rootDir: AbsoluteDir) {
@@ -149,8 +151,14 @@ export class SFTPProvider implements HostingProvider, MediaHostingProvider {
     },
   );
 
-  getBaseUrl(): string {
-    return this.#domain ?? `https://${this.#host}`;
+  getContentBaseUrl(): string {
+    const baseUrl = this.#domain ?? `https://${this.#host}`;
+    const basePath = this.#basePath?.replace(/^\/+|\/+$/g, "");
+    return basePath ? `${baseUrl}/${basePath}` : baseUrl;
+  }
+
+  getMediaBaseUrl(): string {
+    return this.getContentBaseUrl();
   }
 
   listRemoteFiles(): Effect.Effect<

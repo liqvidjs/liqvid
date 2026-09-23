@@ -18,8 +18,11 @@ import {
   RelativeFile,
 } from "effect-paths";
 
+import { readDirWithFileTypes } from "#_/utils/effect.mjs";
+
 import type {
   FileDownloadStatus,
+  HostingProvider,
   MediaHostingProvider,
   RemoteFileInfo,
 } from "../types.mts";
@@ -69,7 +72,7 @@ function getContentType(filePath: string): string {
 }
 
 /** AWS S3, or other compatible provider */
-export class S3Provider implements MediaHostingProvider {
+export class S3Provider implements HostingProvider, MediaHostingProvider {
   private readonly client: S3Client;
   private readonly bucket: string;
   private readonly prefix: string;
@@ -126,20 +129,47 @@ export class S3Provider implements MediaHostingProvider {
     );
   }
 
-  getBaseUrl(): string {
+  getContentBaseUrl(): string {
     return `${this.config.domain}/${this.config.prefix ?? ""}`;
   }
 
-  publishMedia = Effect.fn("publishMedia")(
-    { self: this },
-    function* (
-      this: S3Provider,
-      files: readonly AbsoluteFile[],
-      rootDir: AbsoluteDir,
-      force = false,
-    ) {
+  getMediaBaseUrl(): string {
+    return `${this.config.domain}/${this.config.prefix ?? ""}`;
+  }
+
+  publishContent(localDir: AbsoluteDir, force = false) {
+    return Effect.gen({ self: this }, function* () {
+      const entries = yield* readDirWithFileTypes(localDir, {
+        recursive: true,
+      });
+      const files = entries
+        .filter(([, type]) => type === "File")
+        .map(
+          ([relativePath]) =>
+            path.join(localDir, relativePath as RelativeFile) as AbsoluteFile,
+        );
+
+      yield* this.publishFiles(files, localDir, force, "content");
+    });
+  }
+
+  publishMedia(
+    files: readonly AbsoluteFile[],
+    rootDir: AbsoluteDir,
+    force = false,
+  ) {
+    return this.publishFiles(files, rootDir, force, "media");
+  }
+
+  private publishFiles(
+    files: readonly AbsoluteFile[],
+    rootDir: AbsoluteDir,
+    force: boolean,
+    kind: "content" | "media",
+  ) {
+    return Effect.gen({ self: this }, function* () {
       if (files.length === 0) {
-        yield* Effect.log("No media files to upload.");
+        yield* Effect.log(`No ${kind} files to upload.`);
         return;
       }
 
@@ -165,8 +195,8 @@ export class S3Provider implements MediaHostingProvider {
       );
 
       yield* Effect.log(`Upload complete.`);
-    },
-  );
+    });
+  }
 
   listRemoteFiles() {
     const results: RemoteFileInfo[] = [];
@@ -346,7 +376,7 @@ export class S3Provider implements MediaHostingProvider {
           this.client.send(
             new HeadObjectCommand({
               Bucket: this.bucket,
-              Key: key,
+              Key: this.buildKey(key),
             }),
           ),
       });

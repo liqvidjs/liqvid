@@ -6,6 +6,10 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { Progress } from "@liqvid/renderer";
 import {
   LiqvidStudioProjectMeta,
+  type ParameterConfig,
+  type ParameterValues,
+  type Parametrized,
+  type ProjectId,
   ProjectJson,
   type ProviderConfigLiqvidStudio,
   type WorkspaceId,
@@ -53,10 +57,12 @@ const API_BATCH_SIZE = 1000;
 const CHECK_CONCURRENCY = 50;
 const UPLOAD_CONCURRENCY = 5;
 
-const STUDIO_META_SCHEMA =
-  "https://liqvidjs.org/schemas/latest/liqvid-studio-meta.json";
-const WORKSPACE_META_SCHEMA =
-  "https://liqvidjs.org/schemas/latest/workspace-meta.json";
+const CONTENT_DOMAIN =
+  process.env.LIQVID_STUDIO_CUSTOM_CONTENT_DOMAIN ?? "liqvidstudio.com";
+
+const SCHEMAS = "https://liqvidjs.org/schemas/latest";
+const STUDIO_META_SCHEMA = `${SCHEMAS}/liqvid-studio-meta.json`;
+const WORKSPACE_META_SCHEMA = `${SCHEMAS}/workspace-meta.json`;
 
 const PROJECT_FILE = RelativeFile("project.json");
 
@@ -64,6 +70,14 @@ const LIQVID_DIR = RelativeDir(".liqvid");
 
 const PROJECT_STUDIO_META = RelativeFile(".liqvid-studio.json");
 const WORKSPACE_META = RelativeFile(".liqvid-studio.json");
+
+class LiqvidStudioError extends Schema.TaggedError<LiqvidStudioError>()(
+  "LiqvidStudioError",
+  {
+    cause: Schema.Defect().pipe(Schema.optional),
+    message: Schema.String,
+  },
+) {}
 
 function logClientError(error: unknown) {
   if (!HttpClientError.isHttpClientError(error)) {
@@ -119,7 +133,7 @@ export class LiqvidStudioProvider
   readonly #deleteStale: boolean;
   readonly #dispatcher: Agent;
   readonly #client: ReturnType<typeof makeClient>;
-  #project: string | undefined;
+  #workspaceName: string | undefined;
 
   constructor(config: ProviderConfigLiqvidStudio, deleteStale = false) {
     this.#config = config;
@@ -148,7 +162,7 @@ export class LiqvidStudioProvider
       return yield* Effect.all(
         files.map((filePath) =>
           Effect.gen({ self: this }, function* () {
-            const key = this.#relativeKey(path.relative(rootDir, filePath));
+             const key = this.#relativeKey(path.relative(rootDir, filePath));
             const remote = remoteByKey.get(key);
             if (!remote) {
               return {
@@ -196,17 +210,32 @@ export class LiqvidStudioProvider
     );
   }
 
-  downloadMedia(_files: FileDownloadStatus[]): Effect.Effect<number> {
-    return Effect.die(new Error("Liqvid Studio does not support downloads"));
+  downloadMedia(_files: readonly FileDownloadStatus[]): Effect.Effect<number> {
+    return Effect.die(
+      new LiqvidStudioError({
+        message: "Liqvid Studio does not support downloads",
+      }),
+    );
   }
 
-  getBaseUrl(): string {
-    return `${API_URL}/${this.#getProject()}`;
+  getContentBaseUrl() {
+    return Effect.gen({ self: this }, function* () {
+      const { workspaceId } = yield* this.#getWorkspaceMeta();
+      return `/${workspaceId}`;
+    });
   }
 
-  listRemoteFiles(): Effect.Effect<RemoteFileInfo[]> {
-    return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
-      const prefix = `${this.#getProject()}/`;
+  getMediaBaseUrl() {
+    return Effect.gen({ self: this }, function* () {
+      const { userId, workspaceId } = yield* this.#getWorkspaceMeta();
+      return `https://${userId}.${CONTENT_DOMAIN}/${workspaceId}`;
+    });
+  }
+
+  listRemoteFiles() {
+    return Effect.gen({ self: this }, function* () {
+      const { workspaceId } = yield* this.#getWorkspaceMeta();
+      const prefix = `${workspaceId}/`;
       const files: RemoteFileInfo[] = [];
       let cursor: string | undefined;
 
@@ -215,7 +244,7 @@ export class LiqvidStudioProvider
           .list({
             query: {
               limit: String(API_BATCH_SIZE),
-              prefix: `${this.#getProject()}/`,
+              prefix: prefix,
               ...(cursor === undefined ? {} : { cursor }),
             },
           })
@@ -246,8 +275,10 @@ export class LiqvidStudioProvider
     rootDir: AbsoluteDir,
     force = false,
   ) {
-    return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
-      const workspaceId = yield* this.#getWorkspaceId().pipe(Effect.orDie);
+    return Effect.gen({ self: this }, function* () {
+      const { workspaceId } = yield* this.#getWorkspaceMeta().pipe(
+        Effect.orDie,
+      );
       return yield* this.#publishFiles(
         files.map((file) => [
           file,
@@ -269,7 +300,9 @@ export class LiqvidStudioProvider
   > {
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
       const files = yield* this.#listFiles(localDir);
-      const workspaceId = yield* this.#getWorkspaceId().pipe(Effect.orDie);
+      const { workspaceId } = yield* this.#getWorkspaceMeta().pipe(
+        Effect.orDie,
+      );
       yield* this.#syncProjects(localDir, files, workspaceId).pipe(
         Effect.orDie,
       );
@@ -284,25 +317,29 @@ export class LiqvidStudioProvider
     });
   }
 
-  #getWorkspaceId() {
+  #getWorkspaceMeta() {
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
       const metaFile = path.join(process.cwd(), LIQVID_DIR, WORKSPACE_META);
-      const existingId = yield* this.#readWorkspaceId(metaFile);
-      if (Option.isSome(existingId)) return existingId.value;
+      const existingMeta = yield* this.#readWorkspaceMeta(metaFile);
+      if (Option.isSome(existingMeta)) return existingMeta.value;
 
       const fs = yield* FileSystem.FileSystem;
 
       const response = yield* this.#client.workspaces
-        .create({ payload: { name: this.#getProject() } })
+        .create({ payload: { name: this.#getWorkspaceName() } })
         .pipe(Effect.orDie);
+      const userId = yield* this.#client.identity.get().pipe(
+        Effect.orDie,
+        Effect.map(({ userId }) => userId),
+      );
 
       yield* fs.makeDirectory(path.dirname(metaFile), { recursive: true });
       yield* fs.writeFileString(
         metaFile,
-        `${JSON.stringify({ $schema: WORKSPACE_META_SCHEMA, id: response.workspaceId }, null, 2)}\n`,
+        `${JSON.stringify({ $schema: WORKSPACE_META_SCHEMA, userId, workspaceId: response.workspaceId }, null, 2)}\n`,
       );
 
-      return response.workspaceId;
+      return { userId, workspaceId: response.workspaceId };
     });
   }
 
@@ -312,7 +349,6 @@ export class LiqvidStudioProvider
     workspaceId: WorkspaceId,
   ) {
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
-      console.debug({ workspace: workspaceId });
       const projectFiles = files.filter(
         (file) => path.basename(file) === PROJECT_FILE,
       );
@@ -324,8 +360,9 @@ export class LiqvidStudioProvider
 
             const project = yield* Effect.try({
               catch: (cause) =>
-                new Error(`Invalid ${PROJECT_FILE} at ${projectFile}`, {
+                new LiqvidStudioError({
                   cause,
+                  message: `Invalid ${PROJECT_FILE} at ${projectFile}`,
                 }),
               try: () =>
                 Schema.decodeUnknownSync(ProjectJson)(
@@ -339,33 +376,71 @@ export class LiqvidStudioProvider
               LIQVID_DIR,
               PROJECT_STUDIO_META,
             );
-            const existingId = yield* this.#readProjectId(metaFile);
-            const request: ProjectRequest = {
-              aspectRatio: project.aspectRatio,
-              description: project.description,
-              name: project.title,
-              parameters: project.parameters,
-              path: path
-                .relative(localDir, projectDir)
-                .replaceAll(path.sep, "/"),
-              workspaceId,
-            };
+            const projectPath = path
+              .relative(localDir, projectDir)
+              .replaceAll(path.sep, "/");
+            const combinations = project.parameters
+              ? cartesianProduct(project.parameters)
+              : [];
+            const parameterized = combinations.length > 0;
+            const existingIds = yield* this.#readProjectIds(metaFile);
+            const projectIds: {
+              value: ProjectId;
+              [key: string]: string;
+            }[] = [];
 
-            const response = yield* (
-              existingId
-                ? this.#client.projects.sync({
-                    params: { projectId: existingId },
-                    payload: request,
-                  })
-                : this.#client.projects.create({ payload: request })
-            ).pipe(Effect.orDie);
+            for (const parameters of parameterized ? combinations : [{}]) {
+              const existingId = findProjectId(existingIds, parameters);
+              const request: ProjectRequest = {
+                aspectRatio: project.aspectRatio,
+                description: resolveParametrized(
+                  project.description,
+                  parameters,
+                ),
+                name:
+                  resolveParametrized(project.title, parameters) ??
+                  (() => {
+                    throw new LiqvidStudioError({
+                      message: `Missing title for ${projectPath} with parameters ${JSON.stringify(parameters)}`,
+                    });
+                  })(),
+                parameters: parameterized
+                  ? Object.fromEntries(
+                      Object.entries(parameters).map(([key, value]) => [
+                        key,
+                        [value],
+                      ]),
+                    )
+                  : project.parameters,
+                path: projectPath,
+                workspaceId,
+              };
+
+              const response = yield* (
+                existingId
+                  ? this.#client.projects.sync({
+                      params: { projectId: existingId },
+                      payload: request,
+                    })
+                  : this.#client.projects.create({ payload: request })
+              ).pipe(Effect.orDie);
+
+              projectIds.push({ ...parameters, value: response.projectId });
+            }
 
             yield* fs.makeDirectory(path.dirname(metaFile), {
               recursive: true,
             });
             yield* fs.writeFileString(
               metaFile,
-              `${JSON.stringify({ $schema: STUDIO_META_SCHEMA, id: response.projectId }, null, 2)}\n`,
+              `${JSON.stringify(
+                {
+                  $schema: STUDIO_META_SCHEMA,
+                  projectId: parameterized ? projectIds : projectIds[0]!.value,
+                },
+                null,
+                2,
+              )}\n`,
             );
           }),
         ),
@@ -374,23 +449,24 @@ export class LiqvidStudioProvider
     });
   }
 
-  #readProjectId(metaFile: AbsoluteFile) {
+  #readProjectIds(metaFile: AbsoluteFile) {
     return loadJson(LiqvidStudioProjectMeta, metaFile).pipe(
-      Effect.map((meta) => meta.projectId),
-      Effect.option,
+      Effect.map((meta) =>
+        Array.isArray(meta.projectId)
+          ? meta.projectId
+          : [{ value: meta.projectId }],
+      ),
+      Effect.orElseSucceed(() => []),
     );
   }
 
-  #readWorkspaceId(metaFile: AbsoluteFile) {
-    return loadJson(WorkspaceMeta, metaFile).pipe(
-      Effect.map((meta) => meta.workspaceId),
-      Effect.option,
-    );
+  #readWorkspaceMeta(metaFile: AbsoluteFile) {
+    return loadJson(WorkspaceMeta, metaFile).pipe(Effect.option);
   }
 
   #publishFiles(
     files: readonly [AbsoluteFile, RelativeFile][],
-    workspaceId: string,
+    workspaceId: WorkspaceId,
     force = false,
   ) {
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
@@ -409,7 +485,7 @@ export class LiqvidStudioProvider
         desiredKeys.add(key);
         const stats = yield* fs.stat(filePath);
         const mtime = stats.mtime.pipe(Option.getOrElse(() => new Date()));
-        const remote = remoteByKey.get(relativePath);
+        const remote = remoteByKey.get(key);
         if (
           force ||
           !remote ||
@@ -431,7 +507,7 @@ export class LiqvidStudioProvider
           : undefined;
       progress?.start(totalBytes, 0);
 
-      yield* Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
+      yield* Effect.gen({ self: this }, function* () {
         for (const batch of this.#batches(uploads.map(({ key }) => key))) {
           const body = yield* this.#client.files
             .upload({ payload: { keys: batch, workspaceId } })
@@ -449,45 +525,52 @@ export class LiqvidStudioProvider
                     const upload = byKey.get(key);
                     if (!upload) {
                       return yield* Effect.die(
-                        new Error(
-                          `Studio did not return an upload URL for ${key}`,
-                        ),
-                      );
-                    }
-                    const response = yield* Effect.tryPromise(() => {
-                      const stream = nodeFs.createReadStream(filePath).pipe(
-                        new Transform({
-                          transform(chunk: Buffer, _encoding, callback) {
-                            progress?.increment(chunk.length);
-                            callback(null, chunk);
-                          },
+                        new LiqvidStudioError({
+                          message: `Studio did not return an upload URL for ${key}`,
                         }),
                       );
-                      return fetch(upload.url, {
-                        body: stream,
-                        dispatcher: this.#dispatcher,
-                        duplex: "half",
-                        headers: {
-                          "content-length": String(size),
-                          "content-type": this.#contentType(filePath),
-                        },
-                        method: "PUT",
-                      } as StudioRequestInit);
+                    }
+                    const response = yield* Effect.tryPromise({
+                      try: () => {
+                        const stream = nodeFs.createReadStream(filePath).pipe(
+                          new Transform({
+                            transform(chunk: Buffer, _encoding, callback) {
+                              progress?.increment(chunk.length);
+                              callback(null, chunk);
+                            },
+                          }),
+                        );
+                        return fetch(upload.url, {
+                          body: stream,
+                          dispatcher: this.#dispatcher,
+                          duplex: "half",
+                          headers: {
+                            "content-length": String(size),
+                            "content-type": this.#contentType(filePath),
+                          },
+                          method: "PUT",
+                        } as StudioRequestInit);
+                      },
+                      catch: (cause) =>
+                        new LiqvidStudioError({
+                          cause,
+                          message: `Upload request failed for ${key}`,
+                        }),
                     }).pipe(Effect.retry({ times: 2 }), Effect.orDie);
                     if (!response.ok) {
                       const resText = yield* Effect.promise(() =>
                         response.text(),
                       );
                       return yield* Effect.die(
-                        new Error(
-                          `Upload failed for ${key}: ${response.status} ${response.statusText}\n${resText}`,
-                        ),
+                        new LiqvidStudioError({
+                          message: `Upload failed for ${key}: ${response.status} ${response.statusText}\n${resText}`,
+                        }),
                       );
                     }
                   },
                 ),
               ),
-            { concurrency: CHECK_CONCURRENCY },
+            { concurrency: UPLOAD_CONCURRENCY },
           );
         }
       }).pipe(Effect.ensuring(Effect.sync(() => progress?.stop())));
@@ -527,11 +610,11 @@ export class LiqvidStudioProvider
     });
   }
 
-  #getProject(): string {
-    if (this.#project) return this.#project;
+  #getWorkspaceName(): string {
+    if (this.#workspaceName) return this.#workspaceName;
     if (this.#config.workspace) {
-      this.#project = this.#config.workspace;
-      return this.#project;
+      this.#workspaceName = this.#config.workspace;
+      return this.#workspaceName;
     }
 
     const packagePath = path.join(process.cwd(), PACKAGE_JSON);
@@ -539,25 +622,30 @@ export class LiqvidStudioProvider
     try {
       packageName = JSON.parse(nodeFs.readFileSync(packagePath, "utf8")).name;
     } catch (error) {
-      throw new Error(
-        `Could not read ${packagePath} to determine the project`,
-        { cause: error },
-      );
+      // The cause is carried in the tagged error payload rather than Error options.
+      // biome-ignore lint/style/useErrorCause: the tagged error preserves the cause in its payload
+      throw new LiqvidStudioError({
+        cause: error,
+        message: `Could not read ${packagePath} to determine the project`,
+      });
     }
     if (typeof packageName !== "string" || packageName.length === 0) {
-      throw new Error(`Missing package.json name in ${packagePath}`);
+      throw new LiqvidStudioError({
+        message: `Missing package.json name in ${packagePath}`,
+      });
     }
     if (packageName.includes("/")) {
-      throw new Error(
-        "Liqvid Studio project is required when package.json name contains a slash",
-      );
+      throw new LiqvidStudioError({
+        message:
+          "Liqvid Studio project is required when package.json name contains a slash",
+      });
     }
-    this.#project = packageName;
+    this.#workspaceName = packageName;
     return packageName;
   }
 
   #relativeKey(relativePath: RelativeFile): RelativeFile {
-    return `${this.#getProject()}/${relativePath.replaceAll(path.sep, "/")}` as RelativeFile;
+    return relativePath.replaceAll(path.sep, "/") as RelativeFile;
   }
 
   *#batches<T>(items: readonly T[]): Generator<T[]> {
@@ -595,4 +683,46 @@ function formatBytes(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function cartesianProduct<T extends ParameterConfig>(
+  parameters: T,
+): Array<{ [K in keyof T]: T[K][number] }> {
+  const keys = Object.keys(parameters) as (keyof T)[];
+
+  return keys.reduce<Record<string, string>[]>(
+    (combinations, key) =>
+      combinations.flatMap((combination) =>
+        parameters[key]!.map((value) => ({ ...combination, [key]: value })),
+      ),
+    [{}],
+  ) as Array<{ [K in keyof T]: T[K][number] }>;
+}
+
+function resolveParametrized<T>(
+  input: Parametrized<T> | undefined,
+  parameters: ParameterValues,
+): T | undefined {
+  if (input === undefined) return undefined;
+  if (!Array.isArray(input)) return input as T;
+
+  return input.find((entry) =>
+    Object.entries(entry).every(
+      ([key, value]) => key === "value" || parameters[key] === value,
+    ),
+  )?.value;
+}
+
+function findProjectId(
+  projectIds: readonly {
+    value: ProjectId;
+    [key: string]: string;
+  }[],
+  parameters: ParameterValues,
+): ProjectId | undefined {
+  return projectIds.find((entry) =>
+    Object.entries(entry).every(
+      ([key, value]) => key === "value" || parameters[key] === value,
+    ),
+  )?.value;
 }

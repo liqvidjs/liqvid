@@ -265,11 +265,18 @@ export class CopyProvider implements HostingProvider, MediaHostingProvider {
     },
   );
 
-  getBaseUrl(): string {
-    // For local copy, return a file:// URL or empty string
-    // since this is primarily for local development/testing
+  getContentBaseUrl(): string {
+    const destination = this.#getDestination("hosting");
+    const baseUrl = this.#config.domain?.toString() ?? `file://${destination}`;
+    const basePath = this.#config.basePath?.replace(/^\/+|\/+$/g, "");
+    return basePath ? `${baseUrl}/${basePath}` : baseUrl;
+  }
+
+  getMediaBaseUrl(): string {
     const destination = this.#getDestination("media");
-    return `file: //${path.resolve(destination)}`;
+    const baseUrl = this.#config.domain?.toString() ?? `file://${path.resolve(destination)}`;
+    const basePath = this.#config.basePath?.replace(/^\/+|\/+$/g, "");
+    return basePath ? `${baseUrl}/${basePath}` : baseUrl;
   }
 
   listRemoteFiles(): Effect.Effect<

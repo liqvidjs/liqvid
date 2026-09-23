@@ -8,10 +8,14 @@ import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 
 import { CopyProvider } from "#_/providers/hosting/copy.mjs";
+import { GitHubPagesProvider } from "#_/providers/hosting/github-pages.js";
 import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
 import { S3Provider } from "#_/providers/hosting/s3.mjs";
 import { SFTPProvider } from "#_/providers/hosting/sftp.mjs";
-import type { MediaHostingProvider } from "#_/providers/types.mjs";
+import type {
+  HostingProvider,
+  MediaHostingProvider,
+} from "#_/providers/types.mjs";
 import {
   loadEnvFiles,
   loadLiqvidConfig,
@@ -95,6 +99,51 @@ function getMediaProvider(
     }
   }
 }
+/**
+ * Get the media provider from the config
+ */
+function getContentProvider(
+  config: LiqvidConfig,
+): Option.Option<HostingProvider> {
+  if (!config.backend?.content) {
+    return Option.none();
+  }
+
+  switch (config.backend.content) {
+    case "copy": {
+      return Option.fromNullishOr(config.providers.copy).pipe(
+        Option.map((copyConfig) => new CopyProvider(copyConfig)),
+      );
+    }
+
+    case "githubPages": {
+      return Option.fromNullishOr(config.providers.githubPages).pipe(
+        Option.map(
+          (liqvidStudioConfig) => new GitHubPagesProvider(liqvidStudioConfig),
+        ),
+      );
+    }
+
+    case "liqvidStudio": {
+      return Option.fromNullishOr(config.providers.liqvidStudio).pipe(
+        Option.map(
+          (liqvidStudioConfig) => new LiqvidStudioProvider(liqvidStudioConfig),
+        ),
+      );
+    }
+
+    case "s3":
+      return Option.fromNullishOr(config.providers.s3).pipe(
+        Option.map((s3Config) => new S3Provider(s3Config)),
+      );
+
+    case "sftp": {
+      return Option.fromNullishOr(config.providers.sftp).pipe(
+        Option.map((sftpConfig) => new SFTPProvider(sftpConfig)),
+      );
+    }
+  }
+}
 
 /** Error returned when build fails */
 export type BuildError = {
@@ -126,10 +175,24 @@ export const runNextBuild = Effect.fnUntraced(function* (
   };
 
   if (config) {
+    // set content base url
+    const contentProvider = getContentProvider(config);
+    if (Option.isSome(contentProvider)) {
+      const contentBaseUrl = contentProvider.value.getContentBaseUrl();
+
+      env.NEXT_PUBLIC_CONTENT_BASE =
+        typeof contentBaseUrl === "string"
+          ? contentBaseUrl
+          : yield* contentBaseUrl;
+    }
+
+    // set media base urlNEXT_PUB
     const mediaProvider = getMediaProvider(config);
     if (Option.isSome(mediaProvider)) {
-      const mediaBaseUrl = mediaProvider.value.getBaseUrl();
-      env.NEXT_PUBLIC_LIQVID_MEDIA_BASE = mediaBaseUrl;
+      const mediaBaseUrl = mediaProvider.value.getMediaBaseUrl();
+
+      env.NEXT_PUBLIC_MEDIA_BASE =
+        typeof mediaBaseUrl === "string" ? mediaBaseUrl : yield* mediaBaseUrl;
     }
   }
 

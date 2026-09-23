@@ -9,6 +9,11 @@ export type ProgressService = typeof Progress extends {
   : never;
 
 export interface HostingProvider {
+  /** Get the value of the `NEXT_PUBLIC_LIQVID_CONTENT_BASE` environment variable. */
+  getContentBaseUrl():
+    | string
+    | Effect.Effect<string, PlatformError.PlatformError, FileSystem.FileSystem>;
+
   publishContent(
     localDir: AbsoluteDir,
     force?: boolean,
@@ -91,7 +96,9 @@ export interface MediaHostingProvider {
   ): Effect.Effect<number, PlatformError.PlatformError, FileSystem.FileSystem>;
 
   /** Get the value of the `NEXT_PUBLIC_LIQVID_MEDIA_BASE` environment variable. */
-  getBaseUrl(): string;
+  getMediaBaseUrl():
+    | string
+    | Effect.Effect<string, PlatformError.PlatformError, FileSystem.FileSystem>;
 
   /**
    * List all remote files under the configured prefix.
