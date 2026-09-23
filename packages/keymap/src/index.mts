@@ -1,8 +1,8 @@
-import { compare } from "@liqvid/utils";
+import { assertType, compare } from "@liqvid/utils";
 
 import { mixedCaseVals } from "./mixedCaseVals.mts";
 
-export type ShortcutsSpecifier = string | string[];
+export type ShortcutsSpecifier = string | readonly string[];
 
 /**
  * If this returns `true`, further event handling will be stopped.
@@ -116,7 +116,11 @@ export class Keymap {
       }
       return;
     }
+    // https://github.com/microsoft/TypeScript/issues/17002
+    assertType<string>(seq);
+
     seq = Keymap.normalize(seq);
+
     if (!Object.hasOwn(this.__bindings, seq)) {
       this.__bindings[seq] = [];
     }
@@ -128,14 +132,18 @@ export class Keymap {
    * @param seq Shortcut sequence
    * @param cb Handler to unbind
    */
-  unbind(seq: string | string[], cb: ShortcutHandler) {
+  unbind(seq: ShortcutsSpecifier, cb: ShortcutHandler) {
     if (Array.isArray(seq)) {
       for (const atomic of seq) {
         this.unbind(atomic, cb);
       }
       return;
     }
+    // https://github.com/microsoft/TypeScript/issues/17002
+    assertType<string>(seq);
+
     seq = Keymap.normalize(seq);
+
     if (!Object.hasOwn(this.__bindings, seq)) {
       return;
     }

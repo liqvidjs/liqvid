@@ -15,13 +15,13 @@ export type TreeItem = {
  * A top-level category. A category may have children (a nested group of
  * togglable items) or be a standalone selectable item (no children).
  */
-export type TreeCategory<V extends string = string> = {
+export type TreeCategory<V extends string = string> = Readonly<{
   title: string;
   /** Only used when the category has no children (standalone item). */
   value?: V;
   children?: TreeItem[];
   selected?: boolean;
-};
+}>;
 
 type Row =
   | { type: "category"; catIndex: number }
@@ -49,7 +49,7 @@ const figures = {
  */
 export function treeSelect(opts: {
   message: string;
-  categories: TreeCategory[];
+  categories: readonly TreeCategory[];
 }): Promise<string[] | undefined> {
   const categories = opts.categories.map((cat) => ({
     ...cat,

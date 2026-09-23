@@ -8,12 +8,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useInvisibleClassName } from "./Segment.tsx";
 
-interface AnimationConfig {
+type AnimationConfig = {
   delay?: DurationLike;
   duration: DurationLike;
   easing?: string;
-  keyframes: Keyframe[];
-}
+  keyframes: readonly Keyframe[];
+};
 
 export type SelectorConfig =
   | {
@@ -59,7 +59,7 @@ export function TargetDescendants<M extends string = string>({
 }: {
   asChild?: boolean;
   children?: React.ReactNode;
-  transforms?: TargetConfig<M>[];
+  transforms?: readonly TargetConfig<M>[];
 }) {
   const ref = useRef<HTMLDivElement>(null);
 

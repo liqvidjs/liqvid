@@ -24,7 +24,7 @@ const icon = (props?: React.JSX.IntrinsicElements["svg"]) => (
   </svg>
 );
 
-type MediaDeviceMap = Record<MediaDeviceKind, MediaDeviceInfo[]>;
+type MediaDeviceMap = Readonly<Record<MediaDeviceKind, MediaDeviceInfo[]>>;
 
 function ConfigurationComponent() {
   const [audioEnabled, setAudioEnabled] = useState(false);

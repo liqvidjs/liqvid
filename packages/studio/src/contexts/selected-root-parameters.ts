@@ -1,13 +1,12 @@
 "use client";
 
+import type { ParameterValues } from "@liqvid/schemas";
 import { makeContext } from "@liqvid/utils";
-
-export type SelectedRootParameters = Readonly<Record<string, string>>;
 
 const {
   use: useSelectedRootParameters,
   Provider: SelectedRootParametersProvider,
-} = makeContext<SelectedRootParameters>({
+} = makeContext<ParameterValues>({
   defaultValue: {},
   name: "SelectedRootParameters",
 });

@@ -1,7 +1,11 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta, ScreenshotEntry } from "@liqvid/schemas";
+import type {
+  ParameterValues,
+  ProjectMeta,
+  ScreenshotEntry,
+} from "@liqvid/schemas";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import {
   CopyIcon,
@@ -18,7 +22,7 @@ import { useCallback, useEffect, useState } from "react";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
 import { Spinner } from "#_/components/Spinner.js";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import { PlainString } from "#_/i18n/shared.mjs";
+import { type LocalizedString, PlainString } from "#_/i18n/shared.mjs";
 import { openScreenshotInFinderAction } from "#_/pages/root-actions.js";
 import {
   AlertDialogBackdrop,
@@ -57,17 +61,16 @@ interface ScreenshotsSectionProps {
   project: Omit<ProjectMeta, "duration">;
 
   /** Selected parameter values for parameterized projects */
-  selectedParams?: Readonly<Record<string, string>>;
+  selectedParams?: ParameterValues;
 }
 
 type ConfirmState = {
   screenshotId: string;
   target: CopyTarget;
-  variant?: VariantLabel;
+  variant?: LocalizedString;
 };
 
 type CopyTarget = "opengraph-image.png" | "twitter-image.png";
-type VariantLabel = "Light" | "Dark" | null;
 
 const styles = stylex.create({
   actions: {
@@ -235,7 +238,7 @@ async function copyScreenshot(
   projectPath: RelativeDir,
   screenshotId: string,
   target: CopyTarget,
-  variant?: VariantLabel,
+  variant?: LocalizedString,
   params?: string,
 ) {
   try {
@@ -270,16 +273,16 @@ interface ScreenshotItemProps {
   onConfirmOverwrite: (
     screenshotId: string,
     target: CopyTarget,
-    variant?: VariantLabel,
+    variant?: LocalizedString,
   ) => void;
   onDelete: (screenshotId: string) => void;
   /** Open a full-size preview of the given image src */
   onPreview: (src: string, alt: string) => void;
   onRename: (screenshotId: string) => void;
-  parameterValues?: Readonly<Record<string, string>>;
+  parameterValues?: ParameterValues;
   params?: string;
   screenshot: ScreenshotEntry;
-  variant: { label: VariantLabel; path: string };
+  variant: { label?: LocalizedString; path: string };
 }
 
 function ScreenshotItem({
@@ -493,10 +496,10 @@ export function ScreenshotsSection({
               const variants =
                 typeof imagePath === "object"
                   ? ([
-                      { label: "Light", path: imagePath.light },
-                      { label: "Dark", path: imagePath.dark },
+                      { label: t.colorScheme.light, path: imagePath.light },
+                      { label: t.colorScheme.dark, path: imagePath.dark },
                     ] as const)
-                  : ([{ label: null, path: imagePath }] as const);
+                  : ([{ label: undefined, path: imagePath }] as const);
 
               return variants.map((variant, variantIndex) => (
                 <ScreenshotItem

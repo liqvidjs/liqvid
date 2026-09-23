@@ -1,10 +1,14 @@
-import type { Parametrized } from "@liqvid/schemas";
+import type {
+  ParameterConfig,
+  ParameterValues,
+  Parametrized,
+} from "@liqvid/schemas";
 
 /**
  * Get default parameter values (first value of each parameter).
  */
 export function getDefaultParams(
-  parameters: Readonly<Record<string, readonly string[]>>,
+  parameters: ParameterConfig,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, values] of Object.entries(parameters)) {
@@ -25,8 +29,8 @@ export function getDefaultParams(
  */
 export function interpolatePathParametersWithSelected(
   path: string,
-  projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
-  selectedRootParams: Readonly<Record<string, string>>,
+  projectParameters: ParameterConfig | undefined,
+  selectedRootParams: ParameterValues,
 ): string {
   // Match all path parameters like [lang], [id], etc.
   return path.replace(/\[([^\]]+)\]/g, (match, paramName) => {
@@ -64,7 +68,7 @@ export function interpolatePathParametersWithSelected(
  */
 export function resolveParametrized<T>(
   input: Parametrized<T>,
-  params: Readonly<Record<string, string>>,
+  params: ParameterValues,
 ): T | undefined {
   if (!Array.isArray(input)) {
     return input;

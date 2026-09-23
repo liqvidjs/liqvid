@@ -4,6 +4,7 @@ import { playerApiDeclaration } from "@liqvid/player/iframe-api";
 import type {
   AspectRatio,
   ColorSchemeOption,
+  ParameterValues,
   ProjectMeta,
 } from "@liqvid/schemas";
 import { formatTimeMs, parseTime$, timeRegexp } from "@liqvid/utils";
@@ -54,7 +55,7 @@ interface ScreenshotModalProps {
   project: Omit<ProjectMeta, "duration">;
 
   /** Selected parameter values for parameterized projects */
-  selectedParams?: Readonly<Record<string, string>>;
+  selectedParams?: ParameterValues;
 }
 
 const styles = stylex.create({

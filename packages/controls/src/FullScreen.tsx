@@ -1,5 +1,6 @@
 "use client";
 
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, useForceUpdate } from "@liqvid/utils";
 import clsx from "clsx";
@@ -23,7 +24,7 @@ type FullScreenControlProps = FullscreenOptions & {
     },
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
-  shortcuts?: string | string[];
+  shortcuts?: ShortcutsSpecifier;
 };
 
 /** Fullscreen control */

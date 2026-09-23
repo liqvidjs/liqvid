@@ -17,13 +17,13 @@ export interface AdjustVolumeShortcut {
   seq: string;
 }
 
-export interface SetVolumeShortcut {
+export type SetVolumeShortcut = {
   /** Keyboard sequence */
   seq: string;
 
   /** Value between 0 and 100 to set the volume to. */
   value: number;
-}
+};
 
 export type VolumeShortcut = AdjustVolumeShortcut | SetVolumeShortcut;
 
@@ -44,7 +44,7 @@ export interface VolumeSliderProps
     },
     props: React.InputHTMLAttributes<HTMLInputElement>,
   ) => React.ReactNode;
-  shortcuts?: VolumeShortcut[];
+  shortcuts?: readonly VolumeShortcut[];
 }
 
 const VOLUME_MAX = 100;

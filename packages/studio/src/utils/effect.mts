@@ -1,51 +1,9 @@
-import path from "node:path";
-
 import type { Progress, SingleBarOptions } from "@liqvid/cli/utils";
-import {
-  type Context,
-  Effect,
-  FileSystem,
-  Option,
-  type PlatformError,
-} from "effect";
-import type { Concurrency } from "effect/Types";
-import type {
-  AbsoluteDir,
-  RelativeDir,
-  RelativeFile,
-  RelativePath,
-} from "effect-paths";
+import { type Context, Effect, Option, type PlatformError } from "effect";
 
 import type { LoggableJob, StructuredLog } from "../api/schemas.mts";
 
-export const readDirWithFileTypes = Effect.fnUntraced(function* (
-  dirname: AbsoluteDir,
-  {
-    concurrency,
-    recursive,
-  }: { concurrency?: Concurrency; recursive?: boolean } = {},
-) {
-  const fs = yield* FileSystem.FileSystem;
-
-  const files = (yield* fs.readDirectory(dirname, {
-    recursive,
-  })) as RelativePath[];
-
-  return yield* Effect.all(
-    files.map((basename) =>
-      Effect.gen(function* () {
-        const stats = yield* fs.stat(
-          path.join(dirname, basename as RelativePath),
-        );
-        return [basename, stats.type] as
-          | [RelativeFile, "File"]
-          | [RelativeDir, "Directory"]
-          | [RelativePath, "SymbolicLink"];
-      }),
-    ),
-    { concurrency },
-  );
-});
+export { readDirWithFileTypes } from "@liqvid/cli/utils";
 
 /**
  * Treat file not found errors as Option

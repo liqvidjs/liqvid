@@ -113,7 +113,7 @@ export interface DropdownOption {
   onSelect: () => void;
 }
 
-export interface ButtonWithDropdownProps {
+export type ButtonWithDropdownProps = {
   /** Contents of the main action button */
   children: LocalizedReactNode;
 
@@ -127,11 +127,11 @@ export interface ButtonWithDropdownProps {
   onClick: () => void;
 
   /** Options shown in the attached dropdown menu */
-  options: DropdownOption[];
+  options: readonly DropdownOption[];
 
   /** Visual variant of the main button. Defaults to "default". */
   variant?: "default" | "primary";
-}
+};
 
 /**
  * A split button: a primary action button with an attached dropdown menu of

@@ -4,7 +4,7 @@ import { usePlayback } from "@liqvid/playback/react";
 import { formatTime, useFirstRender } from "@liqvid/utils";
 import { useEffect } from "react";
 
-export interface ThumbData {
+export type ThumbData = {
   /**
    * Number of columns per thumbnail sheet.
    * @default 5
@@ -24,7 +24,7 @@ export interface ThumbData {
   height?: number;
 
   /** Points of interest in the video to highlight. */
-  highlights?: VideoHighlight[];
+  highlights?: readonly VideoHighlight[];
 
   /**
    * URL pattern for thumbnails. Must include "%s" for the index of the image.
@@ -43,7 +43,7 @@ export interface ThumbData {
    * @default 160
    */
   width?: number;
-}
+};
 
 export interface ThumbnailBoxProps extends Omit<ThumbData, "highlights"> {
   progress: number;

@@ -817,7 +817,6 @@ function RenameDialog({
           }}
           // autoFocus
           sx={styles.textInput}
-          type="text"
           value={renameValue}
         />
       </div>

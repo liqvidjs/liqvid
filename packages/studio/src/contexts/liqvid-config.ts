@@ -1,15 +1,15 @@
 "use client";
 
-import type { RootParameters } from "@liqvid/schemas";
+import type { ParameterConfig } from "@liqvid/schemas";
 import { makeContext } from "@liqvid/utils";
 
-type ClientSideLiqvidConfig = {
+type ClientSideLiqvidConfig = Readonly<{
   domain: string;
   basePath: string;
   hideProjects: readonly string[];
   productionServerPort: number;
-  rootParameters: RootParameters;
-};
+  rootParameters: ParameterConfig;
+}>;
 
 const { use: useLiqvidConfig, Provider: LiqvidConfigProvider } =
   makeContext<ClientSideLiqvidConfig>({

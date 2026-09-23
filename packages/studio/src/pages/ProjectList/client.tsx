@@ -1,10 +1,14 @@
 "use client";
 
 import { Duration } from "@liqvid/duration";
-import type { ProjectMeta, SerializedProjectMeta } from "@liqvid/schemas";
+import type {
+  ParameterValues,
+  ProjectMeta,
+  SerializedProjectMeta,
+} from "@liqvid/schemas";
 import { deserialize } from "@liqvid/ssr/serde";
 import * as stylex from "@stylexjs/stylex";
-import type { RelativeDir } from "effect-paths";
+import { RelativeDir } from "effect-paths";
 import picomatch from "picomatch";
 import { useState } from "react";
 import Cookies from "universal-cookie";
@@ -65,7 +69,7 @@ export type ProjectListProps = {
   initialShowHiddenProjects: boolean;
 
   /** Initial selected root parameter values (from cookie) */
-  initialSelectedRootParams: Readonly<Record<string, string>>;
+  initialSelectedRootParams: ParameterValues;
 
   projects: Readonly<Record<RelativeDir, SerializedProjectMeta>>;
 };
@@ -101,13 +105,13 @@ export function ProjectListClient({
     () => new Set(initialCollapsedFolders),
   );
   // Selected root parameter values - initialized from cookie or defaults
-  const [selectedRootParams, setSelectedRootParams] = useState<
-    Readonly<Record<string, string>>
-  >(() => {
-    // Use initial values from cookie, fill in any missing with defaults
-    const defaults = getDefaultParams(rootParameters);
-    return { ...defaults, ...initialSelectedRootParams };
-  });
+  const [selectedRootParams, setSelectedRootParams] = useState<ParameterValues>(
+    () => {
+      // Use initial values from cookie, fill in any missing with defaults
+      const defaults = getDefaultParams(rootParameters);
+      return { ...defaults, ...initialSelectedRootParams };
+    },
+  );
 
   // Check if we have any root parameters to display
   const hasRootParameters = Object.values(rootParameters).some(
@@ -255,18 +259,18 @@ function omitHiddenProjects(
 function buildFolderTree(
   projects: Readonly<Record<string, ProjectMeta>>,
 ): Map<string, FolderNode> {
-  const root = new Map<string, FolderNode>();
+  const root = new Map<RelativeDir, FolderNode>();
 
   const sortedProjects = Object.entries(projects).sort(([, a], [, b]) =>
     a.path.localeCompare(b.path),
   );
 
   for (const [key, project] of sortedProjects) {
-    const parts = project.path.split("/").filter(Boolean);
+    const parts = (project.path.split("/") as RelativeDir[]).filter(Boolean);
 
     if (parts.length === 1) {
       // Top-level project (no folder)
-      const folderName = "";
+      const folderName = RelativeDir("");
       if (!root.has(folderName)) {
         root.set(folderName, {
           name: folderName,
@@ -310,9 +314,9 @@ function buildFolderTree(
  * For example, `a/b/c` and `a/b/d` become `a/b` with `c` and `d` below it.
  */
 function collapseSingleChildFolders(
-  folders: Map<string, FolderNode>,
-): Map<string, FolderNode> {
-  const collapsed = new Map<string, FolderNode>();
+  folders: ReadonlyMap<RelativeDir, FolderNode>,
+): Map<RelativeDir, FolderNode> {
+  const collapsed = new Map<RelativeDir, FolderNode>();
 
   for (const [folderName, folder] of folders) {
     let name = folderName;
@@ -323,7 +327,7 @@ function collapseSingleChildFolders(
 
     while (current.projects.length === 0 && current.subfolders.size === 1) {
       const [childName, child] = current.subfolders.entries().next().value!;
-      name = `${name}/${childName}`;
+      name = RelativeDir(`${name}/${childName}`);
       current = child;
     }
 

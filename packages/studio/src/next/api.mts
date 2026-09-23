@@ -41,9 +41,11 @@ import {
 import { getLogLevel } from "#_/utils/misc.mjs";
 
 interface RequestContext {
-  params: Promise<{
-    [key: string]: string[];
-  }>;
+  params: Promise<
+    Readonly<{
+      [key: string]: readonly string[];
+    }>
+  >;
 }
 
 // Re-export for backwards compatibility

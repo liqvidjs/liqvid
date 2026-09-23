@@ -1,8 +1,8 @@
-import type { Keymap } from "@liqvid/keymap";
+import type { Keymap, ShortcutsSpecifier } from "@liqvid/keymap";
 
 export function bind(
   keymap: Keymap,
-  seqs: string | string[] | undefined,
+  seqs: ShortcutsSpecifier | undefined,
   callback: () => void,
 ) {
   if (!seqs) return;
@@ -17,7 +17,7 @@ export function bind(
 
 export function unbind(
   keymap: Keymap,
-  seqs: string | string[] | undefined,
+  seqs: ShortcutsSpecifier | undefined,
   callback: () => void,
 ) {
   if (!seqs) return;
@@ -31,7 +31,7 @@ export function unbind(
 }
 
 export function convertShortcuts(
-  keys: string | string[] | undefined,
+  keys: ShortcutsSpecifier | undefined,
 ): string | undefined {
   if (typeof keys === "string") return keys;
   if (typeof keys === "undefined") return undefined;

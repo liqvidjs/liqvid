@@ -8,7 +8,7 @@ import { Keymap } from "@liqvid/keymap";
  */
 export function passThrough(
   keymap: Keymap,
-  seqs: string[] = [],
+  seqs: readonly string[] = [],
   options?: KeyBinding,
 ): KeyBinding[] {
   return seqs.map((seq) => {

@@ -1,13 +1,11 @@
+import type { ParameterValues } from "@liqvid/schemas";
 import * as stylex from "@stylexjs/stylex";
 import { Duration } from "effect";
 import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import {
-  type SelectedRootParameters,
-  useSelectedRootParameters,
-} from "#_/contexts/selected-root-parameters.js";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
 import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
 import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
 import { PlainString } from "#_/i18n/shared.mjs";
@@ -27,7 +25,7 @@ import {
 
 interface RootParameterSelectorProps {
   /** Callback when root parameter values change */
-  onRootParamsChange: (params: SelectedRootParameters) => void;
+  onRootParamsChange: (params: ParameterValues) => void;
 }
 
 const styles = stylex.create({

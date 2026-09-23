@@ -28,6 +28,8 @@ import { UpdateBanner } from "./UpdateBanner/server.tsx";
 
 import "../stylex.css";
 
+import type { ParameterValues } from "@liqvid/schemas";
+
 import { LiqvidConfigProvider } from "#_/contexts/liqvid-config.js";
 
 import type TranslationsJson from "./.translations/en.json";
@@ -105,8 +107,9 @@ export async function Homepage() {
 
   // Read selected root parameters from cookie
   const rootParamsCookie = cookieStore.get(ROOT_PARAMS_COOKIE);
-  const initialSelectedRootParams: Readonly<Record<string, string>> =
-    rootParamsCookie?.value ? JSON.parse(rootParamsCookie.value) : {};
+  const initialSelectedRootParams: ParameterValues = rootParamsCookie?.value
+    ? JSON.parse(rootParamsCookie.value)
+    : {};
 
   const domain = (() => {
     const DEFAULT = new URL("http://localhost:4000");

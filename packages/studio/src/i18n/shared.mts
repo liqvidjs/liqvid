@@ -98,8 +98,9 @@ export type Localized<T> = T extends string
   : T extends bigint | number | boolean | null | undefined
     ? T
     : {
-        [key in keyof T]: Localized<T[key]>;
+        readonly [key in keyof T]: Localized<T[key]>;
       };
+
 export type LocalizedReactNode =
   | React.ReactElement
   | " "

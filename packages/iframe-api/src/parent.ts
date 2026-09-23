@@ -9,14 +9,14 @@ import type {
 
 const DEFAULT_RETRY_INTERVAL = 100;
 
-interface PendingRequest {
-  arguments: unknown[];
+type PendingRequest = {
+  arguments: readonly unknown[];
   method: string;
   received: boolean;
   reject: (error: Error) => void;
   resolve: (value: unknown) => void;
   retryTimer: ReturnType<typeof setInterval> | null;
-}
+};
 
 /**
  * Options for getIframeApi in the parent.

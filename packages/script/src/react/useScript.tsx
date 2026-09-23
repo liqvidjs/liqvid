@@ -1,5 +1,6 @@
 "use client";
 
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { KeymapProvider, useKeyboardShortcut } from "@liqvid/keymap/react";
 import { makeContext } from "@liqvid/utils";
 
@@ -20,13 +21,13 @@ export const useScript = <M extends string>() =>
   ScriptContext.use() as unknown as Script<M>;
 
 /** Shortcuts for navigating between markers. */
-export interface ScriptShortcuts {
+export type ScriptShortcuts = {
   /** Go to the previous marker. */
-  back?: string | string[];
+  back?: ShortcutsSpecifier;
 
   /** Go to the next marker. */
-  forward?: string | string[];
-}
+  forward?: ShortcutsSpecifier;
+};
 
 export function ScriptProvider<M extends string>({
   children,

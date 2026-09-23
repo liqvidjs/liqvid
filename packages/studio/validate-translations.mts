@@ -122,8 +122,8 @@ function diffShape(
   reference: Json,
   candidate: Json,
   keyPath: string,
-  out: Discrepancy[],
-): void {
+  out: Discrepancy[] = [],
+) {
   const refType = typeOf(reference);
   const candType = typeOf(candidate);
 
@@ -134,7 +134,7 @@ function diffShape(
       keyPath: keyPath || "(root)",
       kind: "type",
     });
-    return;
+    return out;
   }
 
   // For plain objects, compare the set of keys and recurse.
@@ -161,6 +161,7 @@ function diffShape(
 
   // Arrays and leaf primitives only need their type to match, which we already
   // verified above.
+  return out;
 }
 
 /** Read and parse a JSON translation file, throwing a helpful error on failure. */
@@ -207,8 +208,7 @@ async function validateDir(dir: AbsoluteDir): Promise<DirReport> {
       .map(async (locale) => {
         const file = path.join(dir, RelativeFile(`${locale}.json`));
         const candidate = await readJson(file);
-        const discrepancies: Discrepancy[] = [];
-        diffShape(reference, candidate, "", discrepancies);
+        const discrepancies = diffShape(reference, candidate, "");
         return { discrepancies, file, locale };
       }),
   );
@@ -220,8 +220,8 @@ async function validateDir(dir: AbsoluteDir): Promise<DirReport> {
 function printDiscrepancies(
   relativeDir: string,
   locale: string,
-  discrepancies: Discrepancy[],
-): void {
+  discrepancies: readonly Discrepancy[],
+) {
   console.warn(
     chalk.yellow(
       `! ${relativeDir}/${locale}.json does not match ${DEFAULT_LOCALE}.json:`,
@@ -342,7 +342,7 @@ function resolveComponentFile(
 function followReferences(
   declNode: Node,
   prefix: string,
-  allLeafKeys: Set<string>,
+  allLeafKeys: ReadonlySet<string>,
   referenced: Set<string>,
   visited: Set<string>,
 ): void {
@@ -607,7 +607,7 @@ function followPropsInFile(
   file: import("ts-morph").SourceFile,
   propName: string,
   prefix: string,
-  allLeafKeys: Set<string>,
+  allLeafKeys: ReadonlySet<string>,
   referenced: Set<string>,
   visited: Set<string>,
 ): void {
@@ -942,7 +942,7 @@ function deleteKeyPath(obj: { [key: string]: Json }, keyPath: string): void {
  */
 async function removeUnusedKeysFromDir(
   dir: AbsoluteDir,
-  unusedKeys: string[],
+  unusedKeys: readonly string[],
 ): Promise<string[]> {
   const entries = await fsp.readdir(dir, { withFileTypes: true });
   const jsonFiles = entries

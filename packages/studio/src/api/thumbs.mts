@@ -2,7 +2,9 @@ import * as path from "node:path";
 
 import { generateThumbs as generateThumbsApi } from "@liqvid/cli/thumbs";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
+import type { ColorScheme } from "@liqvid/color-scheme/react";
 import {
+  type ColorSchemeOrBoth,
   type ThumbnailOptions,
   ThumbnailsJob,
   type ThumbnailsJobIn,
@@ -31,8 +33,8 @@ import { WebApi } from "./contract.mts";
 
 const THUMBS_JOB_FILE = RelativeFile("thumbnails-job.json");
 
-interface GenerateThumbsBody {
-  colorScheme?: "light" | "dark" | "both";
+type GenerateThumbsBody = {
+  colorScheme?: ColorSchemeOrBoth;
   cols?: number;
   frequency?: number;
   height?: number;
@@ -40,7 +42,7 @@ interface GenerateThumbsBody {
   quality?: number;
   rows?: number;
   width?: number;
-}
+};
 
 /**
  * Read thumbnail sheets from a directory.
@@ -67,7 +69,10 @@ const readThumbSheets = Effect.fnUntraced(function* (dir: AbsoluteDir) {
  */
 const generateThumbnails = Effect.fnUntraced(function* (
   url: string,
-  schemes: readonly { colorScheme: "light" | "dark"; outputDir: AbsoluteDir }[],
+  schemes: readonly Readonly<{
+    colorScheme: ColorScheme;
+    outputDir: AbsoluteDir;
+  }>[],
   { colorScheme: _, ...body }: GenerateThumbsBody,
   projectPath: RelativeDir,
 ) {

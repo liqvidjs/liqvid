@@ -2,7 +2,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadJson, UP } from "@liqvid/cli/utils";
-import { ProjectJson } from "@liqvid/schemas";
+import { type ParameterConfig, ProjectJson } from "@liqvid/schemas";
 import {
   Cause,
   Effect,
@@ -107,7 +107,7 @@ const initializeParameterizedDirs = Effect.fnUntraced(
   function* (
     assetsDir: AbsoluteDir,
     projectPath: RelativeDir,
-    projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
+    projectParameters: ParameterConfig | undefined,
   ) {
     const fs = yield* FileSystem.FileSystem;
 

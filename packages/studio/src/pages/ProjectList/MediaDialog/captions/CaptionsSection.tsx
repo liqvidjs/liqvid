@@ -1,5 +1,6 @@
 "use client";
 
+import type { ParameterValues } from "@liqvid/schemas";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { WaveformIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
@@ -34,7 +35,7 @@ export type { T as TranslationsCaptionsSection };
 
 interface CaptionsSectionProps {
   /** Selected parameter values for parameterized projects */
-  selectedParams?: Readonly<Record<string, string>>;
+  selectedParams?: ParameterValues;
 }
 
 const styles = stylex.create({

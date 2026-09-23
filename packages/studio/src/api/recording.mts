@@ -361,8 +361,7 @@ export const recordingsLive = HttpApiBuilder.group(
 
                   if (pluginInfo.isBlob) {
                     // For blob data, the persisted value is an array of PersistedFile
-                    const files =
-                      data as ReadonlyArray<Multipart.PersistedFile>;
+                    const files = data as readonly Multipart.PersistedFile[];
                     if (files.length > 0) {
                       const file = files[0]!;
                       const filename =

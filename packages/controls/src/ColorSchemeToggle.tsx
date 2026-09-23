@@ -1,4 +1,5 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact } from "@liqvid/utils";
 import { useMemo } from "react";
@@ -13,7 +14,7 @@ type ColorSchemeToggleProps = {
     },
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
-  shortcuts?: string | string[];
+  shortcuts?: ShortcutsSpecifier;
 };
 
 export function ColorSchemeToggle({

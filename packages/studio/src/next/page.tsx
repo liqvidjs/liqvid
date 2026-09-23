@@ -6,17 +6,20 @@ import { Homepage } from "../pages/root.tsx";
 import { Settings } from "../pages/settings/server.tsx";
 import { getTranslations } from "../utils/i18n.mts";
 
-type Params = {
-  route: string[];
-  [key: string]: string[] | undefined;
-};
+type Params = Readonly<{
+  route: readonly string[];
+  [key: string]: readonly string[] | undefined;
+}>;
 
+// biome-ignore lint/style/noDefaultExport: needed for Next
 export default async function Pages({
   params,
   searchParams: _asyncSearchParams,
 }: {
   params: Promise<Params>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<
+    Readonly<Record<string, string | readonly string[] | undefined>>
+  >;
 }) {
   const resolvedParams = await params;
   const route = getRoute(resolvedParams);

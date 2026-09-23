@@ -1,7 +1,11 @@
 "use client";
 
 import type { Duration } from "@liqvid/duration";
-import type { ProjectMeta, RootParameters } from "@liqvid/schemas";
+import type {
+  ParameterConfig,
+  ParameterValues,
+  ProjectMeta,
+} from "@liqvid/schemas";
 import {
   CameraIcon,
   ClosedCaptioningIcon,
@@ -9,17 +13,9 @@ import {
   FilmStripIcon,
   ImagesIcon,
 } from "@phosphor-icons/react";
-import * as stylex from "@stylexjs/stylex";
 import { useMemo, useState } from "react";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import {
-  colors,
-  dims,
-  opacity,
-  radii,
-  spacing,
-} from "#_/design/tokens.stylex.js";
 import type { Localized } from "#_/i18n/shared.mjs";
 import {
   DialogBackdrop,
@@ -52,32 +48,8 @@ interface ShareButtonProps {
   project: Omit<ProjectMeta, "duration">;
 
   /** Currently selected root parameter values */
-  selectedRootParams: Readonly<Record<string, string>>;
+  selectedRootParams: ParameterValues;
 }
-
-const styles = stylex.create({
-  base: {
-    backgroundColor: {
-      ":hover:not(:disabled)": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.grayNormal,
-    cursor: {
-      ":disabled": "not-allowed",
-      default: "pointer",
-    },
-    opacity: {
-      ":disabled": opacity.disabled,
-    },
-    paddingBlock: spacing.md,
-    paddingInline: spacing.xl,
-    transition: "background-color 0.15s",
-  },
-});
 
 /**
  * Get project-level parameters that should be shown in the media dialog.
@@ -86,9 +58,9 @@ const styles = stylex.create({
  * 2. The project has more values for that parameter than the root
  */
 function getProjectOnlyParameters(
-  projectParameters: Readonly<Record<string, readonly string[]>> | undefined,
-  rootParameters: RootParameters,
-): Readonly<Record<string, readonly string[]>> {
+  projectParameters: ParameterConfig | undefined,
+  rootParameters: ParameterConfig,
+): ParameterConfig {
   if (!projectParameters) {
     return {};
   }
@@ -168,11 +140,7 @@ export function MediaButton({
 
   return (
     <DialogRoot>
-      <DialogTrigger
-        {...stylex.props(styles.base)}
-        title={t.trigger}
-        type="button"
-      >
+      <DialogTrigger title={t.trigger} type="button">
         <FilmSlateIcon size={16} />
       </DialogTrigger>
       <DialogPortal>

@@ -50,7 +50,7 @@ export function LiqvidDevToolsProvider({
   plugins,
 }: {
   children?: React.ReactNode;
-  plugins?: LiqvidStudioPlugin[];
+  plugins?: readonly LiqvidStudioPlugin[];
 }) {
   const projectPath = useProjectPath();
   const projectParams = useProjectParams();

@@ -18,3 +18,12 @@ export type CleanUpFn = () => void;
  * Either a value of type `T` or a promise that resolves to a value of type `T`.
  */
 export type Awaitable<T> = T | Promise<T>;
+
+const createIdentity =
+  /* @__PURE__ */
+    () =>
+    <T>(x: T): Readonly<T> =>
+      x;
+
+/** Mark a value as readonly. This is a no-op at runtime. */
+export const readonly = createIdentity();

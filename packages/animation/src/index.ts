@@ -86,7 +86,9 @@ export function animate(
  * {@link Duration} equivalent of {@link animate}.
  */
 export function animate$(
-  options: AnimateOptions<DurationLike> | AnimateOptions<DurationLike>[],
+  options:
+    | AnimateOptions<DurationLike>
+    | readonly AnimateOptions<DurationLike>[],
 ): (t: Duration) => number {
   if (Array.isArray(options)) {
     // parse Durations
@@ -115,6 +117,9 @@ export function animate$(
       return fns[options.length - 1]!(t);
     };
   }
+
+  // https://github.com/microsoft/TypeScript/issues/17002
+  assertType<AnimateOptions<Duration>>(options);
 
   const {
     startValue = 0,

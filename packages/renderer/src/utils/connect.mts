@@ -258,7 +258,7 @@ export const getPages = Effect.fnUntraced(
 export async function callPlayerApi(
   page: Puppeteer.Page,
   method: string,
-  args: unknown[],
+  args: readonly unknown[],
 ): Promise<unknown> {
   return page.evaluate(
     ({ args, method, namespace }) =>

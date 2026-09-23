@@ -241,7 +241,7 @@ export const ServiceClient = Schema.Struct({
 });
 
 export type ServiceClientEncoded = (typeof ServiceClient)["Encoded"] & {
-  logs: StructuredLogEncoded[];
+  logs: readonly StructuredLogEncoded[];
   readonly startTime: SerializedDate;
 };
 export type ServiceClient = (typeof ServiceClient)["Type"];

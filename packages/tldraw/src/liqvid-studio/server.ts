@@ -2,6 +2,7 @@
 
 import path from "node:path";
 
+import type { ParameterValues } from "@liqvid/schemas";
 import {
   ASSETS_DIR,
   readDirWithFileTypes,
@@ -23,7 +24,7 @@ import type { SavedState } from "./types.ts";
 
 export async function saveSnapshot(
   projectPath: RelativeDir,
-  params: Readonly<Record<string, string>>,
+  params: ParameterValues,
   snapshot: TLEditorSnapshot,
   index: number,
 ): Promise<SavedState> {
@@ -62,7 +63,7 @@ export async function saveSnapshot(
 
 export async function renameSnapshot(
   projectPath: RelativeDir,
-  params: Readonly<Record<string, string>>,
+  params: ParameterValues,
   name: string,
   newName: string,
 ): Promise<void> {
@@ -87,7 +88,7 @@ export async function renameSnapshot(
 
 export async function deleteSnapshot(
   projectPath: RelativeDir,
-  params: Readonly<Record<string, string>>,
+  params: ParameterValues,
   name: string,
 ): Promise<void> {
   validateName(name);
@@ -102,7 +103,7 @@ export async function deleteSnapshot(
 
 export async function listSaved(
   projectPath: RelativeDir,
-  params: Readonly<Record<string, string>>,
+  params: ParameterValues,
 ): Promise<readonly SavedState[]> {
   const pluginDir = getPluginDir(projectPath, params);
 
@@ -166,10 +167,7 @@ function validateName(name: string): void {
   }
 }
 
-function getPluginDir(
-  projectPath: RelativeDir,
-  params: Readonly<Record<string, string>>,
-) {
+function getPluginDir(projectPath: RelativeDir, params: ParameterValues) {
   return path.join(
     resolveProjectPath(projectPath),
     ASSETS_DIR,

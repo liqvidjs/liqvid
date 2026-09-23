@@ -45,7 +45,7 @@ export function LiqvidStudioPluginApiProvider({
   value,
 }: {
   children?: React.ReactNode;
-  plugins?: LiqvidStudioPlugin[];
+  plugins?: readonly LiqvidStudioPlugin[];
   value?: Partial<PluginContext>;
 }) {
   const [plugins] = useState<Record<string, LiqvidStudioPlugin>>(() =>

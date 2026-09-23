@@ -5,11 +5,12 @@ import { apply, redo, undo } from "../src/components/CaptionsEditor/utils.ts";
 
 /** Build a minimal state from explicit word text and an initial selection. */
 function stateFromWords(
-  wordTexts: string[],
+  wordTexts: readonly string[],
   selection: State["selection"] = { end: 0, start: 0 },
 ): State {
   return {
     captionBreaks: [],
+    open: false,
     paragraphBreaks: [],
     redoStack: [],
     selection,
@@ -33,6 +34,7 @@ function makeState(
 ): State {
   return {
     captionBreaks,
+    open: false,
     paragraphBreaks,
     redoStack: [],
     selection,

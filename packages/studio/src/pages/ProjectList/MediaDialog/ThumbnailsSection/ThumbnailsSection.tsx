@@ -1,5 +1,6 @@
 "use client";
 
+import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { Duration } from "@liqvid/duration";
 import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { ImagesIcon } from "@phosphor-icons/react";
@@ -230,7 +231,7 @@ export function ThumbnailsSection({
     };
   }, [job, sliderValue, duration]);
 
-  const getSheetUrl = (colorScheme: "light" | "dark") => {
+  const getSheetUrl = (colorScheme: ColorScheme) => {
     if (!thumbInfo) return "";
 
     // Build the path segments

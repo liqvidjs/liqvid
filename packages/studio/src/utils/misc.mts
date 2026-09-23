@@ -2,7 +2,12 @@ import "server-only";
 
 import path from "node:path";
 
-import type { LiqvidConfig, RenderSource } from "@liqvid/schemas";
+import type {
+  LiqvidConfig,
+  ParameterConfig,
+  ParameterValues,
+  RenderSource,
+} from "@liqvid/schemas";
 import { Effect, type LogLevel, Option } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { headers } from "next/headers";
@@ -62,7 +67,7 @@ const getOrigin = Effect.fnUntraced(function* () {
  */
 function interpolatePathParams(
   urlPath: string,
-  params?: Readonly<Record<string, string>>,
+  params?: ParameterValues,
 ): string {
   if (!params) return urlPath;
   return urlPath.replace(
@@ -74,7 +79,7 @@ function interpolatePathParams(
 export const getRenderUrl = Effect.fnUntraced(function* (
   renderSource: RenderSource,
   projectPath: RelativeDir,
-  params?: Readonly<Record<string, string>>,
+  params?: ParameterValues,
 ) {
   const origin = yield* getOrigin();
 
@@ -93,9 +98,7 @@ export const getRenderUrl = Effect.fnUntraced(function* (
 /**
  * Generate cartesian product of possible parameter values.
  */
-export function cartesianProduct<
-  T extends Readonly<Record<string, readonly string[]>>,
->(
+export function cartesianProduct<T extends ParameterConfig>(
   parameters: T,
 ): Array<{
   [K in keyof T]: T[K][number];
@@ -104,7 +107,7 @@ export function cartesianProduct<
 
   if (keys.length === 0) return [];
 
-  return keys.reduce<Array<Record<string, string>>>(
+  return keys.reduce<Record<string, string>[]>(
     (acc, key) => {
       const values = parameters[key]!;
       return acc.flatMap((obj) =>

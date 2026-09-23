@@ -1,6 +1,6 @@
 "use client";
 
-import type { RootParameters } from "@liqvid/schemas";
+import type { ParameterConfig, ParameterValues } from "@liqvid/schemas";
 import * as stylex from "@stylexjs/stylex";
 import { useMemo } from "react";
 
@@ -29,13 +29,13 @@ import {
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
-  onParamsChange: (params: Readonly<Record<string, string>>) => void;
+  onParamsChange: (params: ParameterValues) => void;
 
   /** Parameter definitions from project.json or liqvid.json */
-  parameters: RootParameters;
+  parameters: ParameterConfig;
 
   /** Currently selected parameter values */
-  selectedParams: Readonly<Record<string, string>>;
+  selectedParams: ParameterValues;
 }
 
 const styles = stylex.create({
@@ -127,8 +127,8 @@ export function ParameterSelector({
  * merged with project-level parameter definitions.
  */
 export function useProjectParameterValues(
-  projectParameters?: Readonly<Record<string, readonly string[]>>,
-  rootParameters?: RootParameters,
+  projectParameters?: ParameterConfig,
+  rootParameters?: ParameterConfig,
 ): Readonly<Record<string, readonly string[]>> {
   return useMemo(() => {
     // Start with root parameters as fallback

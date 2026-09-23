@@ -1,4 +1,5 @@
 import { CONFIG_FILE_JSONC, resolveConfigPath } from "@liqvid/cli/utils";
+import type { ColorSchemeSpecifier } from "@liqvid/color-scheme/react";
 import type { Locale } from "@liqvid/schemas";
 import * as commentJson from "comment-json";
 import { Effect, FileSystem, Option, Schema } from "effect";
@@ -11,10 +12,8 @@ import { getLocale } from "#_/utils/i18n.mjs";
 
 import { SettingsConfig, WebApi } from "./contract.mts";
 
-type Theme = "light" | "dark" | "system";
-
 /** Read the current theme from in-memory config, defaulting to `"system"`. */
-function getTheme(): Theme {
+function getTheme(): ColorSchemeSpecifier {
   const { config } = getServerState();
   return config.pipe(
     Option.flatMapNullishOr((c) => c.ui?.theme),
@@ -24,7 +23,10 @@ function getTheme(): Theme {
 
 /** Shape of the raw `liqvid.json(c)`, with optional `ui.locale` and `ui.theme` fields. */
 type RawConfig = {
-  ui?: { locale?: Locale; theme?: Theme } & Record<string, unknown>;
+  ui?: { locale?: Locale; theme?: ColorSchemeSpecifier } & Record<
+    string,
+    unknown
+  >;
 } & Record<string, unknown>;
 
 /**

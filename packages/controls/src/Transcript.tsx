@@ -12,7 +12,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 
 type TranscriptContext = {
   body: HTMLDivElement | null;
-  links: TranscriptLink[];
+  links: readonly TranscriptLink[];
   setSearch: (search: string) => void;
   supply: (update: Partial<TranscriptContext>) => void;
   transcript: RichTranscript | null;
@@ -217,7 +217,7 @@ function TranscriptSearch({
 }: {
   filter?: (
     input: string,
-    token: { start: number; end: number; word: string },
+    token: Readonly<{ start: number; end: number; word: string }>,
   ) => boolean;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   const { links } = useTranscriptApi();

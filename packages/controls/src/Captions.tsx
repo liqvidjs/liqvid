@@ -2,6 +2,7 @@
 
 import { useEventListener } from "@liqvid/event-emitter/react";
 import { type BooleanValueConfig, usePersistentState } from "@liqvid/hydration";
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import type { SyntheticTextTrack } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
@@ -21,7 +22,7 @@ export type CaptionsToggleProps = {
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
   persistence?: BooleanValueConfig;
-  shortcuts?: string | string[];
+  shortcuts?: ShortcutsSpecifier;
 };
 
 /** Button to toggle captions. */

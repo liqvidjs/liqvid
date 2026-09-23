@@ -16,7 +16,7 @@ export interface ConsoleMessage<T = unknown, K extends string = string> {
   timestamp: Date;
 }
 
-export type LiveCodeFile = {
+export type LiveCodeFile = Readonly<{
   /** Whether the buffer can be edited by the viewer. */
   editable: boolean;
 
@@ -25,20 +25,21 @@ export type LiveCodeFile = {
 
   /** Reference to CodeMirror {@link EditorView} */
   view: EditorView;
-};
+}>;
 
-export type LiveCodeGroup = {
+export type LiveCodeGroup = Readonly<{
   /** Name of active file. */
   activeFile: string;
 
   /** Files contained in this editor group. */
-  files: LiveCodeFile[];
-};
+  files: readonly LiveCodeFile[];
+}>;
 
 /** LiveCode store state. */
-export interface LiveCodeState {
+export type LiveCodeState = Readonly<{
   /** Used to broadcast run events. */
   __run: number;
+
   /**
    * Name of active editor group.
    */
@@ -51,14 +52,14 @@ export interface LiveCodeState {
   groups: Record<string, LiveCodeGroup>;
 
   /** Console logs. */
-  messages: ConsoleMessage[];
+  messages: readonly ConsoleMessage[];
 
   /** Code recorder. */
   recorder?: CodeRecorder;
 
   /** Keyboard shortcuts. */
   shortcuts: Record<string, KeyBinding>;
-}
+}>;
 
 export const makeStore = (state: Partial<LiveCodeState> = {}) =>
   createStore<LiveCodeState>()(

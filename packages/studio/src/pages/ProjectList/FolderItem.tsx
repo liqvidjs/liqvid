@@ -5,6 +5,7 @@ import {
   FolderIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
+import type { RelativeDir } from "effect-paths";
 import { useId } from "react";
 
 import {
@@ -18,11 +19,11 @@ import {
 
 import { ProjectItem } from "./ProjectItem.tsx";
 
-export type FolderNode = {
-  name: string;
-  projects: Array<[string, ProjectMeta]>;
-  subfolders: Map<string, FolderNode>;
-};
+export type FolderNode = Readonly<{
+  name: RelativeDir;
+  projects: [string, ProjectMeta][];
+  subfolders: Map<RelativeDir, FolderNode>;
+}>;
 
 const styles = stylex.create({
   chevron: {
@@ -126,7 +127,7 @@ export function FolderItem({
   nested = false,
 }: {
   basePath: string;
-  collapsedFolders: Set<string>;
+  collapsedFolders: ReadonlySet<string>;
   folder: FolderNode;
   folderPath: string;
   onToggle: (folderPath: string, expanded: boolean) => void;

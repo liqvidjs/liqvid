@@ -57,9 +57,10 @@ type Keyframe$<M extends string, T extends AnyElement> = Partial<
   };
 
 /** An array of keyframes describing how element attributes change over time. */
-export type Keyframes$<M extends string, T extends AnyElement> = ReadonlyArray<
-  Keyframe$<M, T>
->;
+export type Keyframes$<
+  M extends string,
+  T extends AnyElement,
+> = readonly Keyframe$<M, T>[];
 
 /** Metadata keys that aren't attribute values to interpolate. */
 const metaKeys = new Set(["at", "duration", "easing", "offset"]);
@@ -159,7 +160,7 @@ function resolveKeyframes<M extends string, T extends AnyElement>(
  */
 function applyKeyframes(
   node: AnyElement,
-  resolved: ResolvedKeyframe[],
+  resolved: readonly ResolvedKeyframe[],
   tMs: number,
 ): void {
   if (resolved.length === 0) return;

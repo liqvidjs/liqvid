@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import type { ParameterValues } from "@liqvid/schemas";
 import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
@@ -39,7 +40,7 @@ export function parseParamsMarker(filename: RelativeFile): string[] | null {
  * e.g., `["lang", "locale"]` → `.params=lang,locale`
  */
 export function generateParamsMarkerFilename(
-  paramNames: string[],
+  paramNames: readonly string[],
 ): RelativeFile {
   return RelativeFile(`${PARAMS_MARKER_PREFIX}${paramNames.join(",")}`);
 }
@@ -58,7 +59,7 @@ export function hasParameters(projectPath: string): boolean {
  * returns `"en/US"`.
  */
 export function buildParameterSubpath(
-  paramNames: string[],
+  paramNames: readonly string[],
   paramValues: Record<string, string>,
 ): RelativeDir {
   const parts = paramNames.map((name) => paramValues[name] ?? "");
@@ -143,7 +144,7 @@ export const ensureParamsMarker = Effect.fnUntraced(function* (
  */
 export const getExistingParameterCombinations = Effect.fnUntraced(function* (
   assetsDir: AbsoluteDir,
-  paramNames: string[],
+  paramNames: readonly string[],
 ) {
   const fs = yield* FileSystem.FileSystem;
 
@@ -162,10 +163,10 @@ export const getExistingParameterCombinations = Effect.fnUntraced(function* (
 const traverseParameterDirs = Effect.fnUntraced(function* (
   fs: FileSystem.FileSystem,
   currentDir: AbsoluteDir,
-  paramNames: string[],
+  paramNames: readonly string[],
   depth: number,
-  currentValues: Record<string, string>,
-  combinations: Record<string, string>[],
+  currentValues: ParameterValues,
+  combinations: ParameterValues[],
 ): Generator<
   Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>
 > {

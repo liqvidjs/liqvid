@@ -75,6 +75,8 @@
 
 *.ttf
 
+repos
+
 # **/dist
 *.d.mts
 pnpm-lock.yaml

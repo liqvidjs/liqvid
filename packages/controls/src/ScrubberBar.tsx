@@ -31,19 +31,19 @@ export interface PercentageSeekShortcut {
   multiplier: number;
 }
 
-export interface ScrubberBarProps {
+export type ScrubberBarProps = {
   /** seeking shortcuts */
   shortcuts?: {
     /** configure shortcuts for seeking forward/backward by a fixed amount of time */
-    relative?: RelativeSeekShortcut[];
+    relative?: readonly RelativeSeekShortcut[];
 
     /** configure shortcuts for seeking to a percentage of the Playback duration */
-    percentage?: PercentageSeekShortcut[];
+    percentage?: readonly PercentageSeekShortcut[];
   };
 
   /** Thumbnail preview data */
   thumbs?: ThumbData;
-}
+};
 
 /** Display a scrubber interface for playback, optionally including thumbnail previews and highlights. */
 export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
@@ -290,7 +290,9 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
   );
 }
 
-function useRelativeShortcuts(shortcuts: RelativeSeekShortcut[] | undefined) {
+function useRelativeShortcuts(
+  shortcuts: readonly RelativeSeekShortcut[] | undefined,
+) {
   const keymap = useKeymap();
   const playback = usePlayback();
 
@@ -323,7 +325,7 @@ function useRelativeShortcuts(shortcuts: RelativeSeekShortcut[] | undefined) {
 }
 
 function usePercentageShortcuts(
-  shortcuts: PercentageSeekShortcut[] | undefined,
+  shortcuts: readonly PercentageSeekShortcut[] | undefined,
 ) {
   const keymap = useKeymap();
   const playback = usePlayback();

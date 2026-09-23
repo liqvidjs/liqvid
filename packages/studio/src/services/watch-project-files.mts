@@ -6,6 +6,7 @@ import { Duration } from "@liqvid/duration";
 import {
   type AspectRatio,
   AutoGenProjectMeta,
+  type ParameterConfig,
   type ParametrizedValueEntry,
   ProjectJson,
   type ProjectMeta,
@@ -715,7 +716,7 @@ const hasOpenGraphImage = Effect.fnUntraced(function* (dirname: AbsoluteDir) {
  */
 const hasLiqvidStudioImages = Effect.fnUntraced(function* (
   dirname: AbsoluteDir,
-  parameters: Readonly<Record<string, readonly string[]>> | undefined,
+  parameters: ParameterConfig | undefined,
 ) {
   const fs = yield* FileSystem.FileSystem;
 

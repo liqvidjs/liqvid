@@ -2,7 +2,7 @@
 
 import path from "node:path";
 
-import type { RichTranscript } from "@liqvid/schemas";
+import type { ParameterValues, RichTranscript } from "@liqvid/schemas";
 import {
   inlineTypeDeclaration,
   writeTypedJson,
@@ -24,7 +24,7 @@ export async function saveCaptions({
   projectPath,
   transcript,
 }: {
-  params?: Readonly<Record<string, string>>;
+  params?: ParameterValues;
   projectPath: RelativeDir;
   transcript: RichTranscript;
 }) {

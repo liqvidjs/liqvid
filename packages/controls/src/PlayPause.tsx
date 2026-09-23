@@ -1,5 +1,6 @@
 "use client";
 
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { useForceUpdate } from "@liqvid/utils";
@@ -22,7 +23,7 @@ export function PlayPause({
     },
     props: React.ButtonHTMLAttributes<HTMLButtonElement>,
   ) => React.ReactNode;
-  shortcuts?: string[];
+  shortcuts?: ShortcutsSpecifier;
 }) {
   const playback = usePlayback();
   const forceUpdate = useForceUpdate();

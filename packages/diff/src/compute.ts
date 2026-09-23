@@ -14,7 +14,7 @@ import type { ArrayDiff, ObjectDiff } from "./types.ts";
 import { cmp } from "./utils.ts";
 
 /** Compute the diff between two arrays. */
-export function diffArrays<T>(a: T[], b: T[]): ArrayDiff<T> {
+export function diffArrays<T>(a: readonly T[], b: readonly T[]): ArrayDiff<T> {
   // diffs
   const itemDiffs: Exclude<ArrayDiff<T>[1], undefined> = [];
 

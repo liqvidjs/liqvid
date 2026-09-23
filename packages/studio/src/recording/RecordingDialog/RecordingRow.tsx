@@ -1,5 +1,5 @@
 import { Collapsible } from "@base-ui/react/collapsible";
-import type { RecordingMeta } from "@liqvid/schemas";
+import type { ParameterValues, RecordingMeta } from "@liqvid/schemas";
 import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { useToggle } from "@liqvid/utils";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
@@ -131,7 +131,7 @@ export function RecordingRow({
   projectPath,
   recording: r,
 }: {
-  projectParams: Readonly<Record<string, string>>;
+  projectParams: ParameterValues;
   projectPath: RelativeDir;
   recording: RecordingMeta;
 }) {

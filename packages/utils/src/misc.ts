@@ -12,7 +12,7 @@ export function bind<
   o: T,
 
   /** Method names to bind */
-  methods: K[],
+  methods: readonly K[],
 ) {
   for (const method of methods) {
     // biome-ignore lint/suspicious/noExplicitAny: some craziness going on here

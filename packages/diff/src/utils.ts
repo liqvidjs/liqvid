@@ -229,7 +229,7 @@ export function invertDiff<T>(state: T, diff: ObjectDiff<T>): ObjectDiff<T> {
  * B → A.
  */
 export function invertArrayDiff<T>(
-  state: T[],
+  state: readonly T[],
   diff: ArrayDiff<T>,
 ): ArrayDiff<T> {
   const [delta, itemDiffs = []] = diff;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
 
 import type { RenderMode } from "./render-mode.ts";
@@ -35,7 +36,7 @@ export const playerApiDeclaration = {
 
     /** Set the color scheme */
     setColorScheme: {
-      arguments: type<[colorScheme: "light" | "dark"]>(),
+      arguments: type<[colorScheme: ColorScheme]>(),
       return: type<void>(),
     },
 

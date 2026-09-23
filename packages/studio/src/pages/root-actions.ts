@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
 import { UP, writeJSON } from "@liqvid/cli/utils";
-import type { AutoGenProjectMeta } from "@liqvid/schemas";
+import type { AutoGenProjectMeta, ParameterValues } from "@liqvid/schemas";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import {
   type AbsoluteDir,
@@ -191,7 +191,7 @@ export async function openInFinderAction(
 export async function openRenderInFinderAction(
   projectPath: RelativeDir,
   renderId: string,
-  params?: Readonly<Record<string, string>>,
+  params?: ParameterValues,
 ): Promise<{ success: boolean }> {
   try {
     // Validate paths to prevent directory traversal
@@ -222,7 +222,7 @@ export async function openRenderInFinderAction(
 export async function openScreenshotInFinderAction(
   projectPath: RelativeDir,
   screenshotId: string,
-  params?: Readonly<Record<string, string>>,
+  params?: ParameterValues,
 ): Promise<{ success: boolean }> {
   try {
     // Validate paths to prevent directory traversal
