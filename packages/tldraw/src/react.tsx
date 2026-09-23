@@ -250,17 +250,16 @@ export function TldrawReplay({
     }
   }, [replay, editor, playback, start, follow]);
 
-  const { colorScheme } = useColorScheme();
-
   return (
     <FollowContext.Provider value={follow}>
-      <Tldraw colorScheme={colorScheme} {...props}>
+      <Tldraw {...props}>
         {/*
          * React explodes if we call `loadSnapshot()`, which is part of
          * initialize(), inside <Tldraw>. So we have to do this awkward
          * thing instead.
          */}
         <SetEditor setEditor={setEditor} />
+        <SetTldrawColorScheme />
         <SetDataAffords />
         <PreserveViewportOnResize />
         <CanvasLayer>
@@ -301,6 +300,21 @@ function SetEditor({
   useEffect(() => {
     setEditor(editor);
   }, [editor, setEditor]);
+  return null;
+}
+
+/**
+ * DO NOT set colorScheme on `<Tlraw>` component directly
+ * as that recreates the component and breaks the camera
+ */
+function SetTldrawColorScheme() {
+  const editor = useEditor();
+  const { colorScheme } = useColorScheme();
+
+  useEffect(() => {
+    editor.setColorMode(colorScheme);
+  }, [colorScheme, editor]);
+
   return null;
 }
 
