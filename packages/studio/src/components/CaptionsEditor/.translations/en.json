@@ -13,6 +13,7 @@
   "shortcut_endNextComma": "Move selection to the next word ending in a comma",
   "shortcut_endNextSentence": "Extend selection to the end of the next sentence",
   "shortcut_endNextTranscriptBreak": "Extend selection to the next paragraph break",
+  "shortcut_lowercase": "Convert selected word to lowercase",
   "shortcut_mergeFollowing": "Merge the following word into the selected word",
   "shortcut_save": "Save captions",
   "shortcut_scrollToBottom": "Scroll the selected word to the bottom",
@@ -27,6 +28,7 @@
   "shortcut_startPrevTranscriptBreak": "Move selection to the previous paragraph break",
   "shortcut_toggleCaptionBreak": "Toggle a caption break at the selection",
   "shortcut_toggleTranscriptBreak": "Toggle a paragraph break at the selection",
+  "shortcut_uppercase": "Convert selected word to uppercase",
   "shortcutColumnAction": "Action",
   "shortcutColumnKey": "Shortcut"
 }
