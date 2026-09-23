@@ -530,12 +530,18 @@ export class LiqvidStudioProvider
                         }),
                       );
                     }
+                    let countedBytes = 0;
                     const response = yield* Effect.tryPromise({
                       try: () => {
                         const stream = nodeFs.createReadStream(filePath).pipe(
                           new Transform({
                             transform(chunk: Buffer, _encoding, callback) {
-                              progress?.increment(chunk.length);
+                              const bytesToCount = Math.min(
+                                chunk.length,
+                                size - countedBytes,
+                              );
+                              countedBytes += bytesToCount;
+                              progress?.increment(bytesToCount);
                               callback(null, chunk);
                             },
                           }),
