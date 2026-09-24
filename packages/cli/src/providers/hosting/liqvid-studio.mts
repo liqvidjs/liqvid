@@ -1,14 +1,13 @@
-import * as nodeFs from "node:fs";
 import * as path from "node:path";
-import { Transform } from "node:stream";
 
-import { NodeHttpClient } from "@effect/platform-node";
+import { NodeHttpClient, NodeStream } from "@effect/platform-node";
+import { checkbox, confirm } from "@inquirer/prompts";
 import { Progress } from "@liqvid/renderer";
 import {
   LiqvidStudioProjectMeta,
   type ParameterConfig,
   type ParameterValues,
-  type Parametrized,
+  type ParametrizedValueEntry,
   type ProjectId,
   ProjectJson,
   type ProviderConfigLiqvidStudio,
@@ -20,6 +19,7 @@ import {
   type ProjectRequest,
 } from "@liqvid/studio-public-api";
 import {
+  Cause,
   Duration,
   Effect,
   FileSystem,
@@ -27,7 +27,9 @@ import {
   Option,
   type PlatformError,
   Redacted,
+  Result,
   Schema,
+  Stream,
 } from "effect";
 import { HttpClient, HttpClientRequest } from "effect/unstable/http";
 import * as HttpClientError from "effect/unstable/http/HttpClientError";
@@ -41,6 +43,7 @@ import {
 import { Agent, fetch, type RequestInit as StudioRequestInit } from "undici";
 
 import { PACKAGE_JSON } from "#_/conventions.js";
+import { resolveParametrized } from "#_/utils/parametrization.js";
 import { loadJson, readDirWithFileTypes } from "#_/utils.js";
 
 import type {
@@ -79,9 +82,19 @@ class LiqvidStudioError extends Schema.TaggedError<LiqvidStudioError>()(
   },
 ) {}
 
-function logClientError(error: unknown) {
+function logClientError(cause: Cause.Cause<unknown>) {
+  const $error = Cause.findError(cause);
+  if (Result.isFailure($error)) {
+    return Effect.void;
+  }
+  const error = $error.success;
+  const stack = Cause.pretty(cause);
+  const fullStack = stack.includes("\n    at ")
+    ? stack
+    : `${stack}\n${new Error().stack?.split("\n").slice(1).join("\n") ?? ""}`;
+
   if (!HttpClientError.isHttpClientError(error)) {
-    return Effect.logError("Liqvid Studio API request failed", error);
+    return Effect.logError("Liqvid Studio API request failed", fullStack);
   }
 
   const { request, response, reason } = error;
@@ -89,7 +102,7 @@ function logClientError(error: unknown) {
   if (!response) {
     return Effect.logError(
       `Liqvid Studio API request failed (${requestInfo}, ${reason._tag})`,
-      error,
+      fullStack,
     );
   }
 
@@ -97,13 +110,13 @@ function logClientError(error: unknown) {
     Effect.flatMap((body) =>
       Effect.logError(
         `Liqvid Studio API request failed (${requestInfo}, status ${response.status}, ${reason._tag}): ${body || "<empty body>"}`,
-        error,
+        fullStack,
       ),
     ),
     Effect.catch(() =>
       Effect.logError(
         `Liqvid Studio API request failed (${requestInfo}, status ${response.status}, ${reason._tag}; response body unavailable)`,
-        error,
+        fullStack,
       ),
     ),
   );
@@ -116,11 +129,22 @@ function makeClient(accessToken: Redacted.Redacted<string>, dispatcher: Agent) {
   return Effect.runSync(
     HttpApiClient.make(LiqvidStudioPublicApi, {
       baseUrl: API_URL,
-      transformClient: HttpClient.mapRequest(
-        HttpClientRequest.bearerToken(Redacted.value(accessToken)),
-      ),
+      transformClient: (client) =>
+        client.pipe(
+          HttpClient.mapRequest(
+            HttpClientRequest.bearerToken(Redacted.value(accessToken)),
+          ),
+          HttpClient.tapRequest((request) =>
+            Effect.logDebug("Liqvid Studio API request").pipe(
+              Effect.annotateLogs({
+                method: request.method,
+                url: request.url,
+              }),
+            ),
+          ),
+        ),
       transformResponse: (effect) =>
-        effect.pipe(Effect.tapError(logClientError)),
+        effect.pipe(Effect.tapCause(logClientError)),
     }).pipe(Effect.provide(httpClientLayer)),
   );
 }
@@ -266,8 +290,12 @@ export class LiqvidStudioProvider
     }).pipe(Effect.orDie);
   }
 
-  publishContent(localDir: AbsoluteDir, force = false) {
-    return this.#publishDirectory(localDir, force);
+  publishContent(
+    localDir: AbsoluteDir,
+    force = false,
+    projectDir: AbsoluteDir = localDir,
+  ) {
+    return this.#publishDirectory(localDir, force, projectDir);
   }
 
   publishMedia(
@@ -293,19 +321,27 @@ export class LiqvidStudioProvider
   #publishDirectory(
     localDir: AbsoluteDir,
     force: boolean,
+    projectDir: AbsoluteDir,
   ): Effect.Effect<
     void,
     PlatformError.PlatformError,
     FileSystem.FileSystem | ProgressService
   > {
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
+      let i = 0;
       const files = yield* this.#listFiles(localDir);
+
+      const projectFiles =
+        projectDir === localDir ? files : yield* this.#listFiles(projectDir);
+
       const { workspaceId } = yield* this.#getWorkspaceMeta().pipe(
         Effect.orDie,
       );
-      yield* this.#syncProjects(localDir, files, workspaceId).pipe(
+
+      yield* this.#syncProjects(projectDir, projectFiles, workspaceId).pipe(
         Effect.orDie,
       );
+
       yield* this.#publishFiles(
         files.map((file) => [
           file,
@@ -314,6 +350,8 @@ export class LiqvidStudioProvider
         workspaceId,
         force,
       );
+
+      yield* Effect.logInfo(i++);
     });
   }
 
@@ -326,7 +364,7 @@ export class LiqvidStudioProvider
       const fs = yield* FileSystem.FileSystem;
 
       const response = yield* this.#client.workspaces
-        .create({ payload: { name: this.#getWorkspaceName() } })
+        .create({ payload: { name: yield* this.#getWorkspaceName() } })
         .pipe(Effect.orDie);
       const userId = yield* this.#client.identity.get().pipe(
         Effect.orDie,
@@ -348,28 +386,22 @@ export class LiqvidStudioProvider
     files: readonly AbsoluteFile[],
     workspaceId: WorkspaceId,
   ) {
-    return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
+    return Effect.gen({ self: this }, function* () {
       const projectFiles = files.filter(
         (file) => path.basename(file) === PROJECT_FILE,
       );
 
-      yield* Effect.all(
+      const projectData = yield* Effect.all(
         projectFiles.map((projectFile) =>
           Effect.gen({ self: this }, function* () {
-            const fs = yield* FileSystem.FileSystem;
-
-            const project = yield* Effect.try({
-              catch: (cause) =>
-                new LiqvidStudioError({
-                  cause,
-                  message: `Invalid ${PROJECT_FILE} at ${projectFile}`,
-                }),
-              try: () =>
-                Schema.decodeUnknownSync(ProjectJson)(
-                  JSON.parse(nodeFs.readFileSync(projectFile, "utf8")),
+            const project = yield* loadJson(ProjectJson, projectFile).pipe(
+              Effect.tapCause((cause) =>
+                Effect.logError(
+                  `Failed to load ${PROJECT_FILE} at ${projectFile}`,
+                  Cause.pretty(cause),
                 ),
-            });
-
+              ),
+            );
             const projectDir = path.dirname(projectFile) as AbsoluteDir;
             const metaFile = path.join(
               projectDir,
@@ -382,40 +414,100 @@ export class LiqvidStudioProvider
             const combinations = project.parameters
               ? cartesianProduct(project.parameters)
               : [];
-            const parameterized = combinations.length > 0;
-            const existingIds = yield* this.#readProjectIds(metaFile);
-            const projectIds: {
-              value: ProjectId;
-              [key: string]: string;
-            }[] = [];
+            return {
+              existingIds: yield* this.#readProjectIds(metaFile),
+              metaFile,
+              parameterized: combinations.length > 0,
+              parameterSets: (combinations.length > 0
+                ? combinations
+                : [{}]) as ParameterValues[],
+              project,
+              projectPath,
+            };
+          }),
+        ),
+        { concurrency: UPLOAD_CONCURRENCY },
+      );
 
-            for (const parameters of parameterized ? combinations : [{}]) {
-              const existingId = findProjectId(existingIds, parameters);
+      const drafts = projectData.flatMap((data) =>
+        data.parameterSets.flatMap((parameters) => {
+          const projectId = findProjectId(data.existingIds, parameters);
+          if (
+            !projectId ||
+            !resolveParametrized(data.project.draft, parameters)
+          ) {
+            return [];
+          }
+          const parameterText = Object.entries(parameters)
+            .map(([key, value]) => `${key}=${value}`)
+            .join(", ");
+          return [
+            {
+              id: projectId,
+              label: `${data.projectPath}/project.json${parameterText ? ` (${parameterText})` : ""}`,
+            },
+          ];
+        }),
+      );
+      const toUnpublish = drafts.length
+        ? yield* Effect.promise(() => selectProjectsToUnpublish(drafts))
+        : new Set<ProjectId>();
+
+      if (drafts.length > 0 && toUnpublish.size === 0) {
+        return yield* Effect.die(
+          new LiqvidStudioError({ message: "Publishing cancelled" }),
+        );
+      }
+
+      yield* Effect.all(
+        projectData.map((data) =>
+          Effect.gen({ self: this }, function* () {
+            const fs = yield* FileSystem.FileSystem;
+            const projectIds: ParametrizedValueEntry<ProjectId>[] = [];
+
+            for (const parameters of data.parameterSets) {
+              const existingId = findProjectId(data.existingIds, parameters);
+              const isDraft = resolveParametrized(
+                data.project.draft,
+                parameters,
+              );
+              if (isDraft) {
+                if (existingId && toUnpublish.has(existingId)) {
+                  yield* this.#client.projects
+                    .delete({
+                      params: { projectId: existingId },
+                    })
+                    .pipe(Effect.orDie);
+                } else if (existingId) {
+                  projectIds.push({ ...parameters, value: existingId });
+                }
+                continue;
+              }
+
               const request: ProjectRequest = {
-                aspectRatio: project.aspectRatio,
+                aspectRatio: data.project.aspectRatio,
                 description: resolveParametrized(
-                  project.description,
+                  data.project.description,
                   parameters,
                 ),
                 name:
-                  resolveParametrized(project.title, parameters) ??
+                  resolveParametrized(data.project.title, parameters) ??
                   (() => {
                     throw new LiqvidStudioError({
-                      message: `Missing title for ${projectPath} with parameters ${JSON.stringify(parameters)}`,
+                      message: `Missing title for ${data.projectPath} with parameters ${JSON.stringify(parameters)}`,
                     });
                   })(),
-                parameters: parameterized
+                parameters: data.parameterized
                   ? Object.fromEntries(
                       Object.entries(parameters).map(([key, value]) => [
                         key,
                         [value],
                       ]),
                     )
-                  : project.parameters,
-                path: projectPath,
+                  : data.project.parameters,
+                path: data.projectPath,
                 workspaceId,
               };
-
               const response = yield* (
                 existingId
                   ? this.#client.projects.sync({
@@ -424,19 +516,26 @@ export class LiqvidStudioProvider
                     })
                   : this.#client.projects.create({ payload: request })
               ).pipe(Effect.orDie);
-
               projectIds.push({ ...parameters, value: response.projectId });
             }
 
-            yield* fs.makeDirectory(path.dirname(metaFile), {
+            if (projectIds.length === 0) {
+              if (data.existingIds.length > 0) {
+                yield* fs.remove(data.metaFile);
+              }
+              return;
+            }
+            yield* fs.makeDirectory(path.dirname(data.metaFile), {
               recursive: true,
             });
             yield* fs.writeFileString(
-              metaFile,
+              data.metaFile,
               `${JSON.stringify(
                 {
                   $schema: STUDIO_META_SCHEMA,
-                  projectId: parameterized ? projectIds : projectIds[0]!.value,
+                  projectId: data.parameterized
+                    ? projectIds
+                    : projectIds[0]!.value,
                 },
                 null,
                 2,
@@ -469,7 +568,7 @@ export class LiqvidStudioProvider
     workspaceId: WorkspaceId,
     force = false,
   ) {
-    return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
+    return Effect.gen({ self: this }, function* () {
       const fs = yield* FileSystem.FileSystem;
       const remoteFiles = yield* this.listRemoteFiles();
       const remoteByKey = new Map(remoteFiles.map((file) => [file.key, file]));
@@ -519,62 +618,66 @@ export class LiqvidStudioProvider
             uploads
               .filter(({ key }) => batch.includes(key))
               .map(({ filePath, key, size }) =>
-                Effect.gen(
-                  { self: this },
-                  function* (this: LiqvidStudioProvider) {
-                    const upload = byKey.get(key);
-                    if (!upload) {
-                      return yield* Effect.die(
-                        new LiqvidStudioError({
-                          message: `Studio did not return an upload URL for ${key}`,
-                        }),
-                      );
-                    }
-                    let countedBytes = 0;
-                    const response = yield* Effect.tryPromise({
-                      catch: (cause) =>
-                        new LiqvidStudioError({
-                          cause,
-                          message: `Upload request failed for ${key}`,
-                        }),
-                      try: () => {
-                        const stream = nodeFs.createReadStream(filePath).pipe(
-                          new Transform({
-                            transform(chunk: Buffer, _encoding, callback) {
+                Effect.gen({ self: this }, function* () {
+                  const upload = byKey.get(key);
+                  if (!upload) {
+                    return yield* Effect.die(
+                      new LiqvidStudioError({
+                        message: `Studio did not return an upload URL for ${key}`,
+                      }),
+                    );
+                  }
+                  let countedBytes = 0;
+                  const response = yield* Effect.gen(
+                    { self: this },
+                    function* () {
+                      // Build a fresh body for each retry; streams are single-use.
+                      const stream = yield* NodeStream.toReadable(
+                        fs.stream(filePath).pipe(
+                          Stream.tap((chunk) =>
+                            Effect.sync(() => {
                               const bytesToCount = Math.min(
                                 chunk.length,
                                 size - countedBytes,
                               );
                               countedBytes += bytesToCount;
                               progress?.increment(bytesToCount);
-                              callback(null, chunk);
-                            },
+                            }),
+                          ),
+                        ),
+                      );
+
+                      return yield* Effect.tryPromise({
+                        catch: (cause) =>
+                          new LiqvidStudioError({
+                            cause,
+                            message: `Upload request failed for ${key}`,
                           }),
-                        );
-                        return fetch(upload.url, {
-                          body: stream,
-                          dispatcher: this.#dispatcher,
-                          duplex: "half",
-                          headers: {
-                            "content-length": String(size),
-                            "content-type": this.#contentType(filePath),
-                          },
-                          method: "PUT",
-                        } as StudioRequestInit);
-                      },
-                    }).pipe(Effect.retry({ times: 2 }), Effect.orDie);
-                    if (!response.ok) {
-                      const resText = yield* Effect.promise(() =>
-                        response.text(),
-                      );
-                      return yield* Effect.die(
-                        new LiqvidStudioError({
-                          message: `Upload failed for ${key}: ${response.status} ${response.statusText}\n${resText}`,
-                        }),
-                      );
-                    }
-                  },
-                ),
+                        try: () =>
+                          fetch(upload.url, {
+                            body: stream,
+                            dispatcher: this.#dispatcher,
+                            duplex: "half",
+                            headers: {
+                              "content-length": String(size),
+                              "content-type": this.#contentType(filePath),
+                            },
+                            method: "PUT",
+                          } as StudioRequestInit),
+                      });
+                    },
+                  ).pipe(Effect.retry({ times: 2 }), Effect.orDie);
+                  if (!response.ok) {
+                    const resText = yield* Effect.promise(() =>
+                      response.text(),
+                    );
+                    return yield* Effect.die(
+                      new LiqvidStudioError({
+                        message: `Upload failed for ${key}: ${response.status} ${response.statusText}\n${resText}`,
+                      }),
+                    );
+                  }
+                }),
               ),
             { concurrency: UPLOAD_CONCURRENCY },
           );
@@ -616,38 +719,42 @@ export class LiqvidStudioProvider
     });
   }
 
-  #getWorkspaceName(): string {
-    if (this.#workspaceName) return this.#workspaceName;
-    if (this.#config.workspace) {
-      this.#workspaceName = this.#config.workspace;
-      return this.#workspaceName;
-    }
+  #getWorkspaceName() {
+    return Effect.gen({ self: this }, function* () {
+      if (this.#workspaceName) return this.#workspaceName;
+      if (this.#config.workspace) {
+        this.#workspaceName = this.#config.workspace;
+        return this.#workspaceName;
+      }
 
-    const packagePath = path.join(process.cwd(), PACKAGE_JSON);
-    let packageName: unknown;
-    try {
-      packageName = JSON.parse(nodeFs.readFileSync(packagePath, "utf8")).name;
-    } catch (error) {
-      // The cause is carried in the tagged error payload rather than Error options.
-      // biome-ignore lint/style/useErrorCause: the tagged error preserves the cause in its payload
-      throw new LiqvidStudioError({
-        cause: error,
-        message: `Could not read ${packagePath} to determine the project`,
+      const PackageJson = Schema.Struct({
+        name: Schema.String,
       });
-    }
-    if (typeof packageName !== "string" || packageName.length === 0) {
-      throw new LiqvidStudioError({
-        message: `Missing package.json name in ${packagePath}`,
-      });
-    }
-    if (packageName.includes("/")) {
-      throw new LiqvidStudioError({
-        message:
-          "Liqvid Studio project is required when package.json name contains a slash",
-      });
-    }
-    this.#workspaceName = packageName;
-    return packageName;
+
+      const packagePath = path.join(process.cwd(), PACKAGE_JSON);
+
+      const packageJson = yield* loadJson(PackageJson, packagePath).pipe(
+        Effect.mapError(
+          (cause) =>
+            new LiqvidStudioError({
+              cause,
+              message: `Could not read ${packagePath} to determine the project`,
+            }),
+        ),
+      );
+
+      const packageName = packageJson.name;
+
+      if (packageName.includes("/")) {
+        yield* new LiqvidStudioError({
+          message:
+            "Liqvid Studio project is required when package.json name contains a slash",
+        });
+      }
+
+      this.#workspaceName = packageName;
+      return packageName;
+    });
   }
 
   #relativeKey(relativePath: RelativeFile): RelativeFile {
@@ -705,25 +812,8 @@ function cartesianProduct<T extends ParameterConfig>(
   ) as Array<{ [K in keyof T]: T[K][number] }>;
 }
 
-function resolveParametrized<T>(
-  input: Parametrized<T> | undefined,
-  parameters: ParameterValues,
-): T | undefined {
-  if (input === undefined) return undefined;
-  if (!Array.isArray(input)) return input as T;
-
-  return input.find((entry) =>
-    Object.entries(entry).every(
-      ([key, value]) => key === "value" || parameters[key] === value,
-    ),
-  )?.value;
-}
-
 function findProjectId(
-  projectIds: readonly {
-    value: ProjectId;
-    [key: string]: string;
-  }[],
+  projectIds: ParametrizedValueEntry<ProjectId>[],
   parameters: ParameterValues,
 ): ProjectId | undefined {
   return projectIds.find((entry) =>
@@ -731,4 +821,23 @@ function findProjectId(
       ([key, value]) => key === "value" || parameters[key] === value,
     ),
   )?.value;
+}
+
+async function selectProjectsToUnpublish(
+  projects: readonly { id: ProjectId; label: string }[],
+): Promise<Set<ProjectId>> {
+  const selection = await checkbox<ProjectId>({
+    choices: projects.map(({ id, label }) => ({ name: label, value: id })),
+    message: "Select draft projects to unpublish",
+    theme: { keybindings: ["vim"] },
+  });
+  const selected = new Set(selection);
+  if (selected.size === 0) return selected;
+
+  return (await confirm({
+    default: false,
+    message: `Unpublish ${selected.size} project${selected.size === 1 ? "" : "s"}?`,
+  }))
+    ? selected
+    : new Set();
 }

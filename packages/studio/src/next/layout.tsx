@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: "Liqvid Studio",
 };
 
+// biome-ignore lint/style/noDefaultExport: Next.js
 export default async function RootLayout({
   children,
 }: {

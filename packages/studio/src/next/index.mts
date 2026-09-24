@@ -2,7 +2,11 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { agnosticFileSystem, loadJson } from "@liqvid/cli/utils";
+import {
+  agnosticFileSystem,
+  loadJson,
+  resolveParametrized,
+} from "@liqvid/cli/utils";
 import { ProjectJson } from "@liqvid/schemas";
 import { Effect, Exit, Layer, Logger } from "effect";
 import type { RelativeDir } from "effect-paths";
@@ -19,7 +23,6 @@ import {
 import { withLogLevel } from "#_/server-runtime.mjs";
 import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
 import { extractParameterNames } from "#_/utils/parameters.mjs";
-import { resolveParametrized } from "#_/utils/parameters-client.mjs";
 
 import { ProjectPathHelperComponent } from "./react.tsx";
 
@@ -185,10 +188,6 @@ export function liqvidProject<
 
     const project = $project.value;
 
-    if (project.draft) {
-      return notFound();
-    }
-
     // Validate parameter values against declared allowed values
     const params = await $params;
 
@@ -201,6 +200,10 @@ export function liqvidProject<
           return notFound();
         }
       }
+    }
+
+    if (resolveParametrized(project.draft, params as Record<string, string>)) {
+      return notFound();
     }
 
     return Component({

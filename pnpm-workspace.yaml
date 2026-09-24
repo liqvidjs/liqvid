@@ -54,6 +54,7 @@ catalog:
   "@effect/platform-node": 4.0.0-rc.117
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
+  '@inquirer/prompts': ^8.7.2
   "@juggle/resize-observer": ^3.4.0
   "@lezer/highlight": 1.2.3
   "@lqv/codebooth": ^0.5.1
@@ -102,7 +103,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-rc.116
+  effect: 4.0.0-rc.117
   "effect-paths": "^1.0.1"
   execa: ^9.6.1
   fast-glob: 3.3.3
@@ -210,7 +211,7 @@ catalogs:
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.4
     csstype: ^3.2.3
-    effect: 4.0.0-rc.116
+    effect: 4.0.0-rc.117
     "effect-paths": "^1.0.1"
     eslint: ^10.10.0
     glslx: ^0.3.1
@@ -263,7 +264,7 @@ catalogs:
     "@tldraw/validate": ^5.4.0
     "@types/react": "19.3.0"
     "@types/react-dom": "19.3.0"
-    effect: ">=4.0.0-rc.116"
+    effect: ">=4.0.0-rc.117"
     "effect-paths": "^1.0.1"
     glslx: ^0.3.1
     hls.js: ^1.6.16
@@ -308,49 +309,49 @@ overrides:
   "react-dom": 19.3.0
   react: 19.3.0
 minimumReleaseAgeExclude:
-  - '@biomejs/biome@2.5.7 || 2.5.8'
-  - '@biomejs/cli-darwin-arm64@2.5.7 || 2.5.8'
-  - '@biomejs/cli-darwin-x64@2.5.7 || 2.5.8'
-  - '@biomejs/cli-linux-arm64-musl@2.5.7 || 2.5.8'
-  - '@biomejs/cli-linux-arm64@2.5.7 || 2.5.8'
-  - '@biomejs/cli-linux-x64-musl@2.5.7 || 2.5.8'
-  - '@biomejs/cli-linux-x64@2.5.7 || 2.5.8'
-  - '@biomejs/cli-win32-arm64@2.5.7 || 2.5.8'
-  - '@biomejs/cli-win32-x64@2.5.7 || 2.5.8'
+  - "@biomejs/biome@2.5.7 || 2.5.8"
+  - "@biomejs/cli-darwin-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-darwin-x64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-arm64-musl@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-x64-musl@2.5.7 || 2.5.8"
+  - "@biomejs/cli-linux-x64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-win32-arm64@2.5.7 || 2.5.8"
+  - "@biomejs/cli-win32-x64@2.5.7 || 2.5.8"
   - prettier@3.9.6
   - no-private-imports@0.0.4
-  - '@next/env@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-darwin-arm64@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-darwin-x64@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-linux-arm64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-linux-arm64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-linux-x64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-linux-x64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-win32-arm64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
-  - '@next/swc-win32-x64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27'
+  - "@next/env@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-darwin-arm64@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-darwin-x64@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-linux-arm64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-linux-arm64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-linux-x64-gnu@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-linux-x64-musl@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-win32-arm64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
+  - "@next/swc-win32-x64-msvc@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27"
   - next@16.3.0 || 16.3.1 || 16.4.0-canary.1 || 16.4.0-canary.27
-  - '@effect/platform-bun@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117'
-  - '@effect/platform-node-shared@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117'
-  - '@effect/platform-node@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117'
-  - '@effect/tsgo-darwin-arm64@0.36.0 || 0.45.0'
-  - '@effect/tsgo-darwin-x64@0.36.0 || 0.45.0'
-  - '@effect/tsgo-linux-arm64@0.36.0 || 0.45.0'
-  - '@effect/tsgo-linux-arm@0.36.0 || 0.45.0'
-  - '@effect/tsgo-linux-x64@0.36.0 || 0.45.0'
-  - '@effect/tsgo-win32-arm64@0.36.0 || 0.45.0'
-  - '@effect/tsgo-win32-x64@0.36.0 || 0.45.0'
-  - '@effect/tsgo@0.36.0 || 0.45.0'
+  - "@effect/platform-bun@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117"
+  - "@effect/platform-node-shared@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117"
+  - "@effect/platform-node@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113 || 4.0.0-rc.117"
+  - "@effect/tsgo-darwin-arm64@0.36.0 || 0.45.0"
+  - "@effect/tsgo-darwin-x64@0.36.0 || 0.45.0"
+  - "@effect/tsgo-linux-arm64@0.36.0 || 0.45.0"
+  - "@effect/tsgo-linux-arm@0.36.0 || 0.45.0"
+  - "@effect/tsgo-linux-x64@0.36.0 || 0.45.0"
+  - "@effect/tsgo-win32-arm64@0.36.0 || 0.45.0"
+  - "@effect/tsgo-win32-x64@0.36.0 || 0.45.0"
+  - "@effect/tsgo@0.36.0 || 0.45.0"
   - effect@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113
-  - '@tldraw/driver@5.4.0'
-  - '@tldraw/editor@5.4.0'
-  - '@tldraw/state-react@5.4.0'
-  - '@tldraw/state@5.4.0'
-  - '@tldraw/store@5.4.0'
-  - '@tldraw/tlschema@5.4.0'
-  - '@tldraw/utils@5.4.0'
-  - '@tldraw/validate@5.4.0'
+  - "@tldraw/driver@5.4.0"
+  - "@tldraw/editor@5.4.0"
+  - "@tldraw/state-react@5.4.0"
+  - "@tldraw/state@5.4.0"
+  - "@tldraw/store@5.4.0"
+  - "@tldraw/tlschema@5.4.0"
+  - "@tldraw/utils@5.4.0"
+  - "@tldraw/validate@5.4.0"
   - tldraw@5.4.0
-  - '@tldraw/assets@5.4.0'
-  - '@liqvid/color-scheme@1.0.0-alpha.5'
+  - "@tldraw/assets@5.4.0"
+  - "@liqvid/color-scheme@1.0.0-alpha.5"
   - effect-paths@1.0.1
-  - '@types/node@26.6.1'
+  - "@types/node@26.6.1"

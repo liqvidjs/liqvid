@@ -1,4 +1,4 @@
-import { agnosticFileSystem } from "@liqvid/cli/utils";
+import { agnosticFileSystem, defaultCliProgressLayer } from "@liqvid/cli/utils";
 import { Effect, Layer, Logger, ManagedRuntime, References } from "effect";
 
 import { getLogLevel } from "#_/utils/misc.mjs";
@@ -9,6 +9,7 @@ import { getLogLevel } from "#_/utils/misc.mjs";
  */
 export const ServerLayer = Layer.mergeAll(
   agnosticFileSystem,
+  defaultCliProgressLayer(),
   Logger.layer([Logger.consolePretty()]),
 );
 

@@ -1,3 +1,4 @@
+import { resolveParametrized } from "@liqvid/cli/utils";
 import type { ProjectMeta } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
@@ -17,10 +18,7 @@ import {
   typeface,
 } from "#_/design/tokens.stylex.js";
 import { TimeDuration } from "#_/ui/Time.js";
-import {
-  interpolatePathParametersWithSelected,
-  resolveParametrized,
-} from "#_/utils/parameters-client.mjs";
+import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client.mjs";
 import { useTranslations } from "#_/utils/react.js";
 
 import { EmbedButton } from "./EmbedButton.tsx";
@@ -106,6 +104,8 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
     ? resolveParametrized(project.title, combinedParams)
     : undefined;
 
+  const isDraft = resolveParametrized(project.draft, selectedRootParams);
+
   // Interpolate path parameters using selected root params + project params
   const interpolatedPath = interpolatePathParametersWithSelected(
     project.path,
@@ -126,7 +126,7 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
           <div>
             <span sx={styles.name}>
               {resolvedTitle ?? project.path}
-              {project.draft && (
+              {isDraft && (
                 <FileDashedIcon>
                   <title>{t.draft}</title>
                 </FileDashedIcon>

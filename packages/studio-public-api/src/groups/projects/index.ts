@@ -1,5 +1,6 @@
 import {
   AspectRatio,
+  Parametrized,
   SchemaProjectId,
   SchemaWorkspaceId,
 } from "@liqvid/schemas";
@@ -17,7 +18,7 @@ import { InternalServerError, NotFound, Unauthorized } from "../../errors.ts";
 export const ProjectRequest = Schema.Struct({
   aspectRatio: AspectRatio,
 
-  description: Schema.String.pipe(Schema.optional),
+  description: Parametrized(Schema.String).pipe(Schema.optional),
 
   name: Schema.String,
 
@@ -56,6 +57,11 @@ export class Projects extends HttpApiGroup.make("projects")
       payload: ProjectRequest,
       success: ProjectResponse,
     }).annotate(OpenApi.Summary, "Sync an existing project"),
+    HttpApiEndpoint.delete("delete", "/:projectId", {
+      error: [Unauthorized, NotFound, InternalServerError],
+      params: { projectId: SchemaProjectId },
+      success: ProjectResponse,
+    }).annotate(OpenApi.Summary, "Unpublish a project"),
   )
   .prefix("/projects")
   .annotate(OpenApi.Title, "Projects")

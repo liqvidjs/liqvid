@@ -114,6 +114,7 @@
     "@aws-sdk/lib-storage": "catalog:",
     "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
+    "@inquirer/prompts": "catalog:",
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",

@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Cause, Effect, FileSystem, Layer, Option, References } from "effect";
+import { Effect, FileSystem, Layer, Logger, Option, References } from "effect";
 import { Command, Flag } from "effect/unstable/cli";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
@@ -121,12 +121,14 @@ export const publish = Command.make(
 
       // Publish media if requested
       if (shouldPublishMedia) {
-        yield* Effect.promise(() =>
-          publishMedia({ baseDir, configPath, cwd, dryRun, force }),
+        yield* publishMedia({ baseDir, configPath, cwd, dryRun, force }).pipe(
+          Effect.provide(
+            Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+          ),
         );
       }
 
-      console.log("\nPublish complete!");
+      yield* Effect.logInfo("\nPublish complete!");
       process.exit(0);
     }),
 ).pipe(
@@ -138,16 +140,16 @@ export const publish = Command.make(
 /**
  * Load the parsed Liqvid config for the given cwd/configPath.
  */
-async function loadConfig(cwd: AbsoluteDir, configPath: AbsoluteFile) {
+const loadConfig = Effect.fnUntraced(function* (
+  cwd: AbsoluteDir,
+  configPath: AbsoluteFile,
+) {
   const envFiles = loadEnvFiles(cwd);
 
-  return Effect.runPromise(
-    loadLiqvidConfig({ configPath }).pipe(
-      Effect.provide(NodeFileSystem.layer),
-      Effect.provideService(EnvFiles, envFiles),
-    ),
+  return yield* loadLiqvidConfig({ configPath }).pipe(
+    Effect.provideService(EnvFiles, envFiles),
   );
-}
+});
 
 /**
  * Publish content files (html/css/js) to the configured hosting provider.
@@ -162,12 +164,21 @@ export async function publishContent(
   const dryRun = options.dryRun ?? false;
   const force = options.force ?? false;
 
-  const config = await loadConfig(cwd, configPath);
+  const config = await Effect.runPromise(
+    loadConfig(cwd, configPath).pipe(Effect.provide(NodeFileSystem.layer)),
+  );
 
   await Effect.runPromise(
     publishContentFiles(config, cwd, dryRun, force).pipe(
+      Effect.provideService(
+        References.MinimumLogLevel,
+        getLogLevel(Option.some(config)),
+      ),
       Effect.provide(
-        Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+        Layer.mergeAll(
+          Logger.layer([Logger.consolePretty({ colors: true })]),
+          Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+        ),
       ),
     ),
   );
@@ -178,7 +189,9 @@ export async function publishContent(
  *
  * Equivalent to `liqvid publish --media`.
  */
-export async function publishMedia(options: PublishOptions = {}) {
+export const publishMedia = Effect.fnUntraced(function* (
+  options: PublishOptions = {},
+) {
   const cwd = options.cwd ?? process.cwd();
   const baseDir = options.baseDir ?? RelativeDir("app");
   const configPath = options.configPath ?? path.join(cwd, CONFIG_FILE);
@@ -189,22 +202,15 @@ export async function publishMedia(options: PublishOptions = {}) {
   // and paths are computed relative to it
   const searchDir = path.join(cwd, baseDir);
 
-  const config = await loadConfig(cwd, configPath);
+  const config = yield* loadConfig(cwd, configPath);
 
-  await Effect.runPromise(
-    publishMediaFiles(config, searchDir, baseDir, dryRun, force).pipe(
-      Effect.provideService(
-        References.MinimumLogLevel,
-        getLogLevel(Option.some(config)),
-      ),
-      Effect.provide(
-        Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
-      ),
-      Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
-      Effect.catch(Effect.die),
+  yield* publishMediaFiles(config, searchDir, baseDir, dryRun, force).pipe(
+    Effect.provideService(
+      References.MinimumLogLevel,
+      getLogLevel(Option.some(config)),
     ),
   );
-}
+});
 
 /**
  * Publish content files (html/css/js) to the hosting provider.
@@ -219,6 +225,7 @@ const publishContentFiles = Effect.fnUntraced(function* (
 
   // Next.js builds to the 'out' directory by default for static export
   const outDir = path.join(cwd, RelativeDir("out"));
+  const projectDir = path.join(cwd, RelativeDir("app"));
 
   // Check if the out directory exists
   if (!(yield* fs.exists(outDir))) {
@@ -229,7 +236,7 @@ const publishContentFiles = Effect.fnUntraced(function* (
     );
   }
 
-  yield* Effect.log("Publishing content files...");
+  yield* Effect.log("Publishing content files...", { outDir, projectDir });
 
   const hostingProvider = createHostingProvider(config);
 
@@ -238,7 +245,7 @@ const publishContentFiles = Effect.fnUntraced(function* (
     return;
   }
 
-  yield* hostingProvider.publishContent(outDir, force);
+  yield* hostingProvider.publishContent(outDir, force, projectDir);
   yield* Effect.log("Content publishing complete.");
 });
 

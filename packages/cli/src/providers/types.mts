@@ -12,11 +12,12 @@ export interface HostingProvider {
   /** Get the value of the `NEXT_PUBLIC_LIQVID_CONTENT_BASE` environment variable. */
   getContentBaseUrl():
     | string
-    | Effect.Effect<string, PlatformError.PlatformError, FileSystem.FileSystem>;
+    | Effect.Effect<string, unknown, FileSystem.FileSystem>;
 
   publishContent(
     localDir: AbsoluteDir,
     force?: boolean,
+    projectDir?: AbsoluteDir,
   ): Effect.Effect<
     void,
     PlatformError.PlatformError,
@@ -93,12 +94,12 @@ export interface MediaHostingProvider {
    */
   downloadMedia(
     files: readonly FileDownloadStatus[],
-  ): Effect.Effect<number, PlatformError.PlatformError, FileSystem.FileSystem>;
+  ): Effect.Effect<number, unknown, FileSystem.FileSystem>;
 
   /** Get the value of the `NEXT_PUBLIC_LIQVID_MEDIA_BASE` environment variable. */
   getMediaBaseUrl():
     | string
-    | Effect.Effect<string, PlatformError.PlatformError, FileSystem.FileSystem>;
+    | Effect.Effect<string, unknown, FileSystem.FileSystem>;
 
   /**
    * List all remote files under the configured prefix.

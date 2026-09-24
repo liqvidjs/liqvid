@@ -1,8 +1,4 @@
-import type {
-  ParameterConfig,
-  ParameterValues,
-  Parametrized,
-} from "@liqvid/schemas";
+import type { ParameterConfig, ParameterValues } from "@liqvid/schemas";
 
 /**
  * Get default parameter values (first value of each parameter).
@@ -45,43 +41,4 @@ export function interpolatePathParametersWithSelected(
     // If no value found, keep the original
     return match;
   });
-}
-
-/**
- * Resolve a {@link Parametrized} value to a plain value given a set of
- * parameter values.
- *
- * - If the input is a plain value, it is returned as-is.
- * - If the input is an array of entries, the first entry whose parameter keys
- *   all match the provided values is returned. If no entry matches,
- *   `undefined` is returned.
- *
- * @example
- * ```ts
- * const title: ParametrizedString = [
- *   { lang: "en", value: "Spaces" },
- *   { lang: "fr", value: "Espaces" },
- * ];
- * resolveParametrized(title, { lang: "fr" }); // "Espaces"
- * resolveParametrized("Hello", {}); // "Hello"
- * ```
- */
-export function resolveParametrized<T>(
-  input: Parametrized<T>,
-  params: ParameterValues,
-): T | undefined {
-  if (!Array.isArray(input)) {
-    return input;
-  }
-
-  for (const entry of input) {
-    const matches = Object.entries(entry).every(
-      ([key, val]) => key === "value" || params[key] === val,
-    );
-    if (matches) {
-      return entry.value;
-    }
-  }
-
-  return undefined;
 }

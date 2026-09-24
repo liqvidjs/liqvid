@@ -5,6 +5,7 @@ export * from "./jobs/thumbnails.mts";
 export * from "./liqvid-config.mts";
 export * from "./liqvid-studio-project-meta.mts";
 export * from "./liqvid-studio-workspace-meta.mts";
+export * from "./misc/aspect-ratio.mts";
 export * from "./project.mts";
 export * from "./providers/index.mts";
 export * from "./recording-meta.mts";

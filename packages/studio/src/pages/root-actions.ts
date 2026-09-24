@@ -101,7 +101,7 @@ export async function publishMediaAction(): Promise<PublishActionResult> {
   const { cwd } = getServerState();
 
   try {
-    await publishMedia({ cwd });
+    await serverRuntime.runPromise(publishMedia({ cwd }));
     getServerState().lastBuildTime = Date.now();
     return { success: true };
   } catch (e) {
@@ -120,7 +120,10 @@ export async function publishAction(): Promise<PublishActionResult> {
   const { cwd } = getServerState();
 
   try {
-    await Promise.all([publishContent({ cwd }), publishMedia({ cwd })]);
+    await Promise.all([
+      publishContent({ cwd }),
+      serverRuntime.runPromise(publishMedia({ cwd })),
+    ]);
     getServerState().lastBuildTime = Date.now();
     return { success: true };
   } catch (e) {

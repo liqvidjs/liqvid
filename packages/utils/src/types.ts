@@ -27,3 +27,6 @@ const createIdentity =
 
 /** Mark a value as readonly. This is a no-op at runtime. */
 export const readonly = createIdentity();
+
+/** Prevent TypeScript from inferring a type. */
+export type PreventInference<T> = [T][T extends unknown ? 0 : never];

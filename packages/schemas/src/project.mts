@@ -1,8 +1,15 @@
 import type { SerializedDuration } from "@liqvid/duration";
 import { Duration } from "@liqvid/duration";
 import { DurationOptions } from "@liqvid/duration/effect";
-import { Effect, Schema, SchemaTransformation, Struct } from "effect";
+import { Effect, Schema, Struct } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
+
+import { AspectRatioSpecifier } from "./misc/aspect-ratio.mts";
+
+/** Root or project-level parameter definitions. */
+export type ParameterConfig = Readonly<
+  Record<string, readonly string[]>
+>;
 
 /**
  * A single entry in a parametrized value array.
@@ -17,12 +24,40 @@ export const ParametrizedValueEntry = <T, E, RD, RE>(
   value: Schema.Codec<T, E, RD, RE>,
 ) =>
   Schema.StructWithRest(Schema.Struct({ value }), [
-    Schema.Record(Schema.String, Schema.String),
+    // The `value` field is also covered by a string-keyed rest schema. Unknown
+    // keeps the rest compatible with parametrized values such as booleans.
+    Schema.Record(Schema.String, Schema.Unknown),
   ]);
 
-export type ParametrizedValueEntry<T> = ReturnType<
-  typeof ParametrizedValueEntry<T, T, never, never>
->["Type"];
+export type ParametrizedValueEntry<
+  T,
+  Parameters extends ParameterConfig | undefined = undefined,
+> = {
+  readonly value: T;
+} & (Parameters extends ParameterConfig
+  ? { readonly [K in keyof Parameters]: Parameters[K][number] }
+  : unknown);
+
+export type Parametrized<
+  T,
+  Parameters extends ParameterConfig | undefined = undefined,
+> =
+  | T
+  | readonly ParametrizedValueEntry<T, Parameters>[];
+
+type ProjectFields<Parameters extends ParameterConfig | undefined> = {
+  description?: Parametrized<string, Parameters>;
+  draft: Parametrized<boolean, Parameters>;
+  title: Parametrized<string, Parameters>;
+};
+
+/** A project with parametrized fields keyed by `Parameters`. */
+export type Project<Parameters extends ParameterConfig | undefined = undefined> = Omit<
+  (typeof ProjectJson)["Type"],
+  keyof ProjectFields<Parameters>
+> &
+  ProjectFields<Parameters>;
+
 /**
  * A string that can optionally vary by parameter values.
  *
@@ -36,55 +71,6 @@ export type ParametrizedValueEntry<T> = ReturnType<
  */
 export const Parametrized = <T, E, RD, RE>(value: Schema.Codec<T, E, RD, RE>) =>
   Schema.Union([value, Schema.Array(ParametrizedValueEntry(value))]);
-
-export type Parametrized<T> = ReturnType<
-  typeof Parametrized<T, T, never, never>
->["Type"];
-
-export const AspectRatio = Schema.Struct({
-  height: Schema.Number,
-  width: Schema.Number,
-});
-export type AspectRatio = (typeof AspectRatio)["Type"];
-
-export const AspectRatioSpecifier = Schema.Union([
-  Schema.Literal("square"),
-  Schema.Literal("video"),
-  Schema.TemplateLiteral([Schema.Number, ":", Schema.Number]),
-  Schema.Tuple([Schema.Number, Schema.Number]),
-  AspectRatio,
-]).pipe(
-  Schema.decodeTo(
-    AspectRatio,
-    SchemaTransformation.transform({
-      decode: (from) => {
-        if (typeof from === "string") {
-          if (from === "video") {
-            return { height: 9, width: 16 };
-          }
-
-          if (from === "square") {
-            return { height: 1, width: 1 };
-          }
-
-          const [width, height] = from.split(":").map(Number) as [
-            number,
-            number,
-          ];
-          return { height, width };
-        } else if (Array.isArray(from)) {
-          const [width, height] = from;
-          return { height, width };
-        } else {
-          // https://github.com/microsoft/TypeScript/issues/17002
-          return from as AspectRatio;
-        }
-      },
-      encode: (to) => to,
-    }),
-  ),
-);
-export type AspectRatioSpecifier = (typeof AspectRatioSpecifier)["Encoded"];
 
 /** project.json files */
 export const ProjectJson = Schema.Struct({
@@ -109,18 +95,18 @@ export const ProjectJson = Schema.Struct({
     }),
   ),
 
-  /** Set this to true to omit the project from the production build. */
-  draft: Schema.Boolean.pipe(
+  /** Set this to true, or parametrize it, to omit the project from production. */
+  draft: Parametrized(Schema.Boolean).pipe(
     Schema.withDecodingDefault(Effect.succeed(false)),
 
     Schema.annotateEncoded({
       description:
-        "Set this to true to omit the project from the production build.",
+        "Set this to true, or parametrize it, to omit the project from production.",
     }),
 
     Schema.annotate({
       description:
-        "Set this to true to omit the project from the production build.",
+        "Set this to true, or parametrize it, to omit the project from production.",
     }),
   ),
 
@@ -144,7 +130,8 @@ export const ProjectJson = Schema.Struct({
   ),
 });
 
-export type ProjectJson = (typeof ProjectJson)["Type"];
+export type ProjectJson<Parameters extends ParameterConfig | undefined = undefined> =
+  Project<Parameters>;
 
 /**
  * auto-generated project-meta.json files
@@ -192,12 +179,6 @@ export type ProjectMeta = (typeof ProjectMeta)["Type"];
 export type SerializedProjectMeta = Omit<ProjectMeta, "duration"> & {
   duration: SerializedDuration;
 };
-
-/**
- * Root parameters type for the liqvid.json configuration.
- * Format: `{ parameterName: [value1, value2, ...] }`
- */
-export type ParameterConfig = Readonly<Record<string, readonly string[]>>;
 
 /** Record of selected parameter values */
 export type ParameterValues = Readonly<Record<string, string>>;

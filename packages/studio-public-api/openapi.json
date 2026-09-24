@@ -379,7 +379,7 @@
         }
       }
     },
-    "/health": {
+    "/api/v1/health": {
       "get": {
         "tags": [
           "health"
@@ -413,7 +413,7 @@
         }
       }
     },
-    "/identity": {
+    "/api/v1/identity": {
       "get": {
         "tags": [
           "identity"
@@ -461,7 +461,7 @@
     "/api/v1/projects": {
       "post": {
         "tags": [
-          "projects"
+          "Projects"
         ],
         "operationId": "projects.create",
         "parameters": [],
@@ -560,7 +560,33 @@
                   },
                   "description": {
                     "anyOf": [
-                      {},
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "value"
+                              ],
+                              "allOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {}
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
                       {
                         "type": "null"
                       }
@@ -610,7 +636,7 @@
     "/api/v1/projects/{projectId}": {
       "put": {
         "tags": [
-          "projects"
+          "Projects"
         ],
         "operationId": "projects.sync",
         "parameters": [
@@ -728,7 +754,33 @@
                   },
                   "description": {
                     "anyOf": [
-                      {},
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "value"
+                              ],
+                              "allOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {}
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
                       {
                         "type": "null"
                       }
@@ -773,6 +825,79 @@
           },
           "required": true
         }
+      },
+      "delete": {
+        "tags": [
+          "Projects"
+        ],
+        "operationId": "projects.delete",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "projectId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "projectId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedEncoded"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundEncoded"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorEncoded"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Unpublish a project"
       }
     },
     "/api/v1/tokens": {
@@ -1003,7 +1128,7 @@
       "name": "identity"
     },
     {
-      "name": "projects"
+      "name": "Projects"
     },
     {
       "name": "tokens"

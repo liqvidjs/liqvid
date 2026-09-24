@@ -156,13 +156,39 @@
     "draft": {
       "anyOf": [
         {
-          "type": "boolean"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "allOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         },
         {
           "type": "null"
         }
       ],
-      "description": "Set this to true to omit the project from the production build."
+      "description": "Set this to true, or parametrize it, to omit the project from production."
     },
     "parameters": {
       "anyOf": [
