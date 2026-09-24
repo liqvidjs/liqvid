@@ -179,7 +179,9 @@ function PlayerChrome({
           className={clsx(
             "bg-[#eee] text-black",
             "dark:bg-[#202020] dark:text-white",
-            "transition-colors duration-150",
+            // only do background color transition in the web view, or else
+            // dark mode renders will get messed up
+            "lv-render-web:transition-colors transition-none duration-150",
             propClassNames?.canvas,
           )}
           pauseOnClick={isProduction}
