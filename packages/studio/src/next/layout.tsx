@@ -1,16 +1,15 @@
-import type { Metadata } from "next";
-
-import { getConfigSync, initializeServer } from "#_/initialize.mjs";
-
 import "../palette.css";
 import "../studio.css";
 import "../stylex.css";
 
-import { ColorSchemeProvider } from "@liqvid/color-scheme/react";
+import type { Metadata } from "next";
 
 import { DevToggleTheme } from "#_/components/DevToggleTheme.js";
 import { FloatingNav } from "#_/components/FloatingNav/server.js";
+import { IsStudioProvider } from "#_/contexts/is-studio.js";
 import { LocaleProvider } from "#_/contexts/locale.js";
+import { getConfigSync, initializeServer } from "#_/initialize.mjs";
+import { colorSchemeSpecifierToCss } from "#_/utils/misc.client.mjs";
 
 export const metadata: Metadata = {
   description: "Liqvid Studio is a platform for creating interactive videos.",
@@ -26,23 +25,19 @@ export default async function RootLayout({
   await initializeServer();
   const config = getConfigSync();
 
-  const colorScheme =
-    config.ui.theme === "system" ? "light dark" : config.ui.theme;
-
   return (
     <LocaleProvider value={config.ui.locale}>
-      <html lang={config.ui.locale} style={{ colorScheme }}>
+      <html
+        lang={config.ui.locale}
+        style={{ colorScheme: colorSchemeSpecifierToCss(config.ui.theme) }}
+      >
         <head />
         <body>
-          <ColorSchemeProvider
-            initialValue={
-              colorScheme === "light dark" ? undefined : colorScheme
-            }
-          >
+          <IsStudioProvider value={true}>
             <DevToggleTheme />
             <FloatingNav />
             {children}
-          </ColorSchemeProvider>
+          </IsStudioProvider>
         </body>
       </html>
     </LocaleProvider>
