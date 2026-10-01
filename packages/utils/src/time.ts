@@ -9,21 +9,54 @@ const DAYS = 24 * HOURS;
 // nice minus sign
 const MINUS_SIGN = "\u2212";
 
+// maintain compatiblity with Effect ecosystem without making it a dependency
+interface Brand<in out Keys extends string> {
+  readonly "~effect/Brand": {
+    readonly [K in Keys]: Keys;
+  };
+}
+
+/** `hh:mm:ss` string, with `hh` and `mm` optional */
+export type DurationStringWithoutMilliseconds<S extends string = string> = S &
+  Brand<"DurationStringWithoutMilliseconds">;
+
+/** `hh:mm:ss.ms` string, with `hh` and `mm` optional */
+export type DurationStringWithMilliseconds<S extends string = string> = S &
+  Brand<"DurationStringWithMilliseconds">;
+
+/** `hh:mm:ss.ms` string, with `hh`, `mm`, and `ms` optional */
+export type DurationString<S extends string = string> =
+  | DurationStringWithoutMilliseconds<S>
+  | DurationStringWithMilliseconds<S>;
+
+/**
+ * ISO8601 format for durations, used for the `datetime` attribute of `<time>` elements.
+ * @see https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm
+ */
+export type ISO8601DurationString = string & Brand<"ISO8601DurationString">;
+
 /**
  * Regular expression used to match times
  */
 export const timeRegexp = new RegExp(
-  "^" + "(?:(\\d+):)?".repeat(3) + "(\\d+)(?:\\.(\\d+))?$",
+  "^" +
+    `[${MINUS_SIGN}-]?` +
+    "(?:(\\d+):)?".repeat(3) +
+    "(\\d+)(?:\\.(\\d+))?$",
 );
+
+/** Narrow a string to a {@link DurationString} if it matches `[hh:][mm:]ss[.ms]` */
+export const isDurationString = (str: unknown): str is DurationString =>
+  typeof str === "string" && timeRegexp.test(str);
 
 /**
  * Parse a time string like "3:43" into milliseconds
  * @param str String to parse
  * @returns Time in milliseconds
  */
-export function parseTime(str: string): number {
+export function parseTimeMs(str: string): number {
   if (str[0] === MINUS_SIGN || str[0] === "-") {
-    return -parseTime(str.slice(1));
+    return -parseTimeMs(str.slice(1));
   }
 
   // d, h, m, s
@@ -49,12 +82,21 @@ export function parseTime(str: string): number {
   ];
 
   return (
-    milliseconds + 1000 * (seconds + 60 * (minutes + 60 * (hours + 24 * days)))
+    milliseconds +
+    SECONDS * seconds +
+    MINUTES * minutes +
+    HOURS * hours +
+    DAYS * days
   );
 }
 
+/** @deprecated use parseTimeMs instead */
+export function parseTime(str: string): number {
+  return parseTimeMs(str);
+}
+
 export function parseTime$(str: string): Duration {
-  return new Duration({ milliseconds: parseTime(str) });
+  return new Duration({ milliseconds: parseTimeMs(str) });
 }
 
 /**
@@ -64,7 +106,9 @@ export function parseTime$(str: string): Duration {
  * @returns A duration string such as "PT4H18M3S".
  * @since 1.7.0
  */
-export function formatTimeDuration(time: number | DurationLike): string {
+export function formatTimeDuration(
+  time: number | DurationLike,
+): ISO8601DurationString {
   if (typeof time === "object") {
     return formatTimeDuration(Duration.inMilliseconds(time));
   }
@@ -96,7 +140,7 @@ export function formatTimeDuration(time: number | DurationLike): string {
     parts.push("T", ...timeParts);
   }
 
-  return parts.join("");
+  return parts.join("") as ISO8601DurationString;
 }
 
 /**
@@ -104,12 +148,15 @@ export function formatTimeDuration(time: number | DurationLike): string {
  * @param time Time in milliseconds
  * @returns Formatted time
  */
-export function formatTime(time: number | DurationLike): string {
+export function formatTime(
+  time: number | DurationLike,
+): DurationStringWithoutMilliseconds {
   if (typeof time === "object") {
     return formatTime(Duration.inMilliseconds(time));
   }
   if (time < 0) {
-    return MINUS_SIGN + formatTime(-time);
+    return (MINUS_SIGN +
+      formatTime(-time)) as DurationStringWithoutMilliseconds;
   }
   const days = Math.floor(time / DAYS),
     hours = Math.floor((time / HOURS) % 24),
@@ -133,7 +180,7 @@ export function formatTime(time: number | DurationLike): string {
     str += "0:";
   }
   str += seconds.toString().padStart(2, "0");
-  return str;
+  return str as DurationStringWithoutMilliseconds;
 }
 
 /**
@@ -141,12 +188,12 @@ export function formatTime(time: number | DurationLike): string {
  * @param time Time in milliseconds
  * @returns Formatted time
  */
-export function formatTimeMs(time: number | DurationLike): string {
+export function formatTimeMs(time: number | DurationLike): DurationString {
   if (typeof time === "object") {
     return formatTimeMs(Duration.inMilliseconds(time));
   }
   if (time < 0) {
-    return MINUS_SIGN + formatTimeMs(-time);
+    return (MINUS_SIGN + formatTimeMs(-time)) as DurationStringWithMilliseconds;
   }
   const milliseconds = Math.floor(time % 1000);
 
@@ -154,17 +201,19 @@ export function formatTimeMs(time: number | DurationLike): string {
     return formatTime(time);
   }
 
-  return (
-    formatTime(time) +
+  return (formatTime(time) +
     "." +
-    String(milliseconds).padStart(3, "0").replace(/0+$/, "")
-  );
+    String(milliseconds)
+      .padStart(3, "0")
+      .replace(/0+$/, "")) as DurationStringWithMilliseconds;
 }
 
 /**
  * Format a millisecond timestamp as a VTT cue time (`HH:MM:SS.mmm`).
  */
-export function formatVttTimestamp(ms: number | DurationLike): string {
+export function formatVttTimestamp(
+  ms: number | DurationLike,
+): DurationStringWithMilliseconds {
   if (typeof ms !== "number") {
     ms = Duration.inMilliseconds(ms);
   }
@@ -178,5 +227,5 @@ export function formatVttTimestamp(ms: number | DurationLike): string {
   const pad = (value: number, length = 2) =>
     value.toString().padStart(length, "0");
 
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(millis, 3)}`;
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(millis, 3)}` as DurationStringWithMilliseconds;
 }

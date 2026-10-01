@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { formatTime, parseTime } from "@liqvid/utils";
+import { formatTime, parseTimeMs } from "@liqvid/utils";
 import { Effect, FileSystem } from "effect";
 import type { AbsoluteFile } from "effect-paths";
 
@@ -251,7 +251,7 @@ const assembleVideo = Effect.fnUntraced(function* ({
     job.stderr.on("data", (msg: Buffer) => {
       const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
       if ($_) {
-        stitchingBar.update(parseTime($_[1]!));
+        stitchingBar.update(parseTimeMs($_[1]!));
       }
     });
 

@@ -1,7 +1,7 @@
 import fs, { promises as fsp } from "node:fs";
 import path from "node:path";
 
-import { assertType, formatTime, parseTime } from "@liqvid/utils";
+import { assertType, formatTime, parseTimeMs } from "@liqvid/utils";
 import cliProgress from "cli-progress";
 import { execa } from "execa";
 
@@ -69,7 +69,7 @@ async function fixWebm(src: string, tmp: string) {
     const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
     if ($_) {
       assertType<[string, string]>($_);
-      bar.update(parseTime($_[1]));
+      bar.update(parseTimeMs($_[1]));
     }
   });
 
@@ -111,7 +111,7 @@ async function convertMp4(src: string, dest: string) {
     const $_ = msg.toString().match(/time=(\d+:\d+:\d+.\d+)/);
     if ($_) {
       assertType<[string, string]>($_[1]);
-      bar.update(parseTime($_[1]));
+      bar.update(parseTimeMs($_[1]));
     }
   });
 

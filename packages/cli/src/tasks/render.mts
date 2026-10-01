@@ -2,7 +2,7 @@ import os from "node:os";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import type { ImageFormat } from "@liqvid/schemas";
-import { parseTime } from "@liqvid/utils";
+import { parseTimeMs } from "@liqvid/utils";
 import { Console, Effect, Exit, Option } from "effect";
 import { Command, Flag } from "effect/cli";
 import type { AbsoluteFile } from "effect-paths";
@@ -178,7 +178,7 @@ export const render = Command.make(
       Flag.withAlias("d"),
       Flag.withDescription("Duration, specify as [hh:]mm:ss[.ms]"),
       Flag.mapTryCatch(
-        (s: string) => parseTime(s),
+        (s: string) => parseTimeMs(s),
         (error) => `Invalid time: ${error}`,
       ),
       Flag.optional,
@@ -187,7 +187,7 @@ export const render = Command.make(
       Flag.withAlias("e"),
       Flag.withDescription("End time, specify as [hh:]mm:ss[.ms]"),
       Flag.mapTryCatch(
-        (s: string) => parseTime(s),
+        (s: string) => parseTimeMs(s),
         (error) => `Invalid time: ${error}`,
       ),
       Flag.optional,
@@ -235,7 +235,7 @@ export const render = Command.make(
       Flag.withAlias("s"),
       Flag.withDescription("Start time, specify as [hh:]mm:ss[.ms]"),
       Flag.mapTryCatch(
-        (s: string) => parseTime(s),
+        (s: string) => parseTimeMs(s),
         (error) => `Invalid time: ${error}`,
       ),
       Flag.withDefault(0),
