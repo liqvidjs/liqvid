@@ -346,9 +346,7 @@ export function RendersSection({
   }));
 
   // Serialize params for use in query
-  const paramsJson = selectedParams
-    ? JSON.stringify(selectedParams)
-    : undefined;
+  const paramsJson = JSON.stringify(selectedParams ?? {});
 
   const loadRenders = useCallback(async () => {
     setIsLoading(true);
@@ -556,6 +554,7 @@ export function RendersSection({
           <RenameDialog
             {...{
               loadRenders,
+              params: paramsJson,
               renameValue,
               renamingRender,
               setRenameValue,
@@ -570,7 +569,14 @@ export function RendersSection({
         onOpenChange={(open) => !open && setDeleteDialog(null)}
         open={!!deleteDialog}
       >
-        <DeleteDialog {...{ deleteDialog, loadRenders, setDeleteDialog }} />
+        <DeleteDialog
+          {...{
+            deleteDialog,
+            loadRenders,
+            params: paramsJson,
+            setDeleteDialog,
+          }}
+        />
       </DialogRoot>
     </TranslationProvider>
   );
@@ -757,12 +763,14 @@ function ConfigDialog({
 
 function RenameDialog({
   loadRenders,
+  params,
   renameValue,
   renamingRender,
   setRenamingRender,
   setRenameValue,
 }: {
   loadRenders: () => Promise<void>;
+  params: string;
   renameValue: string;
   renamingRender: RenderEntry | null;
   setRenameValue: React.Dispatch<React.SetStateAction<string>>;
@@ -788,7 +796,7 @@ function RenameDialog({
             newName: renameValue.trim(),
             renderId: renamingRender.id,
           },
-          query: { projectPath },
+          query: { params, projectPath },
         });
       }),
     );
@@ -842,10 +850,12 @@ function RenameDialog({
 function DeleteDialog({
   deleteDialog,
   loadRenders,
+  params,
   setDeleteDialog,
 }: {
   deleteDialog: { renderId: string } | null;
   loadRenders: () => Promise<void>;
+  params: string;
   setDeleteDialog: React.Dispatch<
     React.SetStateAction<{ renderId: string } | null>
   >;
@@ -864,7 +874,7 @@ function DeleteDialog({
 
           yield* client.renders.delete({
             payload: { renderId: deleteDialog.renderId },
-            query: { projectPath },
+            query: { params, projectPath },
           });
         }),
       );

@@ -4,14 +4,14 @@ import { Schema } from "effect";
 /**
  * Message sent when a new recording is saved to disk.
  *
- * `url` is the `file://` URL of the owning project's `page.tsx`, matching the
- * `projectPath` the recording dialog is scoped to, so the client can ignore
- * recordings that belong to other projects.
+ * `projectPath` is the owning project directory relative to the routes root,
+ * matching the path the recording dialog is scoped to.
  */
 const NewRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     recording: RecordingMeta,
-    url: Schema.String,
+    projectPath: Schema.String,
+    projectParams: Schema.Record(Schema.String, Schema.String),
   }),
   type: Schema.Literal("newRecording"),
 }).pipe(
@@ -24,7 +24,8 @@ const NewRecordingMessage = Schema.Struct({
 const UpdateRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     recording: RecordingMeta,
-    url: Schema.String,
+    projectPath: Schema.String,
+    projectParams: Schema.Record(Schema.String, Schema.String),
   }),
   type: Schema.Literal("updateRecording"),
 }).pipe(
@@ -38,7 +39,8 @@ const DeleteRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     /** Name (directory) of the recording that was deleted */
     name: Schema.String,
-    url: Schema.String,
+    projectPath: Schema.String,
+    projectParams: Schema.Record(Schema.String, Schema.String),
   }),
   type: Schema.Literal("deleteRecording"),
 }).pipe(

@@ -137,9 +137,7 @@ export function ThumbnailsSection({
     setIsLoading(true);
 
     // Serialize params for use in query
-    const paramsJson = selectedParams
-      ? JSON.stringify(selectedParams)
-      : undefined;
+    const paramsJson = JSON.stringify(selectedParams ?? {});
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {

@@ -238,8 +238,8 @@ async function copyScreenshot(
   projectPath: RelativeDir,
   screenshotId: string,
   target: CopyTarget,
-  variant?: LocalizedString,
-  params?: string,
+  variant: LocalizedString | undefined,
+  params: string,
 ) {
   try {
     await clientRuntime.runPromise(
@@ -280,7 +280,7 @@ interface ScreenshotItemProps {
   onPreview: (src: string, alt: string) => void;
   onRename: (screenshotId: string) => void;
   parameterValues?: ParameterValues;
-  params?: string;
+  params: string;
   screenshot: ScreenshotEntry;
   variant: { label?: LocalizedString; path: string };
 }
@@ -428,9 +428,7 @@ export function ScreenshotsSection({
   const projectPath = project.path;
 
   // Serialize params for use as dependency
-  const paramsJson = selectedParams
-    ? JSON.stringify(selectedParams)
-    : undefined;
+  const paramsJson = JSON.stringify(selectedParams ?? {});
 
   const loadScreenshots = useCallback(async () => {
     setIsLoading(true);
@@ -598,7 +596,7 @@ function ConfirmationDialog({
   setConfirmDialog,
 }: {
   confirmDialog: ConfirmState | null;
-  params?: string;
+  params: string;
   setConfirmDialog: React.Dispatch<React.SetStateAction<ConfirmState | null>>;
 }) {
   const t = useTranslations<{ screenshots: T }>().screenshots.confirmDialog;
@@ -649,7 +647,7 @@ function RenameDialog({
   setRenameValue,
 }: {
   loadScreenshots: () => Promise<void>;
-  params?: string;
+  params: string;
   renameDialog: { screenshotId: string } | null;
   renameError: string | null;
   renameValue: string;
@@ -726,7 +724,7 @@ function DeleteDialog({
 }: {
   deleteDialog: { screenshotId: string } | null;
   loadScreenshots: () => Promise<void>;
-  params?: string;
+  params: string;
   setDeleteDialog: React.Dispatch<
     React.SetStateAction<{ screenshotId: string } | null>
   >;

@@ -154,10 +154,7 @@ export function RecordingRow({
           yield* client.recordings.reprocess({
             payload: { recordingName: r.name },
             query: {
-              params:
-                Object.keys(projectParams).length > 0
-                  ? JSON.stringify(projectParams)
-                  : undefined,
+              params: JSON.stringify(projectParams),
               projectPath,
             },
           });

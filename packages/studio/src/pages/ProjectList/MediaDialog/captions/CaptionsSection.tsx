@@ -108,9 +108,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   const projectPath = useProjectPath();
 
   // Serialize params for use in API calls
-  const paramsJson = selectedParams
-    ? JSON.stringify(selectedParams)
-    : undefined;
+  const paramsJson = JSON.stringify(selectedParams ?? {});
 
   const { isOpen } = useDialogApi();
 

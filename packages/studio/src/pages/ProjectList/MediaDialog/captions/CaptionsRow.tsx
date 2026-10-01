@@ -125,9 +125,7 @@ export function CaptionRow({
   const { hasCaptioningConfigured } = useDerivedConfig();
 
   // Serialize params for use in API calls
-  const paramsJson = selectedParams
-    ? JSON.stringify(selectedParams)
-    : undefined;
+  const paramsJson = JSON.stringify(selectedParams ?? {});
 
   /** Whether captions are currently being (re)generated for this entry */
   const [captioning, setCaptioning] = useState(false);

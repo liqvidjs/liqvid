@@ -37,7 +37,7 @@ const projectPathWithParamsQuery = Schema.Struct({
    * JSON-encoded parameter values for parameterized projects.
    * e.g., `{"lang":"en","locale":"US"}`
    */
-  params: Schema.String.pipe(Schema.optional),
+  params: Schema.String,
 
   /** path to the project */
   projectPath: SchemaRelativeDir,

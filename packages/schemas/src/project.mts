@@ -7,9 +7,7 @@ import { SchemaRelativeDir } from "effect-paths";
 import { AspectRatioSpecifier } from "./misc/aspect-ratio.mts";
 
 /** Root or project-level parameter definitions. */
-export type ParameterConfig = Readonly<
-  Record<string, readonly string[]>
->;
+export type ParameterConfig = Readonly<Record<string, readonly string[]>>;
 
 /**
  * A single entry in a parametrized value array.
@@ -41,9 +39,7 @@ export type ParametrizedValueEntry<
 export type Parametrized<
   T,
   Parameters extends ParameterConfig | undefined = undefined,
-> =
-  | T
-  | readonly ParametrizedValueEntry<T, Parameters>[];
+> = T | readonly ParametrizedValueEntry<T, Parameters>[];
 
 type ProjectFields<Parameters extends ParameterConfig | undefined> = {
   description?: Parametrized<string, Parameters>;
@@ -52,10 +48,9 @@ type ProjectFields<Parameters extends ParameterConfig | undefined> = {
 };
 
 /** A project with parametrized fields keyed by `Parameters`. */
-export type Project<Parameters extends ParameterConfig | undefined = undefined> = Omit<
-  (typeof ProjectJson)["Type"],
-  keyof ProjectFields<Parameters>
-> &
+export type Project<
+  Parameters extends ParameterConfig | undefined = undefined,
+> = Omit<(typeof ProjectJson)["Type"], keyof ProjectFields<Parameters>> &
   ProjectFields<Parameters>;
 
 /**
@@ -130,8 +125,9 @@ export const ProjectJson = Schema.Struct({
   ),
 });
 
-export type ProjectJson<Parameters extends ParameterConfig | undefined = undefined> =
-  Project<Parameters>;
+export type ProjectJson<
+  Parameters extends ParameterConfig | undefined = undefined,
+> = Project<Parameters>;
 
 /**
  * auto-generated project-meta.json files

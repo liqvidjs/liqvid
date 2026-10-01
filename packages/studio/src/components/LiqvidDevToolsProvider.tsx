@@ -83,10 +83,7 @@ export function LiqvidDevToolsProvider({
                 durationMs: Duration.inMilliseconds(duration),
               },
               query: {
-                params:
-                  Object.keys(projectParams).length > 0
-                    ? JSON.stringify(projectParams)
-                    : undefined,
+                params: JSON.stringify(projectParams),
                 projectPath,
               },
             });
