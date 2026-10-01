@@ -3,7 +3,7 @@ import type { ColorSchemeSpecifier } from "@liqvid/color-scheme/react";
 import type { Locale } from "@liqvid/schemas";
 import * as commentJson from "comment-json";
 import { Effect, FileSystem, Option, Schema } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import type { AbsoluteFile } from "effect-paths";
 import { JSONC } from "jsonc.min";
 

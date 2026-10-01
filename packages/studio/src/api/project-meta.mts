@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import type { AbsoluteDir } from "effect-paths";
 
 import { PROJECT_META_FILE } from "#_/conventions.mjs";

@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import { Brand, Effect, FileSystem, Option, Schedule, Schema } from "effect";
-import { FetchHttpClient, HttpClient } from "effect/unstable/http";
+import { FetchHttpClient, HttpClient } from "effect/http";
 import { type AbsoluteDir, type RelativeDir, RelativeFile } from "effect-paths";
 
 import { getServerState } from "#_/initialize.mjs";

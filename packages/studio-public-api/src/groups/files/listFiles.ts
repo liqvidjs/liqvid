@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, OpenApi } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, OpenApi } from "effect/http-api";
 
 import { InternalServerError, Unauthorized } from "../../errors.ts";
 

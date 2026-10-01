@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import chalk from "chalk";
 import { Effect, Option } from "effect";
-import { Argument, Command, Flag } from "effect/unstable/cli";
+import { Argument, Command, Flag } from "effect/cli";
 import {
   type AbsoluteDir,
   type AbsoluteFile,

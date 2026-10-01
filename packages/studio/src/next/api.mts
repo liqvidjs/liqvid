@@ -11,9 +11,9 @@ import {
   Option,
   References,
 } from "effect";
-import { Etag } from "effect/unstable/http";
-import { toWebHandler } from "effect/unstable/http/HttpRouter";
-import { HttpApiBuilder, HttpApiSwagger } from "effect/unstable/httpapi";
+import { Etag } from "effect/http";
+import { toWebHandler } from "effect/http/HttpRouter";
+import { HttpApiBuilder, HttpApiSwagger } from "effect/http-api";
 import { RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 

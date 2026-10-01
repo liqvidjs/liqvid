@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Effect, Option, References } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 

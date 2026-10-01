@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { renderVideo } from "@liqvid/cli/render";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import { Cause, Effect, Fiber, FileSystem, Option } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 

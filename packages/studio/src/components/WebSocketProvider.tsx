@@ -4,7 +4,7 @@ import { Duration } from "@liqvid/duration";
 import { deserialize, type JSONValue, serialize } from "@liqvid/ssr/serde";
 import type { CleanUpFn } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
-import { Socket } from "effect/unstable/socket";
+import { Socket } from "effect/socket";
 import { createContext, useContext, useEffect, useRef } from "react";
 
 import {

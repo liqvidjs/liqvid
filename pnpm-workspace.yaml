@@ -50,11 +50,11 @@ catalog:
   "@docusaurus/preset-classic": 3.10.2
   "@docusaurus/tsconfig": 3.10.2
   "@docusaurus/types": 3.10.2
-  "@effect/platform-bun": 4.0.0-rc.117
-  "@effect/platform-node": 4.0.0-rc.117
+  "@effect/platform-bun": 4.0.0-rc.118
+  "@effect/platform-node": 4.0.0-rc.118
   "@fontsource-variable/alegreya": ^5.2.8
   "@fontsource-variable/inter": ^5.2.8
-  '@inquirer/prompts': ^8.7.2
+  "@inquirer/prompts": ^8.7.2
   "@juggle/resize-observer": ^3.4.0
   "@lezer/highlight": 1.2.3
   "@lqv/codebooth": ^0.5.1
@@ -103,7 +103,7 @@ catalog:
   csstype: ^3.2.3
   desmos-react: ^1.2.0
   easings: ^1.1.1
-  effect: 4.0.0-rc.117
+  effect: 4.0.0-rc.118
   "effect-paths": "^1.0.1"
   execa: ^9.6.1
   fast-glob: 3.3.3
@@ -147,6 +147,7 @@ catalog:
   tailwind-merge: ^3.6.0
   three: ^0.183.1
   three-stdlib: 2.36.1
+  tldraw: ^5.4.2
   ts-morph: ^28.0.0
   tsd: ^0.33.0
   typescript: ^5.9
@@ -211,7 +212,7 @@ catalogs:
     "@typescript/typescript6": ^6.0.2
     concurrently: ^9.2.4
     csstype: ^3.2.3
-    effect: 4.0.0-rc.117
+    effect: 4.0.0-rc.118
     "effect-paths": "^1.0.1"
     eslint: ^10.10.0
     glslx: ^0.3.1
@@ -256,15 +257,16 @@ catalogs:
     "@react-three/drei": ">=10"
     "@react-three/fiber": ">=9"
     "@replit/codemirror-vim": ^6.3
-    "@tldraw/editor": ^5.4.0
-    "@tldraw/store": ^5.4.0
-    "@tldraw/store-react": ^5.4.0
-    "@tldraw/tldraw": ^5.4.0
-    "@tldraw/tlschema": ^5.4.0
-    "@tldraw/validate": ^5.4.0
+    "@tldraw/assets": ^5.5.0
+    "@tldraw/editor": ^5.5.0
+    "@tldraw/store": ^5.5.0
+    "@tldraw/store-react": ^5.5.0
+    "@tldraw/tldraw": ^5.5.0
+    "@tldraw/tlschema": ^5.5.0
+    "@tldraw/validate": ^5.5.0
     "@types/react": "19.3.0"
     "@types/react-dom": "19.3.0"
-    effect: ">=4.0.0-rc.117"
+    effect: ">=4.0.0-rc.118"
     "effect-paths": "^1.0.1"
     glslx: ^0.3.1
     hls.js: ^1.6.16
@@ -281,7 +283,7 @@ catalogs:
     skulpt: ^1.2
     smart-whisper: "^0.8.1"
     three: ">=0.183"
-    tldraw: ^5.4.0
+    tldraw: ^5.5.0
     ws: ^8.21.3
     zod: ">=4"
 
@@ -342,7 +344,7 @@ minimumReleaseAgeExclude:
   - "@effect/tsgo-win32-x64@0.36.0 || 0.45.0"
   - "@effect/tsgo@0.36.0 || 0.45.0"
   - effect@4.0.0-beta.106 || 4.0.0-rc.108 || 4.0.0-rc.109 || 4.0.0-rc.110 || 4.0.0-rc.113
-  - "@tldraw/driver@5.4.0"
+  - "@tldraw/driver@5.4.0 || 5.5.0"
   - "@tldraw/editor@5.4.0"
   - "@tldraw/state-react@5.4.0"
   - "@tldraw/state@5.4.0"
@@ -350,8 +352,8 @@ minimumReleaseAgeExclude:
   - "@tldraw/tlschema@5.4.0"
   - "@tldraw/utils@5.4.0"
   - "@tldraw/validate@5.4.0"
-  - tldraw@5.4.0
-  - "@tldraw/assets@5.4.0"
+  - tldraw@5.4.0 || 5.5.0
+  - "@tldraw/assets@5.4.0 || 5.5.0"
   - "@liqvid/color-scheme@1.0.0-alpha.5"
   - effect-paths@1.0.1
   - "@types/node@26.6.1"

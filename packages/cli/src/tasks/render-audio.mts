@@ -1,5 +1,5 @@
 import { Effect, Exit, Option } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import type { AbsoluteFile } from "effect-paths";
 
 import { agnosticFileSystem } from "../utils.mts";

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import type { thumbs as captureThumbs, solidify } from "@liqvid/renderer";
 import { Effect } from "effect";
-import { Command } from "effect/unstable/cli";
+import { Command } from "effect/cli";
 
 import { PACKAGE_JSON } from "./conventions.mts";
 import type { runNextBuild } from "./tasks/build.mts";

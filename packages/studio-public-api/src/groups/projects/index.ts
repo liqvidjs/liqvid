@@ -10,7 +10,7 @@ import {
   HttpApiGroup,
   HttpApiSchema,
   OpenApi,
-} from "effect/unstable/httpapi";
+} from "effect/http-api";
 
 import { Authorization } from "../../authorization.ts";
 import { InternalServerError, NotFound, Unauthorized } from "../../errors.ts";

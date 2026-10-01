@@ -31,9 +31,9 @@ import {
   Schema,
   Stream,
 } from "effect";
-import { HttpClient, HttpClientRequest } from "effect/unstable/http";
-import * as HttpClientError from "effect/unstable/http/HttpClientError";
-import { HttpApiClient } from "effect/unstable/httpapi";
+import { HttpClient, HttpClientRequest } from "effect/http";
+import * as HttpClientError from "effect/http/HttpClientError";
+import { HttpApiClient } from "effect/http-api";
 import {
   type AbsoluteDir,
   type AbsoluteFile,

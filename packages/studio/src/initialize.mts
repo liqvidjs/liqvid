@@ -1,7 +1,7 @@
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles, type LiqvidConfig, type ProjectMeta } from "@liqvid/schemas";
 import { Effect, Option } from "effect";
-import type { Socket } from "effect/unstable/socket";
+import type { Socket } from "effect/socket";
 import type { AbsoluteDir } from "effect-paths";
 
 import type { LoggableJob, Service } from "./api/schemas.mts";

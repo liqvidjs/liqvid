@@ -3,7 +3,7 @@ import os from "node:os";
 import { NodeFileSystem } from "@effect/platform-node";
 import { ThumbnailOptions, type ThumbnailOptionsIn } from "@liqvid/schemas";
 import { Console, Effect, Exit, FileSystem, Option, Schema } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import type { AbsoluteFile } from "effect-paths";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";

@@ -4,7 +4,7 @@ import { renderAudio } from "@liqvid/cli/render-audio";
 import { loadJson, writeJSON } from "@liqvid/cli/utils";
 import type { LiqvidConfig } from "@liqvid/schemas";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
 import {

@@ -10,7 +10,7 @@ import {
   type ThumbnailsJobIn,
 } from "@liqvid/schemas";
 import { Effect, FileSystem, Option } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
 import {

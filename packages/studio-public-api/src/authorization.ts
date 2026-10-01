@@ -1,6 +1,6 @@
 import type { UserId } from "@liqvid/schemas";
 import { Context } from "effect";
-import { HttpApiMiddleware, HttpApiSecurity } from "effect/unstable/httpapi";
+import { HttpApiMiddleware, HttpApiSecurity } from "effect/http-api";
 
 import { Unauthorized } from "./errors.ts";
 

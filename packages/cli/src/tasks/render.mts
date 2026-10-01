@@ -4,7 +4,7 @@ import { NodeFileSystem } from "@effect/platform-node";
 import type { ImageFormat } from "@liqvid/schemas";
 import { parseTime } from "@liqvid/utils";
 import { Console, Effect, Exit, Option } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import type { AbsoluteFile } from "effect-paths";
 
 import { defaultCliProgressLayer } from "../utils/progress.mts";

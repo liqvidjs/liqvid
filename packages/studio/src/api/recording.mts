@@ -20,8 +20,8 @@ import {
   type PlatformError,
   Schema,
 } from "effect";
-import type { Multipart } from "effect/unstable/http";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import type { Multipart } from "effect/http";
+import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir } from "effect-paths";
 
 import {

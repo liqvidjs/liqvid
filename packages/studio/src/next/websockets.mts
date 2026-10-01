@@ -1,7 +1,7 @@
 import { NodeSocket } from "@effect/platform-node";
 import { serialize } from "@liqvid/ssr/serde";
 import { Effect, Fiber, Logger, ManagedRuntime, Schema } from "effect";
-import { Socket } from "effect/unstable/socket";
+import { Socket } from "effect/socket";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
 

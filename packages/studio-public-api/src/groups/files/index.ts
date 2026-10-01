@@ -1,4 +1,4 @@
-import { HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiGroup } from "effect/http-api";
 
 import { Authorization } from "../../authorization.ts";
 

@@ -1,6 +1,6 @@
 import { SchemaUserId } from "@liqvid/schemas";
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiGroup } from "effect/http-api";
 
 import { Authorization } from "../../authorization.ts";
 

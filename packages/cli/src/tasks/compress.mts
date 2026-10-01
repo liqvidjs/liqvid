@@ -3,7 +3,7 @@ import * as path from "node:path";
 
 import chalk from "chalk";
 import { Effect, Exit, Option } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import type { AbsoluteDir, AbsoluteFile, RelativeDir } from "effect-paths";
 
 import { fgEffect } from "#_/utils/fastglob.js";

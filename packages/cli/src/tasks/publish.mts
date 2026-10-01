@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
 import { Effect, FileSystem, Layer, Logger, Option, References } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
 import pluralize from "pluralize";

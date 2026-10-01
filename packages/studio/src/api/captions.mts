@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { transcribe } from "@liqvid/cli/transcribe";
 import { writeJSON } from "@liqvid/cli/utils";
 import { Effect, FileSystem } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir } from "effect-paths";
 
 import {

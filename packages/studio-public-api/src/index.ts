@@ -1,4 +1,4 @@
-import { HttpApi } from "effect/unstable/httpapi";
+import { HttpApi } from "effect/http-api";
 
 import { Files } from "./groups/files/index.ts";
 import { Health } from "./groups/health/index.ts";

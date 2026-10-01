@@ -9,7 +9,7 @@ import type {
 } from "@liqvid/schemas";
 import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
 import { Effect, FileSystem, Layer, Option } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 import { type AnyDir, type AnyFile, RelativeFile } from "effect-paths";
 import type { TranscribeDetailedResult, TranscribeParams } from "smart-whisper";
 

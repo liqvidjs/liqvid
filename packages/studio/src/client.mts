@@ -1,7 +1,7 @@
 import { Err, Ok, type Result } from "@liqvid/fp";
 import { ManagedRuntime } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
-import { HttpApiClient } from "effect/unstable/httpapi";
+import { FetchHttpClient } from "effect/http";
+import { HttpApiClient } from "effect/http-api";
 import type { RelativeDir } from "effect-paths";
 
 import { WebApi } from "./api/contract.mts";

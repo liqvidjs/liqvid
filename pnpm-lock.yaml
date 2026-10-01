@@ -7,153 +7,153 @@ importers:
     configDependencies: {}
     packageManagerDependencies:
       pnpm:
-        specifier: 12.5.1
-        version: 12.5.1
+        specifier: 12.6.0
+        version: 12.6.0
 
 packages:
 
-  '@pnpm/exe.android-arm64@12.5.1':
-    resolution: {integrity: sha512-6LGBmQuDzUmgpHSuy+haG0jrmkwFNa4EuShDZqK3cIBv4Wfb75CzjJmowkzr+iJg40vnBKMQ62t4Ko6mwsId7A==}
+  '@pnpm/exe.android-arm64@12.6.0':
+    resolution: {integrity: sha512-kviIHft9h02q+7N2In7tSL9T/HRUSGwYmU74YPtsWU5ee7vgqPyC0JT6RRX6miW+NxX1CvHgQxg69qq1qTLJYQ==}
     cpu: [arm64]
     os: [android]
 
-  '@pnpm/exe.android-x64@12.5.1':
-    resolution: {integrity: sha512-091oCltP3Rx89yxL1Wh5rXkUXEyFzyxIzSHKRFDyDFlQkb8Ox8FaDcm+M8PNkMyqnLA+qeGOLzY7Rjj9izl1Ww==}
+  '@pnpm/exe.android-x64@12.6.0':
+    resolution: {integrity: sha512-CT8aJKLq2mtZFE71pr4E5Z2xHL8uGnRGr+NclDqsXlVF4SVcQ2QAs14mWi0C8gjT4hbmi+Q0lJRRIkMAWfjjng==}
     cpu: [x64]
     os: [android]
 
-  '@pnpm/exe.darwin-arm64@12.5.1':
-    resolution: {integrity: sha512-r1vEMQPVjRexZMyL2HonxJoo3+nuB/+G+tg+f2PK6faRdXX1TDwevKXOxJAfqlPInTy6W/pm912+s+m0NcR4BQ==}
+  '@pnpm/exe.darwin-arm64@12.6.0':
+    resolution: {integrity: sha512-rafpVkjzugKBMxSvGQd5wK1x5eOTkD/+lcJIFHeQhvd+BJ8kDisOOvwhQDrpGd4vd2Fx+hhW0P2Ptt638OlhFg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/exe.darwin-x64@12.5.1':
-    resolution: {integrity: sha512-YHwI1g2B+Y2cAEylOR31r781GWijdJL7Gy7TEn/ZpZ5v/Cuwp5/Pz0EFCgo0M2MKLafAbL/laUMGvOpAdnerAw==}
+  '@pnpm/exe.darwin-x64@12.6.0':
+    resolution: {integrity: sha512-72Jpuv1m24gI8zUNcaylYpBWEhBzz1VPhnDIU2GYM2eRP+KsOqVLwV78i+JrihI39zY2NNXmaN4eAKX1inpaDQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/exe.freebsd-x64@12.5.1':
-    resolution: {integrity: sha512-sFUMHiYFs6q5syFwgaVppzhQSmqnXoJIz/YwTXIOXTDE76ndIpTRpDGAnBCBKjsaEBnqjJA/2l6hpJcNDNoMiA==}
+  '@pnpm/exe.freebsd-x64@12.6.0':
+    resolution: {integrity: sha512-LON4QgNy1w/XF4uySZIyC/5hEB0oGdelXsY9tSKqstER+2j2X2oHz67skD11RRd/HWFRtMr64shQZ4I9ZoZ0zg==}
     cpu: [x64]
     os: [freebsd]
 
-  '@pnpm/exe.linux-arm64-musl@12.5.1':
-    resolution: {integrity: sha512-zupuxYZBuBEGjUz805/4/Asq01UNziFADANt8yp+LdUjU9bbMa3xY78Bx1PsGDqBy7aiad4sdUMK8ZxH4n4gmQ==}
+  '@pnpm/exe.linux-arm64-musl@12.6.0':
+    resolution: {integrity: sha512-BdDpX+DeaMUc5x6WNcE6FkmFy36NwrBbBvwsZU737Zt3u1fTY+iKFPchjEQNCM4rT6q6xvF2oN3ZwExGsJCkxQ==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-arm64@12.5.1':
-    resolution: {integrity: sha512-6hbMWW2/eQo1b5wvQPe/ndLHVTH88Rav6N+ffD4/h6IuFMjWCgasFYYsFv0GrvpqREAx3SwmZSvli+0NFXqbxA==}
+  '@pnpm/exe.linux-arm64@12.6.0':
+    resolution: {integrity: sha512-8h2sNoIhHDpHDYqZZCh9PXr6krqW10btb0GHVGuw710muDHlFAHMtUG2ogmaHge6zJG1xgY4Y7mwX5g/LWvrYg==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-ppc64@12.5.1':
-    resolution: {integrity: sha512-Gg3maDzaE/ZFMV9HIx/BwMN0Y6QbEs13URfxmiYHtKjjLAs5wEQZRMUP87YNLYO7cNaEfbM8GRbS9vPosyD9Gw==}
+  '@pnpm/exe.linux-ppc64@12.6.0':
+    resolution: {integrity: sha512-ld6xgcEhFCFrsVsJhbmdmR714PnsEspO/Ij8w0/D7OSiz2hYGu3fZd5tKRxOI5m6H6Gl0/RRFAPncTHbsgXVjQ==}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-riscv64@12.5.1':
-    resolution: {integrity: sha512-6fgWxXYMBMsWQ8DAiRevscX4QZQjwh+FsyCj8ZOk8pMXvqeq84MqBLCmS6KckvnbdqJ+HlSVQ7fs/kd0ldwfhA==}
+  '@pnpm/exe.linux-riscv64@12.6.0':
+    resolution: {integrity: sha512-HIbImydoC3J8NFt+8MXfhTCf5rO6NjCMyinSAHac0VmV8uCHw+kbQkyAzxV84rzz9ZOzmBOnj0b1N461UIYGsw==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-s390x@12.5.1':
-    resolution: {integrity: sha512-nzMZruRvxDhEfYUhzu+7EmM39+82Dgagc/6hPFPqGqzXNGcIG0anuxbUxfeNtI64SHt91KuuYUmCB/inlM+Pag==}
+  '@pnpm/exe.linux-s390x@12.6.0':
+    resolution: {integrity: sha512-DjSqT7+BZ/lWcDHwNMuzsRVfyxUimh+D54Xw4tSWbdVVQhtWtNMUyI93LVnwCmsoEpar2gC3SFeAgywx37svKQ==}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-x64-musl@12.5.1':
-    resolution: {integrity: sha512-kHCbegdTNHpzmPtUD4S5fqkVkqgdQR47spF9p2VPP3dIIkZl6Ytk8w0vhlAsAGgge8FmucfwX+vvPKgm0NtOCQ==}
+  '@pnpm/exe.linux-x64-musl@12.6.0':
+    resolution: {integrity: sha512-31lKeGPmRE6xfV6I3VjaEGVFRei14pl/zgoFDK4w+UkbJqOuNl2Ht3O1GuqNIg3Gl14qTEb4kZRAYFHXifDx9A==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-x64@12.5.1':
-    resolution: {integrity: sha512-3PkUBYo5z4dgtlnTNIFj7QGpcDUAuqXz9WGVigPDCeccEnhGiRkWmA5102TmYJHtwJP3LfmE+ZF9PGeWhn8p9Q==}
+  '@pnpm/exe.linux-x64@12.6.0':
+    resolution: {integrity: sha512-qFWBneHJAJ73W4whtbaFOL1M/7DBC6ILHXuxc7ZPtEhfPuT1zeZiGrmKHoMAfJA+mcm6xhOFljqVTUS+00Jabw==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.win32-arm64@12.5.1':
-    resolution: {integrity: sha512-49NvjZIXHly56/PLoEDD7VphbO4N8dwMXoApElDFCpVGDNGeKlwlib1tXtnpTF6i2/XIsAj7GgatHB5KHXgBnA==}
+  '@pnpm/exe.win32-arm64@12.6.0':
+    resolution: {integrity: sha512-OhfefXEEykZlslSUhR8PPRe6MVPV3Oink/dVfIecE5velpc7j80cZYsHlaDrtRDcm3TPwQHkaRW1SJ1efX9oFg==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/exe.win32-x64@12.5.1':
-    resolution: {integrity: sha512-ePUmQFPAPJFNMwg1lelDx2PdjHqYRiF0yfg5e6qeDbPNOu97QNo557Ru/SxmCrmt8ydQWNuZXWpdEp019md5vw==}
+  '@pnpm/exe.win32-x64@12.6.0':
+    resolution: {integrity: sha512-L2tuyrD2+Imgxs3VK/ST/2L3xD6vDP0ktJQxM0TaGw7TbAQEMq+RMc8iK6Ew7Id579uzjJe8jSfJID2ZGsOHCA==}
     cpu: [x64]
     os: [win32]
 
-  pnpm@12.5.1:
-    resolution: {integrity: sha512-4/MFvHhKK8ifWtO2E4iJRw+ujSr182thIW7JHCw9ZAiXdfneOKrDMQROpA8kXLDVZmOS399lgk4ZB+9qLGLeXw==}
+  pnpm@12.6.0:
+    resolution: {integrity: sha512-PvaPlRyxEawgS0paFvCy3fDaVqluBBPoHYVdnwtV75JnFHCQKOHNAMQFwsX7e56OxNxGd3yAXQNzwvL/AP0g7A==}
     engines: {node: '>=18.*'}
     hasBin: true
 
 snapshots:
 
-  '@pnpm/exe.android-arm64@12.5.1':
+  '@pnpm/exe.android-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.android-x64@12.5.1':
+  '@pnpm/exe.android-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.darwin-arm64@12.5.1':
+  '@pnpm/exe.darwin-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.darwin-x64@12.5.1':
+  '@pnpm/exe.darwin-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.freebsd-x64@12.5.1':
+  '@pnpm/exe.freebsd-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64-musl@12.5.1':
+  '@pnpm/exe.linux-arm64-musl@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64@12.5.1':
+  '@pnpm/exe.linux-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-ppc64@12.5.1':
+  '@pnpm/exe.linux-ppc64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-riscv64@12.5.1':
+  '@pnpm/exe.linux-riscv64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-s390x@12.5.1':
+  '@pnpm/exe.linux-s390x@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-x64-musl@12.5.1':
+  '@pnpm/exe.linux-x64-musl@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-x64@12.5.1':
+  '@pnpm/exe.linux-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.win32-arm64@12.5.1':
+  '@pnpm/exe.win32-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.win32-x64@12.5.1':
+  '@pnpm/exe.win32-x64@12.6.0':
     optional: true
 
-  pnpm@12.5.1:
+  pnpm@12.6.0:
     optionalDependencies:
-      '@pnpm/exe.android-arm64': 12.5.1
-      '@pnpm/exe.android-x64': 12.5.1
-      '@pnpm/exe.darwin-arm64': 12.5.1
-      '@pnpm/exe.darwin-x64': 12.5.1
-      '@pnpm/exe.freebsd-x64': 12.5.1
-      '@pnpm/exe.linux-arm64': 12.5.1
-      '@pnpm/exe.linux-arm64-musl': 12.5.1
-      '@pnpm/exe.linux-ppc64': 12.5.1
-      '@pnpm/exe.linux-riscv64': 12.5.1
-      '@pnpm/exe.linux-s390x': 12.5.1
-      '@pnpm/exe.linux-x64': 12.5.1
-      '@pnpm/exe.linux-x64-musl': 12.5.1
-      '@pnpm/exe.win32-arm64': 12.5.1
-      '@pnpm/exe.win32-x64': 12.5.1
+      '@pnpm/exe.android-arm64': 12.6.0
+      '@pnpm/exe.android-x64': 12.6.0
+      '@pnpm/exe.darwin-arm64': 12.6.0
+      '@pnpm/exe.darwin-x64': 12.6.0
+      '@pnpm/exe.freebsd-x64': 12.6.0
+      '@pnpm/exe.linux-arm64': 12.6.0
+      '@pnpm/exe.linux-arm64-musl': 12.6.0
+      '@pnpm/exe.linux-ppc64': 12.6.0
+      '@pnpm/exe.linux-riscv64': 12.6.0
+      '@pnpm/exe.linux-s390x': 12.6.0
+      '@pnpm/exe.linux-x64': 12.6.0
+      '@pnpm/exe.linux-x64-musl': 12.6.0
+      '@pnpm/exe.win32-arm64': 12.6.0
+      '@pnpm/exe.win32-x64': 12.6.0
 
 ---
 lockfileVersion: '9.0'
@@ -183,11 +183,11 @@ catalogs:
       specifier: 3.10.2
       version: 3.10.2
     '@effect/platform-bun':
-      specifier: 4.0.0-rc.117
-      version: 4.0.0-rc.117
+      specifier: 4.0.0-rc.118
+      version: 4.0.0-rc.118
     '@effect/platform-node':
-      specifier: 4.0.0-rc.117
-      version: 4.0.0-rc.117
+      specifier: 4.0.0-rc.118
+      version: 4.0.0-rc.118
     '@fontsource-variable/inter':
       specifier: ^5.2.8
       version: 5.3.0
@@ -261,8 +261,8 @@ catalogs:
       specifier: ^3.2.3
       version: 3.2.3
     effect:
-      specifier: 4.0.0-rc.117
-      version: 4.0.0-rc.117
+      specifier: 4.0.0-rc.118
+      version: 4.0.0-rc.118
     effect-paths:
       specifier: ^1.0.1
       version: 1.0.1
@@ -439,8 +439,8 @@ catalogs:
       specifier: ^3.2.3
       version: 3.2.3
     effect:
-      specifier: 4.0.0-rc.117
-      version: 4.0.0-rc.117
+      specifier: 4.0.0-rc.118
+      version: 4.0.0-rc.118
     effect-paths:
       specifier: ^1.0.1
       version: 1.0.1
@@ -508,9 +508,12 @@ catalogs:
     '@replit/codemirror-vim':
       specifier: ^6.3
       version: 6.4.0
+    '@tldraw/assets':
+      specifier: ^5.5.0
+      version: 5.5.0
     effect:
-      specifier: '>=4.0.0-rc.117'
-      version: 4.0.0-rc.117
+      specifier: '>=4.0.0-rc.118'
+      version: 4.0.0-rc.118
     effect-paths:
       specifier: ^1.0.1
       version: 1.0.1
@@ -533,8 +536,8 @@ catalogs:
       specifier: ^0.8.1
       version: 0.8.1
     tldraw:
-      specifier: ^5.4.0
-      version: 5.4.2
+      specifier: ^5.5.0
+      version: 5.5.0
     ws:
       specifier: ^8.21.3
       version: 8.21.3
@@ -660,10 +663,10 @@ importers:
         version: 3.1138.0(@aws-sdk/client-s3@3.1138.0)
       '@effect/platform-bun':
         specifier: 'catalog:'
-        version: 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)
+        version: 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(redis@6.2.1)(utf-8-validate@5.0.10)
+        version: 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(redis@6.2.1)(utf-8-validate@5.0.10)
       '@inquirer/prompts':
         specifier: 'catalog:'
         version: 8.7.2(@types/node@26.6.2)
@@ -699,10 +702,10 @@ importers:
         version: 3.12.0
       effect:
         specifier: 'catalog:'
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:peer
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -797,10 +800,10 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:dev
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -1261,7 +1264,7 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -1411,7 +1414,7 @@ importers:
         version: 17.4.2
       effect:
         specifier: rc
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       hastscript:
         specifier: ^9.0.1
         version: 9.0.1
@@ -1932,7 +1935,7 @@ importers:
         version: 6.43.0
       '@effect/atom-react':
         specifier: 4.0.0-beta.107
-        version: 4.0.0-beta.107(effect@4.0.0-rc.115)(react@19.3.0)(scheduler@0.27.0)
+        version: 4.0.0-beta.107(effect@4.0.0-rc.118)(react@19.3.0)(scheduler@0.27.0)
       '@fontsource-variable/alegreya':
         specifier: ^5.3.0
         version: 5.3.0
@@ -2063,8 +2066,8 @@ importers:
         specifier: ^5.102.8
         version: 5.103.2(react@19.3.0)
       '@tldraw/assets':
-        specifier: ^5.4.0
-        version: 5.4.2
+        specifier: catalog:peer
+        version: 5.5.0
       '@tldraw/editor':
         specifier: 5.4.0
         version: 5.4.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2087,11 +2090,11 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       effect:
-        specifier: 4.0.0-rc.115
-        version: 4.0.0-rc.115
+        specifier: 'catalog:'
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: ^1.0.1
-        version: 1.0.1(effect@4.0.0-rc.115)
+        version: 1.0.1(effect@4.0.0-rc.118)
       have-fun:
         specifier: 'catalog:'
         version: 0.0.2(zod@4.6.5)
@@ -2176,9 +2179,9 @@ importers:
       three-stdlib:
         specifier: ^2.36.1
         version: 2.36.1(three@0.184.0)
-      tldraw:
-        specifier: ^5.4.0
-        version: 5.4.2(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      ts-extras:
+        specifier: ^1.3.0
+        version: 1.3.0
       universal-cookie:
         specifier: ^8.1.2
         version: 8.1.2
@@ -2227,7 +2230,7 @@ importers:
         version: 1.0.0
       next-ws:
         specifier: ^2.2.13
-        version: 2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.4.0-canary.28(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))
+        version: 2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.4.0-canary.28(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       no-private-imports:
         specifier: ^0.0.4
         version: 0.0.4(typescript@7.0.2)
@@ -2424,7 +2427,7 @@ importers:
     dependencies:
       effect:
         specifier: catalog:peer
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -2580,7 +2583,7 @@ importers:
         version: 2.1.1
       effect:
         specifier: catalog:peer
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -2899,10 +2902,10 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:dev
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -3170,6 +3173,9 @@ importers:
       '@liqvid/utils':
         specifier: workspace:^2.0.0-alpha.0
         version: link:../utils
+      '@lqv/playback':
+        specifier: workspace:^1.0.0-alpha.0
+        version: link:../lqv-playback
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -3212,10 +3218,10 @@ importers:
         version: 3.12.0
       effect:
         specifier: 'catalog:'
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:peer
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -3261,7 +3267,7 @@ importers:
         version: link:../duration
       effect-paths:
         specifier: 'catalog:'
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -3274,7 +3280,7 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -3332,10 +3338,10 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:dev
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -3377,10 +3383,10 @@ importers:
         version: 1.8.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@effect/platform-bun':
         specifier: 'catalog:'
-        version: 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)
+        version: 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(redis@6.2.1)(utf-8-validate@5.0.10)
+        version: 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(redis@6.2.1)(utf-8-validate@5.0.10)
       '@fontsource-variable/inter':
         specifier: 'catalog:'
         version: 5.3.0
@@ -3458,10 +3464,10 @@ importers:
         version: 5.0.0
       effect:
         specifier: 'catalog:'
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:peer
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -3622,10 +3628,10 @@ importers:
         version: 6.0.2
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:dev
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -3643,7 +3649,7 @@ importers:
         version: link:../schemas
       effect:
         specifier: catalog:peer
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
     devDependencies:
       '@biomejs/biome':
         specifier: catalog:dev
@@ -3761,7 +3767,7 @@ importers:
         version: 16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0)
       next-ws:
         specifier: ^2.2
-        version: 2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))
+        version: 2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       prettier:
         specifier: ^3.9.6
         version: 3.9.8
@@ -3873,10 +3879,10 @@ importers:
         version: 0.19.1
       effect:
         specifier: catalog:dev
-        version: 4.0.0-rc.117
+        version: 4.0.0-rc.118
       effect-paths:
         specifier: catalog:peer
-        version: 1.0.1(effect@4.0.0-rc.117)
+        version: 1.0.1(effect@4.0.0-rc.118)
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -3922,7 +3928,7 @@ importers:
         version: 30.5.2(@types/node@26.6.2)(supports-color@10.2.2)
       tldraw:
         specifier: catalog:peer
-        version: 5.4.2(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 5.5.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       ts-jest:
         specifier: catalog:dev
         version: 29.4.12(@babel/core@7.29.7(supports-color@10.2.2))(@jest/transform@30.5.2(supports-color@10.2.2))(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.5.2(@types/node@26.6.2)(supports-color@10.2.2))(typescript@7.0.2)
@@ -5902,22 +5908,22 @@ packages:
     resolution: {integrity: sha512-CfiSoaVQO8pZgaMZGw5VvMvRGybsJ2LaSDoLYaqiVGvo/YYPYVR2GzUKY0h1NtIweq/+SQ5XLrvtzPIttWQ0GQ==}
     hasBin: true
 
-  '@effect/platform-bun@4.0.0-rc.117':
-    resolution: {integrity: sha512-jyvoxPjT9562z5Tc2gib9GB16jcgh43jhpsuNQxs9B8WJ7RB2doPBQdrYLSSWRodGPLJBKJGzToRRbJiaGblsw==}
+  '@effect/platform-bun@4.0.0-rc.118':
+    resolution: {integrity: sha512-NT/VHIUEYk7QR86sC5le9OzEoRdy9DgxZ89zDkw9Ovd2oMaSw6+IBm3fj+2voGTEPXZaYPdF0to3oQbMouBeEA==}
     peerDependencies:
-      effect: ^4.0.0-rc.117
+      effect: ^4.0.0-rc.118
 
-  '@effect/platform-node-shared@4.0.0-rc.117':
-    resolution: {integrity: sha512-GyRkEfLBG49MwJe+/XDPiXYcQ44RA9p2z0AurlsWhR1cd1PqOUMEZU1pORL+/R5hR8aH6ZuqoJYD8lAc6h+wlA==}
+  '@effect/platform-node-shared@4.0.0-rc.118':
+    resolution: {integrity: sha512-pNbmIlxbAUxAthUNsp2xm1NLG9kxoYecsPkoYl9mNF2oxPcKDxAvkOar7tYnLSUpXJeATm4pxYVipdZjQfqO4Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-rc.117
+      effect: ^4.0.0-rc.118
 
-  '@effect/platform-node@4.0.0-rc.117':
-    resolution: {integrity: sha512-WbPcvQDkqXFnCeG6LohJ9eVNapCDhZbCpezhYKxm0IsZEk7swakRh7RkC1t2CXzd3hGmszTv2k9e/pXyZuL+wQ==}
+  '@effect/platform-node@4.0.0-rc.118':
+    resolution: {integrity: sha512-qdAxPZ+5bKxVnzkwziqcHZTHRHz2hyfFX6NhwEmm75CBpmaIzXIZR2LRqGd1/8eI3J3cOrXcAYzByhln7T1/EA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.0-rc.117
+      effect: ^4.0.0-rc.118
       redis: '>=5.0.0 <7.0.0'
 
   '@effect/tsgo-darwin-arm64@0.45.0':
@@ -10175,6 +10181,11 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.31.3
 
+  '@tiptap/extension-typography@3.13.0':
+    resolution: {integrity: sha512-Pvxc0Mu3fIgcqOVpU5DqK55F+/ShvX020HmbsPY+Z7SED9fkan5QVn3n2nm13A2TQ+RWDlPAnHe7Gh0d/KsL5Q==}
+    peerDependencies:
+      '@tiptap/core': ^3.13.0
+
   '@tiptap/extension-underline@3.31.3':
     resolution: {integrity: sha512-HghdJaOwRqYzsAxqSyNyb+IWyOMcdCl8IoiBETA9BZCJAqdXzFLcuWp7CqCqJPam9dgkWosSoHqTCAO4nTBfpw==}
     peerDependencies:
@@ -10202,12 +10213,12 @@ packages:
   '@tiptap/starter-kit@3.31.3':
     resolution: {integrity: sha512-WKof9RewdmGHvWJ1wn0/HVNG2mV+HOgVRyJkKekuM9fgr6BZAAH/xZsWE1eon+94JnQ+KtK2ThydXQM/qc6b2A==}
 
-  '@tldraw/assets@5.4.2':
-    resolution: {integrity: sha512-+3mAc5ix1qO76LtEEGPgvxKEE1dMfiJrajnetzt0JjeX6WZeUwhscUqwcWz8A/IxA9qtctxDAhVXTdomGQ2oGQ==}
+  '@tldraw/assets@5.5.0':
+    resolution: {integrity: sha512-ae1YNpL0uTRI4UUJXRHMjDbERwl3SF1Wo61E3qlH8CMzwLDYyLH+nhISm0Lnlllifqnvv+SwFz5ByMRsYkMeCw==}
     engines: {node: '>=22.12.0'}
 
-  '@tldraw/driver@5.4.2':
-    resolution: {integrity: sha512-XY0YOEyfkJ5emU+r75Hr1ZIC2A2aQcStM9itV99leGGaEXfr/4isFtC02qVpqAHBe3r0ePbQhqCKbsxFE/OpfQ==}
+  '@tldraw/driver@5.5.0':
+    resolution: {integrity: sha512-yC/rs+1f7mnHNYZbaE/RrEKuiBcJLwaIYSsz+WXh+j48lERtCRnHjJgzFww1QxJedJvMuzF9JRymyuVT2R753Q==}
     engines: {node: '>=22.12.0'}
 
   '@tldraw/editor@5.4.0':
@@ -12159,11 +12170,11 @@ packages:
       effect:
         optional: true
 
-  effect@4.0.0-rc.115:
-    resolution: {integrity: sha512-ogYulZ5ffeOzrJqQrG0XOkDO5lKn2s9KNHhoxJy/6wKUkF0i12dlVXWA9TgsgQ+zV/JzizyG0+XMPepZEQX6vw==}
-
   effect@4.0.0-rc.117:
     resolution: {integrity: sha512-UUyi9QiOW4nySFIBM3KnYbNMd9EZliOdKfBcyLD0mPMPheO2fkuXS5y0opjWc9oqzlJxPQICEGm8gGw3kh9j/w==}
+
+  effect@4.0.0-rc.118:
+    resolution: {integrity: sha512-hxhpCd+swzrtu9lnyPpEFre2ODQzJ9qxgyL1oHIEY8NKnW4PxTbM1XzplMZXiAsLD62HO+KJc41Nqxr9T791ZQ==}
 
   electron-to-chromium@1.5.436:
     resolution: {integrity: sha512-iG79/xCF3iThADicbgbES2+liFYmTvelo7jWcEfg6lQ+Adrh7zShrXSg2ZdEDLbKjJ298kGAKMnnzVWobp0L+g==}
@@ -16585,8 +16596,8 @@ packages:
     resolution: {integrity: sha512-Zba82s87IFq9A9XmjiX5uZA/ARWDrB03OHlq+Vw1fSdt0I+4/Kutwy8BP4Y/y/aORMo61FQ0vIb5j44vSo5Pkg==}
     engines: {node: ^18.0.0 || >=20.0.0}
 
-  tldraw@5.4.2:
-    resolution: {integrity: sha512-hAVjY+X2gln1ogVYkUMC2cee+J5hrAKZbl0WIpKm4HpLsAFdwqVrKzi6UZ8TONOfe4rDgq0+IyHfIn1+XPrHtw==}
+  tldraw@5.5.0:
+    resolution: {integrity: sha512-3l8cw2XchnHFLwHMY169BdujZgf9VVojbbNDgFFfzIrhTxa1ykmI5BQ3h55cg/NeZKGXMg9rg53QSmrVCS7ISQ==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       react: 19.3.0
@@ -16821,6 +16832,10 @@ packages:
 
   undici@8.11.0:
     resolution: {integrity: sha512-AdzuGcAkzhbha3GgCSoUBx2P0quwym6qdFNCQz/fDGZc8w9XJ741wHUbt2kTmfPz+ZIOMkySFkiY7RXmiDDC8w==}
+    engines: {node: '>=22.19.0'}
+
+  undici@8.11.2:
+    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
     engines: {node: '>=22.19.0'}
 
   unenv@2.0.0-rc.24:
@@ -17278,6 +17293,18 @@ packages:
 
   ws@8.21.3:
     resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.22.0:
+    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -21756,37 +21783,37 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.2.1': {}
 
-  '@effect/atom-react@4.0.0-beta.107(effect@4.0.0-rc.115)(react@19.3.0)(scheduler@0.27.0)':
+  '@effect/atom-react@4.0.0-beta.107(effect@4.0.0-rc.118)(react@19.3.0)(scheduler@0.27.0)':
     dependencies:
-      effect: 4.0.0-rc.115
+      effect: 4.0.0-rc.118
       react: 19.3.0
       scheduler: 0.27.0
 
   '@effect/language-service@0.87.2': {}
 
-  '@effect/platform-bun@4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)':
+  '@effect/platform-bun@4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)':
     dependencies:
-      '@effect/platform-node-shared': 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)
-      effect: 4.0.0-rc.117
+      '@effect/platform-node-shared': 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)
+      effect: 4.0.0-rc.118
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node-shared@4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)':
+  '@effect/platform-node-shared@4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)':
     dependencies:
       '@types/ws': 8.18.1
-      effect: 4.0.0-rc.117
-      ws: 8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      effect: 4.0.0-rc.118
+      ws: 8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(redis@6.2.1)(utf-8-validate@5.0.10)':
+  '@effect/platform-node@4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(redis@6.2.1)(utf-8-validate@5.0.10)':
     dependencies:
-      '@effect/platform-node-shared': 4.0.0-rc.117(bufferutil@4.1.0)(effect@4.0.0-rc.117)(utf-8-validate@5.0.10)
-      effect: 4.0.0-rc.117
+      '@effect/platform-node-shared': 4.0.0-rc.118(bufferutil@4.1.0)(effect@4.0.0-rc.118)(utf-8-validate@5.0.10)
+      effect: 4.0.0-rc.118
       redis: 6.2.1
-      undici: 8.11.0
+      undici: 8.11.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -22770,7 +22797,7 @@ snapshots:
   '@jest/console@30.5.2':
     dependencies:
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       chalk: 4.1.2
       jest-message-util: 30.5.1
       jest-util: 30.5.1
@@ -22818,7 +22845,7 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 30.5.2
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       jest-mock: 30.5.2
 
   '@jest/expect-utils@30.5.2':
@@ -22836,7 +22863,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.5.1
       '@sinonjs/fake-timers': 15.4.0
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       jest-message-util: 30.5.1
       jest-mock: 30.5.2
       jest-util: 30.5.1
@@ -22854,7 +22881,7 @@ snapshots:
 
   '@jest/pattern@30.5.0':
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       jest-regex-util: 30.5.0
 
   '@jest/reporters@30.5.2(supports-color@10.2.2)':
@@ -22963,7 +22990,7 @@ snapshots:
       '@jest/schemas': 30.5.0
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -25803,6 +25830,10 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
 
+  '@tiptap/extension-typography@3.13.0(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))':
+    dependencies:
+      '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
+
   '@tiptap/extension-underline@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))':
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
@@ -25872,11 +25903,11 @@ snapshots:
       '@tiptap/extensions': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
       '@tiptap/pm': 3.31.3
 
-  '@tldraw/assets@5.4.2':
+  '@tldraw/assets@5.5.0':
     dependencies:
       '@tldraw/utils': 5.4.0
 
-  '@tldraw/driver@5.4.2(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@tldraw/driver@5.5.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@tldraw/editor': 5.4.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tldraw/utils': 5.4.0
@@ -27878,17 +27909,18 @@ snapshots:
     optionalDependencies:
       effect: 4.0.0-rc.117
 
-  effect-paths@1.0.1(effect@4.0.0-rc.115):
-    optionalDependencies:
-      effect: 4.0.0-rc.115
-
   effect-paths@1.0.1(effect@4.0.0-rc.117):
     optionalDependencies:
       effect: 4.0.0-rc.117
 
-  effect@4.0.0-rc.115: {}
+  effect-paths@1.0.1(effect@4.0.0-rc.118):
+    optionalDependencies:
+      effect: 4.0.0-rc.118
 
-  effect@4.0.0-rc.117: {}
+  effect@4.0.0-rc.117:
+    optional: true
+
+  effect@4.0.0-rc.118: {}
 
   electron-to-chromium@1.5.436: {}
 
@@ -29434,7 +29466,7 @@ snapshots:
       '@jest/environment': 30.5.2
       '@jest/fake-timers': 30.5.2
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       jest-mock: 30.5.2
       jest-util: 30.5.1
       jest-validate: 30.5.1
@@ -29445,7 +29477,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.5.1
       '@parcel/watcher': 2.6.0
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       fdir: 6.5.0(picomatch@4.0.7)
@@ -29503,7 +29535,7 @@ snapshots:
     dependencies:
       '@jest/expect-utils': 30.5.2
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       jest-util: 30.5.1
 
   jest-regex-util@26.0.0: {}
@@ -29620,7 +29652,7 @@ snapshots:
   jest-util@30.5.1:
     dependencies:
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
@@ -29639,7 +29671,7 @@ snapshots:
     dependencies:
       '@jest/test-result': 30.5.2
       '@jest/types': 30.5.1
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -29648,7 +29680,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -29661,7 +29693,7 @@ snapshots:
 
   jest-worker@30.5.1:
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 26.6.2
       '@ungap/structured-clone': 1.4.0
       jest-util: 30.5.1
       merge-stream: 2.0.0
@@ -30934,6 +30966,18 @@ snapshots:
       - '@babel/preset-env'
       - supports-color
 
+  next-ws@2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
+    dependencies:
+      jscodeshift: 17.4.0(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(supports-color@10.2.2)
+      minimist: 1.2.8
+      next: 16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0)
+      react: 19.3.0
+      semver: 7.8.5
+      ws: 8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - '@babel/preset-env'
+      - supports-color
+
   next-ws@2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.3.6(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@26.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
     dependencies:
       jscodeshift: 17.4.0(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(supports-color@10.2.2)
@@ -30946,14 +30990,14 @@ snapshots:
       - '@babel/preset-env'
       - supports-color
 
-  next-ws@2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.4.0-canary.28(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
+  next-ws@2.2.15(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(next@16.4.0-canary.28(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0))(react@19.3.0)(supports-color@10.2.2)(ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
     dependencies:
       jscodeshift: 17.4.0(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(supports-color@10.2.2)
       minimist: 1.2.8
       next: 16.4.0-canary.28(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0)
       react: 19.3.0
       semver: 7.8.5
-      ws: 8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      ws: 8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@babel/preset-env'
       - supports-color
@@ -33611,16 +33655,17 @@ snapshots:
 
   tinypool@1.1.1: {}
 
-  tldraw@5.4.2(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  tldraw@5.5.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
       '@tiptap/extension-code': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
       '@tiptap/extension-highlight': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
       '@tiptap/extension-list': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
+      '@tiptap/extension-typography': 3.13.0(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
       '@tiptap/pm': 3.31.3
       '@tiptap/react': 3.31.3(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tiptap/starter-kit': 3.31.3
-      '@tldraw/driver': 5.4.2(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@tldraw/driver': 5.5.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tldraw/editor': 5.4.0(@floating-ui/dom@1.8.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tldraw/state': 5.4.0
       '@tldraw/store': 5.4.0(react@19.3.0)
@@ -33882,6 +33927,8 @@ snapshots:
   undici@7.29.0: {}
 
   undici@8.11.0: {}
+
+  undici@8.11.2: {}
 
   unenv@2.0.0-rc.24:
     dependencies:
@@ -34586,6 +34633,11 @@ snapshots:
       utf-8-validate: 5.0.10
 
   ws@8.21.3(bufferutil@4.1.0)(utf-8-validate@5.0.10):
+    optionalDependencies:
+      bufferutil: 4.1.0
+      utf-8-validate: 5.0.10
+
+  ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     optionalDependencies:
       bufferutil: 4.1.0
       utf-8-validate: 5.0.10
