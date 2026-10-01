@@ -49,7 +49,16 @@ function ConfigurationComponent() {
     const deviceList = await navigator.mediaDevices.enumerateDevices();
     const grouped = deviceList.reduce(
       (acc, curr) => {
-        acc[curr.kind].push(curr);
+        const devices = acc[curr.kind];
+        const duplicateIndex = devices.findIndex(
+          (device) => mediaDeviceKey(device) === mediaDeviceKey(curr),
+        );
+
+        if (duplicateIndex === -1) {
+          devices.push(curr);
+        } else if (!devices[duplicateIndex].label && curr.label) {
+          devices[duplicateIndex] = curr;
+        }
         return acc;
       },
       {
@@ -61,6 +70,48 @@ function ConfigurationComponent() {
     setDevices(grouped);
     return grouped;
   }, []);
+
+  useEffect(() => {
+    const mediaDevices = navigator.mediaDevices;
+    if (!mediaDevices) return;
+
+    const handleDeviceChange = () => {
+      void refreshDevices()
+        .then((grouped) => {
+          if (
+            audioEnabled &&
+            !grouped.audioinput.some(
+              (device) => device.deviceId === selectedAudioDevice,
+            )
+          ) {
+            setSelectedAudioDevice(grouped.audioinput[0]?.deviceId);
+          }
+
+          if (
+            videoEnabled &&
+            !grouped.videoinput.some(
+              (device) => device.deviceId === selectedVideoDevice,
+            )
+          ) {
+            setSelectedVideoDevice(grouped.videoinput[0]?.deviceId);
+          }
+        })
+        .catch((error: unknown) => {
+          console.error("Failed to refresh media devices:", error);
+        });
+    };
+
+    mediaDevices.addEventListener("devicechange", handleDeviceChange);
+    return () => {
+      mediaDevices.removeEventListener("devicechange", handleDeviceChange);
+    };
+  }, [
+    audioEnabled,
+    refreshDevices,
+    selectedAudioDevice,
+    selectedVideoDevice,
+    videoEnabled,
+  ]);
 
   // Configure recorder when device selection changes
   useEffect(() => {
@@ -177,7 +228,7 @@ function ConfigurationComponent() {
           >
             {devices.audioinput.map((d) => (
               <option key={mediaDeviceKey(d)} value={d.deviceId}>
-                {d.label}
+                {mediaDeviceLabel(d)}
               </option>
             ))}
           </select>
@@ -203,7 +254,7 @@ function ConfigurationComponent() {
           >
             {devices.videoinput.map((d) => (
               <option key={mediaDeviceKey(d)} value={d.deviceId}>
-                {d.label}
+                {mediaDeviceLabel(d)}
               </option>
             ))}
           </select>
@@ -257,6 +308,13 @@ const latest = recordings.dir(${JSON.stringify(name)});
 
 function mediaDeviceKey(d: MediaDeviceInfo) {
   return `${d.kind}.${d.groupId}.${d.deviceId}`;
+}
+
+function mediaDeviceLabel(d: MediaDeviceInfo) {
+  const label = d.label || (d.kind === "audioinput" ? "Audio input" : "Video input");
+  return d.kind === "audioinput" && d.deviceId === "default"
+    ? `Default — ${label}`
+    : label;
 }
 
 function Spinner() {
