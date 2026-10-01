@@ -75,13 +75,16 @@ export function pick<T extends object, K extends keyof T>(
       .map((key) => [key, obj[key]]),
   ) as Pick<T, K>;
 }
+type PromiseRecord<T> = {
+  [K in keyof T]: T[K] | PromiseLike<T[K]>;
+};
 
 /**
  * Polyfill for upcoming `Promise.allKeyed`
  */
 export async function promiseAllKeyed<
-  T extends Record<string, Promise<unknown>>,
->(obj: T): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
+  const T extends Record<PropertyKey, unknown>,
+>(obj: PromiseRecord<T>): Promise<T> {
   const values = await Promise.all(Object.values(obj));
   const keys = Object.keys(obj) as (keyof T)[];
   return keys.reduce(
