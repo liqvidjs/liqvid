@@ -9,7 +9,11 @@ export {
   ScrubberBar,
   type ScrubberBarProps,
 } from "./ScrubberBar.tsx";
-export type { ThumbData, VideoHighlight } from "./ThumbnailBox.tsx";
+export type {
+  ThumbData,
+  ThumbnailProps,
+  VideoHighlight,
+} from "./ThumbnailBox.tsx";
 export * from "./TimeDisplay.tsx";
 export * from "./Transcript.tsx";
 export * from "./VolumeSlider.tsx";

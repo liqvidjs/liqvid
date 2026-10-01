@@ -1,7 +1,7 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
-import type { DurationLike } from "@liqvid/duration";
+import type { Duration, DurationLike } from "@liqvid/duration";
 import { usePlayback } from "@liqvid/playback/react";
-import { formatTime, useFirstRender } from "@liqvid/utils";
+import { useFirstRender } from "@liqvid/utils";
 import { useEffect } from "react";
 
 export type ThumbData = {
@@ -19,7 +19,7 @@ export type ThumbData = {
 
   /**
    * Height of individual thumbnails.
-   * @default 100
+   * @default 90
    */
   height?: number;
 
@@ -45,16 +45,31 @@ export type ThumbData = {
   width?: number;
 };
 
-export interface ThumbnailBoxProps extends Omit<ThumbData, "highlights"> {
+export type ThumbnailProps = {
+  col: number;
+  height: number;
   progress: number;
+  row: number;
   show: boolean;
-  title?: string;
-}
+  src: string;
+  time: Duration;
+  width: number;
 
-export interface VideoHighlight {
+  title?: string;
+};
+
+export type ThumbnailBoxProps = Omit<ThumbnailProps, "src"> & {
+  cols: number;
+  frequency: number;
+  path: string;
+  rows: number;
+  render: (props: ThumbnailProps) => React.ReactNode;
+};
+
+export type VideoHighlight = {
   time: DurationLike;
   title: string;
-}
+};
 
 export function ThumbnailBox({
   cols = 5,
@@ -64,17 +79,18 @@ export function ThumbnailBox({
   progress,
   show,
   title,
-  height = 100,
+  height = 90,
   width = 160,
+  render,
 }: ThumbnailBoxProps) {
-  const { duration } = usePlayback();
+  const { duration$ } = usePlayback();
   const { colorScheme } = useColorScheme();
 
   const count = cols * rows;
 
   useEffect(() => {
     // preload thumbs (once more important loading has taken place)
-    const maxSlide = Math.floor(duration / frequency),
+    const maxSlide = Math.floor(duration$.inSeconds() / frequency),
       maxSheet = Math.floor(maxSlide / count);
 
     for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
@@ -83,18 +99,18 @@ export function ThumbnailBox({
         .replace("%s", sheetNum.toString())
         .replace("%c", colorScheme);
     }
-  }, [count, frequency, path, duration, colorScheme]);
+  }, [count, frequency, path, duration$, colorScheme]);
 
-  const time = progress * duration;
+  const time = duration$.times(progress);
 
-  const markerNum = Math.floor(time / frequency);
+  const markerNum = Math.floor(time.inSeconds() / frequency);
   const sheetNum = Math.floor(markerNum / count);
   const markerNumOnSheet = markerNum % count;
 
   const row = Math.floor(markerNumOnSheet / rows);
   const col = markerNumOnSheet % rows;
 
-  const sheetName = path
+  const src = path
     .replace("%s", sheetNum.toString())
     .replace("%c", colorScheme);
 
@@ -102,27 +118,15 @@ export function ThumbnailBox({
   const isFirstRender = useFirstRender();
   if (isFirstRender) return null;
 
-  return (
-    <div
-      className="lv-controls-thumbnail"
-      style={{
-        display: show ? "block" : "none",
-        left: `${progress * 100}%`,
-      }}
-    >
-      {title && <span className="lv-thumbnail-title">{title}</span>}
-      <div className="lv-thumbnail-box">
-        <img
-          alt=""
-          src={sheetName}
-          style={{
-            left: `-${col * width}px`,
-            maxWidth: "unset",
-            top: `-${row * height}px`,
-          }}
-        />
-        <span className="lv-thumbnail-time">{formatTime(time * 1000)}</span>
-      </div>
-    </div>
-  );
+  return render({
+    col,
+    height,
+    progress,
+    row,
+    show,
+    src,
+    time,
+    title,
+    width,
+  });
 }

@@ -11,15 +11,15 @@ import { type ThumbData, ThumbnailBox } from "./ThumbnailBox.tsx";
 export type { ThumbData };
 
 /** Shortcut to seek forward/backward by a fixed amount of time. */
-export interface RelativeSeekShortcut {
+export type RelativeSeekShortcut = {
   delta: DurationLike;
 
   /** key to trigger the shortcut */
   key: string;
-}
+};
 
 /** Shortcut to seek to a percentage of the Playback duration. */
-export interface PercentageSeekShortcut {
+export type PercentageSeekShortcut = {
   /** key to trigger the shortcut */
   key: string;
 
@@ -29,9 +29,11 @@ export interface PercentageSeekShortcut {
    * @max 1
    */
   multiplier: number;
-}
+};
 
 export type ScrubberBarProps = {
+  renderThumbnail?: React.ComponentProps<typeof ThumbnailBox>["render"];
+
   /** seeking shortcuts */
   shortcuts?: {
     /** configure shortcuts for seeking forward/backward by a fixed amount of time */
@@ -46,7 +48,12 @@ export type ScrubberBarProps = {
 };
 
 /** Display a scrubber interface for playback, optionally including thumbnail previews and highlights. */
-export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
+export function ScrubberBar({
+  renderThumbnail,
+  shortcuts,
+  thumbs,
+  ...props
+}: ScrubberBarProps) {
   const playback = usePlayback();
 
   const [progress, setProgress] = useState({
@@ -223,10 +230,11 @@ export function ScrubberBar({ shortcuts, thumbs, ...props }: ScrubberBarProps) {
       {...divEvents}
       {...props}
     >
-      {thumbs && (
+      {thumbs && renderThumbnail && (
         <ThumbnailBox
           {...thumbs}
           progress={progress.thumb}
+          render={renderThumbnail}
           show={showThumb}
           title={activeHighlight?.title}
         />
