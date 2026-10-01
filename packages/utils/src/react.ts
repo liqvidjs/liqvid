@@ -196,7 +196,7 @@ export function makeContext<T>({
     // biome-ignore lint/complexity/useArrowFunction: preserve name for console logs
     [`use${name}`]: function () {
       const value = useOptional();
-      if (!value) {
+      if (value === null || value === undefined) {
         throw new Error(
           `use${name ?? "Context"} must be used within a ${name ?? "Context"}Provider`,
         );
@@ -207,6 +207,7 @@ export function makeContext<T>({
   }[`use${name}`]!;
 
   return {
+    context,
     Provider: context.Provider,
     use,
     useOptional,
