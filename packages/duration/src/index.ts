@@ -49,12 +49,13 @@ export type SerializedDuration = DurationOptions &
   SerializedValue<typeof serializationKey>;
 
 export interface DurationSetter {
-  add(other: DurationOptions): void;
-  set(options: DurationOptions): void;
-  setMilliseconds(ms: number): void;
-  setSeconds(s: number): void;
-  setToZero(): void;
-  subtract(other: DurationOptions): void;
+  add(other: DurationLike): this;
+  multiplyBy(factor: number): this;
+  set(options: DurationLike): this;
+  setMilliseconds(ms: number): this;
+  setSeconds(s: number): this;
+  setToZero(): this;
+  subtract(other: DurationLike): this;
 }
 
 /**
@@ -134,23 +135,33 @@ export class Duration {
     return [
       dur,
       {
-        add(other: DurationOptions) {
+        add(other: DurationLike) {
           dur.__valueMs += Duration.inMilliseconds(other);
+          return this;
         },
-        set(other: DurationOptions) {
+        multiplyBy(factor) {
+          dur.__valueMs *= factor;
+          return this;
+        },
+        set(other: DurationLike) {
           dur.__valueMs = Duration.inMilliseconds(other);
+          return this;
         },
         setMilliseconds(ms: number) {
           dur.__valueMs = ms;
+          return this;
         },
-        setSeconds(ms: number) {
-          dur.__valueMs = ms;
+        setSeconds(s: number) {
+          dur.__valueMs = s * 1000;
+          return this;
         },
         setToZero() {
           dur.__valueMs = 0;
+          return this;
         },
-        subtract(other: DurationOptions) {
+        subtract(other: DurationLike) {
           dur.__valueMs -= Duration.inMilliseconds(other);
+          return this;
         },
       },
     ];
@@ -256,26 +267,37 @@ export class Duration {
 export class MutableDuration extends Duration implements DurationSetter {
   /* ------------------------------ setter methods ------------------------------ */
   add(other: DurationLike) {
-    this.__valueMs = this.__valueMs + Duration.inMilliseconds(other);
+    this.__valueMs += Duration.inMilliseconds(other);
+    return this;
   }
 
   subtract(other: DurationLike) {
-    this.__valueMs = this.__valueMs - Duration.inMilliseconds(other);
+    this.__valueMs -= Duration.inMilliseconds(other);
+    return this;
   }
 
-  set(opts: DurationOptions = {}) {
+  set(opts: DurationLike = {}) {
     this.__valueMs = Duration.inMilliseconds(opts);
+    return this;
   }
 
   setMilliseconds(ms: number) {
     this.__valueMs = ms;
+    return this;
   }
 
   setSeconds(s: number) {
     this.__valueMs = s * 1000;
+    return this;
   }
 
   setToZero() {
     this.__valueMs = 0;
+    return this;
+  }
+
+  multiplyBy(factor: number): this {
+    this.__valueMs *= factor;
+    return this;
   }
 }
