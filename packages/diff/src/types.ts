@@ -9,12 +9,15 @@ export type RunedKey<
 > = `${(typeof runes)[K]}${Name}`;
 
 // array diffs
-export type ChangeItemDiff<T> = [offset: number, value: T];
-export type ObjectItemDiff<T> = [
+export type ChangeItemDiff<T> = readonly [offset: number, value: T];
+export type ObjectItemDiff<T> = readonly [
   offset: RunedKey<"object">,
   diff: ObjectDiff<T>,
 ];
-export type ArrayItemDiff<T> = [offset: RunedKey<"array">, diff: ArrayDiff<T>];
+export type ArrayItemDiff<T> = readonly [
+  offset: RunedKey<"array">,
+  diff: ArrayDiff<T>,
+];
 
 /**
  * Note that offsets are relative to the **end** of the array.
@@ -27,10 +30,10 @@ export type ItemDiff<T> =
 /**
  * A record describing how to make changes to an array.
  */
-export type ArrayDiff<T> = [
+export type ArrayDiff<T> = readonly [
   delta: number,
-  itemDiffs?: ItemDiff<T>[],
-  ...tail: unknown[],
+  itemDiffs?: readonly ItemDiff<T>[],
+  ...tail: readonly unknown[],
 ];
 
 // delete placeholder
@@ -39,11 +42,11 @@ export type DeletePlaceholder = typeof deletePlaceholder;
 /**
  * A record describing how to make changes to an object.
  */
-export type ObjectDiff<T> = {
+export type ObjectDiff<T> = Readonly<{
   // biome-ignore lint/suspicious/noExplicitAny: variance
   [key: RunedKey<"array">]: ArrayDiff<any>;
   [key: RunedKey<"change">]: unknown;
   [key: RunedKey<"create">]: unknown;
   [key: RunedKey<"delete">]: DeletePlaceholder;
   [key: RunedKey<"object">]: ObjectDiff<T>;
-};
+}>;

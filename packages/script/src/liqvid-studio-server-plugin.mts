@@ -12,10 +12,13 @@ const TIMINGS_DTS = "timings.d.json.ts" as RelativeFile;
 /**
  * Generate TypeScript declaration content from timings JSON.
  */
-function generateTimingsDeclaration(timings: Array<[string, string]>): string {
+function generateTimingsDeclaration(
+  timings: readonly [string, string][],
+): string {
   const entries = timings
     .map(
-      ([name, time]) => `\t${JSON.stringify(name)}: ${JSON.stringify(time)};`,
+      ([name, time]) =>
+        `\t${JSON.stringify(name)}: import("@liqvid/utils").DurationString<${JSON.stringify(time)}>;`,
     )
     .join("\n");
 

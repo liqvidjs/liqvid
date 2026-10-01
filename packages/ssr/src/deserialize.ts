@@ -74,7 +74,7 @@ export type JSONValue =
 export type DeserKeys<T extends JSONValue> =
   T extends SerializedValue<infer DK>
     ? DK
-    : T extends ReadonlyArray<JSONValue>
+    : T extends readonly JSONValue[]
       ? { [k in number & keyof T]: DeserKeys<T[k]> }[number & keyof T]
       : T extends Record<string, JSONValue>
         ? { [k in keyof T]: DeserKeys<T[k]> }[keyof T & string]
@@ -94,7 +94,9 @@ export type DeserializedValue<
     ? Date
     : In extends SerializedValue<infer DK extends string & keyof DeserMap>
       ? ReturnType<DeserMap[DK]>
-      : In extends ReadonlyArray<JSONValue> & { [key in string | symbol]: any }
+      : In extends readonly JSONValue[] & {
+            readonly [key in string | symbol]: any;
+          }
         ? {
             [index in keyof In]: DeserializedValue<
               In[index],

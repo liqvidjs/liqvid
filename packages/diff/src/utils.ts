@@ -1,4 +1,4 @@
-import { assertType } from "@liqvid/utils";
+import { assertType, type Mutable } from "@liqvid/utils";
 
 import {
   arrayDiff,
@@ -108,7 +108,7 @@ export function matchRunes<T, R>(
 }
 
 export function consume<T>(
-  a: ObjectDiff<T>,
+  a: Mutable<ObjectDiff<T>>,
   key: string,
   fns: {
     [$name in RuneName | "else" | "none"]?: $name extends RuneName

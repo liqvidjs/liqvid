@@ -38,7 +38,13 @@ const IGNORED_DIRS = new Set<string>([
 const INTERPOLATION_KEYS = new Set(["_", "$", "__template"]);
 
 /** A JSON value, as parsed from a translation file. */
-type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly Json[]
+  | { readonly [key: string]: Json };
 
 /** A single discrepancy between a locale file and the reference `en.json`. */
 type Discrepancy =

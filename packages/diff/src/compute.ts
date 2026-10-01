@@ -10,13 +10,13 @@ import {
   objectDiff,
   objectItemDiff,
 } from "./builders.ts";
-import type { ArrayDiff, ObjectDiff } from "./types.ts";
+import type { ArrayDiff, ItemDiff, ObjectDiff } from "./types.ts";
 import { cmp } from "./utils.ts";
 
 /** Compute the diff between two arrays. */
 export function diffArrays<T>(a: readonly T[], b: readonly T[]): ArrayDiff<T> {
   // diffs
-  const itemDiffs: Exclude<ArrayDiff<T>[1], undefined> = [];
+  const itemDiffs: ItemDiff<T>[] = [];
 
   for (let i = 0; i < Math.min(a.length, b.length); ++i) {
     const itemA = a[i];

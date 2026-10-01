@@ -30,3 +30,10 @@ export const readonly = createIdentity();
 
 /** Prevent TypeScript from inferring a type. */
 export type PreventInference<T> = [T][T extends unknown ? 0 : never];
+
+/** Remove the `readonly` modifier from all properties of a type. */
+export type Mutable<T, K extends keyof T = keyof T> = {
+  -readonly [P in K]: T[P];
+} & {
+  [P in Exclude<keyof T, K>]: T[P];
+};

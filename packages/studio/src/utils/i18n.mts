@@ -119,7 +119,7 @@ export function getLocale(): Locale {
 }
 
 type Json = {
-  [key: string]: string | number | boolean | Json | Json[];
+  readonly [key: string]: string | number | boolean | Json | readonly Json[];
 };
 
 function isObject(item: unknown): item is Json {
