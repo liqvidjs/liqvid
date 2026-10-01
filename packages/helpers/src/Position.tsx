@@ -7,6 +7,12 @@ export interface PositionProps {
 
   children?: React.ReactNode;
 
+  /** translate-x */
+  dx?: Property.Translate | undefined;
+
+  /** translate-y */
+  dy?: Property.Translate | undefined;
+
   /** font-size */
   fs?: Property.FontSize | undefined;
 
@@ -34,6 +40,8 @@ export interface PositionProps {
 /** Positioning helper */
 export function Position({
   b,
+  dx,
+  dy,
   fs,
   h,
   r,
@@ -48,6 +56,9 @@ export function Position({
 
   // be very careful about this to avoid hydration errors
   if (b !== undefined) ourStyles.bottom = b;
+  if (dx !== undefined || dy !== undefined) {
+    ourStyles.transform = `translate(${dx ?? 0}, ${dy ?? 0})`;
+  }
   if (fs !== undefined) ourStyles.fontSize = fs;
   if (h !== undefined) ourStyles.height = h;
   if (x !== undefined) ourStyles.left = x;
