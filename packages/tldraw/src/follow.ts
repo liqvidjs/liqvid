@@ -1,4 +1,4 @@
-import type { Editor, TLPageId } from "tldraw";
+import type { Editor, TLPageId } from "@tldraw/editor";
 
 import type { Viewport } from "./types.ts";
 

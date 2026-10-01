@@ -1,7 +1,7 @@
 import { useEditor, useQuickReactor } from "@tldraw/editor";
 import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
 
-import type { PointerHandler } from "../index.ts";
+import type { PointerHandler } from "../types.ts";
 import { getCursorSvgs } from "../utils.ts";
 
 /** Half the cursor image size (32px), used to center it on the point. */

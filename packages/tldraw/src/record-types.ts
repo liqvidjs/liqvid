@@ -1,4 +1,9 @@
-import type { TLCamera, TLDrawShape, TLRecord, TLUnknownShape } from "tldraw";
+import type {
+  TLCamera,
+  TLDrawShape,
+  TLRecord,
+  TLUnknownShape,
+} from "@tldraw/tlschema";
 
 import type { PointerEvent, ViewportEvent } from "./types.ts";
 

@@ -35,8 +35,9 @@ import { useProjectParams, useProjectPath } from "@liqvid/studio-plugin-api";
 import { waitFor } from "@liqvid/utils";
 import x from "@stylexjs/atoms";
 import * as stylex from "@stylexjs/stylex";
+import type { Editor } from "@tldraw/editor";
 import { useEffect, useState } from "react";
-import { type Editor, TldrawUiContextProvider, TldrawUiIcon } from "tldraw";
+import { TldrawUiContextProvider, TldrawUiIcon } from "tldraw";
 
 import {
   deleteSnapshot,

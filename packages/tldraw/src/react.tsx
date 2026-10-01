@@ -12,6 +12,13 @@ import {
 } from "@liqvid/utils";
 import { useSeekable } from "@lqv/playback/react";
 import {
+  type Editor,
+  type TLEventInfo,
+  type TLKeyboardEventInfo,
+  Tldraw,
+  useEditor,
+} from "@tldraw/editor";
+import {
   lazy,
   useCallback,
   useContext,
@@ -21,24 +28,14 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import {
-  type Editor,
-  type TLEventInfo,
-  type TLKeyboardEventInfo,
-  Tldraw,
-  useEditor,
-} from "tldraw";
 
-import {
-  FollowController,
-  type PointerHandler,
-  tldrawReplay,
-} from "./index.ts";
+import { FollowController } from "./index.ts";
 import { CanvasLayer } from "./react/CanvasLayer.tsx";
 import { CursorImage } from "./react/CursorImage.tsx";
 import { TldrawRecording } from "./recording.tsx";
+import { tldrawReplay } from "./replay.ts";
 import { TLDRAW_SYMBOL } from "./symbols.ts";
-import type { TldrawData } from "./types.ts";
+import type { PointerHandler, TldrawData } from "./types.ts";
 
 /**
  * Context exposing the {@link FollowController} for the current
@@ -112,7 +109,8 @@ export function TldrawRecord({
   return (
     <Tldraw colorScheme={colorScheme} {...props}>
       <BubbleKeyboardEvents />
-      <AttachEditor />
+      <ProvideEditorToRecording />
+      <AttachSymbol />
       <SetDataAffords />
       {children}
     </Tldraw>
@@ -259,6 +257,7 @@ export function TldrawReplay({
          * thing instead.
          */}
         <SetEditor setEditor={setEditor} />
+        <AttachSymbol />
         <SetTldrawColorScheme />
         <SetDataAffords />
         <PreserveViewportOnResize />
@@ -273,13 +272,21 @@ export function TldrawReplay({
 
 /* ------------------------------ helpers ------------------------------ */
 
-function AttachEditor() {
+/** Hack to make editor available to recording */
+function ProvideEditorToRecording() {
   const editor = useEditor();
   const isPreview = useIsPreviewOrProduction();
 
   if (!isPreview) {
     TldrawRecording.recorder.provideEditor(editor);
   }
+
+  return null;
+}
+
+/** Hack to make editor available to the helper drawer */
+function AttachSymbol() {
+  const editor = useEditor();
 
   // TODO: temporary hack to make the helper thing work
   useEffect(() => {
@@ -318,6 +325,7 @@ function SetTldrawColorScheme() {
   return null;
 }
 
+/** Set data-affords attribute on DOM element so that it works in Liqvid */
 function SetDataAffords() {
   const editor = useEditor();
 

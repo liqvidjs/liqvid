@@ -1,5 +1,5 @@
 import { applyDiff, diffObjects } from "@liqvid/diff";
-import { b64Vecs } from "tldraw";
+import { b64Vecs } from "@tldraw/editor";
 
 import { getDefaultShape } from "../src/defaults.ts";
 import { isPointer } from "../src/record-types.ts";

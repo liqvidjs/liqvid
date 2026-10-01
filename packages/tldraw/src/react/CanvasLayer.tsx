@@ -1,5 +1,5 @@
+import { useEditor, useQuickReactor } from "@tldraw/editor";
 import { useMemo, useRef } from "react";
-import { useEditor, useQuickReactor } from "tldraw";
 
 import { layerCanvas } from "../layers.ts";
 

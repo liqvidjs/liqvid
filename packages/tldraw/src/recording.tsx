@@ -12,7 +12,7 @@ import type {
   TLShape,
   TLStoreSnapshot,
   UnknownRecord,
-} from "tldraw";
+} from "@tldraw/editor";
 
 import { getDefaultShape } from "./defaults.ts";
 import { isCamera, isPage, isShape } from "./record-types.ts";

@@ -1,4 +1,4 @@
-import type { TLEditorSnapshot } from "tldraw";
+import type { TLEditorSnapshot } from "@tldraw/editor";
 
 export type SavedState = Readonly<{
   createdAt: string;

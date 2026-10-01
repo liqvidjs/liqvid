@@ -11,7 +11,7 @@ import {
   type RuneName,
 } from "@liqvid/diff";
 import { assertType } from "@liqvid/utils";
-import type { VecModel } from "tldraw";
+import type { VecModel } from "@tldraw/tlschema";
 
 import type { Point3 } from "./types.ts";
 import { isSingleton } from "./utils.ts";

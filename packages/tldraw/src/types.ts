@@ -10,6 +10,7 @@ import type {
   VecModel,
 } from "@tldraw/editor";
 
+import type { CursorName } from "./utils.ts";
 import type { VERSION } from "./version.ts";
 
 export type Point3 = [x: number, y: number, z?: number];
@@ -32,6 +33,7 @@ export type ShapeUpdate = { [key: ShapeKey]: ObjectDiff<unknown> };
 
 // pages
 export type PageKey = `page:${string}`;
+
 /**
  * A page event, keyed by page id:
  * - an object diff creates/updates (e.g. renames) a page,
@@ -48,9 +50,11 @@ export type PageEvent = { [key: PageKey]: ObjectDiff<unknown> | 0 };
 export type Viewport = {
   /** The current page. */
   page: TLPageId;
+
   /** Camera position and zoom: `[x, y, z]`. */
   camera: [x: number, y: number, z: number];
 };
+
 export type ViewportEvent = { v: Partial<Viewport> };
 
 /**
@@ -73,14 +77,14 @@ export type TldrawEvent =
   | ShapeUpdate
   | ViewportEvent;
 
-export type TldrawData = {
+export type TldrawData = Readonly<{
   version: typeof VERSION;
   initialState: ReplayState;
   data: ReplayData<TldrawEvent>;
-};
+}>;
 
 // state
-export type ReplayState = {
+export type ReplayState = Readonly<{
   /**
    * The width (in pixels) of the author's container at the time of recording.
    * Used to scale the viewport zoom when replaying on a different-sized
@@ -103,34 +107,36 @@ export type ReplayState = {
    * base64-encoded.
    */
   snapshot: TLStoreSnapshot;
-};
+}>;
 
 // actions
-export type TldrawAction = {
+export type TldrawAction = Readonly<{
   /** A diff applied to the in-memory store snapshot (shapes and pages). */
   diff?: ObjectDiff<unknown>;
+
   /** The author's pointer position in canvas coordinates. */
   pointer?: Pointer;
+
   /** A change to the author's viewport (current page and/or camera). */
   viewport?: Partial<Viewport>;
-};
+}>;
 
 /* ------------------------------ decoded shapes ------------------------------ */
 
 export type DecodedTLDrawShapeSegment = Omit<TLDrawShapeSegment, "path"> & {
-  path: readonly VecModel[];
+  readonly path: readonly VecModel[];
 };
 
 export type DecodedTLDrawShape = Omit<TLDrawShape, "props"> & {
-  props: Omit<TLDrawShape["props"], "segments"> & {
-    segments: DecodedTLDrawShapeSegment[];
+  readonly props: Omit<TLDrawShape["props"], "segments"> & {
+    readonly segments: DecodedTLDrawShapeSegment[];
   };
 };
 
 export type DecodedTLShape = DecodedTLDrawShape | Exclude<TLShape, TLDrawShape>;
 
 export type DecodedTLSerializedStore = {
-  [key: `shape:${string}`]: DecodedTLShape;
+  readonly [key: `shape:${string}`]: DecodedTLShape;
 };
 
 export type DecodedStoreSnapshot = {
@@ -140,3 +146,11 @@ export type DecodedStoreSnapshot = {
   /** The serialized schema information */
   schema: SerializedSchema;
 };
+
+export type PointerHandler = (
+  args: Readonly<{
+    kind?: CursorName;
+    x?: number;
+    y?: number;
+  }>,
+) => void;

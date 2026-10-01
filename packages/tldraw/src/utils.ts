@@ -4,7 +4,7 @@ import {
   type TLSerializedStore,
   type TLShape,
   type VecModel,
-} from "tldraw";
+} from "@tldraw/tlschema";
 
 import { isDrawShape } from "./record-types.ts";
 import type {

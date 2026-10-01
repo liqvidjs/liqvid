@@ -14,9 +14,9 @@ import {
   inlineTypeDeclaration,
   writeTypedJson,
 } from "@liqvid/studio-plugin-api/server";
+import type { TLEditorSnapshot } from "@tldraw/editor";
 import { Cause, Effect, Exit, FileSystem, type PlatformError } from "effect";
 import { type RelativeDir, RelativeFile } from "effect-paths";
-import type { TLEditorSnapshot } from "tldraw";
 
 import { PACKAGE } from "../version.ts";
 
@@ -50,7 +50,7 @@ export async function saveSnapshot(
         declaration: inlineTypeDeclaration(`{
   createdAt: string;
   name: string;
-  snapshot: import("tldraw").TLEditorSnapshot;
+  snapshot: import("@tldraw/editor").TLEditorSnapshot;
 }`),
         dirname: pluginDir,
         filename: RelativeFile(`${name}.json`),
