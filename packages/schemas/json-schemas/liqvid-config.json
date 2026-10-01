@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -16,20 +16,15 @@
     "backend": {
       "anyOf": [
         {
-          "type": "object",
+          "additionalProperties": true,
+          "description": "Configure your hosting backends",
           "properties": {
             "content": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "copy",
-                    "githubPages",
-                    "liqvidStudio",
-                    "s3",
-                    "sftp"
-                  ],
-                  "description": "Provider hosting your content files (html/css/js)"
+                  "description": "Provider hosting your content files (html/css/js)",
+                  "enum": ["copy", "githubPages", "liqvidStudio", "s3", "sftp"],
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -39,14 +34,9 @@
             "media": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "copy",
-                    "liqvidStudio",
-                    "s3",
-                    "sftp"
-                  ],
-                  "description": "Provider hosting your media files (audio, video, and thumbnails)"
+                  "description": "Provider hosting your media files (audio, video, and thumbnails)",
+                  "enum": ["copy", "liqvidStudio", "s3", "sftp"],
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -54,8 +44,7 @@
               ]
             }
           },
-          "additionalProperties": true,
-          "description": "Configure your hosting backends"
+          "type": "object"
         },
         {
           "type": "null"
@@ -65,16 +54,14 @@
     "logging": {
       "anyOf": [
         {
-          "type": "object",
+          "additionalProperties": true,
+          "description": "Logging configuration",
           "properties": {
             "level": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "debug",
-                    "info"
-                  ]
+                  "enum": ["debug", "info"],
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -82,8 +69,7 @@
               ]
             }
           },
-          "additionalProperties": true,
-          "description": "Logging configuration"
+          "type": "object"
         },
         {
           "type": "null"
@@ -93,12 +79,13 @@
     "media": {
       "anyOf": [
         {
-          "type": "object",
+          "additionalProperties": true,
+          "description": "Media config",
           "properties": {
             "audio": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
                   "properties": {
                     "multiple": {
                       "anyOf": [
@@ -111,15 +98,12 @@
                       ]
                     },
                     "source": {
-                      "type": "string",
-                      "enum": [
-                        "preview",
-                        "production"
-                      ],
-                      "description": "Whether to render from development preview or production build"
+                      "description": "Whether to render from development preview or production build",
+                      "enum": ["preview", "production"],
+                      "type": "string"
                     }
                   },
-                  "additionalProperties": true
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -129,12 +113,13 @@
             "captioning": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Captioning configuration",
                   "properties": {
                     "smartWhisperOptions": {
                       "anyOf": [
                         {
-                          "type": "object",
+                          "additionalProperties": true,
                           "properties": {
                             "gpu": {
                               "anyOf": [
@@ -149,7 +134,6 @@
                             "modelName": {
                               "anyOf": [
                                 {
-                                  "type": "string",
                                   "enum": [
                                     "tiny",
                                     "tiny.en",
@@ -163,7 +147,8 @@
                                     "large-v2",
                                     "large-v3",
                                     "large-v3-turbo"
-                                  ]
+                                  ],
+                                  "type": "string"
                                 },
                                 {
                                   "type": "null"
@@ -201,7 +186,7 @@
                             "whisperOptions": {
                               "anyOf": [
                                 {
-                                  "type": "object",
+                                  "additionalProperties": true,
                                   "properties": {
                                     "language": {
                                       "anyOf": [
@@ -221,12 +206,12 @@
                                               "type": "number"
                                             },
                                             {
-                                              "type": "string",
                                               "enum": [
                                                 "Infinity",
                                                 "-Infinity",
                                                 "NaN"
-                                              ]
+                                              ],
+                                              "type": "string"
                                             }
                                           ]
                                         },
@@ -243,12 +228,12 @@
                                               "type": "number"
                                             },
                                             {
-                                              "type": "string",
                                               "enum": [
                                                 "Infinity",
                                                 "-Infinity",
                                                 "NaN"
-                                              ]
+                                              ],
+                                              "type": "string"
                                             }
                                           ]
                                         },
@@ -289,7 +274,7 @@
                                       ]
                                     }
                                   },
-                                  "additionalProperties": true
+                                  "type": "object"
                                 },
                                 {
                                   "type": "null"
@@ -297,7 +282,7 @@
                               ]
                             }
                           },
-                          "additionalProperties": true
+                          "type": "object"
                         },
                         {
                           "type": "null"
@@ -305,8 +290,7 @@
                       ]
                     }
                   },
-                  "additionalProperties": true,
-                  "description": "Captioning configuration"
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -316,18 +300,15 @@
             "renders": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
                   "properties": {
                     "source": {
-                      "type": "string",
-                      "enum": [
-                        "preview",
-                        "production"
-                      ],
-                      "description": "Whether to render from development preview or production build"
+                      "description": "Whether to render from development preview or production build",
+                      "enum": ["preview", "production"],
+                      "type": "string"
                     }
                   },
-                  "additionalProperties": true
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -337,18 +318,15 @@
             "screenshots": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
                   "properties": {
                     "source": {
-                      "type": "string",
-                      "enum": [
-                        "preview",
-                        "production"
-                      ],
-                      "description": "Whether to render from development preview or production build"
+                      "description": "Whether to render from development preview or production build",
+                      "enum": ["preview", "production"],
+                      "type": "string"
                     }
                   },
-                  "additionalProperties": true
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -358,10 +336,12 @@
             "thumbnails": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Thumbnail generation configuration",
                   "properties": {
                     "defaults": {
-                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Configuration for a thumbnail generation job",
                       "properties": {
                         "browserExecutable": {
                           "anyOf": [
@@ -382,12 +362,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -404,12 +380,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -421,11 +393,8 @@
                         "colorScheme": {
                           "anyOf": [
                             {
-                              "type": "string",
-                              "enum": [
-                                "light",
-                                "dark"
-                              ]
+                              "enum": ["light", "dark"],
+                              "type": "string"
                             },
                             {
                               "type": "null"
@@ -440,12 +409,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -462,12 +427,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -484,12 +445,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -506,12 +463,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -523,12 +476,9 @@
                         "imageFormat": {
                           "anyOf": [
                             {
-                              "type": "string",
-                              "enum": [
-                                "jpeg",
-                                "png"
-                              ],
-                              "description": "Recognized image formats."
+                              "description": "Recognized image formats.",
+                              "enum": ["jpeg", "png"],
+                              "type": "string"
                             },
                             {
                               "type": "null"
@@ -543,12 +493,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -565,12 +511,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -587,12 +529,8 @@
                                   "type": "number"
                                 },
                                 {
-                                  "type": "string",
-                                  "enum": [
-                                    "Infinity",
-                                    "-Infinity",
-                                    "NaN"
-                                  ]
+                                  "enum": ["Infinity", "-Infinity", "NaN"],
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -602,23 +540,16 @@
                           ]
                         }
                       },
-                      "additionalProperties": true,
-                      "description": "Configuration for a thumbnail generation job"
+                      "type": "object"
                     },
                     "source": {
-                      "type": "string",
-                      "enum": [
-                        "preview",
-                        "production"
-                      ],
-                      "description": "Whether to render from development preview or production build"
+                      "description": "Whether to render from development preview or production build",
+                      "enum": ["preview", "production"],
+                      "type": "string"
                     }
                   },
-                  "required": [
-                    "defaults"
-                  ],
-                  "additionalProperties": true,
-                  "description": "Thumbnail generation configuration"
+                  "required": ["defaults"],
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -626,8 +557,7 @@
               ]
             }
           },
-          "additionalProperties": true,
-          "description": "Media config"
+          "type": "object"
         },
         {
           "type": "null"
@@ -635,12 +565,12 @@
       ]
     },
     "providers": {
-      "type": "object",
+      "additionalProperties": true,
       "properties": {
         "copy": {
           "anyOf": [
             {
-              "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "basePath": {
                   "anyOf": [
@@ -676,7 +606,7 @@
                       ]
                     },
                     {
-                      "type": "object",
+                      "additionalProperties": true,
                       "properties": {
                         "hosting": {
                           "anyOf": [
@@ -699,11 +629,8 @@
                           ]
                         }
                       },
-                      "required": [
-                        "hosting",
-                        "media"
-                      ],
-                      "additionalProperties": true
+                      "required": ["hosting", "media"],
+                      "type": "object"
                     }
                   ],
                   "description": "The destination to copy to. Can be either a directory path, or an object with separate paths for hosting vs media."
@@ -711,8 +638,8 @@
                 "domain": {
                   "anyOf": [
                     {
-                      "type": "string",
-                      "format": "uri"
+                      "format": "uri",
+                      "type": "string"
                     },
                     {
                       "type": "null"
@@ -721,10 +648,8 @@
                   "description": "Domain content will be hosted at. Currently, this is only used for the \"copy embed code\" button."
                 }
               },
-              "required": [
-                "destination"
-              ],
-              "additionalProperties": true
+              "required": ["destination"],
+              "type": "object"
             },
             {
               "type": "null"
@@ -734,7 +659,7 @@
         "githubPages": {
           "anyOf": [
             {
-              "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "branch": {
                   "anyOf": [
@@ -747,19 +672,16 @@
                   ]
                 },
                 "repository": {
-                  "type": "string",
-                  "description": "Name of the repository to publish to"
+                  "description": "Name of the repository to publish to",
+                  "type": "string"
                 },
                 "username": {
-                  "type": "string",
-                  "description": "Your GitHub username"
+                  "description": "Your GitHub username",
+                  "type": "string"
                 }
               },
-              "required": [
-                "repository",
-                "username"
-              ],
-              "additionalProperties": true
+              "required": ["repository", "username"],
+              "type": "object"
             },
             {
               "type": "null"
@@ -769,14 +691,14 @@
         "liqvidStudio": {
           "anyOf": [
             {
-              "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "accessToken": {
                   "type": "string"
                 },
                 "username": {
-                  "type": "string",
-                  "description": "Your Liqvid Studio username."
+                  "description": "Your Liqvid Studio username.",
+                  "type": "string"
                 },
                 "workspace": {
                   "anyOf": [
@@ -790,11 +712,8 @@
                   "description": "Name of this project, used to scope your content on Liqvid Studio.\nIf not set, defaults to `name` from `package.json`.\nMUST be set if the package.json `name` contains a slash."
                 }
               },
-              "required": [
-                "accessToken",
-                "username"
-              ],
-              "additionalProperties": true
+              "required": ["accessToken", "username"],
+              "type": "object"
             },
             {
               "type": "null"
@@ -804,38 +723,35 @@
         "s3": {
           "anyOf": [
             {
-              "type": "object",
+              "additionalProperties": true,
+              "description": "Configuration for AWS S3 (or other compatible provider)",
               "properties": {
                 "auth": {
                   "anyOf": [
                     {
-                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Authentication via AWS profile",
                       "properties": {
                         "profile": {
                           "type": "string"
                         },
                         "type": {
-                          "type": "string",
-                          "enum": [
-                            "profile"
-                          ]
+                          "enum": ["profile"],
+                          "type": "string"
                         }
                       },
-                      "required": [
-                        "profile",
-                        "type"
-                      ],
-                      "additionalProperties": true,
-                      "description": "Authentication via AWS profile"
+                      "required": ["profile", "type"],
+                      "type": "object"
                     },
                     {
-                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Explicit S3 credentials authentication",
                       "properties": {
                         "accessKeyId": {
                           "anyOf": [
                             {
-                              "type": "string",
-                              "pattern": "^\\{env:[\\s\\S]*?\\}$"
+                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
+                              "type": "string"
                             },
                             {
                               "type": "null"
@@ -865,8 +781,8 @@
                         "secretAccessKey": {
                           "anyOf": [
                             {
-                              "type": "string",
-                              "pattern": "^\\{env:[\\s\\S]*?\\}$"
+                              "pattern": "^\\{env:[\\s\\S]*?\\}$",
+                              "type": "string"
                             },
                             {
                               "type": "null"
@@ -874,28 +790,23 @@
                           ]
                         },
                         "type": {
-                          "type": "string",
-                          "enum": [
-                            "explicit"
-                          ]
+                          "enum": ["explicit"],
+                          "type": "string"
                         }
                       },
-                      "required": [
-                        "type"
-                      ],
-                      "additionalProperties": true,
-                      "description": "Explicit S3 credentials authentication"
+                      "required": ["type"],
+                      "type": "object"
                     }
                   ],
                   "description": "S3 authentication config - discriminated union"
                 },
                 "bucket": {
-                  "type": "string",
-                  "description": "Bucket name"
+                  "description": "Bucket name",
+                  "type": "string"
                 },
                 "domain": {
-                  "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "type": "string"
                 },
                 "prefix": {
                   "anyOf": [
@@ -919,13 +830,8 @@
                   ]
                 }
               },
-              "required": [
-                "auth",
-                "bucket",
-                "domain"
-              ],
-              "additionalProperties": true,
-              "description": "Configuration for AWS S3 (or other compatible provider)"
+              "required": ["auth", "bucket", "domain"],
+              "type": "object"
             },
             {
               "type": "null"
@@ -935,7 +841,7 @@
         "sftp": {
           "anyOf": [
             {
-              "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "basePath": {
                   "anyOf": [
@@ -951,8 +857,8 @@
                 "domain": {
                   "anyOf": [
                     {
-                      "type": "string",
-                      "format": "uri"
+                      "format": "uri",
+                      "type": "string"
                     },
                     {
                       "type": "null"
@@ -967,11 +873,8 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "host",
-                "path"
-              ],
-              "additionalProperties": true
+              "required": ["host", "path"],
+              "type": "object"
             },
             {
               "type": "null"
@@ -979,12 +882,13 @@
           ]
         }
       },
-      "additionalProperties": true
+      "type": "object"
     },
     "publishing": {
       "anyOf": [
         {
-          "type": "object",
+          "additionalProperties": true,
+          "description": "Publishing configuration",
           "properties": {
             "delete": {
               "anyOf": [
@@ -999,17 +903,18 @@
             "include": {
               "anyOf": [
                 {
-                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Glob patterns of files to include when publishing",
                   "properties": {
                     "media": {
                       "anyOf": [
                         {
                           "anyOf": [
                             {
-                              "type": "array",
                               "items": {
                                 "type": "string"
-                              }
+                              },
+                              "type": "array"
                             },
                             {
                               "type": "null"
@@ -1022,8 +927,7 @@
                       ]
                     }
                   },
-                  "additionalProperties": true,
-                  "description": "Glob patterns of files to include when publishing"
+                  "type": "object"
                 },
                 {
                   "type": "null"
@@ -1031,8 +935,7 @@
               ]
             }
           },
-          "additionalProperties": true,
-          "description": "Publishing configuration"
+          "type": "object"
         },
         {
           "type": "null"
@@ -1042,14 +945,14 @@
     "rootParameters": {
       "anyOf": [
         {
-          "type": "object",
           "additionalProperties": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           },
-          "description": "Root-level static parameters that apply to all projects. These are used as fallbacks when a project does not define its own parameters. Format: `{ parameterName: [value1, value2, ...] }`. Note: \"value\" is not permitted as a parameter name."
+          "description": "Root-level static parameters that apply to all projects. These are used as fallbacks when a project does not define its own parameters. Format: `{ parameterName: [value1, value2, ...] }`. Note: \"value\" is not permitted as a parameter name.",
+          "type": "object"
         },
         {
           "type": "null"
@@ -1059,15 +962,15 @@
     "ui": {
       "anyOf": [
         {
-          "type": "object",
+          "additionalProperties": true,
           "properties": {
             "hideProjects": {
               "anyOf": [
                 {
-                  "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "type": "array"
                 },
                 {
                   "type": "null"
@@ -1077,14 +980,8 @@
             "locale": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "en",
-                    "fr",
-                    "es",
-                    "de",
-                    "zh"
-                  ]
+                  "enum": ["en", "fr", "es", "de", "zh"],
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -1094,12 +991,8 @@
             "theme": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "light",
-                    "dark",
-                    "system"
-                  ]
+                  "enum": ["light", "dark", "system"],
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -1107,7 +1000,7 @@
               ]
             }
           },
-          "additionalProperties": true
+          "type": "object"
         },
         {
           "type": "null"
@@ -1115,8 +1008,6 @@
       ]
     }
   },
-  "required": [
-    "providers"
-  ],
-  "additionalProperties": true
+  "required": ["providers"],
+  "type": "object"
 }

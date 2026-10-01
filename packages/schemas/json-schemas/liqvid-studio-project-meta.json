@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -18,32 +18,26 @@
           "type": "string"
         },
         {
-          "type": "array",
           "items": {
-            "type": "object",
+            "allOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              }
+            ],
             "properties": {
               "value": {
                 "type": "string"
               }
             },
-            "required": [
-              "value"
-            ],
-            "allOf": [
-              {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
-              }
-            ]
-          }
+            "required": ["value"],
+            "type": "object"
+          },
+          "type": "array"
         }
       ]
     }
   },
-  "required": [
-    "projectId"
-  ],
-  "additionalProperties": true
+  "required": ["projectId"],
+  "type": "object"
 }

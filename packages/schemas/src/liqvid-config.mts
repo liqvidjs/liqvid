@@ -7,11 +7,7 @@ import { ProviderConfigGitHubPages } from "./providers/hosting/github-pages.mts"
 import { ProviderConfigLiqvidStudio } from "./providers/hosting/liqvid-studio.mts";
 import { ProviderConfigS3 } from "./providers/hosting/s3.mts";
 import { ProviderConfigSFTP } from "./providers/hosting/sftp.mts";
-import {
-  ColorSchemeSpecifier,
-  LogLevel,
-  RenderSource,
-} from "./shared.mts";
+import { ColorSchemeSpecifier, LogLevel, RenderSource } from "./shared.mts";
 
 /** Supported locales. */
 export const Locale = Schema.Literals(["en", "fr", "es", "de", "zh"] as const);

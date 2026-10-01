@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -19,9 +19,6 @@
       "type": "string"
     }
   },
-  "required": [
-    "userId",
-    "workspaceId"
-  ],
-  "additionalProperties": true
+  "required": ["userId", "workspaceId"],
+  "type": "object"
 }

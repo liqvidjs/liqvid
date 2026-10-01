@@ -14,12 +14,7 @@ import { ThumbnailsJob } from "../src/jobs/thumbnails.mts";
 import { LiqvidConfig } from "../src/liqvid-config.mts";
 import { LiqvidStudioProjectMeta } from "../src/liqvid-studio-project-meta.mts";
 import { WorkspaceMeta } from "../src/liqvid-studio-workspace-meta.mts";
-import {
-  AspectRatio,
-  AspectRatioSpecifier,
-  AutoGenProjectMeta,
-  ProjectJson,
-} from "../src/project.mts";
+import { AutoGenProjectMeta, ProjectJson } from "../src/project.mts";
 import { RecordingMeta, RecordingMetaFile } from "../src/recording-meta.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,8 +34,6 @@ const schemas: SchemaEntry[] = [
   { name: "liqvid-config", schema: LiqvidConfig },
 
   // project
-  { name: "aspect-ratio", schema: AspectRatio },
-  { name: "aspect-ratio-specifier", schema: AspectRatioSpecifier },
   { name: "project-json", schema: ProjectJson },
   { name: "project-meta-autogen", schema: AutoGenProjectMeta },
 

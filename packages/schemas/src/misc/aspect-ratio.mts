@@ -3,7 +3,15 @@ import { Schema, SchemaTransformation } from "effect";
 export const AspectRatio = Schema.Struct({
   height: Schema.Number,
   width: Schema.Number,
-});
+}).pipe(
+  Schema.refine(
+    (value): value is { height: number; width: number } =>
+      value.width / value.height >= 0.5 && value.width / value.height <= 2,
+    {
+      message: "Aspect ratio must be between 0.5 and 2",
+    },
+  ),
+);
 export type AspectRatio = (typeof AspectRatio)["Type"];
 
 export const AspectRatioSpecifier = Schema.Union([

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -16,7 +16,7 @@
       "type": "string"
     },
     "duration": {
-      "type": "object",
+      "additionalProperties": true,
       "properties": {
         "d": {
           "anyOf": [
@@ -26,12 +26,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -48,12 +44,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -70,12 +62,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -92,12 +80,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -114,56 +98,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "minutes": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "ms": {
-          "anyOf": [
-            {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -180,12 +116,44 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ms": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -202,12 +170,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -224,12 +188,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -246,12 +206,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -268,12 +224,8 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "enum": [
-                    "Infinity",
-                    "-Infinity",
-                    "NaN"
-                  ]
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
                 }
               ]
             },
@@ -283,12 +235,9 @@
           ]
         }
       },
-      "additionalProperties": true
+      "type": "object"
     }
   },
-  "required": [
-    "created",
-    "duration"
-  ],
-  "additionalProperties": true
+  "required": ["created", "duration"],
+  "type": "object"
 }

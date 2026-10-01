@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
+  "additionalProperties": true,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -17,23 +17,20 @@
         {
           "anyOf": [
             {
-              "type": "string",
-              "enum": [
-                "square"
-              ]
+              "enum": ["square"],
+              "type": "string"
             },
             {
-              "type": "string",
-              "enum": [
-                "video"
-              ]
+              "enum": ["video"],
+              "type": "string"
             },
             {
-              "type": "string",
-              "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$"
+              "pattern": "^[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?:[+-]?\\d*\\.?\\d+(?:[Ee][+-]?\\d+)?$",
+              "type": "string"
             },
             {
-              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
               "prefixItems": [
                 {
                   "anyOf": [
@@ -41,12 +38,8 @@
                       "type": "number"
                     },
                     {
-                      "type": "string",
-                      "enum": [
-                        "Infinity",
-                        "-Infinity",
-                        "NaN"
-                      ]
+                      "enum": ["Infinity", "-Infinity", "NaN"],
+                      "type": "string"
                     }
                   ]
                 },
@@ -56,21 +49,16 @@
                       "type": "number"
                     },
                     {
-                      "type": "string",
-                      "enum": [
-                        "Infinity",
-                        "-Infinity",
-                        "NaN"
-                      ]
+                      "enum": ["Infinity", "-Infinity", "NaN"],
+                      "type": "string"
                     }
                   ]
                 }
               ],
-              "maxItems": 2,
-              "minItems": 2
+              "type": "array"
             },
             {
-              "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "height": {
                   "anyOf": [
@@ -78,12 +66,8 @@
                       "type": "number"
                     },
                     {
-                      "type": "string",
-                      "enum": [
-                        "Infinity",
-                        "-Infinity",
-                        "NaN"
-                      ]
+                      "enum": ["Infinity", "-Infinity", "NaN"],
+                      "type": "string"
                     }
                   ]
                 },
@@ -93,21 +77,14 @@
                       "type": "number"
                     },
                     {
-                      "type": "string",
-                      "enum": [
-                        "Infinity",
-                        "-Infinity",
-                        "NaN"
-                      ]
+                      "enum": ["Infinity", "-Infinity", "NaN"],
+                      "type": "string"
                     }
                   ]
                 }
               },
-              "required": [
-                "height",
-                "width"
-              ],
-              "additionalProperties": true
+              "required": ["height", "width"],
+              "type": "object"
             }
           ]
         },
@@ -124,26 +101,22 @@
               "type": "string"
             },
             {
-              "type": "array",
               "items": {
-                "type": "object",
+                "allOf": [
+                  {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                ],
                 "properties": {
                   "value": {
                     "type": "string"
                   }
                 },
-                "required": [
-                  "value"
-                ],
-                "allOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "string"
-                    }
-                  }
-                ]
-              }
+                "required": ["value"],
+                "type": "object"
+              },
+              "type": "array"
             }
           ]
         },
@@ -161,26 +134,22 @@
               "type": "boolean"
             },
             {
-              "type": "array",
               "items": {
-                "type": "object",
+                "allOf": [
+                  {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                ],
                 "properties": {
                   "value": {
                     "type": "boolean"
                   }
                 },
-                "required": [
-                  "value"
-                ],
-                "allOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "string"
-                    }
-                  }
-                ]
-              }
+                "required": ["value"],
+                "type": "object"
+              },
+              "type": "array"
             }
           ]
         },
@@ -193,13 +162,13 @@
     "parameters": {
       "anyOf": [
         {
-          "type": "object",
           "additionalProperties": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
-          }
+            },
+            "type": "array"
+          },
+          "type": "object"
         },
         {
           "type": "null"
@@ -213,33 +182,27 @@
           "type": "string"
         },
         {
-          "type": "array",
           "items": {
-            "type": "object",
+            "allOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              }
+            ],
             "properties": {
               "value": {
                 "type": "string"
               }
             },
-            "required": [
-              "value"
-            ],
-            "allOf": [
-              {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
-              }
-            ]
-          }
+            "required": ["value"],
+            "type": "object"
+          },
+          "type": "array"
         }
       ],
       "description": "Name of the project"
     }
   },
-  "required": [
-    "title"
-  ],
-  "additionalProperties": true
+  "required": ["title"],
+  "type": "object"
 }
