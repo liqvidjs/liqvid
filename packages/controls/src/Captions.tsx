@@ -8,8 +8,9 @@ import type { SyntheticTextTrack } from "@liqvid/playback";
 import { usePlayback } from "@liqvid/playback/react";
 import { usePlayer } from "@liqvid/player";
 import { useInitial } from "@liqvid/utils";
+import { RenderMode } from "@lqv/playback/react";
 import clsx from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 
 import { convertShortcuts } from "./utils.ts";
 
@@ -125,7 +126,7 @@ function CaptionsToggle({
 function CaptionsDisplay(props: Omit<React.ComponentProps<"div">, "children">) {
   const playback = usePlayback();
   const [captions, setCaptions] = useState<string[]>([]);
-  const { renderMode } = usePlayer();
+  const renderMode = use(RenderMode);
 
   const updateCaptions = useCallback(() => {
     const activeCaptions: string[] = [];

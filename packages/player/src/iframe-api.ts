@@ -2,8 +2,8 @@
 
 import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
-
-import type { RenderMode } from "./render-mode.ts";
+import type { ShortcutsSpecifier } from "@liqvid/keymap";
+import type { RenderMode } from "@lqv/playback/react";
 
 /**
  * Type-level carrier for a value of type `T`. The runtime never reads this
@@ -26,6 +26,18 @@ export const playerApiDeclaration = {
     getDuration: {
       arguments: type<[]>(),
       return: type<number>(),
+    },
+
+    /** Get the keyboard shortcuts handled by the player */
+    getKeyboardShortcuts: {
+      arguments: type<[]>(),
+      return: type<readonly PlayerKeyboardShortcut[]>(),
+    },
+
+    /** Dispatch a keyboard shortcut received by the embedding page */
+    handleKeyboardShortcut: {
+      arguments: type<[shortcut: string]>(),
+      return: type<void>(),
     },
 
     /** Seek to a specific time in seconds */
@@ -62,3 +74,8 @@ export const playerApiDeclaration = {
 } satisfies IFrameAPIDeclaration;
 
 export type PlayerApiDeclaration = typeof playerApiDeclaration;
+
+export type PlayerKeyboardShortcut = {
+  description?: string;
+  shortcut: ShortcutsSpecifier;
+};

@@ -4,9 +4,9 @@ import { Brand, Effect, FileSystem, Option, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient } from "effect/http";
 import { type AbsoluteDir, type RelativeDir, RelativeFile } from "effect-paths";
 
-import { getServerState } from "#_/initialize.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { PackageName } from "#_/types/misc.mjs";
+import { getServerState } from "#_/initialize";
+import { serverRuntime } from "#_/server-runtime";
+import { PackageName } from "#_/types/misc";
 
 /** Packages we check for updates. */
 const TRACKED_PACKAGES = [

@@ -2,7 +2,7 @@ export type ColorScheme = "light" | "dark";
 
 export type ImageFormat = "jpeg" | "png";
 
-export type RenderMode = "screenshot" | "thumbs" | "video";
+export type RenderMode = "screenshot" | "thumbnails" | "video";
 
 // hilarious!!
 declare global {

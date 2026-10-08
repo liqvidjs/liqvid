@@ -162,6 +162,7 @@ export const getPages = Effect.fnUntraced(
     concurrency,
     executablePath,
     height,
+    progress: showProgress = true,
     renderMode,
     url,
     width,
@@ -170,16 +171,29 @@ export const getPages = Effect.fnUntraced(
     concurrency: number;
     executablePath: AbsoluteFile;
     height: number;
+    /**
+     * Render a bar while pages connect. Callers that own the only progress bar
+     * (thumbnail capture) pass false so concurrent connects do not stack bars.
+     */
+    progress?: boolean;
     renderMode: RenderMode;
     url: string;
     width: number;
   }) {
-    // progress bar
-    const progress = yield* Progress;
-    const playerBar = new progress.SingleBar({
-      etaBuffer: 1,
-    });
-    playerBar.start(concurrency, 0);
+    // Connection is setup, not distributed work. Skip the bar when the caller
+    // is already showing the one bar for screenshot capture.
+    let playerBar:
+      | {
+          increment(step?: number): void;
+          stop(): void;
+        }
+      | undefined;
+    if (showProgress) {
+      const { SingleBar } = yield* Progress;
+      const bar = new SingleBar({ etaBuffer: 1 });
+      bar.start(concurrency, 0);
+      playerBar = bar;
+    }
 
     // get local browser - acquireRelease handles cleanup when scope closes
     const browser = yield* acquireBrowser({
@@ -210,7 +224,7 @@ export const getPages = Effect.fnUntraced(
           Effect.tap((page) =>
             Effect.sync(() => {
               createdPages.push(page);
-              playerBar.increment();
+              playerBar?.increment();
             }),
           ),
         ),
@@ -235,7 +249,7 @@ export const getPages = Effect.fnUntraced(
       ).pipe(Effect.ignore),
     );
 
-    playerBar.stop();
+    playerBar?.stop();
 
     yield* Effect.logDebug("connected to all pages");
 

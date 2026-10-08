@@ -74,6 +74,7 @@
   },
   "dependencies": {
     "@liqvid/utils": "workspace:^2.0.0-alpha.3",
+    "@napi-rs/image": "catalog:",
     "@puppeteer/browsers": "catalog:",
     "cli-progress": "catalog:",
     "effect": "catalog:",

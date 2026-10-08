@@ -6,6 +6,13 @@ import { Context } from "effect";
 export interface SingleBarOptions {
   etaBuffer?: number;
   /**
+   * Extra format-string elements. `scheme` is rendered ahead of
+   * `{value}/{total}`, so `{ scheme: "light" }` displays as `light 2/168`.
+   */
+  format?: {
+    scheme?: string;
+  };
+  /**
    * Format a raw progress value (e.g. `value` or `total`) for display.
    * Defaults to the value's own string representation.
    */

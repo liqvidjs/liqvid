@@ -17,28 +17,24 @@ import { HttpApiBuilder, HttpApiSwagger } from "effect/http-api";
 import { RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { audioLive } from "#_/api/audio.mjs";
-import { captionsLive } from "#_/api/captions.mjs";
-import { WebApi } from "#_/api/contract.mjs";
-import { projectMetaLive } from "#_/api/project-meta.mjs";
+import { audioLive } from "#_/api/audio";
+import { captionsLive } from "#_/api/captions";
+import { WebApi } from "#_/api/contract";
+import { projectMetaLive } from "#_/api/project-meta";
 import {
   DynamicImports,
   type DynamicImports as DynamicImportsType,
   recordingsLive,
-} from "#_/api/recording.mjs";
-import { rendersLive } from "#_/api/renders.mjs";
-import { getRoot } from "#_/api/root.mjs";
-import { screenshotsLive } from "#_/api/screenshots.mjs";
-import { settingsLive } from "#_/api/settings.mjs";
-import { serveStaticFile } from "#_/api/static-file.mjs";
-import { thumbsLive } from "#_/api/thumbs.mjs";
-import { getServerState, initializeServer } from "#_/initialize.mjs";
-import {
-  ServerLayer,
-  serverRuntime,
-  withLogLevel,
-} from "#_/server-runtime.mjs";
-import { getLogLevel } from "#_/utils/misc.mjs";
+} from "#_/api/recording";
+import { rendersLive } from "#_/api/renders";
+import { getRoot } from "#_/api/root";
+import { screenshotsLive } from "#_/api/screenshots";
+import { settingsLive } from "#_/api/settings";
+import { serveStaticFile } from "#_/api/static-file";
+import { thumbsLive } from "#_/api/thumbs";
+import { getServerState, initializeServer } from "#_/initialize";
+import { ServerLayer, serverRuntime, withLogLevel } from "#_/server-runtime";
+import { getLogLevel } from "#_/utils/misc";
 
 interface RequestContext {
   params: Promise<
@@ -152,7 +148,7 @@ export function patchHandler(dynamicImports: DynamicImportsType) {
   };
 }
 
-export { upgradeHandler } from "./websockets.mts";
+export { upgradeHandler } from "./websockets";
 
 async function runEffect<A, E>(
   program: Effect.Effect<A, E, EnvFiles | FileSystem.FileSystem>,

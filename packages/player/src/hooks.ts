@@ -4,8 +4,6 @@ import type { AspectRatio } from "@liqvid/schemas";
 import { type CleanUpFn, createUniqueContext } from "@liqvid/utils";
 import { useContext } from "react";
 
-import type { RenderMode } from "./render-mode.ts";
-
 export type ControlsState = Readonly<{
   /** whether the `<Controls>` component has been mounted in the DOM */
   mounted: boolean;
@@ -27,14 +25,6 @@ export type PlayerContext = Readonly<{
   /** the DOM element of the player root */
   domElement: HTMLElement | null;
 
-  /**
-   * Current rendering mode
-   * - `screenshot`: rendering to take a screenshot of one frame
-   * - `thumbs`: rendering to generate thumbnails
-   * - `video`: static video export
-   * - `web`: the default experience
-   * */
-  renderMode: RenderMode;
   renderingTasks: Set<RenderingTask>;
   registerRenderingTask(task: RenderingTask): CleanUpFn;
 }>;
@@ -47,10 +37,17 @@ export const PlayerContext = createUniqueContext<PlayerContext>(
     domElement: null,
     registerRenderingTask: () => () => {},
     renderingTasks: new Set(),
-    renderMode: "web",
   },
 );
 
-export function usePlayer(): PlayerContext {
+export function usePlayerOptional() {
   return useContext(PlayerContext);
+}
+
+export function usePlayer() {
+  const value = useContext(PlayerContext);
+  if (value === null) {
+    throw new Error("usePlayer() must be used within a <PlayerProvider>.");
+  }
+  return value;
 }

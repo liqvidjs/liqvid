@@ -17,3 +17,4 @@ export * from "@liqvid/script/react";
 export * from "@liqvid/ssr";
 export * from "@liqvid/ssr/react";
 export * as Utils from "@liqvid/utils";
+export { RenderMode } from "@lqv/playback/react";

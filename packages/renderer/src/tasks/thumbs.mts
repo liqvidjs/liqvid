@@ -1,8 +1,9 @@
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { Effect, FileSystem } from "effect";
+import { ResizeFit, Transformer } from "@napi-rs/image";
+import { Effect, FileSystem, PubSub } from "effect";
 import type { AbsoluteFile } from "effect-paths";
-import jimp from "jimp";
 
 import type { ColorScheme, ImageFormat } from "../types.mts";
 import { getEnsureChrome } from "../utils/binaries.mts";
@@ -31,6 +32,10 @@ When multiple schemes are given they share a single browser and set of loaded
 pages: the URL is loaded once and each scheme is captured by re-applying the
 color scheme to the existing pages, avoiding a second (contention-inducing)
 page load.
+
+Screenshot capture is the only step fanned out across those pages. Each color
+scheme has its own progress bar (`light 2/168`). As each screenshot lands it
+is published and blitted into its sheet, so assembly overlaps capture.
 */
 export function thumbs({
   browserExecutable,
@@ -81,7 +86,7 @@ export function thumbs({
     const fs = yield* FileSystem.FileSystem;
 
     let step = 1;
-    const total = 3;
+    const total = 2;
 
     // validation
     const executablePath = yield* Effect.promise(() =>
@@ -129,6 +134,7 @@ export function thumbs({
       concurrency,
       executablePath,
       height: browserHeight,
+      progress: false,
       renderMode: "thumbs",
       url,
       width: browserWidth,
@@ -143,42 +149,73 @@ export function thumbs({
 
     const numThumbs = Math.ceil(durationSeconds / frequency);
 
-    // grab thumbs for each scheme, reusing the same pages
     yield* Effect.log(`(${step++}/${total}) Capturing thumbs...`);
-    for (const [i, { colorScheme }] of passes.entries()) {
+    const { SingleBar } = yield* Progress;
+
+    for (const [i, { colorScheme, output }] of passes.entries()) {
       // re-apply the scheme to every page before capturing this pass
       yield* Effect.all(
         pages.map((page) => setColorScheme(page, colorScheme)),
         { concurrency: "unbounded" },
       );
 
-      yield* captureRange({
-        count: numThumbs,
-        filename: (j) => path.join(tmpDirs[i]!, `${j}.${imageFormat}`),
-        imageFormat,
-        pool,
-        time: (j) => j * frequency,
-      }).pipe(Effect.annotateLogs({ colorScheme }));
-    }
+      const captureBar = new SingleBar({ format: { scheme: colorScheme } });
+      captureBar.start(numThumbs, 0);
 
-    // assemble + clean up each scheme's sheets
-    yield* Effect.log(`(${step++}/${total}) Assembling sheets...`);
-    yield* Effect.all(
-      passes.map(({ output }, i) =>
-        assembleSheets({
-          cols,
-          height,
-          imageFormat,
-          numThumbs,
-          output,
-          quality,
-          rows,
-          tmpDir: tmpDirs[i]!,
-          width,
+      // Subscribe before capture publishes, then blit each shot as it lands.
+      // Bounded so a slow blit backpressures instead of dropping frames.
+      yield* Effect.scoped(
+        Effect.gen(function* () {
+          const pubsub = yield* PubSub.bounded<CapturedThumb>(
+            Math.max(1, concurrency),
+          );
+          const subscription = yield* PubSub.subscribe(pubsub);
+
+          yield* Effect.all(
+            [
+              blitCaptured({
+                cols,
+                height,
+                imageFormat,
+                numThumbs,
+                output,
+                quality,
+                rows,
+                subscription,
+                tmpDir: tmpDirs[i]!,
+                width,
+              }),
+              captureRange({
+                bar: captureBar,
+                count: numThumbs,
+                filename: (j) => path.join(tmpDirs[i]!, `${j}.${imageFormat}`),
+                imageFormat,
+                onCaptured: (index) =>
+                  PubSub.publish(pubsub, { _tag: "thumb", index }).pipe(
+                    Effect.flatMap((accepted) =>
+                      accepted
+                        ? Effect.void
+                        : Effect.die(
+                            "dropped a thumbnail before it was blitted",
+                          ),
+                    ),
+                  ),
+                pool,
+                time: (j) => j * frequency,
+              }).pipe(
+                Effect.ensuring(
+                  PubSub.end(pubsub, { _tag: "end" }).pipe(Effect.asVoid),
+                ),
+              ),
+            ],
+            { concurrency: "unbounded" },
+          );
         }),
-      ),
-      { concurrency: "unbounded" },
-    );
+      ).pipe(
+        Effect.annotateLogs({ colorScheme }),
+        Effect.ensuring(Effect.sync(() => captureBar.stop())),
+      );
+    }
 
     // clean up tmp files
     yield* Effect.log("Cleaning up...");
@@ -210,10 +247,15 @@ export function thumbs({
   );
 }
 
+type CapturedThumb =
+  | { readonly _tag: "end" }
+  | { readonly _tag: "thumb"; readonly index: number };
+
 /**
-Assemble thumb screenshots into sheets.
+Blit each captured screenshot into its sheet as it arrives, and write a sheet
+once every cell in it has landed.
 */
-const assembleSheets = Effect.fnUntraced(
+const blitCaptured = Effect.fnUntraced(
   function* ({
     cols,
     height,
@@ -222,6 +264,7 @@ const assembleSheets = Effect.fnUntraced(
     output,
     quality,
     rows,
+    subscription,
     tmpDir,
     width,
   }: {
@@ -232,50 +275,73 @@ const assembleSheets = Effect.fnUntraced(
     output: string;
     quality: number;
     rows: number;
+    subscription: PubSub.Subscription<CapturedThumb>;
     tmpDir: string;
     width: number;
   }) {
-    const numSheets = Math.ceil(numThumbs / cols / rows);
+    const perSheet = cols * rows;
+    const sheetWidth = cols * width;
+    const sheetHeight = rows * height;
+    const sheets = new Map<
+      number,
+      {
+        expected: number;
+        filled: number;
+        image: ReturnType<typeof Transformer.fromRgbaPixels>;
+      }
+    >();
 
-    // progress bar
-    const progress = yield* Progress;
-    const sheetsBar = new progress.SingleBar();
+    while (true) {
+      const message = yield* PubSub.take(subscription);
+      if (message._tag === "end") return;
 
-    sheetsBar.start(numThumbs, 0);
+      const { index } = message;
+      const sheetNum = Math.floor(index / perSheet);
+      const cell = index % perSheet;
 
-    yield* Effect.promise(() =>
-      Promise.all(
-        new Array(numSheets).fill(null).map(async (_, sheetNum) => {
-          const sheet = new jimp(cols * width, rows * height);
+      let sheet = sheets.get(sheetNum);
+      if (!sheet) {
+        sheet = {
+          expected: Math.min(perSheet, numThumbs - sheetNum * perSheet),
+          filled: 0,
+          // Transparent canvas; JPEG encode flattens empty cells to black.
+          image: Transformer.fromRgbaPixels(
+            new Uint8Array(sheetWidth * sheetHeight * 4),
+            sheetWidth,
+            sheetHeight,
+          ),
+        };
+        sheets.set(sheetNum, sheet);
+      }
+      const current = sheet;
 
-          // blit thumbs into here
-          await Promise.all(
-            new Array(cols * rows).fill(null).map(async (_, i) => {
-              const index = sheetNum * cols * rows + i;
-              if (index >= numThumbs) return;
+      yield* Effect.promise(async () => {
+        const bytes = await readFile(
+          path.join(tmpDir, `${index}.${imageFormat}`),
+        );
+        // PNG intermediate so JPEG quality is applied once, on the sheet.
+        const thumb = await new Transformer(bytes)
+          .resize(width, height, null, ResizeFit.Fill)
+          .png();
+        current.image.overlay(
+          thumb,
+          (cell % cols) * width,
+          Math.floor(cell / rows) * height,
+        );
+      });
 
-              const thumb = await jimp.read(
-                path.join(tmpDir, `${index}.${imageFormat}`),
-              );
-              if (imageFormat === "jpeg") {
-                thumb.quality(quality);
-              }
-              thumb.resize(width, height);
-              sheet.blit(
-                thumb,
-                (i % cols) * width,
-                Math.floor(i / rows) * height,
-              );
-              sheetsBar.increment();
-            }),
-          );
+      current.filled += 1;
+      if (current.filled < current.expected) continue;
 
-          await sheet.writeAsync(output.replace("%s", sheetNum.toString()));
-        }),
-      ),
-    );
-
-    sheetsBar.stop();
+      sheets.delete(sheetNum);
+      yield* Effect.promise(async () => {
+        const encoded =
+          imageFormat === "jpeg"
+            ? await current.image.jpeg(quality)
+            : await current.image.png();
+        await writeFile(output.replace("%s", sheetNum.toString()), encoded);
+      });
+    }
   },
-  (effect) => effect.pipe(Effect.withLogSpan("assembleSheets")),
+  (effect) => effect.pipe(Effect.withLogSpan("blitCaptured")),
 );

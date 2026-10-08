@@ -3,11 +3,12 @@
 import { type ColorScheme, useColorScheme } from "@liqvid/color-scheme/react";
 import { HydrateElement } from "@liqvid/hydration";
 import { provideIframeApi } from "@liqvid/iframe-api/child";
-import { KeymapProvider } from "@liqvid/keymap/react";
+import { KeymapProvider, useKeymap } from "@liqvid/keymap/react";
 import type { Playback } from "@liqvid/playback";
 import { usePlaybackOptional } from "@liqvid/playback/react";
 import type { AspectRatioSpecifier } from "@liqvid/schemas";
 import { combineRefs } from "@liqvid/utils";
+import { RenderMode } from "@lqv/playback/react";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,9 +20,11 @@ import {
   PlayerContext,
   type RenderingTask,
 } from "./hooks.ts";
-import { playerApiDeclaration } from "./iframe-api.ts";
+import {
+  type PlayerKeyboardShortcut,
+  playerApiDeclaration,
+} from "./iframe-api.ts";
 import { PrivatePlayerContext } from "./private-api.ts";
-import type { RenderMode } from "./render-mode.ts";
 
 const API_SYMBOL = Symbol.for("@liqvid/player/api");
 
@@ -32,6 +35,7 @@ export function Root({
   playback: propsPlayback,
   ref: forwardedRef = null,
   renderMode: initialRenderMode = "web",
+  keyboardShortcuts,
   style,
   ...props
 }: {
@@ -40,6 +44,8 @@ export function Root({
   playback?: Playback;
   ref?: React.Ref<HTMLDivElement>;
   renderMode?: RenderMode;
+  /** Explicit shortcuts that should be exposed to embedding pages. */
+  keyboardShortcuts?: readonly PlayerKeyboardShortcut[];
 } & React.HTMLAttributes<HTMLElement>) {
   const aspectRatio = useMemo(
     () => normalizeAspectRatio(propsAspectRatio),
@@ -80,7 +86,7 @@ export function Root({
   });
 
   const context = useMemo(
-    (): PlayerContext => ({
+    (): NonNullable<PlayerContext> => ({
       aspectRatio,
       controls,
       get domElement() {
@@ -88,17 +94,26 @@ export function Root({
       },
       registerRenderingTask,
       renderingTasks,
-      renderMode,
     }),
-    [aspectRatio, renderingTasks, registerRenderingTask, renderMode, controls],
+    [aspectRatio, renderingTasks, registerRenderingTask, controls],
   );
 
   const { colorScheme, persistence, setColorScheme } = useColorScheme();
+  const keymap = useKeymap();
 
   const api = useMemo(
     () => ({
       getDuration() {
         return playback.duration;
+      },
+      getKeyboardShortcuts() {
+        return (
+          keyboardShortcuts ??
+          keymap.getKeys().map((shortcut) => ({ shortcut }))
+        );
+      },
+      handleKeyboardShortcut(shortcut: string) {
+        keymap.handleShortcut(shortcut);
       },
       seekTo(time: number) {
         playback.currentTime = time;
@@ -124,7 +139,7 @@ export function Root({
         );
       },
     }),
-    [playback, setColorScheme],
+    [keyboardShortcuts, keymap, playback, setColorScheme],
   );
 
   // Initialize iframe API for postMessage communication
@@ -167,35 +182,37 @@ export function Root({
 
   return (
     <KeymapProvider>
-      <PrivatePlayerContext value={privateApi}>
-        <PlayerContext.Provider value={context}>
-          {persistence ? (
-            <HydrateElement
-              from={[persistence]}
-              hydrationFn={(node, colorScheme) => {
-                const style = node.getAttribute("style");
-                if (style?.includes("color-scheme:")) {
-                  node.setAttribute(
-                    "style",
-                    style.replace(
-                      /color-scheme:[^;]+/,
-                      `color-scheme:${colorScheme}`,
-                    ),
-                  );
-                } else {
-                  node.setAttribute("style", `color-scheme:${colorScheme}`);
-                }
+      <RenderMode value={renderMode}>
+        <PrivatePlayerContext value={privateApi}>
+          <PlayerContext.Provider value={context}>
+            {persistence ? (
+              <HydrateElement
+                from={[persistence]}
+                hydrationFn={(node, colorScheme) => {
+                  const style = node.getAttribute("style");
+                  if (style?.includes("color-scheme:")) {
+                    node.setAttribute(
+                      "style",
+                      style.replace(
+                        /color-scheme:[^;]+/,
+                        `color-scheme:${colorScheme}`,
+                      ),
+                    );
+                  } else {
+                    node.setAttribute("style", `color-scheme:${colorScheme}`);
+                  }
 
-                node.dataset.colorScheme = colorScheme;
-              }}
-            >
-              {inner}
-            </HydrateElement>
-          ) : (
-            inner
-          )}
-        </PlayerContext.Provider>
-      </PrivatePlayerContext>
+                  node.dataset.colorScheme = colorScheme;
+                }}
+              >
+                {inner}
+              </HydrateElement>
+            ) : (
+              inner
+            )}
+          </PlayerContext.Provider>
+        </PrivatePlayerContext>
+      </RenderMode>
     </KeymapProvider>
   );
 }

@@ -4,15 +4,36 @@ import { createContext, useContext, useEffect, useRef } from "react";
 
 import type { Seekable } from "./index.ts";
 
-type GlobalThis = {
+const symbol = Symbol.for("@lqv/playback");
+const renderModeSymbol = Symbol.for("@lqv/playback/renderMode");
+
+/**
+ *  TODO: figure out where this should be centralized; don't really want to depend on @liqvid/player here
+ * - `cli`: rendering in a CLI environment. Not currently used, but reserved for future use.
+ * - `screenshot`: rendering to take a screenshot of one frame
+ * - `thumbs`: rendering to generate thumbnails
+ * - `video`: static video export
+ * - `web`: the default experience
+ * */
+export type RenderMode = "cli" | "screenshot" | "thumbnails" | "video" | "web";
+
+type GlobalThis = typeof globalThis & {
   [symbol]: React.Context<Seekable | null>;
+  [renderModeSymbol]: React.Context<RenderMode>;
 };
 
-const symbol = Symbol.for("@lqv/playback");
-
 if (!(symbol in globalThis)) {
-  (globalThis as unknown as GlobalThis)[symbol] =
-    createContext<Seekable | null>(null);
+  // Seekable context
+  const Seekable = createContext<Seekable | null>(null);
+  Seekable.displayName = "Seekable";
+  (globalThis as GlobalThis)[symbol] = Seekable;
+}
+
+if (!(renderModeSymbol in globalThis)) {
+  // RenderMode context
+  const RenderMode = createContext<RenderMode>("web");
+  RenderMode.displayName = "RenderMode";
+  (globalThis as GlobalThis)[renderModeSymbol] = RenderMode;
 }
 
 /**
@@ -80,3 +101,12 @@ export function useTime<T = number>(
     };
   }, [callback, playback, transform]);
 }
+
+/**
+ * {@link React.Context} used to access current rendering mode
+ * - `screenshot`: rendering to take a screenshot of one frame
+ * - `thumbs`: rendering to generate thumbnails
+ * - `video`: static video export
+ * - `web`: the default experience
+ */
+export const RenderMode = (globalThis as GlobalThis)[renderModeSymbol];
