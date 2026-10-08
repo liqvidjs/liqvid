@@ -107,10 +107,12 @@ export function parseTime$(str: string): Duration {
  * @since 1.7.0
  */
 export function formatTimeDuration(
-  time: number | DurationLike,
+  time: number | DurationLike | DurationString,
 ): ISO8601DurationString {
   if (typeof time === "object") {
     return formatTimeDuration(Duration.inMilliseconds(time));
+  } else if (typeof time === "string") {
+    return formatTimeDuration(parseTimeMs(time));
   }
   const parts = ["P"];
   const timeParts: string[] = [];
@@ -149,10 +151,12 @@ export function formatTimeDuration(
  * @returns Formatted time
  */
 export function formatTime(
-  time: number | DurationLike,
+  time: number | DurationLike | DurationString,
 ): DurationStringWithoutMilliseconds {
   if (typeof time === "object") {
     return formatTime(Duration.inMilliseconds(time));
+  } else if (typeof time === "string") {
+    return time.replace(/\.0+$/, "") as DurationStringWithoutMilliseconds;
   }
   if (time < 0) {
     return (MINUS_SIGN +
@@ -188,9 +192,13 @@ export function formatTime(
  * @param time Time in milliseconds
  * @returns Formatted time
  */
-export function formatTimeMs(time: number | DurationLike): DurationString {
+export function formatTimeMs(
+  time: number | DurationLike | DurationString,
+): DurationString {
   if (typeof time === "object") {
     return formatTimeMs(Duration.inMilliseconds(time));
+  } else if (typeof time === "string") {
+    return time;
   }
   if (time < 0) {
     return (MINUS_SIGN + formatTimeMs(-time)) as DurationStringWithMilliseconds;
