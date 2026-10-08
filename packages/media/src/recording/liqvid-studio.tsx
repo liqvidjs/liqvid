@@ -1,18 +1,30 @@
+import { Button, DialogRoot, type LocalizedString } from "@liqvid/studio/ui";
 import {
   type LiqvidStudioRecordingPlugin,
   packageNameToDirName,
   type RecordingComponentProps,
   usePluginApi,
+  useProjectParams,
+  useProjectPath,
 } from "@liqvid/studio-plugin-api";
+import { RelativeFile } from "effect-paths";
 import { useCallback, useEffect, useState } from "react";
 
 import { CameraPreview } from "./CameraPreview.tsx";
 import {
   LiqvidMediaRecorder,
   type MediaRecorderConfig,
-} from "./LiqvidMediaRecorder.mts";
+} from "./LiqvidMediaRecorder.ts";
+import {
+  canGeneratePlainTranscriptAction,
+  generatePlainTranscriptAction,
+  reprocessHlsAction,
+} from "./server.ts";
+import { TranscriptDialog } from "./TranscriptDialog.tsx";
 
 import styles from "./studio-plugin.module.css";
+
+const PLAIN_TRANSCRIPT = RelativeFile("plain.txt");
 
 const icon = (props?: React.JSX.IntrinsicElements["svg"]) => (
   <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -25,6 +37,14 @@ const icon = (props?: React.JSX.IntrinsicElements["svg"]) => (
 );
 
 type MediaDeviceMap = Readonly<Record<MediaDeviceKind, MediaDeviceInfo[]>>;
+
+const t = {
+  generateTranscript: "Generate transcript" as LocalizedString,
+  generatingTranscript: "Generating transcript…" as LocalizedString,
+  hlsJobStarted: "HLS reprocessing job started" as LocalizedString,
+  reprocessHls: "Reprocess HLS" as LocalizedString,
+  reprocessingHls: "Starting HLS job…" as LocalizedString,
+};
 
 function ConfigurationComponent() {
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -56,7 +76,7 @@ function ConfigurationComponent() {
 
         if (duplicateIndex === -1) {
           devices.push(curr);
-        } else if (!devices[duplicateIndex].label && curr.label) {
+        } else if (!devices[duplicateIndex]!.label && curr.label) {
           devices[duplicateIndex] = curr;
         }
         return acc;
@@ -265,8 +285,113 @@ function ConfigurationComponent() {
   );
 }
 
-function RecordingComponent({ name }: RecordingComponentProps) {
+function RecordingComponent({
+  files,
+  loadFile,
+  name,
+}: RecordingComponentProps) {
   const { makeToast } = usePluginApi();
+  const projectParams = useProjectParams();
+  const projectPath = useProjectPath();
+  const [updatedFiles, setUpdatedFiles] = useState<readonly string[] | null>(
+    null,
+  );
+  const mediaFiles = updatedFiles ?? files.list();
+  const hasHlsFiles = mediaFiles.some((filename) =>
+    filename.startsWith("hls/"),
+  );
+  const visibleFiles = mediaFiles.filter(
+    (filename) => !filename.startsWith("hls/"),
+  );
+  const [canGenerateTranscript, setCanGenerateTranscript] = useState(false);
+  const [isReprocessingHls, setIsReprocessingHls] = useState(false);
+  const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
+  const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
+  const [transcript, setTranscript] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    void canGeneratePlainTranscriptAction()
+      .then((enabled) => {
+        if (active) setCanGenerateTranscript(enabled);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to load media recording configuration:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const hasFile = (filename: string) =>
+    files.has(filename) || mediaFiles.includes(filename);
+
+  const refreshFileList = (updatedFiles: string[]) => {
+    setUpdatedFiles(updatedFiles);
+  };
+
+  const handleReprocessHls = async () => {
+    setIsReprocessingHls(true);
+    try {
+      await reprocessHlsAction({
+        projectParams,
+        projectPath,
+        recordingName: name,
+      });
+      makeToast({ title: t.hlsJobStarted, type: "success" });
+    } catch (error) {
+      makeToast({
+        message: error instanceof Error ? error.message : undefined,
+        title: "Failed to reprocess HLS video",
+        type: "negative",
+      });
+    } finally {
+      setIsReprocessingHls(false);
+    }
+  };
+
+  const handleGenerateTranscript = async () => {
+    setIsGeneratingTranscript(true);
+    try {
+      refreshFileList(
+        await generatePlainTranscriptAction({
+          projectParams,
+          projectPath,
+          recordingName: name,
+        }),
+      );
+      makeToast({ title: "Transcript generated", type: "success" });
+    } catch (error) {
+      makeToast({
+        message: error instanceof Error ? error.message : undefined,
+        title: "Failed to generate transcript",
+        type: "negative",
+      });
+    } finally {
+      setIsGeneratingTranscript(false);
+    }
+  };
+
+  const handleViewTranscript = async () => {
+    setIsTranscriptOpen(true);
+    setIsLoadingTranscript(true);
+    try {
+      setTranscript(await loadFile(PLAIN_TRANSCRIPT));
+    } catch (error) {
+      makeToast({
+        message: error instanceof Error ? error.message : undefined,
+        title: "Failed to load transcript",
+        type: "negative",
+      });
+      setIsTranscriptOpen(false);
+    } finally {
+      setIsLoadingTranscript(false);
+    }
+  };
+
   const onClick = async () => {
     try {
       await navigator.clipboard.writeText(
@@ -297,11 +422,60 @@ const latest = recordings.dir(${JSON.stringify(name)});
 
   return (
     <div>
-      {icon({ height: 24, width: 24 })}
-
-      <button className="lv-studio-button" onClick={onClick} type="button">
-        Use
-      </button>
+      <h4 className={styles.title}>
+        {icon({ className: styles.icon, height: 24, width: 24 })}
+        Audio/Video
+      </h4>
+      <ul className={styles.fileList}>
+        {visibleFiles.map((filename) => (
+          <li key={filename}>
+            <code>{filename}</code>
+          </li>
+        ))}
+        {hasHlsFiles && (
+          <li>
+            <code>hls/</code>
+          </li>
+        )}
+        {visibleFiles.length === 0 && !hasHlsFiles && (
+          <li>No media files available.</li>
+        )}
+      </ul>
+      <div className={styles.actions}>
+        {hasFile("video.webm") && (
+          <Button disabled={isReprocessingHls} onClick={handleReprocessHls}>
+            {isReprocessingHls ? t.reprocessingHls : t.reprocessHls}
+          </Button>
+        )}
+        {canGenerateTranscript &&
+          !hasFile(PLAIN_TRANSCRIPT) &&
+          (hasFile("audio.webm") || hasFile("video.webm")) && (
+            <Button
+              disabled={isGeneratingTranscript}
+              onClick={handleGenerateTranscript}
+            >
+              {isGeneratingTranscript
+                ? t.generatingTranscript
+                : t.generateTranscript}
+            </Button>
+          )}
+        {hasFile(PLAIN_TRANSCRIPT) && (
+          <button
+            className="lv-studio-button"
+            disabled={isLoadingTranscript}
+            onClick={handleViewTranscript}
+            type="button"
+          >
+            {isLoadingTranscript ? "Loading transcript…" : "View transcript"}
+          </button>
+        )}
+        <button className="lv-studio-button" onClick={onClick} type="button">
+          Use
+        </button>
+      </div>
+      <DialogRoot onOpenChange={setIsTranscriptOpen} open={isTranscriptOpen}>
+        <TranscriptDialog transcript={transcript} />
+      </DialogRoot>
     </div>
   );
 }
@@ -311,7 +485,8 @@ function mediaDeviceKey(d: MediaDeviceInfo) {
 }
 
 function mediaDeviceLabel(d: MediaDeviceInfo) {
-  const label = d.label || (d.kind === "audioinput" ? "Audio input" : "Video input");
+  const label =
+    d.label || (d.kind === "audioinput" ? "Audio input" : "Video input");
   return d.kind === "audioinput" && d.deviceId === "default"
     ? `Default — ${label}`
     : label;

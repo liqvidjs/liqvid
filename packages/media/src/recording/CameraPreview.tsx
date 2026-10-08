@@ -6,7 +6,7 @@ import { Portal, useDraggable, useResizable } from "@liqvid/studio/ui";
 import clsx from "clsx";
 import { type JSX, useEffect, useRef, useState } from "react";
 
-import type { LiqvidMediaRecorder } from "./LiqvidMediaRecorder.mts";
+import type { LiqvidMediaRecorder } from "./LiqvidMediaRecorder";
 
 const initialHeight = 300;
 

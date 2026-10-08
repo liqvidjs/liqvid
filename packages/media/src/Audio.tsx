@@ -5,9 +5,11 @@ import type { AudioSourceRegistration } from "@liqvid/playback";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
 import { useScriptOptional } from "@liqvid/script/react";
 import { isSafari } from "@liqvid/utils";
+import { RenderMode } from "@lqv/playback/react";
 import {
   Children,
   isValidElement,
+  use,
   useCallback,
   useEffect,
   useMemo,
@@ -71,16 +73,21 @@ export function Audio<M extends string = string>({
   src: srcProp,
   start = 0,
 }: AudioProps<M>) {
+  const renderMode = use(RenderMode);
   const playback = usePlayback();
   const script = useScriptOptional();
 
+  const isActive = renderMode === "video" || renderMode === "web";
+
   // Resolve the audio source URL
   const src = useMemo(() => {
+    if (!isActive) return;
     if (srcProp) return srcProp;
     return findSupportedSource(children);
-  }, [srcProp, children]);
+  }, [srcProp, children, isActive]);
 
   const startInSeconds = (() => {
+    if (!isActive) return 0;
     if (typeof start === "number") {
       return start;
     } else if (typeof start === "string") {
@@ -268,35 +275,40 @@ export function Audio<M extends string = string>({
   }, [src, decodeAudio, stopAudio]);
 
   // Decode audio when audioContext becomes available
-  usePlaybackEvent("audiocontextchange", decodeAudio);
+  usePlaybackEvent("audiocontextchange", decodeAudio, { enabled: isActive });
 
   // Handle play event
-  usePlaybackEvent("play", syncAudio);
+  usePlaybackEvent("play", syncAudio, { enabled: isActive });
 
   // Handle pause event
-  usePlaybackEvent("pause", stopAudio);
+  usePlaybackEvent("pause", stopAudio, { enabled: isActive });
 
   // Handle stop event
-  usePlaybackEvent("stop", stopAudio);
+  usePlaybackEvent("stop", stopAudio, { enabled: isActive });
 
   // Handle seek events - need to restart audio at new position
-  usePlaybackEvent("seeked", syncAudio);
+  usePlaybackEvent("seeked", syncAudio, { enabled: isActive });
 
   // Handle seeking (while dragging) - pause audio
-  usePlaybackEvent("seeking", stopAudio);
+  usePlaybackEvent("seeking", stopAudio, { enabled: isActive });
 
   // Handle timeupdate - start/stop audio when entering/exiting time range
-  usePlaybackEvent("timeupdate", syncAudio);
+  usePlaybackEvent("timeupdate", syncAudio, { enabled: isActive });
 
   // Handle playback rate changes
-  usePlaybackEvent("ratechange", () => {
-    if (sourceNodeRef.current) {
-      sourceNodeRef.current.playbackRate.value = playback.playbackRate;
-    }
-  });
+  usePlaybackEvent(
+    "ratechange",
+    () => {
+      if (sourceNodeRef.current) {
+        sourceNodeRef.current.playbackRate.value = playback.playbackRate;
+      }
+    },
+    { enabled: isActive },
+  );
 
   // Cleanup on unmount
   useEffect(() => {
+    if (!isActive) return;
     return () => {
       stopAudio();
       // Unregister from offline rendering
@@ -305,7 +317,11 @@ export function Audio<M extends string = string>({
         registrationRef.current = null;
       }
     };
-  }, [playback, stopAudio]);
+  }, [playback, stopAudio, isActive]);
+
+  if (renderMode === "screenshot" || renderMode === "thumbnails") {
+    return null;
+  }
 
   return <div>{children}</div>;
 }

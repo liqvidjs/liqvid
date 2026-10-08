@@ -14,6 +14,51 @@
   }
 }
 
+.title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+
+.icon {
+  flex: 0 0 auto;
+}
+
+.fileList {
+  max-height: 180px;
+  padding-left: 20px;
+  margin: 0 0 8px;
+  overflow: auto;
+}
+
+.fileList li {
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.transcript {
+  max-height: min(65vh, 600px);
+  padding-block: var(--lvs-spacing-sm);
+  padding-inline: var(--lvs-spacing-md);
+  margin: 12px 0;
+
+  overflow: auto;
+  overflow-wrap: anywhere;
+
+  background-color: light-dark(white, #3a3a3a);
+  border: 1px solid light-dark(#ddd, #444);
+  border-radius: var(--lvs-rounded-md);
+
+  box-shadow: inset 0 0 4px 2px
+    light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.05));
+}
+
 .spinner {
   display: inline-block;
   width: 14px;
