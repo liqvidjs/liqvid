@@ -95,3 +95,21 @@ export function ColorSchemeMetaTag() {
 
   return null;
 }
+
+/**
+ * Container for a value that depends on the color scheme, e.g. image URLs.
+ */
+export type LightDarkVariant<T> = {
+  light: T;
+  dark: T;
+};
+
+/** build a LightDarkVariant using a callback */
+export function lightDark<T>(
+  getValue: (colorScheme: ColorScheme) => T,
+): LightDarkVariant<T> {
+  return {
+    dark: getValue("dark"),
+    light: getValue("light"),
+  };
+}
