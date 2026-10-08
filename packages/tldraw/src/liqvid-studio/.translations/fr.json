@@ -1,0 +1,27 @@
+{
+  "caption": "États sauvegardés",
+  "capture": "Capturer",
+  "confirmDelete": "Voulez-vous vraiment supprimer cet état sauvegardé ? Cette action est irréversible.",
+  "confirmOverwrite": "Écraser cet état sauvegardé avec le canevas actuel ? Cette action est irréversible.",
+  "delete": "Supprimer",
+  "errors": {
+    "invalidName": "Le nom d'un état sauvegardé doit être un seul segment de chemin",
+    "nameExists": "Un état sauvegardé nommé {name} existe déjà",
+    "notFound": "Aucun état sauvegardé nommé {name}",
+    "overwriteFailed": "Échec de l'écrasement",
+    "renameFailed": "Échec du renommage"
+  },
+  "headers": {
+    "actions": "Actions",
+    "date": "Date",
+    "name": "Nom",
+    "preview": "Aperçu"
+  },
+  "newName": "Nouveau nom",
+  "overwrite": "Écraser",
+  "rename": "Renommer",
+  "restore": "Restaurer",
+  "restoreOptions": "Options de restauration",
+  "restoreShapes": "Restaurer les formes",
+  "restoreViewport": "Restaurer la vue"
+}

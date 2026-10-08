@@ -11,7 +11,7 @@ import type {
 } from "@tldraw/editor";
 
 import type { CursorName } from "./utils.ts";
-import type { VERSION } from "./version.ts";
+import type { PACKAGE, VERSION } from "./version.ts";
 
 export type Point3 = [x: number, y: number, z?: number];
 
@@ -39,7 +39,7 @@ export type PageKey = `page:${string}`;
  * - an object diff creates/updates (e.g. renames) a page,
  * - `0` deletes it.
  */
-export type PageEvent = { [key: PageKey]: ObjectDiff<unknown> | 0 };
+export type PageEvent = { readonly [key: PageKey]: ObjectDiff<unknown> | 0 };
 
 /**
  * The author's viewport in tldraw coordinates: the current page and the
@@ -78,9 +78,10 @@ export type TldrawEvent =
   | ViewportEvent;
 
 export type TldrawData = Readonly<{
-  version: typeof VERSION;
-  initialState: ReplayState;
   data: ReplayData<TldrawEvent>;
+  initialState: ReplayState;
+  package: typeof PACKAGE;
+  version: typeof VERSION;
 }>;
 
 // state

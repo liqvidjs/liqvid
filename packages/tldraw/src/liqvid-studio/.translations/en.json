@@ -1,0 +1,27 @@
+{
+  "caption": "Saved states",
+  "capture": "Capture",
+  "confirmDelete": "Are you sure you want to delete this saved state? This action cannot be undone.",
+  "confirmOverwrite": "Overwrite this saved state with the current canvas? This action cannot be undone.",
+  "delete": "Delete",
+  "errors": {
+    "invalidName": "Saved state names must be a single path segment",
+    "nameExists": "A saved state named {name} already exists",
+    "notFound": "No saved state named {name}",
+    "overwriteFailed": "Overwrite failed",
+    "renameFailed": "Rename failed"
+  },
+  "headers": {
+    "actions": "Actions",
+    "date": "Date",
+    "name": "Name",
+    "preview": "Preview"
+  },
+  "newName": "New name",
+  "overwrite": "Overwrite",
+  "rename": "Rename",
+  "restore": "Restore",
+  "restoreOptions": "Restore options",
+  "restoreShapes": "Restore shapes",
+  "restoreViewport": "Restore viewport"
+}

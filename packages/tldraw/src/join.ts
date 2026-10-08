@@ -11,7 +11,13 @@ import type { TLStoreSnapshot } from "@tldraw/tlschema";
 
 import { getDefaultShape } from "./defaults.ts";
 import { isPage, isShape } from "./record-types.ts";
-import { apply, blankState, decompress, merge } from "./replay.ts";
+import {
+  apply,
+  blankState,
+  decompress,
+  initializeHistory,
+  merge,
+} from "./replay.ts";
 import type { PageKey, ReplayState, ShapeKey, TldrawEvent } from "./types.ts";
 import { decodeStore, encodeDiffPaths, encodePointer } from "./utils.ts";
 import { PACKAGE, VERSION } from "./version.ts";
@@ -36,6 +42,7 @@ export function joinTldrawRecordings(
     decompress,
     initial: head[0].initial,
     initialize: initializeNoProps,
+    initializeHistory,
     merge,
   });
 
@@ -43,8 +50,8 @@ export function joinTldrawRecordings(
     ReplayData<TldrawEvent>,
     number | DurationLike | DurationString,
   ])[] = [];
-  for (const [recording, { start } = {}] of configs) {
-    const events = diffStates(state, recording.initial);
+  for (const [index, [recording, { start } = {}]] of configs.entries()) {
+    const events = index === 0 ? [] : diffStates(state, recording.initial);
 
     state = getFinalState({
       apply,
@@ -53,6 +60,7 @@ export function joinTldrawRecordings(
       decompress,
       initial: recording.initial,
       initialize: initializeNoProps,
+      initializeHistory,
       merge,
     });
 
@@ -83,7 +91,7 @@ function initializeNoProps(state: ReplayState) {
   };
 }
 
-function diffStates(a: ReplayState, b: ReplayState): TldrawEvent[] {
+function diffStates(a: ReplayState, b: ReplayState): readonly TldrawEvent[] {
   const next = initializeNoProps(b);
   const events = diffStoreStates(
     a.snapshot.store as Record<string, unknown>,
@@ -115,8 +123,8 @@ function diffStates(a: ReplayState, b: ReplayState): TldrawEvent[] {
 }
 
 function diffStoreStates(
-  a: Record<string, unknown>,
-  b: Record<string, unknown>,
+  a: Readonly<Record<string, unknown>>,
+  b: Readonly<Record<string, unknown>>,
 ): TldrawEvent[] {
   const events: TldrawEvent[] = [];
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
@@ -135,12 +143,17 @@ function diffStoreRecord(
   to: unknown,
 ): TldrawEvent | undefined {
   if (isShape(key)) {
-    return diffRecord(key, from, to, (shape) =>
-      encodeDiffPaths(diffObjects(getDefaultShape(), shape)),
+    return diffRecord(key, from, to, (previous, shape) =>
+      encodeDiffPaths(
+        diffObjects(
+          previous === undefined ? getDefaultShape() : previous,
+          shape,
+        ),
+      ),
     );
   }
   if (isPage(key)) {
-    return diffRecord(key, from, to, (page) => diffObjects({}, page));
+    return diffRecord(key, from, to, (_, page) => diffObjects({}, page));
   }
 
   return undefined;
@@ -150,7 +163,7 @@ function diffRecord(
   key: ShapeKey | PageKey,
   from: unknown,
   to: unknown,
-  createDiff: (record: unknown) => unknown,
+  createDiff: (from: unknown, to: unknown) => unknown,
 ): TldrawEvent | undefined {
   if (to === undefined) {
     return from === undefined ? undefined : ({ [key]: 0 } as TldrawEvent);
@@ -159,5 +172,5 @@ function diffRecord(
     return undefined;
   }
 
-  return { [key]: createDiff(to) } as TldrawEvent;
+  return { [key]: createDiff(from, to) } as TldrawEvent;
 }

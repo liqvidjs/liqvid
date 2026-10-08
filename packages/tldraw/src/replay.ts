@@ -10,8 +10,9 @@ import {
   objectDiff,
   objectKeys,
 } from "@liqvid/diff";
+import { Duration } from "@liqvid/duration";
 import { makeReplayPlugin } from "@liqvid/recording/utils";
-import { assertType, type Mutable } from "@liqvid/utils";
+import { assertType, length, type Mutable } from "@liqvid/utils";
 import type {
   Editor,
   TLDrawShape,
@@ -26,6 +27,7 @@ import { getDefaultShape } from "./defaults.ts";
 import type { FollowController } from "./follow.ts";
 import { isPage, isPointer, isShape, isViewportEvent } from "./record-types.ts";
 import type {
+  DecodedTLSerializedStore,
   DecodedTLShape,
   Point3,
   PointerHandler,
@@ -183,8 +185,24 @@ export const tldrawReplay = makeReplayPlugin<
     }
   },
 
+  commitState(state, props) {
+    restoreState(
+      state,
+      props,
+      state.snapshot.store as unknown as DecodedTLSerializedStore,
+    );
+  },
+
   decompress,
+  defaultCacheDepth: ({ data }) =>
+    Math.max(
+      0,
+      Math.floor(
+        Math.log2(length(data) / Duration.inMilliseconds({ minutes: 1 })),
+      ),
+    ),
   initialize,
+  initializeHistory,
 
   // invert
   invert(state, action) {
@@ -357,6 +375,23 @@ export function decompress(
   return {};
 }
 
+export function initializeHistory(
+  history: TldrawHistory,
+  state: ReplayState,
+): void {
+  const store = decodeStore(state.snapshot.store);
+  history.shapes = new Map();
+  history.pages = new Map();
+
+  for (const [key, record] of Object.entries(store)) {
+    if (isShape(key)) {
+      history.shapes.set(key, record as DecodedTLShape);
+    } else if (isPage(key)) {
+      history.pages.set(key, record as unknown as TLPage);
+    }
+  }
+}
+
 function initialize(state: ReplayState, props: TldrawProps) {
   // Decode the stored (base64) snapshot for in-memory use, but load the
   // re-encoded snapshot into tldraw, which expects base64 vectors.
@@ -388,34 +423,13 @@ function initialize(state: ReplayState, props: TldrawProps) {
 
   props.editor.store.loadStoreSnapshot({
     ...state.snapshot,
-    store: encodeStore(decodedStore),
+    store: encodeStore(lockReplayShapes(decodedStore)),
   });
 
   // Lock every shape from the initial store snapshot so the viewer cannot
   // modify it. (Shapes created later during replay are locked as they are
   // created; see the `create` handler in `commit`.) We lock across all pages,
   // not just the current one, by walking the loaded snapshot's shape records.
-  const shapeIds = objectKeys(decodedStore).filter((k) =>
-    isShape(k as string),
-  ) as TLShapeId[];
-  props.editor.store.mergeRemoteChanges(() => {
-    props.editor.run(
-      () => {
-        props.editor.updateShapes(
-          shapeIds
-            .map((id) => props.editor.getShape(id))
-            .filter((shape) => shape && !shape.isLocked)
-            .map((shape) => ({
-              id: shape!.id,
-              isLocked: true,
-              type: shape!.type,
-            })),
-        );
-      },
-      { ignoreShapeLock: true },
-    );
-  });
-
   // Seed the follow controller with the author's viewport (unscaled) and snap
   // the editor to it (following is on by default). The controller applies the
   // scale when snapping.
@@ -428,10 +442,49 @@ function initialize(state: ReplayState, props: TldrawProps) {
   return decodedState;
 }
 
+function restoreState(
+  state: ReplayState,
+  props: TldrawProps,
+  decodedStore: DecodedTLSerializedStore,
+): void {
+  props.editor.store.mergeRemoteChanges(() => {
+    props.editor.store.loadStoreSnapshot({
+      ...state.snapshot,
+      store: encodeStore(lockReplayShapes(decodedStore)),
+    });
+  });
+
+  props.follow.setAuthorViewport(state.viewport);
+  const [x, y] = state.pointer;
+  props.handlePointer({ x, y });
+}
+
+function lockReplayShapes(
+  store: DecodedTLSerializedStore,
+): DecodedTLSerializedStore {
+  return Object.fromEntries(
+    Object.entries(store).map(([key, record]) =>
+      isShape(key)
+        ? [key, { ...(record as DecodedTLShape), isLocked: true }]
+        : [key, record],
+    ),
+  ) as DecodedTLSerializedStore;
+}
+
 export function merge(...actions: readonly TldrawAction[]): TldrawAction {
   return actions.reduce<Mutable<TldrawAction>>(
     (acc, curr) => {
-      const diff = mergeDiffs(acc.diff!, curr.diff ?? {}, false);
+      // `mergeDiffs(..., true)` mutates the accumulator. Clone the incoming
+      // action diff so nested values adopted by the accumulator stay private
+      // and later merges cannot corrupt `actions` or their precomputed inverses.
+      const incomingDiff = curr.diff ?? {};
+      const diff = mergeDiffs(
+        acc.diff!,
+        objectKeys(incomingDiff).length > 0
+          ? fastClone(incomingDiff)
+          : incomingDiff,
+        true,
+      );
       const viewport =
         acc.viewport || curr.viewport
           ? { ...acc.viewport, ...curr.viewport }

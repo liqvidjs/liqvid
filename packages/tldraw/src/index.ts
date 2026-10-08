@@ -1,3 +1,7 @@
+export {
+  toggleDevMode,
+  toggleDevOnlyOnSelectedShapes,
+} from "./dev-mode.ts";
 export { FollowController } from "./follow.ts";
 export { joinTldrawRecordings } from "./join.ts";
 export {

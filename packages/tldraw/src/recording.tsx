@@ -1,5 +1,6 @@
 import { diffObjects } from "@liqvid/diff";
 import { type RecordingPlugin, ReplayDataRecorder } from "@liqvid/recording";
+import type { RecordingComponentProps } from "@liqvid/studio-plugin-api";
 import type { ReplayData } from "@liqvid/utils";
 import { assertType, bind } from "@liqvid/utils";
 import type {
@@ -13,8 +14,10 @@ import type {
   TLStoreSnapshot,
   UnknownRecord,
 } from "@tldraw/editor";
+import { lazy } from "react";
 
 import { getDefaultShape } from "./defaults.ts";
+import { filterDevOnlyShapes, isDevOnlyShape } from "./dev-mode.ts";
 import { isCamera, isPage, isShape } from "./record-types.ts";
 import type {
   DecodedTLShape,
@@ -85,6 +88,16 @@ export class TldrawRecorder extends ReplayDataRecorder<
       this.#pageCache.set(page.id, page);
     }
 
+    this.#shapeCache.clear();
+    const snapshot = this.#editor.store.getStoreSnapshot("all");
+    const filteredSnapshot = filterDevOnlyShapes(snapshot);
+    for (const [key, record] of Object.entries(filteredSnapshot.store)) {
+      if (isShape(key)) {
+        assertType<TLShape>(record);
+        this.#shapeCache.set(record.id, decodeShape(record));
+      }
+    }
+
     this.#viewport = this.#readViewport();
 
     this.initial = {
@@ -92,11 +105,13 @@ export class TldrawRecorder extends ReplayDataRecorder<
       containerWidth: this.#editor.getContainer().clientWidth,
       // most recent pointer position, in canvas coordinates
       pointer: this.#pointer,
-      snapshot: this.#editor.store.getStoreSnapshot("all"),
+      snapshot: filteredSnapshot,
       // the author's viewport (current page + camera)
       viewport: this.#viewport,
     };
-    this.#unlisten = this.#editor.store.listen(this.captureEvent);
+    this.#unlisten = this.#editor.store.listen(this.captureEvent, {
+      source: "user",
+    });
   }
 
   override endRecording(): void {
@@ -175,6 +190,10 @@ export class TldrawRecorder extends ReplayDataRecorder<
       switch (true) {
         case isShape(key): {
           assertType<TLShape>(created);
+          if (isDevOnlyShape(created)) {
+            this.#shapeCache.delete(created.id);
+            break;
+          }
 
           const decoded = decodeShape(created);
           // diff the decoded shape, then re-encode the vectors so the stored
@@ -206,7 +225,17 @@ export class TldrawRecorder extends ReplayDataRecorder<
           break;
         // shape
         case isShape(key): {
+          const from = update[0] as TLRecord;
           assertType<TLShape>(to);
+          assertType<TLShape>(from);
+
+          if (isDevOnlyShape(to)) {
+            if (!isDevOnlyShape(from) && this.#shapeCache.has(to.id)) {
+              events.push({ [key]: 0 });
+            }
+            this.#shapeCache.delete(to.id);
+            break;
+          }
 
           const decodedTo = decodeShape(to);
 
@@ -226,8 +255,8 @@ export class TldrawRecorder extends ReplayDataRecorder<
               events.push({ [key]: encodeDiffPaths(diff) });
             }
           } else {
-            // TODO: is this necessary? what happens if the shape exists before recording,
-            // we need to initialize the shape cache better
+            // A shape omitted from the initial snapshot may become recordable
+            // if its dev-only marker is removed.
             events.push({
               [key]: encodeDiffPaths(diffObjects(getDefaultShape(), decodedTo)),
             });
@@ -274,6 +303,11 @@ export class TldrawRecorder extends ReplayDataRecorder<
     for (const [key, removed] of Object.entries(changes.removed)) {
       switch (true) {
         case isShape(key):
+          assertType<TLShape>(removed);
+          if (isDevOnlyShape(removed)) {
+            this.#shapeCache.delete(removed.id);
+            break;
+          }
           events.push({ [key]: 0 });
           this.#shapeCache.delete(removed.id);
           break;
@@ -317,10 +351,17 @@ export const TldrawRecording: RecordingPlugin<
   [number, TldrawEvent],
   ReplayData<TldrawEvent>,
   TldrawRecorder
-> = {
+> & {
+  recordingComponent?: (props: RecordingComponentProps) => React.ReactNode;
+} = {
   icon,
   name: "Tldraw",
   package: PACKAGE,
   recorder: new TldrawRecorder(),
+  recordingComponent: lazy(() =>
+    import("./liqvid-studio/RecordingPreview.tsx").then((mod) => ({
+      default: mod.RecordingPreview,
+    })),
+  ),
   title: "Record Tldraw",
 };

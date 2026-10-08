@@ -1,5 +1,6 @@
+import { RenderMode } from "@lqv/playback/react";
 import { useEditor, useQuickReactor } from "@tldraw/editor";
-import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { use, useCallback, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { PointerHandler } from "../types.ts";
 import { getCursorSvgs } from "../utils.ts";
@@ -12,10 +13,13 @@ const CURSOR_OFFSET = 16;
  */
 export function CursorImage({
   ref,
+  visibility,
 }: {
+  visibility?: RenderMode | readonly RenderMode[];
   ref?: React.Ref<{ handlePointer: PointerHandler }>;
 }): React.ReactNode {
   const editor = useEditor();
+  const renderMode = use(RenderMode);
 
   /** Cursors map */
   const cursors = useMemo(getCursorSvgs, []);
@@ -98,6 +102,14 @@ export function CursorImage({
     }),
     [cursor?.image],
   );
+
+  if (visibility) {
+    if (typeof visibility === "string") {
+      if (renderMode !== visibility) return null;
+    } else {
+      if (!visibility.includes(renderMode)) return null;
+    }
+  }
 
   return <div id="tl-cursor" ref={cursorRef} style={style} />;
 }

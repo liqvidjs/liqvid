@@ -1,23 +1,12 @@
-import { useColorScheme } from "@liqvid/color-scheme/react";
-import { useKeymap } from "@liqvid/keymap/react";
-import {
-  useIsPreview,
-  useIsPreviewOrProduction,
-} from "@liqvid/studio-plugin-api";
+import { useIsPreview } from "@liqvid/studio-plugin-api";
 import {
   type Awaitable,
   assertType,
   createUniqueContext,
   omit,
 } from "@liqvid/utils";
-import { useSeekable } from "@lqv/playback/react";
-import {
-  type Editor,
-  type TLEventInfo,
-  type TLKeyboardEventInfo,
-  Tldraw,
-  useEditor,
-} from "@tldraw/editor";
+import { type RenderMode, useSeekable } from "@lqv/playback/react";
+import type { Editor } from "@tldraw/editor";
 import {
   lazy,
   useCallback,
@@ -28,14 +17,23 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { Tldraw, useEditor } from "tldraw";
 
-import { FollowController } from "./index.ts";
-import { CanvasLayer } from "./react/CanvasLayer.tsx";
-import { CursorImage } from "./react/CursorImage.tsx";
-import { TldrawRecording } from "./recording.tsx";
-import { tldrawReplay } from "./replay.ts";
-import { TLDRAW_SYMBOL } from "./symbols.ts";
-import type { PointerHandler, TldrawData } from "./types.ts";
+import { isDevModeEnabled, subscribeDevMode } from "../dev-mode.ts";
+import { FollowController } from "../index.ts";
+import { tldrawReplay } from "../replay.ts";
+import type { PointerHandler, TldrawData } from "../types.ts";
+
+import { CanvasLayer } from "./CanvasLayer.tsx";
+import { CursorImage } from "./CursorImage.tsx";
+import {
+  AttachSymbol,
+  PreserveViewportOnResize,
+  SetDataAffords,
+  SetDevOnlyShapeSvgAttributes,
+  SetEditor,
+  SetTldrawColorScheme,
+} from "./helpers.tsx";
 
 /**
  * Context exposing the {@link FollowController} for the current
@@ -80,58 +78,58 @@ export function useFollow(): {
   return { controller, followAuthor, following };
 }
 
+/** Read whether newly created shapes are currently marked dev-only. */
+export function useDevMode(): boolean {
+  const editor = useEditor();
+
+  return useSyncExternalStore(
+    useCallback((onChange) => subscribeDevMode(editor, onChange), [editor]),
+    useCallback(() => isDevModeEnabled(editor), [editor]),
+    () => false,
+  );
+}
+
 /**
  * In development mode, `<TldrawRecord>` component.
  * In production mode (or preview), a `<TldrawReplay>` component.
  */
 export const TldrawAmbi = lazy(
   import.meta.env.DEV
-    ? async () => ({
-        default: function TldrawAmbi(
-          props: React.ComponentProps<typeof TldrawReplay>,
-        ) {
-          const isPreview = useIsPreview();
-          if (isPreview) {
-            return <TldrawReplay {...props} />;
-          }
+    ? async () =>
+        import("./record.tsx").then((mod) => ({
+          default: function TldrawAmbi(
+            props: React.ComponentProps<typeof TldrawReplay>,
+          ): React.ReactNode {
+            const isPreview = useIsPreview();
+            if (isPreview) {
+              return <TldrawReplay {...props} />;
+            }
 
-          return <TldrawRecord {...omit(props, ["replay", "start"])} />;
-        },
-      })
+            return <mod.TldrawRecord {...omit(props, ["replay", "start"])} />;
+          },
+        }))
     : async () => ({ default: TldrawReplay }),
 );
-
-export function TldrawRecord({
-  children,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof Tldraw>) {
-  const { colorScheme } = useColorScheme();
-  return (
-    <Tldraw colorScheme={colorScheme} {...props}>
-      <BubbleKeyboardEvents />
-      <ProvideEditorToRecording />
-      <AttachSymbol />
-      <SetDataAffords />
-      {children}
-    </Tldraw>
-  );
-}
 
 /**
  * Replay Tldraw canvas. React version of {@link tldrawReplay}.
  */
 export function TldrawReplay({
   children,
+  cursorVisibility,
   start,
   replay,
+  colorScheme: _colorScheme,
   ...props
 }: Omit<
   Parameters<typeof tldrawReplay>[0],
   "data" | "playback" | "editor" | "handlePointer" | "follow" | "recording"
 > &
   React.ComponentPropsWithoutRef<typeof Tldraw> & {
+    cursorVisibility?: RenderMode | readonly RenderMode[];
+
     /** Cursor data to replay. */
-    replay: Awaitable<TldrawData>;
+    replay?: Awaitable<TldrawData>;
   }): React.ReactNode {
   const playback = useSeekable();
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -260,195 +258,13 @@ export function TldrawReplay({
         <AttachSymbol />
         <SetTldrawColorScheme />
         <SetDataAffords />
+        <SetDevOnlyShapeSvgAttributes />
         <PreserveViewportOnResize />
         <CanvasLayer>
-          <CursorImage ref={cursorRef} />
+          <CursorImage ref={cursorRef} visibility={cursorVisibility} />
         </CanvasLayer>
         {children}
       </Tldraw>
     </FollowContext.Provider>
   );
-}
-
-/* ------------------------------ helpers ------------------------------ */
-
-/** Hack to make editor available to recording */
-function ProvideEditorToRecording() {
-  const editor = useEditor();
-  const isPreview = useIsPreviewOrProduction();
-
-  if (!isPreview) {
-    TldrawRecording.recorder.provideEditor(editor);
-  }
-
-  return null;
-}
-
-/** Hack to make editor available to the helper drawer */
-function AttachSymbol() {
-  const editor = useEditor();
-
-  // TODO: temporary hack to make the helper thing work
-  useEffect(() => {
-    (editor.getContainer() as unknown as { [sym: symbol]: Editor })[
-      TLDRAW_SYMBOL
-    ] = editor;
-  }, [editor]);
-
-  return null;
-}
-
-function SetEditor({
-  setEditor,
-}: {
-  setEditor: (editor: Editor | null) => void;
-}) {
-  const editor = useEditor();
-  useEffect(() => {
-    setEditor(editor);
-  }, [editor, setEditor]);
-  return null;
-}
-
-/**
- * DO NOT set colorScheme on `<Tlraw>` component directly
- * as that recreates the component and breaks the camera
- */
-function SetTldrawColorScheme() {
-  const editor = useEditor();
-  const { colorScheme } = useColorScheme();
-
-  useEffect(() => {
-    editor.setColorMode(colorScheme);
-  }, [colorScheme, editor]);
-
-  return null;
-}
-
-/** Set data-affords attribute on DOM element so that it works in Liqvid */
-function SetDataAffords() {
-  const editor = useEditor();
-
-  // set data-affords="click keys" on DOM element
-
-  useEffect(() => {
-    editor.getContainer().setAttribute("data-affords", "click keys");
-  }, [editor]);
-
-  return null;
-}
-
-/**
- * Preserve the viewport when the container is resized. When the container width
- * changes (assuming constant aspect ratio), the zoom is scaled proportionally
- * so the same canvas region remains visible.
- *
- * This works in conjunction with the FollowController's scale factor:
- * - When following: updates the scale factor, and the controller re-snaps
- * - When not following: directly scales the camera zoom
- */
-function PreserveViewportOnResize() {
-  const editor = useEditor();
-  const { controller } = useFollow();
-  const referenceWidthRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const container = editor.getContainer();
-
-    // Store the initial width as the reference
-    referenceWidthRef.current = container.clientWidth;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const newWidth = entry.contentRect.width;
-        const referenceWidth = referenceWidthRef.current;
-
-        if (newWidth > 0 && referenceWidth && referenceWidth > 0) {
-          const resizeScale = newWidth / referenceWidth;
-
-          // Only adjust if there's a meaningful change
-          if (Math.abs(resizeScale - 1) > 1e-6) {
-            if (controller) {
-              // Update the follow controller's scale (multiplied by the resize
-              // ratio). This handles both following and not-following cases:
-              // the controller stores the new scale for future viewport snaps.
-              const newScale = controller.scale * resizeScale;
-              controller.setScale(newScale);
-            }
-
-            // If not following, directly scale the camera
-            if (!controller?.following) {
-              const camera = editor.getCamera();
-              editor.setCamera({
-                x: camera.x,
-                y: camera.y,
-                z: camera.z * resizeScale,
-              });
-            }
-
-            referenceWidthRef.current = newWidth;
-          }
-        }
-      }
-    });
-
-    resizeObserver.observe(container);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [editor, controller]);
-
-  return null;
-}
-
-/** Pass keyboard shortcuts up to the Liqvid keymap */
-function BubbleKeyboardEvents() {
-  const editor = useEditor();
-  const keymap = useKeymap();
-
-  const handleKeyboardShortcuts = useCallback(
-    (e: TLEventInfo) => {
-      if (!(e.type === "keyboard" && e.name === "key_down")) return;
-
-      // only want to do recording shortcuts
-      // remove if you're changing the recording shortcuts
-      if (!(e.ctrlKey && e.altKey)) return;
-
-      keymap.handle(asKeyboardEventish(e));
-    },
-    [keymap],
-  );
-
-  useEffect(() => {
-    editor.on("event", handleKeyboardShortcuts);
-
-    return () => {
-      editor.off("event", handleKeyboardShortcuts);
-    };
-  }, [editor, handleKeyboardShortcuts]);
-
-  return null;
-}
-
-/** Wrap a Tldraw event info so that Liqvid's keymap can handle it */
-function asKeyboardEventish(
-  e: TLKeyboardEventInfo,
-): Pick<KeyboardEvent, "getModifierState" | "preventDefault"> &
-  TLKeyboardEventInfo {
-  return {
-    ...e,
-    getModifierState(modifier: string) {
-      switch (modifier) {
-        case "Alt":
-          return e.altKey;
-        case "Control":
-          return e.ctrlKey;
-        case "Shift":
-          return e.shiftKey;
-      }
-      return false;
-    },
-    preventDefault() {},
-  };
 }

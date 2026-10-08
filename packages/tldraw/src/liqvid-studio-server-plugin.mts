@@ -16,7 +16,7 @@ const RAW_DTS = RelativeFile("raw.d.json.ts");
 const declaration =
   inlineTypeDeclaration(`import("@liqvid/recording").RecordingData<
   import("@liqvid/utils").ReplayData<import("@lqv/tldraw").TldrawEvent>,
-  import("@lqv/tldraw").ReplayState,
+  import("@lqv/tldraw").ReplayState
 >`);
 
 /**

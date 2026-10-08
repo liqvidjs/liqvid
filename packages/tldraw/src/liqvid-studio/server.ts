@@ -5,13 +5,17 @@ import path from "node:path";
 import type { ParameterValues } from "@liqvid/schemas";
 import {
   ASSETS_DIR,
+  type Localized,
   readDirWithFileTypes,
+  getTranslations as readTranslations,
   resolveProjectPath,
   serverRuntime,
 } from "@liqvid/studio/server";
 import { packageNameToDirName } from "@liqvid/studio-plugin-api";
 import {
+  deleteTypedJson,
   inlineTypeDeclaration,
+  renameTypedJson,
   writeTypedJson,
 } from "@liqvid/studio-plugin-api/server";
 import type { TLEditorSnapshot } from "@tldraw/editor";
@@ -21,6 +25,26 @@ import { type RelativeDir, RelativeFile } from "effect-paths";
 import { PACKAGE } from "../version.ts";
 
 import type { SavedState } from "./types.ts";
+
+import type Translations from "./.translations/en.json";
+
+type T = Localized<typeof Translations>;
+
+const snapshotDeclaration = inlineTypeDeclaration(`{
+  createdAt: string;
+  name: string;
+  snapshot: import("@tldraw/editor").TLEditorSnapshot;
+}`);
+
+/**
+ * Load this plugin's UI strings for the studio locale.
+ *
+ * `useAsyncTranslations` resolves files under the studio package root, so a
+ * plugin loads its own `.translations` directory from a server action.
+ */
+export async function getTranslations(): Promise<T> {
+  return readTranslations<typeof Translations>(import.meta.url);
+}
 
 export async function saveSnapshot(
   projectPath: RelativeDir,
@@ -47,16 +71,52 @@ export async function saveSnapshot(
           createdAt,
           snapshot,
         },
-        declaration: inlineTypeDeclaration(`{
-  createdAt: string;
-  name: string;
-  snapshot: import("@tldraw/editor").TLEditorSnapshot;
-}`),
+        declaration: snapshotDeclaration,
         dirname: pluginDir,
         filename: RelativeFile(`${name}.json`),
       });
 
       return newSaved;
+    }),
+  );
+}
+
+export async function overwriteSnapshot(
+  projectPath: RelativeDir,
+  params: ParameterValues,
+  name: string,
+  snapshot: TLEditorSnapshot,
+): Promise<SavedState> {
+  const t = await getTranslations();
+  validateName(name, t.errors.invalidName);
+
+  const pluginDir = getPluginDir(projectPath, params);
+  const createdAt = new Date().toISOString();
+  const filename = RelativeFile(`${name}.json`);
+
+  return await serverRuntime.runPromise(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+
+      if (!(yield* fs.exists(path.join(pluginDir, filename)))) {
+        throw new Error(t.errors.notFound.replaceAll("{name}", name));
+      }
+
+      yield* writeTypedJson({
+        data: {
+          createdAt,
+          snapshot,
+        },
+        declaration: snapshotDeclaration,
+        dirname: pluginDir,
+        filename,
+      });
+
+      return {
+        createdAt,
+        name,
+        snapshot,
+      };
     }),
   );
 }
@@ -67,21 +127,32 @@ export async function renameSnapshot(
   name: string,
   newName: string,
 ): Promise<void> {
-  validateName(name);
-  validateName(newName);
+  const t = await getTranslations();
+  validateName(name, t.errors.invalidName);
+  validateName(newName, t.errors.invalidName);
 
   const pluginDir = getPluginDir(projectPath, params);
 
   await serverRuntime.runPromise(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const destination = snapshotPath(pluginDir, newName);
 
-      if (yield* fs.exists(destination)) {
-        throw new Error(`A saved state named ${newName} already exists`);
+      if (
+        yield* fs.exists(path.join(pluginDir, RelativeFile(`${newName}.json`)))
+      ) {
+        throw new Error(t.errors.nameExists.replaceAll("{name}", newName));
       }
 
-      yield* fs.rename(snapshotPath(pluginDir, name), destination);
+      yield* renameTypedJson(
+        {
+          dirname: pluginDir,
+          filename: RelativeFile(`${name}.json`),
+        },
+        {
+          dirname: pluginDir,
+          filename: RelativeFile(`${newName}.json`),
+        },
+      );
     }),
   );
 }
@@ -91,12 +162,15 @@ export async function deleteSnapshot(
   params: ParameterValues,
   name: string,
 ): Promise<void> {
-  validateName(name);
+  const t = await getTranslations();
+  validateName(name, t.errors.invalidName);
 
   await serverRuntime.runPromise(
     Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      yield* fs.remove(snapshotPath(getPluginDir(projectPath, params), name));
+      yield* deleteTypedJson({
+        dirname: getPluginDir(projectPath, params),
+        filename: RelativeFile(`${name}.json`),
+      });
     }),
   );
 }
@@ -154,16 +228,9 @@ export async function listSaved(
   return exit.value;
 }
 
-function snapshotPath(
-  pluginDir: ReturnType<typeof getPluginDir>,
-  name: string,
-) {
-  return path.join(pluginDir, RelativeFile(`${name}.json`));
-}
-
-function validateName(name: string): void {
+function validateName(name: string, errorMessageWhenInvalid: string): void {
   if (!name || name === "." || name === ".." || /[\\/]/.test(name)) {
-    throw new Error("Saved state names must be a single path segment");
+    throw new Error(errorMessageWhenInvalid);
   }
 }
 
