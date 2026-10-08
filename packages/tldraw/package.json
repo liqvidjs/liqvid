@@ -21,9 +21,9 @@
       "import": "./dist/esm/index.js"
     },
     "./liqvid-studio": {
-      "@liqvid/dev": "./src/liqvid-studio.tsx",
-      "types": "./dist/types/liqvid-studio.d.ts",
-      "import": "./dist/esm/liqvid-studio.js"
+      "@liqvid/dev": "./src/liqvid-studio/index.tsx",
+      "types": "./dist/types/liqvid-studio/index.d.ts",
+      "import": "./dist/esm/liqvid-studio/index.js"
     },
     "./liqvid-studio-server-plugin": {
       "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
@@ -31,9 +31,9 @@
       "import": "./dist/esm/recording.js"
     },
     "./react": {
-      "@liqvid/dev": "./src/react.tsx",
-      "types": "./dist/types/react.d.ts",
-      "import": "./dist/esm/react.js"
+      "@liqvid/dev": "./src/react/index.tsx",
+      "types": "./dist/types/react/index.d.ts",
+      "import": "./dist/esm/react/index.js"
     },
     "./recording": {
       "@liqvid/dev": "./src/recording.tsx",
@@ -56,7 +56,7 @@
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:tsc": "tsc --noEmit",
-    "test": "jest --coverage",
+    "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest --coverage",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -69,6 +69,7 @@
     "@stylexjs/babel-plugin": "catalog:dev",
     "@stylexjs/eslint-plugin": "catalog:dev",
     "@stylexjs/postcss-plugin": "catalog:dev",
+    "@jest/globals": "catalog:dev",
     "@tldraw/editor": "catalog:peer",
     "@tldraw/store": "catalog:peer",
     "@tldraw/tlschema": "catalog:peer",
@@ -79,6 +80,7 @@
     "jest": "catalog:dev",
     "tldraw": "catalog:peer",
     "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

@@ -1,9 +1,9 @@
-export default {
-  coverageReporters: ["json-summary"],
+module.exports = {
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.(m?[jt]s|tsx)$": "$1",
   },
+  testEnvironment: "jsdom",
   testPathIgnorePatterns: ["dist"],
   transform: {
     "^.+\\.(m?ts|tsx)$": [

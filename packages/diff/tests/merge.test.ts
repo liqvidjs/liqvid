@@ -1,4 +1,9 @@
-import { applyDiff, diffObjects, invertDiff, mergeDiffs } from "../src";
+import {
+  applyDiff,
+  diffObjects,
+  invertDiff,
+  mergeDiffs,
+} from "../src/index.ts";
 
 /**
  * Merging the diffs `a→b` and `b→c` should produce the diff `a→c`.
@@ -337,5 +342,42 @@ describe("invertDiff", () => {
       // first operand must be pristine for backward/forward re-scrubbing
       expect(create).toEqual({ "+arr": [0] });
     });
+
+    test("in-place create/object merging reuses the created value", () => {
+      const createDiff = { "+shape": { props: { color: "red" } } };
+      const createValue = createDiff["+shape"];
+      const updateDiff = { "@shape": { "@props": { "=color": "blue" } } };
+
+      const merged = mergeDiffs(createDiff, updateDiff, true);
+
+      expect(merged).toBe(createDiff);
+      expect(merged["+shape"]).toBe(createValue);
+      expect(createValue.props.color).toBe("blue");
+      expect(updateDiff).toEqual({
+        "@shape": { "@props": { "=color": "blue" } },
+      });
+    });
+  });
+
+  test("records per-branch merge timings when profiling is enabled", () => {
+    const profile: Record<string, number> = {};
+    const profileKey = Symbol.for("@liqvid/diff/merge-profile");
+    Reflect.set(globalThis, profileKey, profile);
+
+    try {
+      mergeDiffs(
+        { "+shape": { props: { color: "red" } } },
+        { "@shape": { "@props": { "=color": "blue" } } },
+      );
+      const before = { points: [1, 2] };
+      const middle = { points: [1, 3] };
+      const after = { points: [1, 4] };
+      mergeDiffs(diffObjects(before, middle), diffObjects(middle, after));
+    } finally {
+      Reflect.deleteProperty(globalThis, profileKey);
+    }
+
+    expect(profile["object.create"]).toBeGreaterThan(0);
+    expect(profile["array.array"]).toBeGreaterThan(0);
   });
 });

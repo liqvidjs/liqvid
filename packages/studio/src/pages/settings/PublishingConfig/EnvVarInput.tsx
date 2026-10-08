@@ -7,15 +7,15 @@ import { useRef, useState } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { LocalizedString } from "#_/i18n/shared.mjs";
-import { PlainString } from "#_/i18n/shared.mjs";
-import { RadioIndicator, RadioRoot } from "#_/ui/Radio.js";
-import { TextField } from "#_/ui/TextField.js";
+} from "#_/design/tokens.stylex";
+import type { LocalizedString } from "#_/i18n/shared";
+import { PlainString } from "#_/i18n/shared";
+import { RadioIndicator, RadioRoot } from "#_/ui/Radio";
+import { TextField } from "#_/ui/TextField";
 
 type Mode = "literal" | "env";
 
@@ -60,7 +60,7 @@ const styles = stylex.create({
   fileInput: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
@@ -89,7 +89,7 @@ const styles = stylex.create({
   input: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontFamily: typeface.mono,

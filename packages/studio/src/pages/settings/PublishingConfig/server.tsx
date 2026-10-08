@@ -1,8 +1,8 @@
-import { getSettingsConfig } from "#_/api/settings.mjs";
+import { getSettingsConfig } from "#_/api/settings";
 import { ConfigSection } from "#_/components/ConfigSection.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared";
+import { serverRuntime } from "#_/server-runtime";
+import { getTranslations } from "#_/utils/i18n";
 
 import { BackendConfig } from "./BackendConfig/server.tsx";
 import { BasePathConfig } from "./BasePathConfig/server.tsx";

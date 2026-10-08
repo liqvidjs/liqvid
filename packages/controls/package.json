@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@jest/globals": "catalog:dev",
     "@testing-library/react": "catalog:dev",
     "@types/jest": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -47,7 +48,9 @@
     "@types/react-dom": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
+    "jest-environment-jsdom": "catalog:",
     "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
@@ -63,6 +66,7 @@
     "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
     "react": "catalog:peer"
   }
 }

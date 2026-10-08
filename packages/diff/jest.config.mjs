@@ -1,5 +1,4 @@
 export default {
-  coverageReporters: ["json-summary"],
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.(m?[jt]s|tsx)$": "$1",

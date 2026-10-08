@@ -1,4 +1,6 @@
-import { animate, bezier, type ReplayData, replay } from "../src/index.ts";
+import type { ReplayData } from "@liqvid/utils";
+
+import { animate, bezier, replay } from "../src/index.ts";
 
 describe("animation/animate", () => {
   test("defaults", () => {

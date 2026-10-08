@@ -6,12 +6,12 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import type { SettingsConfig } from "#_/api/contract.mjs";
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { colors, spacing } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
+import type { SettingsConfig } from "#_/api/contract";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { colors, spacing } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
+import { Spinner } from "#_/ui/Spinner.js";
 
 import type TranslationsJson from "./.translations/en.json";
 

@@ -12,7 +12,7 @@ const config: Config = {
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   transform: {
     "^.+\\.(m?ts|tsx)$": [
-      "ts-jest",
+      "<rootDir>/../../jest-ts6-transformer.cjs",
       {
         tsconfig: {
           jsx: "react-jsx",

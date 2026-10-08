@@ -39,7 +39,7 @@
     "docs:watch": "typedoc --watch",
     "lint": "pnpm biome check --fix",
     "lint:tsc": "tsc --noEmit",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -47,10 +47,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@jest/globals": "catalog:dev",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "babel-jest": "catalog:",
+    "jest": "catalog:dev",
+    "jest-environment-jsdom": "catalog:",
+    "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

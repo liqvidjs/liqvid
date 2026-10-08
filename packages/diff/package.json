@@ -34,7 +34,7 @@
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:tsc": "tsc --noEmit",
-    "test": "jest --coverage"
+    "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest --coverage"
   },
   "dependencies": {
     "@liqvid/utils": "workspace:^"
@@ -46,6 +46,7 @@
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
     "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

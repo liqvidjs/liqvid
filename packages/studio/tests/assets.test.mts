@@ -64,3 +64,14 @@ test("ServerDirectoryHelper.dir() scopes existence checks", () => {
   expect(files.dir("audio").has("intro.mp3")).toBe(true);
   expect(files.dir("audio").has("missing.mp3")).toBe(false);
 });
+
+test("ServerDirectoryHelper.fromFileList() builds a searchable directory", () => {
+  const files = ServerDirectoryHelper.fromFileList([
+    "timings.json",
+    "metadata/info.json",
+  ]);
+
+  expect(files.has("timings.json")).toBe(true);
+  expect(files.has("metadata/info.json")).toBe(true);
+  expect(files.list().sort()).toEqual(["metadata/info.json", "timings.json"]);
+});

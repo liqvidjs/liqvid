@@ -56,6 +56,8 @@
     "@types/react": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
+    "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

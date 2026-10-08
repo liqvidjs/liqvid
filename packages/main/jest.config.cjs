@@ -1,10 +1,11 @@
-export default {
-  coverageReporters: ["json-summary"],
+module.exports = {
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.(m?[jt]s|tsx)$": "$1",
   },
-  testPathIgnorePatterns: ["dist"],
+  setupFilesAfterEnv: ["<rootDir>/../../jest-setup.cjs"],
+  testEnvironment: "jsdom",
+  testPathIgnorePatterns: ["dist", "e2e"],
   transform: {
     "^.+\\.(m?ts|tsx)$": [
       "<rootDir>/../../jest-ts6-transformer.cjs",
