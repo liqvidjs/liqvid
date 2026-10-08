@@ -20,20 +20,20 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js"
     },
-    "./extras": {
-      "@liqvid/dev": "./src/extras/index.ts",
-      "types": "./dist/types/extras/index.d.ts",
-      "import": "./dist/esm/extras/index.js"
+    "./hls": {
+      "@liqvid/dev": "./src/hls/index.ts",
+      "types": "./dist/types/hls/index.d.ts",
+      "import": "./dist/esm/hls/index.js"
     },
     "./liqvid-studio-server-plugin": {
-      "@liqvid/dev": "./src/liqvid-studio-server-plugin.mts",
-      "types": "./dist/types/liqvid-studio-server-plugin.d.mts",
-      "import": "./dist/esm/liqvid-studio-server-plugin.mjs"
+      "@liqvid/dev": "./src/liqvid-studio-server-plugin.ts",
+      "types": "./dist/types/liqvid-studio-server-plugin.d.ts",
+      "import": "./dist/esm/liqvid-studio-server-plugin.js"
     },
     "./recording": {
-      "@liqvid/dev": "./src/recording.mts",
-      "types": "./dist/types/recording.d.mts",
-      "import": "./dist/esm/recording.mjs"
+      "@liqvid/dev": "./src/recording.ts",
+      "types": "./dist/types/recording.d.ts",
+      "import": "./dist/esm/recording.js"
     }
   },
   "files": [
@@ -54,10 +54,12 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "clsx": "catalog:"
+    "clsx": "catalog:",
+    "mediabunny": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@ts-ffmpeg/fluent-ffmpeg": "catalog:peer",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",
@@ -74,19 +76,30 @@
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/recording": "workspace:^1.0.0-alpha.0",
+    "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.2",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
+    "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "@ts-ffmpeg/fluent-ffmpeg": "catalog:peer",
+    "effect": "catalog:peer",
     "execa": "catalog:",
-    "react": "catalog:peer"
+    "react": "catalog:peer",
+    "smart-whisper": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@liqvid/studio": {
       "optional": true
     },
     "execa": {
+      "optional": true
+    },
+    "effect": {
+      "optional": true
+    },
+    "smart-whisper": {
       "optional": true
     },
     "react": {
