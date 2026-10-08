@@ -1,5 +1,4 @@
 import type { DurationString } from "@liqvid/utils";
-
 export type Directory = {
   [key: string]: Directory | (() => unknown);
 };
@@ -84,6 +83,14 @@ export class DirectoryHelper<
     dirname: D,
   ): DirectoryHelper<ChildDirectory<DS, D>, TemplateVars> {
     return new DirectoryHelper(`${this.dirname}/${dirname}`);
+  }
+
+  /**
+   * Bypasses union-call restrictions by flattening the instance into a callable intersection.
+   * This is useful for parametrized projects.
+   */
+  distribute<T>(this: T): UnionToIntersection<T> {
+    return this as UnionToIntersection<T>;
   }
 
   /** fetch a JSON file */
@@ -313,3 +320,10 @@ export class ServerDirectoryHelper<D extends Directory> {
     return match(this.#files, 0);
   }
 }
+
+// biome-ignore lint/suspicious/noExplicitAny: variance
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I,
+) => void
+  ? I
+  : never;
