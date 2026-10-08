@@ -3,7 +3,6 @@ import * as path from "node:path";
 
 import {
   GetObjectCommand,
-  HeadObjectCommand,
   ListObjectsV2Command,
   type PutObjectCommandInput,
   S3Client,
@@ -119,22 +118,64 @@ export class S3Provider implements HostingProvider, MediaHostingProvider {
   }
 
   checkFiles(files: readonly AbsoluteFile[], rootDir: AbsoluteDir) {
-    return Effect.all(
-      files.map((filePath) => {
-        const relativeFromRoot = path.relative(rootDir, filePath);
-        const key = this.buildKey(relativeFromRoot);
-        return this.getUploadStatus(filePath, key);
-      }),
-      { concurrency: CHECK_CONCURRENCY },
-    );
+    return Effect.gen({ self: this }, function* () {
+      const remoteFiles = yield* this.listRemoteFiles();
+      const remoteByKey = new Map(remoteFiles.map((file) => [file.key, file]));
+      const fs = yield* FileSystem.FileSystem;
+
+      return yield* Effect.all(
+        files.map((filePath) =>
+          Effect.gen({ self: this }, function* (this: S3Provider) {
+            const relativePath = RelativeFile(
+              path.relative(rootDir, filePath).replace(/\\/g, "/"),
+            );
+            const key = this.buildKey(relativePath);
+            const remote = remoteByKey.get(relativePath);
+
+            if (!remote) {
+              return {
+                filePath,
+                key,
+                needsUpload: true,
+                reason: "new" as const,
+              };
+            }
+
+            const localStats = yield* fs.stat(filePath);
+            const localLastModified = localStats.mtime.pipe(
+              Option.getOrElse(() => new Date()),
+            );
+            const needsUpload =
+              Number(localStats.size) !== remote.size ||
+              localLastModified > remote.lastModified;
+
+            return {
+              filePath,
+              key,
+              needsUpload,
+              reason: needsUpload
+                ? ("modified" as const)
+                : ("unchanged" as const),
+            };
+          }),
+        ),
+        { concurrency: CHECK_CONCURRENCY },
+      );
+    });
   }
 
   getContentBaseUrl(): string {
-    return `${this.config.domain}/${this.config.prefix ?? ""}`;
+    return new URL(
+      `${this.config.prefix ?? ""}/`,
+      this.config.domain,
+    ).toString();
   }
 
   getMediaBaseUrl(): string {
-    return `${this.config.domain}/${this.config.prefix ?? ""}`;
+    return new URL(
+      `${this.config.prefix ?? ""}/`,
+      this.config.domain,
+    ).toString();
   }
 
   publishContent(localDir: AbsoluteDir, force = false) {
@@ -356,74 +397,6 @@ export class S3Provider implements HostingProvider, MediaHostingProvider {
     await fsp.writeFile(localPath, buffer);
     console.log(`  Downloaded: ${key}`);
   }
-
-  /**
-   * Get the upload status for a single file.
-   */
-  private readonly getUploadStatus = Effect.fn("getUploadStatus")(
-    { self: this },
-    function* (this: S3Provider, filePath: AbsoluteFile, key: RelativeFile) {
-      const fs = yield* FileSystem.FileSystem;
-
-      yield* Effect.logDebug("checking").pipe(
-        Effect.annotateLogs({ filePath, key }),
-      );
-
-      // Get remote file metadata
-      const headResponse = yield* Effect.tryPromise({
-        catch: (err) => err as { name?: string },
-        try: () =>
-          this.client.send(
-            new HeadObjectCommand({
-              Bucket: this.bucket,
-              Key: this.buildKey(key),
-            }),
-          ),
-      });
-
-      const remoteLastModified = headResponse.LastModified;
-      if (!remoteLastModified) {
-        // Can't determine remote modification time, upload to be safe
-        return { filePath, key, needsUpload: true, reason: "new" } as const;
-      }
-
-      // Get local file modification time
-      const localStats = yield* fs.stat(filePath);
-      const localLastModified = localStats.mtime.pipe(
-        Option.getOrElse(() => new Date()),
-      );
-
-      // Upload if local file is newer than remote
-      if (localLastModified > remoteLastModified) {
-        return {
-          filePath,
-          key,
-          needsUpload: true,
-          reason: "modified",
-        } as const;
-      }
-
-      return {
-        filePath,
-        key,
-        needsUpload: false,
-        reason: "unchanged",
-      } as const;
-    },
-    (effect, filePath, key) =>
-      effect.pipe(
-        Effect.catchIf(
-          (err): err is { name?: string } => err?.name === "NotFound",
-          () =>
-            Effect.succeed({
-              filePath,
-              key,
-              needsUpload: true,
-              reason: "new",
-            } as const),
-        ),
-      ),
-  );
 
   /**
    * Build the S3 key for a file
