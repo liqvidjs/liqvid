@@ -7,7 +7,7 @@ import { themed } from "./themed.tsx";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
@@ -34,7 +34,7 @@ export const fonts = stylex.create({
   var: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontFamily: typeface.mono,

@@ -45,7 +45,7 @@ export default [
         {
           propLimits: {
             "background*Color": {
-              limit: null,
+              limit: ["transparent"],
               reason: "use a colors.* token from `#_/design/tokens.stylex.js`",
             },
             "border*Color": {

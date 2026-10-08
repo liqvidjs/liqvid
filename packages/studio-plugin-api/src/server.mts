@@ -9,8 +9,60 @@ export const JsonFile = Schema.TemplateLiteral([Schema.String, ".json"]).pipe(
 
 type JsonFile = (typeof JsonFile)["Type"];
 
+type JsonFilePair = Readonly<{
+  dirname: AbsoluteDir;
+  filename: JsonFile;
+}>;
+
 /**
- * Write a JSON file along with an adjacent `.d.ts` file specifying its type.
+ * Remove a JSON file along with its adjacent `.d.json.ts` file
+ */
+export const deleteTypedJson = Effect.fnUntraced(function* ({
+  dirname,
+  filename,
+}: JsonFilePair) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const jsonPath = path.join(dirname, filename);
+  const dtsPath = path.join(
+    dirname,
+    RelativeFile(filename.replace(/\.json$/, ".d.json.ts")),
+  );
+
+  yield* Effect.all([fs.remove(jsonPath), fs.remove(dtsPath)], {
+    concurrency: "unbounded",
+  });
+});
+
+/**
+ * Rename a JSON file along with its adjacent `.d.json.ts` file
+ */
+export const renameTypedJson = Effect.fnUntraced(function* (
+  from: JsonFilePair,
+  to: JsonFilePair,
+) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const oldJsonPath = path.join(from.dirname, from.filename);
+  const oldDtsPath = path.join(
+    from.dirname,
+    RelativeFile(from.filename.replace(/\.json$/, ".d.json.ts")),
+  );
+
+  const newJsonPath = path.join(to.dirname, to.filename);
+  const newDtsPath = path.join(
+    to.dirname,
+    RelativeFile(to.filename.replace(/\.json$/, ".d.json.ts")),
+  );
+
+  yield* Effect.all(
+    [fs.rename(oldJsonPath, newJsonPath), fs.rename(oldDtsPath, newDtsPath)],
+    { concurrency: "unbounded" },
+  );
+});
+
+/**
+ * Write a JSON file along with an adjacent `.d.json.ts` file specifying its shape.
  */
 export const writeTypedJson = Effect.fnUntraced(function* ({
   data,
@@ -19,12 +71,9 @@ export const writeTypedJson = Effect.fnUntraced(function* ({
   filename,
 
   pretty = false,
-}: {
+}: JsonFilePair & {
   data: unknown;
   declaration: string;
-  dirname: AbsoluteDir;
-  filename: JsonFile;
-
   pretty?: boolean;
 }) {
   const fs = yield* FileSystem.FileSystem;

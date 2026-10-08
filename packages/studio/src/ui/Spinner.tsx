@@ -6,7 +6,7 @@ import {
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
+import { colors } from "#_/design/tokens.stylex";
 
 const settingsSpin = stylex.keyframes({
   from: { transform: "rotate(0deg)" },

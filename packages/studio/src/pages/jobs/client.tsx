@@ -20,15 +20,15 @@ import type {
   ServiceClientEncoded,
   StructuredLog,
   StructuredLogType,
-} from "#_/api/schemas.mjs";
-import { useChannel } from "#_/components/WebSocketProvider.js";
-import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
-import { Time, TimeDuration } from "#_/ui/Time.js";
-import { ToggleButton } from "#_/ui/ToggleButton.js";
+} from "#_/api/schemas";
+import { useChannel } from "#_/components/WebSocketProvider";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs";
+import { Time, TimeDuration } from "#_/ui/Time";
+import { ToggleButton } from "#_/ui/ToggleButton";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -42,7 +42,7 @@ const spin = stylex.keyframes({
 const styles = stylex.create({
   annotations: {
     alignItems: "flex-start",
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     bottom: "1em",
     boxShadow: `0 0 0 1px ${colors.graySep}`,
     display: "flex",
@@ -84,13 +84,13 @@ const styles = stylex.create({
       default: "transparent",
     },
     borderBottomColor: colors.transparent,
-    borderBottomLeftRadius: radii.none,
-    borderBottomRightRadius: radii.none,
+    borderBottomLeftRadius: rounded.none,
+    borderBottomRightRadius: rounded.none,
     borderBottomStyle: "solid",
     borderBottomWidth: spacing.sm,
     borderStyle: "none",
-    borderTopLeftRadius: radii.md,
-    borderTopRightRadius: radii.md,
+    borderTopLeftRadius: rounded.md,
+    borderTopRightRadius: rounded.md,
     color: colors.grayNormal,
     cursor: "pointer",
     fontSize: text.base,
@@ -140,7 +140,7 @@ const styles = stylex.create({
 
   logGroup: {
     borderColor: colors.graySep,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontSize: text.md,
@@ -172,15 +172,15 @@ const styles = stylex.create({
 
   timestamp: {
     backgroundColor: colors.grayApp,
-    borderBottomLeftRadius: radii.sm,
-    borderBottomRightRadius: radii.none,
+    borderBottomLeftRadius: rounded.sm,
+    borderBottomRightRadius: rounded.none,
     borderBottomStyle: "solid",
     borderColor: colors.graySep,
     borderLeftStyle: "solid",
     borderRightStyle: "none",
     borderStyle: "solid",
-    borderTopLeftRadius: radii.none,
-    borderTopRightRadius: radii.none,
+    borderTopLeftRadius: rounded.none,
+    borderTopRightRadius: rounded.none,
     borderTopStyle: "none",
     borderWidth: dims.sep,
     color: colors.grayDim,
@@ -625,7 +625,9 @@ function LogGroup({
                 return (
                   <div sx={styles.progress}>
                     <progress max={msg.total} value={msg.value} />
-                    {`${msg.formattedValue} / ${msg.formattedTotal}`}
+                    {msg.scheme
+                      ? `${msg.scheme} ${msg.formattedValue}/${msg.formattedTotal}`
+                      : `${msg.formattedValue} / ${msg.formattedTotal}`}
                   </div>
                 );
               }
@@ -685,6 +687,7 @@ type JobProgressEvent = Readonly<{
   total: number;
   formattedValue: string;
   formattedTotal: string;
+  scheme?: string;
 }>;
 
 function isProgressEvent(msg: unknown): msg is JobProgressEvent {

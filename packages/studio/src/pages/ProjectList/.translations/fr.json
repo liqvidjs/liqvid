@@ -4,6 +4,8 @@
   "folderView": "Affichage dossier",
   "openInFinder": "Ouvrir dans Finder",
   "preview": "Aperçu",
+  "projectOptions": "Options du projet",
+  "showHiddenProjects": "Afficher les projets cachés",
   "tabs": {
     "captions": "Sous-titres",
     "renders": "Rendus",

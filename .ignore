@@ -10,7 +10,8 @@
 # **/projects/algtop/1.3*
 #app/_index.tsx
 #
-# **/.liqvid
+**/.liqvid/**/recording.json
+**/.liqvid/**/raw.json
 #
 
 # ------------------------------ packages ------------------------------
@@ -68,6 +69,11 @@
 !packages/react-router/TODO.md
 
 !**/.translations/**/*.json
+
+**/@lqv+tldraw/*.json
+**/.liqvid/**/audio/*.json
+
+**/*.m3u8
 
 # XyPic is huge
 **/xypic.js

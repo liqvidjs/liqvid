@@ -1,6 +1,10 @@
-import { Duration as EffectDuration, Schema } from "effect";
+import { Brand, Duration as EffectDuration, Schema } from "effect";
 
-import { Duration, type DurationLike } from "./index.ts";
+import {
+  Duration,
+  type DurationLike,
+  type DurationString as TDurationString,
+} from "./index.ts";
 
 /**
  * These are additive, e.g. passing `{seconds: 20, minutes: 5}` is
@@ -54,3 +58,9 @@ export function fromEffectDuration(
 ): Duration {
   return new Duration({ milliseconds: EffectDuration.toMillis(duration) });
 }
+
+export const DurationString = Brand.nominal<TDurationString>();
+
+export const SchemaDurationString = Schema.String.pipe(
+  Schema.fromBrand("DurationString", DurationString),
+);

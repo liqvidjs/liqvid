@@ -1,8 +1,13 @@
 {
+  "copiedProjectPath": "Copied project path",
   "copyEmbedCode": "Copy embed code",
+  "copyProjectPath": "Copy project path",
   "draft": "This project is marked as a draft and will not be published to production.",
   "folderView": "Folder view",
   "openInFinder": "Open in Finder",
   "preview": "Preview",
+  "projectFilesRegenerated": "Project files regenerated",
+  "projectOptions": "Project options",
+  "regenerateProjectFiles": "Regenerate project files",
   "showHiddenProjects": "Show hidden projects"
 }

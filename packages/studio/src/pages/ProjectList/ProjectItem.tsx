@@ -97,7 +97,8 @@ const styles = stylex.create({
 /** @package */
 export function ProjectItem({ project }: { project: ProjectMeta }) {
   const t = useTranslations<T>();
-  const { basePath, productionServerPort } = useLiqvidConfig();
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const { basePath, previewServer } = useLiqvidConfig();
   const selectedRootParams = useSelectedRootParameters();
 
   // Build combined params: root params as base, project params (first value) override
@@ -153,11 +154,29 @@ export function ProjectItem({ project }: { project: ProjectMeta }) {
             project={omit(project, ["duration"])}
             selectedRootParams={selectedRootParams}
           />
-          <EmbedButton basePath={basePath} project={project} />
-          <OpenInFinderButton />
-          <PreviewButton
-            href={`http://localhost:${productionServerPort}${previewPath}`}
-          />
+          <MenuRoot onOpenChange={setOptionsOpen} open={optionsOpen}>
+            <MenuTrigger aria-label={t.projectOptions} kind="ghost">
+              <DotsThreeIcon size={24} weight="bold" />
+            </MenuTrigger>
+            <MenuPortal>
+              <MenuPositioner align="end" sideOffset={4}>
+                <MenuPopup>
+                  <EmbedButton basePath={basePath} project={project} />
+                  <CopyProjectPathButton />
+                  <OpenInFinderButton />
+                  <PreviewButton
+                    href={`${getPreviewServerOrigin(previewServer)}${previewPath}`}
+                  />
+                  {process.env.LIQVID_STUDIO_DEV === "true" && (
+                    <>
+                      <MenuSeparator />
+                      <RegenerateProjectFilesButton />
+                    </>
+                  )}
+                </MenuPopup>
+              </MenuPositioner>
+            </MenuPortal>
+          </MenuRoot>
         </div>
       </li>
     </ProjectPathProvider>

@@ -3,9 +3,11 @@
   "folderView": "Affichage dossier",
   "openInFinder": "Abrir en Finder",
   "preview": "Previa",
+  "projectOptions": "Opciones del proyecto",
   "renders": {
     "render": "Renderizar"
   },
+  "showHiddenProjects": "Mostrar proyectos ocultos",
   "tabs": {
     "captions": "Subtítulos",
     "renders": "Renders",

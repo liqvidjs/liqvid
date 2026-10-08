@@ -351,6 +351,9 @@ export const colors = stylex.defineVars({
   affordanceBg: `light-dark(white, ${scales.zinc750})`,
   affordanceHover: `light-dark(${scales.zinc100}, ${scales.zinc600})`,
 
+  /** separators inside menu/select dropdowns */
+  affordanceSep: `light-dark(${scales.gray200}, ${scales.zinc600})`,
+
   /** update banner colors */
   bannerBg: "var(--accent-ui)",
   bannerBorder: "var(--accent-sep)",
@@ -364,7 +367,7 @@ export const colors = stylex.defineVars({
   /** base button colors */
   btnBg: `light-dark(#f0f0f0, ${scales.stone750})`,
   btnBgActive: `light-dark(#d0d0d0, ${scales.stone800})`,
-  btnBgHover: `light-dark(#fafafa, ${scales.stone700})`,
+  btnBgHover: `light-dark(${scales.zinc150}, ${scales.stone700})`,
   btnBorder: `light-dark(#ccc, #555)`,
   btnColor: `light-dark(#333, #fff)`,
   btnColorDisabled: `light-dark(#aaa, #eee)`,
@@ -431,7 +434,7 @@ export const colors = stylex.defineVars({
 
   secondary: `light-dark(${scales.zinc400}, ${scales.zinc600})`,
 
-  sep: `light-dark(black, white)`,
+  sep: `light-dark(${scales.zinc400}, white)`,
 
   sepSurface: `light-dark(${scales.stone300}, ${scales.stone700})`,
 
@@ -467,7 +470,7 @@ export const dims = stylex.defineConsts({
 });
 
 // biome-ignore assist/source/useSortedKeys: ascending
-export const radii = stylex.defineConsts({
+export const rounded = stylex.defineConsts({
   none: "0",
   sm: "2px",
   md: "4px",
@@ -485,6 +488,7 @@ export const shadows = stylex.defineConsts({
       `,
   lg: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
   md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+  radial: "0 0 4px 4px rgba(0, 0, 0, 0.1)",
   sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
   xl: "0 10px 38px -10px rgb(0 0 0 / 0.35), 0 10px 20px -15px rgb(0 0 0 / 0.2)",
   xxl: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
@@ -563,4 +567,15 @@ export const nullHack = stylex.defineVars({
 /** @public */
 export const browserShadows = stylex.defineVars({
   "--shadow-focus": shadows.focus,
+});
+
+/** @public */
+export const pluginStyles = stylex.defineVars({
+  "--lvs-color-secondary": colors.secondary,
+
+  "--lvs-rounded-md": rounded.md,
+  "--lvs-rounded-sm": rounded.sm,
+
+  "--lvs-spacing-md": spacing.md,
+  "--lvs-spacing-sm": spacing.sm,
 });

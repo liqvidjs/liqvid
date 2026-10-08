@@ -191,6 +191,53 @@ export async function openInFinderAction(
 }
 
 /**
+ * Open a recording folder in Finder
+ */
+export async function openRecordingInFinderAction(
+  projectPath: RelativeDir,
+  recordingName: string,
+  params?: ParameterValues,
+): Promise<{ success: boolean }> {
+  try {
+    if (
+      projectPath.startsWith("/") ||
+      projectPath.includes("\\") ||
+      projectPath
+        .split("/")
+        .some((part) => !part || part === "." || part === "..") ||
+      !isValidRecordingName(recordingName) ||
+      recordingName === "." ||
+      recordingName === ".." ||
+      Object.values(params ?? {}).some(
+        (value) =>
+          value.includes("/") ||
+          value.includes("\\") ||
+          value === "." ||
+          value === "..",
+      )
+    ) {
+      return { success: false };
+    }
+
+    const assetsDir = getParameterizedAssetsDir(
+      getRoutesDir(),
+      projectPath,
+      params,
+    );
+    const fullPath = path.join(
+      assetsDir,
+      RECORDINGS_DIR,
+      RelativeDir(recordingName),
+    );
+    await execa("open", [fullPath]);
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to open recording in Finder:", e);
+    return { success: false };
+  }
+}
+
+/**
  * Open a render folder in Finder
  */
 export async function openRenderInFinderAction(
@@ -505,9 +552,10 @@ export async function createProjectAction(
       );
 
       // Generate .liqvid/project-meta.json (initial empty duration)
-      yield* writeJSON<AutoGenProjectMeta>(
+      yield* writeJSONWithSchema(
+        AutoGenProjectMeta,
         path.join(fullProjectPath, ASSETS_DIR, PROJECT_META_FILE),
-        { duration: { milliseconds: 0 } },
+        { chosenRecordings: {}, duration: { milliseconds: 0 } },
       );
 
       // Generate .liqvid/project-path.json

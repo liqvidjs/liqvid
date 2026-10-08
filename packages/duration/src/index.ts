@@ -8,6 +8,12 @@ const SECONDS = 1000,
 
 const serializationKey = "@liqvid/duration";
 
+export type DurationString = string & {
+  readonly "~effect/Brand": {
+    readonly [K in "DurationString"]: "DurationString";
+  };
+};
+
 /**
  * Convenience type representing either a {@link Duration}
  * or creation options for one
@@ -21,28 +27,28 @@ export type DurationLike = Duration | DurationOptions;
  */
 export type DurationOptions = {
   /** shortcut for days */
-  readonly d?: number;
-  readonly days?: number;
+  d?: number;
+  days?: number;
 
   /** shortcut for hours */
-  readonly h?: number;
-  readonly hours?: number;
+  h?: number;
+  hours?: number;
 
   /** shortcut for milliseconds */
-  readonly ms?: number;
-  readonly milliseconds?: number;
+  ms?: number;
+  milliseconds?: number;
 
   /** shortcut for minutes */
-  readonly m?: number;
-  readonly minutes?: number;
+  m?: number;
+  minutes?: number;
 
   /** shortcut for seconds */
-  readonly s?: number;
-  readonly seconds?: number;
+  s?: number;
+  seconds?: number;
 
   /** shortcut for weeks */
-  readonly w?: number;
-  readonly weeks?: number;
+  w?: number;
+  weeks?: number;
 };
 
 export type SerializedDuration = DurationOptions &

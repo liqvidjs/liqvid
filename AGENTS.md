@@ -20,12 +20,12 @@ Legacy (ignore): `captioning`, `server`, `cli`, `dev-watcher`, `dev-watcher-rs`,
 
 Run from a package dir (e.g. `packages/utils`), or from root via `pnpm --filter <pkg> <cmd>`.
 
-**Important:** Call `tsc` and `biome` directly via `npx` instead of through `pnpm` scripts — `pnpm` does a full workspace re-install which is slow.
+**Important:** Call `tsc` and `biome` directly instead of through `pnpm` scripts — `pnpm` does a full workspace re-install which is slow. Run Biome as `./node_modules/.bin/biome` from the package dir — do NOT use `npx biome` or `pnpx biome`, they fail.
 
 ```bash
 pnpm build                       # clean + compile (ESM + CJS)
 tsc --noEmit                 # type-check only (fast, no build)
-biome check --fix --reporter=concise  # lint + format with auto-fix
+./node_modules/.bin/biome check --fix --reporter=concise  # lint + format with auto-fix
 pnpm test                        # all tests (--coverage for coverage)
 jest tests/foo.test.ts       # single file
 jest -t "pattern"            # by name

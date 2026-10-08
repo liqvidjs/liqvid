@@ -18,43 +18,55 @@
   ],
   "type": "module",
   "imports": {
-    "#_/*.js": {
-      "default": "./src/*",
-      "@liqvid/dev": [
-        "./src/*.ts",
-        "./src/*.tsx"
-      ],
-      "import": "./dist/esm/*"
-    },
     "#_/*.json": {
       "default": "./src/*.json",
       "import": "./dist/esm/*.json"
     },
-    "#_/*.mjs": {
-      "default": "./src/*.mts",
-      "import": "./dist/esm/*"
+    "#_/*.png": {
+      "default": "./src/*.png",
+      "import": "./dist/esm/*.png"
+    },
+    "#_/*.svg": {
+      "default": "./src/*.svg",
+      "import": "./dist/esm/*.svg"
+    },
+    "#_/*.stylex.js": {
+      "default": [
+        "./src/*.stylex.ts"
+      ],
+      "import": "./dist/esm/*.stylex.js"
+    },
+    "#_/*.js": {
+      "default": [
+        "./src/*.tsx",
+        "./src/*.ts"
+      ],
+      "import": "./dist/esm/*.js"
     },
     "#_/*": {
+      "@liqvid/dev": [
+        "./src/*.ts",
+        "./src/*.tsx"
+      ],
       "default": "./src/*",
-      "@liqvid/dev": "./src/*",
       "import": "./dist/esm/*"
     }
   },
   "exports": {
     ".": {
-      "@liqvid/dev": "./src/index.mts",
-      "types": "./dist/types/index.d.mts",
-      "import": "./dist/esm/index.mjs"
+      "@liqvid/dev": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js"
     },
     "./next": {
-      "@liqvid/dev": "./src/next/index.mts",
-      "types": "./dist/types/next/index.d.mts",
-      "import": "./dist/esm/next/index.mjs"
+      "@liqvid/dev": "./src/next/index.ts",
+      "types": "./dist/types/next/index.d.ts",
+      "import": "./dist/esm/next/index.js"
     },
     "./next/api": {
-      "@liqvid/dev": "./src/next/api.mts",
-      "types": "./dist/types/next/api.d.mts",
-      "import": "./dist/esm/next/api.mjs"
+      "@liqvid/dev": "./src/next/api.ts",
+      "types": "./dist/types/next/api.d.ts",
+      "import": "./dist/esm/next/api.js"
     },
     "./next/layout": {
       "@liqvid/dev": "./src/next/layout.tsx",
@@ -67,9 +79,9 @@
       "import": "./dist/esm/next/page.js"
     },
     "./server": {
-      "@liqvid/dev": "./src/server.mts",
-      "types": "./dist/types/server.d.mts",
-      "import": "./dist/esm/server.mjs"
+      "@liqvid/dev": "./src/server.ts",
+      "types": "./dist/types/server.d.ts",
+      "import": "./dist/esm/server.js"
     },
     "./ui": {
       "@liqvid/dev": "./src/ui/index.ts",

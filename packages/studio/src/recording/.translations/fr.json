@@ -5,9 +5,17 @@
       "title": "Configuration"
     },
     "saved": {
+      "rename": {
+        "action": "Renommer",
+        "cancel": "Annuler",
+        "failed": "Échec du renommage de l’enregistrement",
+        "name": "Nom de l’enregistrement",
+        "renaming": "Renommage..."
+      },
       "reprocess": "Retraiter",
       "reprocessing": "Retraitement en cours...",
       "rerun": "Réexécuter les plugins de post-traitement",
+      "openInFinder": "Ouvrir dans Finder",
       "subtitle": "Sauvegardé",
       "title": "Enregistrements"
     },

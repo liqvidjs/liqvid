@@ -183,4 +183,17 @@ export class Keymap {
       }
     }
   }
+
+  /** Dispatch handlers for a canonical shortcut sequence. */
+  handleShortcut(seq: string) {
+    const normalized = Keymap.normalize(seq);
+    const handlers = this.__bindings[normalized];
+    if (!handlers) return;
+
+    const event = new KeyboardEvent("keydown");
+    event.preventDefault();
+    for (const cb of handlers) {
+      cb(event, { seq: normalized });
+    }
+  }
 }

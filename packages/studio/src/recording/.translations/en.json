@@ -5,9 +5,17 @@
       "title": "Configuration"
     },
     "saved": {
+      "rename": {
+        "action": "Rename",
+        "cancel": "Cancel",
+        "failed": "Failed to rename recording",
+        "name": "Recording name",
+        "renaming": "Renaming..."
+      },
       "reprocess": "Reprocess",
       "reprocessing": "Reprocessing...",
       "rerun": "Re-run post-processing plugins",
+      "openInFinder": "Open in Finder",
       "subtitle": "Saved",
       "title": "Recordings"
     },

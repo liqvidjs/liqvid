@@ -44,7 +44,7 @@ export function TimeDisplay({
       >
         {formatTime(playback.currentTime$)}
       </time>
-      <span className="lv-time-separator">/</span>
+      <span className={classNames?.separator}>/</span>
       <time
         className="lv-total-time"
         dateTime={formatTimeDuration(playback.duration$)}

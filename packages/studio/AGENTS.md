@@ -10,7 +10,7 @@ Use original extensions for relative imports, and remapped extensions for absolu
 
 ```ts
 // original file is `i18n.mts`
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { getTranslations } from "#_/utils/i18n"
 
 import { NewProjectButton } from "./NewProjectButton/NewProjectButton.tsx";
 ```
@@ -41,9 +41,9 @@ This package uses **Effect v4 RC** (`effect@4.0.0-rc.112`, `@effect/platform-nod
 
 ### Imports
 
-- HTTP API pieces come from `effect/unstable/*` (unstable is expected here):
-  - `effect/unstable/httpapi` → `HttpApi`, `HttpApiEndpoint`, `HttpApiGroup`, `HttpApiBuilder`, `HttpApiClient`, `HttpApiSchema`, `HttpApiSwagger`, `OpenApi`
-  - `effect/unstable/http` → `HttpClient`, `FetchHttpClient`, `Etag`, `HttpRouter` (`toWebHandler` lives at `effect/unstable/http/HttpRouter`)
+- HTTP API pieces come from `effect/*` (unstable is expected here):
+  - `effect/http-api` → `HttpApi`, `HttpApiEndpoint`, `HttpApiGroup`, `HttpApiBuilder`, `HttpApiClient`, `HttpApiSchema`, `HttpApiSwagger`, `OpenApi`
+  - `effect/http` → `HttpClient`, `FetchHttpClient`, `Etag`, `HttpRouter` (`toWebHandler` lives at `effect/http/HttpRouter`)
 - `Schema`, `Effect`, `Layer`, `Option`, `FileSystem`, `ManagedRuntime`, `PlatformError` are top-level: `import { ... } from "effect"`.
 - Node platform layers come from `@effect/platform-node`: `NodeServices.layer` (FileSystem + Path), `NodeHttpPlatform.layer`, `NodeFileSystem.layer`.
 
@@ -92,6 +92,12 @@ Define API errors with `Schema.TaggedErrorClass` and a `httpApiStatus` annotatio
 - Derive the browser client with `HttpApiClient.make(WebApi)` (see `src/client.mts`, exported as `LiqvidStudioApiClient`), run it with `clientRuntime.runPromise(...)` where `clientRuntime = ManagedRuntime.make(FetchHttpClient.layer)`.
 - Call endpoints as `client.<group>.<endpoint>({ query, payload })` inside `Effect.gen`.
 - Legacy zod operations in `src/api/contract.mts` + `makeFetcher` in `src/client.mts` still exist for not-yet-migrated routes; prefer the Effect client for new/migrated work.
+
+## Parameterized projects
+
+For a route like `[lang]/lesson`, `projectPath` is the route template and `useProjectParams()` supplies the active values, e.g. `{ lang: "en" }`. Project assets are stored under `.liqvid/<value...>/` (for example `.liqvid/en/recordings`), so the `.liqvid` directory is not necessarily the recording directory's parent. Use `getParameterizedAssetsDir` when constructing asset paths; when handling filesystem events, resolve the `.liqvid` ancestor and map the remaining path segments back to parameter names with `extractParameterNames`.
+
+Scope project API requests and WebSocket events by **both** `projectPath` and the exact `projectParams` values. Pass API params as the JSON-serialized `params` query value; include the parameter values in WebSocket messages and filter them on the client. For unparameterized projects, the values are `{}`.
 
 ## File Paths
 

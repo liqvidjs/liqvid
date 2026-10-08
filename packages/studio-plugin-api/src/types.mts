@@ -1,5 +1,10 @@
 import type { Recorder } from "@liqvid/recording";
+import type { Brand } from "effect";
+import type { RelativeFile } from "effect-paths";
 import type { JSX } from "react";
+
+/** valid name for a recording */
+export type RecordingName = string & Brand.Brand<"RecordingName">;
 
 export interface LiqvidStudioPluginBase {
   /** SVG icon for the plugin */
@@ -19,9 +24,23 @@ export type ConfigurationComponentProps<Instance> = {
   instances: Set<Instance>;
 };
 
+export type RecordingFiles = {
+  /** Test whether a relative file path is present. */
+  has: (filename: string) => boolean;
+
+  /** List files relative to the plugin's recording directory. */
+  list: () => readonly string[];
+};
+
 export type RecordingComponentProps = {
   /** Name of the recording */
-  name: string;
+  name: RecordingName;
+
+  /** Files relative to this plugin's directory in the recording. */
+  files: RecordingFiles;
+
+  /** Load a text file relative to this plugin's directory. */
+  loadFile: (filename: RelativeFile) => Promise<string>;
 };
 
 export interface LiqvidStudioRecordingPlugin<

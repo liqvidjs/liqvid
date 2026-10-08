@@ -101,6 +101,7 @@ export function RecordingDialog({
   const projectParams = useProjectParams();
 
   const [recordings, setRecordings] = useState<readonly RecordingMeta[]>([]);
+  const recordingsRevisionRef = useRef(0);
 
   const [activeTab, setActiveTab] = usePersistentState(
     {
@@ -166,53 +167,47 @@ export function RecordingDialog({
   );
 
   useEffect(() => {
+    let active = true;
+    const revisionAtStart = recordingsRevisionRef.current;
+
     clientRuntime.runPromise(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
 
         const recordings = yield* client.recordings.list({
           query: {
-            params:
-              Object.keys(projectParams).length > 0
-                ? JSON.stringify(projectParams)
-                : undefined,
+            params: JSON.stringify(projectParams),
             projectPath,
           },
         });
 
-        setRecordings(recordings);
+        if (active && recordingsRevisionRef.current === revisionAtStart) {
+          setRecordings(recordings);
+        }
       }),
     );
+
+    return () => {
+      active = false;
+    };
   }, [projectParams, projectPath]);
 
-  // Live-update the list as recordings are created/updated/deleted on disk.
-  useChannel(
-    "recordings",
-    useMemo(
-      () => ({
-        deleteRecording: ({ name, url }) => {
-          if (url !== projectPath) return;
-          setRecordings((prev) => prev.filter((r) => r.name !== name));
-        },
-        newRecording: ({ recording, url }) => {
-          if (url !== projectPath) return;
-          setRecordings((prev) => upsertRecording(prev, recording));
-        },
-        updateRecording: ({ recording, url }) => {
-          if (url !== projectPath) return;
-          setRecordings((prev) => upsertRecording(prev, recording));
-        },
-      }),
-      [projectPath],
-    ),
-  );
+  useRecordingEvents({
+    projectParams,
+    projectPath,
+    recordingsRevisionRef,
+    setRecordings,
+  });
 
   if (isPreview) return;
 
   return (
     <TranslationProvider t={t}>
       <DockableDialog.Dialog>
-        <DockableDialog.Header>{t.title}</DockableDialog.Header>
+        <DockableDialog.Header>
+          {t.title}
+          <DockableDialog.Close />
+        </DockableDialog.Header>
         <DockableDialog.Content>
           <div>
             <Tabs onValueChange={setActiveTab} size="small" value={activeTab}>
@@ -229,7 +224,7 @@ export function RecordingDialog({
               </TabsList>
               <TabsContent asChild keepMounted value={tabs.configuration}>
                 <section>
-                  <h3 sx={styles.subtitle}>{t.tabs.configuration.subtitle}</h3>
+                  <Subtitle>{t.tabs.configuration.subtitle}</Subtitle>
 
                   <div sx={styles.togglePlugins}>
                     {Object.values(plugins).map((plugin) => {
@@ -288,23 +283,13 @@ export function RecordingDialog({
                 </section>
               </TabsContent>
               <TabsContent asChild value={tabs.saved}>
-                <section>
-                  <h3 sx={styles.subtitle}>{t.tabs.saved.subtitle}</h3>
-                  <div sx={styles.Recordings}>
-                    {recordings.map((r) => (
-                      <RecordingRow
-                        key={r.name}
-                        projectParams={projectParams}
-                        projectPath={projectPath}
-                        recording={r}
-                      />
-                    ))}
-                  </div>
-                </section>
+                <SavedContent
+                  {...{ recordings, recordingsRevisionRef, setRecordings }}
+                />
               </TabsContent>
               <TabsContent asChild value={tabs.shortcuts}>
                 <section>
-                  <h3 sx={styles.subtitle}>{t.tabs.shortcuts.title}</h3>
+                  <Subtitle>{t.tabs.shortcuts.title}</Subtitle>
                   <ShortcutsTable
                     onShortcutChange={onShortcutChange}
                     shortcuts={shortcuts}
@@ -320,6 +305,44 @@ export function RecordingDialog({
   );
 }
 
+function useRecordingEvents({
+  projectParams,
+  projectPath,
+  recordingsRevisionRef,
+  setRecordings,
+}: {
+  projectParams: ParameterValues;
+  projectPath: RelativeDir;
+  recordingsRevisionRef: { current: number };
+  setRecordings: (
+    action: React.SetStateAction<readonly RecordingMeta[]>,
+  ) => void;
+}): void {
+  useChannel(
+    "recordings",
+    useMemo(
+      () => ({
+        deleteRecording: (event) => {
+          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          recordingsRevisionRef.current++;
+          setRecordings((prev) => prev.filter((r) => r.name !== event.name));
+        },
+        newRecording: (event) => {
+          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          recordingsRevisionRef.current++;
+          setRecordings((prev) => upsertRecording(prev, event.recording));
+        },
+        updateRecording: (event) => {
+          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          recordingsRevisionRef.current++;
+          setRecordings((prev) => upsertRecording(prev, event.recording));
+        },
+      }),
+      [projectParams, projectPath, recordingsRevisionRef, setRecordings],
+    ),
+  );
+}
+
 /**
  * Insert or replace a recording (keyed by `name`), keeping the list sorted by
  * creation time to match the server's `list` ordering.
@@ -332,4 +355,18 @@ function upsertRecording(
   next.push(recording);
   next.sort((a, b) => compare(a.created, b.created));
   return next;
+}
+
+function isCurrentProject(
+  event: { projectParams: ParameterValues; projectPath: string },
+  current: { projectParams: ParameterValues; projectPath: string },
+): boolean {
+  return (
+    event.projectPath === current.projectPath &&
+    Object.keys(event.projectParams).length ===
+      Object.keys(current.projectParams).length &&
+    Object.entries(event.projectParams).every(
+      ([key, value]) => current.projectParams[key] === value,
+    )
+  );
 }

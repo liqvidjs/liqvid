@@ -1,10 +1,12 @@
 {
   "folderView": "文件夹视图",
+  "projectOptions": "项目选项",
   "screenshots": {
     "colorScheme": {
       "both": "两都"
     }
   },
+  "showHiddenProjects": "显示隐藏的项目",
   "tabs": {
     "captions": "字幕",
     "renders": "渲染",

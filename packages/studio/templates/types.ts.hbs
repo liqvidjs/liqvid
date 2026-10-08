@@ -1,5 +1,8 @@
 /** This file is automatically @generated. */
-import type { FileNames } from "@liqvid/studio";
+import type { FileNames{{#if hasChosenRecordings}}, Recording{{/if}} } from "@liqvid/studio";
+{{#if hasChosenRecordings}}
+import type { DurationString } from "@liqvid/utils";
+{{/if}}
 
 export type ProjectStructure =
 {{#*inline "directoryTypes"}}
@@ -29,4 +32,17 @@ export type ProjectParams = {
 };
 {{else}}
 export type ProjectParams = Readonly<Record<string, never>>;
+{{/if}}
+
+{{#if chosenRecordings}}
+/**
+ * The recordings chosen for inclusion in the final video (the
+ * `chosenRecordings` field of `.liqvid/project-meta.json`).
+ *
+ * Only the current parameter combination is populated at runtime, although
+ * this type is typed as if every combination were assigned.
+ */
+export type ChosenRecordings = {{{chosenRecordings}}};
+{{else}}
+export type ChosenRecordings = Record<string, never>;
 {{/if}}

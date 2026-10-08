@@ -72,12 +72,7 @@ type T = Localized<typeof TranslationsJson>;
 
 export async function Homepage() {
   await initializeServer();
-  const {
-    basePath,
-    config: $config,
-    projects,
-    productionServerPort,
-  } = getServerState();
+  const { basePath, config: $config, projects } = getServerState();
 
   if (Option.isNone($config)) {
     throw new Error("config is not initialized");
@@ -112,7 +107,7 @@ export async function Homepage() {
     : {};
 
   const domain = (() => {
-    const DEFAULT = new URL("http://localhost:4000");
+    const DEFAULT = new URL(getPreviewServerOrigin(config.previewServer));
     switch (config.backend?.content) {
       case "copy":
         return config.providers.copy?.domain ?? DEFAULT;
@@ -146,8 +141,10 @@ export async function Homepage() {
               basePath,
               domain: domain.origin,
               hideProjects: config.ui.hideProjects,
-              productionServerPort,
+              logging: { dir: config.logging?.dir ?? "logs" },
+              previewServer: config.previewServer,
               rootParameters: config.rootParameters ?? {},
+              routesDir: getRoutesDir(),
             }}
           >
             <ProjectList

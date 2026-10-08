@@ -404,7 +404,7 @@ export function ScreenshotsSection({
   // Serialize params for use as dependency
   const paramsJson = JSON.stringify(selectedParams ?? {});
 
-  const loadScreenshots = useCallback(async () => {
+  const loadScreenshots = async () => {
     setIsLoading(true);
 
     await clientRuntime.runPromise(
@@ -423,13 +423,18 @@ export function ScreenshotsSection({
     );
 
     setIsLoading(false);
-  }, [paramsJson, projectPath]);
+  };
+
+  const loadScreenshots$ = useEffectEvent(loadScreenshots);
 
   useEffect(() => {
     if (isOpen) {
-      loadScreenshots();
+      // TODO: this is ugly
+      // (need to reload content when selectedParams changes)
+      selectedParams;
+      queueMicrotask(loadScreenshots$);
     }
-  }, [isOpen, loadScreenshots]);
+  }, [isOpen, selectedParams]);
 
   const openRenameDialog = (screenshotId: string) => {
     setRenameValue(screenshotId);

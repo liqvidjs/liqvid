@@ -138,7 +138,7 @@ export function ScreenshotModal({
   project,
   selectedParams,
 }: ScreenshotModalProps) {
-  const { productionServerPort } = useLiqvidConfig();
+  const { previewServer } = useLiqvidConfig();
   const { screenshots: t } = useTranslations<{ screenshots: T }>();
 
   const { renderSource } = useDerivedConfig();
@@ -165,7 +165,7 @@ export function ScreenshotModal({
     const baseUrl =
       renderSource.screenshots === "preview"
         ? `/${interpolatedProjectPath}/`
-        : `http://localhost:${productionServerPort}${previewPath}`;
+        : `${getPreviewServerOrigin(previewServer)}${previewPath}`;
 
     const searchParams = new URLSearchParams();
     if (renderSource.screenshots === "preview") {
@@ -224,7 +224,7 @@ export function ScreenshotModal({
         }),
       );
 
-      onCaptured();
+      onCaptured(selectedParams ?? {});
     } catch (e) {
       console.error("Failed to capture screenshot:", e);
     } finally {
@@ -247,8 +247,12 @@ export function ScreenshotModal({
 
   return (
     <DialogPortal>
-      <DialogBackdrop />
-      <DialogPopup aria-describedby={undefined} size="huge">
+      <DialogBackdrop forceRender />
+      <DialogPopup
+        aria-describedby={undefined}
+        size="huge"
+        style={styles.popup}
+      >
         <div>
           <DialogTitle>{t.title}</DialogTitle>
           <DialogClose />

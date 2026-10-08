@@ -1,71 +1,97 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "disabled_providers": ["amazon-bedrock"],
+  "experimental": {
+    "policies": [
+      {
+        "action": "provider.use",
+        "resource": "amazon-bedrock",
+        "effect": "deny"
+      }
+    ]
+  },
   "formatter": {
     "prettier": {
       "disabled": true
     }
   },
   "mcp": {
-    "next-devtools": {
-      "command": ["npx", "-y", "next-devtools-mcp@latest"],
-      "type": "local"
+    "servers": {
+      "next-devtools": {
+        "command": ["npx", "-y", "next-devtools-mcp@latest"],
+        "type": "local"
+      }
     }
   },
-  "permission": {
-    "external_directory": "deny",
-    "bash": {
-      "*": "ask",
-      "biome *": "allow",
-      "cat *": "allow",
-      "cd *": "allow",
-      "echo *": "allow",
-      "*find* -delete*": "deny",
-      "find *": "allow",
-      "eslint *": "allow",
-      "git *": "deny",
-      "grep *": "allow",
-      "head *": "allow",
-      "ls *": "allow",
-      "mkdir *": "allow",
-      "node --version": "allow",
-      "node build-stylex.mjs *": "allow",
-      "npm *": "ask",
-      "npm list": "allow",
-      "npm run build *": "allow",
-      "npx biome *": "allow",
-      "npx jest *": "allow",
-      "npx tsc --noEmit *": "allow",
-      "pnpm add *": "allow",
-      "pnpm build *": "allow",
-      "pnpm build:js": "allow",
-      "pnpm exec biome *": "allow",
-      "pnpm exec tsc --noEmit *": "allow",
-      "pnpm filter *": "allow",
-      "pnpm format *": "allow",
-      "pnpm generate:openapi *": "allow",
-      "pnpm generate:schemas": "allow",
-      "pnpm info *": "allow",
-      "pnpm install *": "allow",
-      "pnpm lint *": "allow",
-      "pnpm lint:agent": "allow",
-      "pnpm lint:stylex": "allow",
-      "pnpm ls *": "allow",
-      "pnpm validate-translations *": "allow",
-      "ripwire *": "allow",
-      "rm *": "deny",
-      "sed *": "allow",
-      "sort *": "allow",
-      "tail *": "allow",
-      "tsc --noEmit *": "allow",
-      "uniq *": "allow",
-      "xargs *": "allow"
-    }
-  },
-  "provider": {
+  "permissions": [
+    { "action": "external_directory", "resource": "*", "effect": "deny" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "./node_modules/.bin/biome *", "effect": "allow" },
+    { "action": "shell", "resource": "./node_modules/.bin/tsc *", "effect": "allow" },
+    { "action": "shell", "resource": "biome *", "effect": "allow" },
+    { "action": "shell", "resource": "cat *", "effect": "allow" },
+    { "action": "shell", "resource": "cd *", "effect": "allow" },
+    { "action": "shell", "resource": "cp *", "effect": "allow" },
+    { "action": "shell", "resource": "diff *", "effect": "allow" },
+    { "action": "shell", "resource": "echo *", "effect": "allow" },
+    { "action": "shell", "resource": "*find* -delete*", "effect": "deny" },
+    { "action": "shell", "resource": "find *", "effect": "allow" },
+    { "action": "shell", "resource": "eslint *", "effect": "allow" },
+    { "action": "shell", "resource": "git *", "effect": "deny" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "grep *", "effect": "allow" },
+    { "action": "shell", "resource": "head *", "effect": "allow" },
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "mkdir *", "effect": "allow" },
+    { "action": "shell", "resource": "node --version", "effect": "allow" },
+    { "action": "shell", "resource": "node build-stylex.mjs *", "effect": "allow" },
+    { "action": "shell", "resource": "npm *", "effect": "ask" },
+    { "action": "shell", "resource": "npm list", "effect": "allow" },
+    { "action": "shell", "resource": "npm run build *", "effect": "allow" },
+    { "action": "shell", "resource": "npx biome *", "effect": "allow" },
+    { "action": "shell", "resource": "npx jest *", "effect": "allow" },
+    { "action": "shell", "resource": "npx tsc --noEmit *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm add *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm build *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm build:js", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm exec biome *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm exec tsc --noEmit *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm filter *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm format *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm generate:openapi *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm generate:schemas", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm info *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm install *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm lint *", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm lint:agent", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm lint:stylex", "effect": "allow" },
+    { "action": "shell", "resource": "pnpm ls *", "effect": "allow" },
+    {
+      "action": "shell",
+      "resource": "pnpm validate-translations *",
+      "effect": "allow"
+    },
+    { "action": "shell", "resource": "ripwire *", "effect": "allow" },
+    { "action": "shell", "resource": "rg *", "effect": "allow" },
+    { "action": "shell", "resource": "rm *", "effect": "deny" },
+    {
+      "action": "shell",
+      "resource": "rm -f packages/studio/dev/*",
+      "effect": "allow"
+    },
+    { "action": "shell", "resource": "sed *", "effect": "allow" },
+    { "action": "shell", "resource": "sort *", "effect": "allow" },
+    { "action": "shell", "resource": "stat *", "effect": "allow" },
+    { "action": "shell", "resource": "tail *", "effect": "allow" },
+    { "action": "shell", "resource": "tsc --noEmit *", "effect": "allow" },
+    { "action": "shell", "resource": "uniq *", "effect": "allow" },
+    { "action": "shell", "resource": "xargs *", "effect": "allow" }
+  ],
+  "providers": {
     "anthropic": {
       "models": {},
-      "options": {
+      "settings": {
         "apiKey": "{env:ANTHROPIC_API_KEY}"
       }
     }
