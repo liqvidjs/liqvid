@@ -15,18 +15,17 @@ import type { RelativeDir } from "effect-paths";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
-import { Spinner } from "#_/components/Spinner.js";
-import { useChannel } from "#_/components/WebSocketProvider.js";
+import { useChannel } from "#_/components/WebSocketProvider";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { Transcript } from "#_/types/schemas.mjs";
-import { Button } from "#_/ui/Button.js";
+} from "#_/design/tokens.stylex";
+import type { Transcript } from "#_/types/schemas";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
@@ -34,7 +33,7 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTrigger,
-} from "#_/ui/Dialog.js";
+} from "#_/ui/Dialog";
 import {
   MenuItem,
   MenuPopup,
@@ -42,9 +41,10 @@ import {
   MenuPositioner,
   MenuRoot,
   MenuTrigger,
-} from "#_/ui/Menu.js";
-import { TimeDuration } from "#_/ui/Time.js";
-import { useAsyncTranslations } from "#_/utils/react.js";
+} from "#_/ui/Menu";
+import { Spinner } from "#_/ui/Spinner";
+import { TimeDuration } from "#_/ui/Time";
+import { useAsyncTranslations } from "#_/utils/react";
 
 import { CaptionsPreview } from "./CaptionsPreview.tsx";
 import {
@@ -71,7 +71,7 @@ const styles = stylex.create({
 
   activeWord: {
     backgroundColor: colors.transparent,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     color: colors.accentSolid,
   },
   CaptionsEditor: {
@@ -98,7 +98,7 @@ const styles = stylex.create({
 
   hoverWord: {
     background: "light-dark(rgba(0, 0, 0, 8%), rgba(255, 255, 255, 10%))",
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     boxSizing: "content-box",
     paddingBlock: spacing.xs,
     paddingInline: spacing.sm,
@@ -111,7 +111,7 @@ const styles = stylex.create({
   selection: {
     "::before": {
       backgroundColor: colors.captionsEditorSelectedWord,
-      borderRadius: radii.sm,
+      borderRadius: rounded.sm,
       boxSizing: "content-box",
       content: '""',
       height: "100%",
@@ -158,7 +158,7 @@ const styles = stylex.create({
 
   transcript: {
     borderColor: colors.graySep,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontFamily: typeface.serif,
@@ -173,7 +173,7 @@ const styles = stylex.create({
   wordInput: {
     backgroundColor: colors.grayApp,
     borderColor: colors.accentSolid,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.inherit,

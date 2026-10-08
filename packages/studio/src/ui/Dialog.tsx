@@ -3,6 +3,7 @@
 import {
   Dialog,
   type DialogRootChangeEventDetails,
+  // biome-ignore lint/style/noRestrictedImports: this is the styled version
 } from "@base-ui/react/dialog";
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import { XIcon } from "@phosphor-icons/react";
@@ -11,10 +12,10 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 
-import { useIsStudio } from "#_/contexts/is-studio.js";
-import { themed } from "#_/design/themed.js";
-import type { NonCustomizable } from "#_/types/misc.mjs";
-import { useCommonTranslations } from "#_/utils/react.js";
+import { useIsStudio } from "#_/contexts/is-studio";
+import { themed } from "#_/design/themed";
+import type { NonCustomizable } from "#_/types/misc";
+import { useCommonTranslations } from "#_/utils/react";
 
 import { Button } from "./Button.tsx";
 import {

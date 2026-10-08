@@ -1,7 +1,7 @@
 import type { Progress, SingleBarOptions } from "@liqvid/cli/utils";
 import { type Context, Effect, Option, type PlatformError } from "effect";
 
-import type { LoggableJob, StructuredLog } from "../api/schemas.mts";
+import type { LoggableJob, StructuredLog } from "../api/schemas";
 
 export { readDirWithFileTypes } from "@liqvid/cli/utils";
 
@@ -35,6 +35,8 @@ type ProgressMessage = {
   readonly __kind: "progress";
   readonly formattedTotal: string;
   formattedValue: string;
+  /** Format element rendered ahead of the value/total pair, e.g. "light". */
+  readonly scheme?: string;
   readonly total: number;
   value: number;
 };
@@ -61,9 +63,11 @@ export const jobProgressLayer = (
   SingleBar: class SingleBar {
     #message: ProgressMessage | undefined;
     readonly #formatValue: (value: number) => string;
+    readonly #scheme: string | undefined;
 
-    constructor({ formatValue }: SingleBarOptions = {}) {
+    constructor({ format, formatValue }: SingleBarOptions = {}) {
       this.#formatValue = formatValue ?? String;
+      this.#scheme = format?.scheme;
     }
 
     start(total: number, startValue: number) {
@@ -71,6 +75,7 @@ export const jobProgressLayer = (
         __kind: "progress",
         formattedTotal: this.#formatValue(total),
         formattedValue: this.#formatValue(startValue),
+        ...(this.#scheme ? { scheme: this.#scheme } : {}),
         total,
         value: startValue,
       };

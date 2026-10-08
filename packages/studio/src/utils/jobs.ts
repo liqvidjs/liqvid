@@ -14,12 +14,12 @@ import type {
   LoggableJobClient,
   StructuredLog,
   StructuredLogType,
-} from "#_/api/schemas.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { broadcast } from "#_/next/websockets.mjs";
-import { withLogLevel } from "#_/server-runtime.mjs";
+} from "#_/api/schemas";
+import { getServerState } from "#_/initialize";
+import { broadcast } from "#_/next/websockets";
+import { withLogLevel } from "#_/server-runtime";
 
-import { jobProgressLayer } from "./effect.mts";
+import { jobProgressLayer } from "./effect.ts";
 
 /**
  * Strip the (non-serializable) fiber from a job to get the client-facing

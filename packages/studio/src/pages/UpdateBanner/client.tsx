@@ -9,17 +9,17 @@ import { useCallback, useState } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import type { PackageUpdate } from "#_/jobs/check-updates.mjs";
-import { updatePackageAction } from "#_/pages/root-actions.js";
-import type { PackageName } from "#_/types/misc.mjs";
-import { Button } from "#_/ui/Button.js";
-import { IconButton } from "#_/ui/IconButton.js";
+} from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import type { PackageUpdate } from "#_/jobs/check-updates";
+import { updatePackageAction } from "#_/pages/root-actions";
+import type { PackageName } from "#_/types/misc";
+import { Button } from "#_/ui/Button";
+import { IconButton } from "#_/ui/IconButton";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -28,7 +28,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.bannerBg,
     borderColor: colors.bannerBorder,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.bannerColor,
@@ -47,7 +47,7 @@ const styles = stylex.create({
       ":hover": colors.bannerDismissBgHover,
       default: colors.transparent,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "none",
     color: {
       ":hover": colors.bannerDismissColorHover,

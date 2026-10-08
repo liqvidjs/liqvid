@@ -5,9 +5,9 @@ import {
   breakpoints,
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
-} from "#_/design/tokens.stylex.js";
+} from "#_/design/tokens.stylex";
 import logo from "#_/logo.png";
 import {
   NavigationMenuContent,
@@ -20,8 +20,8 @@ import {
   NavigationMenuRoot,
   NavigationMenuTrigger,
   NavigationMenuViewport,
-} from "#_/ui/NavigationMenu.js";
-import { getTranslations } from "#_/utils/i18n.mjs";
+} from "#_/ui/NavigationMenu";
+import { getTranslations } from "#_/utils/i18n";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -45,7 +45,7 @@ const styles = stylex.create({
 
   link: {
     backgroundColor: colors.transparent,
-    borderRadius: radii.circle,
+    borderRadius: rounded.circle,
   },
 
   logo: {

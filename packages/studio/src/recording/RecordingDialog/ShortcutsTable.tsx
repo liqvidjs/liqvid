@@ -6,12 +6,12 @@ import { useCallback, useId, useState } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { Localized, LocalizedString } from "#_/i18n/shared.mjs";
+} from "#_/design/tokens.stylex";
+import type { Localized, LocalizedString } from "#_/i18n/shared";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
@@ -25,7 +25,7 @@ const styles = stylex.create({
   bodyRow: {
     backgroundColor: {
       ":hover": colors.grayHover,
-      // eslint-disable-next-line @stylexjs/valid-styles
+       
       default: null,
     },
   },
@@ -50,7 +50,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     cursor: "pointer",

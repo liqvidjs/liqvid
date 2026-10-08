@@ -4,10 +4,10 @@ import type { ParameterValues } from "@liqvid/schemas";
 import { Effect, FileSystem, Option, type PlatformError } from "effect";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
-import { ASSETS_DIR, PARAMS_MARKER_PREFIX } from "#_/conventions.mjs";
-import { getServerState } from "#_/initialize.mjs";
+import { ASSETS_DIR, PARAMS_MARKER_PREFIX } from "#_/conventions";
+import { getServerState } from "#_/initialize";
 
-import { readDirWithFileTypes } from "./effect.mts";
+import { readDirWithFileTypes } from "./effect";
 
 /**
  * Extract parameter names from a project path.

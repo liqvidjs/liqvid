@@ -1,7 +1,7 @@
-import { typography } from "#_/design/styles.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { getLocale, getTranslations } from "#_/utils/i18n.mjs";
+import { typography } from "#_/design/styles";
+import type { Localized } from "#_/i18n/shared";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
+import { getLocale, getTranslations } from "#_/utils/i18n";
 
 import { ConfigureLocaleClient } from "./client.tsx";
 

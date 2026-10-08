@@ -1,8 +1,8 @@
 import { promiseAllKeyed } from "@liqvid/utils";
 import { RelativeDir } from "effect-paths";
 
-import { getTranslations } from "#_/utils/i18n.mjs";
-import { TranslationProvider } from "#_/utils/react.js";
+import { getTranslations } from "#_/utils/i18n";
+import { TranslationProvider } from "#_/utils/react";
 
 import { ProjectListClient, type ProjectListProps } from "./client.tsx";
 import type { TranslationsCaptionsSection } from "./MediaDialog/captions/CaptionsSection.tsx";

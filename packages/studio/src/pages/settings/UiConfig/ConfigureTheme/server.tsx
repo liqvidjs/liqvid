@@ -1,8 +1,8 @@
-import { typography } from "#_/design/styles.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getConfigSync } from "#_/initialize.mjs";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { typography } from "#_/design/styles";
+import type { Localized } from "#_/i18n/shared";
+import { getConfigSync } from "#_/initialize";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
+import { getTranslations } from "#_/utils/i18n";
 
 import { ConfigureThemeClient } from "./client.tsx";
 

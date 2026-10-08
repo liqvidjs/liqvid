@@ -5,14 +5,14 @@ import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useId, useState } from "react";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import { type Localized, PlainString } from "#_/i18n/shared.mjs";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import { type Localized, PlainString } from "#_/i18n/shared";
 import {
   createProjectAction,
   loadTemplatesAction,
   type TemplateInfo,
-} from "#_/pages/root-actions.js";
-import { Button } from "#_/ui/Button.js";
+} from "#_/pages/root-actions";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
@@ -21,8 +21,8 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "#_/ui/Dialog.js";
-import { IconButton } from "#_/ui/IconButton.js";
+} from "#_/ui/Dialog";
+import { IconButton } from "#_/ui/IconButton";
 import {
   SelectIcon,
   SelectItem,
@@ -35,8 +35,8 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
-import { TextField } from "#_/ui/TextField.js";
+} from "#_/ui/Select";
+import { TextField } from "#_/ui/TextField";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -59,7 +59,7 @@ const styles = stylex.create({
   error: {
     backgroundColor: colors.errorSubtle,
     borderColor: colors.errorBorder,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.errorText,

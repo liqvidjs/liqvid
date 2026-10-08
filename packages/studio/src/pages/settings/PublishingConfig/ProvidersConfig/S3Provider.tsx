@@ -4,12 +4,12 @@ import { CONFIG_FILE } from "@liqvid/cli/utils";
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
-import { fonts } from "#_/design/styles.js";
-import { colors, spacing, text } from "#_/design/tokens.stylex.js";
-import { type Localized, PlainString } from "#_/i18n/shared.mjs";
-import s3Logo from "#_/icons/s3.svg";
-import { TextField } from "#_/ui/TextField.js";
-import { useTranslations } from "#_/utils/react.js";
+import { fonts } from "#_/design/styles";
+import { colors, spacing, text } from "#_/design/tokens.stylex";
+import { type Localized, PlainString } from "#_/i18n/shared";
+import S3Logo from "#_/icons/s3.svg";
+import { TextField } from "#_/ui/TextField";
+import { useTranslations } from "#_/utils/react";
 
 import type { Providers } from "../client.tsx";
 
@@ -39,7 +39,7 @@ export function S3Provider({
   return (
     <ProviderCard
       enabled={value !== undefined}
-      icon={<Image alt="" height={24} src={s3Logo} />}
+      icon={<S3Logo height={24} width="auto" />}
       onToggle={(enabled) =>
         onChange(enabled ? { bucket: "", domain: "" } : undefined)
       }

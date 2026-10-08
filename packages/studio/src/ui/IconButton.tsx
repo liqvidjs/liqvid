@@ -3,14 +3,14 @@
 import { Slot } from "@radix-ui/react-slot";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, opacity, radii } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
+import { colors, opacity, rounded } from "#_/design/tokens.stylex";
+import type { LocalizedReactNode } from "#_/i18n/shared";
 
 const styles = stylex.create({
   base: {
     alignItems: "center",
     backgroundColor: colors.accentSolid,
-    borderRadius: radii.circle,
+    borderRadius: rounded.circle,
     borderStyle: "none",
     cursor: {
       ":disabled": "not-allowed",

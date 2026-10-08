@@ -21,13 +21,12 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { RenderEntry } from "#_/api/schemas.mjs";
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { PlainString } from "#_/i18n/shared.mjs";
-import { openRenderInFinderAction } from "#_/pages/root-actions.js";
-import { Button } from "#_/ui/Button.js";
+import type { RenderEntry } from "#_/api/schemas";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import type { PlainString } from "#_/i18n/shared";
+import { openRenderInFinderAction } from "#_/pages/root-actions";
+import { Button } from "#_/ui/Button";
 import {
   DialogActions,
   DialogBackdrop,
@@ -37,17 +36,18 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "#_/ui/Dialog.js";
-import { useDialogApi } from "#_/ui/dialogs-shared.js";
-import { NumericInput } from "#_/ui/NumericInput.js";
-import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
-import { TextField } from "#_/ui/TextField.js";
-import { Time } from "#_/ui/Time.js";
+} from "#_/ui/Dialog";
+import { useDialogApi } from "#_/ui/dialogs-shared";
+import { NumericInput } from "#_/ui/NumericInput";
+import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs";
+import { Spinner } from "#_/ui/Spinner";
+import { TextField } from "#_/ui/TextField";
+import { Time } from "#_/ui/Time";
 import {
   TranslationProvider,
   useCommonTranslations,
   useTranslations,
-} from "#_/utils/react.js";
+} from "#_/utils/react";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -99,7 +99,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
@@ -146,7 +146,7 @@ const styles = stylex.create({
       default: colors.graySubtle,
     },
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
 
@@ -168,7 +168,7 @@ const styles = stylex.create({
       default: colors.graySubtle,
     },
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
@@ -210,7 +210,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",
@@ -267,7 +267,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
@@ -289,7 +289,7 @@ const styles = stylex.create({
   },
   videoPlayer: {
     backgroundColor: colors.black,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     display: "block",
     maxHeight: "70vh",
     maxWidth: "100%",

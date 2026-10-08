@@ -7,12 +7,12 @@ import { useMemo } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   scales,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
-import { PlainString } from "#_/i18n/shared.mjs";
+} from "#_/design/tokens.stylex";
+import { PlainString } from "#_/i18n/shared";
 import {
   SelectIcon,
   SelectItem,
@@ -25,7 +25,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
+} from "#_/ui/Select";
 
 interface ParameterSelectorProps {
   /** Callback when parameter values change */
@@ -43,7 +43,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: `light-dark(${scales.stone200}, ${scales.stone700})`,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",

@@ -3,12 +3,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Locale } from "@liqvid/schemas";
+import type { Mutable } from "@liqvid/utils";
 import { Option } from "effect";
 import { RelativeDir, RelativeFile } from "effect-paths";
 
-import { TRANSLATIONS_DIR } from "#_/conventions.mjs";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getServerState } from "#_/initialize.mjs";
+import { TRANSLATIONS_DIR } from "#_/conventions";
+import type { Localized } from "#_/i18n/shared";
+import { getServerState } from "#_/initialize";
 
 import type CommonTranslationsJson from "../.translations/en.json";
 
@@ -128,10 +129,10 @@ function isObject(item: unknown): item is Json {
 
 function deepMerge(target: Json, source: Json) {
   // Create a new object to prevent mutating the original target
-  const output: Json = Object.assign({}, target);
+  const output: Mutable<Json> = Object.assign({}, target);
 
   if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach((key) => {
+    for (const key of Object.keys(source)) {
       if (isObject(source[key])) {
         if (!(key in target)) {
           Object.assign(output, { [key]: source[key] });
@@ -143,7 +144,7 @@ function deepMerge(target: Json, source: Json) {
         // Handle primitive values, arrays, or overwrites
         Object.assign(output, { [key]: source[key] });
       }
-    });
+    }
   }
 
   return output;

@@ -1,10 +1,10 @@
 import { Err, Ok, type Result } from "@liqvid/fp";
-import { ManagedRuntime } from "effect";
+import { Effect, ManagedRuntime } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 import type { RelativeDir } from "effect-paths";
 
-import { WebApi } from "./api/contract.mts";
+import { WebApi } from "./api/contract";
 
 const apiRoot = "/api/liqvid";
 
@@ -90,3 +90,15 @@ export const clientRuntime = ManagedRuntime.make(FetchHttpClient.layer);
  * Use with Effect.
  */
 export const LiqvidStudioApiClient = HttpApiClient.make(WebApi);
+
+/** Force a full scan and regeneration of one project's asset manifest/types. */
+export function regenerateProjectFiles(projectPath: RelativeDir) {
+  return clientRuntime.runPromiseExit(
+    Effect.gen(function* () {
+      const client = yield* LiqvidStudioApiClient;
+      return yield* client.projects.regenerateFiles({
+        query: { projectPath },
+      });
+    }),
+  );
+}

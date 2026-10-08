@@ -4,19 +4,19 @@ import {
   colors,
   dims,
   opacity,
-  radii,
+  rounded,
   scales,
   shadows,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
-import type { NonCustomizable } from "#_/types/misc.mjs";
+} from "#_/design/tokens.stylex";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared";
+import type { NonCustomizable } from "#_/types/misc";
 
 const styles = stylex.create({
   button: {
     alignItems: "center",
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     cursor: {
@@ -68,6 +68,24 @@ const styles = stylex.create({
     color: colors.white,
   },
 
+  ghost: {
+    backgroundColor: {
+      ":active:enabled": colors.btnBgActive,
+      ":disabled": colors.btnBg,
+      ":hover:enabled": colors.btnBgHover,
+      default: null,
+    },
+    borderStyle: "none",
+    boxShadow: {
+      ":focus": shadows.focus,
+      default: null,
+    },
+    color: {
+      ":disabled": colors.btnColorDisabled,
+      default: colors.btnColor,
+    },
+  },
+
   primary: {
     backgroundColor: {
       ":active:enabled": colors.accentActive,
@@ -104,7 +122,7 @@ export function Button({
     __error: "";
   };
   children?: LocalizedReactNode;
-  kind?: "default" | "destructive" | "primary";
+  kind?: "default" | "destructive" | "ghost" | "primary";
 
   size?: "normal" | "small";
 

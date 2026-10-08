@@ -1,19 +1,22 @@
 "use client";
 
-import { Menu } from "@base-ui/react/menu";
+import { Menu, type MenuTriggerProps } from "@base-ui/react/menu";
+import { useColorScheme } from "@liqvid/color-scheme/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { extensible, themed } from "#_/design/themed.js";
+import { useIsStudio } from "#_/contexts/is-studio";
+import { extensible, themed } from "#_/design/themed";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   shadows,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
+} from "#_/design/tokens.stylex";
 
+import { Button } from "./Button.tsx";
 import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
@@ -22,10 +25,9 @@ const styles = stylex.create({
     backgroundColor: {
       ":active": colors.affordanceActive,
       ":focus": colors.affordanceHover,
-      // eslint-disable-next-line @stylexjs/valid-styles
-      default: null,
+      default: colors.affordanceBg,
     },
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     boxShadow: {
       ":focus-visible": null,
       default: null,
@@ -45,7 +47,7 @@ const styles = stylex.create({
   popup: {
     backgroundColor: colors.affordanceBg,
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     boxShadow: shadows.xl,
@@ -58,46 +60,40 @@ const styles = stylex.create({
   },
 
   separator: {
-    backgroundColor: colors.graySep,
+    backgroundColor: colors.affordanceSep,
     height: dims.sep,
-    marginBlock: spacing.md,
-    marginInline: spacing.zero,
-  },
-
-  trigger: {
-    alignItems: "center",
-    backgroundColor: {
-      ":active:enabled": colors.btnBgActive,
-      ":disabled": colors.btnBg,
-      ":hover:enabled": colors.btnBgHover,
-      default: colors.btnBg,
-    },
-    borderColor: colors.btnBorder,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: colors.inherit,
-    columnGap: spacing.lg,
-    cursor: "pointer",
-    display: "flex",
-    fontSize: text.md,
-    outline: {
-      ":focus": `2px solid ${colors.accentSolid}`,
-      default: null,
-    },
-    outlineOffset: {
-      ":focus": "1px",
-      default: null,
-    },
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    rowGap: spacing.lg,
   },
 });
 
 export const MenuItem = themed(Menu.Item, styles.item);
+export const MenuLinkItem = themed(Menu.LinkItem, styles.item);
 
-export const MenuPopup = themed(Menu.Popup, styles.popup);
+export function MenuPopup({
+  style,
+  ...props
+}: Omit<React.ComponentProps<typeof Menu.Popup>, "className" | "style"> & {
+  className?: {
+    __error: "this component does not support customization";
+  };
+  style?: stylex.StyleXStyles;
+}) {
+  const { colorScheme } = useColorScheme();
+  const isStudio = useIsStudio();
+
+  const sx = stylex.props(styles.popup, style);
+
+  return (
+    <Menu.Popup
+      data-color-scheme={colorScheme}
+      {...props}
+      className={sx.className}
+      style={{
+        ...sx.style,
+        colorScheme: isStudio ? undefined : colorScheme,
+      }}
+    />
+  );
+}
 
 export const MenuPortal = Menu.Portal;
 
@@ -120,4 +116,9 @@ export const MenuRoot = Menu.Root;
 /** @future */
 export const MenuSeparator = themed(Menu.Separator, styles.separator);
 
-export const MenuTrigger = extensible()(Menu.Trigger, styles.trigger);
+export function MenuTrigger<Payload>({
+  style,
+  ...props
+}: MenuTriggerProps<Payload> & React.ComponentProps<typeof Button>) {
+  return <Menu.Trigger render={<Button style={style} />} {...props} />;
+}

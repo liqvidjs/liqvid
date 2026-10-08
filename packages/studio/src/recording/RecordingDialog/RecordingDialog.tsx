@@ -1,6 +1,6 @@
 import { usePersist, usePersistentState } from "@liqvid/hydration";
 import { useRecordingApi } from "@liqvid/recording";
-import type { RecordingMeta } from "@liqvid/schemas";
+import type { ParameterValues, RecordingMeta } from "@liqvid/schemas";
 import {
   useIsPreview,
   usePluginApi,
@@ -12,18 +12,19 @@ import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { useStudioPrivateApi } from "#_/components/LiqvidDevToolsProvider.js";
-import { useChannel } from "#_/components/WebSocketProvider.js";
-import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
-import { DockableDialog } from "#_/ui/DockableDialog.js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
-import { TranslationProvider, useAsyncTranslations } from "#_/utils/react.js";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { useStudioPrivateApi } from "#_/components/LiqvidDevToolsProvider/index.js";
+import { useChannel } from "#_/components/WebSocketProvider";
+import { colors, dims, rounded, spacing } from "#_/design/tokens.stylex";
+import { DockableDialog } from "#_/ui/DockableDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs";
+import { TranslationProvider, useAsyncTranslations } from "#_/utils/react";
 
 import type { RecordingControlProps } from "../RecordingControl.tsx";
 
-import { RecordingRow } from "./RecordingRow.tsx";
+import { SavedContent } from "./RecordingRow.tsx";
 import { ShortcutsTable } from "./ShortcutsTable.tsx";
+import { Subtitle } from "./ui.tsx";
 
 import Translations from "../.translations/en.json";
 
@@ -48,20 +49,10 @@ const styles = stylex.create({
     width: "calc(36px + 8px)",
   },
 
-  Recordings: {
-    backgroundColor: colors.grayUi,
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    margin: `${spacing.md} 0`,
-    overflow: "hidden",
-  },
-
   recordingToggle: {
     alignItems: "center",
     backgroundColor: colors.grayDim,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     cursor: "pointer",
     display: "inline-flex",
     height: "36px",
@@ -73,10 +64,6 @@ const styles = stylex.create({
 
   recordingToggleChecked: {
     backgroundColor: colors.recordingPluginActive,
-  },
-
-  subtitle: {
-    marginBottom: spacing.md,
   },
 
   togglePlugins: {

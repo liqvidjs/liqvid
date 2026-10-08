@@ -1,9 +1,14 @@
 import type { DurationLike } from "@liqvid/duration";
-import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
+import {
+  type DurationString,
+  formatTime,
+  formatTimeDuration,
+  formatTimeMs,
+} from "@liqvid/utils";
 
-import { useLocale } from "#_/contexts/locale.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
-import { asDate, toISODateString } from "#_/utils/time.mjs";
+import { useLocale } from "#_/contexts/locale";
+import type { LocalizedReactNode } from "#_/i18n/shared";
+import { asDate, toISODateString } from "#_/utils/time";
 
 type TimeFormat = "long" | "date-and-time";
 type Language = "en-US";
@@ -41,7 +46,7 @@ export function TimeDuration({
    * - `milliseconds`: 1:23.456
    */
   format?: "seconds" | "milliseconds";
-  value: DurationLike;
+  value: DurationLike | DurationString;
 }) {
   return (
     <time

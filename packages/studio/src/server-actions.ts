@@ -5,9 +5,9 @@ import path from "node:path";
 
 import { type RelativeDir, RelativeFile } from "effect-paths";
 
-import { TRANSLATIONS_DIR } from "./conventions.mts";
-import { getLocale } from "./utils/i18n.mts";
-import { STUDIO_ROOT } from "./utils/server.mts";
+import { TRANSLATIONS_DIR } from "./conventions.ts";
+import { getLocale } from "./utils/i18n.ts";
+import { STUDIO_ROOT } from "./utils/server.ts";
 
 export async function getTranslationsFromServer<T>(
   componentPath: RelativeDir,

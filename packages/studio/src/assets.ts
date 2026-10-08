@@ -1,3 +1,5 @@
+import type { DurationString } from "@liqvid/utils";
+
 export type Directory = {
   [key: string]: Directory | (() => unknown);
 };
@@ -23,7 +25,7 @@ export type FileNames<D extends Directory> = FileNamesOf<D> & {
 
 type Files<T extends string> = T extends `${string}/` ? never : T;
 
-type DirectoryLike = Directory | string;
+export type DirectoryLike = Directory | string;
 
 type SourceDirectory<D> = D extends {
   readonly [directorySource]?: infer Source extends Directory;
@@ -190,11 +192,74 @@ type Resolve<
       : never
     : never;
 
+/**
+ * A recording chosen for inclusion in the final video. Behaves as a
+ * {@link DirectoryHelper} rooted at the recording's directory, and carries the
+ * recording's duration as a string like `"1:02:00"`.
+ */
+export class Recording<
+  Dur extends DurationString,
+  DS extends DirectoryLike = Directory,
+> extends DirectoryHelper<DS> {
+  /** duration of the recording, e.g. `"0:45:00"` */
+  readonly duration: Dur;
+
+  constructor(dirname: string, duration: Dur) {
+    super(dirname);
+    this.duration = duration;
+  }
+}
+
 export class ServerDirectoryHelper<D extends Directory> {
   readonly #files: D;
 
   constructor(files: D) {
     this.#files = files;
+  }
+
+  static fromFileList(
+    files: readonly string[],
+  ): ServerDirectoryHelper<Directory> {
+    const directory: Directory = {};
+
+    for (const filename of files) {
+      const parts = filename.split("/");
+      let current = directory;
+
+      for (const [index, part] of parts.entries()) {
+        if (index === parts.length - 1) {
+          current[part] = () => undefined;
+        } else {
+          const child = current[part];
+          if (typeof child !== "object" || child === null) {
+            current[part] = {};
+          }
+          current = current[part] as Directory;
+        }
+      }
+    }
+
+    return new ServerDirectoryHelper(directory);
+  }
+
+  /** List files relative to this directory. */
+  list(): string[] {
+    const files: string[] = [];
+
+    const visit = (directory: Directory, prefix = "") => {
+      for (const [name, child] of Object.entries(directory)) {
+        const filename = prefix ? `${prefix}/${name}` : name;
+
+        if (typeof child === "object" && child !== null) {
+          visit(child as Directory, filename);
+        } else {
+          files.push(filename);
+        }
+      }
+    };
+
+    visit(this.#files);
+    return files;
   }
 
   /** get a new ServerDirectoryHelper for a subdirectory */

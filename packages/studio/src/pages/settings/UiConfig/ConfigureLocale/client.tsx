@@ -5,10 +5,9 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { spacing, text } from "#_/design/tokens.stylex.js";
-import { PlainString } from "#_/i18n/shared.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { spacing, text } from "#_/design/tokens.stylex";
+import { PlainString } from "#_/i18n/shared";
 import {
   SelectIcon,
   SelectItem,
@@ -20,7 +19,8 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
+} from "#_/ui/Select";
+import { Spinner } from "#_/ui/Spinner";
 
 const styles = stylex.create({
   flag: {

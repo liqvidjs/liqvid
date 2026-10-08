@@ -2,13 +2,13 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import type { SettingsConfig } from "#_/api/contract.mjs";
-import { fonts } from "#_/design/styles.js";
-import { spacing } from "#_/design/tokens.stylex.js";
-import { PlainString } from "#_/i18n/shared.mjs";
-import { Checkbox } from "#_/ui/Checkbox.js";
-import { TextField } from "#_/ui/TextField.js";
-import { useTranslations } from "#_/utils/react.js";
+import type { SettingsConfig } from "#_/api/contract";
+import { fonts } from "#_/design/styles";
+import { spacing } from "#_/design/tokens.stylex";
+import { PlainString } from "#_/i18n/shared";
+import { Checkbox } from "#_/ui/Checkbox";
+import { TextField } from "#_/ui/TextField";
+import { useTranslations } from "#_/utils/react";
 
 import type { Providers } from "../client.tsx";
 

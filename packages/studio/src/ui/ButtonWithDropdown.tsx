@@ -7,11 +7,11 @@ import {
   colors,
   dims,
   opacity,
-  radii,
+  rounded,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
+} from "#_/design/tokens.stylex";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared";
 
 import {
   MenuItem,
@@ -32,7 +32,7 @@ const styles = stylex.create({
     borderInlineStartStyle: "none",
     /* collapse the shared border between the two buttons */
     borderInlineStartWidth: spacing.zero,
-    borderRadius: `0 ${radii.md} ${radii.md} 0`,
+    borderRadius: `0 ${rounded.md} ${rounded.md} 0`,
   },
 
   mainButton: {
@@ -43,7 +43,7 @@ const styles = stylex.create({
       default: colors.btnBg,
     },
     borderColor: colors.btnBorder,
-    borderRadius: `${radii.md} 0 0 ${radii.md}`,
+    borderRadius: `${rounded.md} 0 0 ${rounded.md}`,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: {

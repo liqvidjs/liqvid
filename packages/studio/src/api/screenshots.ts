@@ -14,21 +14,17 @@ import {
   SCREENSHOT_FILE_LIGHT,
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
-} from "#_/conventions.mjs";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
-import {
-  ConflictError,
-  InvalidError,
-  NotFoundError,
-} from "#_/utils/errors.mjs";
-import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
+} from "#_/conventions";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { ConflictError, InvalidError, NotFoundError } from "#_/utils/errors";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "#_/utils/parameters.mjs";
+} from "#_/utils/parameters";
 
-import { WebApi } from "./contract.mts";
+import { WebApi } from "./contract";
 
 const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
 

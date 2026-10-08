@@ -8,23 +8,23 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
-import type { ThumbsData } from "#_/api/schemas.mjs";
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions.mjs";
+import type { ThumbsData } from "#_/api/schemas";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { ASSETS_DIR, THUMBS_DIR } from "#_/conventions";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import { Button } from "#_/ui/Button.js";
-import { useDialogApi } from "#_/ui/dialogs-shared.js";
-import { Range } from "#_/ui/Range.js";
-import { TimeDuration } from "#_/ui/Time.js";
-import { useCommonTranslations, useTranslations } from "#_/utils/react.js";
+} from "#_/design/tokens.stylex";
+import { Button } from "#_/ui/Button";
+import { useDialogApi } from "#_/ui/dialogs-shared";
+import { Range } from "#_/ui/Range";
+import { Spinner } from "#_/ui/Spinner";
+import { TimeDuration } from "#_/ui/Time";
+import { useCommonTranslations, useTranslations } from "#_/utils/react";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -64,7 +64,7 @@ const styles = stylex.create({
   seekSlider: {
     appearance: "none",
     backgroundColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     flex: "1",
     height: "6px",
   },
@@ -76,7 +76,7 @@ const styles = stylex.create({
   thumbsPreviewBox: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     overflow: "hidden",

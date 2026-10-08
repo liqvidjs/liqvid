@@ -1,5 +1,4 @@
 import * as path from "node:path";
-import { pathToFileURL } from "node:url";
 
 import { loadJson } from "@liqvid/cli/utils";
 import { Duration } from "@liqvid/duration";
@@ -31,7 +30,7 @@ import {
   type RelativePath,
 } from "effect-paths";
 
-import { loadRecordingMeta } from "#_/api/recording.mjs";
+import { loadRecordingMeta } from "#_/api/recording";
 import {
   ASSETS_DIR,
   NEXT_PAGE,
@@ -41,17 +40,19 @@ import {
   RECORDING_META_FILE,
   RECORDINGS_DIR,
   SOCIALS_DIR,
-} from "#_/conventions.mjs";
-import { broadcast } from "#_/next/websockets.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { existenceOptional } from "#_/utils/effect.mjs";
-import { walkDir } from "#_/utils/fs.mjs";
-import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
+} from "#_/conventions";
+import { broadcast } from "#_/next/websockets";
+import { serverRuntime } from "#_/server-runtime";
+import { existenceOptional } from "#_/utils/effect";
+import { walkDir } from "#_/utils/fs";
+import { cartesianProduct, getRoutesDir } from "#_/utils/misc";
 import {
   extractParameterNames,
   getDefaultParameterValues,
   getProjectParameterValues,
-} from "#_/utils/parameters.mjs";
+} from "#_/utils/parameters";
+
+import { getRecordingLocation } from "./recording-location";
 
 type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 
@@ -291,12 +292,12 @@ function normalizeEditorTempPath(rel: RelativePath): RelativePath {
  */
 const handleWatchEvent = Effect.fnUntraced(
   function* (event: WatchEvent, projects: Projects) {
-    // A recording is a directory under `.liqvid/recordings/`; its removal (as
-    // opposed to a change to its `recording-meta.json`) surfaces as a dir
-    // event, so handle those here before bailing on non-file events.
+    // A recording is a directory under `.liqvid/<params>/recordings/`; its
+    // removal or rename surfaces as a dir event, so handle those here before
+    // bailing on non-file events.
     if (event.kind === "dir") {
       if (path.basename(event.dirname) === RECORDINGS_DIR) {
-        yield* handleRecordingDir(event.filename);
+        yield* handleRecordingDir(event.filename, projects);
       }
       return;
     }
@@ -565,27 +566,36 @@ const handleProjectMeta = Effect.fnUntraced(
 /**
  * Handle removal of a recording directory (`.liqvid/recordings/<name>`).
  *
- * Creation is handled via the `recording-meta.json` file event once the
- * metadata is actually written, so this only acts on directories that no
- * longer exist.
+ * Directory additions cover renames, where the moved metadata file may not
+ * produce its own watch event. New recordings are also picked up when their
+ * metadata file is written.
  */
 const handleRecordingDir = Effect.fnUntraced(
-  function* (recordingDir: AbsoluteDir) {
+  function* (recordingDir: AbsoluteDir, projects: Projects) {
     const fs = yield* FileSystem.FileSystem;
 
-    if (yield* fs.exists(recordingDir)) return;
-
-    const recordingsDir = AbsoluteDir(path.dirname(recordingDir));
-    const assetsDir = AbsoluteDir(path.dirname(recordingsDir));
-    const projectDir = AbsoluteDir(path.dirname(assetsDir));
-
-    if (path.basename(assetsDir) !== ASSETS_DIR) return;
-
-    const url = pathToFileURL(path.join(projectDir, NEXT_PAGE)).href;
+    const location = getRecordingLocation(
+      recordingDir,
+      getRoutesDir(),
+      Object.keys(projects) as RelativeDir[],
+    );
+    if (!location) return;
     const name = dirNameToPackageName(path.basename(recordingDir));
 
+    if (yield* fs.exists(recordingDir)) {
+      const metaPath = path.join(recordingDir, RECORDING_META_FILE);
+      if (!(yield* fs.exists(metaPath))) return;
+
+      const recording = yield* loadRecordingMeta(recordingDir);
+      yield* broadcast("recordings", {
+        data: { ...location, recording },
+        type: "newRecording",
+      });
+      return;
+    }
+
     yield* broadcast("recordings", {
-      data: { name, url },
+      data: { ...location, name },
       type: "deleteRecording",
     });
   },
@@ -599,35 +609,25 @@ const handleRecordingDir = Effect.fnUntraced(
  * Handle creation, modification, or deletion of a recording's
  * `recording-meta.json`.
  *
- * A recording lives at `<project>/.liqvid/recordings/<name>/`, so the meta
- * file's directory is the recording directory, whose grandparent (via the
- * `recordings` and `.liqvid` dirs) is the project directory. Whether the file
- * still exists tells create/update from delete.
+ * A recording lives at `<project>/.liqvid/<params>/recordings/<name>/`, so
+ * derive its project and parameter scope from its directory. Whether the meta
+ * file still exists tells create/update from delete.
  */
 const handleRecordingMeta = Effect.fnUntraced(
-  function* ({ dirname: recordingDir, filename }: Context) {
+  function* ({ dirname: recordingDir, filename, projects }: Context) {
     const fs = yield* FileSystem.FileSystem;
 
-    // Validate the expected `.liqvid/recordings/<name>` structure.
-    const recordingsDir = AbsoluteDir(path.dirname(recordingDir));
-    const assetsDir = AbsoluteDir(path.dirname(recordingsDir));
-    const projectDir = AbsoluteDir(path.dirname(assetsDir));
-
-    if (
-      path.basename(recordingsDir) !== RECORDINGS_DIR ||
-      path.basename(assetsDir) !== ASSETS_DIR
-    ) {
-      return;
-    }
-
-    // The recording dialog is scoped by the `file://` URL of the project's
-    // `page.tsx`, so broadcast that as the discriminator.
-    const url = pathToFileURL(path.join(projectDir, NEXT_PAGE)).href;
+    const location = getRecordingLocation(
+      recordingDir,
+      getRoutesDir(),
+      Object.keys(projects) as RelativeDir[],
+    );
+    if (!location) return;
     const name = dirNameToPackageName(path.basename(recordingDir));
 
     if (!(yield* fs.exists(filename))) {
       yield* broadcast("recordings", {
-        data: { name, url },
+        data: { ...location, name },
         type: "deleteRecording",
       });
       return;
@@ -636,7 +636,7 @@ const handleRecordingMeta = Effect.fnUntraced(
     const recording = yield* loadRecordingMeta(recordingDir);
 
     yield* broadcast("recordings", {
-      data: { recording, url },
+      data: { ...location, recording },
       type: "newRecording",
     });
   },

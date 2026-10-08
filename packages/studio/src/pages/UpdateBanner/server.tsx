@@ -1,6 +1,6 @@
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared";
+import { getServerState } from "#_/initialize";
+import { getTranslations } from "#_/utils/i18n";
 
 import { UpdateBannerClient } from "./client.tsx";
 

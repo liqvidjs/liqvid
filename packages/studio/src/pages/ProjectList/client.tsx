@@ -13,19 +13,19 @@ import picomatch from "picomatch";
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
-import { useChannel } from "#_/components/WebSocketProvider.js";
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import { SelectedRootParametersProvider } from "#_/contexts/selected-root-parameters.js";
+import { useChannel } from "#_/components/WebSocketProvider";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import { SelectedRootParametersProvider } from "#_/contexts/selected-root-parameters";
 import {
   COLLAPSED_FOLDERS_COOKIE,
   FOLDER_VIEW_COOKIE,
   SHOW_HIDDEN_PROJECTS_COOKIE,
-} from "#_/cookies.js";
-import { spacing } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Switch } from "#_/ui/Switch.js";
-import { getDefaultParams } from "#_/utils/parameters-client.mjs";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/cookies";
+import { spacing } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Switch } from "#_/ui/Switch";
+import { getDefaultParams } from "#_/utils/parameters-client";
+import { useTranslations } from "#_/utils/react";
 
 import { FolderItem, type FolderNode } from "./FolderItem.tsx";
 import { ProjectItem } from "./ProjectItem.tsx";

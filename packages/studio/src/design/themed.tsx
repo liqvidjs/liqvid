@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared.mjs";
+import type { LocalizedReactNode, LocalizedString } from "#_/i18n/shared";
 
 /**
  * Shortcut to apply styles to a base component.

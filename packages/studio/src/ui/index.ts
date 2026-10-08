@@ -3,7 +3,9 @@ export {
   type LocalizedReactNode,
   type LocalizedString,
   PlainString,
-} from "#_/i18n/shared.mjs";
+} from "#_/i18n/shared";
+
+export { TranslationProvider, useAsyncTranslations } from "../utils/react.tsx";
 
 export * from "./AlertDialog.tsx";
 export * from "./Button.tsx";
@@ -17,6 +19,7 @@ export * from "./Portal.tsx";
 export * from "./Radio.tsx";
 export * from "./RadioTabs.tsx";
 export * from "./Select.tsx";
+export * from "./Spinner.tsx";
 export * from "./Tabs.tsx";
 export * from "./TextField.tsx";
 export * from "./Time.tsx";

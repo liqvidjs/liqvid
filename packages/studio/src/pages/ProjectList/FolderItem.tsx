@@ -11,11 +11,11 @@ import { useId } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
+} from "#_/design/tokens.stylex";
 
 import { ProjectItem } from "./ProjectItem.tsx";
 
@@ -35,7 +35,7 @@ const styles = stylex.create({
     alignItems: "center",
     aspectRatio: "square",
     backgroundColor: colors.graySep,
-    borderRadius: radii.circle,
+    borderRadius: rounded.circle,
     color: colors.secondary,
     display: "flex",
     fontSize: text.sm,
@@ -49,7 +49,7 @@ const styles = stylex.create({
 
   folder: {
     borderColor: colors.folderBorder,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     overflow: "visible",
@@ -59,9 +59,9 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: {
       ":hover": colors.folderHeaderBgHover,
-      default: colors.folderHeaderBg,
+      default: null,
     },
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     borderStyle: "none",
     boxShadow: "none",
     cursor: "pointer",
@@ -99,7 +99,7 @@ const styles = stylex.create({
   },
 
   nestedFolder: {
-    borderRadius: radii.none,
+    borderRadius: rounded.none,
     borderStyle: "none",
   },
 

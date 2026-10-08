@@ -9,12 +9,12 @@ import { EnvFiles } from "@liqvid/schemas";
 import { Cause, Effect, FileSystem, Logger, Option, Stream } from "effect";
 import { RelativeFile } from "effect-paths";
 
-import { ROOT_HIDDEN_DIR, TYPES_AUTOGEN } from "#_/conventions.mjs";
-import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
-import { withLogLevel } from "#_/server-runtime.mjs";
-import { getBiomePath } from "#_/utils/fs.mjs";
+import { ROOT_HIDDEN_DIR, TYPES_AUTOGEN } from "#_/conventions";
+import { getServerState, type LiqvidServerState } from "#_/initialize";
+import { withLogLevel } from "#_/server-runtime";
+import { getBiomePath } from "#_/utils/fs";
 
-import { runTemplate } from "./watch-assets.mts";
+import { runTemplate } from "./watch-assets";
 
 /**
  * Generate the root-level .liqvid/types.ts file containing RootParams type.

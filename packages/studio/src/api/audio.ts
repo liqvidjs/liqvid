@@ -13,20 +13,16 @@ import {
   CAPTIONS_FILE,
   CAPTIONS_META,
   RICH_TRANSCRIPT,
-} from "#_/conventions.mjs";
-import { CaptionsMeta } from "#_/types/schemas.mjs";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect.mjs";
-import {
-  ConflictError,
-  InvalidError,
-  NotFoundError,
-} from "#_/utils/errors.mjs";
-import { createJob } from "#_/utils/jobs.mjs";
-import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
-import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
+} from "#_/conventions";
+import { CaptionsMeta } from "#_/types/schemas";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { ConflictError, InvalidError, NotFoundError } from "#_/utils/errors";
+import { createJob } from "#_/utils/jobs";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
+import { getParameterizedAssetsDir } from "#_/utils/parameters";
 
-import { WebApi } from "./contract.mts";
-import { type AudioEntry, AudioMeta } from "./schemas.mts";
+import { WebApi } from "./contract";
+import { type AudioEntry, AudioMeta } from "./schemas";
 
 const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 

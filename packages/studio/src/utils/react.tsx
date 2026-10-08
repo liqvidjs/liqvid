@@ -5,15 +5,15 @@ import type { RelativeDir } from "effect-paths";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import CommonTranslations from "#_/.translations/en.json";
-import { COMMON_TRANSLATIONS_DIR } from "#_/conventions.mjs";
+import { COMMON_TRANSLATIONS_DIR } from "#_/conventions";
 import {
   type Interpolated,
   interpolated,
   type Localized,
-} from "#_/i18n/shared.mjs";
-import { getTranslationsFromServer } from "#_/server-actions.js";
+} from "#_/i18n/shared";
+import { getTranslationsFromServer } from "#_/server-actions";
 
-import type { CommonTranslations as CommonTranslationsType } from "./i18n.mts";
+import type { CommonTranslations as CommonTranslationsType } from "./i18n";
 
 /* ------------------------------ translations ------------------------------ */
 

@@ -2,8 +2,15 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadJson, UP } from "@liqvid/cli/utils";
-import { type ParameterConfig, ProjectJson } from "@liqvid/schemas";
 import {
+  AutoGenProjectMeta,
+  type ParameterConfig,
+  ProjectJson,
+  RecordingMetaFile,
+} from "@liqvid/schemas";
+import { formatTimeMs } from "@liqvid/utils";
+import {
+  Cache,
   Cause,
   Effect,
   FileSystem,
@@ -15,7 +22,7 @@ import {
   Stream,
 } from "effect";
 import {
-  type AbsoluteDir,
+  AbsoluteDir,
   type AbsoluteFile,
   type AbsolutePath,
   RelativeDir,
@@ -29,22 +36,31 @@ import {
   ASSETS_DIR,
   DS_STORE,
   NEXT_PAGE,
+  PARAMS_MARKER_PREFIX,
   PROJECT_FILE,
   PROJECT_FILES_AUTOGEN,
   PROJECT_META_FILE,
+  RECORDING_META_FILE,
+  RECORDINGS_DIR,
   TYPES_AUTOGEN,
-} from "#_/conventions.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { withLogLevel } from "#_/server-runtime.mjs";
-import { readDirWithFileTypes } from "#_/utils/effect.mjs";
-import { getBiomePath } from "#_/utils/fs.mjs";
-import { cartesianProduct, getRoutesDir } from "#_/utils/misc.mjs";
+} from "#_/conventions";
+import { getServerState } from "#_/initialize";
+import { withLogLevel } from "#_/server-runtime";
+import {
+  buildChosenRecordingsTree,
+  type ChosenRecordingEntry,
+  renderChosenRecordingsType,
+  treeHasChosenRecordings,
+} from "#_/utils/chosen-recordings";
+import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { getBiomePath } from "#_/utils/fs";
+import { cartesianProduct, getRoutesDir } from "#_/utils/misc";
 import {
   buildParameterSubpath,
   ensureParamsMarker,
   extractParameterNames,
   getProjectParameterValues,
-} from "#_/utils/parameters.mjs";
+} from "#_/utils/parameters";
 
 /**
  * Files/patterns to exclude from the directory listing (relative to project dir).
@@ -87,7 +103,6 @@ function shouldIgnoreEvent(
   if (basename === DS_STORE) return true;
   if (basename === TYPES_AUTOGEN) return true;
   if (basename === PROJECT_FILES_AUTOGEN) return true;
-  if (basename === PROJECT_META_FILE) return true;
   return false;
 }
 
@@ -112,6 +127,22 @@ const initializeParameterizedDirs = Effect.fnUntraced(
     const fs = yield* FileSystem.FileSystem;
 
     const paramNames = extractParameterNames(projectPath);
+    const expectedMarker =
+      paramNames.length > 0
+        ? `${PARAMS_MARKER_PREFIX}${paramNames.join(",")}`
+        : undefined;
+
+    if (yield* fs.exists(assetsDir)) {
+      const entries = yield* fs.readDirectory(assetsDir);
+      for (const entry of entries) {
+        if (
+          entry.startsWith(PARAMS_MARKER_PREFIX) &&
+          entry !== expectedMarker
+        ) {
+          yield* fs.remove(path.join(assetsDir, RelativeFile(entry)));
+        }
+      }
+    }
 
     if (paramNames.length === 0) {
       // No parameters - nothing to initialize
@@ -196,6 +227,30 @@ type DirectoryStructure = {
   [key: string]: DirectoryStructure | null;
 };
 
+type AssetWatchEvent = {
+  event: FileSystem.WatchEvent;
+  filename: AbsolutePath;
+  projectDir: AbsoluteDir;
+};
+
+/**
+ * Writers into the running asset watcher's caches. A forced regeneration
+ * replaces those entries so the next watch event does not write a stale tree
+ * back. Absent when the watcher has not been started.
+ */
+let syncDirectoryStructure:
+  | ((
+      projectDir: AbsoluteDir,
+      structure: DirectoryStructure,
+    ) => Effect.Effect<void>)
+  | undefined;
+let syncChosenRecordings:
+  | ((
+      projectDir: AbsoluteDir,
+      tree: ReturnType<typeof buildChosenRecordingsTree>,
+    ) => Effect.Effect<void>)
+  | undefined;
+
 const getJsonType = Effect.fnUntraced(function* (jsonPath: AbsoluteFile) {
   const fs = yield* FileSystem.FileSystem;
 
@@ -225,7 +280,7 @@ const getJsonType = Effect.fnUntraced(function* (jsonPath: AbsoluteFile) {
         ),
       )?.[1]
       ?.trim() ?? null
-  );
+  )?.replace(/,(\s*)>/g, "$1>");
 });
 
 const getDirectoryTypes = Effect.fnUntraced(function* (
@@ -256,6 +311,81 @@ const getDirectoryTypes = Effect.fnUntraced(function* (
   return result;
 });
 
+/**
+ * Load the chosen recordings for every parameter combination, with their
+ * durations, for generating the `ChosenRecordings` type. The recording names
+ * come from each combination's auto-generated `project-meta.json`, and the
+ * durations from each recording's own `recording-meta.json`.
+ */
+const loadChosenRecordings = Effect.fnUntraced(function* (
+  assetsDir: AbsoluteDir,
+  paramNames: readonly string[],
+  parametersRecord: Record<string, readonly string[]>,
+) {
+  const combinations =
+    paramNames.length > 0 ? cartesianProduct(parametersRecord) : [{}];
+
+  return yield* Effect.all(
+    combinations.map((combination) =>
+      Effect.gen(function* () {
+        const values = paramNames.map((name) => combination[name] ?? "");
+        const combinationAssetsDir = path.join(
+          assetsDir,
+          ...(values as RelativeDir[]),
+        );
+
+        const meta = yield* loadJson(
+          AutoGenProjectMeta,
+          path.join(combinationAssetsDir, PROJECT_META_FILE),
+        ).pipe(
+          existenceOptional,
+          Effect.catchTag("FileDecodeError", () =>
+            Effect.succeed(Option.none<AutoGenProjectMeta>()),
+          ),
+        );
+
+        const entries: ChosenRecordingEntry[] = [];
+
+        if (Option.isSome(meta) && meta.value.chosenRecordings) {
+          for (const [name, chosen] of Object.entries(
+            meta.value.chosenRecordings,
+          )) {
+            // skip unchosen entries and guard against malformed directory names
+            if (!chosen || name.includes("/") || name.includes("..")) continue;
+
+            const recordingMeta = yield* loadJson(
+              RecordingMetaFile,
+              path.join(
+                combinationAssetsDir,
+                RECORDINGS_DIR,
+                RelativeDir(name),
+                RECORDING_META_FILE,
+              ),
+            ).pipe(
+              existenceOptional,
+              Effect.catchTag("FileDecodeError", () =>
+                Effect.succeed(
+                  Option.none<(typeof RecordingMetaFile)["Type"]>(),
+                ),
+              ),
+            );
+
+            if (Option.isSome(recordingMeta)) {
+              entries.push({
+                duration: formatTimeMs(recordingMeta.value.duration),
+                name,
+              });
+            }
+          }
+        }
+
+        return { entries, values };
+      }),
+    ),
+    { concurrency: "unbounded" },
+  );
+});
+
 export const watchAssets = Effect.fnUntraced(
   function* () {
     Handlebars.registerHelper(
@@ -268,6 +398,26 @@ export const watchAssets = Effect.fnUntraced(
     );
 
     const TARGET_DIR = getRoutesDir();
+
+    // Keep the expensive project-tree crawl and chosen-recording metadata in
+    // separate caches: a project-meta refresh must not rebuild ProjectStructure.
+    const directoryStructures = yield* Cache.make<
+      AbsoluteDir,
+      DirectoryStructure,
+      PlatformError.PlatformError,
+      FileSystem.FileSystem
+    >({
+      capacity: Number.POSITIVE_INFINITY,
+      lookup: (projectDir) => listProjectDir(projectDir),
+    });
+    const chosenRecordings = yield* Cache.make({
+      capacity: Number.POSITIVE_INFINITY,
+      lookup: loadChosenRecordingsTree,
+    });
+    syncDirectoryStructure = (projectDir, structure) =>
+      Cache.set(directoryStructures, projectDir, structure);
+    syncChosenRecordings = (projectDir, tree) =>
+      Cache.set(chosenRecordings, projectDir, tree);
 
     // A resolved asset change: the project directory whose types.ts should be
     // regenerated for this event.
@@ -297,7 +447,17 @@ export const watchAssets = Effect.fnUntraced(
             Stream.runForEach(() =>
               Effect.gen(function* () {
                 const biomePath = yield* getBiomePath(projectDir);
-                yield* generateProjectTypes({ biomePath, projectDir });
+                const [directoryStructure, chosenRecordingsTree] =
+                  yield* Effect.all([
+                    Cache.get(directoryStructures, projectDir),
+                    Cache.get(chosenRecordings, projectDir),
+                  ]);
+                yield* generateProjectTypes({
+                  biomePath,
+                  chosenRecordingsTree,
+                  directoryStructure,
+                  projectDir,
+                });
               }).pipe(
                 Effect.tapCause((cause) =>
                   Effect.logError(Cause.pretty(cause)),
@@ -312,10 +472,29 @@ export const watchAssets = Effect.fnUntraced(
       Effect.forkScoped,
     );
 
+    // Seed both caches from the initial project scan. Project metadata is
+    // already populated by initProjectFiles before this service is started.
+    for (const projectPath of Object.keys(getServerState().projects)) {
+      const projectDir = path.join(TARGET_DIR, RelativeDir(projectPath));
+      yield* Cache.get(directoryStructures, projectDir);
+      yield* Cache.get(chosenRecordings, projectDir);
+      yield* PubSub.publish(pubsub, { projectDir });
+    }
+
     // Producer: pump fs.watch events into the Pub/Sub. This runs forever,
     // keeping the scope (and the forked consumer) alive.
     yield* watchAssetEvents(TARGET_DIR).pipe(
-      Stream.runForEach((event) => PubSub.publish(pubsub, event)),
+      Stream.runForEach((event) =>
+        Effect.gen(function* () {
+          yield* updateDirectoryStructure(directoryStructures, event);
+
+          if (isChosenRecordingsInput(event)) {
+            yield* Cache.invalidate(chosenRecordings, event.projectDir);
+          }
+
+          yield* PubSub.publish(pubsub, { projectDir: event.projectDir });
+        }),
+      ),
       Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
     );
   },
@@ -330,7 +509,7 @@ export const watchAssets = Effect.fnUntraced(
  */
 function watchAssetEvents(
   targetDir: AbsoluteDir,
-): Stream.Stream<{ projectDir: AbsoluteDir }, never, FileSystem.FileSystem> {
+): Stream.Stream<AssetWatchEvent, never, FileSystem.FileSystem> {
   return Stream.unwrap(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
@@ -349,7 +528,11 @@ function watchAssetEvents(
             const $projectDir = yield* findProjectDirectory(filename);
             if (Option.isNone($projectDir)) return Result.fail(event);
 
-            return Result.succeed({ projectDir: $projectDir.value });
+            return Result.succeed({
+              event,
+              filename,
+              projectDir: $projectDir.value,
+            });
           }),
         ),
         // A PlatformError from the watcher itself becomes a defect so the
@@ -366,9 +549,13 @@ function watchAssetEvents(
 const generateProjectTypes = Effect.fnUntraced(
   function* ({
     biomePath,
+    chosenRecordingsTree,
+    directoryStructure,
     projectDir,
   }: {
     biomePath: Option.Option<AbsoluteFile>;
+    chosenRecordingsTree: ReturnType<typeof buildChosenRecordingsTree>;
+    directoryStructure: DirectoryStructure;
     projectDir: AbsoluteDir;
   }) {
     const fs = yield* FileSystem.FileSystem;
@@ -377,7 +564,6 @@ const generateProjectTypes = Effect.fnUntraced(
       `generating ${PROJECT_FILES_AUTOGEN} and ${TYPES_AUTOGEN} `,
     );
 
-    const directoryStructure = yield* listProjectDir(projectDir);
     const directoryTypes = yield* getDirectoryTypes(
       projectDir,
       directoryStructure,
@@ -420,28 +606,217 @@ const generateProjectTypes = Effect.fnUntraced(
       project.parameters,
     );
 
-    yield* Effect.forkDetach(
-      withLogLevel(
-        Effect.all([
-          fs.writeFileString(
-            path.join(assetsDir, PROJECT_FILES_AUTOGEN),
-            JSON.stringify(directoryStructure, null, 2),
-          ),
-          runTemplate({
-            biomePath,
-            data: { directoryTypes, parameters },
-            out: path.join(assetsDir, TYPES_AUTOGEN),
-            template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
-          }),
-        ]),
-      ).pipe(
-        // Send these logs to the console, not the service's structured logger.
-        Effect.provide(Logger.layer([Logger.consolePretty()])),
-      ),
+    yield* withLogLevel(
+      Effect.all([
+        fs.writeFileString(
+          path.join(assetsDir, PROJECT_FILES_AUTOGEN),
+          JSON.stringify(directoryStructure, null, 2),
+        ),
+        runTemplate({
+          biomePath,
+          data: {
+            chosenRecordings: renderChosenRecordingsType(chosenRecordingsTree),
+            directoryTypes,
+            hasChosenRecordings: treeHasChosenRecordings(chosenRecordingsTree),
+            parameters,
+          },
+          out: path.join(assetsDir, TYPES_AUTOGEN),
+          template: RelativeFile(`${TYPES_AUTOGEN}.hbs`),
+        }),
+      ]),
+    ).pipe(
+      // Send these logs to the console, not the service's structured logger.
+      Effect.provide(Logger.layer([Logger.consolePretty()])),
     );
   },
   (effect, projectDir) => effect.pipe(Effect.annotateLogs({ projectDir })),
 );
+
+/**
+ * Load the chosen recordings for one project. This is the lookup function for
+ * the chosen-recordings cache and is invalidated by relevant watch events.
+ */
+const loadChosenRecordingsTree = Effect.fnUntraced(function* (
+  projectDir: AbsoluteDir,
+) {
+  const project = yield* loadJson(
+    ProjectJson,
+    path.join(projectDir, PROJECT_FILE),
+  );
+  const projectPath = path.relative(getRoutesDir(), projectDir);
+  const parametersRecord =
+    project.parameters ??
+    (() => {
+      const { config } = getServerState();
+      return Option.isSome(config) ? (config.value.rootParameters ?? {}) : {};
+    })();
+  const assetsDir = path.join(projectDir, ASSETS_DIR);
+
+  return buildChosenRecordingsTree(
+    yield* loadChosenRecordings(
+      assetsDir,
+      extractParameterNames(projectPath),
+      parametersRecord,
+    ),
+  );
+});
+
+/**
+ * Force a full rescan and rewrite `project-files.json` and `types.ts`.
+ *
+ * Unlike the watcher, this does not apply an incremental cache update — it
+ * rebuilds the tree from the filesystem. If the asset watcher is running, its
+ * caches are replaced so a later event does not write the previous tree back.
+ */
+export const regenerateProjectFiles = Effect.fnUntraced(function* (
+  projectDir: AbsoluteDir,
+) {
+  const project = yield* loadJson(
+    ProjectJson,
+    path.join(projectDir, PROJECT_FILE),
+  );
+  const projectPath = path.relative(getRoutesDir(), projectDir);
+  const assetsDir = path.join(projectDir, ASSETS_DIR);
+
+  // Reconcile the parameter marker before scanning so stale markers from an
+  // earlier route shape are not copied into the new manifest.
+  yield* initializeParameterizedDirs(
+    assetsDir,
+    projectPath,
+    project.parameters,
+  );
+
+  const directoryStructure = yield* listProjectDir(projectDir);
+  const chosenRecordingsTree = yield* loadChosenRecordingsTree(projectDir);
+
+  if (syncDirectoryStructure) {
+    yield* syncDirectoryStructure(projectDir, directoryStructure);
+  }
+  if (syncChosenRecordings) {
+    yield* syncChosenRecordings(projectDir, chosenRecordingsTree);
+  }
+
+  const biomePath = yield* getBiomePath(projectDir);
+  yield* generateProjectTypes({
+    biomePath,
+    chosenRecordingsTree,
+    directoryStructure,
+    projectDir,
+  });
+
+  return {
+    chosenRecordings: renderChosenRecordingsType(chosenRecordingsTree),
+    directoryStructure,
+    paramNames: extractParameterNames(projectPath),
+    projectPath,
+  };
+});
+
+/**
+ * Apply one filesystem notification to the cached project tree. File changes
+ * update a single entry. A newly-created/replaced directory is crawled only
+ * below that directory; removals are reconciled against the current filesystem
+ * state so delete-create rename pairs converge regardless of event timing.
+ */
+const updateDirectoryStructure = Effect.fnUntraced(function* (
+  cache: Cache.Cache<
+    AbsoluteDir,
+    DirectoryStructure,
+    PlatformError.PlatformError,
+    FileSystem.FileSystem
+  >,
+  event: AssetWatchEvent,
+) {
+  const relative = path.relative(event.projectDir, event.filename);
+  if (!relative || relative === "." || relative.startsWith(`..${path.sep}`)) {
+    return;
+  }
+
+  const basename = RelativeFile(path.basename(relative));
+  const relativePath = RelativeDir(relative);
+  if (shouldExclude(relativePath, basename)) return;
+
+  const fs = yield* FileSystem.FileSystem;
+  const current = yield* Cache.get(cache, event.projectDir);
+  const info = yield* fs.stat(event.filename).pipe(Effect.option);
+  let next: DirectoryStructure;
+
+  if (Option.isNone(info)) {
+    next = setDirectoryEntry(current, relative.split(path.sep), undefined);
+  } else if (info.value.type === "Directory") {
+    const parts = relative.split(path.sep);
+    const existing = getDirectoryEntry(current, parts);
+
+    if (
+      event.event._tag === "Update" &&
+      existing !== undefined &&
+      existing !== null
+    ) {
+      return;
+    }
+
+    const subtree = yield* listProjectDir(
+      event.projectDir,
+      AbsoluteDir(event.filename),
+      relativePath,
+    );
+    next = setDirectoryEntry(current, parts, subtree);
+  } else {
+    next = setDirectoryEntry(current, relative.split(path.sep), null);
+  }
+
+  yield* Cache.set(cache, event.projectDir, next);
+});
+
+function getDirectoryEntry(
+  directory: DirectoryStructure,
+  parts: readonly string[],
+): DirectoryStructure | null | undefined {
+  const [head, ...tail] = parts;
+  if (head === undefined || !(head in directory)) return undefined;
+  const entry = directory[head];
+  if (tail.length === 0) return entry;
+  if (entry === null || entry === undefined) return undefined;
+  return getDirectoryEntry(entry, tail);
+}
+
+function setDirectoryEntry(
+  directory: DirectoryStructure,
+  parts: readonly string[],
+  value: DirectoryStructure | null | undefined,
+): DirectoryStructure {
+  const [head, ...tail] = parts;
+  if (head === undefined) return directory;
+
+  const next = { ...directory };
+  if (tail.length === 0) {
+    if (value === undefined) delete next[head];
+    else next[head] = value;
+    return next;
+  }
+
+  const child = directory[head];
+  if (value === undefined && child === undefined) return directory;
+  const childDirectory = child !== null && child !== undefined ? child : {};
+  next[head] = setDirectoryEntry(childDirectory, tail, value);
+  return next;
+}
+
+function isChosenRecordingsInput(event: AssetWatchEvent): boolean {
+  const relative = path.relative(event.projectDir, event.filename);
+  const basename = path.basename(relative);
+  const parts = relative.split(path.sep);
+  const recordingsIndex = parts.indexOf(RECORDINGS_DIR);
+
+  return (
+    basename === PROJECT_FILE ||
+    basename === PROJECT_META_FILE ||
+    basename === RECORDING_META_FILE ||
+    (recordingsIndex >= 0 &&
+      parts.length === recordingsIndex + 2 &&
+      (event.event._tag === "Create" || event.event._tag === "Remove"))
+  );
+}
 
 /**
  * Generate a file from a Handlebars template, and format the result with Biome (if available).

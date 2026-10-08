@@ -3,15 +3,15 @@
 import { Popover } from "@base-ui/react/popover";
 import * as stylex from "@stylexjs/stylex";
 
-import { themed } from "#_/design/themed.js";
+import { themed } from "#_/design/themed";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   shadows,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
+} from "#_/design/tokens.stylex";
 
 import { useDialogApi } from "./dialogs-shared.ts";
 
@@ -19,7 +19,7 @@ const styles = stylex.create({
   popup: {
     backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     boxShadow: shadows.xl,
@@ -37,7 +37,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.inherit,

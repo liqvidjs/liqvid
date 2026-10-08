@@ -18,31 +18,32 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import { useEffect, useId, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
-import { Spinner } from "#_/components/Spinner.js";
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import { getPreviewServerOrigin } from "#_/contexts/preview-server-config";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { Localized, LocalizedString } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
+} from "#_/design/tokens.stylex";
+import type { Localized, LocalizedString } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "#_/ui/Dialog.js";
-import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs.js";
-import { TimeDuration } from "#_/ui/Time.js";
-import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client.mjs";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/ui/Dialog";
+import { RadioTabs, RadioTabsItem } from "#_/ui/RadioTabs";
+import { Spinner } from "#_/ui/Spinner";
+import { TimeDuration } from "#_/ui/Time";
+import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client";
+import { useTranslations } from "#_/utils/react";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -51,7 +52,7 @@ type T = Localized<typeof TranslationsJson>;
 interface ScreenshotModalProps {
   basePath: string;
   duration: DurationLike;
-  onCaptured: () => void;
+  onCaptured: (params: ParameterValues) => void;
   project: Omit<ProjectMeta, "duration">;
 
   /** Selected parameter values for parameterized projects */
@@ -76,7 +77,7 @@ const styles = stylex.create({
   iframe: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     maxHeight: "60vh",
@@ -85,6 +86,8 @@ const styles = stylex.create({
     position: "relative",
     width: "100%",
   },
+
+  popup: { maxWidth: "unset", width: "60vw" },
 
   previewControls: {
     alignItems: "center",
@@ -99,7 +102,7 @@ const styles = stylex.create({
   seekSlider: {
     appearance: "none",
     backgroundColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     flex: "1",
     height: "6px",
   },
@@ -115,7 +118,7 @@ const styles = stylex.create({
   timeInput: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayDim,

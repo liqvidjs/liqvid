@@ -10,12 +10,12 @@ import {
   colors,
   dims,
   opacity,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
 } from "#_/design/tokens.stylex.js";
-import type { NonCustomizable } from "#_/types/misc.mjs";
+import type { NonCustomizable } from "#_/types/misc";
 
 const styles = stylex.create({
   content: {
@@ -25,7 +25,7 @@ const styles = stylex.create({
 
   list: {
     backgroundColor: colors.tabTriggerBg,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     height: "min-content",
     marginBlock: spacing.zero,
     marginInline: spacing.auto,
@@ -43,30 +43,30 @@ const styles = stylex.create({
   trigger: {
     backgroundColor: {
       "[aria-selected='true']": colors.accentSolid,
-      // eslint-disable-next-line @stylexjs/valid-styles
+
       default: null,
     },
 
     borderBottomLeftRadius: {
-      ":first-child": radii.md,
+      ":first-child": rounded.md,
       // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
 
     borderBottomRightRadius: {
-      ":last-child": radii.md,
+      ":last-child": rounded.md,
       // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
 
     borderTopLeftRadius: {
-      ":first-child": radii.md,
+      ":first-child": rounded.md,
       // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
 
     borderTopRightRadius: {
-      ":last-child": radii.md,
+      ":last-child": rounded.md,
       // eslint-disable-next-line @stylexjs/valid-styles
       default: null,
     },
@@ -96,7 +96,7 @@ const styles = stylex.create({
   triggerWrap: {
     alignItems: "center",
 
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     columnGap: spacing.md,
 
     display: "inline-flex",
@@ -126,7 +126,7 @@ const sizeVariants = stylex.create({
   small: {
     "--font-size": text.sm,
     "--padding-block": spacing.xs,
-    "--padding-inline": spacing.sm,
+    "--padding-inline": spacing.md,
   },
 });
 
@@ -148,7 +148,7 @@ function Tabs({
   );
 }
 
-function TabsList({
+export function TabsList({
   style: inlineStyle,
   ...props
 }: Omit<React.ComponentProps<typeof TabsPrimitive.List>, "className">) {
@@ -163,7 +163,7 @@ function TabsList({
   );
 }
 
-function TabsTrigger({
+export function TabsTrigger({
   children,
   ...props
 }: Omit<
@@ -186,7 +186,7 @@ interface TabsContentProps
   asChild?: boolean;
 }
 
-function TabsContent({
+export function TabsContent({
   asChild,
   children,
   className,
@@ -223,4 +223,4 @@ function TabsContent({
   );
 }
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+export { Tabs };

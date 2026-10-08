@@ -4,12 +4,13 @@ import type { ProjectMeta } from "@liqvid/schemas";
 import { CodeIcon } from "@phosphor-icons/react";
 import { useEffectEvent } from "react";
 
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
-import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client.mjs";
-import { useTranslations } from "#_/utils/react.js";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
+import { MenuItem } from "#_/ui/Menu";
+import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client";
+import { useTranslations } from "#_/utils/react";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -34,7 +35,7 @@ export function EmbedButton({ basePath, project }: EmbedButtonProps) {
     selectedRootParams,
   );
 
-  const handleClick = useEffectEvent(async () => {
+  const handleClick = async () => {
     const previewPath = basePath
       ? `${basePath}/${interpolatedPath}`
       : `/${interpolatedPath}`;
@@ -42,11 +43,12 @@ export function EmbedButton({ basePath, project }: EmbedButtonProps) {
     const embedCode = `<iframe src="${src}" style="aspect-ratio: ${project.aspectRatio.width} / ${project.aspectRatio.height}; width: 100%;"></iframe>`;
 
     await navigator.clipboard.writeText(embedCode);
-  });
+  };
 
   return (
-    <Button onClick={handleClick} title={t.copyEmbedCode}>
+    <MenuItem onClick={handleClick}>
       <CodeIcon size={24} />
-    </Button>
+      {t.copyEmbedCode}
+    </MenuItem>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
-import { TextField } from "#_/ui/TextField.js";
-import { useTranslations } from "#_/utils/react.js";
+import { TextField } from "#_/ui/TextField";
+import { useTranslations } from "#_/utils/react";
 
 import type { Providers } from "../client.tsx";
 

@@ -2,8 +2,8 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedString, PlainString } from "#_/i18n/shared.mjs";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import type { LocalizedString, PlainString } from "#_/i18n/shared";
 
 const styles = stylex.create({
   field: {
@@ -21,7 +21,7 @@ const styles = stylex.create({
   input: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,

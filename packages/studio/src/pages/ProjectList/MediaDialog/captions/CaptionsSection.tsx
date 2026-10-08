@@ -7,12 +7,11 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useCallback, useEffect, useState } from "react";
 
-import type { AudioEntry } from "#_/api/schemas.mjs";
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
+import type { AudioEntry } from "#_/api/schemas";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
@@ -20,10 +19,11 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTitle,
-} from "#_/ui/Dialog.js";
-import { useDialogApi } from "#_/ui/dialogs-shared.js";
-import { TextField } from "#_/ui/TextField.js";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/ui/Dialog";
+import { useDialogApi } from "#_/ui/dialogs-shared";
+import { Spinner } from "#_/ui/Spinner";
+import { TextField } from "#_/ui/TextField";
+import { useTranslations } from "#_/utils/react";
 
 import { CaptionRow } from "./CaptionsRow.tsx";
 
@@ -89,7 +89,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,

@@ -1,5 +1,5 @@
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared";
+import { getTranslations } from "#_/utils/i18n";
 
 import { NewProjectButtonClient } from "./client.tsx";
 

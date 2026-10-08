@@ -1,9 +1,9 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { H, Section } from "#_/components/headings.js";
-import { typography } from "#_/design/styles.js";
-import { spacing, text } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
+import { H, Section } from "#_/components/headings";
+import { typography } from "#_/design/styles";
+import { spacing, text } from "#_/design/tokens.stylex";
+import type { LocalizedReactNode } from "#_/i18n/shared";
 
 const styles = stylex.create({
   heading: {

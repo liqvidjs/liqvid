@@ -9,8 +9,9 @@ export {
   useProjectPathOptional,
 } from "@liqvid/studio-plugin-api";
 
-export * from "./assets.mts";
+export * from "./assets.ts";
 export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
+export * from "./contexts/recordings.ts";
 export { DockableDialog } from "./ui/DockableDialog.tsx";
 export * from "./ui/Tabs.tsx";
 
@@ -24,14 +25,16 @@ export * from "./ui/Tabs.tsx";
  */
 export const LiqvidDevToolsProvider = import.meta.env.DEV
   ? lazy(() =>
-      import("./components/LiqvidDevToolsProvider.tsx").then((imports) => ({
-        default: imports.LiqvidDevToolsProvider,
-      })),
+      import("./components/LiqvidDevToolsProvider/index.tsx").then(
+        (imports) => ({
+          default: imports.LiqvidDevToolsProvider,
+        }),
+      ),
     )
   : Fragment;
 
 /** LiqvidDevToolsProvider without env-switching */
-export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./components/LiqvidDevToolsProvider.tsx";
+export { LiqvidDevToolsProvider as LiqvidDevToolsProviderUnivalent } from "./components/LiqvidDevToolsProvider/index.tsx";
 
 /**
  * Liqvid recording control.

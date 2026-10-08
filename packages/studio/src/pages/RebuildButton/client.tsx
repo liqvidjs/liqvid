@@ -6,17 +6,17 @@ import * as stylex from "@stylexjs/stylex";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Spinner } from "#_/components/Spinner.js";
-import { useChannel } from "#_/components/WebSocketProvider.js";
-import { spacing } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import { useChannel } from "#_/components/WebSocketProvider";
+import { spacing } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
 import {
   publishAction,
   publishContentAction,
   publishMediaAction,
   rebuildAction,
-} from "#_/pages/root-actions.js";
-import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown.js";
+} from "#_/pages/root-actions";
+import { ButtonWithDropdown } from "#_/ui/ButtonWithDropdown";
+import { Spinner } from "#_/ui/Spinner";
 
 import type TranslationsJson from "./.translations/en.json";
 

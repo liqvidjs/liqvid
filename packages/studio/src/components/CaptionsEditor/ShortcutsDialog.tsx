@@ -6,20 +6,20 @@ import { Fragment } from "react";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Button } from "#_/ui/Button.js";
+} from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
   DialogPopup,
   DialogPortal,
   DialogTitle,
-} from "#_/ui/Dialog.js";
+} from "#_/ui/Dialog";
 
 import {
   defaultShortcuts,
@@ -41,7 +41,7 @@ const styles = stylex.create({
     backgroundColor: colors.graySubtle,
     borderBottomWidth: spacing.sm,
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.grayNormal,
@@ -72,7 +72,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":nth-of-type(even)": colors.stripeEven,
       ":nth-of-type(odd)": colors.stripeOdd,
-      // eslint-disable-next-line @stylexjs/valid-styles
+       
       default: null,
     },
   },
@@ -80,7 +80,7 @@ const styles = stylex.create({
   table: {
     borderCollapse: "collapse",
     borderColor: colors.sepSurface,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     fontSize: text.md,

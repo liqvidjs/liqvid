@@ -12,10 +12,10 @@ import chalk from "chalk";
 import { Cause, Effect, Exit, FileSystem } from "effect";
 import type { RelativeDir } from "effect-paths";
 
-import { AUDIO_DIR, CAPTIONS_FILE, RICH_TRANSCRIPT } from "#_/conventions.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { getRoutesDir } from "#_/utils/misc.mjs";
-import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
+import { AUDIO_DIR, CAPTIONS_FILE, RICH_TRANSCRIPT } from "#_/conventions";
+import { serverRuntime } from "#_/server-runtime";
+import { getRoutesDir } from "#_/utils/misc";
+import { getParameterizedAssetsDir } from "#_/utils/parameters";
 
 import type { Transcript } from "./state.ts";
 

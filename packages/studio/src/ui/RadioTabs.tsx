@@ -7,13 +7,13 @@ import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import type { ReactNode } from "react";
 
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
-import type { LocalizedString } from "#_/i18n/shared.mjs";
+import { colors, rounded, spacing } from "#_/design/tokens.stylex";
+import type { LocalizedString } from "#_/i18n/shared";
 
 const styles = stylex.create({
   radioTabs: {
     backgroundColor: colors.graySubtle,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     columnGap: spacing.sm,
     display: "inline-flex",
     rowGap: spacing.sm,
@@ -22,7 +22,7 @@ const styles = stylex.create({
   radioTabsItem: {
     alignItems: "center",
     backgroundColor: colors.transparent,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "none",
     color: colors.grayDim,
     cursor: "pointer",

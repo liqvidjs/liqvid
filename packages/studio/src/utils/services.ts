@@ -13,10 +13,10 @@ import type {
   ServiceClient,
   StructuredLog,
   StructuredLogType,
-} from "#_/api/schemas.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { broadcast } from "#_/next/websockets.mjs";
-import { withLogLevel } from "#_/server-runtime.mjs";
+} from "#_/api/schemas";
+import { getServerState } from "#_/initialize";
+import { broadcast } from "#_/next/websockets";
+import { withLogLevel } from "#_/server-runtime";
 
 /**
  * Strip the (non-serializable) fiber from a service to get the client-facing
@@ -95,7 +95,7 @@ export const createService = Effect.fnUntraced(function* <A, E, R>(
 
     appendLog(service, {
       annotations,
-      message: message as ReadonlyArray<Schema.Json>,
+      message: message as readonly Schema.Json[],
       spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
       timestamp: date,
       type: mappedType,

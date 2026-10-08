@@ -2,29 +2,40 @@ import { resolveParametrized } from "@liqvid/cli/utils";
 import type { ProjectMeta } from "@liqvid/schemas";
 import { ProjectPathProvider } from "@liqvid/studio-plugin-api";
 import { omit } from "@liqvid/utils";
-import { FileDashedIcon } from "@phosphor-icons/react";
+import { DotsThreeIcon, FileDashedIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
-import { ASSETS_DIR, SOCIALS_DIR } from "#_/conventions.mjs";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import { getPreviewServerOrigin } from "#_/contexts/preview-server-config";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters";
+import { ASSETS_DIR, SOCIALS_DIR } from "#_/conventions";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
-import { TimeDuration } from "#_/ui/Time.js";
-import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client.mjs";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/design/tokens.stylex";
+import {
+  MenuPopup,
+  MenuPortal,
+  MenuPositioner,
+  MenuRoot,
+  MenuSeparator,
+  MenuTrigger,
+} from "#_/ui/Menu";
+import { TimeDuration } from "#_/ui/Time";
+import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client";
+import { useTranslations } from "#_/utils/react";
 
+import { CopyProjectPathButton } from "./CopyProjectPathButton.tsx";
 import { EmbedButton } from "./EmbedButton.tsx";
 import { MediaButton } from "./MediaDialog/client.tsx";
 import { OpenInFinderButton } from "./OpenInFinderButton.tsx";
 import { PreviewButton } from "./ProductionLink.tsx";
+import { RegenerateProjectFilesButton } from "./RegenerateProjectFilesButton.tsx";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -41,7 +52,7 @@ const styles = stylex.create({
   },
   duration: {
     backgroundColor: colors.overlayDark,
-    borderTopLeftRadius: radii.sm,
+    borderTopLeftRadius: rounded.sm,
     bottom: 0,
     color: colors.white,
     fontSize: text.xs,
@@ -53,7 +64,7 @@ const styles = stylex.create({
   listItem: {
     alignItems: "center",
     borderColor: colors.graySep,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",
@@ -76,7 +87,7 @@ const styles = stylex.create({
     fontSize: text.sm,
   },
   thumbnail: {
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     display: "flex",
     position: "relative",
     width: "9rem",

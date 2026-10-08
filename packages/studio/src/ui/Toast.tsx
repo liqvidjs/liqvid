@@ -4,7 +4,14 @@ import { CheckCircleIcon, InfoIcon, XCircleIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { useEffect, useRef } from "react";
 
-import { colors, text, typeface } from "#_/design/tokens.stylex.js";
+import {
+  colors,
+  rounded,
+  shadows,
+  spacing,
+  text,
+  typeface,
+} from "#_/design/tokens.stylex";
 
 const ICON_SIZE = "24px";
 
@@ -14,26 +21,38 @@ const styles = stylex.create({
     fontFamily: typeface.ui,
     fontSize: text.md,
     fontWeight: 500,
-    gridColumnEnd: "header",
-    gridColumnStart: "header",
-    gridRowEnd: "header",
-    gridRowStart: "header",
+    gridColumn: "header",
+    gridRow: "header",
     lineHeight: ICON_SIZE,
+    textAlign: "left",
   },
+
   icon: {
-    gridColumnEnd: "icon",
-    gridColumnStart: "icon",
-    gridRowEnd: "icon",
-    gridRowStart: "icon",
+    alignItems: "center",
+    display: "inline-flex",
+    gridColumn: "icon",
+    gridRow: "icon",
     height: ICON_SIZE,
+    justifyContent: "center",
+    lineHeight: ICON_SIZE,
     width: ICON_SIZE,
   },
+
   message: {
     color: colors.grayDim,
-    gridColumnEnd: "message",
-    gridColumnStart: "message",
-    gridRowEnd: "message",
-    gridRowStart: "message",
+    gridColumn: "message",
+    gridRow: "message",
+  },
+
+  toast: {
+    backgroundColor: colors.surface,
+    borderRadius: rounded.lg,
+    boxShadow: shadows.radial,
+    display: "grid",
+    gap: spacing.sm,
+    grid: `"icon header" "icon message" / ${ICON_SIZE} 1fr`,
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
   },
 });
 
@@ -69,8 +88,8 @@ export function Toast({
   const icon = icons[toastType];
 
   return (
-    <aside ref={combineRefs(ref, elt)}>
-      <div sx={styles.icon}>{icon}</div>
+    <aside ref={combineRefs(ref, elt)} sx={styles.toast}>
+      <span sx={styles.icon}>{icon}</span>
       <header sx={styles.header}>{title}</header>
       {message && <div sx={styles.message}>{message}</div>}
     </aside>

@@ -1,12 +1,12 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { themed } from "#_/design/themed.js";
-import { colors, radii, spacing, text } from "#_/design/tokens.stylex.js";
+import { themed } from "#_/design/themed";
+import { colors, rounded, spacing, text } from "#_/design/tokens.stylex";
 
 const styles = stylex.create({
   fieldset: {
     backgroundColor: colors.surface,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     display: "flex",
     flexDirection: "column",
     marginBottom: spacing.huge,

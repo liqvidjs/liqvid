@@ -8,9 +8,8 @@ import { DesktopIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import type { Localized, LocalizedReactNode } from "#_/i18n/shared.mjs";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import type { Localized, LocalizedReactNode } from "#_/i18n/shared";
 import {
   SelectIcon,
   SelectItem,
@@ -23,7 +22,8 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
+} from "#_/ui/Select";
+import { Spinner } from "#_/ui/Spinner.js";
 
 import type TranslationsJson from "./.translations/en.json";
 

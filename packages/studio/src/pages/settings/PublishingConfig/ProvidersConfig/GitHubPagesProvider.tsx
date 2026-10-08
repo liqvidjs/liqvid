@@ -7,11 +7,11 @@ import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
 
-import { spacing } from "#_/design/tokens.stylex.js";
+import { spacing } from "#_/design/tokens.stylex";
 import githubLogo from "#_/icons/github.svg";
-import { Checkbox } from "#_/ui/Checkbox.js";
-import { TextField } from "#_/ui/TextField.js";
-import { useTranslations } from "#_/utils/react.js";
+import { Checkbox } from "#_/ui/Checkbox";
+import { TextField } from "#_/ui/TextField";
+import { useTranslations } from "#_/utils/react";
 
 import type { Providers } from "../client.tsx";
 

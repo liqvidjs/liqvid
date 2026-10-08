@@ -10,21 +10,21 @@ import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import { useState } from "react";
 
-import type { AudioEntry } from "#_/api/schemas.mjs";
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
+import type { AudioEntry } from "#_/api/schemas";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
-import { Spinner } from "#_/components/Spinner.js";
-import { AUDIO_WAV } from "#_/conventions.mjs";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import { Button } from "#_/ui/Button.js";
-import { Time, TimeDuration } from "#_/ui/Time.js";
-import { useTranslations } from "#_/utils/react.js";
-
-type CaptionsStatus = NonNullable<AudioEntry["captions"]>["status"];
+import { AUDIO_WAV } from "#_/conventions";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import { Button } from "#_/ui/Button";
+import { Spinner } from "#_/ui/Spinner";
+import { Time, TimeDuration } from "#_/ui/Time";
+import { useTranslations } from "#_/utils/react";
 
 import type TranslationsJson from "./.translations/en.json";
 
 type T = typeof TranslationsJson;
+
+type CaptionsStatus = NonNullable<AudioEntry["captions"]>["status"];
 
 const styles = stylex.create({
   renderActions: {
@@ -54,7 +54,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",

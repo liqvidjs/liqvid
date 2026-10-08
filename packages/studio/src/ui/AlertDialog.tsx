@@ -9,8 +9,8 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 
-import { themed } from "#_/design/themed.js";
-import { useCommonTranslations } from "#_/utils/react.js";
+import { themed } from "#_/design/themed";
+import { useCommonTranslations } from "#_/utils/react";
 
 import {
   DialogApiContext,

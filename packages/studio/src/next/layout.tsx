@@ -5,11 +5,11 @@ import "../stylex.css";
 import type { Metadata } from "next";
 
 import { DevToggleTheme } from "#_/components/DevToggleTheme.js";
-import { FloatingNav } from "#_/components/FloatingNav/server.js";
-import { IsStudioProvider } from "#_/contexts/is-studio.js";
-import { LocaleProvider } from "#_/contexts/locale.js";
-import { getConfigSync, initializeServer } from "#_/initialize.mjs";
-import { colorSchemeSpecifierToCss } from "#_/utils/misc.client.mjs";
+import { FloatingNav } from "#_/components/FloatingNav/server";
+import { IsStudioProvider } from "#_/contexts/is-studio";
+import { LocaleProvider } from "#_/contexts/locale";
+import { getConfigSync, initializeServer } from "#_/initialize";
+import { colorSchemeSpecifierToCss } from "#_/utils/misc.client";
 
 export const metadata: Metadata = {
   description: "Liqvid Studio is a platform for creating interactive videos.",

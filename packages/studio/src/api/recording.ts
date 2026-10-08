@@ -26,25 +26,32 @@ import { type AbsoluteDir, RelativeDir } from "effect-paths";
 
 import {
   ASSETS_DIR,
+  PROJECT_META_FILE,
   RECORDING_META_FILE,
   RECORDING_RAW_BLOB,
   RECORDING_RAW_FILE,
   RECORDINGS_DIR,
-} from "#_/conventions.mjs";
-import { readDirWithFileTypes } from "#_/utils/effect.mjs";
-import { InvalidProjectStructure } from "#_/utils/errors.mjs";
-import { getRoutesDir } from "#_/utils/misc.mjs";
+} from "#_/conventions";
+import { readDirWithFileTypes } from "#_/utils/effect";
+import {
+  ConflictError,
+  InvalidError,
+  InvalidProjectStructure,
+  NotFoundError,
+} from "#_/utils/errors";
+import { getConfig, getRoutesDir } from "#_/utils/misc";
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "#_/utils/parameters.mjs";
+} from "#_/utils/parameters";
 
-import { WebApi } from "./contract.mts";
+import { WebApi } from "./contract.ts";
+import { renameRecordingInProjectMeta } from "./project-meta.ts";
 import {
   type SaveRecordingMetadata,
   SaveRecordingMetadataFromJson,
-} from "./types.mts";
+} from "./types.ts";
 
 /**
  * Dynamic imports for server plugins. This allows loading plugins at runtime
@@ -80,6 +87,7 @@ function runPostProcessing(
   return Effect.all(
     plugins.map((pluginInfo) =>
       Effect.gen(function* () {
+        const config = yield* getConfig();
         const pluginDir = path.join(
           recordingDir,
           packageNameToDirName(pluginInfo.key),
@@ -119,11 +127,15 @@ function runPostProcessing(
         yield* Effect.logDebug(
           `running postProcessRecording for ${pluginInfo.key}`,
         );
-        const program = plugin.postProcessRecording({ dirname: pluginDir });
+        const program = plugin.postProcessRecording({
+          config: config.plugins?.[pluginInfo.key],
+          projectConfig: config,
+          dirname: pluginDir,
+        });
 
         if (program instanceof Promise) {
           yield* Effect.tryPromise(() => program).pipe(
-            Effect.tapCause((cause) =>
+            Effect.catchCause((cause) =>
               Effect.logError(
                 `error running postProcessRecording for ${pluginInfo.key}`,
                 Cause.pretty(cause),
@@ -131,7 +143,14 @@ function runPostProcessing(
             ),
           );
         } else {
-          yield* program;
+          yield* program.pipe(
+            Effect.catchCause((cause) =>
+              Effect.logError(
+                `error running postProcessRecording for ${pluginInfo.key}`,
+                Cause.pretty(cause),
+              ),
+            ),
+          );
         }
       }).pipe(Effect.annotateLogs({ _plugin: pluginInfo.key })),
     ),
@@ -319,15 +338,55 @@ export const recordingsLive = HttpApiBuilder.group(
               yield* fs.makeDirectory(recordingsDir, { recursive: true });
             }
 
-            // Create recording directory with ISO datetime name
-            const recordingName = new Date()
-              .toISOString()
-              .replace(/[:.]/g, "-");
-            const recordingDir = path.join(
-              recordingsDir,
-              RelativeDir(recordingName),
+            // Use the first script marker as the recording name when available.
+            let recordingName = new Date().toISOString().replace(/[:.]/g, "-");
+
+            const scriptPlugin = metadata.plugins.find(
+              ({ key }) => key === "@liqvid/script",
             );
-            yield* fs.makeDirectory(recordingDir, { recursive: true });
+            const scriptData = scriptPlugin
+              ? persisted[scriptPlugin.key]
+              : undefined;
+
+            if (typeof scriptData === "string") {
+              let markers: unknown;
+              try {
+                markers = JSON.parse(scriptData);
+              } catch {
+                // Invalid script data cannot provide a marker-based name.
+              }
+
+              if (
+                Array.isArray(markers) &&
+                Array.isArray(markers[0]) &&
+                typeof markers[0][0] === "string"
+              ) {
+                recordingName = packageNameToDirName(markers[0][0]);
+              }
+            }
+
+            const baseRecordingName = recordingName;
+            let suffix = 0;
+            let recordingDir: AbsoluteDir;
+            while (true) {
+              const candidateDir = path.join(
+                recordingsDir,
+                RelativeDir(recordingName),
+              );
+              const created = yield* fs.makeDirectory(candidateDir).pipe(
+                Effect.as(true),
+                Effect.catchReason("PlatformError", "AlreadyExists", () =>
+                  Effect.succeed(false),
+                ),
+              );
+
+              if (created) {
+                recordingDir = candidateDir;
+                break;
+              }
+
+              recordingName = `${baseRecordingName}${++suffix}`;
+            }
 
             // Write recording-meta.json
             const recordingMeta: RecordingMetaFile = {
@@ -397,6 +456,75 @@ export const recordingsLive = HttpApiBuilder.group(
         ),
       )
       .handle(
+        "rename",
+        Effect.fnUntraced(
+          function* ({
+            payload: { newName, recordingName },
+            query: { params: paramsJson, projectPath },
+          }) {
+            const sanitizedName = newName.replace(/[/\\:*?"<>|]/g, "-").trim();
+
+            if (!isValidRecordingName(sanitizedName)) {
+              return yield* new InvalidError({ message: "Invalid name" });
+            }
+
+            if (!isValidRecordingName(recordingName)) {
+              return yield* new InvalidError({
+                message: "Invalid recording name",
+              });
+            }
+
+            const params = paramsJson
+              ? (JSON.parse(paramsJson) as Record<string, string>)
+              : undefined;
+            const routesDir = getRoutesDir();
+            const assetsDir = getParameterizedAssetsDir(
+              routesDir as AbsoluteDir,
+              projectPath,
+              params,
+            );
+            const recordingsDir = path.join(assetsDir, RECORDINGS_DIR);
+            const oldPath = path.join(recordingsDir, recordingName);
+            const newPath = path.join(
+              recordingsDir,
+              RelativeDir(sanitizedName),
+            );
+            const fs = yield* FileSystem.FileSystem;
+
+            if (!(yield* fs.exists(oldPath))) {
+              return yield* new NotFoundError({
+                message: "Recording not found",
+              });
+            }
+
+            if (recordingName === sanitizedName) {
+              return { newName: sanitizedName };
+            }
+
+            if (yield* fs.exists(newPath)) {
+              return yield* new ConflictError({
+                message: "A recording with this name already exists",
+              });
+            }
+
+            yield* fs.rename(oldPath, newPath);
+            yield* renameRecordingInProjectMeta(
+              path.join(assetsDir, PROJECT_META_FILE),
+              recordingName,
+              sanitizedName,
+            );
+
+            return { newName: sanitizedName };
+          },
+          (effect) =>
+            effect.pipe(
+              Effect.withLogSpan("recordings.rename"),
+              Effect.catchTag("PlatformError", Effect.die),
+              Effect.catchTag("FileDecodeError", Effect.die),
+            ),
+        ),
+      )
+      .handle(
         "reprocess",
         Effect.fnUntraced(
           function* ({ query: { projectPath, params: paramsJson }, payload }) {
@@ -452,3 +580,13 @@ export const recordingsLive = HttpApiBuilder.group(
         ),
       ),
 );
+
+function isValidRecordingName(name: string): name is RelativeDir {
+  return (
+    name !== "" &&
+    name !== "." &&
+    name !== ".." &&
+    !name.includes("/") &&
+    !name.includes("\\")
+  );
+}

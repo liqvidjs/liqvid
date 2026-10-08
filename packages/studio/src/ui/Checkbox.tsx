@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-import { colors } from "#_/design/tokens.stylex.js";
+import { colors } from "#_/design/tokens.stylex";
 
 const styles = stylex.create({
   checkbox: {

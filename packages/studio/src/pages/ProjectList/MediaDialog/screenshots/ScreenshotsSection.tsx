@@ -17,13 +17,12 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
-import { clientRuntime, LiqvidStudioApiClient } from "#_/client.mjs";
-import { Spinner } from "#_/components/Spinner.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import { type LocalizedString, PlainString } from "#_/i18n/shared.mjs";
-import { openScreenshotInFinderAction } from "#_/pages/root-actions.js";
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import { type LocalizedString, PlainString } from "#_/i18n/shared";
+import { openScreenshotInFinderAction } from "#_/pages/root-actions";
 import {
   AlertDialogBackdrop,
   AlertDialogClose,
@@ -31,8 +30,8 @@ import {
   AlertDialogPortal,
   AlertDialogRoot,
   AlertDialogTitle,
-} from "#_/ui/AlertDialog.js";
-import { Button } from "#_/ui/Button.js";
+} from "#_/ui/AlertDialog";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
@@ -41,11 +40,12 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "#_/ui/Dialog.js";
-import { useDialogApi } from "#_/ui/dialogs-shared.js";
-import { TextField } from "#_/ui/TextField.js";
-import { Time } from "#_/ui/Time.js";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/ui/Dialog";
+import { useDialogApi } from "#_/ui/dialogs-shared";
+import { Spinner } from "#_/ui/Spinner";
+import { TextField } from "#_/ui/TextField";
+import { Time } from "#_/ui/Time";
+import { useTranslations } from "#_/utils/react";
 
 import { ScreenshotModal } from "./ScreenshotModal.tsx";
 
@@ -77,32 +77,6 @@ const styles = stylex.create({
     display: "flex",
     flexShrink: 0,
     gap: spacing.sm,
-  },
-  addButton: {
-    alignItems: "center",
-    backgroundColor: {
-      ":disabled": colors.graySubtle,
-      ":hover": colors.grayHover,
-      default: colors.graySubtle,
-    },
-    borderColor: colors.graySep,
-    borderRadius: radii.md,
-    borderStyle: "solid",
-    borderWidth: dims.sep,
-    color: {
-      ":disabled": colors.grayDim,
-      default: colors.grayNormal,
-    },
-    cursor: {
-      ":disabled": "default",
-      default: "pointer",
-    },
-    display: "flex",
-    fontSize: text.md,
-    gap: spacing.xs,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.sm,
-    transition: "background-color 0.15s",
   },
   confirmMessage: {
     color: colors.grayDim,
@@ -137,7 +111,7 @@ const styles = stylex.create({
   },
   filename: {
     backgroundColor: colors.graySubtle,
-    borderRadius: radii.sm,
+    borderRadius: rounded.sm,
     fontSize: text.md,
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
@@ -160,7 +134,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.grayApp,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",
@@ -184,7 +158,7 @@ const styles = stylex.create({
     padding: spacing.xl,
   },
   previewImage: {
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     display: "block",
     height: "auto",
     width: "100%",
@@ -200,14 +174,14 @@ const styles = stylex.create({
     marginBottom: spacing.lg,
   },
   thumbnail: {
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     height: "48px",
     objectFit: "cover",
     width: "80px",
   },
   thumbnailButton: {
     backgroundColor: colors.transparent,
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "none",
     cursor: "pointer",
     outlineColor: colors.accentSolid,

@@ -5,16 +5,16 @@ import { Select } from "@base-ui/react/select";
 import { CaretUpDownIcon, CheckIcon, IconContext } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
-import { themed } from "#_/design/themed.js";
+import { themed } from "#_/design/themed";
 import {
   colors,
   dims,
-  radii,
+  rounded,
   shadows,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
+} from "#_/design/tokens.stylex";
+import type { LocalizedReactNode } from "#_/i18n/shared";
 
 const styles = stylex.create({
   icon: {
@@ -26,7 +26,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":active": colors.affordanceActive,
       ":focus": colors.affordanceHover,
-      // eslint-disable-next-line @stylexjs/valid-styles
+       
       default: null,
     },
     color: colors.grayNormal,
@@ -50,7 +50,7 @@ const styles = stylex.create({
   list: {},
   popup: {
     backgroundColor: colors.affordanceBg,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     boxShadow: shadows.md,
     overflow: "hidden",
   },
@@ -61,7 +61,7 @@ const styles = stylex.create({
       ":focus": colors.accentSolid,
       default: colors.graySep,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     borderStyle: "solid",
     borderWidth: dims.sep,
     color: colors.inherit,

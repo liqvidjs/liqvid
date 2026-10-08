@@ -1,24 +1,21 @@
 import { loadEnvFiles, loadLiqvidConfig } from "@liqvid/cli/utils";
 import { EnvFiles, type LiqvidConfig, type ProjectMeta } from "@liqvid/schemas";
-import { Effect, Option } from "effect";
+import { Effect, Fiber, Match, Option } from "effect";
 import type { Socket } from "effect/socket";
 import type { AbsoluteDir } from "effect-paths";
 
-import type { LoggableJob, Service } from "./api/schemas.mts";
-import { type UpdateInfo, watchForUpdates } from "./jobs/check-updates.mts";
-import { serverRuntime } from "./server-runtime.mts";
-import {
-  DEFAULT_PRODUCTION_SERVER_PORT,
-  startProductionServer,
-} from "./services/preview-server.mts";
-import { watchAssets } from "./services/watch-assets.mts";
-import { watchLiqvidConfig } from "./services/watch-config.mts";
+import type { LoggableJob, Service } from "./api/schemas.ts";
+import { type UpdateInfo, watchForUpdates } from "./jobs/check-updates.ts";
+import { serverRuntime } from "./server-runtime.ts";
+import { startPreviewServer } from "./services/preview-server.ts";
+import { watchAssets } from "./services/watch-assets.ts";
+import { watchLiqvidConfig } from "./services/watch-config.ts";
 import {
   initProjectFiles,
   watchProjectFiles,
-} from "./services/watch-project-files.mts";
-import { watchRootTypes } from "./services/watch-root-types.mts";
-import { createService } from "./utils/services.mts";
+} from "./services/watch-project-files.ts";
+import { watchRootTypes } from "./services/watch-root-types.ts";
+import { createService } from "./utils/services";
 
 const symbol = Symbol.for("@liqvid/server");
 
@@ -49,11 +46,11 @@ export interface LiqvidServerState {
    */
   lastBuildTime: null | number;
 
-  productionServerPort: number;
+  previewServerService: Service | null;
   projects: Record<string, ProjectMeta>;
 
   /**
-   * Long-running services (production server, file watchers), keyed by id.
+   * Long-running services (preview server, file watchers), keyed by id.
    * Unlike {@link LiqvidServerState.jobs}, these are not expected to complete;
    * they run for the lifetime of the process. Their captured logs are streamed
    * to the Jobs page.
@@ -61,7 +58,7 @@ export interface LiqvidServerState {
   services: Map<string, Service>;
 
   started: {
-    productionServer: boolean;
+    previewServer: boolean;
     watchAssets: boolean;
     watchConfig: boolean;
     watchProjectFiles: boolean;
@@ -138,7 +135,15 @@ export async function initializeServer() {
     started.watchProjectFiles = true;
     started.watchAssets = true;
 
-    await serverRuntime.runPromise(initProjectFiles(projects));
+    try {
+      await serverRuntime.runPromise(initProjectFiles(projects));
+    } catch (error) {
+      // A failed scan must not leave the guards set: later requests need to be
+      // able to retry initialization after the underlying project issue is fixed.
+      started.watchProjectFiles = false;
+      started.watchAssets = false;
+      throw error;
+    }
 
     serverRuntime.runSync(
       createService("watch project files", watchProjectFiles(projects)),
@@ -147,19 +152,42 @@ export async function initializeServer() {
     serverRuntime.runSync(createService("watch assets", watchAssets()));
   }
 
-  if (!started.productionServer) {
-    envFiles ??= loadEnvFiles(cwd);
-    void serverRuntime.runPromise(
-      createService(
-        "production server",
-        startProductionServer(state).pipe(
-          Effect.provideService(EnvFiles, envFiles),
-        ),
-      ).pipe(Effect.asVoid),
-    );
-    started.productionServer = true;
-  }
+  await serverRuntime.runPromise(syncPreviewServer(state));
 }
+
+/** Keep the preview server's lifecycle in sync with the loaded config. */
+export const syncPreviewServer = Effect.fnUntraced(function* (
+  state: LiqvidServerState,
+) {
+  const config = Option.getOrNull(state.config);
+  const enabled = config?.previewServer.enabled ?? false;
+  state.basePath = config
+    ? Match.value(config.backend?.content).pipe(
+        Match.when("copy", () => config.providers.copy?.basePath ?? ""),
+        Match.when("sftp", () => config.providers.sftp?.basePath ?? ""),
+        Match.orElse(() => ""),
+      )
+    : "";
+
+  if (state.previewServerService?.state !== "running") {
+    state.previewServerService = null;
+    state.started.previewServer = false;
+  }
+
+  if (enabled && state.previewServerService === null) {
+    const envFiles = loadEnvFiles(state.cwd);
+    state.previewServerService = yield* createService(
+      "preview server",
+      startPreviewServer(state).pipe(Effect.provideService(EnvFiles, envFiles)),
+    );
+    state.started.previewServer = true;
+  } else if (!enabled && state.previewServerService !== null) {
+    const service = state.previewServerService;
+    state.previewServerService = null;
+    state.started.previewServer = false;
+    yield* Fiber.interrupt(service.fiber);
+  }
+});
 
 export function getServerState(): LiqvidServerState {
   if (!(symbol in globalThis)) {
@@ -172,11 +200,11 @@ export function getServerState(): LiqvidServerState {
         new: new Map(),
       },
       lastBuildTime: null,
-      productionServerPort: DEFAULT_PRODUCTION_SERVER_PORT,
+      previewServerService: null,
       projects: {},
       services: new Map(),
       started: {
-        productionServer: false,
+        previewServer: false,
         watchAssets: false,
         watchConfig: false,
         watchProjectFiles: false,

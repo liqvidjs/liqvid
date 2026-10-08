@@ -15,8 +15,9 @@ import {
 } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import type { Localized } from "#_/i18n/shared.mjs";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import type { Localized } from "#_/i18n/shared";
+import { Button } from "#_/ui/Button";
 import {
   DialogBackdrop,
   DialogClose,
@@ -25,10 +26,10 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "#_/ui/Dialog.js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs.js";
-import { getDefaultParams } from "#_/utils/parameters-client.mjs";
-import { useTranslations } from "#_/utils/react.js";
+} from "#_/ui/Dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#_/ui/Tabs";
+import { getDefaultParams } from "#_/utils/parameters-client";
+import { useTranslations } from "#_/utils/react";
 
 import { CaptionsSection } from "./captions/CaptionsSection.tsx";
 import { ParameterSelector } from "./ParameterSelector.tsx";
@@ -140,8 +141,8 @@ export function MediaButton({
 
   return (
     <DialogRoot>
-      <DialogTrigger title={t.trigger} type="button">
-        <FilmSlateIcon size={16} />
+      <DialogTrigger render={<Button />} title={t.trigger}>
+        <FilmSlateIcon size={20} />
       </DialogTrigger>
       <DialogPortal>
         <DialogBackdrop />

@@ -5,15 +5,15 @@ import { Socket } from "effect/socket";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
 
-import { getServerState } from "#_/initialize.mjs";
+import { getServerState } from "#_/initialize";
 import {
   type ChannelMessage,
   type ChannelName,
   EnvelopeFromJson,
-} from "#_/lib/websockets/channels.js";
-import { withLogLevel } from "#_/server-runtime.mjs";
+} from "#_/lib/websockets/channels";
+import { withLogLevel } from "#_/server-runtime";
 
-import type { DynamicImports } from "./api.mts";
+import type { DynamicImports } from "./api.ts";
 
 /* ------------------------------ runtime ------------------------------ */
 /**

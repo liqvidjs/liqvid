@@ -4,11 +4,11 @@ import { Duration } from "effect";
 import { useMemo } from "react";
 import Cookies from "universal-cookie";
 
-import { useLiqvidConfig } from "#_/contexts/liqvid-config.js";
-import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters.js";
-import { ROOT_PARAMS_COOKIE } from "#_/cookies.js";
-import { colors, dims, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import { PlainString } from "#_/i18n/shared.mjs";
+import { useLiqvidConfig } from "#_/contexts/liqvid-config";
+import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters";
+import { ROOT_PARAMS_COOKIE } from "#_/cookies";
+import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
+import { PlainString } from "#_/i18n/shared";
 import {
   SelectIcon,
   SelectItem,
@@ -21,7 +21,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
+} from "#_/ui/Select";
 
 interface RootParameterSelectorProps {
   /** Callback when root parameter values change */
@@ -44,7 +44,7 @@ const styles = stylex.create({
     alignItems: "center",
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     display: "flex",

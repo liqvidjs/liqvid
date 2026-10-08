@@ -12,8 +12,9 @@ import { Effect, type LogLevel, Option } from "effect";
 import type { RelativeDir } from "effect-paths";
 import { headers } from "next/headers";
 
-import { NEXT_APP_DIR } from "#_/conventions.mjs";
-import { getServerState } from "#_/initialize.mjs";
+import { getPreviewServerOrigin } from "#_/contexts/preview-server-config";
+import { NEXT_APP_DIR } from "#_/conventions";
+import { getConfigSync, getServerState } from "#_/initialize";
 
 export function getLogLevel(): LogLevel.LogLevel {
   const { config } = getServerState();
@@ -83,7 +84,10 @@ export const getRenderUrl = Effect.fnUntraced(function* (
 ) {
   const origin = yield* getOrigin();
 
-  const { basePath, productionServerPort } = getServerState();
+  const { basePath } = getServerState();
+  const previewServerOrigin = getPreviewServerOrigin(
+    getConfigSync().previewServer,
+  );
 
   // Interpolate path parameters (e.g., [lang] -> "en")
   const interpolatedPath = interpolatePathParams(projectPath, params);
@@ -91,7 +95,7 @@ export const getRenderUrl = Effect.fnUntraced(function* (
   if (renderSource === "preview") {
     return `${origin}/${interpolatedPath}?preview`;
   } else {
-    return `http://localhost:${productionServerPort}${basePath || ""}/${interpolatedPath}/`;
+    return `${previewServerOrigin}${basePath || ""}/${interpolatedPath}/`;
   }
 });
 

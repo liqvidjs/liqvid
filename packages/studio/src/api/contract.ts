@@ -22,9 +22,9 @@ import {
   InvalidError,
   InvalidProjectStructure,
   NotFoundError,
-} from "../utils/errors.mts";
+} from "../utils/errors";
 
-import { AudioEntry, RenderEntry, ThumbsData } from "./schemas.mts";
+import { AudioEntry, RenderEntry, ThumbsData } from "./schemas";
 
 const projectPathQuery = Schema.Struct({
   /** path to the project */
@@ -138,6 +138,28 @@ const projectsGroup = HttpApiGroup.make("projects")
       query: projectPathWithParamsQuery,
     }).annotate(OpenApi.Summary, "Set project metadata"),
   )
+  .add(
+    HttpApiEndpoint.post("regenerateFiles", "/regenerate-files", {
+      error: NotFoundError,
+      query: projectPathQuery,
+      success: Schema.Struct({
+        /** Rendered `ChosenRecordings` type body. */
+        chosenRecordings: Schema.String,
+
+        /** Fresh directory tree written to `project-files.json`. */
+        directoryStructure: Schema.Unknown,
+
+        /** Parameter names extracted from the project path. */
+        paramNames: Schema.Array(Schema.String),
+
+        /** Project path relative to the routes directory. */
+        projectPath: Schema.String,
+      }),
+    }).annotate(
+      OpenApi.Summary,
+      "Force regeneration of project-files.json and types.ts",
+    ),
+  )
   .annotate(OpenApi.Title, "Projects");
 
 /* ------------------------------ renders ------------------------------ */
@@ -235,6 +257,20 @@ const recordingsGroup = HttpApiGroup.make("recordings")
       }),
       success: HttpApiSchema.Created,
     }).annotate(OpenApi.Summary, "Save a new recording"),
+  )
+  .add(
+    HttpApiEndpoint.post("rename", "/rename", {
+      error: [InvalidError, NotFoundError, ConflictError],
+      payload: Schema.Struct({
+        /** New recording directory name */
+        newName: Schema.String,
+
+        /** Current recording directory name */
+        recordingName: Schema.String,
+      }),
+      query: projectPathWithParamsQuery,
+      success: Schema.Struct({ newName: Schema.String }),
+    }).annotate(OpenApi.Summary, "Rename a recording"),
   )
   .add(
     HttpApiEndpoint.post("reprocess", "/reprocess", {

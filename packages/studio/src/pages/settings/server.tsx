@@ -1,11 +1,11 @@
 import { CONFIG_FILE } from "@liqvid/cli/utils";
 import * as stylex from "@stylexjs/stylex";
 
-import { H, Section } from "#_/components/headings.js";
-import { fonts, typography } from "#_/design/styles.js";
-import { breakpoints, spacing, text } from "#_/design/tokens.stylex.js";
-import { interpolated, type Localized } from "#_/i18n/shared.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import { H, Section } from "#_/components/headings";
+import { fonts, typography } from "#_/design/styles";
+import { breakpoints, spacing, text } from "#_/design/tokens.stylex";
+import { interpolated, type Localized } from "#_/i18n/shared";
+import { getTranslations } from "#_/utils/i18n";
 
 import { PublishingConfig } from "./PublishingConfig/server.tsx";
 import { UiConfig } from "./UiConfig/server.tsx";
@@ -21,8 +21,8 @@ const styles = stylex.create({
     marginInline: spacing.auto,
     padding: `${spacing.control} 0`,
     width: {
-      default: null,
       [breakpoints.desktop]: "48rem",
+      default: null,
     },
   },
 });

@@ -11,8 +11,8 @@ import {
 import { useForceUpdate } from "@liqvid/utils";
 import { useCallback, useRef } from "react";
 
-import { saveRecording } from "#_/client.mjs";
-import { DockableDialog } from "#_/ui/DockableDialog.js";
+import { saveRecording } from "#_/client";
+import { DockableDialog } from "#_/ui/DockableDialog";
 
 import { RecordingDialog } from "./RecordingDialog/RecordingDialog.tsx";
 

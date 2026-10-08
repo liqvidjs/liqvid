@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Jobs } from "../pages/jobs/server.tsx";
 import { Homepage } from "../pages/root.tsx";
 import { Settings } from "../pages/settings/server.tsx";
-import { getTranslations } from "../utils/i18n.mts";
+import { getTranslations } from "../utils/i18n.ts";
 
 type Params = Readonly<{
   route: readonly string[];

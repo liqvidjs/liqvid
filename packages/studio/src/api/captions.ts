@@ -11,15 +11,15 @@ import {
   CAPTIONS_FILE,
   CAPTIONS_META,
   RICH_TRANSCRIPT,
-} from "#_/conventions.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import type { CaptionsMeta } from "#_/types/schemas.mjs";
-import { NotFoundError } from "#_/utils/errors.mjs";
-import { createJob } from "#_/utils/jobs.mjs";
-import { getConfig } from "#_/utils/misc.mjs";
+} from "#_/conventions";
+import { getServerState } from "#_/initialize";
+import type { CaptionsMeta } from "#_/types/schemas";
+import { NotFoundError } from "#_/utils/errors";
+import { createJob } from "#_/utils/jobs";
+import { getConfig } from "#_/utils/misc";
 
-import { getAudioDir } from "./audio.mts";
-import { WebApi } from "./contract.mts";
+import { getAudioDir } from "./audio";
+import { WebApi } from "./contract";
 
 /**
  * The name given to a captioning job, uniquely identifying the audio it

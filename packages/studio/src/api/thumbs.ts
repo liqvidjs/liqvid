@@ -13,23 +13,18 @@ import { Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 
-import {
-  ASSETS_DIR,
-  DARK_DIR,
-  LIGHT_DIR,
-  THUMBS_DIR,
-} from "#_/conventions.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { NotFoundError } from "#_/utils/errors.mjs";
-import { createJob } from "#_/utils/jobs.mjs";
-import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc.mjs";
+import { ASSETS_DIR, DARK_DIR, LIGHT_DIR, THUMBS_DIR } from "#_/conventions";
+import { getServerState } from "#_/initialize";
+import { NotFoundError } from "#_/utils/errors";
+import { createJob } from "#_/utils/jobs";
+import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "#_/utils/parameters.mjs";
+} from "#_/utils/parameters";
 
-import { WebApi } from "./contract.mts";
+import { WebApi } from "./contract";
 
 const THUMBS_JOB_FILE = RelativeFile("thumbnails-job.json");
 

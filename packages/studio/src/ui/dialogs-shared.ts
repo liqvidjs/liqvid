@@ -5,12 +5,12 @@ import {
   colors,
   dims,
   opacity,
-  radii,
+  rounded,
   shadows,
   spacing,
   text,
   typeface,
-} from "#_/design/tokens.stylex.js";
+} from "#_/design/tokens.stylex";
 
 interface DialogApi {
   /** Close the dialog. */
@@ -56,7 +56,7 @@ export const dialogStyles = stylex.create({
 
   close: {
     background: "unset",
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
 
     boxShadow: {
       ":focus": shadows.focus,
@@ -87,7 +87,7 @@ export const dialogStyles = stylex.create({
     "--surface": colors.surface,
     backgroundColor: colors.surface,
     borderColor: colors.graySep,
-    borderRadius: radii.xl,
+    borderRadius: rounded.xl,
     borderStyle: "solid",
     borderWidth: dims.sep,
     boxShadow: shadows.lg,
@@ -105,6 +105,7 @@ export const dialogStyles = stylex.create({
 
   huge: {
     height: "90vh",
+    maxWidth: "800px",
   },
 
   large: {

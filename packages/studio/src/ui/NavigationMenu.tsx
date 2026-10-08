@@ -5,16 +5,16 @@ import { NavigationMenu } from "@base-ui/react/navigation-menu";
 import * as stylex from "@stylexjs/stylex";
 import Link from "next/link";
 
-import { fonts } from "#_/design/styles.js";
-import { extensible, themed } from "#_/design/themed.js";
-import { colors, radii, spacing } from "#_/design/tokens.stylex.js";
+import { fonts } from "#_/design/styles";
+import { extensible, themed } from "#_/design/themed";
+import { colors, rounded, spacing } from "#_/design/tokens.stylex";
 
 import { useDialogApi } from "./dialogs-shared.ts";
 
 const styles = stylex.create({
   content: {
     backgroundColor: colors.surface,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     color: colors.grayNormal,
     overflow: "hidden",
   },
@@ -23,10 +23,10 @@ const styles = stylex.create({
   link: {
     backgroundColor: {
       ":hover": colors.grayHover,
-      // eslint-disable-next-line @stylexjs/valid-styles
+       
       default: null,
     },
-    borderRadius: radii.md,
+    borderRadius: rounded.md,
     boxShadow: {
       ":focus-visible": null,
       default: null,

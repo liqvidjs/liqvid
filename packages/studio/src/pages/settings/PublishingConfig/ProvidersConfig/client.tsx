@@ -1,10 +1,10 @@
 "use client";
 
-import type { SettingsConfig } from "#_/api/contract.mjs";
-import { typography } from "#_/design/styles.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { useTranslations } from "#_/utils/react.js";
+import type { SettingsConfig } from "#_/api/contract";
+import { typography } from "#_/design/styles";
+import type { Localized } from "#_/i18n/shared";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
+import { useTranslations } from "#_/utils/react";
 
 import { usePublishingConfigClient } from "../client.tsx";
 

@@ -4,6 +4,7 @@ import { useColorScheme } from "@liqvid/color-scheme/react";
 import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
 import { onClickReact, onDragReact, useToggle } from "@liqvid/utils";
+import { XIcon } from "@phosphor-icons/react";
 import { Portal } from "@radix-ui/react-portal";
 import * as stylex from "@stylexjs/stylex";
 import clsx from "clsx";
@@ -21,38 +22,66 @@ import {
 
 import {
   colors,
-  radii,
+  rounded,
+  scales,
   shadows,
   spacing,
   text,
-} from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
+} from "#_/design/tokens.stylex";
+import type { LocalizedReactNode } from "#_/i18n/shared";
+import { useCommonTranslations } from "#_/utils/react";
 
 const styles = stylex.create({
+  closeButton: {
+    appearance: "none",
+    backgroundColor: {
+      ":active": scales.red600,
+      ":hover": scales.red400,
+      default: scales.red500,
+    },
+    borderRadius: rounded.md,
+    borderStyle: "none",
+    color: colors.white,
+    cursor: "pointer",
+    display: "flex",
+    marginInlineStart: spacing.md,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.xs,
+  },
   content: {
     backgroundColor: colors.dockablePanelBg,
-    borderRadius: `0 0 ${radii.md} ${radii.md}`,
+    borderRadius: `0 0 ${rounded.md} ${rounded.md}`,
     color: colors.foreground,
     paddingBlock: spacing.lg,
     paddingInline: spacing.xl,
   },
+
   dialog: {
     boxShadow: shadows.xxl,
     display: "flex",
     flexDirection: "column",
     position: "absolute",
-    width: "500px",
   },
+
   header: {
+    alignItems: "center",
     backgroundColor: colors.accentSolid,
-    borderTopLeftRadius: radii.md,
-    borderTopRightRadius: radii.md,
+    borderTopLeftRadius: rounded.md,
+    borderTopRightRadius: rounded.md,
     color: colors.white,
+    display: "flex",
     fontSize: text.md,
     fontWeight: "bold",
+    justifyContent: "space-between",
     paddingBlock: spacing.sm,
     paddingInline: spacing.md,
     userSelect: "none",
+  },
+});
+
+const sizes = stylex.create({
+  medium: {
+    minWidth: 500,
   },
 });
 
@@ -165,16 +194,43 @@ function Trigger({
   return <Component {...events}>{children}</Component>;
 }
 
+function Close({
+  children,
+  onClick,
+  ...props
+}: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "style">) {
+  const { setOpen } = useDockableDialogState();
+  const t = useCommonTranslations();
+
+  return (
+    // biome-ignore lint/correctness/noRestrictedElements: this is special
+    <button
+      aria-label={children ? undefined : t.close}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) setOpen(false);
+      }}
+      sx={styles.closeButton}
+      type="button"
+      {...props}
+    >
+      {children ?? <XIcon size={16} weight="bold" />}
+    </button>
+  );
+}
+
 function Content({
   asChild = false,
   className,
+  size = "medium",
   ...props
 }: {
   asChild?: boolean;
   children?: LocalizedReactNode;
+  size?: "auto" | "medium";
 } & React.HTMLAttributes<HTMLElement>) {
   const Component = asChild ? Slot : "div";
-  const sx = stylex.props(styles.content);
+  const sx = stylex.props([styles.content, sizes[size]]);
 
   return <Component className={clsx(sx.className, className)} {...props} />;
 }
@@ -282,6 +338,7 @@ function Dialog({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
 }
 
 export const DockableDialog = {
+  Close,
   Content,
   Dialog,
   Header,

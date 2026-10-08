@@ -3,14 +3,14 @@ import { pick } from "@liqvid/utils";
 import { Fiber } from "effect";
 import { cookies } from "next/headers";
 
-import type { LoggableJobClient, ServiceClient } from "#_/api/schemas.mjs";
-import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
-import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getServerState, initializeServer } from "#_/initialize.mjs";
-import { broadcast } from "#_/next/websockets.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import type { LoggableJobClient, ServiceClient } from "#_/api/schemas";
+import { WebSocketProvider } from "#_/components/WebSocketProvider";
+import { JOBS_TAB_COOKIE, LOG_LEVELS_COOKIE } from "#_/cookies";
+import type { Localized } from "#_/i18n/shared";
+import { getServerState, initializeServer } from "#_/initialize";
+import { broadcast } from "#_/next/websockets";
+import { serverRuntime } from "#_/server-runtime";
+import { getTranslations } from "#_/utils/i18n";
 
 import { DEFAULT_LOG_LEVELS, JobsClient } from "./client.tsx";
 

@@ -1,3 +1,6 @@
+import "../stylex.css";
+
+import type { ParameterValues } from "@liqvid/schemas";
 import { serialize } from "@liqvid/ssr/serde";
 import { GearIcon } from "@phosphor-icons/react/dist/ssr";
 import * as stylex from "@stylexjs/stylex";
@@ -8,29 +11,26 @@ import Link from "next/link";
 import {
   type DerivedConfig,
   DerivedConfigProvider,
-} from "#_/components/DerivedConfig.js";
-import { WebSocketProvider } from "#_/components/WebSocketProvider.js";
+} from "#_/components/DerivedConfig";
+import { WebSocketProvider } from "#_/components/WebSocketProvider";
+import { LiqvidConfigProvider } from "#_/contexts/liqvid-config";
+import { getPreviewServerOrigin } from "#_/contexts/preview-server-config";
 import {
   COLLAPSED_FOLDERS_COOKIE,
   FOLDER_VIEW_COOKIE,
   ROOT_PARAMS_COOKIE,
   SHOW_HIDDEN_PROJECTS_COOKIE,
-} from "#_/cookies.js";
-import { breakpoints, radii, spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getServerState, initializeServer } from "#_/initialize.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+} from "#_/cookies";
+import { breakpoints, rounded, spacing, text } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { getServerState, initializeServer } from "#_/initialize";
+import { getTranslations } from "#_/utils/i18n";
+import { getRoutesDir } from "#_/utils/misc";
 
 import { NewProjectButton } from "./NewProjectButton/server.tsx";
 import { ProjectList } from "./ProjectList/server.tsx";
 import { RebuildButton } from "./RebuildButton/server.tsx";
 import { UpdateBanner } from "./UpdateBanner/server.tsx";
-
-import "../stylex.css";
-
-import type { ParameterValues } from "@liqvid/schemas";
-
-import { LiqvidConfigProvider } from "#_/contexts/liqvid-config.js";
 
 import type TranslationsJson from "./.translations/en.json";
 
@@ -62,7 +62,7 @@ const styles = stylex.create({
 
   settingsLink: {
     aspectRatio: "1 / 1",
-    borderRadius: radii.circle,
+    borderRadius: rounded.circle,
     height: 32,
     marginLeft: spacing.auto,
   },

@@ -2,14 +2,14 @@ import { Switch as BaseSwitch } from "@base-ui/react";
 import type { SwitchRootState } from "@base-ui/react/switch";
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, radii, scales, spacing } from "#_/design/tokens.stylex.js";
+import { colors, rounded, scales, spacing } from "#_/design/tokens.stylex";
 
 const styles = stylex.create({
   root: {
     "--pad": spacing.sm,
     "--thumb": "1rem",
     backgroundColor: scales.gray400,
-    borderRadius: radii.max,
+    borderRadius: rounded.max,
     borderStyle: "none",
     cursor: "pointer",
     height: `calc(var(--thumb) + 2 * var(--pad))`,
@@ -25,7 +25,7 @@ const styles = stylex.create({
   },
   thumb: {
     backgroundColor: colors.white,
-    borderRadius: radii.max,
+    borderRadius: rounded.max,
     display: "block",
     height: "var(--thumb)",
     transform: "translateX(0)",

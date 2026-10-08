@@ -2,10 +2,10 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { typography } from "#_/design/styles.js";
-import { spacing, text } from "#_/design/tokens.stylex.js";
-import type { Localized, LocalizedReactNode } from "#_/i18n/shared.mjs";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
+import { typography } from "#_/design/styles";
+import { spacing, text } from "#_/design/tokens.stylex";
+import type { Localized, LocalizedReactNode } from "#_/i18n/shared";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
 import {
   SelectIcon,
   SelectItem,
@@ -17,7 +17,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValue,
-} from "#_/ui/Select.js";
+} from "#_/ui/Select";
 
 import { usePublishingConfigClient } from "../client.tsx";
 

@@ -2,11 +2,11 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { typography } from "#_/design/styles.js";
-import { spacing } from "#_/design/tokens.stylex.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { Checkbox } from "#_/ui/Checkbox.js";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
+import { typography } from "#_/design/styles";
+import { spacing } from "#_/design/tokens.stylex";
+import type { Localized } from "#_/i18n/shared";
+import { Checkbox } from "#_/ui/Checkbox";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
 
 import { usePublishingConfigClient } from "../client.tsx";
 

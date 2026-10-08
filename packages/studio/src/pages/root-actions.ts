@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
-import { UP, writeJSON } from "@liqvid/cli/utils";
-import type { AutoGenProjectMeta, ParameterValues } from "@liqvid/schemas";
+import { UP, writeJSON, writeJSONWithSchema } from "@liqvid/cli/utils";
+import { AutoGenProjectMeta, type ParameterValues } from "@liqvid/schemas";
+import { isValidRecordingName } from "@liqvid/studio-plugin-api";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
 import {
   type AbsoluteDir,
@@ -23,18 +24,19 @@ import {
   PROJECT_FILE,
   PROJECT_META_FILE,
   PROJECT_PATH,
+  RECORDINGS_DIR,
   SCREENSHOTS_DIR,
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
-} from "#_/conventions.mjs";
-import type { PlainString } from "#_/i18n/shared.mjs";
-import { getServerState } from "#_/initialize.mjs";
-import { serverRuntime } from "#_/server-runtime.mjs";
-import type { PackageName } from "#_/types/misc.mjs";
-import { readDirWithFileTypes } from "#_/utils/effect.mjs";
-import { createJob } from "#_/utils/jobs.mjs";
-import { getRoutesDir } from "#_/utils/misc.mjs";
-import { getParameterizedAssetsDir } from "#_/utils/parameters.mjs";
+} from "#_/conventions";
+import type { PlainString } from "#_/i18n/shared";
+import { getServerState } from "#_/initialize";
+import { serverRuntime } from "#_/server-runtime";
+import type { PackageName } from "#_/types/misc";
+import { readDirWithFileTypes } from "#_/utils/effect";
+import { createJob } from "#_/utils/jobs";
+import { getRoutesDir } from "#_/utils/misc";
+import { getParameterizedAssetsDir } from "#_/utils/parameters";
 
 export interface RebuildActionResult {
   /** ID of the created job, so the client can link to it. */

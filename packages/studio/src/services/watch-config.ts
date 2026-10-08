@@ -7,7 +7,11 @@ import {
 import { EnvFiles } from "@liqvid/schemas";
 import { Effect, FileSystem, Option, Stream } from "effect";
 
-import { getServerState, type LiqvidServerState } from "#_/initialize.mjs";
+import {
+  getServerState,
+  syncPreviewServer,
+  type LiqvidServerState,
+} from "#_/initialize";
 
 /** Check if the path matches either config file name. */
 function isConfigFile(filePath: string): boolean {
@@ -34,6 +38,9 @@ const reloadConfig = Effect.fnUntraced(function* (
       : `${changedFile} detected, loading...`,
   );
   state.config = yield* loadLiqvidConfig().pipe(Effect.option);
+  if (Option.isSome(state.config)) {
+    yield* syncPreviewServer(state);
+  }
 });
 
 /**

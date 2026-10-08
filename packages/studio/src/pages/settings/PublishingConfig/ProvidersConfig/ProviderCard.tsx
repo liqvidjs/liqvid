@@ -2,9 +2,9 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { colors, dims, radii, spacing } from "#_/design/tokens.stylex.js";
-import type { LocalizedReactNode } from "#_/i18n/shared.mjs";
-import { Checkbox } from "#_/ui/Checkbox.js";
+import { colors, dims, rounded, spacing } from "#_/design/tokens.stylex";
+import type { LocalizedReactNode } from "#_/i18n/shared";
+import { Checkbox } from "#_/ui/Checkbox";
 
 const styles = stylex.create({
   label: {
@@ -16,7 +16,7 @@ const styles = stylex.create({
   providerCard: {
     backgroundColor: colors.graySubtle,
     borderColor: colors.graySep,
-    borderRadius: radii.lg,
+    borderRadius: rounded.lg,
     borderStyle: "solid",
     borderWidth: dims.sep,
     marginTop: spacing.lg,

@@ -1,6 +1,6 @@
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
-import { TranslationProvider } from "#_/utils/react.js";
+import type { Localized } from "#_/i18n/shared";
+import { getTranslations } from "#_/utils/i18n";
+import { TranslationProvider } from "#_/utils/react";
 
 import { BasePathConfigClient } from "./client.tsx";
 

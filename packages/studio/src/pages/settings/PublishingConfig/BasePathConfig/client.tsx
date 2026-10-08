@@ -2,11 +2,11 @@
 
 import * as stylex from "@stylexjs/stylex";
 
-import { fonts } from "#_/design/styles.js";
-import { type Localized, PlainString } from "#_/i18n/shared.mjs";
-import { EnvVarInput } from "#_/pages/settings/PublishingConfig/EnvVarInput.js";
-import { FieldSet, Legend } from "#_/ui/Fieldset.js";
-import { useTranslations } from "#_/utils/react.js";
+import { fonts } from "#_/design/styles";
+import { type Localized, PlainString } from "#_/i18n/shared";
+import { EnvVarInput } from "#_/pages/settings/PublishingConfig/EnvVarInput";
+import { FieldSet, Legend } from "#_/ui/Fieldset";
+import { useTranslations } from "#_/utils/react";
 
 import { usePublishingConfigClient } from "../client.tsx";
 

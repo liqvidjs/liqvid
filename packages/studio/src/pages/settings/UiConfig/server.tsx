@@ -1,6 +1,6 @@
 import { ConfigSection } from "#_/components/ConfigSection.js";
-import type { Localized } from "#_/i18n/shared.mjs";
-import { getTranslations } from "#_/utils/i18n.mjs";
+import type { Localized } from "#_/i18n/shared";
+import { getTranslations } from "#_/utils/i18n";
 
 import { ConfigureLocale } from "./ConfigureLocale/server.tsx";
 import { ConfigureTheme } from "./ConfigureTheme/server.tsx";

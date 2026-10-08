@@ -7,10 +7,10 @@ import { HttpApiBuilder } from "effect/http-api";
 import type { AbsoluteFile } from "effect-paths";
 import { JSONC } from "jsonc.min";
 
-import { getServerState } from "#_/initialize.mjs";
-import { getLocale } from "#_/utils/i18n.mjs";
+import { getServerState } from "#_/initialize";
+import { getLocale } from "#_/utils/i18n";
 
-import { SettingsConfig, WebApi } from "./contract.mts";
+import { SettingsConfig, WebApi } from "./contract";
 
 /** Read the current theme from in-memory config, defaulting to `"system"`. */
 function getTheme(): ColorSchemeSpecifier {
