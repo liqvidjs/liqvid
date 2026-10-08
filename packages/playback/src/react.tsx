@@ -199,9 +199,11 @@ export function usePlaybackEvent<
 
   /** Event callback to register */
   callback: (event: PlaybackEventsMap<P>[E]) => unknown,
+
+  options?: Parameters<typeof useEventListener>[3],
 ) {
   // @ts-expect-error TODO: fix this
-  useEventListener(usePlaybackOptional(), eventName, callback);
+  useEventListener(usePlaybackOptional(), eventName, callback, options);
 }
 
 export function useReadyStateItem(defaultValue = 4) {

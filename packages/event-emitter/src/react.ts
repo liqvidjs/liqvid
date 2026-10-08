@@ -44,12 +44,14 @@ export function useEventListener<
             ? MediaQueryListEventMap[KM]
             : WindowEventMap[KW],
   ) => unknown,
+
+  { enabled = true }: { enabled?: boolean } = {},
 ) {
   // allow consumers to omit useCallback without messing up the other useEffect
   const callback$ = useEffectEvent(callback);
 
   useEffect(() => {
-    if (!target?.addEventListener) return;
+    if (!target?.addEventListener || !enabled) return;
 
     const listener: typeof callback = (e) => {
       callback$(e);
@@ -62,5 +64,5 @@ export function useEventListener<
       // biome-ignore lint/suspicious/noExplicitAny: complicated
       (target as any).removeEventListener(eventName, listener);
     };
-  }, [eventName, target]);
+  }, [eventName, target, enabled]);
 }
