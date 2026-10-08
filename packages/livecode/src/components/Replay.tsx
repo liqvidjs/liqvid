@@ -22,16 +22,19 @@ import { useGroup } from "./context.tsx";
 import { Editor } from "./Editor.tsx";
 
 /** Single-file initial state. */
-type SingleFileInitial = {
+type SingleFileInitial = Readonly<{
   content?: string;
   selection?: CMRange;
-};
+}>;
 
 /** Recording data for single-file replay. */
-type SingleFileRecording = RecordingData<ReplayData<Action>, SingleFileInitial>;
+export type SingleFileRecording = RecordingData<
+  ReplayData<Action>,
+  SingleFileInitial
+>;
 
 /** Recording data for multi-file replay. */
-type MultiFileRecording = RecordingData<ReplayData<Action>, CMState>;
+export type MultiFileRecording = RecordingData<ReplayData<Action>, CMState>;
 
 /**
  * Editor to replay recorded coding.

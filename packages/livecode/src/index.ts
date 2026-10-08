@@ -1,19 +1,19 @@
 // buttons
 
-export { Clear } from "./buttons/Clear.tsx";
+export * from "./buttons/Clear.tsx";
 export { FormatButton, FormatButton as Format } from "./buttons/Format.tsx";
-export { Mirror } from "./buttons/Mirror.tsx";
-export { Reset } from "./buttons/Reset.tsx";
+export * from "./buttons/Mirror.tsx";
+export * from "./buttons/ResetButton.tsx";
 export { RunButton, RunButton as Run } from "./buttons/Run.tsx";
 export { VimToggle } from "./buttons/VimToggle.tsx";
-export { Editor } from "./components/Editor.tsx";
-export { EditorGroup } from "./components/EditorGroup.tsx";
-export { EditorPanel } from "./components/EditorPanel.tsx";
-export { FileTabs } from "./components/FileTabs.tsx";
+export * from "./components/Editor.tsx";
+export * from "./components/EditorGroup.tsx";
+export * from "./components/EditorPanel.tsx";
+export * from "./components/FileTabs.tsx";
 export * from "./components/group-tabs.tsx";
-export { Record } from "./components/Record.tsx";
-export { Replay, ReplayMultiple } from "./components/Replay.tsx";
-export { Resize } from "./components/Resize.tsx";
+export * from "./components/Record.tsx";
+export * from "./components/Replay.tsx";
+export * from "./components/Resize.tsx";
 export * from "./components/Root.tsx";
 export * from "./extensions.ts";
 export * from "./hooks.ts";

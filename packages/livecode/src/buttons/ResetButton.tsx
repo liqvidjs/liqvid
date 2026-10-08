@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useLiveCodeStore } from "../store.ts";
 
 /** Button for resetting editor contents to initial state. */
-export function Reset({
+export function ResetButton({
   className,
   ...attrs
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) {

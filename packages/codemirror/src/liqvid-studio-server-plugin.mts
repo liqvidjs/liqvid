@@ -13,12 +13,12 @@ import { RelativeFile } from "effect-paths";
 const RAW_JSON = RelativeFile("raw.json");
 const RAW_DTS = RelativeFile("raw.d.json.ts");
 
+const PROCESSED = RelativeFile("recording.json");
+
 /** TypeScript declaration for JSON files */
-const declaration =
-  inlineTypeDeclaration(`import("@liqvid/recording").RecordingData<
-  import("@lqv/codemirror").Action,
-  import("@lqv/codemirror").CMState,
->`);
+const declaration = inlineTypeDeclaration(
+  `import("@lqv/codemirror").MultiFileRecording`,
+);
 
 /**
  * Post-process @lqv/codemirror recording data.
@@ -53,10 +53,10 @@ const postProcessRecording = Effect.fnUntraced(function* ({
     data: compress(data, 2),
     declaration,
     dirname,
-    filename: RelativeFile("recording.json"),
+    filename: PROCESSED,
   });
 
-  yield* Effect.log("wrote recording.json for codemirror");
+  yield* Effect.log(`wrote ${PROCESSED} for codemirror`);
 });
 
 const plugin: LiqvidStudioServerPlugin = {

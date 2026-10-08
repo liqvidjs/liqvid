@@ -4,17 +4,10 @@ import type { CleanUpFn, ReplayData } from "@liqvid/utils";
 import type { Seekable } from "@lqv/playback";
 
 import { FakeSelection } from "./fake-selection.ts";
-import type { ScrollAction } from "./recording.tsx";
-import type { CMRange, CMRangeArray, CMState } from "./types.ts";
+import type { Action, CMRange, CMState } from "./types.ts";
 
 export { type FakeSelectionConfig, fakeSelection } from "./fake-selection.ts";
 export * from "./types.ts";
-
-/** Possible replay commands. */
-export type Action =
-  | ScrollAction
-  | string
-  | [changes: ChangeSet, selection?: CMRangeArray];
 
 /** Reserved command for specifying file. */
 export const selectCmd = "file:";
@@ -158,7 +151,7 @@ export function cmReplayMultiple({
   start?: number;
 
   /** CodeMirror instances to sync with. */
-  views: Record<string, EditorView>;
+  views: Readonly<Record<string, EditorView>>;
 }): CleanUpFn {
   /** Current file being replayed into */
   let file = initial.activeFile;

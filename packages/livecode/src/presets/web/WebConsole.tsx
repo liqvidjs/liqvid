@@ -32,6 +32,7 @@ export function WebConsole({
   info?: RenderItem;
   log?: RenderItem;
   warn?: RenderItem;
+  table?: RenderItem;
 
   bigint?: RenderProp<bigint> | string;
   boolean?: RenderProp<boolean> | string;

@@ -7,14 +7,14 @@ import { createStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 /** Console message. */
-export interface ConsoleMessage<T = unknown, K extends string = string> {
+export type ConsoleMessage<T = unknown, K extends string = string> = Readonly<{
   characterNumber?: number;
   data: T;
   filename?: string;
   kind: K;
   lineNumber?: number;
   timestamp: Date;
-}
+}>;
 
 export type LiveCodeFile = Readonly<{
   /** Whether the buffer can be edited by the viewer. */

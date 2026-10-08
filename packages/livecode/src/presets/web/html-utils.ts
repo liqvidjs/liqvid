@@ -15,9 +15,9 @@ export function isWebConsoleMessage(
     typeof msg.data === "object" &&
     msg.data !== null &&
     Array.isArray(msg.data) &&
-    (["debug", "error", "info", "log"] as (string | undefined)[]).includes(
-      msg.kind,
-    )
+    (
+      ["debug", "error", "info", "log", "table"] as (string | undefined)[]
+    ).includes(msg.kind)
   );
 }
 
