@@ -262,12 +262,12 @@ catalogs:
     "@replit/codemirror-vim": ^6.3
     "@stylexjs/stylex": ^0.19.1
     "@tldraw/assets": ^5.5.2
-    "@tldraw/editor": ^5.5.0
-    "@tldraw/store": ^5.5.0
-    "@tldraw/store-react": ^5.5.0
-    "@tldraw/tldraw": ^5.5.0
-    "@tldraw/tlschema": ^5.5.0
-    "@tldraw/validate": ^5.5.0
+    "@tldraw/editor": ^5.5.2
+    "@tldraw/store": ^5.5.2
+    "@tldraw/store-react": ^5.5.2
+    "@tldraw/tldraw": ^5.5.2
+    "@tldraw/tlschema": ^5.5.2
+    "@tldraw/validate": ^5.5.2
     "@ts-ffmpeg/fluent-ffmpeg": ^2.2.6
     "@types/react": "19.3.0"
     "@types/react-dom": "19.3.0"
@@ -288,7 +288,7 @@ catalogs:
     skulpt: ^1.2
     smart-whisper: "^0.8.1"
     three: ">=0.183"
-    tldraw: ^5.5.0
+    tldraw: ^5.5.2
     ws: ^8.21.3
     zod: ">=4"
 
@@ -304,13 +304,13 @@ overrides:
   "@docusaurus/theme-common": 3.10.2
   "@docusaurus/types": 3.10.2
   "@lezer/highlight": 1.2.3
-  "@tldraw/editor": 5.5.0
-  "@tldraw/state": 5.5.0
-  "@tldraw/state-react": 5.5.0
-  "@tldraw/store": 5.5.0
-  "@tldraw/tlschema": 5.5.0
-  "@tldraw/utils": 5.5.0
-  "@tldraw/validate": 5.5.0
+  "@tldraw/editor": 5.5.2
+  "@tldraw/state": 5.5.2
+  "@tldraw/state-react": 5.5.2
+  "@tldraw/store": 5.5.2
+  "@tldraw/tlschema": 5.5.2
+  "@tldraw/utils": 5.5.2
+  "@tldraw/validate": 5.5.2
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
   "react-dom": 19.3.0
