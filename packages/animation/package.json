@@ -36,7 +36,7 @@
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:tsc": "tsc --noEmit",
-    "test": "jest --coverage",
+    "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest --coverage",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -44,11 +44,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:dev",
+    "@jest/globals": "catalog:dev",
     "@types/jest": "catalog:dev",
     "@types/node": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
     "jest": "catalog:dev",
+    "jest-environment-jsdom": "catalog:",
     "ts-jest": "catalog:dev",
+    "ts6": "catalog:dev",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"

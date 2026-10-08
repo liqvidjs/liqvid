@@ -2,8 +2,10 @@ import * as path from "node:path";
 
 import { NodeHttpClient, NodeStream } from "@effect/platform-node";
 import { checkbox, confirm } from "@inquirer/prompts";
+import { Duration as LiqvidDuration } from "@liqvid/duration";
 import { Progress } from "@liqvid/renderer";
 import {
+  AutoGenProjectMeta,
   LiqvidStudioProjectMeta,
   type ParameterConfig,
   type ParameterValues,
@@ -42,9 +44,9 @@ import {
 } from "effect-paths";
 import { Agent, fetch, type RequestInit as StudioRequestInit } from "undici";
 
-import { PACKAGE_JSON } from "#_/conventions.js";
-import { resolveParametrized } from "#_/utils/parametrization.js";
-import { loadJson, readDirWithFileTypes } from "#_/utils.js";
+import { PACKAGE_JSON } from "#_/conventions";
+import { loadJson, readDirWithFileTypes } from "#_/utils";
+import { resolveParametrized } from "#_/utils/parametrization";
 
 import type {
   FileDownloadStatus,
@@ -68,6 +70,7 @@ const STUDIO_META_SCHEMA = `${SCHEMAS}/liqvid-studio-project-meta.json`;
 const WORKSPACE_META_SCHEMA = `${SCHEMAS}/liqvid-studio-workspace-meta.json`;
 
 const PROJECT_FILE = RelativeFile("project.json");
+const PROJECT_META_FILE = RelativeFile("project-meta.json");
 
 const LIQVID_DIR = RelativeDir(".liqvid");
 
@@ -133,14 +136,6 @@ function makeClient(accessToken: Redacted.Redacted<string>, dispatcher: Agent) {
         client.pipe(
           HttpClient.mapRequest(
             HttpClientRequest.bearerToken(Redacted.value(accessToken)),
-          ),
-          HttpClient.tapRequest((request) =>
-            Effect.logDebug("Liqvid Studio API request").pipe(
-              Effect.annotateLogs({
-                method: request.method,
-                url: request.url,
-              }),
-            ),
           ),
         ),
       transformResponse: (effect) =>
@@ -422,6 +417,7 @@ export class LiqvidStudioProvider
                 ? combinations
                 : [{}]) as ParameterValues[],
               project,
+              projectDir,
               projectPath,
             };
           }),
@@ -484,12 +480,25 @@ export class LiqvidStudioProvider
                 continue;
               }
 
+              const projectMetaPath = path.join(
+                String(data.projectDir),
+                String(LIQVID_DIR),
+                ...Object.values(parameters),
+                String(PROJECT_META_FILE),
+              ) as AbsoluteFile;
+              const projectMeta = yield* loadJson(
+                AutoGenProjectMeta,
+                projectMetaPath,
+              );
+
               const request: ProjectRequest = {
                 aspectRatio: data.project.aspectRatio,
                 description: resolveParametrized(
                   data.project.description,
                   parameters,
                 ),
+                duration:
+                  LiqvidDuration.inMilliseconds(projectMeta.duration) / 1000,
                 name:
                   resolveParametrized(data.project.title, parameters) ??
                   (() => {

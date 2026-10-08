@@ -592,6 +592,28 @@
                       }
                     ]
                   },
+                  "duration": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "name": {
                     "type": "string"
                   },
@@ -778,6 +800,28 @@
                                 }
                               ]
                             }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duration": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "Infinity",
+                              "-Infinity",
+                              "NaN"
+                            ]
                           }
                         ]
                       },
@@ -1027,13 +1071,13 @@
   },
   "components": {
     "schemas": {
-      "UnauthorizedEncoded": {
+      "InternalServerErrorEncoded": {
         "type": "object",
         "properties": {
           "_tag": {
             "type": "string",
             "enum": [
-              "Unauthorized"
+              "InternalServerError"
             ]
           },
           "cause": {
@@ -1054,13 +1098,13 @@
         ],
         "additionalProperties": false
       },
-      "InternalServerErrorEncoded": {
+      "UnauthorizedEncoded": {
         "type": "object",
         "properties": {
           "_tag": {
             "type": "string",
             "enum": [
-              "InternalServerError"
+              "Unauthorized"
             ]
           },
           "cause": {

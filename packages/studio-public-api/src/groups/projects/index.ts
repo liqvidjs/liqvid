@@ -20,6 +20,9 @@ export const ProjectRequest = Schema.Struct({
 
   description: Parametrized(Schema.String).pipe(Schema.optional),
 
+  /** Project duration in seconds */
+  duration: Schema.Number.pipe(Schema.optional),
+
   name: Schema.String,
 
   parameters: Schema.optional(
