@@ -5,6 +5,7 @@ import { Effect, Schema, Struct } from "effect";
 import { SchemaRelativeDir } from "effect-paths";
 
 import { AspectRatioSpecifier } from "./misc/aspect-ratio.mts";
+import { $SchemaFilename, schemaUrl } from "./url.mts";
 
 /** Root or project-level parameter definitions. */
 export type ParameterConfig = Readonly<Record<string, readonly string[]>>;
@@ -24,7 +25,7 @@ export const ParametrizedValueEntry = <T, E, RD, RE>(
   Schema.StructWithRest(Schema.Struct({ value }), [
     // The `value` field is also covered by a string-keyed rest schema. Unknown
     // keeps the rest compatible with parametrized values such as booleans.
-    Schema.Record(Schema.String, Schema.Unknown),
+    Schema.Record(Schema.String, Schema.Json),
   ]);
 
 export type ParametrizedValueEntry<
@@ -133,10 +134,30 @@ export type ProjectJson<
  * auto-generated project-meta.json files
  */
 export const AutoGenProjectMeta = Schema.Struct({
+  $schema: Schema.Literals([
+    schemaUrl("project-meta-autogen.json"),
+    // Preserve compatibility with files generated before the domain change.
+    "https://liqvid.com/schemas/latest/project-meta-autogen.json",
+  ]).pipe(Schema.optional),
+
+  /**
+   * Recordings chosen for inclusion in the final video, keyed by recording
+   * directory name.
+   */
+  chosenRecordings: Schema.Record(Schema.String, Schema.Boolean).pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Recordings chosen for inclusion in the final video, keyed by recording directory name.",
+    }),
+  ),
+
   /** duration of project */
   duration: DurationOptions.pipe(
     Schema.annotate({ description: "Duration of project" }),
   ),
+}).annotate({
+  [$SchemaFilename]: "project-meta-autogen.json",
 });
 export type AutoGenProjectMeta = (typeof AutoGenProjectMeta)["Type"];
 

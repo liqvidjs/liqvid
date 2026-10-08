@@ -61,7 +61,9 @@ async function main() {
     console.log(`  ${filename}...`);
 
     const filepath = path.join(OUTPUT_DIR, filename);
-    const document = Schema.toJsonSchemaDocument(schema);
+    const document = Schema.toJsonSchemaDocument(schema, {
+      onExcessProperty: "error",
+    });
 
     // Assemble a self-contained JSON Schema document, hoisting any shared
     // definitions into a `$defs` block (draft 2020-12).

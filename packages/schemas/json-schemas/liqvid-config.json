@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -16,7 +16,7 @@
     "backend": {
       "anyOf": [
         {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "description": "Configure your hosting backends",
           "properties": {
             "content": {
@@ -54,9 +54,19 @@
     "logging": {
       "anyOf": [
         {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "description": "Logging configuration",
           "properties": {
+            "dir": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "level": {
               "anyOf": [
                 {
@@ -79,13 +89,13 @@
     "media": {
       "anyOf": [
         {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "description": "Media config",
           "properties": {
             "audio": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "properties": {
                     "multiple": {
                       "anyOf": [
@@ -113,13 +123,13 @@
             "captioning": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "description": "Captioning configuration",
                   "properties": {
                     "smartWhisperOptions": {
                       "anyOf": [
                         {
-                          "additionalProperties": true,
+                          "additionalProperties": false,
                           "properties": {
                             "gpu": {
                               "anyOf": [
@@ -186,7 +196,7 @@
                             "whisperOptions": {
                               "anyOf": [
                                 {
-                                  "additionalProperties": true,
+                                  "additionalProperties": false,
                                   "properties": {
                                     "language": {
                                       "anyOf": [
@@ -300,7 +310,7 @@
             "renders": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "properties": {
                     "source": {
                       "description": "Whether to render from development preview or production build",
@@ -318,7 +328,7 @@
             "screenshots": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "properties": {
                     "source": {
                       "description": "Whether to render from development preview or production build",
@@ -336,11 +346,11 @@
             "thumbnails": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "description": "Thumbnail generation configuration",
                   "properties": {
                     "defaults": {
-                      "additionalProperties": true,
+                      "additionalProperties": false,
                       "description": "Configuration for a thumbnail generation job",
                       "properties": {
                         "browserExecutable": {
@@ -564,13 +574,92 @@
         }
       ]
     },
+    "plugins": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "additionalProperties": {},
+              "type": "object"
+            }
+          ],
+          "description": "Configuration for server-side Liqvid plugins.",
+          "properties": {
+            "@liqvid/media": {
+              "anyOf": [
+                {},
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Configuration for @liqvid/media FFmpeg recording post-processing."
+            }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "previewServer": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "hostname": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "port": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "enum": ["Infinity", "-Infinity", "NaN"],
+                      "type": "string"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "providers": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "copy": {
           "anyOf": [
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "properties": {
                 "basePath": {
                   "anyOf": [
@@ -606,7 +695,7 @@
                       ]
                     },
                     {
-                      "additionalProperties": true,
+                      "additionalProperties": false,
                       "properties": {
                         "hosting": {
                           "anyOf": [
@@ -659,7 +748,7 @@
         "githubPages": {
           "anyOf": [
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "properties": {
                 "branch": {
                   "anyOf": [
@@ -691,7 +780,7 @@
         "liqvidStudio": {
           "anyOf": [
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "properties": {
                 "accessToken": {
                   "type": "string"
@@ -723,13 +812,13 @@
         "s3": {
           "anyOf": [
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "description": "Configuration for AWS S3 (or other compatible provider)",
               "properties": {
                 "auth": {
                   "anyOf": [
                     {
-                      "additionalProperties": true,
+                      "additionalProperties": false,
                       "description": "Authentication via AWS profile",
                       "properties": {
                         "profile": {
@@ -744,7 +833,7 @@
                       "type": "object"
                     },
                     {
-                      "additionalProperties": true,
+                      "additionalProperties": false,
                       "description": "Explicit S3 credentials authentication",
                       "properties": {
                         "accessKeyId": {
@@ -841,7 +930,7 @@
         "sftp": {
           "anyOf": [
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "properties": {
                 "basePath": {
                   "anyOf": [
@@ -887,7 +976,7 @@
     "publishing": {
       "anyOf": [
         {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "description": "Publishing configuration",
           "properties": {
             "delete": {
@@ -903,7 +992,7 @@
             "include": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "description": "Glob patterns of files to include when publishing",
                   "properties": {
                     "media": {
@@ -962,7 +1051,7 @@
     "ui": {
       "anyOf": [
         {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "hideProjects": {
               "anyOf": [

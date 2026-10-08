@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "$schema": {
       "anyOf": [
@@ -58,7 +58,7 @@
               "type": "array"
             },
             {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "properties": {
                 "height": {
                   "anyOf": [

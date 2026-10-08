@@ -55,6 +55,18 @@ export const LiqvidConfig = Schema.Struct({
   /** Logging configuration */
   logging: Schema.Struct({
     /**
+     * Directory for log files, relative to the project working directory.
+     * @default "logs"
+     */
+    dir: Schema.String.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed("logs")),
+      Schema.annotate({
+        default: "logs",
+        description:
+          "Directory for log files, relative to the project working directory.",
+      }),
+    ),
+    /**
      * Logging level.
      * @default "info"
      */
@@ -173,6 +185,53 @@ export const LiqvidConfig = Schema.Struct({
       Schema.optional,
     ),
   }).pipe(Schema.annotate({ description: "Media config" }), Schema.optional),
+
+  /** Configuration for server-side Liqvid plugins. */
+  plugins: Schema.StructWithRest(
+    Schema.Struct({
+      /** Configuration for @liqvid/media FFmpeg recording post-processing. */
+      "@liqvid/media": Schema.Unknown.pipe(
+        Schema.optional,
+        Schema.annotate({
+          description:
+            "Configuration for @liqvid/media FFmpeg recording post-processing.",
+        }),
+      ),
+    }),
+    [Schema.Record(Schema.String, Schema.Unknown)],
+  ).pipe(
+    Schema.annotate({
+      description: "Configuration for server-side Liqvid plugins.",
+    }),
+    Schema.optional,
+  ),
+
+  /** Local server for viewing the static production build. */
+  previewServer: Schema.Struct({
+    enabled: Schema.Boolean.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed(false)),
+      Schema.annotate({
+        default: false,
+        description: "Enable the preview server.",
+      }),
+    ),
+    hostname: Schema.String.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed("localhost")),
+      Schema.annotate({
+        default: "localhost",
+        description: "Preview server hostname.",
+      }),
+    ),
+    port: Schema.Number.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed(4000)),
+      Schema.annotate({ default: 4000, description: "Preview server port." }),
+    ),
+  }).pipe(
+    Schema.withDecodingDefaultType(
+      Effect.succeed({ enabled: false, hostname: "localhost", port: 4000 }),
+    ),
+    Schema.annotate({ description: "Local preview server configuration." }),
+  ),
 
   providers: Schema.Struct({
     // hosting

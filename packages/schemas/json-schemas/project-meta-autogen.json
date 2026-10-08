@@ -1,9 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "anyOf": [
+        {
+          "enum": [
+            "https://liqvidjs.org/schemas/latest/project-meta-autogen.json",
+            "https://liqvid.com/schemas/latest/project-meta-autogen.json"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "chosenRecordings": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Recordings chosen for inclusion in the final video, keyed by recording directory name."
+    },
     "duration": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "Duration of project",
       "properties": {
         "d": {

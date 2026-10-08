@@ -31,6 +31,7 @@
     "build": "tsc",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "generate:schemas": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schemas.mts && biome check --fix json-schemas",
+    "publish:schemas": "printf 'lcd json-schemas\\ncd public_html/schemas/latest\\nput *.json\\n' | sftp lv-docs",
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:tsc": "tsc --noEmit",
