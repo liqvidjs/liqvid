@@ -10,10 +10,10 @@ import type {
 /**
  * Options for provideIframeApi in the child.
  */
-export interface ProvideIframeApiOptions {
+export type ProvideIframeApiOptions = Readonly<{
   /** Target origin for postMessage (default: "*") */
   targetOrigin?: string;
-}
+}>;
 
 /**
  * Provide an iframe API implementation for the parent to call.

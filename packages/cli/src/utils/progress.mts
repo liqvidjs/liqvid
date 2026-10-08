@@ -11,9 +11,12 @@ export const cliProgressLayer = (
       return {
         SingleBar: class SingleBar {
           readonly #bar: cliProgress.SingleBar;
+          readonly #scheme: string;
 
-          constructor({ formatValue }: SingleBarOptions = {}) {
+          constructor({ format, formatValue }: SingleBarOptions = {}) {
             const [barOptions, ...rest] = options;
+            // Trailing space so `{scheme}{value}/{total}` reads "light 2/168".
+            this.#scheme = format?.scheme ? `${format.scheme} ` : "";
 
             this.#bar = new cliProgress.SingleBar(
               {
@@ -34,7 +37,7 @@ export const cliProgressLayer = (
           }
 
           start(total: number, startValue: number) {
-            this.#bar.start(total, startValue);
+            this.#bar.start(total, startValue, { scheme: this.#scheme });
             this.#bar.increment();
           }
 
@@ -59,7 +62,8 @@ export const defaultCliProgressLayer = () =>
     {
       autopadding: true,
       clearOnComplete: true,
-      format: "{bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+      format:
+        "{bar} {percentage}% | ETA: {eta_formatted} | {scheme}{value}/{total}",
       hideCursor: true,
     },
     cliProgress.Presets.shades_classic,

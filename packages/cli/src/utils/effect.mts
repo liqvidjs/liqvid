@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { type EnvFiles, LiqvidConfig } from "@liqvid/schemas";
+import {
+  $SchemaFilename,
+  $SchemaVersion,
+  type EnvFiles,
+  LiqvidConfig,
+  schemaUrl,
+} from "@liqvid/schemas";
 import {
   Cause,
   Effect,
@@ -281,6 +287,35 @@ export const writeJSON = Effect.fnUntraced(function* <T>(
 ) {
   const fs = yield* FileSystem.FileSystem;
   const jsonString = JSON.stringify(data, null, 2);
+  yield* fs.writeFileString(path, jsonString);
+});
+
+/** Write JSON data to a file, pretty-printed with 2-space indentation. */
+export const writeJSONWithSchema = Effect.fnUntraced(function* <
+  S extends Schema.Struct<Schema.Struct.Fields>,
+>(
+  model: S,
+  path: AbsoluteFile,
+  data: Omit<S["Type"], "$schema"> & {
+    readonly $schema?: S["Type"] extends {
+      readonly $schema?: infer T;
+    }
+      ? T
+      : never;
+  },
+) {
+  const fs = yield* FileSystem.FileSystem;
+
+  const $schemaFilename = model.ast.annotations?.[$SchemaFilename];
+  const $schemaVersion = model.ast.annotations?.[$SchemaVersion];
+
+  const jsonString = JSON.stringify(
+    $schemaFilename
+      ? { $schema: schemaUrl($schemaFilename, $schemaVersion), ...data }
+      : data,
+    null,
+    2,
+  );
   yield* fs.writeFileString(path, jsonString);
 });
 

@@ -83,7 +83,7 @@ type PromiseRecord<T> = {
  * Polyfill for upcoming `Promise.allKeyed`
  */
 export async function promiseAllKeyed<
-  const T extends Record<PropertyKey, unknown>,
+  const T extends Readonly<Record<PropertyKey, unknown>>,
 >(obj: PromiseRecord<T>): Promise<T> {
   const values = await Promise.all(Object.values(obj));
   const keys = Object.keys(obj) as (keyof T)[];

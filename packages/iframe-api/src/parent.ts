@@ -21,13 +21,13 @@ type PendingRequest = {
 /**
  * Options for getIframeApi in the parent.
  */
-export interface GetIframeApiOptions {
+export type GetIframeApiOptions = {
   /** Retry interval in milliseconds (default: 100) */
-  retryInterval?: number;
+  retryIntervalMs?: number;
 
   /** Target origin for postMessage (default: "*") */
   targetOrigin?: string;
-}
+};
 
 /**
  * Get an iframe API client for communicating with a child iframe.
@@ -42,10 +42,12 @@ export function getIframeApi<D extends IFrameAPIDeclaration>(
   iframe: HTMLIFrameElement,
 
   /** Configuration options */
-  options: GetIframeApiOptions = {},
+  options: Readonly<GetIframeApiOptions> = {},
 ): IFrameAPIClient<D> {
-  const { retryInterval = DEFAULT_RETRY_INTERVAL, targetOrigin = "*" } =
-    options;
+  const {
+    retryIntervalMs: retryInterval = DEFAULT_RETRY_INTERVAL,
+    targetOrigin = "*",
+  } = options;
 
   let requestIdCounter = 0;
   const pendingRequests = new Map<number, PendingRequest>();

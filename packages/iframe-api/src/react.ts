@@ -5,7 +5,7 @@ import { type GetIframeApiOptions, getIframeApi } from "./parent.ts";
 
 export function useIframeApi<D extends IFrameAPIDeclaration>(
   decl: D,
-  options?: GetIframeApiOptions,
+  options?: Readonly<GetIframeApiOptions>,
 ): {
   api: IFrameAPIClient<D> | null;
   ref: React.RefCallback<HTMLIFrameElement>;
@@ -17,7 +17,7 @@ export function useIframeApi<D extends IFrameAPIDeclaration>(
     if (!iframe) return;
 
     const api = getIframeApi(decl, iframe, {
-      retryInterval: options?.retryInterval,
+      retryIntervalMs: options?.retryIntervalMs,
       targetOrigin: options?.targetOrigin,
     });
 
@@ -27,7 +27,7 @@ export function useIframeApi<D extends IFrameAPIDeclaration>(
       api.destroy();
       setApi(null);
     };
-  }, [iframe, decl, options?.retryInterval, options?.targetOrigin]);
+  }, [iframe, decl, options?.retryIntervalMs, options?.targetOrigin]);
 
   return { api, ref: setIframe };
 }

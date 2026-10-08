@@ -7,20 +7,17 @@ import { Command, Flag } from "effect/cli";
 import type { AbsoluteDir, AbsoluteFile } from "effect-paths";
 import { execa } from "execa";
 
-import { CopyProvider } from "#_/providers/hosting/copy.mjs";
+import { CopyProvider } from "#_/providers/hosting/copy";
 import { GitHubPagesProvider } from "#_/providers/hosting/github-pages.js";
-import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio.mjs";
-import { S3Provider } from "#_/providers/hosting/s3.mjs";
-import { SFTPProvider } from "#_/providers/hosting/sftp.mjs";
-import type {
-  HostingProvider,
-  MediaHostingProvider,
-} from "#_/providers/types.mjs";
+import { LiqvidStudioProvider } from "#_/providers/hosting/liqvid-studio";
+import { S3Provider } from "#_/providers/hosting/s3";
+import { SFTPProvider } from "#_/providers/hosting/sftp";
+import type { HostingProvider, MediaHostingProvider } from "#_/providers/types";
 import {
   loadEnvFiles,
   loadLiqvidConfig,
   resolveConfigPath,
-} from "#_/utils/effect.mjs";
+} from "#_/utils/effect";
 
 import { CONFIG_FILE, CONFIG_FILE_JSONC } from "./conventions.mts";
 
@@ -186,7 +183,7 @@ export const runNextBuild = Effect.fnUntraced(function* (
           : yield* contentBaseUrl;
     }
 
-    // set media base urlNEXT_PUB
+    // set media base url
     const mediaProvider = getMediaProvider(config);
     if (Option.isSome(mediaProvider)) {
       const mediaBaseUrl = mediaProvider.value.getMediaBaseUrl();

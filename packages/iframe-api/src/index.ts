@@ -19,12 +19,12 @@ export interface IFrameAPIMethodDeclaration<
 /**
  * Declaration of an iframe API.
  */
-export type IFrameAPIDeclaration = {
+export type IFrameAPIDeclaration = Readonly<{
   /** Namespace for this API */
   namespace: string;
 
-  methods: Record<string, IFrameAPIMethodDeclaration>;
-};
+  methods: Readonly<Record<string, IFrameAPIMethodDeclaration>>;
+}>;
 
 /**
  * Extract the implementation type from an API declaration.

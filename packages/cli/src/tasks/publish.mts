@@ -20,7 +20,7 @@ import {
   resolveConfigPath,
 } from "#_/utils/effect";
 import { getLogLevel } from "#_/utils/misc";
-import { defaultCliProgressLayer } from "#_/utils/progress.mjs";
+import { defaultCliProgressLayer } from "#_/utils/progress";
 
 import {
   CONFIG_FILE,
