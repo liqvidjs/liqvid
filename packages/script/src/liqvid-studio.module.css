@@ -1,0 +1,19 @@
+.timings {
+  th,
+  td {
+    padding-inline: var(--lvs-spacing-md);
+  }
+}
+
+.title {
+  display: flex;
+  gap: var(--lvs-spacing-sm);
+  align-items: center;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+}
+
+.icon {
+  background-color: light-dark(#333, #999);
+  border-radius: var(--lvs-rounded-sm);
+}

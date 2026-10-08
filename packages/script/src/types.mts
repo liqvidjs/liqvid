@@ -1,4 +1,5 @@
 import type { Duration } from "@liqvid/duration";
+import type { DurationString } from "@liqvid/utils";
 
 export interface AbstractMarker<M extends string = string> {
   duration: Duration;
@@ -18,5 +19,5 @@ export type SerializedMarker<M extends string = string> = readonly [
 
 export type MarkerFormatted<M extends string = string> = readonly [
   name: M,
-  formattedTime: string,
+  formattedTime: DurationString,
 ];

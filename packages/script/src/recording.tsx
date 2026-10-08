@@ -1,12 +1,9 @@
 import { BaseRecorder } from "@liqvid/recording";
-import {
-  type LiqvidStudioRecordingPlugin,
-  packageNameToDirName,
-  usePluginApi,
-} from "@liqvid/studio-plugin-api";
+import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
 import { bind, formatTimeMs } from "@liqvid/utils";
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 
+import { icon } from "./icon.tsx";
 import { useScriptOptional } from "./react/useScript.tsx";
 import type { MarkerUpdateEvent, Script } from "./script.mts";
 import type { MarkerFormatted, SerializedMarker } from "./types.mts";
@@ -73,22 +70,6 @@ export class MarkerRecorder extends BaseRecorder<
   }
 }
 
-const icon = (props?: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 100 100" {...props}>
-    <title>Marker recording</title>
-    <text
-      fill="#FFF"
-      fontFamily="Helvetica"
-      fontSize="75"
-      textAnchor="middle"
-      x="50"
-      y="75"
-    >
-      M
-    </text>
-  </svg>
-);
-
 export const MarkerRecording = {
   icon,
   name: "Markers",
@@ -96,36 +77,11 @@ export const MarkerRecording = {
 
   recorder: new MarkerRecorder(),
 
-  recordingComponent: ({ name }) => {
-    const { makeToast } = usePluginApi();
-    const onClick = async () => {
-      try {
-        await navigator.clipboard.writeText(
-          `import ${sanitizeName(name)}Timings from "../.liqvid/recordings/${name}/${packageNameToDirName(MarkerRecording.package)}/timings.json";`,
-        );
-
-        makeToast({
-          message: (
-            <>
-              Paste it into <code>markers.ts</code>
-            </>
-          ),
-          title: "Copied import code to clipboard",
-          type: "success",
-        });
-      } catch (_error) {}
-    };
-
-    return (
-      <div>
-        {icon({ height: 24, width: 24 })}
-
-        <button className="lv-studio-button" onClick={onClick} type="button">
-          Use
-        </button>
-      </div>
-    );
-  },
+  recordingComponent: lazy(() =>
+    import("./liqvid-studio.tsx").then((mod) => ({
+      default: mod.RecordingComponent,
+    })),
+  ),
   useConfigurePlugin() {
     const script = useScriptOptional();
 
@@ -138,7 +94,3 @@ export const MarkerRecording = {
 
   version: "1.0.0",
 } satisfies LiqvidStudioRecordingPlugin<MarkerFormatted>;
-
-function sanitizeName(name: string) {
-  return name.replace(/-/g, "");
-}

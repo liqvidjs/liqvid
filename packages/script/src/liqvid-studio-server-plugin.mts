@@ -3,11 +3,9 @@ import * as path from "node:path";
 
 import type { LiqvidStudioServerPlugin } from "@liqvid/studio-plugin-api";
 import { inlineTypeDeclaration } from "@liqvid/studio-plugin-api/server";
-import type { AbsoluteDir, RelativeFile } from "effect-paths";
+import type { AbsoluteDir } from "effect-paths";
 
-const RAW_JSON = "raw.json" as RelativeFile;
-const TIMINGS_JSON = "timings.json" as RelativeFile;
-const TIMINGS_DTS = "timings.d.json.ts" as RelativeFile;
+import { RAW_JSON, TIMINGS_DTS, TIMINGS_JSON } from "./conventions.ts";
 
 /**
  * Generate TypeScript declaration content from timings JSON.
@@ -48,7 +46,7 @@ async function postProcessRecording({
   }
 
   // Parse the raw data (array of [name, time] tuples)
-  let rawData: Array<[string, string]>;
+  let rawData: [string, string][];
   try {
     rawData = JSON.parse(rawContent);
   } catch {
