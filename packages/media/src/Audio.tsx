@@ -91,6 +91,9 @@ export function Audio<M extends string = string>({
     if (typeof start === "number") {
       return start;
     } else if (typeof start === "string") {
+      if (Duration.isDurationString(start)) {
+        return Duration.inSeconds(start);
+      }
       if (!script) {
         throw new Error(
           "Audio start time is a string, but no script is available to resolve it.",

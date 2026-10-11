@@ -7,7 +7,7 @@ import type {
   ParameterValues,
   ProjectMeta,
 } from "@liqvid/schemas";
-import { formatTimeMs, isDurationString, parseTime$ } from "@liqvid/utils";
+import { formatTimeMs, parseTime$ } from "@liqvid/utils";
 import {
   CameraIcon,
   MoonIcon,
@@ -233,7 +233,7 @@ export function ScreenshotModal({
   };
 
   const handleTimeInputSubmit = () => {
-    if (!isDurationString(timeInput)) {
+    if (!Duration.isDurationString(timeInput)) {
       return;
     }
 
@@ -272,7 +272,7 @@ export function ScreenshotModal({
             onBlur={() => setTimeInput(formatTimeMs(previewTime))}
             onChange={(e) => {
               const { value } = e.target;
-              if (isDurationString(value)) {
+              if (Duration.isDurationString(value)) {
                 setTimeInput(value);
               }
             }}

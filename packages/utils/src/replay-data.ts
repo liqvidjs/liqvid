@@ -1,6 +1,8 @@
-import { Duration, type DurationLike } from "@liqvid/duration";
-
-import { type DurationString, isDurationString, parseTimeMs } from "./time.ts";
+import {
+  Duration,
+  type DurationLike,
+  type DurationString,
+} from "@liqvid/duration";
 
 /**
  * Type representing recorded data
@@ -20,11 +22,7 @@ export function concatenateReplayData<T>(
 ) {
   const ret: ReplayData<T> = [...head[0]];
   const headOffset =
-    typeof head[1] === "number"
-      ? head[1]
-      : isDurationString(head[1])
-        ? parseTimeMs(head[1])
-        : Duration.inMilliseconds(head[1]);
+    typeof head[1] === "number" ? head[1] : Duration.inMilliseconds(head[1]);
 
   let ptr = headOffset + length(head[0]);
 
@@ -33,11 +31,7 @@ export function concatenateReplayData<T>(
     copy[0] = copy[0]!.slice() as [number, T];
 
     const offset =
-      typeof start === "number"
-        ? start
-        : isDurationString(start)
-          ? parseTimeMs(start)
-          : Duration.inMilliseconds(start);
+      typeof start === "number" ? start : Duration.inMilliseconds(start);
 
     copy[0]![0] += offset - ptr;
     ret.push(...copy);

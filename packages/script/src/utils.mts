@@ -1,4 +1,4 @@
-import type { DurationString } from "@liqvid/utils";
+import type { DurationString } from "@liqvid/duration";
 
 export function withTimings<const M extends string>(
   markerNames: readonly M[],

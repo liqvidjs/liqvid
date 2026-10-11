@@ -1,4 +1,8 @@
-import { Duration, type DurationLike } from "@liqvid/duration";
+import {
+  Duration,
+  type DurationLike,
+  type DurationString,
+} from "@liqvid/duration";
 
 /* time constants */
 const SECONDS = 1000;
@@ -15,19 +19,6 @@ interface Brand<in out Keys extends string> {
     readonly [K in Keys]: Keys;
   };
 }
-
-/** `hh:mm:ss` string, with `hh` and `mm` optional */
-export type DurationStringWithoutMilliseconds<S extends string = string> = S &
-  Brand<"DurationStringWithoutMilliseconds">;
-
-/** `hh:mm:ss.ms` string, with `hh` and `mm` optional */
-export type DurationStringWithMilliseconds<S extends string = string> = S &
-  Brand<"DurationStringWithMilliseconds">;
-
-/** `hh:mm:ss.ms` string, with `hh`, `mm`, and `ms` optional */
-export type DurationString<S extends string = string> =
-  | DurationStringWithoutMilliseconds<S>
-  | DurationStringWithMilliseconds<S>;
 
 /**
  * ISO8601 format for durations, used for the `datetime` attribute of `<time>` elements.
@@ -152,15 +143,14 @@ export function formatTimeDuration(
  */
 export function formatTime(
   time: number | DurationLike | DurationString,
-): DurationStringWithoutMilliseconds {
+): DurationString {
   if (typeof time === "object") {
     return formatTime(Duration.inMilliseconds(time));
   } else if (typeof time === "string") {
-    return time.replace(/\.0+$/, "") as DurationStringWithoutMilliseconds;
+    return time.replace(/\.0+$/, "") as DurationString;
   }
   if (time < 0) {
-    return (MINUS_SIGN +
-      formatTime(-time)) as DurationStringWithoutMilliseconds;
+    return (MINUS_SIGN + formatTime(-time)) as DurationString;
   }
   const days = Math.floor(time / DAYS),
     hours = Math.floor((time / HOURS) % 24),
@@ -184,7 +174,7 @@ export function formatTime(
     str += "0:";
   }
   str += seconds.toString().padStart(2, "0");
-  return str as DurationStringWithoutMilliseconds;
+  return str as DurationString;
 }
 
 /**
@@ -201,7 +191,7 @@ export function formatTimeMs(
     return time;
   }
   if (time < 0) {
-    return (MINUS_SIGN + formatTimeMs(-time)) as DurationStringWithMilliseconds;
+    return (MINUS_SIGN + formatTimeMs(-time)) as DurationString;
   }
   const milliseconds = Math.floor(time % 1000);
 
@@ -211,17 +201,13 @@ export function formatTimeMs(
 
   return (formatTime(time) +
     "." +
-    String(milliseconds)
-      .padStart(3, "0")
-      .replace(/0+$/, "")) as DurationStringWithMilliseconds;
+    String(milliseconds).padStart(3, "0").replace(/0+$/, "")) as DurationString;
 }
 
 /**
  * Format a millisecond timestamp as a VTT cue time (`HH:MM:SS.mmm`).
  */
-export function formatVttTimestamp(
-  ms: number | DurationLike,
-): DurationStringWithMilliseconds {
+export function formatVttTimestamp(ms: number | DurationLike): DurationString {
   if (typeof ms !== "number") {
     ms = Duration.inMilliseconds(ms);
   }
@@ -235,5 +221,5 @@ export function formatVttTimestamp(
   const pad = (value: number, length = 2) =>
     value.toString().padStart(length, "0");
 
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(millis, 3)}` as DurationStringWithMilliseconds;
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(millis, 3)}` as DurationString;
 }

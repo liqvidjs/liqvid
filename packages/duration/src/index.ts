@@ -1,5 +1,7 @@
 import type { SerializedValue } from "@liqvid/ssr/serde";
 
+import { parseTimeMs, timeRegexp } from "./parsing.ts";
+
 const SECONDS = 1000,
   MINUTES = 60 * SECONDS,
   HOURS = 60 * MINUTES,
@@ -8,7 +10,7 @@ const SECONDS = 1000,
 
 const serializationKey = "@liqvid/duration";
 
-export type DurationString = string & {
+export type DurationString<S extends string = string> = S & {
   readonly "~effect/Brand": {
     readonly [K in "DurationString"]: "DurationString";
   };
@@ -18,7 +20,7 @@ export type DurationString = string & {
  * Convenience type representing either a {@link Duration}
  * or creation options for one
  */
-export type DurationLike = Duration | DurationOptions;
+export type DurationLike = Duration | DurationOptions | DurationString;
 
 /**
  * Object for creating or specifying Durations.
@@ -74,61 +76,6 @@ export class Duration {
     this.__valueMs = Duration.inMilliseconds(opts);
   }
 
-  static betweenDates(start: Date, end: Date): Duration {
-    return new Duration({ milliseconds: end.getTime() - start.getTime() });
-  }
-
-  /**
-   * Coerce a DurationLike or Date into a Duration
-   */
-  static from(val: DurationLike | Date): Duration {
-    if (val instanceof Date)
-      return new Duration({ milliseconds: val.getTime() });
-    if (val instanceof Duration) return val;
-    return new Duration(val);
-  }
-
-  /**
-   * Hydrate a Duration value
-   */
-  static fromJSON(val: SerializedDuration): Duration {
-    return Duration.from(val);
-  }
-
-  /** convert a DurationLike to milliseconds without creating unnecessary Duration objects */
-  static inMilliseconds(val: DurationLike = {}): number {
-    if (val instanceof Duration) return val.inMilliseconds();
-
-    const {
-      milliseconds = 0,
-      ms = 0,
-      seconds = 0,
-      s = 0,
-      minutes = 0,
-      m = 0,
-      hours = 0,
-      h = 0,
-      days = 0,
-      d = 0,
-      weeks = 0,
-      w = 0,
-    } = val;
-
-    return (
-      (weeks + w) * WEEKS +
-      (days + d) * DAYS +
-      (hours + h) * HOURS +
-      (minutes + m) * MINUTES +
-      (seconds + s) * SECONDS +
-      (milliseconds + ms)
-    );
-  }
-
-  /** convert a DurationLike to seconds without creating unnecessary Duration objects */
-  static inSeconds(val: DurationLike): number {
-    return Duration.inMilliseconds(val) / 1000;
-  }
-
   /**
    * Create a new {@link Duration} object and receive a callback
    * to imperatively set its value. You can use this instead of
@@ -173,12 +120,40 @@ export class Duration {
     ];
   }
 
-  /** referentially stable empty duration */
-  static zero = new Duration();
-
   /* ------------------------- serialization ------------------------- */
-  toJSON(): SerializedDuration {
-    return { __deser: serializationKey, ms: this.__valueMs };
+  toJSON(format: "minimal" | "long" | "short" = "minimal"): SerializedDuration {
+    const ret: SerializedDuration = { __deser: serializationKey };
+
+    if (format === "minimal") {
+      ret.ms = this.__valueMs;
+      return ret;
+    }
+
+    const days = Math.floor(this.__valueMs / DAYS);
+    const hours = Math.floor((this.__valueMs % DAYS) / HOURS);
+    const minutes = Math.floor((this.__valueMs % HOURS) / MINUTES);
+    const seconds = Math.floor((this.__valueMs % MINUTES) / SECONDS);
+    const milliseconds = this.__valueMs % SECONDS;
+
+    switch (format) {
+      case "short":
+        if (days !== 0) ret.d = days;
+        if (hours !== 0) ret.h = hours;
+        if (minutes !== 0) ret.m = minutes;
+        if (seconds !== 0) ret.s = seconds;
+        if (milliseconds !== 0) ret.ms = milliseconds;
+        break;
+
+      case "long":
+        if (days !== 0) ret.days = days;
+        if (hours !== 0) ret.hours = hours;
+        if (minutes !== 0) ret.minutes = minutes;
+        if (seconds !== 0) ret.seconds = seconds;
+        if (milliseconds !== 0) ret.milliseconds = milliseconds;
+        break;
+    }
+
+    return ret;
   }
 
   /* ------------------------- extractors ------------------------- */
@@ -247,8 +222,8 @@ export class Duration {
     });
   }
 
-  plus(other: Date): Date;
   plus(other: DurationLike): Duration;
+  plus(other: Date): Date;
   plus(other: DurationLike | Date): Duration | Date {
     if (other instanceof Date) {
       return new Date(other.getTime() + this.__valueMs);
@@ -306,4 +281,72 @@ export class MutableDuration extends Duration implements DurationSetter {
     this.__valueMs *= factor;
     return this;
   }
+}
+
+export namespace Duration {
+  export function isDurationString(val: unknown): val is DurationString {
+    return typeof val === "string" && timeRegexp.test(val);
+  }
+
+  /** convert a DurationLike to milliseconds without creating unnecessary Duration objects */
+  export function inMilliseconds(val: DurationLike = {}): number {
+    if (val instanceof Duration) return val.inMilliseconds();
+    if (typeof val === "string") return parseTimeMs(val);
+
+    const {
+      milliseconds = 0,
+      ms = 0,
+      seconds = 0,
+      s = 0,
+      minutes = 0,
+      m = 0,
+      hours = 0,
+      h = 0,
+      days = 0,
+      d = 0,
+      weeks = 0,
+      w = 0,
+    } = val;
+
+    return (
+      (weeks + w) * WEEKS +
+      (days + d) * DAYS +
+      (hours + h) * HOURS +
+      (minutes + m) * MINUTES +
+      (seconds + s) * SECONDS +
+      (milliseconds + ms)
+    );
+  }
+
+  export function betweenDates(start: Date, end: Date): Duration {
+    return new Duration({ milliseconds: end.getTime() - start.getTime() });
+  }
+
+  /**
+   * Coerce a DurationLike or Date into a Duration
+   */
+  export function from(val: DurationLike | Date): Duration {
+    if (val instanceof Date)
+      return new Duration({ milliseconds: val.getTime() });
+    if (val instanceof Duration) return val;
+    if (typeof val === "string") {
+      return new Duration({ milliseconds: parseTimeMs(val) });
+    }
+    return new Duration(val);
+  }
+
+  /**
+   * Hydrate a Duration value
+   */
+  export function fromJSON(val: SerializedDuration): Duration {
+    return Duration.from(val);
+  }
+
+  /** convert a DurationLike to seconds without creating unnecessary Duration objects */
+  export function inSeconds(val: DurationLike): number {
+    return Duration.inMilliseconds(val) / 1000;
+  }
+
+  /** referentially stable empty duration */
+  export const zero = new Duration();
 }

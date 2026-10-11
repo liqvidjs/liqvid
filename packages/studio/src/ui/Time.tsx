@@ -1,10 +1,5 @@
-import type { DurationLike } from "@liqvid/duration";
-import {
-  type DurationString,
-  formatTime,
-  formatTimeDuration,
-  formatTimeMs,
-} from "@liqvid/utils";
+import type { DurationLike, DurationString } from "@liqvid/duration";
+import { formatTime, formatTimeDuration, formatTimeMs } from "@liqvid/utils";
 
 import { useLocale } from "#_/contexts/locale";
 import type { LocalizedReactNode } from "#_/i18n/shared";

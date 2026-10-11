@@ -16,7 +16,7 @@ function generateTimingsDeclaration(
   const entries = timings
     .map(
       ([name, time]) =>
-        `\t${JSON.stringify(name)}: import("@liqvid/utils").DurationString<${JSON.stringify(time)}>;`,
+        `\t${JSON.stringify(name)}: import("@liqvid/duration").DurationString<${JSON.stringify(time)}>;`,
     )
     .join("\n");
 

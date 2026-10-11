@@ -1,5 +1,4 @@
-import type { Duration } from "@liqvid/duration";
-import type { DurationString } from "@liqvid/utils";
+import type { Duration, DurationString } from "@liqvid/duration";
 
 export interface AbstractMarker<M extends string = string> {
   duration: Duration;

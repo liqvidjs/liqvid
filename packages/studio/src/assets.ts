@@ -1,4 +1,5 @@
-import type { DurationString } from "@liqvid/utils";
+import type { DurationString } from "@liqvid/duration";
+
 export type Directory = {
   [key: string]: Directory | (() => unknown);
 };
