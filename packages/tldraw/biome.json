@@ -6,5 +6,6 @@
         "useImportExtensions": "error"
       }
     }
-  }
+  },
+  "root": false
 }

@@ -50,6 +50,10 @@
       "!build",
       "!coverage",
       "!opencode.json",
+      "!packages/create-liqvid/templates/app*",
+      "!packages/desmos-react",
+      "!packages/epiplexis",
+      "!packages/test",
       "!**/dist",
       "!**/package-lock.json",
       "!**/node_modules",
@@ -114,7 +118,7 @@
       "nursery": {
         "useReactAsyncServerFunction": "error",
         "useReactCompiler": {
-          "level": "on",
+          "level": "off",
           "options": {
             "compilationMode": "all"
           }
@@ -157,7 +161,11 @@
   },
   "overrides": [
     {
-      "includes": ["**/liqvid-studio-server-plugin.mts"],
+      "includes": [
+        "**/liqvid-studio-server-plugin.mts",
+        "**/eslint.config.*",
+        "**/jest.config.*"
+      ],
       "linter": {
         "rules": {
           "style": {
