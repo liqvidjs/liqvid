@@ -7,6 +7,10 @@ import type {
   WhisperConfig,
   WhisperModelName,
 } from "@liqvid/schemas";
+import {
+  inlineTypeDeclaration,
+  writeTypedJson,
+} from "@liqvid/studio-plugin-api/server";
 import { formatTimeMs, formatVttTimestamp } from "@liqvid/utils";
 import { Effect, FileSystem, Layer, Option } from "effect";
 import { Command, Flag } from "effect/cli";
@@ -410,7 +414,15 @@ export function transcribe({
     yield* fs.writeFileString(targetVttPath, vtt);
 
     const transcript = buildTranscript(segments);
-    yield* writeJSON(targetJsonPath, transcript);
+    yield* writeTypedJson({
+      data: transcript,
+      declaration: inlineTypeDeclaration(
+        'import("@liqvid/schemas").RichTranscript',
+      ),
+      dirname: absoluteOutputDir,
+      filename: RICH_TRANSCRIPT,
+      pretty: true,
+    });
 
     yield* writeJSON(
       path.join(absoluteOutputDir, RelativeFile("transcript-raw.json")),

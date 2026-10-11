@@ -119,6 +119,7 @@
     "@liqvid/fp": "workspace:^1.0.0-alpha.0",
     "@liqvid/renderer": "workspace:^2.0.0-alpha.1",
     "@liqvid/schemas": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^",
     "@liqvid/studio-public-api": "workspace:^",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@octokit/rest": "catalog:",
