@@ -91,7 +91,7 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
 
     appendLog(job, {
       annotations,
-      message: message as ReadonlyArray<Schema.Json>,
+      message: message as readonly Schema.Json[],
       spans: activeSpans.map(([label, start]) => [label, timestamp - start]),
       timestamp: date,
       type: mappedType,

@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
-import { loadJson, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, readDirWithFileTypes, writeJSON } from "@liqvid/cli/utils";
 import { Cause, Effect, Fiber, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
@@ -9,19 +9,18 @@ import { StatusCodes } from "http-status-codes";
 
 import { ASSETS_DIR, RENDER_META_FILE, RENDERS_DIR } from "#_/conventions";
 import { getServerState } from "#_/initialize";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { existenceOptional } from "#_/utils/effect";
 import { ConflictError, NotFoundError } from "#_/utils/errors";
 import { createJob } from "#_/utils/jobs";
 import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
-
 import {
   ensureParamsMarker,
   extractParameterNames,
   getParameterizedAssetsDir,
-} from "../utils/parameters";
+} from "#_/utils/parameters";
 
-import { WebApi } from "./contract";
-import { RenderMeta } from "./schemas";
+import { WebApi } from "./contract.ts";
+import { RenderMeta } from "./schemas.ts";
 
 /**
  * Generate a unique job name for a render.

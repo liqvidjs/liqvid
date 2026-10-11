@@ -35,7 +35,7 @@ import {
 } from "#_/utils/chosen-recordings";
 import { extractParameterNames } from "#_/utils/parameters";
 
-import { MysteriouslyFixCreateContextErrorsDuringBuild } from "./liqvidProject.client";
+import { MysteriouslyFixCreateContextErrorsDuringBuild } from "./liqvidProject.client.tsx";
 
 export function liqvidProject<
   D extends Directory,

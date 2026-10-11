@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import { renderAudio } from "@liqvid/cli/render-audio";
-import { loadJson, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, readDirWithFileTypes, writeJSON } from "@liqvid/cli/utils";
 import type { LiqvidConfig } from "@liqvid/schemas";
 import { Array as Arr, Effect, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
@@ -15,14 +15,14 @@ import {
   RICH_TRANSCRIPT,
 } from "#_/conventions";
 import { CaptionsMeta } from "#_/types/schemas";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { existenceOptional } from "#_/utils/effect";
 import { ConflictError, InvalidError, NotFoundError } from "#_/utils/errors";
 import { createJob } from "#_/utils/jobs";
 import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
 import { getParameterizedAssetsDir } from "#_/utils/parameters";
 
-import { WebApi } from "./contract";
-import { type AudioEntry, AudioMeta } from "./schemas";
+import { WebApi } from "./contract.ts";
+import { type AudioEntry, AudioMeta } from "./schemas.ts";
 
 const AUDIO_META_FILE = RelativeFile("audio-meta.json");
 

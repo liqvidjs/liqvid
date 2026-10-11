@@ -13,7 +13,7 @@ import {
 } from "#_/i18n/shared";
 import { getTranslationsFromServer } from "#_/server-actions";
 
-import type { CommonTranslations as CommonTranslationsType } from "./i18n";
+import type { CommonTranslations as CommonTranslationsType } from "./i18n.ts";
 
 /* ------------------------------ translations ------------------------------ */
 

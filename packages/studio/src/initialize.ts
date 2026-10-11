@@ -15,7 +15,7 @@ import {
   watchProjectFiles,
 } from "./services/watch-project-files.ts";
 import { watchRootTypes } from "./services/watch-root-types.ts";
-import { createService } from "./utils/services";
+import { createService } from "./utils/services.ts";
 
 const symbol = Symbol.for("@liqvid/server");
 

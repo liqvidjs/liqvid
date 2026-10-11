@@ -9,8 +9,8 @@ import { Effect, FileSystem, Option, Stream } from "effect";
 
 import {
   getServerState,
-  syncPreviewServer,
   type LiqvidServerState,
+  syncPreviewServer,
 } from "#_/initialize";
 
 /** Check if the path matches either config file name. */

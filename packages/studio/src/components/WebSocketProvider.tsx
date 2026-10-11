@@ -12,7 +12,7 @@ import {
   type ChannelName,
   type Channels,
   EnvelopeFromJson,
-} from "../lib/websockets/channels.ts";
+} from "#_/lib/websockets/channels";
 
 /**
  * Subscriber callback: receives the full decoded message for a channel.

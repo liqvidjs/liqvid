@@ -5,6 +5,7 @@
       "title": "Configuration"
     },
     "saved": {
+      "openInFinder": "Ouvrir dans Finder",
       "rename": {
         "action": "Renommer",
         "cancel": "Annuler",
@@ -15,7 +16,6 @@
       "reprocess": "Retraiter",
       "reprocessing": "Retraitement en cours...",
       "rerun": "Réexécuter les plugins de post-traitement",
-      "openInFinder": "Ouvrir dans Finder",
       "subtitle": "Sauvegardé",
       "title": "Enregistrements"
     },

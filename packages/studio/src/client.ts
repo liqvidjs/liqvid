@@ -4,7 +4,7 @@ import { FetchHttpClient } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 import type { RelativeDir } from "effect-paths";
 
-import { WebApi } from "./api/contract";
+import { WebApi } from "./api/contract.ts";
 
 const apiRoot = "/api/liqvid";
 

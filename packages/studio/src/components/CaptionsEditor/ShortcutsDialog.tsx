@@ -72,7 +72,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":nth-of-type(even)": colors.stripeEven,
       ":nth-of-type(odd)": colors.stripeOdd,
-       
+
       default: null,
     },
   },

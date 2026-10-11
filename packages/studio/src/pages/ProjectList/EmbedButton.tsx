@@ -2,12 +2,10 @@
 
 import type { ProjectMeta } from "@liqvid/schemas";
 import { CodeIcon } from "@phosphor-icons/react";
-import { useEffectEvent } from "react";
 
 import { useLiqvidConfig } from "#_/contexts/liqvid-config";
 import { useSelectedRootParameters } from "#_/contexts/selected-root-parameters";
 import type { Localized } from "#_/i18n/shared";
-import { Button } from "#_/ui/Button";
 import { MenuItem } from "#_/ui/Menu";
 import { interpolatePathParametersWithSelected } from "#_/utils/parameters-client";
 import { useTranslations } from "#_/utils/react";

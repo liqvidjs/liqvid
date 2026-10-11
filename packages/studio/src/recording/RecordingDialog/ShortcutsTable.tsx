@@ -25,7 +25,7 @@ const styles = stylex.create({
   bodyRow: {
     backgroundColor: {
       ":hover": colors.grayHover,
-       
+
       default: null,
     },
   },

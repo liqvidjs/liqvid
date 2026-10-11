@@ -24,7 +24,7 @@ import {
   getParameterizedAssetsDir,
 } from "#_/utils/parameters";
 
-import { WebApi } from "./contract";
+import { WebApi } from "./contract.ts";
 
 const THUMBS_JOB_FILE = RelativeFile("thumbnails-job.json");
 

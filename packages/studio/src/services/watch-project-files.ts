@@ -52,7 +52,7 @@ import {
   getProjectParameterValues,
 } from "#_/utils/parameters";
 
-import { getRecordingLocation } from "./recording-location";
+import { getRecordingLocation } from "./recording-location.ts";
 
 type Projects = Record<RelativeDir, Schema.Struct.Mutable<ProjectMeta>>;
 

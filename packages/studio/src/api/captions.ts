@@ -18,8 +18,8 @@ import { NotFoundError } from "#_/utils/errors";
 import { createJob } from "#_/utils/jobs";
 import { getConfig } from "#_/utils/misc";
 
-import { getAudioDir } from "./audio";
-import { WebApi } from "./contract";
+import { getAudioDir } from "./audio.ts";
+import { WebApi } from "./contract.ts";
 
 /**
  * The name given to a captioning job, uniquely identifying the audio it

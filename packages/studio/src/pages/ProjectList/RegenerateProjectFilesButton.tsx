@@ -26,7 +26,7 @@ export function RegenerateProjectFilesButton() {
     const result = await regenerateProjectFiles(projectPath);
 
     if (Exit.isSuccess(result)) {
-      console.debug("Regenerated project files:", result.value);
+      console.info("Regenerated project files:", result.value);
       setStatus("done");
     } else {
       console.error("Failed to regenerate project files:", result.cause);

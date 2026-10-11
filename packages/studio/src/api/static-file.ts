@@ -4,8 +4,8 @@ import { Effect, FileSystem } from "effect";
 import type { RelativePath } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
 
-import { InvalidError, NotFoundError } from "../utils/errors";
-import { getRoutesDir } from "../utils/misc";
+import { InvalidError, NotFoundError } from "#_/utils/errors";
+import { getRoutesDir } from "#_/utils/misc";
 
 /**
  * MIME type mappings for common file extensions

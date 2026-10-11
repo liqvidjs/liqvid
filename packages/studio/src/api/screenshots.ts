@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { screenshot } from "@liqvid/cli/screenshot";
-import { loadJson, writeJSON } from "@liqvid/cli/utils";
+import { loadJson, readDirWithFileTypes, writeJSON } from "@liqvid/cli/utils";
 import { type ScreenshotEntry, ScreenshotMeta } from "@liqvid/schemas";
 import { assertType } from "@liqvid/utils";
 import { Effect, FileSystem, Option } from "effect";
@@ -15,7 +15,7 @@ import {
   SCREENSHOT_FILE as SCREENSHOT_PNG,
   SCREENSHOTS_DIR,
 } from "#_/conventions";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { existenceOptional } from "#_/utils/effect";
 import { ConflictError, InvalidError, NotFoundError } from "#_/utils/errors";
 import { getConfig, getRenderUrl, getRoutesDir } from "#_/utils/misc";
 import {
@@ -24,7 +24,7 @@ import {
   getParameterizedAssetsDir,
 } from "#_/utils/parameters";
 
-import { WebApi } from "./contract";
+import { WebApi } from "./contract.ts";
 
 const SCREENSHOT_META_FILE = RelativeFile("screenshot-meta.json");
 

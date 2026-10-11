@@ -14,7 +14,7 @@ import { getServerState, type LiqvidServerState } from "#_/initialize";
 import { withLogLevel } from "#_/server-runtime";
 import { getBiomePath } from "#_/utils/fs";
 
-import { runTemplate } from "./watch-assets";
+import { runTemplate } from "./watch-assets.ts";
 
 /**
  * Generate the root-level .liqvid/types.ts file containing RootParams type.

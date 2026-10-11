@@ -9,9 +9,9 @@ import { Schema } from "effect";
  */
 const NewRecordingMessage = Schema.Struct({
   data: Schema.Struct({
-    recording: RecordingMeta,
-    projectPath: Schema.String,
     projectParams: Schema.Record(Schema.String, Schema.String),
+    projectPath: Schema.String,
+    recording: RecordingMeta,
   }),
   type: Schema.Literal("newRecording"),
 }).pipe(
@@ -23,9 +23,9 @@ const NewRecordingMessage = Schema.Struct({
 /** Message sent when an existing recording's metadata changes. */
 const UpdateRecordingMessage = Schema.Struct({
   data: Schema.Struct({
-    recording: RecordingMeta,
-    projectPath: Schema.String,
     projectParams: Schema.Record(Schema.String, Schema.String),
+    projectPath: Schema.String,
+    recording: RecordingMeta,
   }),
   type: Schema.Literal("updateRecording"),
 }).pipe(
@@ -39,8 +39,8 @@ const DeleteRecordingMessage = Schema.Struct({
   data: Schema.Struct({
     /** Name (directory) of the recording that was deleted */
     name: Schema.String,
-    projectPath: Schema.String,
     projectParams: Schema.Record(Schema.String, Schema.String),
+    projectPath: Schema.String,
   }),
   type: Schema.Literal("deleteRecording"),
 }).pipe(

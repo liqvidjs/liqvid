@@ -5,6 +5,7 @@
       "title": "Configuration"
     },
     "saved": {
+      "openInFinder": "Open in Finder",
       "rename": {
         "action": "Rename",
         "cancel": "Cancel",
@@ -15,7 +16,6 @@
       "reprocess": "Reprocess",
       "reprocessing": "Reprocessing...",
       "rerun": "Re-run post-processing plugins",
-      "openInFinder": "Open in Finder",
       "subtitle": "Saved",
       "title": "Recordings"
     },

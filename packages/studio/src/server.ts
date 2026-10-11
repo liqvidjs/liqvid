@@ -5,9 +5,7 @@ import type { AbsoluteDir, RelativeDir } from "effect-paths";
 import { NEXT_APP_DIR } from "#_/conventions";
 import { getServerState } from "#_/initialize";
 
-export { loadJson } from "@liqvid/cli/utils";
-
-export { readDirWithFileTypes } from "#_/utils/effect";
+export { loadJson, readDirWithFileTypes } from "@liqvid/cli/utils";
 
 export { ASSETS_DIR } from "./conventions.ts";
 export type { Localized } from "./i18n/shared.ts";

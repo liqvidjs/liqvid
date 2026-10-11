@@ -26,7 +26,7 @@ const styles = stylex.create({
     backgroundColor: {
       ":active": colors.affordanceActive,
       ":focus": colors.affordanceHover,
-       
+
       default: null,
     },
     color: colors.grayNormal,

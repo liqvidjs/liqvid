@@ -1,13 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import Image from "next/image";
 
-import {
-  breakpoints,
-  colors,
-  dims,
-  rounded,
-  spacing,
-} from "#_/design/tokens.stylex";
+import { breakpoints, colors, rounded, spacing } from "#_/design/tokens.stylex";
 import logo from "#_/logo.png";
 import {
   NavigationMenuContent,

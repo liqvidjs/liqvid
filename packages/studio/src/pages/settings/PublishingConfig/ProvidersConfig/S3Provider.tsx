@@ -2,7 +2,6 @@
 
 import { CONFIG_FILE } from "@liqvid/cli/utils";
 import * as stylex from "@stylexjs/stylex";
-import Image from "next/image";
 
 import { fonts } from "#_/design/styles";
 import { colors, spacing, text } from "#_/design/tokens.stylex";

@@ -1,9 +1,7 @@
 import type { Progress, SingleBarOptions } from "@liqvid/cli/utils";
 import { type Context, Effect, Option, type PlatformError } from "effect";
 
-import type { LoggableJob, StructuredLog } from "../api/schemas";
-
-export { readDirWithFileTypes } from "@liqvid/cli/utils";
+import type { LoggableJob, StructuredLog } from "#_/api/schemas";
 
 /**
  * Treat file not found errors as Option

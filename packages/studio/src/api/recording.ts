@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { loadJson } from "@liqvid/cli/utils";
+import { loadJson, readDirWithFileTypes } from "@liqvid/cli/utils";
 import { type RecordingMeta, RecordingMetaFile } from "@liqvid/schemas";
 import {
   dirNameToPackageName,
@@ -32,7 +32,6 @@ import {
   RECORDING_RAW_FILE,
   RECORDINGS_DIR,
 } from "#_/conventions";
-import { readDirWithFileTypes } from "#_/utils/effect";
 import {
   ConflictError,
   InvalidError,
@@ -62,8 +61,11 @@ export type DynamicImports = Record<
   string,
   () => Promise<
     {
-      default?: LiqvidStudioServerPlugin;
-    } & LiqvidStudioServerPlugin
+      // biome-ignore lint/suspicious/noExplicitAny: variance
+      default?: LiqvidStudioServerPlugin<any>;
+
+      // biome-ignore lint/suspicious/noExplicitAny: variance
+    } & LiqvidStudioServerPlugin<any>
   >
 >;
 
@@ -129,8 +131,8 @@ function runPostProcessing(
         );
         const program = plugin.postProcessRecording({
           config: config.plugins?.[pluginInfo.key],
-          projectConfig: config,
           dirname: pluginDir,
+          projectConfig: config,
         });
 
         if (program instanceof Promise) {

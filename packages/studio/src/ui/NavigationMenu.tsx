@@ -23,7 +23,7 @@ const styles = stylex.create({
   link: {
     backgroundColor: {
       ":hover": colors.grayHover,
-       
+
       default: null,
     },
     borderRadius: rounded.md,

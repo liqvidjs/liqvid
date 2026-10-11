@@ -22,9 +22,13 @@ import {
   InvalidError,
   InvalidProjectStructure,
   NotFoundError,
-} from "../utils/errors";
+} from "#_/utils/errors";
 
-import { AudioEntry, RenderEntry, ThumbsData } from "./schemas";
+import {
+  AudioEntry,
+  RenderEntry,
+  ThumbsData,
+} from "./schemas.ts";
 
 const projectPathQuery = Schema.Struct({
   /** path to the project */

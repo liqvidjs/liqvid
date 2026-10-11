@@ -10,7 +10,7 @@ import { JSONC } from "jsonc.min";
 import { getServerState } from "#_/initialize";
 import { getLocale } from "#_/utils/i18n";
 
-import { SettingsConfig, WebApi } from "./contract";
+import { SettingsConfig, WebApi } from "./contract.ts";
 
 /** Read the current theme from in-memory config, defaulting to `"system"`. */
 function getTheme(): ColorSchemeSpecifier {

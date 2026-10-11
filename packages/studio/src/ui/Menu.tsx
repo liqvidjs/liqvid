@@ -5,7 +5,7 @@ import { useColorScheme } from "@liqvid/color-scheme/react";
 import * as stylex from "@stylexjs/stylex";
 
 import { useIsStudio } from "#_/contexts/is-studio";
-import { extensible, themed } from "#_/design/themed";
+import { themed } from "#_/design/themed";
 import {
   colors,
   dims,
