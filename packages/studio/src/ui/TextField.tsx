@@ -61,28 +61,10 @@ export function TextField({
   React.ComponentProps<"input">,
   "className" | "children" | "style" | "type" | "onChange"
 >) {
-  if (label) {
-    return (
-      <label sx={styles.field}>
-        <span sx={styles.fieldLabel} {...labelProps}>
-          {label}
-        </span>
-        {/** biome-ignore lint/correctness/noRestrictedElements: this is the styled version */}
-        <input
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          sx={[styles.input, style]}
-          type="text"
-          value={value}
-          {...props}
-        />
-      </label>
-    );
-  }
-
-  return (
-    /** biome-ignore lint/correctness/noRestrictedElements: this is the styled version */
+  const input = (
+    // biome-ignore lint/correctness/noRestrictedElements: this is the styled version
     <input
+      data-affords="keys"
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       sx={[styles.input, style]}
@@ -91,4 +73,18 @@ export function TextField({
       {...props}
     />
   );
+
+  if (label) {
+    return (
+      // biome-ignore lint/a11y/noLabelWithoutControl: it is associated with input defined above
+      <label sx={styles.field}>
+        <span sx={styles.fieldLabel} {...labelProps}>
+          {label}
+        </span>
+        {input}
+      </label>
+    );
+  }
+
+  return input;
 }
