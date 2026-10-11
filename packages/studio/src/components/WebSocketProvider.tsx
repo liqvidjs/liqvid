@@ -2,10 +2,10 @@
 
 import { Duration } from "@liqvid/duration";
 import { deserialize, type JSONValue, serialize } from "@liqvid/ssr/serde";
-import type { CleanUpFn } from "@liqvid/utils";
+import { type CleanUpFn, createUniqueContext } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/socket";
-import { createContext, useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 
 import {
   type ChannelMessage,
@@ -128,7 +128,11 @@ function toAbsoluteUrl(url: string): string {
   return `${wsProtocol}//${host}${url}`;
 }
 
-const WebSocketContext = createContext<WebSocketClient | null>(null);
+const WebSocketContext = createUniqueContext<WebSocketClient | null>(
+  "@liqvid/studio/WebSocket",
+  null,
+  "WebSocket",
+);
 
 /**
  * Module-level singleton for the WebSocket client. This survives React
@@ -139,7 +143,11 @@ let sharedClient: WebSocketClient | null = null;
 let sharedClientRefCount = 0;
 
 /** @scopeException ../../app/providers.tsx */
-export function WebSocketProvider({ children }: { children: React.ReactNode }) {
+export function WebSocketProvider({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   const clientRef = useRef<WebSocketClient | null>(null);
 
   // On first render, get or create the shared client

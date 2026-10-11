@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createUniqueContext } from "@liqvid/utils";
+import { useContext, useMemo } from "react";
 
 import { parseMacros } from "./macros.ts";
 
@@ -8,9 +9,13 @@ export interface MathJaxContext {
   macros: Record<string, string>;
 }
 
-export const MathJaxContext = createContext<MathJaxContext>({
-  macros: {},
-});
+export const MathJaxContext = createUniqueContext<MathJaxContext>(
+  "@liqvid/mathjax",
+  {
+    macros: {},
+  },
+  "MathJax",
+);
 
 export function useMathJaxContext() {
   return useContext(MathJaxContext);

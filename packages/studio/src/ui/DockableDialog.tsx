@@ -3,7 +3,12 @@
 import { useColorScheme } from "@liqvid/color-scheme/react";
 import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import { useKeyboardShortcut } from "@liqvid/keymap/react";
-import { onClickReact, onDragReact, useToggle } from "@liqvid/utils";
+import {
+  createUniqueContext,
+  onClickReact,
+  onDragReact,
+  useToggle,
+} from "@liqvid/utils";
 import { XIcon } from "@phosphor-icons/react";
 import { Portal } from "@radix-ui/react-portal";
 import * as stylex from "@stylexjs/stylex";
@@ -12,7 +17,6 @@ import { Option, Schema } from "effect";
 import {
   Children,
   cloneElement,
-  createContext,
   isValidElement,
   useContext,
   useEffect,
@@ -115,12 +119,15 @@ interface DockableDialogContextShape {
   toggle: () => void;
 }
 
-const dockableDialogContext = createContext<DockableDialogContextShape>({
-  open: false,
-  setOpen() {},
-  toggle() {},
-});
-dockableDialogContext.displayName = "DockableDialog";
+const dockableDialogContext = createUniqueContext<DockableDialogContextShape>(
+  "@liqvid/studio/ui/DockableDialog",
+  {
+    open: false,
+    setOpen() {},
+    toggle() {},
+  },
+  "DockableDialog",
+);
 
 function useDockableDialogState() {
   return useContext(dockableDialogContext);

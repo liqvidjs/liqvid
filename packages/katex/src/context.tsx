@@ -1,11 +1,16 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createUniqueContext } from "@liqvid/utils";
+import { useContext, useMemo } from "react";
 
 import { parseMacros } from "./macros.ts";
 import type { BetterRenderMathInElementOptions } from "./types.ts";
 
-const KaTeXContext = createContext<BetterRenderMathInElementOptions>({});
+const KaTeXContext = createUniqueContext<BetterRenderMathInElementOptions>(
+  "@liqvid/katex",
+  {},
+  "KaTeX",
+);
 
 export function useKaTeXContext() {
   return useContext(KaTeXContext);
