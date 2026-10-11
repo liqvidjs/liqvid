@@ -2,6 +2,7 @@
 
 import type { ColorScheme } from "@liqvid/color-scheme/react";
 import type { IFrameAPIDeclaration } from "@liqvid/iframe-api";
+import { observeParentIntersection } from "@liqvid/iframe-api/child";
 import type { ShortcutsSpecifier } from "@liqvid/keymap";
 import type { RenderMode } from "@lqv/playback/react";
 
@@ -74,6 +75,23 @@ export const playerApiDeclaration = {
 } satisfies IFrameAPIDeclaration;
 
 export type PlayerApiDeclaration = typeof playerApiDeclaration;
+
+/** Observe this player's iframe from the embedding document. */
+export function observePlayerIntersection(
+  options: IntersectionObserverInit,
+  callback: (
+    entry: Pick<
+      IntersectionObserverEntry,
+      "intersectionRatio" | "isIntersecting"
+    >,
+  ) => void,
+): () => void {
+  return observeParentIntersection(
+    playerApiDeclaration.namespace,
+    options,
+    callback,
+  );
+}
 
 export type PlayerKeyboardShortcut = {
   description?: string;

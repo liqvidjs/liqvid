@@ -3,9 +3,86 @@ import type {
   ErrorMessage,
   IFrameAPIDeclaration,
   IFrameAPIImplementation,
+  IntersectionUpdateMessage,
+  ObserveIntersectionMessage,
   ReceivedMessage,
   ReturnMessage,
+  UnobserveIntersectionMessage,
 } from "./index.ts";
+
+let observerIdCounter = 0;
+
+/**
+ * Subscribe to intersection changes for this iframe in its parent document.
+ * The parent must have a matching `getIframeApi` client for this namespace.
+ * Options cross the frame boundary via structured cloning, so `root` must be
+ * `null`; the other IntersectionObserver options are forwarded as provided.
+ */
+export function observeParentIntersection(
+  namespace: string,
+  options: IntersectionObserverInit,
+  callback: (
+    entry: Pick<
+      IntersectionObserverEntry,
+      "intersectionRatio" | "isIntersecting"
+    >,
+  ) => void,
+): () => void {
+  if (typeof window === "undefined" || window.parent === window) {
+    return () => {};
+  }
+
+  const observerId = ++observerIdCounter;
+  let active = true;
+
+  const handleMessage = (event: MessageEvent<IntersectionUpdateMessage>) => {
+    const data = event.data;
+    if (
+      !active ||
+      event.source !== window.parent ||
+      !data ||
+      data.type !== "intersection-update" ||
+      data.namespace !== namespace ||
+      data.observerId !== observerId
+    ) {
+      return;
+    }
+
+    callback(data);
+  };
+
+  window.addEventListener("message", handleMessage);
+
+  const message: ObserveIntersectionMessage = {
+    namespace,
+    observerId,
+    options,
+    type: "observe-intersection",
+  };
+  try {
+    window.parent.postMessage(message, "*");
+  } catch (error) {
+    window.removeEventListener("message", handleMessage);
+    active = false;
+    throw error;
+  }
+
+  return () => {
+    if (!active) return;
+    active = false;
+    window.removeEventListener("message", handleMessage);
+    const unobserveMessage: UnobserveIntersectionMessage = {
+      namespace,
+      observerId,
+      type: "unobserve-intersection",
+    };
+    try {
+      window.parent.postMessage(unobserveMessage, "*");
+    } catch {
+      // The parent may have navigated away before this cleanup runs.
+    }
+  };
+}
 
 /**
  * Options for provideIframeApi in the child.

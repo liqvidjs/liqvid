@@ -88,6 +88,30 @@ export interface ErrorMessage {
   type: "error";
 }
 
+/** Request from a child frame to observe its iframe element in the parent. */
+export type ObserveIntersectionMessage = {
+  namespace: string;
+  observerId: number;
+  options: IntersectionObserverInit;
+  type: "observe-intersection";
+};
+
+/** Stop observing a child iframe element in the parent. */
+export type UnobserveIntersectionMessage = {
+  namespace: string;
+  observerId: number;
+  type: "unobserve-intersection";
+};
+
+/** An intersection update sent from the parent to the child frame. */
+export type IntersectionUpdateMessage = {
+  intersectionRatio: number;
+  isIntersecting: boolean;
+  namespace: string;
+  observerId: number;
+  type: "intersection-update";
+};
+
 /**
  * All message types used in iframe communication.
  */
@@ -95,4 +119,7 @@ export type IFrameMessage =
   | CallMessage
   | ReceivedMessage
   | ReturnMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | ObserveIntersectionMessage
+  | UnobserveIntersectionMessage
+  | IntersectionUpdateMessage;

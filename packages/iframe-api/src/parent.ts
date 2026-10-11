@@ -1,10 +1,10 @@
 import type {
   CallMessage,
-  ErrorMessage,
   IFrameAPIClient,
   IFrameAPIDeclaration,
-  ReceivedMessage,
-  ReturnMessage,
+  IFrameMessage,
+  ObserveIntersectionMessage,
+  UnobserveIntersectionMessage,
 } from "./index.ts";
 
 const DEFAULT_RETRY_INTERVAL = 100;
@@ -51,13 +51,61 @@ export function getIframeApi<D extends IFrameAPIDeclaration>(
 
   let requestIdCounter = 0;
   const pendingRequests = new Map<number, PendingRequest>();
+  const intersectionObservers = new Map<number, IntersectionObserver>();
 
   const handleMessage = (event: MessageEvent) => {
     // Only accept messages from the iframe
     if (event.source !== iframe.contentWindow) return;
 
-    const data = event.data as ReceivedMessage | ReturnMessage | ErrorMessage;
+    const data = event.data as IFrameMessage;
     if (!data || typeof data !== "object" || !("type" in data)) return;
+
+    if (
+      data.type === "observe-intersection" &&
+      "namespace" in data &&
+      data.namespace === declaration.namespace
+    ) {
+      const request = data as ObserveIntersectionMessage;
+      intersectionObservers.get(request.observerId)?.disconnect();
+
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          iframe.contentWindow?.postMessage(
+            {
+              intersectionRatio: entry.intersectionRatio,
+              isIntersecting: entry.isIntersecting,
+              namespace: declaration.namespace,
+              observerId: request.observerId,
+              type: "intersection-update",
+            },
+            targetOrigin,
+          );
+        }
+      }, request.options);
+
+      intersectionObservers.set(request.observerId, observer);
+      observer.observe(iframe);
+      return;
+    }
+
+    if (
+      data.type === "unobserve-intersection" &&
+      "namespace" in data &&
+      data.namespace === declaration.namespace
+    ) {
+      const request = data as UnobserveIntersectionMessage;
+      intersectionObservers.get(request.observerId)?.disconnect();
+      intersectionObservers.delete(request.observerId);
+      return;
+    }
+
+    if (
+      data.type !== "received" &&
+      data.type !== "return" &&
+      data.type !== "error"
+    ) {
+      return;
+    }
 
     const pending = pendingRequests.get(data.requestId);
     if (!pending) return;
@@ -141,6 +189,10 @@ export function getIframeApi<D extends IFrameAPIDeclaration>(
   // Add destroy method to clean up
   api.destroy = () => {
     window.removeEventListener("message", handleMessage);
+    for (const observer of intersectionObservers.values()) {
+      observer.disconnect();
+    }
+    intersectionObservers.clear();
     // Clear all pending retry timers
     for (const pending of pendingRequests.values()) {
       if (pending.retryTimer) {
