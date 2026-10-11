@@ -3,20 +3,21 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@jest/globals";
+import type { DurationString } from "@liqvid/duration";
 import Handlebars from "handlebars";
-import type { DurationString } from "@liqvid/utils";
 
-import { Recording } from "../src/assets.mts";
 import {
   buildChosenRecordingsTree,
   type ChosenRecordingEntry,
   createRecordingTree,
   formatRecordingDuration,
   nestRecordingLeaves,
-  renameChosenRecording,
+  renameHiddenRecording,
   renderChosenRecordingsType,
   treeHasChosenRecordings,
-} from "../src/utils/chosen-recordings.mts";
+} from "#_/utils/chosen-recordings.js";
+
+import { Recording } from "../src/assets.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -48,9 +49,9 @@ test("nestRecordingLeaves preserves recording-shaped data", () => {
   });
 });
 
-test("renameChosenRecording moves chosen and unchosen entries", () => {
+test("renameHiddenRecording moves hidden entries", () => {
   expect(
-    renameChosenRecording(
+    renameHiddenRecording(
       { abstract: true, intro: false },
       "abstract",
       "opening",
@@ -58,18 +59,18 @@ test("renameChosenRecording moves chosen and unchosen entries", () => {
   ).toEqual({ intro: false, opening: true });
 
   expect(
-    renameChosenRecording({ abstract: false }, "abstract", "opening"),
+    renameHiddenRecording({ abstract: false }, "abstract", "opening"),
   ).toEqual({ opening: false });
 });
 
-test("renameChosenRecording leaves missing entries unchanged", () => {
-  const chosenRecordings = { abstract: true };
+test("renameHiddenRecording leaves missing entries unchanged", () => {
+  const hiddenRecordings = { abstract: true };
 
-  expect(renameChosenRecording(chosenRecordings, "missing", "opening")).toBe(
-    chosenRecordings,
+  expect(renameHiddenRecording(hiddenRecordings, "missing", "opening")).toBe(
+    hiddenRecordings,
   );
-  expect(renameChosenRecording(chosenRecordings, "abstract", "abstract")).toBe(
-    chosenRecordings,
+  expect(renameHiddenRecording(hiddenRecordings, "abstract", "abstract")).toBe(
+    hiddenRecordings,
   );
 });
 

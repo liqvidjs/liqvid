@@ -1,5 +1,8 @@
-import { Duration, type DurationOptions } from "@liqvid/duration";
-import type { DurationString } from "@liqvid/utils";
+import {
+  Duration,
+  type DurationOptions,
+  type DurationString,
+} from "@liqvid/duration";
 import type { RelativeDir } from "effect-paths";
 
 import { Recording } from "../assets.ts";
@@ -28,23 +31,25 @@ export type ChosenRecordingEntry = Readonly<{
 }>;
 
 /**
- * Move a recording's choice to its renamed directory key. Returns the input
- * unchanged when the old name is not present.
+ * Move a hidden-recording entry to its renamed directory key. Returns the
+ * input unchanged when the old name is not present — with the
+ * `hiddenRecordings` pattern, a recording chosen by default has no entry to
+ * move.
  */
-export function renameChosenRecording(
-  chosenRecordings: Readonly<Record<string, boolean>> | undefined,
+export function renameHiddenRecording(
+  hiddenRecordings: Readonly<Record<string, boolean>> | undefined,
   oldName: RelativeDir,
   newName: RelativeDir,
 ): Record<RelativeDir, boolean> | undefined {
   if (
-    !chosenRecordings ||
+    !hiddenRecordings ||
     oldName === newName ||
-    !Object.hasOwn(chosenRecordings, oldName)
+    !Object.hasOwn(hiddenRecordings, oldName)
   ) {
-    return chosenRecordings;
+    return hiddenRecordings;
   }
 
-  const next = { ...chosenRecordings };
+  const next = { ...hiddenRecordings };
   next[newName] = next[oldName]!;
   delete next[oldName];
   return next;

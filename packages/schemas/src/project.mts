@@ -140,21 +140,22 @@ export const AutoGenProjectMeta = Schema.Struct({
     "https://liqvid.com/schemas/latest/project-meta-autogen.json",
   ]).pipe(Schema.optional),
 
-  /**
-   * Recordings chosen for inclusion in the final video, keyed by recording
-   * directory name.
-   */
-  chosenRecordings: Schema.Record(Schema.String, Schema.Boolean).pipe(
-    Schema.optional,
-    Schema.annotate({
-      description:
-        "Recordings chosen for inclusion in the final video, keyed by recording directory name.",
-    }),
-  ),
-
   /** duration of project */
   duration: DurationOptions.pipe(
     Schema.annotate({ description: "Duration of project" }),
+  ),
+
+  /**
+   * Recordings hidden from the final video, keyed by recording directory
+   * name. Missing entries default to `false` (i.e. chosen), so newly recorded
+   * recordings are included without updating this file.
+   */
+  hiddenRecordings: Schema.Record(Schema.String, Schema.Boolean).pipe(
+    Schema.optional,
+    Schema.annotate({
+      description:
+        "Recordings hidden from the final video, keyed by recording directory name. Missing entries default to false (i.e. chosen).",
+    }),
   ),
 }).annotate({
   [$SchemaFilename]: "project-meta-autogen.json",

@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -42,7 +42,7 @@ test("legacy metadata keeps asset watchers working", async () => {
       duration: { milliseconds: 1000 },
     }),
   );
-  await writeProjectMeta(metaFile, false);
+  await writeProjectMeta(metaFile, true);
 
   const state = getServerState();
   const previous = {
@@ -64,7 +64,9 @@ test("legacy metadata keeps asset watchers working", async () => {
         async () => (await exists(typesFile)) && (await exists(projectFiles)),
       );
 
-      await writeProjectMeta(metaFile, true);
+      // unhide the recording; new recordings are chosen by default, so this
+      // clears the hiddenRecordings entry
+      await writeProjectMeta(metaFile, false);
       await waitFor(async () =>
         /fibonacci:\s*\{\s*main:\s*Recording</s.test(
           await readFile(typesFile, "utf8"),
@@ -83,17 +85,22 @@ test("legacy metadata keeps asset watchers working", async () => {
     state.config = previous.config;
     state.cwd = previous.cwd;
     state.projects = previous.projects;
-    await rm(root, { recursive: true, force: true });
+    await rm(root, { force: true, recursive: true });
   }
 });
 
-async function writeProjectMeta(file: string, chosen: boolean): Promise<void> {
+/**
+ * Write `project-meta.json` with the recording hidden or not. Missing entries
+ * default to `false` (chosen), so `writeProjectMeta(file, false)` writes an
+ * empty `hiddenRecordings`.
+ */
+async function writeProjectMeta(file: string, hidden: boolean): Promise<void> {
   await writeFile(
     file,
     JSON.stringify({
       $schema: "https://liqvid.com/schemas/latest/project-meta-autogen.json",
-      chosenRecordings: { main: chosen },
-      duration: { m: 0, s: 1, ms: 0 },
+      duration: { m: 0, ms: 0, s: 1 },
+      hiddenRecordings: hidden ? { main: true } : {},
     }),
   );
 }

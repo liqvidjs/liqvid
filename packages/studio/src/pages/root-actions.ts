@@ -6,7 +6,12 @@ import { fileURLToPath } from "node:url";
 
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
-import { UP, writeJSON, writeJSONWithSchema } from "@liqvid/cli/utils";
+import {
+  readDirWithFileTypes,
+  UP,
+  writeJSON,
+  writeJSONWithSchema,
+} from "@liqvid/cli/utils";
 import { AutoGenProjectMeta, type ParameterValues } from "@liqvid/schemas";
 import { isValidRecordingName } from "@liqvid/studio-plugin-api";
 import { Effect, Exit, FileSystem, type PlatformError } from "effect";
@@ -33,7 +38,6 @@ import type { PlainString } from "#_/i18n/shared";
 import { getServerState } from "#_/initialize";
 import { serverRuntime } from "#_/server-runtime";
 import type { PackageName } from "#_/types/misc";
-import { readDirWithFileTypes } from "#_/utils/effect";
 import { createJob } from "#_/utils/jobs";
 import { getRoutesDir } from "#_/utils/misc";
 import { getParameterizedAssetsDir } from "#_/utils/parameters";
@@ -551,11 +555,12 @@ export async function createProjectAction(
         templateData,
       );
 
-      // Generate .liqvid/project-meta.json (initial empty duration)
+      // Generate .liqvid/project-meta.json (initial empty duration; recordings
+      // are chosen by default thanks to the hiddenRecordings pattern)
       yield* writeJSONWithSchema(
         AutoGenProjectMeta,
         path.join(fullProjectPath, ASSETS_DIR, PROJECT_META_FILE),
-        { chosenRecordings: {}, duration: { milliseconds: 0 } },
+        { duration: { milliseconds: 0 } },
       );
 
       // Generate .liqvid/project-path.json

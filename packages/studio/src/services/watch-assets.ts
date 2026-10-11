@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { loadJson, UP } from "@liqvid/cli/utils";
+import { loadJson, readDirWithFileTypes, UP } from "@liqvid/cli/utils";
 import {
   AutoGenProjectMeta,
   type ParameterConfig,
@@ -52,7 +52,7 @@ import {
   renderChosenRecordingsType,
   treeHasChosenRecordings,
 } from "#_/utils/chosen-recordings";
-import { existenceOptional, readDirWithFileTypes } from "#_/utils/effect";
+import { existenceOptional } from "#_/utils/effect";
 import { getBiomePath } from "#_/utils/fs";
 import { cartesianProduct, getRoutesDir } from "#_/utils/misc";
 import {
@@ -314,14 +314,17 @@ const getDirectoryTypes = Effect.fnUntraced(function* (
 /**
  * Load the chosen recordings for every parameter combination, with their
  * durations, for generating the `ChosenRecordings` type. The recording names
- * come from each combination's auto-generated `project-meta.json`, and the
- * durations from each recording's own `recording-meta.json`.
+ * come from each combination's `recordings` directory (every recording is
+ * chosen unless listed in `hiddenRecordings`), and the durations from each
+ * recording's own `recording-meta.json`.
  */
 const loadChosenRecordings = Effect.fnUntraced(function* (
   assetsDir: AbsoluteDir,
   paramNames: readonly string[],
   parametersRecord: Record<string, readonly string[]>,
 ) {
+  const fs = yield* FileSystem.FileSystem;
+
   const combinations =
     paramNames.length > 0 ? cartesianProduct(parametersRecord) : [{}];
 
@@ -344,37 +347,49 @@ const loadChosenRecordings = Effect.fnUntraced(function* (
           ),
         );
 
+        const hiddenRecordings = Option.isSome(meta)
+          ? (meta.value.hiddenRecordings ?? {})
+          : {};
+
         const entries: ChosenRecordingEntry[] = [];
 
-        if (Option.isSome(meta) && meta.value.chosenRecordings) {
-          for (const [name, chosen] of Object.entries(
-            meta.value.chosenRecordings,
-          )) {
-            // skip unchosen entries and guard against malformed directory names
-            if (!chosen || name.includes("/") || name.includes("..")) continue;
+        const recordingsDir = path.join(combinationAssetsDir, RECORDINGS_DIR);
 
-            const recordingMeta = yield* loadJson(
-              RecordingMetaFile,
-              path.join(
-                combinationAssetsDir,
-                RECORDINGS_DIR,
-                RelativeDir(name),
-                RECORDING_META_FILE,
-              ),
-            ).pipe(
-              existenceOptional,
-              Effect.catchTag("FileDecodeError", () =>
-                Effect.succeed(
-                  Option.none<(typeof RecordingMetaFile)["Type"]>(),
+        if (yield* fs.exists(recordingsDir)) {
+          const names = yield* readDirWithFileTypes(recordingsDir).pipe(
+            Effect.map((dirents) =>
+              dirents
+                .map(([name, kind]) => (kind === "Directory" ? name : null))
+                .filter((name): name is RelativeDir => name !== null),
+            ),
+            Effect.option,
+          );
+
+          if (Option.isSome(names)) {
+            for (const name of names.value) {
+              // skip hidden recordings and guard against malformed directory names
+              if (hiddenRecordings[name] === true) continue;
+              if (name.includes("/") || name.includes("..")) continue;
+              if (!(yield* fs.exists(path.join(recordingsDir, name)))) continue;
+
+              const recordingMeta = yield* loadJson(
+                RecordingMetaFile,
+                path.join(recordingsDir, name, RECORDING_META_FILE),
+              ).pipe(
+                existenceOptional,
+                Effect.catchTag("FileDecodeError", () =>
+                  Effect.succeed(
+                    Option.none<(typeof RecordingMetaFile)["Type"]>(),
+                  ),
                 ),
-              ),
-            );
+              );
 
-            if (Option.isSome(recordingMeta)) {
-              entries.push({
-                duration: formatTimeMs(recordingMeta.value.duration),
-                name,
-              });
+              if (Option.isSome(recordingMeta)) {
+                entries.push({
+                  duration: formatTimeMs(recordingMeta.value.duration),
+                  name,
+                });
+              }
             }
           }
         }

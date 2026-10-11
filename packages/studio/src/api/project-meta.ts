@@ -10,7 +10,7 @@ import { AbsoluteDir, type AbsoluteFile, type RelativeDir } from "effect-paths";
 import { NEXT_PAGE, PROJECT_FILE, PROJECT_META_FILE } from "#_/conventions";
 import { getServerState } from "#_/initialize";
 import { regenerateProjectFiles } from "#_/services/watch-assets";
-import { renameChosenRecording } from "#_/utils/chosen-recordings";
+import { renameHiddenRecording } from "#_/utils/chosen-recordings";
 import { existenceOptional } from "#_/utils/effect";
 import { NotFoundError } from "#_/utils/errors";
 import { getRoutesDir } from "#_/utils/misc";
@@ -79,7 +79,7 @@ export const projectMetaLive = HttpApiBuilder.group(
               });
             }
 
-            // read the existing meta so other fields (e.g. chosenRecordings)
+            // read the existing meta so other fields (e.g. hiddenRecordings)
             // are preserved
             const existing = yield* loadJson(
               AutoGenProjectMeta,
@@ -106,7 +106,7 @@ export const projectMetaLive = HttpApiBuilder.group(
       ),
 );
 
-/** Update chosen-recording keys after the corresponding directory is renamed. */
+/** Update hidden-recording keys after the corresponding directory is renamed. */
 export const renameRecordingInProjectMeta = Effect.fnUntraced(function* (
   projectMetaFile: AbsoluteFile,
   oldName: RelativeDir,
@@ -118,16 +118,16 @@ export const renameRecordingInProjectMeta = Effect.fnUntraced(function* (
 
   if (Option.isNone(existing)) return;
 
-  const chosenRecordings = renameChosenRecording(
-    existing.value.chosenRecordings,
+  const hiddenRecordings = renameHiddenRecording(
+    existing.value.hiddenRecordings,
     oldName,
     newName,
   );
 
-  if (chosenRecordings === existing.value.chosenRecordings) return;
+  if (hiddenRecordings === existing.value.hiddenRecordings) return;
 
   yield* writeJSON<AutoGenProjectMeta>(projectMetaFile, {
     ...existing.value,
-    chosenRecordings,
+    hiddenRecordings,
   });
 });
