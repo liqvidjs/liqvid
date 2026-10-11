@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy } from "react";
+import { recordingsContext } from "./recordings.client.ts";
 
 /**
  * Provides serializable chosen-recording data to descendants. Rendered by
@@ -9,10 +9,7 @@ import { lazy } from "react";
 export {
   type RecordingsContextValue,
   useRecordings,
+  useRecordingsOptional,
 } from "./recordings.client.ts";
 
-export const RecordingsProvider = lazy(() =>
-  import("./recordings.client.ts").then((mod) => ({
-    default: mod.recordingsContext.Provider,
-  })),
-);
+export const RecordingsProvider = recordingsContext.Provider;

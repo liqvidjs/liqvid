@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, use, useMemo } from "react";
+import { createUniqueContext } from "@liqvid/utils";
+import { use, useMemo } from "react";
 
 import {
   type ChosenRecordingsData,
@@ -33,10 +34,12 @@ export type RecordingsContextValue = {
 };
 
 /** @package */
-export const recordingsContext = createContext<RecordingsContextValue | null>(
-  null,
-);
-recordingsContext.displayName = "ChosenRecordings";
+export const recordingsContext =
+  createUniqueContext<RecordingsContextValue | null>(
+    "@liqvid/studio/recordings",
+    null,
+    "ChosenRecordings",
+  );
 
 /**
  * The recordings chosen for inclusion in the final video, as {@link Recording}
@@ -55,6 +58,19 @@ export function useRecordings<R = Record<string, never>>(): R {
   const value = use(recordingsContext);
   if (value === null) {
     throw new Error("useRecordings must be used within a RecordingsProvider");
+  }
+
+  return useMemo(
+    () =>
+      createRecordingTree(value.base, value.recordings, value.parameterDepth),
+    [value],
+  ) as R;
+}
+
+export function useRecordingsOptional<R = Record<string, never>>(): R | null {
+  const value = use(recordingsContext);
+  if (value === null) {
+    return value;
   }
 
   return useMemo(

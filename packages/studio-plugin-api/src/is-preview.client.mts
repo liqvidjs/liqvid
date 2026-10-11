@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-const isPreviewContext = createContext<boolean | null>(null);
+export const isPreviewContext = createContext<boolean | null>(null);
 isPreviewContext.displayName = "IsPreview";
 
 export function useIsPreview() {
@@ -22,5 +22,3 @@ export function useIsPreviewOptional() {
 export function useIsPreviewOrProduction() {
   return useIsPreviewOptional() ?? true;
 }
-
-export const IsPreviewProvider = isPreviewContext.Provider;

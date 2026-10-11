@@ -3,7 +3,7 @@
 import type { RelativeDir } from "effect-paths";
 import { createContext, useContext } from "react";
 
-const projectPathContext = createContext<RelativeDir | null>(null);
+export const projectPathContext = createContext<RelativeDir | null>(null);
 projectPathContext.displayName = "ProjectPath";
 
 export function useProjectPathOptional(): RelativeDir | null {
@@ -18,5 +18,3 @@ export function useProjectPath(): RelativeDir {
 
   return value;
 }
-
-export const ProjectPathProvider = projectPathContext.Provider;

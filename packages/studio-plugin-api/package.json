@@ -13,7 +13,9 @@
   },
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/is-preview.mts"
+  ],
   "exports": {
     ".": {
       "@liqvid/dev": "./src/index.mts",
@@ -56,6 +58,7 @@
   },
   "peerDependencies": {
     "effect-paths": "catalog:peer",
+    "next": "catalog:peer",
     "react": "catalog:peer"
   }
 }

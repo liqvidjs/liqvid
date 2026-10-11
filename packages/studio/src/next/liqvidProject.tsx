@@ -2,6 +2,7 @@
  * @file This needs to be isolated from the metadata generation functions, since
  * those don't work with client content even assuming "use client".
  */
+import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +14,7 @@ import {
   type RecordingMetaFile,
 } from "@liqvid/schemas";
 import { Effect, Exit, Layer, Logger } from "effect";
-import { type AbsoluteDir, RelativeDir } from "effect-paths";
+import { type AbsoluteDir, RelativeDir, type RelativePath } from "effect-paths";
 import { notFound } from "next/navigation";
 
 import type { Directory } from "#_/assets";
@@ -216,10 +217,6 @@ export function liqvidProject<
     params: Promise<P>;
     searchParams: Promise<SP & { preview?: string | string[] | undefined }>;
   }) {
-    // THESE CANNOT BE COMBINED OR ELSE IT WILL DESCEND INTO THE WHOLE MODULE AND
-    // CHOKE ON `createContext()` CALLS. THIS WAS VERY PAINFUL TO DISCOVER.
-    const { RecordingsProvider } = await import("#_/contexts/recordings");
-
     let projectFiles = {} as D;
 
     try {
@@ -281,35 +278,26 @@ export function liqvidProject<
       ).toString(),
     );
 
-    console.debug({
-      base: recordingData.base,
-      parameterDepth: recordingData.parameterDepth,
-      recordings: recordingData.recordingsData,
-    });
-
     return (
       <MysteriouslyFixCreateContextErrorsDuringBuild
         projectParams={projectParams ?? null}
         projectPath={projectPath}
+        recordingData={{
+          base: recordingData.base,
+          parameterDepth: recordingData.parameterDepth,
+          recordings: recordingData.recordingsData,
+        }}
       >
-        <RecordingsProvider
-          value={{
-            base: recordingData.base,
-            parameterDepth: recordingData.parameterDepth,
-            recordings: recordingData.recordingsData,
+        <Component
+          {...{
+            params,
+            project,
+            projectFiles,
+            projectPath,
+            recordings: recordingData.recordings,
+            ...props,
           }}
-        >
-          <Component
-            {...{
-              params,
-              project,
-              projectFiles,
-              projectPath,
-              recordings: recordingData.recordings,
-              ...props,
-            }}
-          />
-        </RecordingsProvider>
+        />
       </MysteriouslyFixCreateContextErrorsDuringBuild>
     );
   };
@@ -364,30 +352,44 @@ async function createChosenRecordings<R>(
 }
 
 /**
- * Load recording-shaped data from `project-meta.json` and each chosen
- * recording's `recording-meta.json` duration.
+ * Load recording-shaped data from the `recordings` directory and each chosen
+ * recording's `recording-meta.json` duration. Every recording is chosen
+ * unless listed in the `hiddenRecordings` field of `project-meta.json`.
  */
 async function loadChosenRecordingsData(
   assetsDir: AbsoluteDir,
 ): Promise<Record<string, ChosenRecordingData>> {
-  let chosenRecordings: Record<string, boolean> | undefined;
+  let hiddenRecordings: Record<string, boolean> = {};
 
   try {
     const meta = JSON.parse(
       await fsp.readFile(path.join(assetsDir, PROJECT_META_FILE), "utf8"),
     ) as AutoGenProjectMeta;
-    chosenRecordings = meta.chosenRecordings;
+    hiddenRecordings = meta.hiddenRecordings ?? {};
+  } catch {
+    // no metadata; recordings are still chosen by default
+  }
+
+  const recordings: Record<string, ChosenRecordingData> = {};
+
+  let dirents: fs.Dirent<RelativePath>[];
+  try {
+    dirents = await fsp.readdir(path.join(assetsDir, RECORDINGS_DIR), {
+      withFileTypes: true,
+    });
   } catch {
     return {};
   }
 
-  if (!chosenRecordings) return {};
+  for (const dirent of dirents) {
+    if (!dirent.isDirectory()) continue;
 
-  const recordings: Record<string, ChosenRecordingData> = {};
+    // guard against malformed directory names
+    const name = dirent.name;
+    if (name.includes("/") || name.includes("..")) continue;
 
-  for (const [name, chosen] of Object.entries(chosenRecordings)) {
-    // skip unchosen entries and guard against malformed directory names
-    if (!chosen || name.includes("/") || name.includes("..")) continue;
+    // hidden recordings are excluded; missing entries default to chosen
+    if (hiddenRecordings[name] === true) continue;
 
     try {
       const recordingMeta = JSON.parse(

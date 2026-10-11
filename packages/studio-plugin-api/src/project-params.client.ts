@@ -1,14 +1,16 @@
-"use client";
+import { use } from "react";
 
-import { createContext, useContext } from "react";
+import { createUniqueContext } from "./utils.client.mts";
 
 /**
  * Context for project parameter values.
  * Used for parameterized projects (e.g., `/[lang]/[locale]/project`)
  * to provide the current parameter values to descendants.
  */
-const projectParamsContext = createContext<Record<string, string> | null>(null);
-projectParamsContext.displayName = "ProjectParams";
+export const projectParamsContext = createUniqueContext<Record<
+  string,
+  string
+> | null>("@liqvid/studio-plugin-api/ProjectParams", null, "ProjectParams");
 
 /**
  * Get the current project parameter values, or null if not in a parameterized project.
@@ -16,7 +18,7 @@ projectParamsContext.displayName = "ProjectParams";
 export function useProjectParamsOptional<
   PP extends Record<string, string> = Record<string, string>,
 >(): PP | null {
-  return useContext(projectParamsContext) as PP | null;
+  return use(projectParamsContext) as PP | null;
 }
 
 /**
@@ -29,5 +31,3 @@ export function useProjectParams<
   const value = useProjectParamsOptional<PP>();
   return value ?? ({} as PP);
 }
-
-export const ProjectParamsProvider = projectParamsContext.Provider;
