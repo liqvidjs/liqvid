@@ -63,7 +63,7 @@ export const connect = Effect.fnUntraced(
     width: number;
     renderMode: RenderMode;
   }) {
-    const timeout = 5_000;
+    const timeout = 30_000;
 
     // Create page - caller manages lifecycle via getPages' finalizer
     const page = yield* Effect.tryPromise(() => browser.newPage()).pipe(

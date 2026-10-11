@@ -135,7 +135,7 @@ export function thumbs({
       executablePath,
       height: browserHeight,
       progress: false,
-      renderMode: "thumbs",
+      renderMode: "thumbnails",
       url,
       width: browserWidth,
     });
