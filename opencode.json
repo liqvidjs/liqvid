@@ -10,6 +10,9 @@
     ]
   },
   "formatter": {
+    "biome": {
+      "disabled": false
+    },
     "prettier": {
       "disabled": true
     }
@@ -33,6 +36,7 @@
     { "action": "shell", "resource": "cp *", "effect": "allow" },
     { "action": "shell", "resource": "diff *", "effect": "allow" },
     { "action": "shell", "resource": "echo *", "effect": "allow" },
+    { "action": "shell", "resource": "exit *", "effect": "allow" },
     { "action": "shell", "resource": "*find* -delete*", "effect": "deny" },
     { "action": "shell", "resource": "find *", "effect": "allow" },
     { "action": "shell", "resource": "eslint *", "effect": "allow" },

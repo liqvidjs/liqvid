@@ -463,6 +463,8 @@ export const colors = stylex.defineVars({
 export const dims = stylex.defineConsts({
   icon: "24px",
 
+  recordingIcon: "36px",
+
   /** size of ring around focused elements */
   ring: "2px",
 

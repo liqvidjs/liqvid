@@ -16,20 +16,6 @@
         }
       ]
     },
-    "chosenRecordings": {
-      "anyOf": [
-        {
-          "additionalProperties": {
-            "type": "boolean"
-          },
-          "type": "object"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "description": "Recordings chosen for inclusion in the final video, keyed by recording directory name."
-    },
     "duration": {
       "additionalProperties": false,
       "description": "Duration of project",
@@ -252,6 +238,20 @@
         }
       },
       "type": "object"
+    },
+    "hiddenRecordings": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Recordings hidden from the final video, keyed by recording directory name. Missing entries default to false (i.e. chosen)."
     }
   },
   "required": ["duration"],

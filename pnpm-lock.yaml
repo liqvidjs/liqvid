@@ -712,6 +712,9 @@ importers:
       '@liqvid/schemas':
         specifier: workspace:^
         version: link:../schemas
+      '@liqvid/studio-plugin-api':
+        specifier: workspace:^
+        version: link:../studio-plugin-api
       '@liqvid/studio-public-api':
         specifier: workspace:^
         version: link:../studio-public-api
@@ -913,6 +916,9 @@ importers:
       '@liqvid/schemas':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../schemas
+      '@liqvid/script':
+        specifier: workspace:^1.0.0-alpha.2
+        version: link:../script
       '@liqvid/ssr':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../ssr
@@ -1415,6 +1421,9 @@ importers:
       '@liqvid/playback':
         specifier: workspace:^
         version: link:../../playback
+      '@liqvid/player':
+        specifier: workspace:^
+        version: link:../../player
       '@liqvid/recording':
         specifier: workspace:^
         version: link:../../recording
@@ -1451,6 +1460,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      cn:
+        specifier: ^0.4.0
+        version: 0.4.0
       docusaurus-plugin-module-alias:
         specifier: ^0.0.2
         version: 0.0.2
@@ -2143,6 +2155,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      cn:
+        specifier: ^0.4.0
+        version: 0.4.0
       desmos-react:
         specifier: workspace:^
         version: link:../../desmos-react
@@ -3591,6 +3606,9 @@ importers:
       '@liqvid/schemas':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../schemas
+      '@liqvid/script':
+        specifier: workspace:^1.0.0-alpha.2
+        version: link:../script
       '@liqvid/ssr':
         specifier: workspace:^1.0.0-alpha.0
         version: link:../ssr
@@ -12104,6 +12122,11 @@ packages:
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
+
+  cn@0.4.0:
+    resolution: {integrity: sha512-qOAeUhPwPzBxx6jaeQdo646XIKliKHc2j1ZF7Ngb1o0pJZKH5gq8FkA0aVdUdPFUDXNXyUCXpCtoJISo6dhizg==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
@@ -27982,6 +28005,8 @@ snapshots:
       shallow-clone: 3.0.1
 
   clsx@2.1.1: {}
+
+  cn@0.4.0: {}
 
   co@4.6.0: {}
 
