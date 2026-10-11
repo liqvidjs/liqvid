@@ -9,8 +9,8 @@ import type {
   RenderSource,
 } from "@liqvid/schemas";
 import { Effect, type LogLevel, Option } from "effect";
+import { HttpServerRequest } from "effect/http";
 import type { RelativeDir } from "effect-paths";
-import { headers } from "next/headers";
 
 import { getPreviewServerOrigin } from "#_/contexts/preview-server-config";
 import { NEXT_APP_DIR } from "#_/conventions";
@@ -51,9 +51,11 @@ export function getConfig() {
 }
 
 const getOrigin = Effect.fnUntraced(function* () {
-  const headersList = yield* Effect.promise(headers);
+  const request = yield* HttpServerRequest.HttpServerRequest;
 
-  const origin = headersList.get("origin");
+  // Safely grab headers from the web server layer
+  const origin = request.headers.origin;
+
   if (!origin) {
     return yield* Effect.die({
       message: "Origin header is missing",
