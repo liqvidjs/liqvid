@@ -11,7 +11,7 @@ export {
 
 export * from "./assets.ts";
 export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
-export * from "./contexts/recordings.ts";
+export * from "./contexts/recordings.tsx";
 export { DockableDialog } from "./ui/DockableDialog.tsx";
 export * from "./ui/Tabs.tsx";
 
@@ -55,6 +55,26 @@ export {
   RecordingControl as RecordingControlUnivalent,
   type RecordingControlProps,
 } from "./recording/RecordingControl.tsx";
+
+/**
+ * Liqvid highlights control.
+ *
+ * Only operates in development. If you want this in production,
+ * use {@link HighlightsControlUnivalent} instead.
+ */
+export const HighlightsControl = import.meta.env.DEV
+  ? lazy(() =>
+      import("./highlights/HighlightsControl.tsx").then((imports) => ({
+        default: imports.HighlightsControl,
+      })),
+    )
+  : () => null;
+
+export {
+  /** highlights control without env-switching */
+  HighlightsControl as HighlightsControlUnivalent,
+  type HighlightsControlProps,
+} from "./highlights/HighlightsControl.tsx";
 
 /**
  * Given a record of string keys to dynamic import functions, returns an object

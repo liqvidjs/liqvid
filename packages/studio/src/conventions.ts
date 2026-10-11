@@ -67,6 +67,11 @@ export const RECORDING_RAW_BLOB = RelativeFile("data.bin");
 
 export const RECORDING_RAW_FILE = RelativeFile("raw.json");
 
+/* ------------------------------ highlights ------------------------------ */
+
+/** Auto-generated highlights data file inside `.liqvid` directory */
+export const HIGHLIGHTS_FILE = RelativeFile("highlights.json");
+
 /* ------------------------------ audio ------------------------------ */
 export const AUDIO_WAV = RelativeFile("audio.wav");
 

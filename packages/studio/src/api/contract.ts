@@ -26,6 +26,7 @@ import {
 
 import {
   AudioEntry,
+  HighlightEntry,
   RenderEntry,
   ThumbsData,
 } from "./schemas.ts";
@@ -131,6 +132,30 @@ const captionsGroup = HttpApiGroup.make("captions")
     }).annotate(OpenApi.Summary, "Delete captions for an audio rendering"),
   )
   .annotate(OpenApi.Title, "Captions");
+
+/* ------------------------------ highlights ------------------------------ */
+const highlightsGroup = HttpApiGroup.make("highlights")
+  .add(
+    HttpApiEndpoint.get("list", "/", {
+      query: projectPathWithParamsQuery,
+      success: Schema.Struct({
+        /** The project's highlights */
+        highlights: Schema.Array(HighlightEntry),
+      }),
+    }).annotate(OpenApi.Summary, "List highlights for a project"),
+  )
+  .add(
+    HttpApiEndpoint.post("save", "/", {
+      payload: Schema.Struct({
+        /** Full list of highlights to store */
+        highlights: Schema.Array(HighlightEntry),
+      }),
+      query: projectPathWithParamsQuery,
+      success: HttpApiSchema.Created,
+    }).annotate(OpenApi.Summary, "Save the highlights for a project"),
+  )
+  .prefix("/highlights")
+  .annotate(OpenApi.Title, "Highlights");
 
 /* ------------------------------ projects ------------------------------ */
 const projectsGroup = HttpApiGroup.make("projects")
@@ -602,6 +627,7 @@ export const WebApi = HttpApi.make("LiqvidStudioWebApi")
   .add(
     audioGroup,
     captionsGroup,
+    highlightsGroup,
     projectsGroup,
     recordingsGroup,
     rendersGroup,

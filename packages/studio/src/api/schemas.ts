@@ -66,6 +66,31 @@ export const AudioMeta = Schema.Union([
 export type AudioMeta = (typeof AudioMeta)["Type"];
 
 /**
+ * An offset relative to the start of a script marker,
+ * e.g. `{ marker: "intro", offset: "-0:05" }` means 5 seconds before
+ * the marker's start.
+ */
+export const MarkerOffset = Schema.Struct({
+  /** Name of the marker in the project script */
+  marker: Schema.String,
+
+  /** Time relative to the marker's start, as a duration string */
+  offset: Schema.String,
+});
+
+/**
+ * A video highlight (`highlights.json`).
+ */
+export const HighlightEntry = Schema.Struct({
+  /** Playback time: a duration string ("1:20") or a marker-relative offset */
+  time: Schema.Union([Schema.String, MarkerOffset]),
+  /** Highlight title */
+  title: Schema.String,
+});
+
+export type HighlightEntry = (typeof HighlightEntry)["Type"];
+
+/**
  * An audio rendering as returned by the API: its id (folder name, or
  * `"default"` in single-audio mode), metadata, and any associated captions.
  */

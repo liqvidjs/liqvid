@@ -20,6 +20,7 @@ import { StatusCodes } from "http-status-codes";
 import { audioLive } from "#_/api/audio";
 import { captionsLive } from "#_/api/captions";
 import { WebApi } from "#_/api/contract";
+import { highlightsLive } from "#_/api/highlights";
 import { projectMetaLive } from "#_/api/project-meta";
 import {
   DynamicImports,
@@ -148,7 +149,7 @@ export function patchHandler(dynamicImports: DynamicImportsType) {
   };
 }
 
-export { upgradeHandler } from "./websockets";
+export { upgradeHandler } from "./websockets.ts";
 
 async function runEffect<A, E>(
   program: Effect.Effect<A, E, EnvFiles | FileSystem.FileSystem>,
@@ -232,6 +233,7 @@ function createWebApiHandler(
     Layer.provide([
       audioLive,
       captionsLive,
+      highlightsLive,
       projectMetaLive,
       recordingsLive,
       rendersLive,
