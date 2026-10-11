@@ -22,7 +22,7 @@ export default async function RootLayout({
 }: {
   children?: React.ReactNode;
 }) {
-  await initializeServer();
+  await initializeServer({ waitForProjects: false });
   const config = getConfigSync();
 
   return (

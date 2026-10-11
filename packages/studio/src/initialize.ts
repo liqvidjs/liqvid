@@ -49,6 +49,9 @@ export interface LiqvidServerState {
   previewServerService: Service | null;
   projects: Record<string, ProjectMeta>;
 
+  /** Resolves after the initial project scan and file watchers are ready. */
+  projectsInitialized: Promise<void> | null;
+
   /**
    * Long-running services (preview server, file watchers), keyed by id.
    * Unlike {@link LiqvidServerState.jobs}, these are not expected to complete;
@@ -85,9 +88,9 @@ type GlobalThis = {
   [symbol]: LiqvidServerState;
 };
 
-export async function initializeServer() {
+export async function initializeServer({ waitForProjects = true } = {}) {
   const state = getServerState();
-  const { cwd, jobs, projects, started } = state;
+  const { cwd, jobs, started } = state;
 
   let envFiles: EnvFiles;
 
@@ -124,35 +127,47 @@ export async function initializeServer() {
     started.watchRootTypes = true;
   }
 
-  // Do the initial scan of the project tree first so `projects` is fully
-  // populated, then start the watchers. Starting them only after the initial
-  // run succeeds avoids racing the watch events against the initial scan.
-  //
-  // The flags are flipped *before* awaiting the initial scan so a concurrent
-  // `initializeServer()` call doesn't slip past the guard while the scan is in
-  // flight and start the watchers a second time.
-  if (!started.watchProjectFiles && !started.watchAssets) {
+  // Share the initial scan across concurrent requests. Start the watchers only
+  // after it succeeds so watch events cannot race the initial population.
+  if (state.projectsInitialized === null) {
     started.watchProjectFiles = true;
     started.watchAssets = true;
 
-    try {
-      await serverRuntime.runPromise(initProjectFiles(projects));
-    } catch (error) {
-      // A failed scan must not leave the guards set: later requests need to be
-      // able to retry initialization after the underlying project issue is fixed.
-      started.watchProjectFiles = false;
-      started.watchAssets = false;
-      throw error;
+    const projectsInitialized = initializeProjects(state);
+    state.projectsInitialized = projectsInitialized;
+    // Some routes defer project loading without rendering the project list.
+    // Keep a later await able to observe the rejection without an unhandled
+    // rejection warning in the meantime.
+    void projectsInitialized.then(undefined, () => undefined);
+  }
+
+  if (waitForProjects) {
+    const projectsInitialized = state.projectsInitialized;
+    if (projectsInitialized === null) {
+      throw new Error("Project initialization was not started");
     }
-
-    serverRuntime.runSync(
-      createService("watch project files", watchProjectFiles(projects)),
-    );
-
-    serverRuntime.runSync(createService("watch assets", watchAssets()));
+    await projectsInitialized;
   }
 
   await serverRuntime.runPromise(syncPreviewServer(state));
+}
+
+async function initializeProjects(state: LiqvidServerState): Promise<void> {
+  try {
+    await serverRuntime.runPromise(initProjectFiles(state.projects));
+  } catch (error) {
+    // A failed scan must leave initialization retryable.
+    state.projectsInitialized = null;
+    state.started.watchProjectFiles = false;
+    state.started.watchAssets = false;
+    throw error;
+  }
+
+  serverRuntime.runSync(
+    createService("watch project files", watchProjectFiles(state.projects)),
+  );
+
+  serverRuntime.runSync(createService("watch assets", watchAssets()));
 }
 
 /** Keep the preview server's lifecycle in sync with the loaded config. */
@@ -202,6 +217,7 @@ export function getServerState(): LiqvidServerState {
       lastBuildTime: null,
       previewServerService: null,
       projects: {},
+      projectsInitialized: null,
       services: new Map(),
       started: {
         previewServer: false,

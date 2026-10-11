@@ -1,9 +1,6 @@
-import {
-  type IconProps,
-  SpinnerGapIcon,
-  // biome-ignore lint/style/noRestrictedImports: this is where Spinner is defined
-  SpinnerIcon,
-} from "@phosphor-icons/react";
+"use client";
+
+import { CircleNotchIcon, type IconProps } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 
 import { colors } from "#_/design/tokens.stylex";
@@ -15,7 +12,7 @@ const settingsSpin = stylex.keyframes({
 
 const styles = stylex.create({
   spinner: {
-    animationDuration: "0.8s",
+    animationDuration: "1s",
     animationIterationCount: "infinite",
     animationName: settingsSpin,
     animationTimingFunction: "linear",
@@ -25,13 +22,14 @@ const styles = stylex.create({
 });
 
 export function Spinner({
-  variant = "gap",
+  style,
   ...props
-}: { variant?: "solid" | "gap" } & IconProps) {
-  const Component = {
-    gap: SpinnerGapIcon,
-    solid: SpinnerIcon,
-  }[variant];
-
-  return <Component aria-hidden {...stylex.props(styles.spinner)} {...props} />;
+}: { style?: stylex.StyleXStyles } & Omit<IconProps, "style">) {
+  return (
+    <CircleNotchIcon
+      aria-hidden
+      {...stylex.props(styles.spinner, style)}
+      {...props}
+    />
+  );
 }

@@ -1,12 +1,12 @@
 import "../stylex.css";
 
 import type { ParameterValues } from "@liqvid/schemas";
-import { serialize } from "@liqvid/ssr/serde";
 import { GearIcon } from "@phosphor-icons/react/dist/ssr";
 import * as stylex from "@stylexjs/stylex";
 import { Option } from "effect";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   type DerivedConfig,
@@ -21,9 +21,16 @@ import {
   ROOT_PARAMS_COOKIE,
   SHOW_HIDDEN_PROJECTS_COOKIE,
 } from "#_/cookies";
-import { breakpoints, rounded, spacing, text } from "#_/design/tokens.stylex";
+import {
+  breakpoints,
+  colors,
+  rounded,
+  spacing,
+  text,
+} from "#_/design/tokens.stylex";
 import type { Localized } from "#_/i18n/shared";
 import { getServerState, initializeServer } from "#_/initialize";
+import { Spinner } from "#_/ui/Spinner";
 import { getTranslations } from "#_/utils/i18n";
 import { getRoutesDir } from "#_/utils/misc";
 
@@ -66,13 +73,20 @@ const styles = stylex.create({
     height: 32,
     marginLeft: spacing.auto,
   },
+
+  spinner: {
+    color: colors.accentSolid,
+    display: "block",
+    marginInline: "auto",
+    marginTop: spacing.huge,
+  },
 });
 
 type T = Localized<typeof TranslationsJson>;
 
 export async function Homepage() {
-  await initializeServer();
-  const { basePath, config: $config, projects } = getServerState();
+  await initializeServer({ waitForProjects: false });
+  const { basePath, config: $config } = getServerState();
 
   if (Option.isNone($config)) {
     throw new Error("config is not initialized");
@@ -147,14 +161,17 @@ export async function Homepage() {
               routesDir: getRoutesDir(),
             }}
           >
-            <ProjectList
-              basePath={basePath}
-              initialCollapsedFolders={initialCollapsedFolders}
-              initialFolderView={initialFolderView}
-              initialSelectedRootParams={initialSelectedRootParams}
-              initialShowHiddenProjects={initialShowHiddenProjects}
-              projects={serialize(projects)}
-            />
+            <Suspense fallback={<Spinner size={40} style={styles.spinner} />}>
+              <ProjectList
+                {...{
+                  basePath,
+                  initialCollapsedFolders,
+                  initialFolderView,
+                  initialSelectedRootParams,
+                  initialShowHiddenProjects,
+                }}
+              />
+            </Suspense>
           </LiqvidConfigProvider>
         </main>
       </WebSocketProvider>

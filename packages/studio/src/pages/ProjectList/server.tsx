@@ -1,6 +1,8 @@
+import { serialize } from "@liqvid/ssr/serde";
 import { promiseAllKeyed } from "@liqvid/utils";
 import { RelativeDir } from "effect-paths";
 
+import { getServerState } from "#_/initialize";
 import { getTranslations } from "#_/utils/i18n";
 import { TranslationProvider } from "#_/utils/react";
 
@@ -21,7 +23,15 @@ type T = {
   thumbs: TranslationsThumbnailsSection;
 } & typeof TranslationsJson;
 
-export async function ProjectList(props: Omit<ProjectListProps, "t">) {
+export async function ProjectList(
+  props: Omit<ProjectListProps, "projects" | "t">,
+) {
+  const state = getServerState();
+  const projectsInitialized = state.projectsInitialized;
+  if (projectsInitialized === null) {
+    throw new Error("Project list rendered before initialization started");
+  }
+
   const { base, captions, media, renders, screenshots, thumbs } =
     await promiseAllKeyed({
       base: getTranslations<typeof TranslationsJson>(import.meta.url),
@@ -47,11 +57,13 @@ export async function ProjectList(props: Omit<ProjectListProps, "t">) {
       ),
     });
 
+  await projectsInitialized;
+
   const t: T = { captions, media, renders, screenshots, thumbs, ...base };
 
   return (
     <TranslationProvider t={t}>
-      <ProjectListClient {...props} />
+      <ProjectListClient {...props} projects={serialize(state.projects)} />
     </TranslationProvider>
   );
 }
