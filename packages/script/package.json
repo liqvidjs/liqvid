@@ -49,7 +49,8 @@
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "find . -name tsconfig.tsbuildinfo -delete",
-    "build": "tsc",
+    "build:css": "rsync --include='*.css' --include='*/' --exclude='*' --recursive ./src/ ./dist/esm",
+    "build": "tsc; pnpm build:css",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
