@@ -13,6 +13,12 @@ export interface HlsVideoProps {
   children?: React.ReactNode;
   className?: string;
 
+  /**
+   * The HLS playlist will not start loading until this promise resolves.
+   * (By default, it starts loading on mount).
+   */
+  defer?: Promise<void>;
+
   draggable?: boolean;
 
   filename?: string;
@@ -35,6 +41,7 @@ export interface HlsVideoProps {
 }
 
 export function HlsVideo({
+  defer,
   frameAccurate = false,
   greenscreen = false,
   hls,
@@ -43,7 +50,7 @@ export function HlsVideo({
   ...props
 }: HlsVideoProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const source = useHlsSource(hls);
+  const source = useHlsSource(hls, defer);
   const [nativeHls, setNativeHls] = useState(false);
   const useNativeSource =
     nativeHls && Boolean(source) && !source?.startsWith("data:");
@@ -82,10 +89,29 @@ export function HlsVideo({
   );
 }
 
-function useHlsSource(hls: HlsVideoProps["hls"]): string | undefined {
+function useHlsSource(
+  hls: HlsVideoProps["hls"],
+  defer?: Promise<void>,
+): string | undefined {
   const [source, setSource] = useState<string>();
+  const [held, setHeld] = useState(Boolean(defer));
 
   useEffect(() => {
+    if (defer) {
+      let active = true;
+      setHeld(true);
+      defer.then(() => {
+        if (active) setHeld(false);
+      });
+      return () => {
+        active = false;
+      };
+    }
+  }, [defer]);
+
+  useEffect(() => {
+    if (held) return;
+
     if (!hls) {
       setSource(undefined);
       return;
@@ -98,7 +124,7 @@ function useHlsSource(hls: HlsVideoProps["hls"]): string | undefined {
 
     let active = true;
     setSource(undefined);
-    void joinHls(hls)
+    joinHls(hls)
       .then((joinedSource) => {
         if (active) setSource(joinedSource);
       })
@@ -109,7 +135,7 @@ function useHlsSource(hls: HlsVideoProps["hls"]): string | undefined {
     return () => {
       active = false;
     };
-  }, [hls]);
+  }, [held, hls]);
 
   return source;
 }
