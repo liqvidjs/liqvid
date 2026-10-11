@@ -2,9 +2,10 @@
 set -euo pipefail
 
 MODE="${1:-}"
+PACKAGE="${2:-}"
 
-if [ "$MODE" != "development" ] && [ "$MODE" != "production" ]; then
-  echo "Usage: $0 <development|production>" >&2
+if { [ "$MODE" != "development" ] && [ "$MODE" != "production" ]; } || [ "$#" -gt 2 ]; then
+  echo "Usage: $0 <development|production> [package]" >&2
   exit 1
 fi
 
@@ -17,6 +18,22 @@ else
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -n "$PACKAGE" ]; then
+  if [[ "$PACKAGE" == */* || "$PACKAGE" == "." || "$PACKAGE" == ".." ]]; then
+    echo "Error: package must be a package directory name." >&2
+    exit 1
+  fi
+
+  PACKAGE_FILE="$SCRIPT_DIR/packages/$PACKAGE/package.json"
+  if [ ! -f "$PACKAGE_FILE" ]; then
+    echo "Error: package '$PACKAGE' was not found in $SCRIPT_DIR/packages." >&2
+    exit 1
+  fi
+  PACKAGE_FILES=("$PACKAGE_FILE")
+else
+  PACKAGE_FILES=("$SCRIPT_DIR"/packages/*/package.json)
+fi
 
 FILTER='
 if (.exports | type) == "object" then
@@ -32,7 +49,7 @@ if (.exports | type) == "object" then
 else . end
 '
 
-for pkg in "$SCRIPT_DIR"/packages/*/package.json; do
+for pkg in "${PACKAGE_FILES[@]}"; do
   [ -f "$pkg" ] || continue
 
   tmp="$(dirname "$pkg")/package-toggle.json"
@@ -47,4 +64,8 @@ for pkg in "$SCRIPT_DIR"/packages/*/package.json; do
   fi
 done
 
-echo "Toggled all packages to $MODE mode."
+if [ -n "$PACKAGE" ]; then
+  echo "Toggled package '$PACKAGE' to $MODE mode."
+else
+  echo "Toggled all packages to $MODE mode."
+fi
