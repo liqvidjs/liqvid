@@ -3,10 +3,17 @@
 import { Duration, type DurationLike } from "@liqvid/duration";
 import { useKeymap } from "@liqvid/keymap/react";
 import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import type { Script } from "@liqvid/script";
+import { useScriptOptional } from "@liqvid/script/react";
 import { anyHover, between, clamp, onDrag } from "@liqvid/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { type ThumbData, ThumbnailBox } from "./ThumbnailBox.tsx";
+import {
+  type RelativeOffset,
+  type ThumbData,
+  ThumbnailBox,
+  type VideoHighlight,
+} from "./ThumbnailBox.tsx";
 
 export type { ThumbData };
 
@@ -32,7 +39,16 @@ export type PercentageSeekShortcut = {
 };
 
 export type ScrubberBarProps = {
+  /**
+   * Thumbnails will not preload until this promise resolves.
+   * (By default, they preload on mount).
+   */
+  deferThumbnails?: Promise<void>;
+
+  /** Callback to render a thumbnail preview image. */
   renderThumbnail?: React.ComponentProps<typeof ThumbnailBox>["render"];
+
+  highlights?: readonly VideoHighlight[];
 
   /** seeking shortcuts */
   shortcuts?: {
@@ -49,12 +65,15 @@ export type ScrubberBarProps = {
 
 /** Display a scrubber interface for playback, optionally including thumbnail previews and highlights. */
 export function ScrubberBar({
+  deferThumbnails,
   renderThumbnail,
+  highlights,
   shortcuts,
   thumbs,
   ...props
 }: ScrubberBarProps) {
   const playback = usePlayback();
+  const script = useScriptOptional();
 
   const [progress, setProgress] = useState({
     scrubber: playback.currentTime / playback.duration,
@@ -214,12 +233,27 @@ export function ScrubberBar({
     return props;
   }, [playback]);
 
+  // resolve highlight times; marker-relative offsets are resolved against the script
+  const parsedHighlights = useMemo(
+    () =>
+      highlights
+        ?.map((highlight) => ({
+          highlight,
+          time: resolveHighlightTime(highlight.time, script),
+        }))
+        .filter(
+          (entry): entry is { highlight: VideoHighlight; time: Duration } =>
+            entry.time !== null,
+        ) ?? [],
+    [highlights, script],
+  );
+
   // TODO: optimize this
-  const activeHighlight = thumbs?.highlights?.find((h) =>
+  const activeHighlight = parsedHighlights.find(({ time }) =>
     between(
-      Duration.inSeconds(h.time) / playback.duration,
+      time.inSeconds() / playback.duration,
       progress.thumb,
-      Duration.inSeconds(h.time) / playback.duration + 0.01,
+      time.inSeconds() / playback.duration + 0.01,
     ),
   );
 
@@ -233,10 +267,12 @@ export function ScrubberBar({
       {thumbs && renderThumbnail && (
         <ThumbnailBox
           {...thumbs}
+          defer={deferThumbnails}
+          highlights={highlights}
           progress={progress.thumb}
           render={renderThumbnail}
           show={showThumb}
-          title={activeHighlight?.title}
+          title={activeHighlight?.highlight.title}
         />
       )}
 
@@ -267,23 +303,18 @@ export function ScrubberBar({
               x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
           ))*/}
 
-          {thumbs?.highlights?.map(({ time }) => {
-            const $time = Duration.from(time);
-            return (
-              <rect
-                className={["lv-thumb-highlight"]
-                  .concat(
-                    $time.inSeconds() <= playback.currentTime ? "past" : [],
-                  )
-                  .join(" ")}
-                height="10"
-                key={$time.inSeconds()}
-                width="1"
-                x={($time.inSeconds() / playback.duration) * 100}
-                y="0"
-              />
-            );
-          })}
+          {parsedHighlights.map(({ highlight: { title }, time }) => (
+            <rect
+              className={["lv-thumb-highlight"]
+                .concat(time.inSeconds() <= playback.currentTime ? "past" : [])
+                .join(" ")}
+              height="10"
+              key={`${time.inMilliseconds()}-${title}`}
+              width="1"
+              x={(time.inSeconds() / playback.duration) * 100}
+              y="0"
+            />
+          ))}
         </svg>
         <svg
           className="lv-scrubber"
@@ -295,6 +326,36 @@ export function ScrubberBar({
         </svg>
       </div>
     </div>
+  );
+}
+
+/**
+ * Resolve a highlight's fixed playback time, using the script to resolve
+ * marker-relative offsets.
+ *
+ * Returns `null` for marker-relative offsets that cannot be resolved
+ * (no script available or unknown marker).
+ */
+function resolveHighlightTime(
+  time: VideoHighlight["time"],
+  script: Script<string> | null,
+): Duration | null {
+  if (isMarkerOffset(time)) {
+    if (!script?.has(time.marker)) return null;
+    return script.get(time.marker).start.plus(time.offset);
+  }
+  return Duration.from(time as Exclude<VideoHighlight["time"], RelativeOffset>);
+}
+
+/** Check whether this time value is a marker-relative offset. */
+function isMarkerOffset(
+  time: DurationLike | RelativeOffset,
+): time is RelativeOffset {
+  return (
+    typeof time === "object" &&
+    time !== null &&
+    "marker" in time &&
+    "offset" in time
   );
 }
 

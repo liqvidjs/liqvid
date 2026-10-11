@@ -23,9 +23,6 @@ export type ThumbData = {
    */
   height?: number;
 
-  /** Points of interest in the video to highlight. */
-  highlights?: readonly VideoHighlight[];
-
   /**
    * URL pattern for thumbnails. Must include "%s" for the index of the image.
    * Can also include "%c" for the color scheme.
@@ -60,19 +57,36 @@ export type ThumbnailProps = {
 
 export type ThumbnailBoxProps = Omit<ThumbnailProps, "src"> & {
   cols: number;
+
+  /** Points of interest in the video to highlight. */
+  highlights?: readonly VideoHighlight[];
+
+  /**
+   * Thumbnails will not preload until this promise resolves.
+   * (By default, they preload on mount).
+   */
+  defer?: Promise<void>;
+
+  /** number of seconds between thumbnails */
   frequency: number;
   path: string;
   rows: number;
   render: (props: ThumbnailProps) => React.ReactNode;
 };
 
-export type VideoHighlight = {
-  time: DurationLike;
+export type RelativeOffset<M extends string = string> = {
+  marker: M;
+  offset: DurationLike;
+};
+
+export type VideoHighlight<M extends string = string> = {
+  time: DurationLike | RelativeOffset<M>;
   title: string;
 };
 
 export function ThumbnailBox({
   cols = 5,
+  defer,
   rows = 5,
   frequency = 4,
   path,
@@ -83,23 +97,31 @@ export function ThumbnailBox({
   width = 160,
   render,
 }: ThumbnailBoxProps) {
-  const { duration$ } = usePlayback();
+  const { duration, duration$ } = usePlayback();
   const { colorScheme } = useColorScheme();
 
   const count = cols * rows;
 
   useEffect(() => {
-    // preload thumbs (once more important loading has taken place)
-    const maxSlide = Math.floor(duration$.inSeconds() / frequency),
-      maxSheet = Math.floor(maxSlide / count);
+    const preload = () => {
+      // preload thumbs (once more important loading has taken place)
+      const maxSlide = Math.floor(duration / frequency),
+        maxSheet = Math.floor(maxSlide / count);
 
-    for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
-      const img = new Image();
-      img.src = path
-        .replace("%s", sheetNum.toString())
-        .replace("%c", colorScheme);
+      for (let sheetNum = 0; sheetNum <= maxSheet; ++sheetNum) {
+        const img = new Image();
+        img.src = path
+          .replace("%s", sheetNum.toString())
+          .replace("%c", colorScheme);
+      }
+    };
+
+    if (defer) {
+      defer.then(preload);
+    } else {
+      preload();
     }
-  }, [count, frequency, path, duration$, colorScheme]);
+  }, [count, defer, frequency, path, duration, colorScheme]);
 
   const time = duration$.times(progress);
 

@@ -64,6 +64,7 @@
     "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@liqvid/player": "workspace:^1.0.0-alpha.0",
     "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
+    "@liqvid/script": "workspace:^1.0.0-alpha.2",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
