@@ -1,6 +1,6 @@
 "use client";
 
-import { recordingsContext } from "./recordings.client.ts";
+import dynamic from "next/dynamic";
 
 /**
  * Provides serializable chosen-recording data to descendants. Rendered by
@@ -12,4 +12,8 @@ export {
   useRecordingsOptional,
 } from "./recordings.client.ts";
 
-export const RecordingsProvider = recordingsContext.Provider;
+export const RecordingsProvider = dynamic(() =>
+  import("./recordings.client.ts").then((mod) => ({
+    default: mod.recordingsContext.Provider,
+  })),
+);

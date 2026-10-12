@@ -829,7 +829,7 @@ function RenameDialog({
         />
       </div>
       <div sx={styles.dialogActions}>
-        <DialogClose>{c.cancel}</DialogClose>
+        <DialogClose />
         <Button
           disabled={isRenaming || !renameValue.trim()}
           onClick={handleRename}
@@ -893,7 +893,7 @@ function DeleteDialog({
         <DialogTitle>{t.title}</DialogTitle>
         <p sx={styles.confirmMessage}>{t.confirm}</p>
         <div sx={styles.dialogActions}>
-          <DialogClose>{c.cancel}</DialogClose>
+          <DialogClose />
           <Button kind="destructive" onClick={performDelete}>
             {t.action}
           </Button>

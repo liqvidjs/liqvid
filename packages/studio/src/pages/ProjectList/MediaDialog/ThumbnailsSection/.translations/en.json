@@ -3,5 +3,6 @@
   "altLight": "Light thumbnail",
   "empty": "No thumbnails yet. Click \"Generate\" to create thumbnail sheets.",
   "generate": "Generate",
-  "inProgress": "Generating..."
+  "inProgress": "Generating...",
+  "viewJob": "View job"
 }

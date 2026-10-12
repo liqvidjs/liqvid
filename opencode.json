@@ -29,6 +29,7 @@
     { "action": "external_directory", "resource": "*", "effect": "deny" },
     { "action": "shell", "resource": "*", "effect": "ask" },
     { "action": "shell", "resource": "./node_modules/.bin/biome *", "effect": "allow" },
+    { "action": "shell", "resource": "./node_modules/.bin/jest *", "effect": "allow" },
     { "action": "shell", "resource": "./node_modules/.bin/tsc *", "effect": "allow" },
     { "action": "shell", "resource": "biome *", "effect": "allow" },
     { "action": "shell", "resource": "cat *", "effect": "allow" },

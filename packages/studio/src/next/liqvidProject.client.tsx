@@ -11,7 +11,7 @@ import {
   type RecordingsContextValue,
   RecordingsProvider,
 } from "#_/contexts/recordings";
-import { useRecordings } from "#_/contexts/recordings.client.js";
+import { useRecordings } from "#_/contexts/recordings.client";
 
 export function MysteriouslyFixCreateContextErrorsDuringBuild({
   children,

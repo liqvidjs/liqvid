@@ -11,7 +11,7 @@ export {
 
 export * from "./assets.ts";
 export * from "./components/CaptionsEditor/CaptionsEditor.tsx";
-export * from "./contexts/recordings.tsx";
+export * from "./contexts/recordings.ts";
 export { DockableDialog } from "./ui/DockableDialog.tsx";
 export * from "./ui/Tabs.tsx";
 

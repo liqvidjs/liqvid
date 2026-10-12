@@ -4,6 +4,11 @@
   "completed": "Completed",
   "delete": "Delete",
   "failed": "Failed",
+  "kinds": {
+    "captions": "Captioning",
+    "render": "Static render",
+    "thumbnails": "Thumbnails"
+  },
   "levelDebug": "Debug",
   "levelError": "Errors",
   "levelInfo": "Info",
