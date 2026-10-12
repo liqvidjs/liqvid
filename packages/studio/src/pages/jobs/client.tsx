@@ -3,6 +3,12 @@
 import { Duration } from "@liqvid/duration";
 import { deserialize } from "@liqvid/ssr/serde";
 import {
+  ClosedCaptioningIcon,
+  FilmStrip,
+  FilmStripIcon,
+  ImagesIcon,
+} from "@phosphor-icons/react";
+import {
   CheckCircleIcon,
   SpinnerIcon,
   StopCircleIcon,
@@ -10,7 +16,7 @@ import {
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import * as stylex from "@stylexjs/stylex";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Cookies from "universal-cookie";
 
 import type {
@@ -393,6 +399,17 @@ export function JobsClient({
     ),
   );
 
+  useEffect(() => {
+    if (window.location.hash) setActiveTab("jobs");
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "jobs") return;
+    const id = window.location.hash.slice(1);
+    if (!id || !jobs[id]) return;
+    document.getElementById(id)?.scrollIntoView();
+  }, [activeTab, jobs]);
+
   return (
     <main sx={styles.main}>
       <h1>{t.title}</h1>
@@ -411,9 +428,14 @@ export function JobsClient({
         <TabsContent value="jobs">
           <ul>
             {Object.values(jobs).map((job) => (
-              <li key={job.id} sx={styles.job}>
+              <li id={job.id} key={job.id} sx={styles.job}>
                 <header sx={styles.header}>
                   <JobStateIcon state={job.state} t={t} />
+                  <JobKindIcon
+                    // TODO: fix this
+                    kind={job.name.slice(0, job.name.indexOf(":")) as JobKind}
+                    t={t}
+                  />
                   <pre>{job.path}</pre>
                   {">"}
                   <span>{job.name}</span>
@@ -535,6 +557,31 @@ function JobStateIcon({
         <WarningCircleIcon {...stylex.props(styles.warningIcon)} weight="fill">
           <title>{t.failed}</title>
         </WarningCircleIcon>
+      );
+  }
+}
+
+type JobKind = "captions" | "render" | "thumbnails";
+
+function JobKindIcon({ kind, t }: { kind: JobKind; t: T }) {
+  switch (kind) {
+    case "captions":
+      return (
+        <ClosedCaptioningIcon>
+          <title>{t.kinds.captions}</title>
+        </ClosedCaptioningIcon>
+      );
+    case "render":
+      return (
+        <FilmStripIcon>
+          <title>{t.kinds.render}</title>
+        </FilmStripIcon>
+      );
+    case "thumbnails":
+      return (
+        <ImagesIcon>
+          <title>{t.kinds.thumbnails}</title>
+        </ImagesIcon>
       );
   }
 }
