@@ -9,9 +9,14 @@ import {
   ThumbnailsJob,
   type ThumbnailsJobIn,
 } from "@liqvid/schemas";
-import { Effect, FileSystem, Option } from "effect";
+import { Effect, Exit, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
-import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
+import {
+  type AbsoluteDir,
+  type AbsoluteFile,
+  RelativeDir,
+  RelativeFile,
+} from "effect-paths";
 
 import { ASSETS_DIR, DARK_DIR, LIGHT_DIR, THUMBS_DIR } from "#_/conventions";
 import { getServerState } from "#_/initialize";
@@ -70,6 +75,9 @@ const generateThumbnails = Effect.fnUntraced(function* (
   }>[],
   { colorScheme: _, ...body }: GenerateThumbsBody,
   projectPath: RelativeDir,
+  jobId: string,
+  jobFilePath: AbsoluteFile,
+  jobOptions: ThumbnailsJobIn,
 ) {
   const { config: $config } = getServerState();
   const fs = yield* FileSystem.FileSystem;
@@ -89,20 +97,29 @@ const generateThumbnails = Effect.fnUntraced(function* (
     { concurrency: "unbounded" },
   );
 
-  yield* createJob(
-    "thumbnails",
-    generateThumbsApi({
-      ...defaults,
-      ...body,
-      imageFormat,
-      schemes: schemes.map(({ colorScheme, outputDir }) => ({
-        colorScheme,
-        output: path.join(outputDir, RelativeFile(`%s.${imageFormat}`)),
-      })),
-      url,
-    }),
-    { path: projectPath },
+  yield* writeJSON(jobFilePath, { ...jobOptions, status: "rendering" });
+
+  const generation = generateThumbsApi({
+    ...defaults,
+    ...body,
+    imageFormat,
+    schemes: schemes.map(({ colorScheme, outputDir }) => ({
+      colorScheme,
+      output: path.join(outputDir, RelativeFile(`%s.${imageFormat}`)),
+    })),
+    url,
+  }).pipe(
+    Effect.tap(() =>
+      writeJSON(jobFilePath, { ...jobOptions, status: "completed" }),
+    ),
+    Effect.onExit((exit) =>
+      Exit.isFailure(exit)
+        ? writeJSON(jobFilePath, { ...jobOptions, status: "failed" })
+        : Effect.void,
+    ),
   );
+
+  yield* createJob("thumbnails", generation, { id: jobId, path: projectPath });
 
   return yield* Effect.all(
     schemes.map(({ outputDir }) => readThumbSheets(outputDir)),
@@ -229,11 +246,11 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           rows: payload.rows ?? defaults.rows,
           width: payload.width ?? defaults.width,
         };
+        const jobId = crypto.randomUUID();
+        const jobOptions = { ...resolvedOptions, jobId };
 
         // Save job options to file
         const jobFilePath = path.join(thumbsBaseDir, THUMBS_JOB_FILE);
-        yield* writeJSON(jobFilePath, resolvedOptions);
-
         // Build the list of schemes to capture (shared single browser session).
         const wantLight = colorScheme === "light" || colorScheme === "both";
         const wantDark = colorScheme === "dark" || colorScheme === "both";
@@ -262,6 +279,9 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           schemes,
           payload,
           projectPath,
+          jobId,
+          jobFilePath,
+          jobOptions,
         );
 
         const lightIndex = schemes.findIndex((s) => s.colorScheme === "light");

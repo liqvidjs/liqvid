@@ -58,6 +58,7 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
   name: string,
   effect: Effect.Effect<A, E, R>,
   options?: {
+    readonly id?: string;
     readonly path?: string;
   },
 ) {
@@ -65,7 +66,7 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
   const startTime = new Date();
 
   const logs: StructuredLog[] = [];
-  const id = crypto.randomUUID();
+  const id = options?.id ?? crypto.randomUUID();
 
   // Custom logger that outputs log messages to the console
   const logger = Logger.make(({ date, fiber, logLevel, message }) => {

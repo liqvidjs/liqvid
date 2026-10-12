@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { renderVideo } from "@liqvid/cli/render";
 import { loadJson, readDirWithFileTypes, writeJSON } from "@liqvid/cli/utils";
-import { Cause, Effect, Fiber, FileSystem, Option } from "effect";
+import { Cause, Effect, Exit, Fiber, FileSystem, Option } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { type AbsoluteDir, RelativeDir, RelativeFile } from "effect-paths";
 import { StatusCodes } from "http-status-codes";
@@ -253,16 +253,13 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
           yield* writeRenderMeta(renderDir, updatedMeta);
           yield* Effect.log(`render ${renderId} completed`);
         }).pipe(
-          Effect.catch((error) =>
-            Effect.gen(function* () {
-              // Update metadata with failed status
-              const updatedMeta: RenderMeta = {
-                ...meta,
-                status: "failed",
-              };
-              yield* writeRenderMeta(renderDir, updatedMeta);
-              yield* Effect.logError(`render ${renderId} failed:`, error);
-            }),
+          Effect.tapCause((cause) =>
+            Effect.logError(`render ${renderId} failed:`, cause),
+          ),
+          Effect.onExit((exit) =>
+            Exit.isFailure(exit)
+              ? writeRenderMeta(renderDir, { ...meta, status: "failed" })
+              : Effect.void,
           ),
         );
 

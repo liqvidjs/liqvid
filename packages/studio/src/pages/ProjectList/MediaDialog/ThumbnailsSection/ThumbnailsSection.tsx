@@ -6,6 +6,7 @@ import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { ImagesIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
+import Link from "next/link";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
 import type { ThumbsData } from "#_/api/schemas";
@@ -133,8 +134,8 @@ export function ThumbnailsSection({
   const [sliderValue, setSliderValue] = useState(0);
   const { isOpen } = useDialogApi();
 
-  const loadThumbs = useEffectEvent(async () => {
-    setIsLoading(true);
+  const loadThumbs = useEffectEvent(async (showLoading = true) => {
+    if (showLoading) setIsLoading(true);
 
     // Serialize params for use in query
     const paramsJson = JSON.stringify(selectedParams ?? {});
@@ -162,7 +163,7 @@ export function ThumbnailsSection({
         console.error("Failed to load thumbnails:", result.cause);
       }
     }
-    setIsLoading(false);
+    if (showLoading) setIsLoading(false);
   });
 
   useEffect(() => {
@@ -170,6 +171,16 @@ export function ThumbnailsSection({
       loadThumbs();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || thumbsData?.job?.status !== "rendering") return;
+
+    const interval = window.setInterval(() => {
+      void loadThumbs(false);
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [isOpen, thumbsData?.job?.status]);
 
   const handleGenerate = useEffectEvent(async () => {
     setIsGenerating(true);
@@ -195,6 +206,7 @@ export function ThumbnailsSection({
 
   const hasNoThumbs = thumbsData === null;
   const job = thumbsData?.job;
+  const isJobRunning = job?.status === "rendering";
 
   // Calculate thumbnail display info based on ThumbnailBox strategy
   const thumbInfo = useMemo(() => {
@@ -263,8 +275,11 @@ export function ThumbnailsSection({
   return (
     <div sx={styles.section}>
       <div sx={styles.sectionActions}>
-        <Button disabled={isGenerating} onClick={handleGenerate}>
-          {isGenerating ? (
+        <Button
+          disabled={isGenerating || isJobRunning}
+          onClick={handleGenerate}
+        >
+          {isGenerating || isJobRunning ? (
             <>
               <Spinner size={16} /> {t.inProgress}
             </>
@@ -274,9 +289,10 @@ export function ThumbnailsSection({
             </>
           )}
         </Button>
+        {job?.jobId && <Link href={`/jobs#${job.jobId}`}>{t.viewJob}</Link>}
       </div>
 
-      {isLoading ? (
+      {isLoading && !thumbsData ? (
         <div sx={[styles.loading]}>
           <Spinner size={24} />
         </div>
