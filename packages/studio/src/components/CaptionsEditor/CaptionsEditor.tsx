@@ -12,7 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "zustand";
 
 import { useChannel } from "#_/components/WebSocketProvider";
@@ -47,6 +47,7 @@ import { TimeDuration } from "#_/ui/Time";
 import { useAsyncTranslations } from "#_/utils/react";
 
 import { CaptionsPreview } from "./CaptionsPreview.tsx";
+import { DeleteFillerWordsDialog } from "./DeleteFillerWordsDialog.tsx";
 import {
   useCaptionsEditorShortcuts,
   useHoverHighlight,
@@ -57,7 +58,13 @@ import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { saveCaptions } from "./server.ts";
 import type { Shortcuts } from "./shortcuts.ts";
 import { makeStore } from "./store.ts";
-import { activeWordIndex, apply, isSentenceEnd, join } from "./utils.ts";
+import type { FillerWordOptions } from "./utils.ts";
+import {
+  activeWordIndex,
+  apply,
+  isSentenceEnd,
+  matchFillerWords,
+} from "./utils.ts";
 
 import Translations from "./.translations/en.json";
 
@@ -94,6 +101,12 @@ const styles = stylex.create({
 
   closeButton: {
     marginLeft: "auto",
+  },
+
+  fillerWord: {
+    backgroundColor: colors.errorSubtle,
+    borderRadius: rounded.sm,
+    color: colors.errorText,
   },
 
   hoverWord: {
@@ -281,6 +294,32 @@ export function CaptionsEditor({
     paragraphBreaks: transcriptBreaks,
   } = useStore(store);
 
+  // "Delete filler words" dialog. The options persist across openings, and
+  // while the dialog is open the matching words are highlighted live in the
+  // transcript (see `renderWords`).
+  const [fillerOpen, setFillerOpen] = useState(false);
+  const [fillerOptions, setFillerOptions] = useState<FillerWordOptions>({
+    fillerWords: "uh, um",
+    ignoreCapitalization: true,
+    ignorePunctuation: true,
+  });
+
+  const fillerIndices = useMemo(() => {
+    if (!fillerOpen) return null;
+    return new Set(matchFillerWords(transcript, fillerOptions));
+  }, [fillerOpen, fillerOptions, transcript]);
+
+  /** Deletes every matching filler word from the transcript. */
+  const confirmDeleteFillerWords = () => {
+    store.setState((state) => {
+      const indices = matchFillerWords(state.words, fillerOptions);
+      if (indices.length === 0) return state;
+
+      return apply(state, { action: "delete-words", indices });
+    });
+    setFillerOpen(false);
+  };
+
   const [activeWord, setActiveWord] = useState(-1);
 
   useTime(
@@ -294,26 +333,38 @@ export function CaptionsEditor({
   }, [selection.start, selection.end]);
 
   /**
-   * Renders the words `[from, to)`, wrapping the active word (if it falls in
-   * this range) in a single `<mark>`. Keeps tag usage minimal: at most one
-   * extra element and text node split per range.
+   * Renders the words `[from, to)`, wrapping the active word in a `<mark>` and
+   * the filler-word matches (while the delete-filler-words dialog is open) in
+   * red `<mark>`s. Word boundaries in the DOM are resolved against the real
+   * text content (see `wordIndexAtCaret`), so each word is emitted as its own
+   * node.
    */
   const renderWords = (from: number, to: number) => {
-    const text = join(transcript.slice(from, to));
+    const nodes: React.ReactNode[] = [];
 
-    if (activeWord < from || activeWord >= to) return text;
+    for (let i = from; i < to; i++) {
+      if (i > from) nodes.push(" ");
 
-    const before = join(transcript.slice(from, activeWord));
-    const word = transcript[activeWord]![0];
-    const after = join(transcript.slice(activeWord + 1, to));
+      const word = transcript[i]![0];
 
-    return (
-      <>
-        {before ? `${before} ` : ""}
-        <mark sx={styles.activeWord}>{word}</mark>
-        {after ? ` ${after}` : ""}
-      </>
-    );
+      if (i === activeWord) {
+        nodes.push(
+          <mark key={i} sx={styles.activeWord}>
+            {word}
+          </mark>,
+        );
+      } else if (fillerIndices?.has(i)) {
+        nodes.push(
+          <mark key={i} sx={styles.fillerWord}>
+            {word}
+          </mark>,
+        );
+      } else {
+        nodes.push(word);
+      }
+    }
+
+    return <>{nodes}</>;
   };
 
   /**
@@ -436,10 +487,31 @@ export function CaptionsEditor({
                       >
                         {t.clearParagraphBreaks}
                       </MenuItem>
+                      <MenuItem onClick={() => setFillerOpen(true)}>
+                        {t.deleteFillerWords}
+                      </MenuItem>
                     </MenuPopup>
                   </MenuPositioner>
                 </MenuPortal>
               </MenuRoot>
+
+              {/* delete filler words */}
+              <DialogRoot
+                // Non-modal so the matches stay visible (and the transcript
+                // interactive) while the dialog is open.
+                disablePointerDismissal
+                modal={false}
+                onOpenChange={setFillerOpen}
+                open={fillerOpen}
+              >
+                <DeleteFillerWordsDialog
+                  matchCount={fillerIndices?.size ?? 0}
+                  onConfirm={confirmDeleteFillerWords}
+                  options={fillerOptions}
+                  setOptions={setFillerOptions}
+                  t={t}
+                />
+              </DialogRoot>
 
               {/* keyboard shortcuts */}
               <DialogRoot>

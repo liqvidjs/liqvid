@@ -92,6 +92,43 @@ export function apply(prev: State, action: Action, append = true): State {
       break;
     }
 
+    case "delete-words": {
+      const indices = [...action.indices].sort((a, b) => a - b);
+
+      const toDelete = new Set(indices);
+      next.words = prev.words.filter((_, i) => !toDelete.has(i));
+
+      // Deleting words shifts every subsequent word index down, so the same
+      // adjustment as `delete-word` runs per deleted index: a break *on* a
+      // deleted word is dropped, and a break after deleted words shifts down
+      // by the number of deletions before it, so it stays attached to the same
+      // surviving word. The indices are processed in descending order — each
+      // deletion only ever shifts breaks after it, so a break's index is
+      // always interpreted against the array before any larger-index deletion
+      // occurred.
+      next.captionBreaks = [...indices]
+        .reverse()
+        .reduce(
+          (breaks, index) => shiftBreaksAfterDelete(breaks, index),
+          [...prev.captionBreaks],
+        );
+      next.paragraphBreaks = [...indices]
+        .reverse()
+        .reduce(
+          (breaks, index) => shiftBreaksAfterDelete(breaks, index),
+          [...prev.paragraphBreaks],
+        );
+
+      // Collapse the selection onto the word that now occupies the slot of the
+      // first deleted word (mirroring `delete-word`).
+      const first = indices[0];
+      if (first !== undefined) {
+        const index = Math.max(0, Math.min(first, next.words.length - 1));
+        next.selection = { end: index, start: index };
+      }
+      break;
+    }
+
     case "merge-word": {
       const first = prev.words[action.index];
       const second = prev.words[action.index + 1];
@@ -286,6 +323,38 @@ export function apply(prev: State, action: Action, append = true): State {
       break;
     }
 
+    case "insert-words": {
+      // Restore each deleted entry at its original index. Inserting in
+      // ascending index order keeps every target index valid as we go, since
+      // earlier insertions never move a later index.
+      const words = [...prev.words];
+      for (const { entry, index } of action.deleted) {
+        words.splice(index, 0, entry);
+      }
+      next.words = words;
+
+      // Breaks are restored verbatim when carried from the inverse
+      // `delete-words`; otherwise derive them by shifting, the inverse of the
+      // deletion shifting above (again descending — see `delete-words`).
+      next.captionBreaks =
+        action.captionBreaks ??
+        [...action.deleted]
+          .sort((a, b) => b.index - a.index)
+          .reduce(
+            (breaks, { index }) => shiftBreaksAfterInsert(breaks, index),
+            [...prev.captionBreaks],
+          );
+      next.paragraphBreaks =
+        action.paragraphBreaks ??
+        [...action.deleted]
+          .sort((a, b) => b.index - a.index)
+          .reduce(
+            (breaks, { index }) => shiftBreaksAfterInsert(breaks, index),
+            [...prev.paragraphBreaks],
+          );
+      break;
+    }
+
     case "selection-backward": {
       const newStart = Math.max(0, prev.selection.start - 1);
       next.selection = {
@@ -339,9 +408,9 @@ function record(action: Action, prev: State, next: State): Action | undefined {
     case "change-word":
       return { ...action, prevValue: prev.words[action.index]?.[0] };
 
-    // Capture the removed entry and the pre-delete break arrays so undo can
-    // reinsert the word and restore the breaks regardless of the state at
-    // replay time (by undo, `prev` no longer holds the deleted word, and its
+    // Capture the removed entries and the pre-delete break arrays so undo can
+    // reinsert the words and restore the breaks regardless of the state at
+    // replay time (by undo, `prev` no longer holds the deleted words, and its
     // breaks have already been shifted).
     case "delete-word":
       return {
@@ -350,6 +419,18 @@ function record(action: Action, prev: State, next: State): Action | undefined {
         prevCaptionBreaks: prev.captionBreaks,
         prevParagraphBreaks: prev.paragraphBreaks,
       };
+
+    case "delete-words": {
+      const toDelete = new Set(action.indices);
+      return {
+        ...action,
+        deleted: prev.words
+          .map((entry, index) => ({ entry, index }))
+          .filter(({ index }) => toDelete.has(index)),
+        prevCaptionBreaks: prev.captionBreaks,
+        prevParagraphBreaks: prev.paragraphBreaks,
+      };
+    }
 
     // Capture the two merged entries and the pre-merge break arrays so undo can
     // split the word back and restore the breaks exactly.
@@ -408,6 +489,26 @@ function invert(prev: State, action: Action): Action {
         value: deleted[0],
       };
     }
+
+    case "delete-words":
+      // The recorded action carries the removed entries and the pre-delete
+      // break arrays, since by undo `prev` (the post-delete state) no longer
+      // holds them. Passing the breaks restores them verbatim (see
+      // `insert-words`).
+      return {
+        action: "insert-words",
+        captionBreaks: action.prevCaptionBreaks ?? prev.captionBreaks,
+        deleted: action.deleted ?? [],
+        paragraphBreaks: action.prevParagraphBreaks ?? prev.paragraphBreaks,
+      };
+
+    case "insert-words":
+      // Only ever produced as the inverse of `delete-words`, so the stack
+      // entries never reach here; the inverse is provided for completeness.
+      return {
+        action: "delete-words",
+        indices: action.deleted.map(({ index }) => index),
+      };
 
     // Toggles are normalized to `set-*-breaks` before being recorded, so they
     // never reach undo/redo directly; they invert to themselves for
@@ -529,6 +630,85 @@ export function join(words: readonly TranscriptEntry[]) {
     (acc, curr, index) => acc + (index > 0 ? " " : "") + curr[0],
     "",
   );
+}
+
+/* ------------------------- filler word deletion ------------------------- */
+
+/** Matching options for filler-word detection. */
+export type FillerWordOptions = Readonly<{
+  /** The filler words to match, comma separated (e.g. `"uh, um"`). */
+  fillerWords: string;
+
+  /** Whether matching ignores case (`um` also matches `Um`). */
+  ignoreCapitalization: boolean;
+
+  /** Whether matching ignores punctuation (`um` also matches `um,`). */
+  ignorePunctuation: boolean;
+}>;
+
+/**
+ * Splits the filler-words input into individual filler words on commas,
+ * discarding blanks.
+ */
+export function parseFillerWords(input: string): string[] {
+  return input
+    .split(",")
+    .map((word) => word.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Normalizes a transcript token or filler word for comparison: punctuation is
+ * trimmed from its edges (when `ignorePunctuation`) and the result is
+ * lowercased (when `ignoreCapitalization`). Both sides of the comparison
+ * normalize identically, so `um` matches `Um` and `um,` under the respective
+ * options.
+ */
+function normalizeFillerToken(
+  token: string,
+  ignoreCapitalization: boolean,
+  ignorePunctuation: boolean,
+): string {
+  let value = token.trim();
+
+  if (ignorePunctuation) {
+    value = value.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  }
+
+  if (ignoreCapitalization) value = value.toLocaleLowerCase();
+
+  return value;
+}
+
+/**
+ * Returns the indices of transcript entries matching any of the filler words
+ * under the given options, in ascending order.
+ */
+export function matchFillerWords(
+  transcript: Transcript,
+  { fillerWords, ignoreCapitalization, ignorePunctuation }: FillerWordOptions,
+): number[] {
+  const fillers = new Set(
+    parseFillerWords(fillerWords)
+      .map((word) =>
+        normalizeFillerToken(word, ignoreCapitalization, ignorePunctuation),
+      )
+      .filter(Boolean),
+  );
+
+  const indices: number[] = [];
+
+  transcript.forEach(([text], index) => {
+    if (
+      fillers.has(
+        normalizeFillerToken(text, ignoreCapitalization, ignorePunctuation),
+      )
+    ) {
+      indices.push(index);
+    }
+  });
+
+  return indices;
 }
 
 /**

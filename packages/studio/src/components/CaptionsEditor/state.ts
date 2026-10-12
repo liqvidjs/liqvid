@@ -71,6 +71,36 @@ type DeleteWordAction = Readonly<{
   prevParagraphBreaks?: readonly number[];
 }>;
 
+type DeletedWord = Readonly<{
+  /** The word entry itself. */
+  entry: TranscriptEntry;
+
+  /** The word's index in the transcript at the time of deletion. */
+  index: number;
+}>;
+
+type DeleteWordsAction = Readonly<{
+  action: "delete-words";
+
+  /** Indices of the words to delete, in ascending order. */
+  indices: readonly number[];
+
+  /**
+   * The removed entries with their original indices, captured at record time
+   * so undo can reinsert them (by undo, `prev` no longer holds them). Must be
+   * in ascending index order.
+   */
+  deleted?: readonly DeletedWord[];
+
+  /**
+   * The break arrays before deletion, captured at record time so undo can
+   * restore them exactly (deletion may drop breaks that shifting cannot
+   * recover).
+   */
+  prevCaptionBreaks?: readonly number[];
+  prevParagraphBreaks?: readonly number[];
+}>;
+
 type StartPrevSentenceAction = Readonly<{
   action: "start-prev-sentence";
 }>;
@@ -147,6 +177,25 @@ type InsertWordAction = Readonly<{
   restorePrev?: TranscriptEntry;
 }>;
 
+/**
+ * Inverse of `delete-words`: restores the deleted entries at their original
+ * indices. Only produced by undoing a `delete-words` (it is never recorded).
+ */
+type InsertWordsAction = Readonly<{
+  action: "insert-words";
+
+  /** The entries to restore, with their original indices, ascending. */
+  deleted: readonly DeletedWord[];
+
+  /**
+   * Break arrays to restore verbatim. Carried from the inverse
+   * `delete-words`, since breaks on deleted words cannot be recovered by
+   * shifting. When omitted, breaks are derived by shifting.
+   */
+  captionBreaks?: readonly number[];
+  paragraphBreaks?: readonly number[];
+}>;
+
 type SelectionBackwardAction = Readonly<{
   action: "selection-backward";
 }>;
@@ -163,12 +212,14 @@ type SelectionForwardAction = Readonly<{
 export type Action =
   | ChangeWordAction
   | DeleteWordAction
+  | DeleteWordsAction
   | EndNextCaptionAction
   | EndNextCommaAction
   | EndNextSentenceAction
   | EndNextTranscriptBreakAction
   | IdentityAction
   | InsertWordAction
+  | InsertWordsAction
   | MergeWordAction
   | SelectionBackwardAction
   | SelectionForwardAction

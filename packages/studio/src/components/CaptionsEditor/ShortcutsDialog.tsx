@@ -139,7 +139,7 @@ export function ShortcutsDialog({
                 <td sx={styles.td}>{t[`shortcut_${key}`]}</td>
                 <td sx={[styles.td, styles.keys]}>
                   {formatShortcut(keys[key], mod).map((token, index) => (
-                    <Fragment key={token}>
+                    <Fragment key={`${token}-${index}`}>
                       {index > 0 && <span sx={styles.plus}>{" + "}</span>}
                       <kbd sx={styles.kbd}>{token}</kbd>
                     </Fragment>
