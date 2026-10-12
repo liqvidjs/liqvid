@@ -1,6 +1,6 @@
-import type { DurationLike } from "@liqvid/duration";
-import { useEventListener } from "@liqvid/event-emitter/react";
+import { Duration, type DurationLike } from "@liqvid/duration";
 import {
+  useBufferedItem,
   usePlayback,
   usePlaybackEvent,
   useReadyStateItem,
@@ -9,6 +9,9 @@ import { useStableDuration } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface MediaProps {
+  /** Defer media loading until this promise resolves. */
+  defer?: Promise<void>;
+
   obstructCanPlay?: boolean;
   obstructCanPlayThrough?: boolean;
   start?: DurationLike;
@@ -17,6 +20,7 @@ export interface MediaProps {
 export function useSyncMedia<T extends HTMLMediaElement>(
   ref: React.RefObject<T | null>,
   start: DurationLike = {},
+  enabled = true,
 ) {
   const start$ = useStableDuration(start);
   const playback = usePlayback();
@@ -183,7 +187,7 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   }, [onVolumeChange]);
 
   /* ------------------------------ readyState ------------------------------ */
-  useSyncReadyState(ref);
+  useSyncReadyState(ref, start$, enabled);
 }
 
 /**
@@ -198,28 +202,67 @@ function hasEnded(media: HTMLMediaElement, threshold = 0.5): boolean {
   return media.ended || media.duration - media.currentTime < threshold;
 }
 
-function useSyncReadyState(ref: React.RefObject<HTMLMediaElement | null>) {
-  const { setReadyState } = useReadyStateItem();
+function useSyncReadyState(
+  ref: React.RefObject<HTMLMediaElement | null>,
+  start: DurationLike,
+  enabled: boolean,
+) {
+  const { setReadyState } = useReadyStateItem(0, enabled);
+  const { setBuffered } = useBufferedItem(enabled);
 
-  const updateReadyState = () => {
-    if (!ref.current) return;
-    setReadyState(ref.current.readyState);
-  };
+  const updateMediaState = useCallback(() => {
+    const media = ref.current;
+    if (!media) {
+      setReadyState(HTMLMediaElement.HAVE_NOTHING);
+      setBuffered([]);
+      return;
+    }
 
-  useEventListener(ref.current, "canplay", updateReadyState);
-  useEventListener(ref.current, "canplaythrough", updateReadyState);
-  useEventListener(ref.current, "loadeddata", updateReadyState);
-  useEventListener(ref.current, "loadedmetadata", updateReadyState);
-  useEventListener(ref.current, "waiting", updateReadyState);
+    setReadyState(media.readyState);
+    const ranges: Array<readonly [number, number]> = [];
+    const offset = Duration.inSeconds(start);
 
-  useEventListener(ref.current, "seeking", () => {
-    if (!ref.current) return;
-    if (!(ref.current instanceof HTMLVideoElement)) return;
+    for (let index = 0; index < media.buffered.length; index++) {
+      ranges.push([
+        offset + media.buffered.start(index),
+        offset + media.buffered.end(index),
+      ]);
+    }
+    setBuffered(ranges);
+  }, [ref, setBuffered, setReadyState, start]);
 
-    setReadyState(HTMLMediaElement.HAVE_METADATA);
+  useEffect(() => {
+    if (!enabled) return;
+    const media = ref.current;
+    if (!media) return;
 
-    ref.current.requestVideoFrameCallback(() => {
-      setReadyState(ref.current?.readyState ?? HTMLMediaElement.HAVE_NOTHING);
-    });
-  });
+    const events = [
+      "abort",
+      "canplay",
+      "canplaythrough",
+      "durationchange",
+      "emptied",
+      "error",
+      "loadeddata",
+      "loadedmetadata",
+      "loadstart",
+      "playing",
+      "progress",
+      "seeked",
+      "seeking",
+      "stalled",
+      "suspend",
+      "waiting",
+    ] as const;
+
+    updateMediaState();
+    for (const event of events) {
+      media.addEventListener(event, updateMediaState);
+    }
+    return () => {
+      for (const event of events) {
+        media.removeEventListener(event, updateMediaState);
+      }
+    };
+  }, [enabled, ref, updateMediaState]);
 }

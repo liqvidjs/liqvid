@@ -16,6 +16,8 @@ export interface TrackProps {
    */
   default?: boolean;
 
+  defer?: Promise<void>;
+
   /**
    * The kind of track.
    * @default "subtitles"
@@ -156,6 +158,7 @@ function parseVTT(content: string): Array<{
  */
 export function Track({
   default: isDefault = false,
+  defer,
   kind = "subtitles",
   label = "",
   src,
@@ -189,7 +192,8 @@ export function Track({
 
     let cancelled = false;
 
-    fetch(src)
+    (defer ?? Promise.resolve())
+      .then(() => fetch(src))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch VTT file: ${response.status}`);
@@ -216,7 +220,7 @@ export function Track({
     return () => {
       cancelled = true;
     };
-  }, [src]);
+  }, [src, defer]);
 
   // This component doesn't render anything
   return null;

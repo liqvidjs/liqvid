@@ -2,7 +2,12 @@
 
 import { Duration, type DurationLike } from "@liqvid/duration";
 import type { AudioSourceRegistration } from "@liqvid/playback";
-import { usePlayback, usePlaybackEvent } from "@liqvid/playback/react";
+import {
+  useBufferedItem,
+  usePlayback,
+  usePlaybackEvent,
+  useReadyStateItem,
+} from "@liqvid/playback/react";
 import { useScriptOptional } from "@liqvid/script/react";
 import { isSafari } from "@liqvid/utils";
 import { RenderMode } from "@lqv/playback/react";
@@ -16,8 +21,13 @@ import {
   useRef,
 } from "react";
 
+import { useLoadHold } from "./useLoadHold.ts";
+
 export type AudioProps<M extends string = string> = {
   children?: React.ReactNode;
+
+  /** Defer audio loading until this promise resolves. */
+  defer?: Promise<void>;
 
   /** URL to the audio file. If not provided, will search children for <source> elements. */
   src?: string;
@@ -70,12 +80,14 @@ function findSupportedSource(children: React.ReactNode): string | undefined {
  */
 export function Audio<M extends string = string>({
   children,
+  defer,
   src: srcProp,
   start = 0,
 }: AudioProps<M>) {
   const renderMode = use(RenderMode);
   const playback = usePlayback();
   const script = useScriptOptional();
+  const held = useLoadHold(defer);
 
   const isActive = renderMode === "video" || renderMode === "web";
 
@@ -85,6 +97,10 @@ export function Audio<M extends string = string>({
     if (srcProp) return srcProp;
     return findSupportedSource(children);
   }, [srcProp, children, isActive]);
+
+  const trackLoading = isActive && Boolean(src) && !held;
+  const { setReadyState } = useReadyStateItem(0, trackLoading);
+  const { setBuffered } = useBufferedItem(trackLoading);
 
   const startInSeconds = (() => {
     if (!isActive) return 0;
@@ -140,6 +156,8 @@ export function Audio<M extends string = string>({
       .decodeAudioData(bufferCopy)
       .then((buffer) => {
         audioBufferRef.current = buffer;
+        setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
+        setBuffered([[startInSeconds, startInSeconds + buffer.duration]]);
 
         // Register this audio source for offline rendering
         if (registrationRef.current) {
@@ -153,8 +171,9 @@ export function Audio<M extends string = string>({
       })
       .catch((error) => {
         console.error("Failed to decode audio:", error);
+        setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       });
-  }, [playback, startInSeconds]);
+  }, [playback, setBuffered, setReadyState, startInSeconds]);
 
   /**
    * Stop the current audio source
@@ -253,29 +272,38 @@ export function Audio<M extends string = string>({
 
   // Fetch the audio file immediately
   useEffect(() => {
-    if (!src) return;
+    if (!src || held) {
+      setReadyState(HTMLMediaElement.HAVE_NOTHING);
+      setBuffered([]);
+      return;
+    }
 
     let cancelled = false;
     arrayBufferRef.current = null;
     audioBufferRef.current = null;
+    setReadyState(HTMLMediaElement.HAVE_NOTHING);
+    setBuffered([]);
 
     fetch(src)
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => {
         if (cancelled) return;
         arrayBufferRef.current = arrayBuffer;
+        setReadyState(HTMLMediaElement.HAVE_METADATA);
         // Try to decode immediately if audioContext is available
         decodeAudio();
       })
       .catch((error) => {
+        if (cancelled) return;
         console.error("Failed to fetch audio:", error);
+        setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       });
 
     return () => {
       cancelled = true;
       stopAudio();
     };
-  }, [src, decodeAudio, stopAudio]);
+  }, [src, held, decodeAudio, setBuffered, setReadyState, stopAudio]);
 
   // Decode audio when audioContext becomes available
   usePlaybackEvent("audiocontextchange", decodeAudio, { enabled: isActive });

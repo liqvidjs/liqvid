@@ -28,6 +28,12 @@ export type ReadyStateItem = {
   readyState: number;
 };
 
+export type BufferedRange = readonly [start: number, end: number];
+
+export type BufferedItem = {
+  buffered: readonly BufferedRange[];
+};
+
 type KeyframeEffectOptionsWithDurations = Omit<
   KeyframeEffectOptions,
   "delay" | "duration"
@@ -43,6 +49,7 @@ export class Playback extends CorePlayback {
   private readonly __delays = new WeakMap<AnimationEffect, number>();
 
   private readonly __readyStateItems: Set<ReadyStateItem> = new Set();
+  private readonly __bufferedItems: Set<BufferedItem> = new Set();
 
   private readonly __$currentTime: Duration;
   private readonly __$duration: Duration;
@@ -118,6 +125,36 @@ export class Playback extends CorePlayback {
     }
   }
 
+  registerBufferedItem(item: BufferedItem): void {
+    const previous = this.__getBufferedRanges();
+    this.__bufferedItems.add(item);
+
+    if (!sameRanges(previous, this.__getBufferedRanges())) {
+      this.__emit("bufferupdate");
+    }
+  }
+
+  updateBufferedItem(
+    item: BufferedItem,
+    newBuffered: readonly BufferedRange[],
+  ): void {
+    const previous = this.__getBufferedRanges();
+    item.buffered = normalizeRanges(newBuffered);
+
+    if (!sameRanges(previous, this.__getBufferedRanges())) {
+      this.__emit("bufferupdate");
+    }
+  }
+
+  unregisterBufferedItem(item: BufferedItem): void {
+    const previous = this.__getBufferedRanges();
+    this.__bufferedItems.delete(item);
+
+    if (!sameRanges(previous, this.__getBufferedRanges())) {
+      this.__emit("bufferupdate");
+    }
+  }
+
   /**
    * Create an {@link Animation} (factory) synced to this playback
    * @param keyframes A [keyframes object](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats) or `null`
@@ -159,8 +196,23 @@ export class Playback extends CorePlayback {
     );
   }
 
-  protected override __emit(eventName: PlaybackEvent | "readystatechange") {
-    // @ts-expect-error TODO: fix the types to allow "readystatechange" or work around it
+  /** Buffered playback-time ranges shared by all registered media sources. */
+  get buffered(): TimeRanges {
+    return createTimeRanges(this.__getBufferedRanges());
+  }
+
+  private __getBufferedRanges(): BufferedRange[] {
+    const items = Array.from(this.__bufferedItems, ({ buffered }) =>
+      normalizeRanges(buffered),
+    );
+    if (items.length === 0) return [];
+
+    return items.slice(1).reduce(intersectRanges, items[0]!);
+  }
+
+  protected override __emit(eventName: PlaybackEvent) {
+    // EventEmitter still treats subclass event targets as CorePlayback.
+    // @ts-expect-error Playback's target is narrower than CorePlayback's map.
     this.emit(eventName, { target: this, type: eventName });
   }
 
@@ -304,6 +356,81 @@ export class Playback extends CorePlayback {
       }
     });
   }
+}
+
+function createTimeRanges(ranges: readonly BufferedRange[]): TimeRanges {
+  return {
+    end(index: number) {
+      const range = ranges[index];
+      if (!range) throw new RangeError("Time range index is out of bounds");
+      return range[1];
+    },
+    get length() {
+      return ranges.length;
+    },
+    start(index: number) {
+      const range = ranges[index];
+      if (!range) throw new RangeError("Time range index is out of bounds");
+      return range[0];
+    },
+  };
+}
+
+function normalizeRanges(ranges: readonly BufferedRange[]): BufferedRange[] {
+  const sorted = ranges
+    .filter(
+      ([start, end]) =>
+        Number.isFinite(start) && Number.isFinite(end) && end > start,
+    )
+    .map(([start, end]) => [start, end] as const)
+    .sort(([startA], [startB]) => startA - startB);
+  const normalized: BufferedRange[] = [];
+
+  for (const [start, end] of sorted) {
+    const previous = normalized.at(-1);
+    if (!previous || start > previous[1]) {
+      normalized.push([start, end]);
+    } else if (end > previous[1]) {
+      normalized[normalized.length - 1] = [previous[0], end];
+    }
+  }
+
+  return normalized;
+}
+
+function intersectRanges(
+  left: readonly BufferedRange[],
+  right: readonly BufferedRange[],
+): BufferedRange[] {
+  const intersection: BufferedRange[] = [];
+  let leftIndex = 0;
+  let rightIndex = 0;
+
+  while (leftIndex < left.length && rightIndex < right.length) {
+    const leftRange = left[leftIndex]!;
+    const rightRange = right[rightIndex]!;
+    const start = Math.max(leftRange[0], rightRange[0]);
+    const end = Math.min(leftRange[1], rightRange[1]);
+    if (end > start) intersection.push([start, end]);
+
+    if (leftRange[1] < rightRange[1]) leftIndex++;
+    else rightIndex++;
+  }
+
+  return normalizeRanges(intersection);
+}
+
+function sameRanges(
+  left: readonly BufferedRange[],
+  right: readonly BufferedRange[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every(
+      ([start, end], index) =>
+        start === right[index]?.[0] && end === right[index]?.[1],
+    )
+  );
 }
 
 function transformOptions(options: DurationLike): number;

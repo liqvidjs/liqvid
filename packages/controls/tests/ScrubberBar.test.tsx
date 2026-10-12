@@ -49,4 +49,20 @@ describe("Scrubber bar", () => {
     fireEvent.keyDown(document.body, { code: "KeyW", key: "w" });
     expect(playback.currentTime).toBe(20000);
   });
+
+  test("shows buffered ranges on the timeline", () => {
+    const item = { buffered: [] };
+
+    act(() => {
+      playback.registerBufferedItem(item);
+      playback.updateBufferedItem(item, [[10, 30]]);
+    });
+
+    const bufferedRange = document.querySelector(".lv-progress-buffered");
+    expect(bufferedRange).not.toBeNull();
+    expect(bufferedRange?.getAttribute("x")).toBe(`${(10 / 60) * 100}`);
+    expect(bufferedRange?.getAttribute("width")).toBe(`${(20 / 60) * 100}`);
+
+    act(() => playback.unregisterBufferedItem(item));
+  });
 });

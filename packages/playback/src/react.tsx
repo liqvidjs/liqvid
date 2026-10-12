@@ -11,7 +11,7 @@ import { usePluginApi } from "@liqvid/studio-plugin-api";
 import { makeContext } from "@liqvid/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { Playback } from "./Playback.mts";
+import type { BufferedItem, BufferedRange, Playback } from "./Playback.mts";
 import type {
   CorePlayback,
   PlaybackEvent,
@@ -206,7 +206,7 @@ export function usePlaybackEvent<
   useEventListener(usePlaybackOptional(), eventName, callback, options);
 }
 
-export function useReadyStateItem(defaultValue = 4) {
+export function useReadyStateItem(defaultValue = 4, enabled = true) {
   const [readyState, setReadyState] = useState(defaultValue);
 
   const [item] = useState(() => ({
@@ -216,16 +216,40 @@ export function useReadyStateItem(defaultValue = 4) {
   const playback = usePlayback();
 
   useEffect(() => {
+    if (!enabled) return;
     playback.registerReadyStateItem(item);
 
     return () => {
       playback.unregisterReadyStateItem(item);
     };
-  }, [playback, item]);
+  }, [enabled, playback, item]);
 
   useEffect(() => {
+    if (!enabled) return;
     playback.updateReadyStateItem(item, readyState);
-  }, [playback, item, readyState]);
+  }, [enabled, playback, item, readyState]);
 
   return { readyState, setReadyState };
+}
+
+export function useBufferedItem(enabled = true) {
+  const [buffered, setBuffered] = useState<readonly BufferedRange[]>([]);
+  const [item] = useState<BufferedItem>(() => ({ buffered }));
+  const playback = usePlayback();
+
+  useEffect(() => {
+    if (!enabled) return;
+    playback.registerBufferedItem(item);
+
+    return () => {
+      playback.unregisterBufferedItem(item);
+    };
+  }, [enabled, playback, item]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    playback.updateBufferedItem(item, buffered);
+  }, [enabled, playback, item, buffered]);
+
+  return { buffered, setBuffered };
 }

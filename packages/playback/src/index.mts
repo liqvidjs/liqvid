@@ -1,4 +1,9 @@
-export { Playback } from "./Playback.mts";
+export {
+  type BufferedItem,
+  type BufferedRange,
+  Playback,
+  type ReadyStateItem,
+} from "./Playback.mts";
 export {
   type AudioSourceRegistration,
   CorePlayback,

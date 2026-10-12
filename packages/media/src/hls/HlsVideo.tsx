@@ -3,6 +3,7 @@
 import type { DurationLike } from "@liqvid/duration";
 import { useEffect, useRef, useState } from "react";
 
+import { useLoadHold } from "../useLoadHold.ts";
 import { Video } from "../Video.tsx";
 
 import type { GreenScreenConfig } from "./greenscreen.ts";
@@ -94,20 +95,7 @@ function useHlsSource(
   defer?: Promise<void>,
 ): string | undefined {
   const [source, setSource] = useState<string>();
-  const [held, setHeld] = useState(Boolean(defer));
-
-  useEffect(() => {
-    if (defer) {
-      let active = true;
-      setHeld(true);
-      defer.then(() => {
-        if (active) setHeld(false);
-      });
-      return () => {
-        active = false;
-      };
-    }
-  }, [defer]);
+  const held = useLoadHold(defer);
 
   useEffect(() => {
     if (held) return;

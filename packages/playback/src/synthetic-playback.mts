@@ -15,6 +15,7 @@ export type PlaybackEvent =
   | "pause"
   | "play"
   | "ratechange"
+  | "readystatechange"
   | "seeked"
   | "seeking"
   | "stop"

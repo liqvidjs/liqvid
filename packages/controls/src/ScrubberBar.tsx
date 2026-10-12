@@ -79,6 +79,7 @@ export function ScrubberBar({
     scrubber: playback.currentTime / playback.duration,
     thumb: playback.currentTime / playback.duration,
   });
+  const [buffered, setBuffered] = useState(playback.buffered);
   const [showThumb, setShowThumb] = useState(false);
 
   // refs
@@ -100,6 +101,14 @@ export function ScrubberBar({
     const progress = playback.currentTime / playback.duration;
     setProgress((prev) => ({ scrubber: progress, thumb: prev.thumb }));
   });
+
+  usePlaybackEvent("bufferupdate", () => {
+    setBuffered(playback.buffered);
+  });
+
+  useEffect(() => {
+    setBuffered(playback.buffered);
+  }, [playback]);
 
   useRelativeShortcuts(shortcuts?.relative);
   usePercentageShortcuts(shortcuts?.percentage);
@@ -283,13 +292,6 @@ export function ScrubberBar({
           viewBox="0 0 100 10"
         >
           <rect
-            className="lv-progress-elapsed"
-            height="10"
-            width={progress.scrubber * 100}
-            x="0"
-            y="0"
-          />
-          <rect
             className="lv-progress-remaining"
             height="10"
             width={(1 - progress.scrubber) * 100}
@@ -297,11 +299,31 @@ export function ScrubberBar({
             y="0"
           />
 
-          {/*ranges.map(([start, end]) => (
-            <rect
-              key={`${start}-${end}`} className="controls-progress-buffered"
-              x={start / playback.duration * 100} y="0" height="10" width={(end - start) / playback.duration * 100}/>
-          ))*/}
+          {playback.duration > 0 &&
+            Array.from({ length: buffered.length }, (_, index) => {
+              const start = clamp(0, buffered.start(index), playback.duration);
+              const end = clamp(0, buffered.end(index), playback.duration);
+              if (end <= start) return null;
+
+              return (
+                <rect
+                  className="lv-progress-buffered"
+                  height="10"
+                  key={`${start}-${end}`}
+                  width={((end - start) / playback.duration) * 100}
+                  x={(start / playback.duration) * 100}
+                  y="0"
+                />
+              );
+            })}
+
+          <rect
+            className="lv-progress-elapsed"
+            height="10"
+            width={progress.scrubber * 100}
+            x="0"
+            y="0"
+          />
 
           {parsedHighlights.map(({ highlight: { title }, time }) => (
             <rect
