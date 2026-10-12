@@ -78,6 +78,7 @@ const generateThumbnails = Effect.fnUntraced(function* (
   jobId: string,
   jobFilePath: AbsoluteFile,
   jobOptions: ThumbnailsJobIn,
+  params: Readonly<Record<string, string>> | undefined,
 ) {
   const { config: $config } = getServerState();
   const fs = yield* FileSystem.FileSystem;
@@ -119,7 +120,11 @@ const generateThumbnails = Effect.fnUntraced(function* (
     ),
   );
 
-  yield* createJob("thumbnails", generation, { id: jobId, path: projectPath });
+  yield* createJob("thumbnails", generation, {
+    id: jobId,
+    params,
+    path: projectPath,
+  });
 
   return yield* Effect.all(
     schemes.map(({ outputDir }) => readThumbSheets(outputDir)),
@@ -282,6 +287,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           jobId,
           jobFilePath,
           jobOptions,
+          payload.params,
         );
 
         const lightIndex = schemes.findIndex((s) => s.colorScheme === "light");

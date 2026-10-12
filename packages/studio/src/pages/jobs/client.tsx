@@ -67,6 +67,13 @@ const styles = stylex.create({
     fill: colors.successSolid,
   },
 
+  pathParam: {
+    backgroundColor: "#f59e0b",
+    borderRadius: 2,
+    color: "black",
+    paddingInline: 1,
+  },
+
   filter: {
     alignItems: "center",
     display: "flex",
@@ -215,6 +222,25 @@ const LOG_LEVELS = ["error", "warn", "info", "log", "debug"] as const;
 export const DEFAULT_LOG_LEVELS: LogLevel[] = ["error", "warn", "info", "log"];
 
 type LogLevel = StructuredLogType;
+
+function JobPath({ params, path }: Pick<LoggableJobClient, "params" | "path">) {
+  return (
+    <pre>
+      {path?.split(/(\[[^\]]+\])/g).map((part, index) => {
+        const match = /^\[([^\]]+)\]$/.exec(part);
+        const value = match ? params?.[match[1]!] : undefined;
+
+        return value === undefined ? (
+          part
+        ) : (
+          <span key={index} sx={styles.pathParam} title={part}>
+            {value}
+          </span>
+        );
+      })}
+    </pre>
+  );
+}
 
 const cookieOptions = {
   maxAge: Duration.inSeconds({ days: 365 }),
@@ -436,7 +462,7 @@ export function JobsClient({
                     kind={job.name.slice(0, job.name.indexOf(":")) as JobKind}
                     t={t}
                   />
-                  <pre>{job.path}</pre>
+                  <JobPath params={job.params} path={job.path} />
                   {">"}
                   <span>{job.name}</span>
                   {job.state === "running" ? (
