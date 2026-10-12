@@ -64,7 +64,7 @@ export async function Jobs() {
   const jobs = Object.fromEntries(
     Array.from(serverJobs.new.entries()).map(
       ([id, job]) =>
-        [id, pick(job, ["id", "logs", "name", "path", "state"])] as [
+        [id, pick(job, ["id", "logs", "name", "params", "path", "state"])] as [
           string,
           LoggableJobClient,
         ],

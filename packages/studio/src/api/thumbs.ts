@@ -70,6 +70,7 @@ const generateThumbnails = Effect.fnUntraced(function* (
   }>[],
   { colorScheme: _, ...body }: GenerateThumbsBody,
   projectPath: RelativeDir,
+  params: Readonly<Record<string, string>> | undefined,
 ) {
   const { config: $config } = getServerState();
   const fs = yield* FileSystem.FileSystem;
@@ -101,7 +102,7 @@ const generateThumbnails = Effect.fnUntraced(function* (
       })),
       url,
     }),
-    { path: projectPath },
+    { params, path: projectPath },
   );
 
   return yield* Effect.all(
@@ -262,6 +263,7 @@ export const thumbsLive = HttpApiBuilder.group(WebApi, "thumbs", (handlers) =>
           schemes,
           payload,
           projectPath,
+          payload.params,
         );
 
         const lightIndex = schemes.findIndex((s) => s.colorScheme === "light");

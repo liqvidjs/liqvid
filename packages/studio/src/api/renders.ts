@@ -268,6 +268,7 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
 
         // Start render in background (don't await)
         yield* createJob(renderJobName(projectPath, renderId), fiber, {
+          params: payload.params,
           path: projectPath,
         });
 

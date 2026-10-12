@@ -127,6 +127,7 @@ export const captionsLive = HttpApiBuilder.group(
             );
 
             yield* createJob(jobName, fiber, {
+              params,
               path: projectPath,
             });
 

@@ -213,6 +213,8 @@ export const LoggableJobClient = Schema.Struct({
 
   name: Schema.String,
 
+  params: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+
   path: Schema.optional(Schema.String),
 
   startTime: SerializedDate,

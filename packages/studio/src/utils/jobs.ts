@@ -58,6 +58,7 @@ export const createJob = Effect.fnUntraced(function* <A, E, R>(
   name: string,
   effect: Effect.Effect<A, E, R>,
   options?: {
+    readonly params?: Readonly<Record<string, string>>;
     readonly path?: string;
   },
 ) {

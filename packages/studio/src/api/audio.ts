@@ -208,7 +208,7 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
               }),
             ),
           ),
-          { path: projectPath },
+          { params, path: projectPath },
         );
 
         return { id };
