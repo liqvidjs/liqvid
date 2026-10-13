@@ -1,7 +1,7 @@
 "use client";
 
 import { Duration, type DurationLike } from "@liqvid/duration";
-import type { AudioSourceRegistration } from "@liqvid/playback";
+import type { AudioSourceRegistration, BufferedRange } from "@liqvid/playback";
 import {
   useBufferedItem,
   usePlayback,
@@ -21,6 +21,7 @@ import {
   useRef,
 } from "react";
 
+import { readResponseWithProgress } from "./readResponseWithProgress.ts";
 import { useLoadHold } from "./useLoadHold.ts";
 
 export type AudioProps<M extends string = string> = {
@@ -31,6 +32,9 @@ export type AudioProps<M extends string = string> = {
 
   /** URL to the audio file. If not provided, will search children for <source> elements. */
   src?: string;
+
+  /** Known duration, used to report buffering before an AudioContext is ready. */
+  duration?: DurationLike;
 
   /** Offset in seconds at which to start the audio file */
   start?: number | DurationLike | M;
@@ -81,6 +85,7 @@ function findSupportedSource(children: React.ReactNode): string | undefined {
 export function Audio<M extends string = string>({
   children,
   defer,
+  duration,
   src: srcProp,
   start = 0,
 }: AudioProps<M>) {
@@ -132,6 +137,9 @@ export function Audio<M extends string = string>({
   // Store the decoded audio buffer
   const audioBufferRef = useRef<AudioBuffer | null>(null);
 
+  // Avoid decoding the same response again when the playback context appears.
+  const decodingArrayBufferRef = useRef<ArrayBuffer | null>(null);
+
   // Store the current buffer source node (needs to be recreated on each play)
   const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
 
@@ -142,19 +150,33 @@ export function Audio<M extends string = string>({
   const registrationRef = useRef<AudioSourceRegistration | null>(null);
 
   /**
-   * Decode the audio data once audioContext is available
+   * Decode downloaded audio, even before playback creates its output context.
    */
   const decodeAudio = useCallback(() => {
-    const audioContext = playback.audioContext;
     const arrayBuffer = arrayBufferRef.current;
-    if (!audioContext || !arrayBuffer || audioBufferRef.current) return;
+    if (
+      !arrayBuffer ||
+      audioBufferRef.current ||
+      decodingArrayBufferRef.current === arrayBuffer
+    ) {
+      return;
+    }
+
+    const decodeContext =
+      playback.audioContext ??
+      (typeof OfflineAudioContext === "undefined"
+        ? undefined
+        : new OfflineAudioContext(1, 1, 48000));
+    if (!decodeContext) return;
 
     // Clone the ArrayBuffer because decodeAudioData detaches (consumes) it
     const bufferCopy = arrayBuffer.slice(0);
+    decodingArrayBufferRef.current = arrayBuffer;
 
-    audioContext
+    decodeContext
       .decodeAudioData(bufferCopy)
       .then((buffer) => {
+        if (arrayBufferRef.current !== arrayBuffer) return;
         audioBufferRef.current = buffer;
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
         setBuffered([[startInSeconds, startInSeconds + buffer.duration]]);
@@ -170,8 +192,14 @@ export function Audio<M extends string = string>({
         playback.registerAudioSource(registrationRef.current);
       })
       .catch((error) => {
+        if (arrayBufferRef.current !== arrayBuffer) return;
         console.error("Failed to decode audio:", error);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
+      })
+      .finally(() => {
+        if (decodingArrayBufferRef.current === arrayBuffer) {
+          decodingArrayBufferRef.current = null;
+        }
       });
   }, [playback, setBuffered, setReadyState, startInSeconds]);
 
@@ -279,17 +307,30 @@ export function Audio<M extends string = string>({
     }
 
     let cancelled = false;
+    const controller = new AbortController();
+    const durationInSeconds =
+      duration === undefined ? undefined : Duration.inSeconds(duration);
+    const onProgress = createBufferProgressHandler(
+      startInSeconds,
+      durationInSeconds,
+      setBuffered,
+    );
     arrayBufferRef.current = null;
     audioBufferRef.current = null;
     setReadyState(HTMLMediaElement.HAVE_NOTHING);
     setBuffered([]);
 
-    fetch(src)
-      .then((response) => response.arrayBuffer())
+    fetch(src, { signal: controller.signal })
+      .then((response) => readResponseWithProgress(response, onProgress))
       .then((arrayBuffer) => {
         if (cancelled) return;
         arrayBufferRef.current = arrayBuffer;
-        setReadyState(HTMLMediaElement.HAVE_METADATA);
+        reportAudioLoaded(
+          startInSeconds,
+          durationInSeconds,
+          setBuffered,
+          setReadyState,
+        );
         // Try to decode immediately if audioContext is available
         decodeAudio();
       })
@@ -301,12 +342,29 @@ export function Audio<M extends string = string>({
 
     return () => {
       cancelled = true;
+      controller.abort();
       stopAudio();
     };
-  }, [src, held, decodeAudio, setBuffered, setReadyState, stopAudio]);
+  }, [
+    src,
+    held,
+    duration,
+    decodeAudio,
+    setBuffered,
+    setReadyState,
+    startInSeconds,
+    stopAudio,
+  ]);
 
   // Decode audio when audioContext becomes available
-  usePlaybackEvent("audiocontextchange", decodeAudio, { enabled: isActive });
+  usePlaybackEvent(
+    "audiocontextchange",
+    () => {
+      decodeAudio();
+      syncAudio();
+    },
+    { enabled: isActive },
+  );
 
   // Handle play event
   usePlaybackEvent("play", syncAudio, { enabled: isActive });
@@ -355,4 +413,32 @@ export function Audio<M extends string = string>({
   }
 
   return <div>{children}</div>;
+}
+
+function createBufferProgressHandler(
+  startInSeconds: number,
+  durationInSeconds: number | undefined,
+  setBuffered: (ranges: readonly BufferedRange[]) => void,
+): ((progress: number) => void) | undefined {
+  if (durationInSeconds === undefined) return;
+
+  return (progress) => {
+    // Approximate the sequential media-time range from downloaded bytes.
+    const loadedDuration = durationInSeconds * progress;
+    setBuffered([[startInSeconds, startInSeconds + loadedDuration]]);
+  };
+}
+
+function reportAudioLoaded(
+  startInSeconds: number,
+  durationInSeconds: number | undefined,
+  setBuffered: (ranges: readonly BufferedRange[]) => void,
+  setReadyState: (readyState: number) => void,
+): void {
+  setReadyState(HTMLMediaElement.HAVE_METADATA);
+  if (durationInSeconds === undefined) {
+    return;
+  }
+
+  setBuffered([[startInSeconds, startInSeconds + durationInSeconds]]);
 }

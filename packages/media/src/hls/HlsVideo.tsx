@@ -4,6 +4,7 @@ import type { DurationLike } from "@liqvid/duration";
 import { useEffect, useRef, useState } from "react";
 
 import { useLoadHold } from "../useLoadHold.ts";
+import { useSyncMedia } from "../useSyncMedia.ts";
 import { Video } from "../Video.tsx";
 
 import type { GreenScreenConfig } from "./greenscreen.ts";
@@ -35,6 +36,13 @@ export interface HlsVideoProps {
 
   hls?: string | readonly string[];
 
+  /**
+   * Number of seconds ahead of the current time to preload HLS segments.
+   * In MediaBunny mode, omitting this loads only the next segment. Supplying a
+   * value opts into MediaBunny rendering so the prefetch distance is bounded.
+   */
+  preload?: number | DurationLike;
+
   /** Liqvid time at which this HLS video begins. */
   start?: DurationLike;
 
@@ -46,6 +54,7 @@ export function HlsVideo({
   frameAccurate = false,
   greenscreen = false,
   hls,
+  preload,
   start,
   style,
   ...props
@@ -55,7 +64,11 @@ export function HlsVideo({
   const [nativeHls, setNativeHls] = useState(false);
   const useNativeSource =
     nativeHls && Boolean(source) && !source?.startsWith("data:");
-  const useCanvas = frameAccurate || Boolean(greenscreen) || !useNativeSource;
+  const useCanvas =
+    frameAccurate ||
+    Boolean(greenscreen) ||
+    preload !== undefined ||
+    !useNativeSource;
 
   useEffect(() => {
     const video = document.createElement("video");
@@ -66,6 +79,7 @@ export function HlsVideo({
     canvasRef,
     enabled: useCanvas,
     greenscreen,
+    preload,
     source,
     start,
   });
@@ -73,10 +87,10 @@ export function HlsVideo({
   if (useCanvas) {
     return (
       <div style={style} {...props}>
-        {useNativeSource && (
-          <Video className="invisible absolute" src={source} start={start}>
+        {useNativeSource && source && (
+          <NativeAudio src={source} start={start}>
             {props.children}
-          </Video>
+          </NativeAudio>
         )}
         <canvas className="h-full w-auto" ref={canvasRef} />
       </div>
@@ -84,9 +98,39 @@ export function HlsVideo({
   }
 
   return (
-    <Video src={source} start={start} style={style} {...props}>
+    <Video
+      preload="metadata"
+      src={source}
+      start={start}
+      style={style}
+      {...props}
+    >
       {props.children}
     </Video>
+  );
+}
+
+/**
+ * Plays the stream's audio while frames are drawn to the canvas. An `<audio>`
+ * element avoids decoding the video a second time.
+ */
+function NativeAudio({
+  children,
+  src,
+  start,
+}: {
+  children?: React.ReactNode;
+  src: string;
+  start?: DurationLike;
+}) {
+  const ref = useRef<HTMLAudioElement>(null);
+  useSyncMedia(ref, start);
+
+  return (
+    // biome-ignore lint/a11y/useMediaCaption: caption tracks are passed through as children
+    <audio preload="metadata" ref={ref} src={src}>
+      {children}
+    </audio>
   );
 }
 

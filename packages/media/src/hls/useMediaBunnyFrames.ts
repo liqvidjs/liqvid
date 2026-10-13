@@ -1,32 +1,16 @@
-import type { DurationLike } from "@liqvid/duration";
+import { Duration, type DurationLike } from "@liqvid/duration";
 import {
+  useBufferedItem,
   usePlayback,
   usePlaybackEvent,
   useReadyStateItem,
 } from "@liqvid/playback/react";
 import { useStableDuration } from "@liqvid/utils";
-import { CanvasSink, HLS_FORMATS, Input, UrlSource } from "mediabunny";
-import { useEffect, useEffectEvent, useRef } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef } from "react";
 
-import {
-  disposeGreenScreen,
-  type GreenScreenConfig,
-  renderGreenScreen,
-} from "./greenscreen.ts";
-
-type FrameRenderer = Readonly<{
-  dispose: () => void;
-  invalidate: () => void;
-  render: (timestamp: number) => void;
-  seek: (timestamp: number) => void;
-}>;
-
-type FrameSession = Pick<
-  FrameRenderer,
-  "dispose" | "invalidate" | "render" | "seek"
->;
-
-type CanvasFrame = NonNullable<Awaited<ReturnType<CanvasSink["getCanvas"]>>>;
+import { createFrameHost } from "./frame-host.ts";
+import { type FrameRenderer, ReadyState } from "./frame-session.ts";
+import { type GreenScreenConfig, resolveGreenScreen } from "./greenscreen.ts";
 
 export function useMediaBunnyFrames({
   canvasRef,
@@ -34,76 +18,110 @@ export function useMediaBunnyFrames({
   greenscreen,
   source,
   start,
+  preload,
 }: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   enabled: boolean;
   greenscreen: boolean | GreenScreenConfig;
   source?: string;
   start?: DurationLike;
+  /** Seconds, or a duration. */
+  preload?: number | DurationLike;
 }): void {
   const playback = usePlayback();
+  const { setBuffered } = useBufferedItem(enabled);
   const { setReadyState } = useReadyStateItem();
   const start$ = useStableDuration(start ?? {});
   const rendererRef = useRef<FrameRenderer | null>(null);
 
+  const preloadSeconds =
+    preload === undefined || typeof preload === "number"
+      ? preload
+      : Duration.inSeconds(preload);
+
+  // Frames arrive many times per second; only report actual changes.
+  const reportedReadyState = useRef<number>(ReadyState.HAVE_ENOUGH_DATA);
+  const reportReadyState = useCallback(
+    (readyState: number) => {
+      if (reportedReadyState.current === readyState) return;
+      reportedReadyState.current = readyState;
+      setReadyState(readyState);
+    },
+    [setReadyState],
+  );
+  const reportBuffered = useCallback(
+    (ranges: readonly (readonly [number, number])[]) => {
+      const offset = start$.inSeconds();
+      setBuffered(
+        ranges.map(
+          ([rangeStart, rangeEnd]) =>
+            [offset + rangeStart, offset + rangeEnd] as const,
+        ),
+      );
+    },
+    [setBuffered, start$],
+  );
+
+  // Depend on the resolved values so an inline config object doesn't restart
+  // decoding on every render.
+  const keying = resolveGreenScreen(greenscreen);
+  const keyColor = keying?.color;
+  const keyTolerance = keying?.tolerance;
+
+  const isPlaying = () => !playback.paused && !playback.seeking;
+  const mediaTime$ = useEffectEvent(() =>
+    playback.currentTime$.minus(start$).inSeconds(),
+  );
   const renderAtPlaybackTime$ = useEffectEvent(() => {
     if (playback.paused && !playback.seeking) return;
-    const timestamp = playback.currentTime$.minus(start$).inSeconds();
-    rendererRef.current?.render(timestamp);
+    rendererRef.current?.render(mediaTime$());
   });
   const seekAtPlaybackTime$ = useEffectEvent(() => {
-    const timestamp = playback.currentTime$.minus(start$).inSeconds();
-    rendererRef.current?.seek(timestamp);
+    rendererRef.current?.seek(mediaTime$(), isPlaying());
   });
   const renderAfterSeek$ = useEffectEvent(() => {
     if (playback.seeking) return;
-    const timestamp = playback.currentTime$.minus(start$).inSeconds();
-    rendererRef.current?.seek(timestamp);
+    rendererRef.current?.seek(mediaTime$(), isPlaying());
   });
+
   useEffect(() => {
-    if (!source || !enabled) return;
+    const canvas = canvasRef.current;
+    if (!source || !enabled || !canvas) return;
 
-    setReadyState(HTMLMediaElement.HAVE_NOTHING);
-    const input = new Input({
-      formats: HLS_FORMATS,
-      source: new UrlSource(source),
+    reportReadyState(ReadyState.HAVE_NOTHING);
+    const renderer = createFrameHost({
+      canvas,
+      greenscreen:
+        keyColor === undefined || keyTolerance === undefined
+          ? null
+          : { color: keyColor, tolerance: keyTolerance },
+      initialTimestamp: playback.currentTime$.minus(start$).inSeconds(),
+      onBuffered: reportBuffered,
+      onError(message, error) {
+        reportReadyState(ReadyState.HAVE_ENOUGH_DATA);
+        console.error(`${message} with MediaBunny`, error);
+      },
+      onReadyState: reportReadyState,
+      preloadSeconds,
+      source: new URL(source, document.baseURI).href,
     });
-    let active = true;
-
-    void createFrameRenderer(
-      input,
-      canvasRef,
-      greenscreen,
-      setReadyState,
-      playback.currentTime$.minus(start$).inSeconds(),
-    )
-      .then((renderer) => {
-        if (!active) {
-          renderer.dispose();
-          return;
-        }
-        rendererRef.current = renderer;
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
-        console.error("Failed to load HLS video with MediaBunny", error);
-      });
+    rendererRef.current = renderer;
 
     return () => {
-      active = false;
-      rendererRef.current?.dispose();
+      renderer.dispose();
       rendererRef.current = null;
-      if (greenscreen) disposeGreenScreen(canvasRef.current);
-      setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
-      input.dispose();
+      reportBuffered([]);
+      reportReadyState(ReadyState.HAVE_ENOUGH_DATA);
     };
   }, [
     canvasRef,
     enabled,
-    greenscreen,
+    keyColor,
+    keyTolerance,
     playback,
-    setReadyState,
+    preloadSeconds,
+    reportBuffered,
+    reportReadyState,
     source,
     start$,
   ]);
@@ -114,7 +132,7 @@ export function useMediaBunnyFrames({
     renderAtPlaybackTime$,
     seekAtPlaybackTime$,
     renderAfterSeek$,
-    setReadyState,
+    reportReadyState,
   );
 }
 
@@ -148,285 +166,6 @@ function useFramePlaybackEvents(
   usePlaybackEvent("seeking", () => {
     if (!playback.seeking) programmaticSeek.current = true;
     if (!enabled) return;
-    setReadyState(HTMLMediaElement.HAVE_METADATA);
+    setReadyState(ReadyState.HAVE_METADATA);
   });
-}
-
-async function createFrameRenderer(
-  input: Input,
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  greenscreen: boolean | GreenScreenConfig,
-  setReadyState: (readyState: number) => void,
-  initialTimestamp: number,
-): Promise<FrameRenderer> {
-  const track = await input.getPrimaryVideoTrack();
-  if (!track) {
-    setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
-    return {
-      dispose: () => {},
-      invalidate: () => {},
-      render: () => {},
-      seek: () => {},
-    };
-  }
-
-  const firstTimestamp = await track.getFirstTimestamp();
-  const session = new SequentialFrameSession({
-    canvasRef,
-    firstTimestamp,
-    greenscreen,
-    initialTimestamp,
-    setReadyState,
-    track,
-  });
-  let lastTimestamp = initialTimestamp;
-  let settledBySeek = true;
-
-  return {
-    dispose: () => session.dispose(),
-    invalidate: () => session.invalidate(),
-    render: (timestamp) => {
-      if (timestamp === lastTimestamp) return;
-      if (timestamp < lastTimestamp) {
-        session.seek(timestamp);
-        settledBySeek = true;
-      } else {
-        session.render(timestamp);
-        settledBySeek = false;
-      }
-      lastTimestamp = timestamp;
-    },
-    seek: (timestamp) => {
-      // A sequential render to this timestamp must not swallow the seek.
-      // Otherwise releasing the scrubber continues the frame walk.
-      if (timestamp === lastTimestamp && settledBySeek) return;
-      session.seek(timestamp);
-      lastTimestamp = timestamp;
-      settledBySeek = true;
-    },
-  };
-}
-
-class SequentialFrameSession implements FrameSession {
-  private __active = true;
-  private __invalidated = false;
-  private __targetVersion = 0;
-  private __target: number;
-  private __seekRequest: { timestamp: number; version: number } | null;
-  private __pendingFrame: CanvasFrame | null = null;
-  private __iterator: AsyncIterator<CanvasFrame> | null = null;
-  private __wake: (() => void) | null = null;
-  private readonly __sink: CanvasSink;
-
-  constructor(
-    private readonly __options: {
-      canvasRef: React.RefObject<HTMLCanvasElement | null>;
-      firstTimestamp: number;
-      greenscreen: boolean | GreenScreenConfig;
-      initialTimestamp: number;
-      setReadyState: (readyState: number) => void;
-      track: NonNullable<Awaited<ReturnType<Input["getPrimaryVideoTrack"]>>>;
-    },
-  ) {
-    this.__sink = new CanvasSink(__options.track, { poolSize: 1 });
-    this.__target = this.toTrackTimestamp(__options.initialTimestamp);
-    this.__seekRequest = {
-      timestamp: this.__target,
-      version: this.__targetVersion,
-    };
-    void this.__run();
-  }
-
-  dispose(): void {
-    this.__active = false;
-    this.__cancelFrames();
-  }
-
-  invalidate(): void {
-    this.__invalidated = true;
-    this.__targetVersion += 1;
-    this.__cancelFrames();
-  }
-
-  private __cancelFrames(): void {
-    this.__seekRequest = null;
-    this.__pendingFrame = null;
-    this.__closeIterator();
-    this.__wakeForUpdate();
-  }
-
-  render(timestamp: number): void {
-    if (!this.__active || this.__invalidated) return;
-    this.__target = this.toTrackTimestamp(timestamp);
-    // Playback keeps ticking during a seek. Bumping the version here would
-    // drop the seeked frame when it arrives.
-    this.__wakeForUpdate();
-  }
-
-  seek(timestamp: number): void {
-    if (!this.__active) return;
-    this.__invalidated = false;
-    this.__target = this.toTrackTimestamp(timestamp);
-    this.__targetVersion += 1;
-    this.__seekRequest = {
-      timestamp: this.__target,
-      version: this.__targetVersion,
-    };
-    this.__pendingFrame = null;
-    this.__closeIterator();
-    this.__wakeForUpdate();
-  }
-
-  private async __run(): Promise<void> {
-    while (this.__active) {
-      try {
-        await this.__processStep();
-      } catch (error) {
-        if (!this.__active) return;
-        if (this.__invalidated || this.__seekRequest) continue;
-        this.__reportError("Failed to process HLS video frame", error);
-        return;
-      }
-    }
-  }
-
-  private async __processStep(): Promise<void> {
-    if (this.__invalidated || (!this.__seekRequest && !this.__iterator)) {
-      await this.__waitForUpdate();
-      return;
-    }
-    if (this.__seekRequest) {
-      await this.__seekToRequest();
-      return;
-    }
-    if (this.__iterator) await this.__processNextFrame(this.__iterator);
-  }
-
-  private async __processNextFrame(
-    iterator: AsyncIterator<CanvasFrame>,
-  ): Promise<void> {
-    let frame = this.__pendingFrame;
-    this.__pendingFrame = null;
-    if (!frame) {
-      const result = await iterator.next();
-      if (!this.__active) return;
-      if (this.__seekRequest || iterator !== this.__iterator) return;
-      if (result.done) {
-        this.__iterator = null;
-        return;
-      }
-      frame = result.value;
-    }
-
-    if (frame.timestamp <= this.__target) {
-      this.__draw(frame);
-    } else {
-      this.__pendingFrame = frame;
-      await this.__waitForUpdate();
-    }
-  }
-
-  private async __seekToRequest(): Promise<void> {
-    const request = this.__seekRequest;
-    if (!request) return;
-    this.__seekRequest = null;
-
-    try {
-      const frame = await this.__sink.getCanvas(request.timestamp);
-      if (!this.__active) return;
-      if (this.__invalidated || this.__seekRequest) return;
-
-      if (
-        frame &&
-        frame.timestamp <= this.__target &&
-        request.version === this.__targetVersion
-      ) {
-        this.__draw(frame);
-      }
-      const sequenceStart = frame
-        ? frame.timestamp + frame.duration
-        : request.timestamp;
-      this.__iterator = this.__sink
-        .canvases(sequenceStart)
-        [Symbol.asyncIterator]();
-    } catch (error) {
-      if (!this.__active) return;
-      if (this.__invalidated || this.__seekRequest) return;
-      this.__reportError("Failed to seek HLS video", error);
-    }
-  }
-
-  private async __waitForUpdate(): Promise<void> {
-    if (!this.__active || this.__seekRequest !== null) return;
-    await new Promise<void>((resolve) => {
-      this.__wake = resolve;
-    });
-  }
-
-  private __wakeForUpdate(): void {
-    const wake = this.__wake;
-    this.__wake = null;
-    wake?.();
-  }
-
-  private __closeIterator(): void {
-    const iterator = this.__iterator;
-    this.__iterator = null;
-    void iterator?.return?.().catch((error: unknown) => {
-      if (this.__active) {
-        this.__reportError("Failed to stop HLS frame iteration", error);
-      }
-    });
-  }
-
-  private __draw(frame: CanvasFrame): void {
-    const didDraw = drawFrame(
-      this.__options.canvasRef.current,
-      frame.canvas,
-      this.__options.greenscreen,
-    );
-    this.__options.setReadyState(
-      didDraw
-        ? HTMLMediaElement.HAVE_CURRENT_DATA
-        : HTMLMediaElement.HAVE_ENOUGH_DATA,
-    );
-  }
-
-  private __reportError(message: string, error: unknown): void {
-    this.__options.setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
-    console.error(`${message} with MediaBunny`, error);
-  }
-
-  private toTrackTimestamp(timestamp: number): number {
-    return this.__options.firstTimestamp + Math.max(0, timestamp);
-  }
-}
-
-function drawFrame(
-  canvas: HTMLCanvasElement | null,
-  frame: HTMLCanvasElement | OffscreenCanvas,
-  greenscreen: boolean | GreenScreenConfig,
-): boolean {
-  if (!canvas) return false;
-
-  if (greenscreen) {
-    renderGreenScreen({
-      canvas,
-      color: typeof greenscreen === "object" ? greenscreen.color : undefined,
-      source: frame,
-      tolerance:
-        typeof greenscreen === "object" ? greenscreen.tolerance : undefined,
-    });
-    return true;
-  }
-
-  const context = canvas.getContext("2d", { colorSpace: "srgb" });
-  if (!context) return false;
-
-  if (canvas.width !== frame.width || canvas.height !== frame.height) {
-    canvas.width = frame.width;
-    canvas.height = frame.height;
-  }
-  context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-  return true;
 }
