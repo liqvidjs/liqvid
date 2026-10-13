@@ -182,7 +182,7 @@ export async function startHarness() {
   });
   await page.goto(`${origin}/`);
   await page.waitForFunction(() => window.__fixture !== undefined, {
-    timeout: 5_000,
+    timeout: 5000,
   });
 
   return {

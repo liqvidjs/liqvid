@@ -120,10 +120,10 @@ function decodeWav(buffer: Uint8Array): Float32Array {
       return view.getFloat32(at, true);
     }
     if (bitsPerSample === 16) {
-      return view.getInt16(at, true) / 0x8000;
+      return view.getInt16(at, true) / 0x80_00;
     }
     if (bitsPerSample === 32) {
-      return view.getInt32(at, true) / 0x80000000;
+      return view.getInt32(at, true) / 0x80_00_00_00;
     }
     throw new Error(`Unsupported WAV bit depth: ${bitsPerSample}`);
   };

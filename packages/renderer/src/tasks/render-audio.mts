@@ -303,7 +303,7 @@ async function renderOfflineInPage({
     const offset = 44;
     for (let i = 0; i < interleaved.length; i++) {
       const sample = Math.max(-1, Math.min(1, interleaved[i]!));
-      const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+      const intSample = sample < 0 ? sample * 0x80_00 : sample * 0x7f_ff;
       view.setInt16(offset + i * 2, intSample, true);
     }
 

@@ -237,7 +237,7 @@ const assembleVideo = Effect.fnUntraced(function* ({
     formatValue: formatTime,
   });
 
-  stitchingBar.start(o.duration * 1_000, 0);
+  stitchingBar.start(o.duration * 1000, 0);
 
   yield* Effect.promise((signal) => {
     // ffmpeg stitch job

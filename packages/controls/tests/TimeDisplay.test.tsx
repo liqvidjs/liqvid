@@ -16,7 +16,7 @@ describe("Time display button", () => {
     render(<Player playback={playback}></Player>);
     act(() => {
       playback.currentTime = 0;
-      playback.duration = 60000;
+      playback.duration = 60_000;
     });
     display = document.querySelector(".lv-controls-time");
   });
@@ -24,14 +24,14 @@ describe("Time display button", () => {
   test("displays correct time", () => {
     expect(display.textContent).toBe("0:00/1:00");
     act(() => {
-      playback.seek(30500);
+      playback.seek(30_500);
     });
     expect(display.textContent).toBe("0:30/1:00");
   });
 
   test("responds to duration changes", () => {
     act(() => {
-      playback.duration = 120500;
+      playback.duration = 120_500;
     });
     expect(display.textContent).toBe("0:00/2:00");
   });

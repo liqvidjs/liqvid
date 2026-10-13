@@ -166,7 +166,7 @@ export function Audio<M extends string = string>({
       playback.audioContext ??
       (typeof OfflineAudioContext === "undefined"
         ? undefined
-        : new OfflineAudioContext(1, 1, 48000));
+        : new OfflineAudioContext(1, 1, 48_000));
     if (!decodeContext) return;
 
     // Clone the ArrayBuffer because decodeAudioData detaches (consumes) it

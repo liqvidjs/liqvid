@@ -150,6 +150,7 @@
         "useConsistentObjectDefinitions": "off",
         "useErrorCause": "error",
         "useGroupedAccessorPairs": "error",
+        "useNumericSeparators": "info",
         "useReadonlyClassProperties": "error",
         "useTemplate": "off"
       },

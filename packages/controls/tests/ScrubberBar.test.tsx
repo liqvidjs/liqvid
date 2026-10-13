@@ -21,33 +21,33 @@ describe("Scrubber bar", () => {
 
   test("Keyboard shortcuts work", () => {
     act(() => {
-      playback.seek(30000);
+      playback.seek(30_000);
     });
     fireEvent.keyDown(document.body, { code: "ArrowLeft", key: "ArrowLeft" });
-    expect(playback.currentTime).toBe(25000);
+    expect(playback.currentTime).toBe(25_000);
 
     fireEvent.keyDown(document.body, { code: "ArrowRight", key: "ArrowRight" });
-    expect(playback.currentTime).toBe(30000);
+    expect(playback.currentTime).toBe(30_000);
 
     fireEvent.keyDown(document.body, { code: "KeyJ", key: "j" });
-    expect(playback.currentTime).toBe(20000);
+    expect(playback.currentTime).toBe(20_000);
 
     fireEvent.keyDown(document.body, { code: "KeyL", key: "l" });
-    expect(playback.currentTime).toBe(30000);
+    expect(playback.currentTime).toBe(30_000);
 
     for (let i = 0; i <= 9; ++i) {
       fireEvent.keyDown(document.body, { code: `Digit${i}`, key: String(i) });
-      expect(playback.currentTime).toBe((60000 * i) / 10);
+      expect(playback.currentTime).toBe((60_000 * i) / 10);
     }
   });
 
   test("Script keyboard shortcuts work", () => {
     fireEvent.keyDown(document.body, { code: "KeyE", key: "e" });
-    expect(playback.currentTime).toBe(20000);
+    expect(playback.currentTime).toBe(20_000);
     fireEvent.keyDown(document.body, { code: "KeyE", key: "e" });
-    expect(playback.currentTime).toBe(40000);
+    expect(playback.currentTime).toBe(40_000);
     fireEvent.keyDown(document.body, { code: "KeyW", key: "w" });
-    expect(playback.currentTime).toBe(20000);
+    expect(playback.currentTime).toBe(20_000);
   });
 
   test("shows buffered ranges on the timeline", () => {
