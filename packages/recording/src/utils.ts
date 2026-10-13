@@ -137,10 +137,8 @@ export function makeReplayPlugin<Datum, State, Action, Props, History>({
     const initialState = initial ?? blankState();
 
     /** Array of times that events happen */
-    const times = data.reduce(
-      (acc, [duration]) => acc.concat((acc.at(-1) ?? 0) + duration),
-      [] as number[],
-    );
+    let elapsed = 0;
+    const times = data.map(([duration]) => (elapsed += duration));
 
     /** Uncompressed actions */
     const history = {} as History;
