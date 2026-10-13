@@ -56,7 +56,7 @@ function buildOnce(): Promise<void> {
       jsx: "automatic",
       logLevel: "error",
       outdir: BUILD_DIR,
-      plugins: [workerPlugin()],
+      plugins: [workspaceSourcePlugin(), workerPlugin()],
       sourcemap: "inline",
     });
     fs.writeFileSync(
@@ -67,6 +67,41 @@ function buildOnce(): Promise<void> {
     await esbuild.stop();
   })();
   return built;
+}
+
+/**
+ * Resolve other `@liqvid/*` workspace packages to their sources via the
+ * `@liqvid/dev` export condition, since they may not be built. (The condition
+ * can't be enabled globally: some npm dependencies declare it for sources
+ * they don't publish.) The fixture imports this package's dist directly.
+ */
+function workspaceSourcePlugin(): esbuild.Plugin {
+  return {
+    name: "workspace-source",
+    setup(build) {
+      build.onResolve(
+        { filter: /^@liqvid\// },
+        ({ path: request, resolveDir }) => {
+          const [scope, name, ...rest] = request.split("/");
+          const packageName = `${scope}/${name}`;
+          const subpath = rest.length === 0 ? "." : `./${rest.join("/")}`;
+
+          for (let dir = resolveDir; ; dir = path.dirname(dir)) {
+            const packageDir = path.join(dir, "node_modules", packageName);
+            if (fs.existsSync(path.join(packageDir, "package.json"))) {
+              const { exports } = JSON.parse(
+                fs.readFileSync(path.join(packageDir, "package.json"), "utf8"),
+              ) as { exports?: Record<string, Record<string, string>> };
+              const source = exports?.[subpath]?.["@liqvid/dev"];
+              if (!source) return;
+              return { path: fs.realpathSync(path.join(packageDir, source)) };
+            }
+            if (dir === path.dirname(dir)) return;
+          }
+        },
+      );
+    },
+  };
 }
 
 /**
