@@ -32,7 +32,9 @@ export function useActiveFile() {
     useLiveCodeStore(),
     useShallow((state) => {
       const { activeGroup, groups } = state;
-      if (!activeGroup) return null;
+      if (!activeGroup) {
+        return null;
+      }
 
       // TODO: this is inefficient
       const group = groups[activeGroup];
@@ -57,7 +59,9 @@ export function useCopyActiveFile({
 
   const copyActiveFile = useCallback(async () => {
     const view = selectActiveFile(store.getState())?.view;
-    if (!view) return;
+    if (!view) {
+      return;
+    }
 
     // copy text
     await navigator.clipboard.writeText(viewContents(view));
@@ -125,7 +129,9 @@ export function useLiveCodeShortcut(
   const isFunction = typeof action === "function";
 
   useEffect(() => {
-    if (!shortcut) return;
+    if (!shortcut) {
+      return;
+    }
 
     setStoreState((prev) => ({
       shortcuts: {

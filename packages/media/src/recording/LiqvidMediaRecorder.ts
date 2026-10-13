@@ -80,7 +80,9 @@ export class LiqvidMediaRecorder
   }
 
   beginRecording() {
-    if (!this.stream) throw new Error("Navigator stream not available");
+    if (!this.stream) {
+      throw new Error("Navigator stream not available");
+    }
 
     this.chunks = [];
     this.stopPromise = null;
@@ -107,7 +109,9 @@ export class LiqvidMediaRecorder
   }
 
   endRecording() {
-    if (!this.mediaRecorder) return;
+    if (!this.mediaRecorder) {
+      return;
+    }
 
     // Create a promise that resolves when the recorder stops
     this.stopPromise = new Promise<void>((resolve) => {

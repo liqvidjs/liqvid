@@ -142,7 +142,9 @@ export function TldrawReplay({
   // provide the editor to the follow controller and suspend following when the
   // viewer moves the camera or switches pages on their own
   useEffect(() => {
-    if (!editor) return;
+    if (!editor) {
+      return;
+    }
     follow.provideEditor(editor);
 
     const unlisten = editor.store.listen(
@@ -222,7 +224,9 @@ export function TldrawReplay({
   // subscribe to replay
   useEffect(() => {
     const subscribe = (recording: TldrawData) => {
-      if (!editor) return () => {};
+      if (!editor) {
+        return () => {};
+      }
 
       return tldrawReplay({
         editor,

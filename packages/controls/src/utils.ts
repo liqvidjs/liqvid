@@ -5,7 +5,9 @@ export function bind(
   seqs: ShortcutsSpecifier | undefined,
   callback: () => void,
 ) {
-  if (!seqs) return;
+  if (!seqs) {
+    return;
+  }
   if (typeof seqs === "string") {
     keymap.bind(seqs, callback);
   } else {
@@ -20,7 +22,9 @@ export function unbind(
   seqs: ShortcutsSpecifier | undefined,
   callback: () => void,
 ) {
-  if (!seqs) return;
+  if (!seqs) {
+    return;
+  }
   if (typeof seqs === "string") {
     keymap.bind(seqs, callback);
   } else {
@@ -33,7 +37,11 @@ export function unbind(
 export function convertShortcuts(
   keys: ShortcutsSpecifier | undefined,
 ): string | undefined {
-  if (typeof keys === "string") return keys;
-  if (typeof keys === "undefined") return undefined;
+  if (typeof keys === "string") {
+    return keys;
+  }
+  if (typeof keys === "undefined") {
+    return undefined;
+  }
   return keys.join(" ");
 }

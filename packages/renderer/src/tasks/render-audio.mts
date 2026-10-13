@@ -220,7 +220,9 @@ async function renderOfflineInPage({
     const { buffer, startTime } = registration;
 
     // Skip if the audio starts after the playback ends
-    if (startTime >= duration) continue;
+    if (startTime >= duration) {
+      continue;
+    }
 
     // Create a buffer source for each registered audio
     const sourceNode = offlineContext.createBufferSource();

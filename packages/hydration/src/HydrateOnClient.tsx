@@ -40,7 +40,7 @@ export function HydrateOnClient<
         }
       ) => unknown);
 }) {
-  if (IS_CLIENT)
+  if (IS_CLIENT) {
     return (
       <>
         {children}
@@ -53,6 +53,7 @@ export function HydrateOnClient<
         }
       </>
     );
+  }
 
   let hasCookies = false;
   let hasLocalStorage = false;

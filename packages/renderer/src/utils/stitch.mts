@@ -90,7 +90,9 @@ export function stitch({
  * e.g. `-c:a copy -vn` -> ["-c:a", "copy", "-vn"]
  */
 function splitArgs(combined: string): string[] {
-  if (!combined) return [];
+  if (!combined) {
+    return [];
+  }
 
   const args: string[] = [];
   let current = "";

@@ -40,7 +40,9 @@ export function getCursorSvgs(): Map<CursorName, CursorInfo> {
       const groups = $_?.groups as
         | Record<"url" | "x" | "y" | "fallback", string>
         | undefined;
-      if (!groups) continue;
+      if (!groups) {
+        continue;
+      }
 
       map.set(name, {
         image: groups.url,
@@ -58,8 +60,12 @@ function* getTlcontainerStyleRules() {
   for (const sheet of document.styleSheets) {
     try {
       for (const rule of sheet.cssRules) {
-        if (!isStyleRule(rule)) continue;
-        if (rule.selectorText !== ".tl-container") continue;
+        if (!isStyleRule(rule)) {
+          continue;
+        }
+        if (rule.selectorText !== ".tl-container") {
+          continue;
+        }
 
         yield rule;
       }

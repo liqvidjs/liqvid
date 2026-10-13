@@ -27,7 +27,9 @@ export function objectKeys<T extends object>(obj: T): (keyof T)[] {
 
 /** Comparison function */
 export function cmp(a: unknown, b: unknown): boolean {
-  if (typeof a !== typeof b) return false;
+  if (typeof a !== typeof b) {
+    return false;
+  }
 
   switch (typeof a) {
     case "bigint":
@@ -40,7 +42,9 @@ export function cmp(a: unknown, b: unknown): boolean {
       return a === b;
   }
 
-  if (a === null || b === null) return a === b;
+  if (a === null || b === null) {
+    return a === b;
+  }
 
   assertType<Record<string, unknown>>(a);
   assertType<Record<string, unknown>>(b);
@@ -48,7 +52,9 @@ export function cmp(a: unknown, b: unknown): boolean {
   const keysA = Object.keys(a);
   const keysB = new Set(Object.keys(b));
 
-  if (keysA.length !== keysB.size) return false;
+  if (keysA.length !== keysB.size) {
+    return false;
+  }
   return keysA.every((key) => keysB.has(key) && cmp(a[key], b[key]));
 }
 
@@ -100,7 +106,9 @@ export function matchRunes<T, R>(
     const rune = runes[name];
     if (key.startsWith(rune)) {
       const fn = fns[name];
-      if (!fn) continue;
+      if (!fn) {
+        continue;
+      }
       // biome-ignore lint/suspicious/noExplicitAny: runed key/value are dynamically typed
       return fn(key.slice(rune.length) as any, diff[key] as any);
     }
@@ -125,7 +133,9 @@ export function consume<T>(
     const rune = runes[name];
     const keyA = `${rune}${key}` as const;
 
-    if (!(keyA in a)) continue;
+    if (!(keyA in a)) {
+      continue;
+    }
 
     const valueA = a[keyA];
     delete a[keyA];
@@ -146,7 +156,9 @@ export function consume<T>(
 }
 
 export function getOffset(offset: ItemDiff<unknown>[0]): number {
-  if (typeof offset === "number") return offset;
+  if (typeof offset === "number") {
+    return offset;
+  }
 
   if (isRune(offset, runes.array)) {
     return parseInt(offset.slice(runes.array.length), 10);
@@ -162,7 +174,9 @@ export function addToOffset<O extends ItemDiff<unknown>[0]>(
   delta: number,
 ): O {
   const result = getOffset(offset) + delta;
-  if (typeof offset === "number") return result as O;
+  if (typeof offset === "number") {
+    return result as O;
+  }
 
   if (isRune(offset, runes.array)) {
     return `${runes.array}${result}` as O;

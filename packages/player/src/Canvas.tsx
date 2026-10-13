@@ -49,7 +49,9 @@ export function Canvas({
       // listener and the listener added by dragHelper, so you can't call stopPropagation() in the
       // onMouseUp or else the dragging won't release.
       // biome-ignore lint/suspicious/noExplicitAny: symbol
-      if ((e.nativeEvent as any)[ignoreCanvasClickSymbol]) return;
+      if ((e.nativeEvent as any)[ignoreCanvasClickSymbol]) {
+        return;
+      }
 
       if (playback.paused) {
         playback.play();

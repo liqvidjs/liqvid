@@ -69,7 +69,9 @@ function resolveCacheDepth(
   actionCount: number,
   canRestoreState: boolean,
 ): number {
-  if (!canRestoreState || !Number.isFinite(requested)) return 0;
+  if (!canRestoreState || !Number.isFinite(requested)) {
+    return 0;
+  }
   const maxDepth = Math.ceil(Math.log2(actionCount + 1));
   return Math.min(maxDepth, Math.max(0, Math.floor(requested)));
 }
@@ -257,10 +259,14 @@ function makeReplayUpdate<State, Action, Props>({
     if (actionsToApply.length > 0) {
       const action = merge(...actionsToApply);
       apply(state, action, true);
-      if (!isSeek) commit(action, props);
+      if (!isSeek) {
+        commit(action, props);
+      }
     }
 
-    if (isSeek) commitState?.(state, props);
+    if (isSeek) {
+      commitState?.(state, props);
+    }
     lastTime = t;
   };
 }

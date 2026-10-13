@@ -39,7 +39,9 @@ export function Prompt({
 
   // Set up persistence for this prompt's position
   const persistenceConfig = useMemo((): StringValueConfig | undefined => {
-    if (!persistence || !name) return undefined;
+    if (!persistence || !name) {
+      return undefined;
+    }
     return {
       name: `${persistence.prefix}${name}`,
       source: persistence.source ?? "localStorage",
@@ -54,7 +56,9 @@ export function Prompt({
   // Parse position from storage
   const parsePosition = useCallback(
     (value: string | null): PromptPosition | null => {
-      if (!value) return null;
+      if (!value) {
+        return null;
+      }
       try {
         const parsed = JSON.parse(value);
         if (typeof parsed.left === "string" && typeof parsed.top === "string") {
@@ -79,7 +83,9 @@ export function Prompt({
   );
 
   useEffect(() => {
-    if (!ref) return;
+    if (!ref) {
+      return;
+    }
 
     // Try to restore position from storage
     const savedPosition = parsePosition(getPosition());
@@ -100,7 +106,9 @@ export function Prompt({
     let lastX: number, lastY: number;
     return onDragReact(
       (_e, hit) => {
-        if (!ref) return;
+        if (!ref) {
+          return;
+        }
 
         const offset = offsetParent(ref);
 
@@ -134,9 +142,13 @@ export function Prompt({
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
-  if (isPreviewOrProduction) return null;
+  if (isPreviewOrProduction) {
+    return null;
+  }
 
-  if (!isMounted) return null;
+  if (!isMounted) {
+    return null;
+  }
 
   if (!enabled) {
     return null;
@@ -186,8 +198,9 @@ function offsetParent(node: HTMLElement) {
   let parent = node;
   // biome-ignore lint/suspicious/noAssignInExpressions: this is fine
   while ((parent = parent.parentNode as HTMLElement)) {
-    if (!["absolute", "relative"].includes(getComputedStyle(parent).position))
+    if (!["absolute", "relative"].includes(getComputedStyle(parent).position)) {
       continue;
+    }
 
     const prect = parent.getBoundingClientRect();
 

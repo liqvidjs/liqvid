@@ -58,7 +58,9 @@ export function RebuildButtonClient({
   // Re-evaluate `now` so the button flips back to "Rebuild" once the window
   // elapses without another interaction.
   useEffect(() => {
-    if (buildTime === null) return;
+    if (buildTime === null) {
+      return;
+    }
 
     const remaining = buildTime + PUBLISH_WINDOW_MS - Date.now();
     if (remaining <= 0) {
@@ -120,8 +122,12 @@ export function RebuildButtonClient({
   // user can inspect the captured error output.
   useChannel("jobs", {
     updateJob: ({ job }) => {
-      if (job.id !== rebuildJobId.current) return;
-      if (job.state === "running") return;
+      if (job.id !== rebuildJobId.current) {
+        return;
+      }
+      if (job.state === "running") {
+        return;
+      }
 
       rebuildJobId.current = null;
       setIsBusy(false);

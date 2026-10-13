@@ -227,7 +227,9 @@ function createWebApiHandler(
   dynamicImports: DynamicImportsType,
 ): (request: Request) => Promise<Response> {
   const cached = handlerCache.get(dynamicImports);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const apiLive = HttpApiBuilder.layer(WebApi).pipe(
     Layer.provide([

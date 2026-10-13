@@ -98,9 +98,13 @@ export function useResizable<T extends HTMLElement | SVGElement>(
 
   // Infer initial dimensions from element if not specified
   useEffect(() => {
-    if (size !== null) return;
+    if (size !== null) {
+      return;
+    }
     const target = ref.current;
-    if (!target) return;
+    if (!target) {
+      return;
+    }
 
     const rect = target.getBoundingClientRect();
     setSize({ height: rect.height, width: rect.width });
@@ -115,8 +119,12 @@ export function useResizable<T extends HTMLElement | SVGElement>(
       const events = onDragReact(
         (_e, hit) => {
           const target = ref.current;
-          if (!target) return;
-          if (activeCorner.current !== corner) return;
+          if (!target) {
+            return;
+          }
+          if (activeCorner.current !== corner) {
+            return;
+          }
 
           let newWidth = startSize.current.width;
           let newHeight = startSize.current.height;
@@ -186,8 +194,12 @@ export function useResizable<T extends HTMLElement | SVGElement>(
         },
         (e) => {
           const target = ref.current;
-          if (!target) return;
-          if (!e.target) return;
+          if (!target) {
+            return;
+          }
+          if (!e.target) {
+            return;
+          }
 
           // Check if the event target is a resize handle (has cursor style)
           const eventTarget = e.target as HTMLElement;

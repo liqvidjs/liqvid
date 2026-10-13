@@ -14,9 +14,13 @@ export function activeWordIndex(transcript: Transcript, t: number): number {
     const mid = (lo + hi) >> 1;
     const [, start, end] = transcript[mid]!;
 
-    if (t < start) hi = mid - 1;
-    else if (t >= end) lo = mid + 1;
-    else return mid;
+    if (t < start) {
+      hi = mid - 1;
+    } else if (t >= end) {
+      lo = mid + 1;
+    } else {
+      return mid;
+    }
   }
 
   return -1;
@@ -34,7 +38,9 @@ function shiftBreaksAfterDelete(
   const result: number[] = [];
 
   for (const index of breaks) {
-    if (index === deletedIndex) continue;
+    if (index === deletedIndex) {
+      continue;
+    }
     result.push(index > deletedIndex ? index - 1 : index);
   }
 
@@ -57,7 +63,9 @@ function shiftBreaksAfterInsert(
  * Applies an action to a state and returns the new state.
  */
 export function apply(prev: State, action: Action, append = true): State {
-  if (action.action === "identity") return prev;
+  if (action.action === "identity") {
+    return prev;
+  }
 
   const next = { ...prev };
 
@@ -134,7 +142,9 @@ export function apply(prev: State, action: Action, append = true): State {
       const second = prev.words[action.index + 1];
 
       // Nothing to merge if there is no following word.
-      if (!first || !second) break;
+      if (!first || !second) {
+        break;
+      }
 
       // Combine texts with a space, keeping the first word's start and the
       // second word's end.
@@ -183,7 +193,9 @@ export function apply(prev: State, action: Action, append = true): State {
     case "end-next-sentence": {
       let i = prev.selection.end + 1;
       for (; i < prev.words.length; ++i) {
-        if (isSentenceEnd(prev.words[i]!)) break;
+        if (isSentenceEnd(prev.words[i]!)) {
+          break;
+        }
       }
 
       i = Math.min(i, prev.words.length - 1);
@@ -195,7 +207,9 @@ export function apply(prev: State, action: Action, append = true): State {
     case "end-next-comma": {
       let i = prev.selection.end + 1;
       for (; i < prev.words.length; ++i) {
-        if (prev.words[i]![0].endsWith(",")) break;
+        if (prev.words[i]![0].endsWith(",")) {
+          break;
+        }
       }
 
       i = Math.min(i, prev.words.length - 1);
@@ -210,7 +224,9 @@ export function apply(prev: State, action: Action, append = true): State {
       // falling back to 0.
       for (let i = prev.captionBreaks.length - 1; i >= 0; --i) {
         const breakIndex = prev.captionBreaks[i]!;
-        if (breakIndex + 1 >= prev.selection.start) continue;
+        if (breakIndex + 1 >= prev.selection.start) {
+          continue;
+        }
 
         const index = prev.captionBreaks[i]! + 1;
 
@@ -260,7 +276,9 @@ export function apply(prev: State, action: Action, append = true): State {
       // the current selection start, falling back to 0.
       for (let i = prev.paragraphBreaks.length - 1; i >= 0; --i) {
         const breakIndex = prev.paragraphBreaks[i]!;
-        if (breakIndex + 1 >= prev.selection.start) continue;
+        if (breakIndex + 1 >= prev.selection.start) {
+          continue;
+        }
 
         const index = breakIndex + 1;
 
@@ -437,7 +455,9 @@ function record(action: Action, prev: State, next: State): Action | undefined {
     case "merge-word": {
       const first = prev.words[action.index];
       const second = prev.words[action.index + 1];
-      if (!first || !second) return undefined;
+      if (!first || !second) {
+        return undefined;
+      }
       return {
         ...action,
         prevCaptionBreaks: prev.captionBreaks,
@@ -589,7 +609,9 @@ function invert(prev: State, action: Action): Action {
  */
 export function undo(prev: State): State {
   const action = prev.undoStack.at(-1);
-  if (!action) return prev;
+  if (!action) {
+    return prev;
+  }
 
   // Apply the inverse against the current state without recording it, then
   // move the original action onto the redo stack.
@@ -607,7 +629,9 @@ export function undo(prev: State): State {
  */
 export function redo(prev: State): State {
   const action = prev.redoStack.at(-1);
-  if (!action) return prev;
+  if (!action) {
+    return prev;
+  }
 
   // Reapply the action against the current state without recording it, then
   // move it back onto the undo stack.
@@ -621,7 +645,9 @@ export function redo(prev: State): State {
 }
 
 export function isSentenceEnd(token: TranscriptEntry): boolean {
-  if (token[0].length === 0) return false;
+  if (token[0].length === 0) {
+    return false;
+  }
   const last = token[0].at(-1)!;
   return last === "." || last === "!" || last === "?";
 }
@@ -675,7 +701,9 @@ function normalizeFillerToken(
     value = value.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
   }
 
-  if (ignoreCapitalization) value = value.toLocaleLowerCase();
+  if (ignoreCapitalization) {
+    value = value.toLocaleLowerCase();
+  }
 
   return value;
 }
@@ -722,7 +750,9 @@ export function wordRectRelativeToStripes(
   wordIndex: number,
 ): Highlight | null {
   const rect = wordRect(container, words, wordIndex);
-  if (!rect) return null;
+  if (!rect) {
+    return null;
+  }
 
   const base = container.getBoundingClientRect();
   return {
@@ -758,7 +788,9 @@ export function wordIndexAtCaret(
 ): number {
   // Absolute text offset of the caret within the container.
   const caretOffset = caretTextOffset(container, caret);
-  if (caretOffset < 0) return -1;
+  if (caretOffset < 0) {
+    return -1;
+  }
 
   const { spans } = wordSpans(container, words);
 
@@ -768,7 +800,9 @@ export function wordIndexAtCaret(
   for (let w = 0; w < spans.length; w++) {
     const isLast = w === spans.length - 1;
     const nextStart = isLast ? Number.POSITIVE_INFINITY : spans[w + 1]!.start;
-    if (caretOffset < nextStart) return w;
+    if (caretOffset < nextStart) {
+      return w;
+    }
   }
 
   return words.length - 1;
@@ -808,7 +842,9 @@ function wordSpans(
 
   for (let w = 0; w < words.length; w++) {
     // Skip the inter-word separator whitespace.
-    while (cursor < flat.length && isSpace(flat[cursor]!)) cursor++;
+    while (cursor < flat.length && isSpace(flat[cursor]!)) {
+      cursor++;
+    }
 
     const word = words[w]![0];
     const start = cursor;
@@ -833,11 +869,15 @@ function wordRect(
 ): DOMRect | null {
   const { spans } = wordSpans(container, words);
   const span = spans[wordIndex];
-  if (!span) return null;
+  if (!span) {
+    return null;
+  }
 
   const start = offsetToDomPosition(container, span.start);
   const end = offsetToDomPosition(container, span.end);
-  if (!start || !end) return null;
+  if (!start || !end) {
+    return null;
+  }
 
   const range = document.createRange();
   try {
@@ -869,13 +909,17 @@ function offsetToDomPosition(
   let last: Node | null = null;
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const len = (node.nodeValue ?? "").length;
-    if (offset <= seen + len) return { node, offset: offset - seen };
+    if (offset <= seen + len) {
+      return { node, offset: offset - seen };
+    }
     seen += len;
     last = node;
   }
 
   // Offset past the end: clamp to the end of the last text node.
-  if (last) return { node: last, offset: (last.nodeValue ?? "").length };
+  if (last) {
+    return { node: last, offset: (last.nodeValue ?? "").length };
+  }
   return null;
 }
 
@@ -894,8 +938,11 @@ function caretTextOffset(
     const child = caret.node.childNodes[caret.offset] ?? null;
     const range = document.createRange();
     range.setStart(container, 0);
-    if (child) range.setEndBefore(child);
-    else range.selectNodeContents(container);
+    if (child) {
+      range.setEndBefore(child);
+    } else {
+      range.selectNodeContents(container);
+    }
     return range.toString().length;
   }
 
@@ -907,7 +954,9 @@ function caretTextOffset(
 
   let offset = 0;
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (node === caret.node) return offset + caret.offset;
+    if (node === caret.node) {
+      return offset + caret.offset;
+    }
     offset += (node.nodeValue ?? "").length;
   }
 

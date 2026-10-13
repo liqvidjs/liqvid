@@ -9,7 +9,9 @@ export function ConfigurationComponent({
   instances,
 }: ConfigurationComponentProps<CodeMirrorInstance>) {
   // TODO: disallow code recording in this case
-  if (instances.size === 0) return null;
+  if (instances.size === 0) {
+    return null;
+  }
 
   // TODO: support multiple targets
   useEffect(() => {

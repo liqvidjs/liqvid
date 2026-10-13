@@ -165,7 +165,9 @@ export function cmReplayMultiple({
   // Apply initial state to views
   for (const [filename, fileState] of Object.entries(initial.files)) {
     const view = views[filename];
-    if (!view) continue;
+    if (!view) {
+      continue;
+    }
 
     const { content = "", selection = { anchor: 0, head: 0 } } = fileState;
     selections[filename] = SelectionRange.fromJSON(selection);

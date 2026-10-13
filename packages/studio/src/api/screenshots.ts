@@ -85,7 +85,9 @@ export const screenshotsLive = HttpApiBuilder.group(
           yield* Effect.all(
             entries.map(([name, kind]) =>
               Effect.gen(function* () {
-                if (kind !== "Directory") return;
+                if (kind !== "Directory") {
+                  return;
+                }
 
                 const dirname = path.join(screenshotsDir, name);
 

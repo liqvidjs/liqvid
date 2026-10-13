@@ -65,7 +65,9 @@ export function ConfigureThemeClient({
   );
 
   async function selectTheme(next: ColorSchemeSpecifier) {
-    if (next === theme || saving) return;
+    if (next === theme || saving) {
+      return;
+    }
 
     setSaving(next);
 

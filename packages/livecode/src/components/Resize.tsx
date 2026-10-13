@@ -50,7 +50,9 @@ export function Resize({
 
     return onDragReact(
       (_e, { x, y }) => {
-        if (!container) return;
+        if (!container) {
+          return;
+        }
 
         const rect = container.getBoundingClientRect();
 

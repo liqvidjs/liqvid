@@ -24,8 +24,12 @@ export function bind<
  * Comparison function to use when sorting. Returns -1 if a &lt; b, 1 if a &gt; b, and 0 otherwise.
  */
 export function compare<T extends string | number | Date>(a: T, b: T) {
-  if (a < b) return -1;
-  if (b > a) return 1;
+  if (a < b) {
+    return -1;
+  }
+  if (b > a) {
+    return 1;
+  }
   return 0;
 }
 

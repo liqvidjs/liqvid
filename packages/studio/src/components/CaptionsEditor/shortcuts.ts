@@ -145,10 +145,14 @@ const KEY_LABELS: Record<string, string> = {
  */
 export function formatShortcut(key: string, mod = false): string[] {
   const tokens: string[] = [];
-  if (mod) tokens.push(isMac ? "⌘" : "Ctrl");
+  if (mod) {
+    tokens.push(isMac ? "⌘" : "Ctrl");
+  }
 
   // A single uppercase letter is only produced by holding Shift.
-  if (key.length === 1 && key >= "A" && key <= "Z") tokens.push("Shift");
+  if (key.length === 1 && key >= "A" && key <= "Z") {
+    tokens.push("Shift");
+  }
 
   if (KEY_LABELS[key]) {
     tokens.push(KEY_LABELS[key]);
@@ -174,7 +178,9 @@ export function formatShortcut(key: string, mod = false): string[] {
  * between ALL CAPS and all lowercase.
  */
 export function cycleCapitalization(word: string): string {
-  if (word.length === 0) return word;
+  if (word.length === 0) {
+    return word;
+  }
 
   const lower = word.toLowerCase();
   const upper = word.toUpperCase();
@@ -183,13 +189,17 @@ export function cycleCapitalization(word: string): string {
 
   // All-caps words (that contain at least one cased letter) always cycle to
   // lowercase next, regardless of the initial character.
-  if (word === upper && word !== lower) return lower;
+  if (word === upper && word !== lower) {
+    return lower;
+  }
 
   if (startsWithLetter) {
     const capitalized = first.toUpperCase() + word.slice(1);
 
     // Lowercase initial → capitalize the initial letter.
-    if (first === first.toLowerCase()) return capitalized;
+    if (first === first.toLowerCase()) {
+      return capitalized;
+    }
 
     // Capitalized (but not all caps, handled above) → ALL CAPS.
     return upper;
@@ -207,7 +217,9 @@ export function hasModKey(e: KeyboardEvent) {
 
 /** Whether the event target is a text-editable element. */
 export function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
   const tag = target.tagName;
   return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
 }

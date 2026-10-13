@@ -28,7 +28,9 @@ function bbbSegments(): { end: number; path: string; start: number }[] {
   let time = 0;
   for (let i = 0; i < lines.length; i++) {
     const match = lines[i]!.match(/^#EXTINF:([\d.]+)/);
-    if (!match) continue;
+    if (!match) {
+      continue;
+    }
     const duration = Number(match[1]);
     segments.push({
       end: time + duration,
@@ -44,7 +46,9 @@ function segmentAt(time: number): string {
   const segment = bbbSegments().find(
     ({ end, start }) => start <= time && time < end,
   );
-  if (!segment) throw new Error(`No segment at ${time}`);
+  if (!segment) {
+    throw new Error(`No segment at ${time}`);
+  }
   return segment.path;
 }
 
@@ -127,7 +131,9 @@ describe("frame-accurate HLS rendering", () => {
       // Guard against a trivially-passing comparison.
       const capture = await captureCanvas(harness.page);
       for (const other of Object.keys(REFERENCE_FRAMES)) {
-        if (Number(other) === time) continue;
+        if (Number(other) === time) {
+          continue;
+        }
         expect(
           await imageDifference(
             harness.page,

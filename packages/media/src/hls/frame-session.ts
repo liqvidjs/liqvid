@@ -76,13 +76,17 @@ export function createFrameSession(
 
   void (async () => {
     const track = await input.getPrimaryVideoTrack();
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     if (!track) {
       options.onReadyState(ReadyState.HAVE_ENOUGH_DATA);
       return;
     }
     const firstTimestamp = await track.getFirstTimestamp();
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
 
     session = new SequentialFrameSession({
       ...options,
@@ -94,10 +98,14 @@ export function createFrameSession(
     void getHlsSegments(options.source)
       .then((segments) => session?.setSegments(segments))
       .catch((error: unknown) => {
-        if (!disposed) console.warn("Failed to read HLS segment ranges", error);
+        if (!disposed) {
+          console.warn("Failed to read HLS segment ranges", error);
+        }
       });
   })().catch((error: unknown) => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     options.onError("Failed to load HLS video", error);
   });
 
@@ -108,7 +116,9 @@ export function createFrameSession(
       input.dispose();
     },
     render(timestamp) {
-      if (timestamp === lastTimestamp) return;
+      if (timestamp === lastTimestamp) {
+        return;
+      }
       if (timestamp < lastTimestamp) {
         session?.seek(timestamp, true);
         settledBySeek = true;
@@ -121,7 +131,9 @@ export function createFrameSession(
     seek(timestamp, playing) {
       // A sequential render to this timestamp must not swallow the seek.
       // Otherwise releasing the scrubber continues the frame walk.
-      if (timestamp === lastTimestamp && settledBySeek) return;
+      if (timestamp === lastTimestamp && settledBySeek) {
+        return;
+      }
       session?.seek(timestamp, playing);
       lastTimestamp = timestamp;
       settledBySeek = true;
@@ -186,7 +198,9 @@ class SequentialFrameSession {
   }
 
   render(timestamp: number): void {
-    if (!this.__active) return;
+    if (!this.__active) {
+      return;
+    }
     this.__target = this.__toTrackTimestamp(timestamp);
     this.__preload(timestamp);
     // Playback keeps ticking during a seek. Bumping the version here would
@@ -195,7 +209,9 @@ class SequentialFrameSession {
   }
 
   seek(timestamp: number, playing: boolean): void {
-    if (!this.__active) return;
+    if (!this.__active) {
+      return;
+    }
     this.__target = this.__toTrackTimestamp(timestamp);
     this.__preload(timestamp);
     this.__targetVersion += 1;
@@ -217,8 +233,12 @@ class SequentialFrameSession {
       try {
         await this.__processStep();
       } catch (error) {
-        if (!this.__active) return;
-        if (this.__seekRequest) continue;
+        if (!this.__active) {
+          return;
+        }
+        if (this.__seekRequest) {
+          continue;
+        }
         this.__options.onError("Failed to process HLS video frame", error);
         return;
       }
@@ -276,7 +296,9 @@ class SequentialFrameSession {
     let sample = this.__pendingSample;
     this.__pendingSample = null;
     sample ??= await this.__next(iterator);
-    if (!sample) return;
+    if (!sample) {
+      return;
+    }
 
     if (sample.timestamp > this.__target) {
       this.__pendingSample = sample;
@@ -327,8 +349,12 @@ class SequentialFrameSession {
     iterator: AsyncGenerator<VideoSample>,
   ): Promise<boolean> {
     const target = this.__target;
-    if (target - sample.timestamp < CATCH_UP_THRESHOLD) return false;
-    if (target - this.__catchUpCheckedAt < CATCH_UP_THRESHOLD) return false;
+    if (target - sample.timestamp < CATCH_UP_THRESHOLD) {
+      return false;
+    }
+    if (target - this.__catchUpCheckedAt < CATCH_UP_THRESHOLD) {
+      return false;
+    }
     this.__catchUpCheckedAt = target;
 
     // A seek decodes from the key frame at or before the target, so it only
@@ -336,7 +362,9 @@ class SequentialFrameSession {
     const keyPacket = await this.__packets.getKeyPacket(target, {
       metadataOnly: true,
     });
-    if (this.__isStale(iterator)) return false;
+    if (this.__isStale(iterator)) {
+      return false;
+    }
     return keyPacket !== null && keyPacket.timestamp > sample.timestamp;
   }
 
@@ -348,7 +376,9 @@ class SequentialFrameSession {
     try {
       sample = await this.__sink.getSample(request.timestamp);
     } catch (error) {
-      if (!this.__active || this.__seekRequest) return;
+      if (!this.__active || this.__seekRequest) {
+        return;
+      }
       this.__options.onError("Failed to seek HLS video", error);
       return;
     }
@@ -379,7 +409,9 @@ class SequentialFrameSession {
   }
 
   private async __waitForUpdate(): Promise<void> {
-    if (!this.__active || this.__seekRequest !== null) return;
+    if (!this.__active || this.__seekRequest !== null) {
+      return;
+    }
     await new Promise<void>((resolve) => {
       this.__wake = resolve;
     });
@@ -425,7 +457,9 @@ class SequentialFrameSession {
 
   private __markSegmentLoaded(timestamp: number): void {
     const index = this.__segments.findIndex(({ end }) => timestamp < end);
-    if (index === -1 || this.__loadedSegments.has(index)) return;
+    if (index === -1 || this.__loadedSegments.has(index)) {
+      return;
+    }
     this.__loadedSegments.add(index);
     this.__reportBuffered();
     this.__preload(timestamp);
@@ -433,9 +467,13 @@ class SequentialFrameSession {
 
   private __preload(timestamp: number): void {
     const segments = this.__segments;
-    if (segments.length === 0) return;
+    if (segments.length === 0) {
+      return;
+    }
     const currentIndex = segments.findIndex(({ end }) => timestamp < end);
-    if (currentIndex === -1) return;
+    if (currentIndex === -1) {
+      return;
+    }
 
     const endTime =
       this.__options.preload === undefined
@@ -450,22 +488,32 @@ class SequentialFrameSession {
         ? segments.length - 1
         : Math.max(currentIndex, requestedEndIndex);
     const preloadKey = `${currentIndex}:${lastIndex}`;
-    if (preloadKey === this.__preloadKey) return;
+    if (preloadKey === this.__preloadKey) {
+      return;
+    }
     this.__preloadKey = preloadKey;
     const version = ++this.__preloadVersion;
 
     void (async () => {
       for (let index = currentIndex; index <= lastIndex; index += 1) {
-        if (version !== this.__preloadVersion || !this.__active) return;
-        if (this.__loadedSegments.has(index)) continue;
+        if (version !== this.__preloadVersion || !this.__active) {
+          return;
+        }
+        if (this.__loadedSegments.has(index)) {
+          continue;
+        }
 
         const segment = segments[index]!;
         const middle = (segment.start + segment.end) / 2;
         const packet = await this.__packets.getPacket(
           this.__toTrackTimestamp(middle),
         );
-        if (version !== this.__preloadVersion || !this.__active) return;
-        if (!packet) continue;
+        if (version !== this.__preloadVersion || !this.__active) {
+          return;
+        }
+        if (!packet) {
+          continue;
+        }
 
         this.__loadedSegments.add(index);
         this.__reportBuffered();

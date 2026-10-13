@@ -222,7 +222,9 @@ export const runNextBuild = Effect.fnUntraced(function* (
         stream: NodeJS.ReadableStream | null,
         log: (line: string) => Effect.Effect<void>,
       ) => {
-        if (!stream) return;
+        if (!stream) {
+          return;
+        }
         let buffer = "";
         stream.setEncoding("utf8");
         stream.on("data", (chunk: string) => {

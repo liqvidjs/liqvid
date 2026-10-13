@@ -27,7 +27,9 @@ export function TimeDisplay({
 
   useTime(() => {
     const timeElt = timeRef.current;
-    if (!timeElt) return;
+    if (!timeElt) {
+      return;
+    }
 
     timeElt.setAttribute("datetime", formatTimeDuration(playback.currentTime$));
     timeElt.innerText = formatTime(playback.currentTime$);

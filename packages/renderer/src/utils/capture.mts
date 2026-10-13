@@ -28,11 +28,15 @@ export async function capture({
     //   }, 2000);
     // });
 
-    if (playback.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    if (playback.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      return;
+    }
 
     return new Promise<void>((resolve) => {
       const listener = () => {
-        if (playback.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+        if (playback.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+          return;
+        }
         playback.removeEventListener("readystatechange", listener);
         resolve();
       };

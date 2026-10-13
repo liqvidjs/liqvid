@@ -109,7 +109,9 @@ export function LiqvidDevToolsProvider({
   const playback = usePlaybackOptional();
 
   const updateDuration = useCallback(() => {
-    if (!playback) return;
+    if (!playback) {
+      return;
+    }
     api.setDuration(playback.duration$);
   }, [api, playback]);
 
@@ -123,7 +125,9 @@ export function LiqvidDevToolsProvider({
         <RecordingProvider plugins={recordingPlugins}>
           <StudioPrivateContext.Provider value={privateContext}>
             {plugins?.map((plugin) => {
-              if (!plugin.useConfigurePlugin) return null;
+              if (!plugin.useConfigurePlugin) {
+                return null;
+              }
               return (
                 <CallHook
                   key={plugin.package}

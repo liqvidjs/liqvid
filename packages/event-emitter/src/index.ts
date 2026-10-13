@@ -19,7 +19,9 @@ export class EventEmitter<Events> implements TypedEventTarget<Events> {
     event: Events[K],
   ): void {
     const subscribers = this.__subscribers[eventName];
-    if (!subscribers) return;
+    if (!subscribers) {
+      return;
+    }
 
     for (const callback of subscribers) {
       callback.call(this, event);

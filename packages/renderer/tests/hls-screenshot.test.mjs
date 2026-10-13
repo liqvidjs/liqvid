@@ -86,7 +86,9 @@ async function waitForScreenshotMatch(page, reference) {
       },
       { image: screenshot.toString("base64"), reference },
     );
-    if (difference <= MATCH_THRESHOLD) return difference;
+    if (difference <= MATCH_THRESHOLD) {
+      return difference;
+    }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   return difference;

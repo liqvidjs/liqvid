@@ -29,7 +29,9 @@ export class FrameCompositor {
   draw(sample: VideoSample): boolean {
     const width = sample.displayWidth;
     const height = sample.displayHeight;
-    if (width === 0 || height === 0) return false;
+    if (width === 0 || height === 0) {
+      return false;
+    }
 
     if (this.__keying) {
       renderKeyedFrame({
@@ -48,7 +50,9 @@ export class FrameCompositor {
     this.__context ??= this.__canvas.getContext("2d", {
       colorSpace: "srgb",
     }) as Context2d | null;
-    if (!this.__context) return false;
+    if (!this.__context) {
+      return false;
+    }
     sample.draw(this.__context, 0, 0, width, height);
     return true;
   }
@@ -74,7 +78,9 @@ export class FrameCompositor {
       this.__rotated.height = height;
     }
     const context = this.__rotated.getContext("2d");
-    if (context) sample.draw(context, 0, 0, width, height);
+    if (context) {
+      sample.draw(context, 0, 0, width, height);
+    }
     return this.__rotated;
   }
 }

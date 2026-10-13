@@ -44,7 +44,9 @@ export function render({
   ) as HTMLLinkElement[]) {
     const href = linkTag.getAttribute("href")!;
     const styleSheet = css[normalizePath(href)];
-    if (!styleSheet) continue;
+    if (!styleSheet) {
+      continue;
+    }
 
     const style = doc.createElement("style");
     style.textContent = styleSheet;
@@ -66,7 +68,9 @@ export function render({
       script = js[normalized];
     }
 
-    if (!script) continue;
+    if (!script) {
+      continue;
+    }
 
     scriptTag.dataset.filename = normalized;
     scriptTag.removeAttribute("src");
@@ -151,6 +155,8 @@ export function isElement(node: Node): node is Element {
 }
 
 function normalizePath(path: string) {
-  if (path.startsWith("./")) return path.slice("./".length);
+  if (path.startsWith("./")) {
+    return path.slice("./".length);
+  }
   return path;
 }

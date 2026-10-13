@@ -68,12 +68,16 @@ export function Record({
   // attach recording extensions --- this has to be done this way because
   // the `shortcuts` Compartment will abort further handling of the sequence
   useEffect(() => {
-    if (!recorder) return;
+    if (!recorder) {
+      return;
+    }
 
     const file = groups[groupId]?.files.find(
       (file) => file.filename === filename,
     );
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const { view } = file;
 
@@ -108,7 +112,9 @@ const modifiedRecorder = Symbol();
 type Hack = LiveCodeState["recorder"] & { [modifiedRecorder]: boolean };
 
 function includeFilenameInRecording(state: LiveCodeState) {
-  if (!state.recorder) return;
+  if (!state.recorder) {
+    return;
+  }
 
   // only do this if we are recording in multiple files
   let recordingExtensions = 0;
@@ -118,7 +124,9 @@ function includeFilenameInRecording(state: LiveCodeState) {
       const extnState = recordingCompartment.get(view.state);
       if (Array.isArray(extnState) && extnState.length > 0) {
         recordingExtensions++;
-        if (recordingExtensions > 1) break outer;
+        if (recordingExtensions > 1) {
+          break outer;
+        }
       }
     }
   }
@@ -140,7 +148,9 @@ function includeFilenameInRecording(state: LiveCodeState) {
     beginRecording(...args);
 
     const activeFile = selectActiveFile(state);
-    if (!activeFile) return;
+    if (!activeFile) {
+      return;
+    }
     state.recorder?.capture(0, selectCmd + activeFile.filename);
   };
   (state.recorder as Hack)[modifiedRecorder] = true;

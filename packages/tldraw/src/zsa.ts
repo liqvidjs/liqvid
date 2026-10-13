@@ -50,39 +50,57 @@ export function isSegmentAppend(diff: ObjectDiff<unknown>): diff is ZSA {
 
   // @props
   keys = objectKeys(diff);
-  if (!isSingleton(keys)) return false;
+  if (!isSingleton(keys)) {
+    return false;
+  }
   const _props = matchRunes(diff, keys[0], {
     object: (key, props) => key === "props" && props,
   });
-  if (!_props) return false;
+  if (!_props) {
+    return false;
+  }
 
   // #segments
   keys = objectKeys(_props);
-  if (!isSingleton(keys)) return false;
+  if (!isSingleton(keys)) {
+    return false;
+  }
   const _segments = matchRunes(_props, keys[0], {
     array: (key, props) => key === "segments" && props,
   });
-  if (!_segments) return false;
+  if (!_segments) {
+    return false;
+  }
 
   // array update
-  if (_segments.length !== 2 || _segments[0] !== 0) return false;
+  if (_segments.length !== 2 || _segments[0] !== 0) {
+    return false;
+  }
   assertType<[0, ItemDiff<unknown>[]]>(_segments);
   const segmentDiffs = _segments[1];
 
   // zeroth segment
-  if (!isSingleton(segmentDiffs)) return false;
+  if (!isSingleton(segmentDiffs)) {
+    return false;
+  }
   const segmentDiff = matchItemDiff(segmentDiffs[0], {
     object: (_, diff) => diff,
   });
-  if (!segmentDiff) return false;
+  if (!segmentDiff) {
+    return false;
+  }
 
   // appending to the path
   keys = objectKeys(segmentDiff);
-  if (!isSingleton(keys)) return false;
+  if (!isSingleton(keys)) {
+    return false;
+  }
   const _path = matchRunes(segmentDiff, keys[0], {
     array: (key, props) => key === "path" && props,
   });
-  if (!_path) return false;
+  if (!_path) {
+    return false;
+  }
 
   return (_path[1] ?? []).length === 0;
 }

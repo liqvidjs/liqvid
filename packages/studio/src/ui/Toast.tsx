@@ -81,7 +81,9 @@ export function Toast({
 
   // Add appear animation on mount
   useEffect(() => {
-    if (!elt.current) return;
+    if (!elt.current) {
+      return;
+    }
     elt.current.animate(appearToast.keyframes, appearToast.options);
   }, []);
 

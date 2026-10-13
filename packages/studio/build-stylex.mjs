@@ -93,7 +93,9 @@ async function main() {
         sourceType: "module",
       });
 
-      if (!result?.code) return;
+      if (!result?.code) {
+        return;
+      }
 
       const rules = result.metadata?.stylex;
       if (rules && rules.length > 0) {
@@ -115,7 +117,9 @@ async function main() {
   await Promise.all(
     varFiles.map(async (srcPath) => {
       const source = fs.readFileSync(srcPath, "utf-8");
-      if (!source.includes("stylex.defineVars")) return;
+      if (!source.includes("stylex.defineVars")) {
+        return;
+      }
 
       // Map src/ path to its dist/ equivalent to use as the filename so
       // that the plugin resolves the same hashed variable names.

@@ -163,7 +163,9 @@ const hasMediaFile = Effect.fnUntraced(function* (
   const fs = yield* FileSystem.FileSystem;
   return yield* Effect.gen(function* () {
     const filePath = yield* fs.realPath(path.join(pluginDir, filename));
-    if (!isWithin(pluginDir, filePath)) return false;
+    if (!isWithin(pluginDir, filePath)) {
+      return false;
+    }
     const stat = yield* fs.stat(filePath);
     return stat.type === "File";
   }).pipe(Effect.catch(() => Effect.succeed(false)));
@@ -187,7 +189,9 @@ const listFiles = Effect.fnUntraced(function* (directory: AbsoluteDir) {
         .pipe(Effect.catch(() => Effect.succeed(undefined)));
 
       // Match readdir({ withFileTypes: true }): don't follow symbolic links.
-      if (realPath === undefined || realPath !== entryPath) continue;
+      if (realPath === undefined || realPath !== entryPath) {
+        continue;
+      }
 
       const stat = yield* fs
         .stat(entryPath)

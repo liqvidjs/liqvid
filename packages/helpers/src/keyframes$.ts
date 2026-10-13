@@ -69,8 +69,12 @@ const metaKeys = new Set(["at", "duration", "easing", "offset"]);
 function resolveEasing(
   easing: CommonEasingName | EasingFunction | undefined,
 ): EasingFunction {
-  if (!easing) return (x: number) => x;
-  if (typeof easing === "function") return easing;
+  if (!easing) {
+    return (x: number) => x;
+  }
+  if (typeof easing === "function") {
+    return easing;
+  }
   const points = easings[easing] as readonly [number, number, number, number];
   return bezier(...points);
 }
@@ -137,8 +141,12 @@ function resolveKeyframes<M extends string, T extends AnyElement>(
     // --- collect attribute values ---
     const values: Record<string, number | string> = {};
     for (const [key, val] of Object.entries(kf)) {
-      if (metaKeys.has(key)) continue;
-      if (val === undefined || val === null) continue;
+      if (metaKeys.has(key)) {
+        continue;
+      }
+      if (val === undefined || val === null) {
+        continue;
+      }
       values[key] = val as number | string;
     }
 
@@ -163,7 +171,9 @@ function applyKeyframes(
   resolved: readonly ResolvedKeyframe[],
   tMs: number,
 ): void {
-  if (resolved.length === 0) return;
+  if (resolved.length === 0) {
+    return;
+  }
 
   // Collect all attribute keys across all keyframes
   const allKeys = new Set<string>();
@@ -180,7 +190,9 @@ function applyKeyframes(
     let toKf: ResolvedKeyframe | undefined;
 
     for (const kf of resolved) {
-      if (!(key in kf.values)) continue;
+      if (!(key in kf.values)) {
+        continue;
+      }
 
       if (kf.timeMs <= tMs) {
         fromKf = kf;

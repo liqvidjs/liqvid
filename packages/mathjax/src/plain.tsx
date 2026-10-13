@@ -83,7 +83,9 @@ export function MJX({
       children;
 
       const span = spanRef.current;
-      if (!span) return;
+      if (!span) {
+        return;
+      }
 
       hub.beginRendering();
       status.current = "rendering";

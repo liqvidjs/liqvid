@@ -57,7 +57,9 @@ export class MarkerRecorder extends BaseRecorder<
   }
 
   onMarkerUpdate({ prev }: MarkerUpdateEvent<string>) {
-    if (this.paused) return;
+    if (this.paused) {
+      return;
+    }
 
     this.captureMarker(prev.name);
   }
@@ -85,7 +87,9 @@ export const MarkerRecording = {
   useConfigurePlugin() {
     const script = useScriptOptional();
 
-    if (!script) return;
+    if (!script) {
+      return;
+    }
 
     useEffect(() => {
       MarkerRecording.recorder.configure({ script });

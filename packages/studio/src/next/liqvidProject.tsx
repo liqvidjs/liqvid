@@ -382,14 +382,20 @@ async function loadChosenRecordingsData(
   }
 
   for (const dirent of dirents) {
-    if (!dirent.isDirectory()) continue;
+    if (!dirent.isDirectory()) {
+      continue;
+    }
 
     // guard against malformed directory names
     const name = dirent.name;
-    if (name.includes("/") || name.includes("..")) continue;
+    if (name.includes("/") || name.includes("..")) {
+      continue;
+    }
 
     // hidden recordings are excluded; missing entries default to chosen
-    if (hiddenRecordings[name] === true) continue;
+    if (hiddenRecordings[name] === true) {
+      continue;
+    }
 
     try {
       const recordingMeta = JSON.parse(

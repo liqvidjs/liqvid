@@ -18,7 +18,9 @@ async function waitForKeyedFrame(page: Page): Promise<string> {
   while (Date.now() < deadline) {
     const capture = await captureCanvas(page);
     const [, , , alpha] = await pixelAt(page, capture, SUBJECT.x, SUBJECT.y);
-    if (alpha > 0) return waitForStableCanvas(page);
+    if (alpha > 0) {
+      return waitForStableCanvas(page);
+    }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error("Greenscreen frame was never drawn");

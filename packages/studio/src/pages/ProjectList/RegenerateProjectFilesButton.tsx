@@ -20,7 +20,9 @@ export function RegenerateProjectFilesButton() {
   const [status, setStatus] = useState<"idle" | "running" | "done">("idle");
 
   async function regenerate() {
-    if (status === "running") return;
+    if (status === "running") {
+      return;
+    }
     setStatus("running");
 
     const result = await regenerateProjectFiles(projectPath);

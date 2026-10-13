@@ -147,7 +147,9 @@ export function Root({
   useEffect(() => provideIframeApi(playerApiDeclaration, api), [api]);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     // biome-ignore lint/suspicious/noExplicitAny: symbol
     (ref.current as any)[API_SYMBOL] = {

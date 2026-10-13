@@ -192,9 +192,13 @@ export async function listSaved(
       return yield* Effect.all(
         files.reduce(
           (acc, [filename, kind]) => {
-            if (kind !== "File") return acc;
+            if (kind !== "File") {
+              return acc;
+            }
 
-            if (!filename.endsWith(".json")) return acc;
+            if (!filename.endsWith(".json")) {
+              return acc;
+            }
 
             acc.push(
               Effect.gen(function* () {

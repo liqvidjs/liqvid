@@ -19,7 +19,9 @@ export const requestFullScreen = fullscreenEnabled
 
       if (!__isFullScreen) {
         __isFullScreen = true;
-        for (const _ of __callbacks) _();
+        for (const _ of __callbacks) {
+          _();
+        }
       }
     };
 
@@ -33,7 +35,9 @@ export const exitFullScreen = fullscreenEnabled
 
       if (__isFullScreen) {
         __isFullScreen = false;
-        for (const _ of __callbacks) _();
+        for (const _ of __callbacks) {
+          _();
+        }
       }
     };
 

@@ -91,8 +91,12 @@ async function findTranslationDirs(root: AbsoluteDir): Promise<AbsoluteDir[]> {
 
     await Promise.all(
       entries.map(async (entry) => {
-        if (!entry.isDirectory()) return;
-        if (IGNORED_DIRS.has(entry.name)) return;
+        if (!entry.isDirectory()) {
+          return;
+        }
+        if (IGNORED_DIRS.has(entry.name)) {
+          return;
+        }
 
         const qualified = path.join(dir, RelativeDir(entry.name));
 
@@ -114,8 +118,12 @@ async function findTranslationDirs(root: AbsoluteDir): Promise<AbsoluteDir[]> {
 
 /** The name of a JSON value's type, for human-readable diagnostics. */
 function typeOf(value: Json): string {
-  if (value === null) return "null";
-  if (Array.isArray(value)) return "array";
+  if (value === null) {
+    return "null";
+  }
+  if (Array.isArray(value)) {
+    return "array";
+  }
   return typeof value;
 }
 
@@ -270,7 +278,9 @@ function collectLeafKeyPaths(
   out: Set<string>,
 ): void {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    if (prefix) out.add(prefix);
+    if (prefix) {
+      out.add(prefix);
+    }
     return;
   }
 
@@ -280,7 +290,9 @@ function collectLeafKeyPaths(
   const isInterpolation = keys.some((k) => INTERPOLATION_KEYS.has(k));
   if (isInterpolation) {
     // The parent key is the meaningful one; don't recurse into template guts.
-    if (prefix) out.add(prefix);
+    if (prefix) {
+      out.add(prefix);
+    }
     return;
   }
 
@@ -298,7 +310,9 @@ let _project: Project | undefined;
  * Created lazily and cached for the lifetime of the process.
  */
 function getProject(root: AbsoluteDir): Project {
-  if (_project) return _project;
+  if (_project) {
+    return _project;
+  }
 
   const tsConfigFilePath = path.join(
     root,
@@ -361,7 +375,9 @@ function followReferences(
 
   for (const ref of refs) {
     const parent = ref.getParent();
-    if (!parent) continue;
+    if (!parent) {
+      continue;
+    }
 
     const parentKind = parent.getKind();
 
@@ -430,7 +446,9 @@ function followReferences(
         // Also mark all top-level keys without prefix for unprefixed access.
         if (!prefix) {
           for (const key of allLeafKeys) {
-            if (!key.includes(".")) referenced.add(key);
+            if (!key.includes(".")) {
+              referenced.add(key);
+            }
           }
         }
       }
@@ -627,7 +645,9 @@ function followPropsInFile(
   // Also look for parameter access: function Foo(props: ...) { props.t }
   for (const param of file.getDescendantsOfKind(SyntaxKind.Parameter)) {
     const nameNode = param.getNameNode();
-    if (nameNode.getKind() !== SyntaxKind.Identifier) continue;
+    if (nameNode.getKind() !== SyntaxKind.Identifier) {
+      continue;
+    }
     // Check if this parameter's property `propName` is accessed
     let paramRefs: Node[];
     try {
@@ -720,10 +740,14 @@ function findUnusedKeys(
   // Find all source files that import this en.json.
   const consumers: import("ts-morph").SourceFile[] = [];
   for (const sf of project.getSourceFiles()) {
-    if ((sf.getFilePath() as string).includes("node_modules")) continue;
+    if ((sf.getFilePath() as string).includes("node_modules")) {
+      continue;
+    }
     for (const imp of sf.getImportDeclarations()) {
       const moduleSpec = imp.getModuleSpecifierValue();
-      if (!moduleSpec.endsWith("en.json")) continue;
+      if (!moduleSpec.endsWith("en.json")) {
+        continue;
+      }
       const resolved = imp.getModuleSpecifierSourceFile();
       if (resolved && (resolved.getFilePath() as string) === enJsonPath) {
         consumers.push(sf);
@@ -732,7 +756,9 @@ function findUnusedKeys(
     }
   }
 
-  if (consumers.length === 0) return null;
+  if (consumers.length === 0) {
+    return null;
+  }
 
   const allLeafKeys = new Set<string>();
   collectLeafKeyPaths(referenceJson, "", allLeafKeys);
@@ -747,7 +773,9 @@ function findUnusedKeys(
     // import Translations from "./.translations/en.json";
     // const t = useAsyncTranslations(Translations, ...)
     for (const imp of consumer.getImportDeclarations()) {
-      if (!imp.getModuleSpecifierValue().endsWith("en.json")) continue;
+      if (!imp.getModuleSpecifierValue().endsWith("en.json")) {
+        continue;
+      }
       const resolved = imp.getModuleSpecifierSourceFile();
       if (!resolved || (resolved.getFilePath() as string) !== enJsonPath) {
         continue;
@@ -785,12 +813,16 @@ function findUnusedKeys(
             } else if (parent?.getKind() === SyntaxKind.JsxExpression) {
               // Passed directly as a JSX prop — mark all keys as used
               // (we can't trace further).
-              for (const key of allLeafKeys) allReferenced.add(key);
+              for (const key of allLeafKeys) {
+                allReferenced.add(key);
+              }
             } else if (
               parent?.getKind() === SyntaxKind.SpreadAssignment ||
               parent?.getKind() === SyntaxKind.SpreadElement
             ) {
-              for (const key of allLeafKeys) allReferenced.add(key);
+              for (const key of allLeafKeys) {
+                allReferenced.add(key);
+              }
             }
           }
         }
@@ -803,7 +835,9 @@ function findUnusedKeys(
       SyntaxKind.VariableDeclaration,
     )) {
       const init = varDecl.getInitializer();
-      if (!init) continue;
+      if (!init) {
+        continue;
+      }
       const initText = init.getText();
 
       const isTranslationCall =
@@ -811,7 +845,9 @@ function findUnusedKeys(
         initText.includes("useTranslations") ||
         initText.includes("useAsyncTranslations");
 
-      if (!isTranslationCall) continue;
+      if (!isTranslationCall) {
+        continue;
+      }
 
       // Determine if the call extracts a sub-object:
       // e.g. `useTranslations<T>().renders.rename`
@@ -846,12 +882,16 @@ function findUnusedKeys(
     // This is the entry point when the file is a direct consumer that
     // receives translations as a prop from a server component.
     for (const be of consumer.getDescendantsOfKind(SyntaxKind.BindingElement)) {
-      if (be.getName() !== "t") continue;
+      if (be.getName() !== "t") {
+        continue;
+      }
 
       // Check if this binding element is in a function parameter
       // (component prop destructuring).
       const param = be.getFirstAncestorByKind(SyntaxKind.Parameter);
-      if (!param) continue;
+      if (!param) {
+        continue;
+      }
 
       const visitKey = `${filePath}:param:t:`;
       if (!visited.has(visitKey)) {
@@ -865,7 +905,9 @@ function findUnusedKeys(
   // referenced set.
   const unused: string[] = [];
   for (const key of allLeafKeys) {
-    if (allReferenced.has(key)) continue;
+    if (allReferenced.has(key)) {
+      continue;
+    }
 
     // Check if any ancestor branch is referenced (which would mean the entire
     // sub-tree is passed somewhere we can't statically trace).
@@ -1109,7 +1151,9 @@ export async function validateTranslations(
     }
 
     for (const { locale, discrepancies } of report.locales) {
-      if (discrepancies.length === 0) continue;
+      if (discrepancies.length === 0) {
+        continue;
+      }
       printDiscrepancies(relativeDir, locale, discrepancies);
       problems++;
     }

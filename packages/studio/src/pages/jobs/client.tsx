@@ -346,7 +346,9 @@ export function JobsClient({
       let removed: LoggableJobClient | undefined;
       setJobs((prev) => {
         removed = prev[id];
-        if (!removed) return prev;
+        if (!removed) {
+          return prev;
+        }
         const { [id]: _removed, ...rest } = prev;
         return rest;
       });
@@ -369,7 +371,9 @@ export function JobsClient({
         appendLog: ({ id, log }) => {
           setJobs((prev) => {
             const job = prev[id];
-            if (!job) return prev;
+            if (!job) {
+              return prev;
+            }
             return {
               ...prev,
               [id]: { ...job, logs: [...job.logs, log] },
@@ -379,7 +383,9 @@ export function JobsClient({
 
         deleteJob: ({ id }) => {
           setJobs((prev) => {
-            if (!(id in prev)) return prev;
+            if (!(id in prev)) {
+              return prev;
+            }
             const { [id]: _removed, ...rest } = prev;
             return rest;
           });
@@ -404,7 +410,9 @@ export function JobsClient({
         appendLog: ({ id, log }) => {
           setServices((prev) => {
             const service = prev[id];
-            if (!service) return prev;
+            if (!service) {
+              return prev;
+            }
             return {
               ...prev,
               [id]: { ...service, logs: [...service.logs, reviveLog(log)] },
@@ -425,13 +433,19 @@ export function JobsClient({
   );
 
   useEffect(() => {
-    if (window.location.hash) setActiveTab("jobs");
+    if (window.location.hash) {
+      setActiveTab("jobs");
+    }
   }, []);
 
   useEffect(() => {
-    if (activeTab !== "jobs") return;
+    if (activeTab !== "jobs") {
+      return;
+    }
     const id = window.location.hash.slice(1);
-    if (!id || !jobs[id]) return;
+    if (!id || !jobs[id]) {
+      return;
+    }
     document.getElementById(id)?.scrollIntoView();
   }, [activeTab, jobs]);
 

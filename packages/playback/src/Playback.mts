@@ -205,7 +205,9 @@ export class Playback extends CorePlayback {
     const items = Array.from(this.__bufferedItems, ({ buffered }) =>
       normalizeRanges(buffered),
     );
-    if (items.length === 0) return [];
+    if (items.length === 0) {
+      return [];
+    }
 
     return items.slice(1).reduce(intersectRanges, items[0]!);
   }
@@ -259,10 +261,14 @@ export class Playback extends CorePlayback {
     }
 
     /* adopt animation */
-    if (!anim.effect) return;
+    if (!anim.effect) {
+      return;
+    }
 
     const delay = anim.effect.getTiming().delay;
-    if (delay === undefined) return;
+    if (delay === undefined) {
+      return;
+    }
     this.__delays.set(anim.effect, delay);
 
     anim.currentTime =
@@ -311,7 +317,9 @@ export class Playback extends CorePlayback {
     // play
     this.addEventListener("play", () => {
       for (const anim of this.__animations) {
-        if (!anim.effect) continue;
+        if (!anim.effect) {
+          continue;
+        }
         anim.startTime = null;
         anim.play();
         anim.startTime =
@@ -362,7 +370,9 @@ function createTimeRanges(ranges: readonly BufferedRange[]): TimeRanges {
   return {
     end(index: number) {
       const range = ranges[index];
-      if (!range) throw new RangeError("Time range index is out of bounds");
+      if (!range) {
+        throw new RangeError("Time range index is out of bounds");
+      }
       return range[1];
     },
     get length() {
@@ -370,7 +380,9 @@ function createTimeRanges(ranges: readonly BufferedRange[]): TimeRanges {
     },
     start(index: number) {
       const range = ranges[index];
-      if (!range) throw new RangeError("Time range index is out of bounds");
+      if (!range) {
+        throw new RangeError("Time range index is out of bounds");
+      }
       return range[0];
     },
   };
@@ -411,10 +423,15 @@ function intersectRanges(
     const rightRange = right[rightIndex]!;
     const start = Math.max(leftRange[0], rightRange[0]);
     const end = Math.min(leftRange[1], rightRange[1]);
-    if (end > start) intersection.push([start, end]);
+    if (end > start) {
+      intersection.push([start, end]);
+    }
 
-    if (leftRange[1] < rightRange[1]) leftIndex++;
-    else rightIndex++;
+    if (leftRange[1] < rightRange[1]) {
+      leftIndex++;
+    } else {
+      rightIndex++;
+    }
   }
 
   return normalizeRanges(intersection);
@@ -446,7 +463,9 @@ function transformOptions(
 function transformOptions(
   options: DurationLike | KeyframeEffectOptionsWithDurations | undefined,
 ): number | KeyframeEffectOptions | undefined {
-  if (!options) return options;
+  if (!options) {
+    return options;
+  }
 
   if ("duration" in options) {
     return {

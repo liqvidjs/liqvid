@@ -152,7 +152,9 @@ export class TldrawRecorder extends ReplayDataRecorder<
    * `pointermove` instead.
    */
   trackPointer(event: globalThis.PointerEvent): void {
-    if (!this.#editor) return;
+    if (!this.#editor) {
+      return;
+    }
     const { x, y } = this.#editor.screenToPage({
       x: event.clientX,
       y: event.clientY,
@@ -165,7 +167,9 @@ export class TldrawRecorder extends ReplayDataRecorder<
   }
 
   captureEvent({ changes }: HistoryEntry): void {
-    if (!this.#editor) return;
+    if (!this.#editor) {
+      return;
+    }
 
     for (const compressed of this.#compressChanges(this.#editor, changes)) {
       this.capture(undefined, compressed);
@@ -330,9 +334,15 @@ export class TldrawRecorder extends ReplayDataRecorder<
 
   /** Update the tracked viewport with a (partial) delta. */
   #applyViewportDelta(delta: Partial<Viewport>): void {
-    if (!this.#viewport) return;
-    if (delta.camera) this.#viewport.camera = delta.camera;
-    if (delta.page) this.#viewport.page = delta.page;
+    if (!this.#viewport) {
+      return;
+    }
+    if (delta.camera) {
+      this.#viewport.camera = delta.camera;
+    }
+    if (delta.page) {
+      this.#viewport.page = delta.page;
+    }
   }
 }
 

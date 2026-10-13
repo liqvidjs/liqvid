@@ -7,7 +7,9 @@ type Joinable = false | string | Joinable[];
  * On the client, does nothing
  */
 export function SneakyScript({ children }: { children: Joinable }) {
-  if (IS_CLIENT) return null;
+  if (IS_CLIENT) {
+    return null;
+  }
 
   return (
     <script
@@ -19,8 +21,12 @@ export function SneakyScript({ children }: { children: Joinable }) {
 }
 
 function combine(content: Joinable): string {
-  if (typeof content === "string") return content;
-  if (content === false) return "";
+  if (typeof content === "string") {
+    return content;
+  }
+  if (content === false) {
+    return "";
+  }
 
   return content.reduce<string>((acc, curr) => {
     if (typeof curr === "string") {

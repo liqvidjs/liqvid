@@ -249,11 +249,17 @@ export function RecordingRow({
       {r.plugins.map((p) => {
         const plugin = plugins[p];
 
-        if (!plugin) return null;
-        if (!isValidRecordingName(r.name)) return null;
+        if (!plugin) {
+          return null;
+        }
+        if (!isValidRecordingName(r.name)) {
+          return null;
+        }
 
         const Component = plugin.recordingComponent;
-        if (!Component) return null;
+        if (!Component) {
+          return null;
+        }
 
         return (
           <RecordingPluginRow
@@ -295,7 +301,9 @@ function RecordingPluginRow({
       recordingName: name,
     })
       .then((files) => {
-        if (active) setFileList(files);
+        if (active) {
+          setFileList(files);
+        }
       })
       .catch((error: unknown) => {
         console.error("Failed to list recording plugin files:", error);

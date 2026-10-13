@@ -40,7 +40,9 @@ export function FileTabs({
         recorder.capture(undefined, selectCmd + filename);
       }
 
-      if (!activeGroup) return;
+      if (!activeGroup) {
+        return;
+      }
 
       // set state
       store.setState((state) => ({
@@ -84,10 +86,14 @@ export function FileTabs({
         key: `Mod-${i}`,
         run: () => {
           const state = store.getState();
-          if (!state.activeGroup) return false;
+          if (!state.activeGroup) {
+            return false;
+          }
           const group = state.groups[state.activeGroup]!;
 
-          if (group.files.length < i) return false;
+          if (group.files.length < i) {
+            return false;
+          }
 
           select(group.files[i - 1]!.filename);
 
@@ -120,7 +126,9 @@ export function FileTabs({
     };
   }, [select, store.getState, store.setState]);
 
-  if (!group) return null;
+  if (!group) {
+    return null;
+  }
   assertType<string>(activeGroup);
 
   return (

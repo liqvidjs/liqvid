@@ -20,7 +20,9 @@ export function useTranspile(
     (filename: string, code: string) => {
       const extn = getFileType(filename) as JavaScriptishExtension;
 
-      if (extn === "js" || extn === "mjs") return code;
+      if (extn === "js" || extn === "mjs") {
+        return code;
+      }
 
       // plugins and presets for different filetypes
       const globals = {};
@@ -55,7 +57,9 @@ export function useTranspile(
 
       try {
         const transformed = Babel.transform(code, opts).code;
-        if (typeof transformed === "string") return transformed;
+        if (typeof transformed === "string") {
+          return transformed;
+        }
         throw new Error("Babel transformation failed");
       } catch (cause) {
         throw new Error(`Babel transformation failed`, { cause });

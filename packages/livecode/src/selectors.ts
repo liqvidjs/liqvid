@@ -15,7 +15,9 @@ export function selectActiveGroup(
   state: LiveCodeState,
 ): LiveCodeGroup | undefined {
   const { groups, activeGroup } = state;
-  if (!activeGroup) return undefined;
+  if (!activeGroup) {
+    return undefined;
+  }
   return groups[activeGroup];
 }
 

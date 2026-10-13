@@ -55,17 +55,33 @@ export function Position({
   const ourStyles = {} as React.CSSProperties;
 
   // be very careful about this to avoid hydration errors
-  if (b !== undefined) ourStyles.bottom = b;
+  if (b !== undefined) {
+    ourStyles.bottom = b;
+  }
   if (dx !== undefined || dy !== undefined) {
     ourStyles.transform = `translate(${dx ?? 0}, ${dy ?? 0})`;
   }
-  if (fs !== undefined) ourStyles.fontSize = fs;
-  if (h !== undefined) ourStyles.height = h;
-  if (x !== undefined) ourStyles.left = x;
-  if (r !== undefined) ourStyles.right = r;
-  if (y !== undefined) ourStyles.top = y;
-  if (w !== undefined) ourStyles.width = w;
-  if (z !== undefined) ourStyles.zIndex = z;
+  if (fs !== undefined) {
+    ourStyles.fontSize = fs;
+  }
+  if (h !== undefined) {
+    ourStyles.height = h;
+  }
+  if (x !== undefined) {
+    ourStyles.left = x;
+  }
+  if (r !== undefined) {
+    ourStyles.right = r;
+  }
+  if (y !== undefined) {
+    ourStyles.top = y;
+  }
+  if (w !== undefined) {
+    ourStyles.width = w;
+  }
+  if (z !== undefined) {
+    ourStyles.zIndex = z;
+  }
 
   if (
     b !== undefined ||

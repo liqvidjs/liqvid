@@ -86,7 +86,9 @@ function shouldExclude(
   // Check exclusion patterns
   for (const pattern of EXCLUDE_PATTERNS) {
     if (typeof pattern === "string") {
-      if (relativePath === pattern || basename === pattern) return true;
+      if (relativePath === pattern || basename === pattern) {
+        return true;
+      }
     } else if (pattern.test(relativePath)) {
       return true;
     }
@@ -99,10 +101,18 @@ function shouldIgnoreEvent(
   basename: RelativePath,
   filename: AbsolutePath,
 ): boolean {
-  if (filename.endsWith("~")) return true;
-  if (basename === DS_STORE) return true;
-  if (basename === TYPES_AUTOGEN) return true;
-  if (basename === PROJECT_FILES_AUTOGEN) return true;
+  if (filename.endsWith("~")) {
+    return true;
+  }
+  if (basename === DS_STORE) {
+    return true;
+  }
+  if (basename === TYPES_AUTOGEN) {
+    return true;
+  }
+  if (basename === PROJECT_FILES_AUTOGEN) {
+    return true;
+  }
   return false;
 }
 
@@ -254,23 +264,31 @@ let syncChosenRecordings:
 const getJsonType = Effect.fnUntraced(function* (jsonPath: AbsoluteFile) {
   const fs = yield* FileSystem.FileSystem;
 
-  if (!jsonPath.endsWith(".json")) return null;
+  if (!jsonPath.endsWith(".json")) {
+    return null;
+  }
 
   const declarationPath = path.join(
     path.dirname(jsonPath),
     RelativeFile(path.basename(jsonPath).replace(/\.json$/, ".d.json.ts")),
   );
 
-  if (!(yield* fs.exists(declarationPath))) return null;
+  if (!(yield* fs.exists(declarationPath))) {
+    return null;
+  }
 
   const declaration = yield* fs.readFileString(declarationPath, "utf8");
-  if (/(?:^|[;\n])\s*import\s*(?!\()/m.test(declaration)) return null;
+  if (/(?:^|[;\n])\s*import\s*(?!\()/m.test(declaration)) {
+    return null;
+  }
 
   const defaultName = declaration.match(
     /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/,
   )?.[1];
 
-  if (!defaultName) return null;
+  if (!defaultName) {
+    return null;
+  }
 
   return (
     declaration
@@ -304,7 +322,9 @@ const getDirectoryTypes = Effect.fnUntraced(function* (
         value,
       );
 
-      if (Object.keys(child).length > 0) result[basename] = child;
+      if (Object.keys(child).length > 0) {
+        result[basename] = child;
+      }
     }
   }
 
@@ -368,9 +388,15 @@ const loadChosenRecordings = Effect.fnUntraced(function* (
           if (Option.isSome(names)) {
             for (const name of names.value) {
               // skip hidden recordings and guard against malformed directory names
-              if (hiddenRecordings[name] === true) continue;
-              if (name.includes("/") || name.includes("..")) continue;
-              if (!(yield* fs.exists(path.join(recordingsDir, name)))) continue;
+              if (hiddenRecordings[name] === true) {
+                continue;
+              }
+              if (name.includes("/") || name.includes("..")) {
+                continue;
+              }
+              if (!(yield* fs.exists(path.join(recordingsDir, name)))) {
+                continue;
+              }
 
               const recordingMeta = yield* loadJson(
                 RecordingMetaFile,
@@ -536,12 +562,15 @@ function watchAssetEvents(
             const filename = path.join(targetDir, relPath);
             const basename = path.basename(filename);
 
-            if (shouldIgnoreEvent(basename, filename))
+            if (shouldIgnoreEvent(basename, filename)) {
               return Result.fail(event);
+            }
 
             // Find the project directory containing this file
             const $projectDir = yield* findProjectDirectory(filename);
-            if (Option.isNone($projectDir)) return Result.fail(event);
+            if (Option.isNone($projectDir)) {
+              return Result.fail(event);
+            }
 
             return Result.succeed({
               event,
@@ -749,7 +778,9 @@ const updateDirectoryStructure = Effect.fnUntraced(function* (
 
   const basename = RelativeFile(path.basename(relative));
   const relativePath = RelativeDir(relative);
-  if (shouldExclude(relativePath, basename)) return;
+  if (shouldExclude(relativePath, basename)) {
+    return;
+  }
 
   const fs = yield* FileSystem.FileSystem;
   const current = yield* Cache.get(cache, event.projectDir);
@@ -788,10 +819,16 @@ function getDirectoryEntry(
   parts: readonly string[],
 ): DirectoryStructure | null | undefined {
   const [head, ...tail] = parts;
-  if (head === undefined || !(head in directory)) return undefined;
+  if (head === undefined || !(head in directory)) {
+    return undefined;
+  }
   const entry = directory[head];
-  if (tail.length === 0) return entry;
-  if (entry === null || entry === undefined) return undefined;
+  if (tail.length === 0) {
+    return entry;
+  }
+  if (entry === null || entry === undefined) {
+    return undefined;
+  }
   return getDirectoryEntry(entry, tail);
 }
 
@@ -801,17 +838,24 @@ function setDirectoryEntry(
   value: DirectoryStructure | null | undefined,
 ): DirectoryStructure {
   const [head, ...tail] = parts;
-  if (head === undefined) return directory;
+  if (head === undefined) {
+    return directory;
+  }
 
   const next = { ...directory };
   if (tail.length === 0) {
-    if (value === undefined) delete next[head];
-    else next[head] = value;
+    if (value === undefined) {
+      delete next[head];
+    } else {
+      next[head] = value;
+    }
     return next;
   }
 
   const child = directory[head];
-  if (value === undefined && child === undefined) return directory;
+  if (value === undefined && child === undefined) {
+    return directory;
+  }
   const childDirectory = child !== null && child !== undefined ? child : {};
   next[head] = setDirectoryEntry(childDirectory, tail, value);
   return next;
@@ -939,7 +983,9 @@ const listProjectDir = Effect.fnUntraced(function* (
   );
 
   return results.reduce((acc, entry) => {
-    if (!entry) return acc;
+    if (!entry) {
+      return acc;
+    }
 
     const [basename, value] = entry;
 

@@ -89,7 +89,9 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
       class {
         constructor(view: EditorView) {
           view.scrollDOM.addEventListener("scroll", () => {
-            if (!$this.paused || !$this.active) return;
+            if (!$this.paused || !$this.active) {
+              return;
+            }
             const time = $this.getTime();
 
             const fontSize = Number.parseFloat(
@@ -115,12 +117,16 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
 
     // record document changes
     const updateListener = EditorView.updateListener.of((update) => {
-      if (this.paused || !this.active) return;
+      if (this.paused || !this.active) {
+        return;
+      }
 
       // get selection change (if any)
       const transactions = update.transactions
         .map((t) => {
-          if (!t.selection) return null;
+          if (!t.selection) {
+            return null;
+          }
           const range = t.selection.ranges[0]!;
           return [range.anchor, range.head];
         })
@@ -128,7 +134,9 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
         .slice(-1);
 
       // empty events can break replay
-      if (update.changes.empty && transactions.length === 0) return;
+      if (update.changes.empty && transactions.length === 0) {
+        return;
+      }
 
       this.capture(this.getTime(), [
         update.changes.toJSON(),

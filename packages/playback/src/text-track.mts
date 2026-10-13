@@ -65,7 +65,9 @@ export class SyntheticVTTCue extends EventEmitter<TextTrackCueEventMap> {
 
   /** Internal method to set active state and emit events */
   __setActive(active: boolean): void {
-    if (active === this.__active) return;
+    if (active === this.__active) {
+      return;
+    }
     this.__active = active;
 
     if (active) {
@@ -187,7 +189,9 @@ export class SyntheticTextTrack extends EventEmitter<TextTrackEventMap> {
   }
 
   set mode(value: TextTrackMode) {
-    if (value === this.#mode) return;
+    if (value === this.#mode) {
+      return;
+    }
     this.#mode = value;
     this.#list?.__emitChange();
   }

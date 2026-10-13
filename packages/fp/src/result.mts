@@ -69,7 +69,9 @@ class internalResult<Val, Err> {
   }
 
   flatten() {
-    if (this.isErr) return this;
+    if (this.isErr) {
+      return this;
+    }
     if (!isResult(this.value)) {
       throw new Error("Called flatten() on non-Result<Result<_>>");
     }

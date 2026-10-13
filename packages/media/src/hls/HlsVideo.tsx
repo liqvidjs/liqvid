@@ -142,7 +142,9 @@ function useHlsSource(
   const held = useLoadHold(defer);
 
   useEffect(() => {
-    if (held) return;
+    if (held) {
+      return;
+    }
 
     if (!hls) {
       setSource(undefined);
@@ -158,10 +160,14 @@ function useHlsSource(
     setSource(undefined);
     joinHls(hls)
       .then((joinedSource) => {
-        if (active) setSource(joinedSource);
+        if (active) {
+          setSource(joinedSource);
+        }
       })
       .catch((error: unknown) => {
-        if (active) console.error("Failed to join HLS playlists", error);
+        if (active) {
+          console.error("Failed to join HLS playlists", error);
+        }
       });
 
     return () => {

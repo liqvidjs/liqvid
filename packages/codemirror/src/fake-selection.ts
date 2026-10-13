@@ -109,7 +109,9 @@ const fakeCursorLayer = () =>
       const { state } = view;
       const conf = state.facet(fakeSelectionConfig);
       const cursors: RectangleMarker[] = [];
-      if (!this.range) return [];
+      if (!this.range) {
+        return [];
+      }
 
       for (const r of [this.range]) {
         if (r.empty || conf.drawRangeCursor) {
@@ -152,7 +154,9 @@ const fakeCursorLayer = () =>
         .reduce((a, b) => a.concat(b), []);
 
       const confChange = configChanged(update);
-      if (confChange) setBlinkRate(update.state, dom);
+      if (confChange) {
+        setBlinkRate(update.state, dom);
+      }
 
       const last = effects.at(-1);
 

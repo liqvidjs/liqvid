@@ -134,7 +134,9 @@ function findPngFilesWithPatterns(baseDir: AbsoluteDir) {
  * Format bytes to human-readable string
  */
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
+  if (bytes === 0) {
+    return "0 B";
+  }
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -223,8 +225,11 @@ function processBatch(
       );
 
       for (const result of batchResults) {
-        if ("result" in result) results.push(result.result);
-        else errors.push(result.error);
+        if ("result" in result) {
+          results.push(result.result);
+        } else {
+          errors.push(result.error);
+        }
       }
 
       onProgress?.(Math.min(i + batchSize, files.length), files.length);

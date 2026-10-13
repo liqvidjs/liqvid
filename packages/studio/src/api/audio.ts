@@ -117,7 +117,9 @@ export const audioLive = HttpApiBuilder.group(WebApi, "audio", (handlers) =>
           Effect.gen(function* () {
             const $meta =
               yield* readAudioMeta(audioDir).pipe(existenceOptional);
-            if (Option.isNone($meta)) return Option.none<AudioEntry>();
+            if (Option.isNone($meta)) {
+              return Option.none<AudioEntry>();
+            }
 
             const $captions =
               yield* readCaptionsMeta(audioDir).pipe(existenceOptional);

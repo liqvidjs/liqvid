@@ -36,7 +36,9 @@ export function CameraPreview({
     const plugin = plugins["@liqvid/media"] as any;
     const mediaRecorder = plugin?.recorder as LiqvidMediaRecorder | undefined;
 
-    if (!mediaRecorder) return;
+    if (!mediaRecorder) {
+      return;
+    }
 
     // Set initial stream
     setStream(mediaRecorder.stream);
@@ -56,7 +58,9 @@ export function CameraPreview({
   // Update video element when stream changes
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video) {
+      return;
+    }
 
     video.srcObject = stream;
 

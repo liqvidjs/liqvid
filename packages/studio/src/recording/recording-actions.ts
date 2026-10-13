@@ -73,7 +73,9 @@ async function getExistingPluginRecordingDir(
   const routesRealPath = await fsp.realpath(getRoutesDir());
   const dirRealPath = await fsp.realpath(dir).catch(() => undefined);
 
-  if (!dirRealPath) return undefined;
+  if (!dirRealPath) {
+    return undefined;
+  }
 
   const relative = path.relative(routesRealPath, dirRealPath);
   if (
@@ -92,7 +94,9 @@ export async function getRecordingPluginFilesAction(
   args: RecordingFileActionArgs,
 ): Promise<string[]> {
   const root = await getExistingPluginRecordingDir(args);
-  if (!root) return [];
+  if (!root) {
+    return [];
+  }
 
   const files: string[] = [];
 
@@ -106,7 +110,9 @@ export async function getRecordingPluginFilesAction(
       if (entry.isDirectory()) {
         await visit(entryPath, filename);
       } else if (entry.isFile()) {
-        if (filename === DS_STORE) continue;
+        if (filename === DS_STORE) {
+          continue;
+        }
         files.push(filename);
       }
     }
@@ -132,7 +138,9 @@ export async function loadRecordingPluginFileAction(
   }
 
   const root = await getExistingPluginRecordingDir(args);
-  if (!root) throw new Error("Recording plugin directory does not exist");
+  if (!root) {
+    throw new Error("Recording plugin directory does not exist");
+  }
 
   const filePath = path.join(root, RelativeFile(args.filename));
   const fileRealPath = await fsp.realpath(filePath);
@@ -146,7 +154,9 @@ export async function loadRecordingPluginFileAction(
   }
 
   const stat = await fsp.stat(fileRealPath);
-  if (!stat.isFile()) throw new Error("Recording path is not a file");
+  if (!stat.isFile()) {
+    throw new Error("Recording path is not a file");
+  }
 
   return fsp.readFile(fileRealPath, "utf8");
 }

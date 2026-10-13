@@ -196,15 +196,26 @@ function ShortcutRow({
 
 /** Format key sequences with special characters on Mac */
 function fmtSeq(str: string) {
-  if (!isMac) return str;
-  if (str === undefined) return str;
+  if (!isMac) {
+    return str;
+  }
+  if (str === undefined) {
+    return str;
+  }
   return str
     .split("+")
     .map((k) => {
-      if (k === "Ctrl") return "^";
-      else if (k === "Alt") return "\u2325";
-      if (k === "Shift") return "\u21E7";
-      if (k === "Meta") return "\u2318";
+      if (k === "Ctrl") {
+        return "^";
+      } else if (k === "Alt") {
+        return "\u2325";
+      }
+      if (k === "Shift") {
+        return "\u21E7";
+      }
+      if (k === "Meta") {
+        return "\u2318";
+      }
       return k;
     })
     .join("");

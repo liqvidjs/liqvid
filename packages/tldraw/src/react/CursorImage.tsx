@@ -46,7 +46,9 @@ export function CursorImage({
   const place = useCallback(() => {
     const cursor = cursorRef.current;
     const point = pagePoint.current;
-    if (!cursor || !point) return;
+    if (!cursor || !point) {
+      return;
+    }
 
     // Read zoom from the camera (same source as `CanvasLayer`) so the two
     // stay perfectly in sync.
@@ -60,12 +62,16 @@ export function CursorImage({
   const handlePointer: PointerHandler = useCallback(
     (opts) => {
       const cursor = cursorRef.current;
-      if (!cursor) return;
+      if (!cursor) {
+        return;
+      }
 
       // update image
       if ("kind" in opts && opts.kind !== undefined) {
         const info = cursors.get(opts.kind);
-        if (!info) return;
+        if (!info) {
+          return;
+        }
         cursor.style.backgroundImage = info.image;
       }
 
@@ -105,9 +111,13 @@ export function CursorImage({
 
   if (visibility) {
     if (typeof visibility === "string") {
-      if (renderMode !== visibility) return null;
+      if (renderMode !== visibility) {
+        return null;
+      }
     } else {
-      if (!visibility.includes(renderMode)) return null;
+      if (!visibility.includes(renderMode)) {
+        return null;
+      }
     }
   }
 

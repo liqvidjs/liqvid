@@ -45,7 +45,9 @@ scope.addEventListener("message", ({ data }) => {
       compositor = frameCompositor;
       renderer = createFrameSession({
         draw(sample) {
-          if (!frameCompositor.draw(sample)) return false;
+          if (!frameCompositor.draw(sample)) {
+            return false;
+          }
           const bitmap = canvas.transferToImageBitmap();
           post({ bitmap, type: "frame" }, [bitmap]);
           return true;
@@ -58,7 +60,9 @@ scope.addEventListener("message", ({ data }) => {
         onReadyState(readyState) {
           // Frames carry their own ready state, so the page can report it
           // only once the frame is on screen.
-          if (readyState === ReadyState.HAVE_CURRENT_DATA) return;
+          if (readyState === ReadyState.HAVE_CURRENT_DATA) {
+            return;
+          }
           post({ readyState, type: "readyState" });
         },
         preload: data.preload,

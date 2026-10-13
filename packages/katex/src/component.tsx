@@ -48,7 +48,9 @@ export function KTX({
   const isFirstRender = useFirstRender();
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     // needed for initial client render
     isFirstRender;
@@ -154,7 +156,9 @@ export function RenderMathInElement({
   const defaults = useKaTeXContext();
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     children;
 

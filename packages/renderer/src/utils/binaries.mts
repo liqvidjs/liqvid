@@ -41,7 +41,9 @@ export async function getEnsureChrome(userChrome?: AbsoluteFile) {
 
   // typical install
   const systemChrome = await findChromeByPlatform();
-  if (systemChrome) return systemChrome as AbsoluteFile;
+  if (systemChrome) {
+    return systemChrome as AbsoluteFile;
+  }
 
   // check for already installed browser in cache
   const platform = detectBrowserPlatform();

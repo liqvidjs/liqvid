@@ -68,7 +68,9 @@ export function observeParentIntersection(
   }
 
   return () => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
     active = false;
     window.removeEventListener("message", handleMessage);
     const unobserveMessage: UnobserveIntersectionMessage = {
@@ -117,7 +119,9 @@ export function provideIframeApi<D extends IFrameAPIDeclaration>(
 
   const handleMessage = async (event: MessageEvent) => {
     // Only accept messages from parent
-    if (event.source !== window.parent) return;
+    if (event.source !== window.parent) {
+      return;
+    }
 
     const data = event.data as CallMessage;
     if (

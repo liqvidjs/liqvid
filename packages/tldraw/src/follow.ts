@@ -122,7 +122,9 @@ export class FollowController {
   }
 
   #notify(): void {
-    for (const callback of this.#subscribers) callback();
+    for (const callback of this.#subscribers) {
+      callback();
+    }
   }
 
   /**
@@ -132,7 +134,9 @@ export class FollowController {
   setScale(scale: number): void {
     this.#scale = scale;
     // Re-snap with the new scale if following
-    if (this.#following) this.#snap();
+    if (this.#following) {
+      this.#snap();
+    }
   }
 
   /** Get the current scale factor. */
@@ -151,7 +155,9 @@ export class FollowController {
       page: next.page ?? this.#authorViewport?.page ?? this.#currentPageId(),
     };
 
-    if (this.#following) this.#snap();
+    if (this.#following) {
+      this.#snap();
+    }
   }
 
   /**
@@ -159,7 +165,9 @@ export class FollowController {
    * pages on their own.
    */
   suspend(): void {
-    if (!this.#following) return;
+    if (!this.#following) {
+      return;
+    }
     this.#following = false;
     this.#notify();
   }
@@ -184,7 +192,9 @@ export class FollowController {
    */
   isSelfCamera(x: number, y: number, z: number): boolean {
     const cam = this.#expected?.camera;
-    if (!cam) return false;
+    if (!cam) {
+      return false;
+    }
     return approx(x, cam[0]) && approx(y, cam[1]) && approx(z, cam[2]);
   }
 
@@ -204,7 +214,9 @@ export class FollowController {
   #snap(): void {
     const editor = this.#editor;
     const viewport = this.#authorViewport;
-    if (!editor || !viewport) return;
+    if (!editor || !viewport) {
+      return;
+    }
 
     // Scale the zoom for the viewer's container size
     const [x, y, z] = viewport.camera;

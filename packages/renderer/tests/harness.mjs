@@ -20,7 +20,9 @@ export const FRAME_SIZE = { height: 180, width: 320 };
 let built;
 
 async function buildFixture() {
-  if (built) return built;
+  if (built) {
+    return built;
+  }
   built = (async () => {
     try {
       execFileSync(path.join(MEDIA_DIR, "node_modules/.bin/tsc"), {
@@ -64,10 +66,14 @@ function workerPlugin() {
     name: "media-worker-url",
     setup(build) {
       build.onLoad({ filter: /\.js$/ }, async (args) => {
-        if (!args.path.startsWith(path.join(MEDIA_DIR, "dist"))) return;
+        if (!args.path.startsWith(path.join(MEDIA_DIR, "dist"))) {
+          return;
+        }
         let contents = await fs.promises.readFile(args.path, "utf8");
         const matches = [...contents.matchAll(pattern)];
-        if (matches.length === 0) return;
+        if (matches.length === 0) {
+          return;
+        }
 
         for (const match of matches) {
           const specifier = match[2];
@@ -95,7 +101,9 @@ function workerPlugin() {
 }
 
 function findChrome() {
-  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  if (process.env.CHROME_PATH) {
+    return process.env.CHROME_PATH;
+  }
   const candidates = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/usr/bin/google-chrome",
@@ -116,7 +124,9 @@ function findChrome() {
     }
   }
   const found = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!found) throw new Error("Could not find Chrome; set CHROME_PATH");
+  if (!found) {
+    throw new Error("Could not find Chrome; set CHROME_PATH");
+  }
   return found;
 }
 

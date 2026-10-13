@@ -9,7 +9,9 @@ export class PythonInterpreter {
 
   read(filename: string): string {
     const file = Sk.builtinFiles?.files[filename];
-    if (!file) throw new Error(`File not found: '${filename}'`);
+    if (!file) {
+      throw new Error(`File not found: '${filename}'`);
+    }
 
     if (typeof file !== "string") {
       throw new Error(`Cannot read synchronously: '${filename}'`);

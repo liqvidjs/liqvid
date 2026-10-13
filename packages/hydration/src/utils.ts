@@ -9,7 +9,9 @@ import type { ComparisonVariant, StringVariant } from "./types.ts";
 export const iife = (...lines: (boolean | undefined | null | string)[]) =>
   `(()=>{${lines
     .reduce<string[]>((acc, curr) => {
-      if (!curr) return acc;
+      if (!curr) {
+        return acc;
+      }
 
       if (typeof curr === "string") {
         acc.push(curr);

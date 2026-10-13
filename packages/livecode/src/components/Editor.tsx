@@ -72,7 +72,9 @@ export function Editor({
 
   // initialize the view
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const { content, extensions, filename, groupId, readOnly } =
       initialSettings;

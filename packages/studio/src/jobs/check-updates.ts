@@ -115,7 +115,9 @@ function parseVersion(version: VersionString): ParsedVersion | null {
     /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-.]+))?(?:\+[0-9A-Za-z-.]+)?$/.exec(
       version.trim(),
     );
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
   const [, major, minor, patch, prerelease] = match;
   return {
@@ -134,29 +136,53 @@ function parseVersion(version: VersionString): ParsedVersion | null {
  * prerelease outranks one with the same core version that has a prerelease.
  */
 function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
-  if (a.major !== b.major) return a.major - b.major;
-  if (a.minor !== b.minor) return a.minor - b.minor;
-  if (a.patch !== b.patch) return a.patch - b.patch;
+  if (a.major !== b.major) {
+    return a.major - b.major;
+  }
+  if (a.minor !== b.minor) {
+    return a.minor - b.minor;
+  }
+  if (a.patch !== b.patch) {
+    return a.patch - b.patch;
+  }
 
   // A version with no prerelease is greater than one with a prerelease.
-  if (a.prerelease.length === 0 && b.prerelease.length === 0) return 0;
-  if (a.prerelease.length === 0) return 1;
-  if (b.prerelease.length === 0) return -1;
+  if (a.prerelease.length === 0 && b.prerelease.length === 0) {
+    return 0;
+  }
+  if (a.prerelease.length === 0) {
+    return 1;
+  }
+  if (b.prerelease.length === 0) {
+    return -1;
+  }
 
   const len = Math.max(a.prerelease.length, b.prerelease.length);
   for (let i = 0; i < len; i++) {
     const ai = a.prerelease[i];
     const bi = b.prerelease[i];
-    if (ai === undefined) return -1;
-    if (bi === undefined) return 1;
-    if (ai === bi) continue;
+    if (ai === undefined) {
+      return -1;
+    }
+    if (bi === undefined) {
+      return 1;
+    }
+    if (ai === bi) {
+      continue;
+    }
 
     const aNum = typeof ai === "number";
     const bNum = typeof bi === "number";
-    if (aNum && bNum) return (ai as number) - (bi as number);
+    if (aNum && bNum) {
+      return (ai as number) - (bi as number);
+    }
     // Numeric identifiers have lower precedence than non-numeric ones.
-    if (aNum) return -1;
-    if (bNum) return 1;
+    if (aNum) {
+      return -1;
+    }
+    if (bNum) {
+      return 1;
+    }
     return String(ai) < String(bi) ? -1 : 1;
   }
   return 0;
@@ -168,7 +194,9 @@ function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
 function isNewer(current: VersionString, latest: VersionString): boolean {
   const c = parseVersion(current);
   const l = parseVersion(latest);
-  if (!c || !l) return false;
+  if (!c || !l) {
+    return false;
+  }
   return compareVersions(c, l) < 0;
 }
 
@@ -179,10 +207,16 @@ function isNewer(current: VersionString, latest: VersionString): boolean {
  */
 function isSemverRange(spec: string): boolean {
   const trimmed = spec.trim();
-  if (trimmed === "" || trimmed === "*" || trimmed === "latest") return false;
+  if (trimmed === "" || trimmed === "*" || trimmed === "latest") {
+    return false;
+  }
   // Reject anything using a protocol (workspace:, file:, link:, npm:, git+…).
-  if (/^[a-z]+:/i.test(trimmed)) return false;
-  if (trimmed.includes("/")) return false; // git shorthand like org/repo
+  if (/^[a-z]+:/i.test(trimmed)) {
+    return false;
+  }
+  if (trimmed.includes("/")) {
+    return false; // git shorthand like org/repo
+  }
   // Accept a leading range operator followed by something version-like.
   return /^[\^~>=<]*\s*\d/.test(trimmed) || /^\d/.test(trimmed);
 }
@@ -272,11 +306,14 @@ const checkForUpdates = Effect.fnUntraced(
             { concurrency: "unbounded" },
           );
 
-          if (!Option.isSome($installed) || !Option.isSome($latest))
+          if (!Option.isSome($installed) || !Option.isSome($latest)) {
             return null;
+          }
           const installed = $installed.value;
           const latest = $latest.value;
-          if (!isNewer(installed, latest)) return null;
+          if (!isNewer(installed, latest)) {
+            return null;
+          }
 
           const declared = findDependency(pkg, name);
           const usesRange = declared !== null && isSemverRange(declared.range);

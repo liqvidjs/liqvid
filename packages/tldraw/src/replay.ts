@@ -491,7 +491,9 @@ export function merge(...actions: readonly TldrawAction[]): TldrawAction {
           : undefined;
       Object.assign(acc, curr);
       acc.diff = diff;
-      if (viewport) acc.viewport = viewport;
+      if (viewport) {
+        acc.viewport = viewport;
+      }
       return acc;
     },
     { diff: {} },

@@ -640,7 +640,9 @@ function RenameDialog({
   const projectPath = useProjectPath();
 
   const performRename = async () => {
-    if (!renameDialog) return;
+    if (!renameDialog) {
+      return;
+    }
 
     const newName = renameValue.trim();
     if (!newName) {
@@ -712,7 +714,9 @@ function DeleteDialog({
   const projectPath = useProjectPath();
 
   const performDelete = async () => {
-    if (!deleteDialog) return;
+    if (!deleteDialog) {
+      return;
+    }
 
     try {
       await clientRuntime.runPromise(

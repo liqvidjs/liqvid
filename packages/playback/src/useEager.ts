@@ -11,7 +11,9 @@ export function useEager(callback: () => void, playback: Playback | undefined) {
 
   useEffect(
     () => () => {
-      if (!playback) return;
+      if (!playback) {
+        return;
+      }
 
       const globalInstances = global[sym]!;
       const componentInstances = globalInstances.get(id);

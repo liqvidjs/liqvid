@@ -75,7 +75,9 @@ function parseVTT(content: string): Array<{
       i++;
     }
 
-    if (i >= lines.length) break;
+    if (i >= lines.length) {
+      break;
+    }
 
     let cueId = "";
     let timingLine = "";
@@ -104,7 +106,9 @@ function parseVTT(content: string): Array<{
       cueId = currentLine.trim();
       i++;
 
-      if (i >= lines.length) break;
+      if (i >= lines.length) {
+        break;
+      }
       timingLine = lines[i]!;
     }
 
@@ -188,7 +192,9 @@ export function Track({
   // Load and parse the VTT file
   useEffect(() => {
     const track = trackRef.current;
-    if (!src || !track) return;
+    if (!src || !track) {
+      return;
+    }
 
     let cancelled = false;
 
@@ -201,7 +207,9 @@ export function Track({
         return response.text();
       })
       .then((content) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         // Parse the VTT content
         const parsedCues = parseVTT(content);

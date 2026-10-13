@@ -138,7 +138,9 @@ export function ThumbnailBox({
 
   // easy way to prevent hydration errors
   const isFirstRender = useFirstRender();
-  if (isFirstRender) return null;
+  if (isFirstRender) {
+    return null;
+  }
 
   return render({
     col,

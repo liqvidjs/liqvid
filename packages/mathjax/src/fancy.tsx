@@ -17,14 +17,18 @@ export function MJX({ ref, ...props }: React.ComponentProps<typeof MJXPlain>) {
 
   useEffect(() => {
     const plain = plainRef.current;
-    if (!plain?.domElement) return;
+    if (!plain?.domElement) {
+      return;
+    }
 
     const task = { visible: isVisible(plain.domElement) };
     let unsubscribe: null | CleanUpFn = registerRenderingTask(task);
 
     const onStart = () => {
       unsubscribe?.();
-      if (!plain.domElement) return;
+      if (!plain.domElement) {
+        return;
+      }
       unsubscribe = registerRenderingTask({
         visible: isVisible(plain.domElement),
       });

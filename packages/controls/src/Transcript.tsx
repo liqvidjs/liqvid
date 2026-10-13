@@ -60,7 +60,9 @@ function TranscriptBody({
   const { supply, transcript } = useTranscriptApi();
 
   useEffect(() => {
-    if (!body) return;
+    if (!body) {
+      return;
+    }
 
     const updateLinks = () => {
       supply({
@@ -90,7 +92,9 @@ function TranscriptBody({
     supply({ body });
   }, [body, supply]);
 
-  if (!transcript) return null;
+  if (!transcript) {
+    return null;
+  }
 
   return (
     <div {...props} ref={setRef}>
@@ -147,7 +151,9 @@ function TranscriptTimes({
   const [measured, setMeasured] = useState(false);
 
   useEffect(() => {
-    if (!body || !transcript) return;
+    if (!body || !transcript) {
+      return;
+    }
 
     let j = 0;
 
@@ -205,7 +211,9 @@ function TranscriptTimes({
 function TranscriptSearch({
   filter = (input, { word }) => {
     const normalizedInput = input.toLowerCase().trim();
-    if (!normalizedInput) return true;
+    if (!normalizedInput) {
+      return true;
+    }
 
     const inputWords = normalizedInput.split(/\s+/);
 
@@ -296,7 +304,9 @@ function useHighlightActiveWord() {
 
   const setActiveWord = useCallback(
     (t: Duration) => {
-      if (!body || !transcript) return;
+      if (!body || !transcript) {
+        return;
+      }
 
       const { flat } = getActiveWord(transcript, t);
 

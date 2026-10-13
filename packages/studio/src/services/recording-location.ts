@@ -13,7 +13,9 @@ export function getRecordingLocation(
   projectPaths: readonly RelativeDir[],
 ): { projectParams: ParameterValues; projectPath: RelativeDir } | undefined {
   const recordingsDir = AbsoluteDir(path.dirname(recordingDir));
-  if (path.basename(recordingsDir) !== RECORDINGS_DIR) return;
+  if (path.basename(recordingsDir) !== RECORDINGS_DIR) {
+    return;
+  }
 
   const actualAssetsDir = AbsoluteDir(path.dirname(recordingsDir));
   for (const projectPath of projectPaths) {
@@ -31,7 +33,9 @@ export function getRecordingLocation(
     const parameterNames = extractParameterNames(projectPath);
     const parameterValues = parameterPath ? parameterPath.split(path.sep) : [];
 
-    if (parameterNames.length !== parameterValues.length) continue;
+    if (parameterNames.length !== parameterValues.length) {
+      continue;
+    }
 
     return {
       projectParams: Object.fromEntries(

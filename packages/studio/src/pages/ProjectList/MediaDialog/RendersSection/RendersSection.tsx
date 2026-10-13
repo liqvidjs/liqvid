@@ -377,13 +377,17 @@ export function RendersSection({
 
   // Poll for updates when there are pending/rendering jobs
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const hasActiveRenders = renders.some(
       (r) => r.meta.status === "pending" || r.meta.status === "rendering",
     );
 
-    if (!hasActiveRenders) return;
+    if (!hasActiveRenders) {
+      return;
+    }
 
     const interval = setInterval(loadRenders, 3000);
     return () => clearInterval(interval);
@@ -784,7 +788,9 @@ function RenameDialog({
   const [isRenaming, setIsRenaming] = useState(false);
 
   const handleRename = async () => {
-    if (!renamingRender || !renameValue.trim()) return;
+    if (!renamingRender || !renameValue.trim()) {
+      return;
+    }
 
     setIsRenaming(true);
 
@@ -865,7 +871,9 @@ function DeleteDialog({
   const projectPath = useProjectPath();
 
   const performDelete = async () => {
-    if (!deleteDialog) return;
+    if (!deleteDialog) {
+      return;
+    }
 
     try {
       await clientRuntime.runPromise(

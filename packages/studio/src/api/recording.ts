@@ -253,7 +253,9 @@ export const recordingsLive = HttpApiBuilder.group(
             const recordings = yield* Effect.all(
               recordingDirs.reduce(
                 (acc, [filename, kind]) => {
-                  if (kind !== "Directory") return acc;
+                  if (kind !== "Directory") {
+                    return acc;
+                  }
 
                   const dir = path.join(recordingsDir, filename);
                   acc.push(loadRecordingMeta(dir));
@@ -418,7 +420,9 @@ export const recordingsLive = HttpApiBuilder.group(
 
                   const data = persisted[pluginInfo.key];
 
-                  if (data === undefined) return;
+                  if (data === undefined) {
+                    return;
+                  }
 
                   if (pluginInfo.isBlob) {
                     // For blob data, the persisted value is an array of PersistedFile

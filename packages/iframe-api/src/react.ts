@@ -14,7 +14,9 @@ export function useIframeApi<D extends IFrameAPIDeclaration>(
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
-    if (!iframe) return;
+    if (!iframe) {
+      return;
+    }
 
     const api = getIframeApi(decl, iframe, {
       retryIntervalMs: options?.retryIntervalMs,

@@ -43,7 +43,9 @@ export function useMediaBunnyFrames({
   const reportedReadyState = useRef<number>(ReadyState.HAVE_ENOUGH_DATA);
   const reportReadyState = useCallback(
     (readyState: number) => {
-      if (reportedReadyState.current === readyState) return;
+      if (reportedReadyState.current === readyState) {
+        return;
+      }
       reportedReadyState.current = readyState;
       setReadyState(readyState);
     },
@@ -73,20 +75,26 @@ export function useMediaBunnyFrames({
     playback.currentTime$.minus(start$).inSeconds(),
   );
   const renderAtPlaybackTime$ = useEffectEvent(() => {
-    if (playback.paused && !playback.seeking) return;
+    if (playback.paused && !playback.seeking) {
+      return;
+    }
     rendererRef.current?.render(mediaTime$());
   });
   const seekAtPlaybackTime$ = useEffectEvent(() => {
     rendererRef.current?.seek(mediaTime$(), isPlaying());
   });
   const renderAfterSeek$ = useEffectEvent(() => {
-    if (playback.seeking) return;
+    if (playback.seeking) {
+      return;
+    }
     rendererRef.current?.seek(mediaTime$(), isPlaying());
   });
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!source || !enabled || !canvas) return;
+    if (!source || !enabled || !canvas) {
+      return;
+    }
 
     reportReadyState(ReadyState.HAVE_NOTHING);
     const renderer = createFrameHost({
@@ -160,12 +168,18 @@ function useFramePlaybackEvents(
   });
   usePlaybackEvent("seeked", () => {
     programmaticSeek.current = false;
-    if (playback.seeking) return;
+    if (playback.seeking) {
+      return;
+    }
     onSeeked();
   });
   usePlaybackEvent("seeking", () => {
-    if (!playback.seeking) programmaticSeek.current = true;
-    if (!enabled) return;
+    if (!playback.seeking) {
+      programmaticSeek.current = true;
+    }
+    if (!enabled) {
+      return;
+    }
     setReadyState(ReadyState.HAVE_METADATA);
   });
 }

@@ -19,7 +19,9 @@ export function useFormatActiveFile() {
   return useCallback(async () => {
     // extract state
     const active = selectActiveFile(store.getState());
-    if (!active) return;
+    if (!active) {
+      return;
+    }
     const { filename, view } = active;
 
     // get file type

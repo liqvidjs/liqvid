@@ -87,7 +87,9 @@ export function TargetDescendants<M extends string = string>({
   /** Apply transformations to descendants */
   const update = useCallback(() => {
     const div = ref.current;
-    if (!div) return;
+    if (!div) {
+      return;
+    }
 
     for (const t of indexedTransforms) {
       const matchesDuring =
@@ -123,7 +125,9 @@ export function TargetDescendants<M extends string = string>({
 
   // update when descendants change
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const observer = new MutationObserver(update);
     observer.observe(ref.current, {

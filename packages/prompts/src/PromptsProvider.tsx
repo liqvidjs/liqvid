@@ -75,7 +75,9 @@ export function PromptsProvider({
   const enabledPersistenceConfig = useMemo(():
     | BooleanValueConfig
     | undefined => {
-    if (!persistence) return undefined;
+    if (!persistence) {
+      return undefined;
+    }
     return {
       default: defaultEnabled,
       name: `${persistence.prefix}[${projectPath}].enabled`,
@@ -104,7 +106,9 @@ export function PromptsProvider({
     [enabled, persistence, toggleEnabled, setEnabled, splitLines],
   );
 
-  if (isPreviewOrProduction) return children;
+  if (isPreviewOrProduction) {
+    return children;
+  }
 
   return (
     <promptsContext.Provider value={context}>

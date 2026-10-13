@@ -29,7 +29,9 @@ export function parseMacros(file: string): Record<string, string> {
         braceCount++;
       } else if (char === "}") {
         braceCount--;
-        if (braceCount === 0) break;
+        if (braceCount === 0) {
+          break;
+        }
       } else if (char === "\\") {
         body += file.slice(i, i + 2);
         ++i;

@@ -117,7 +117,9 @@ export function initProjectFiles(projects: Projects) {
         }
       },
       ({ basename }) => {
-        if (basename === ASSETS_DIR) return false;
+        if (basename === ASSETS_DIR) {
+          return false;
+        }
         return true;
       },
     ),
@@ -461,7 +463,9 @@ const createProject = Effect.fnUntraced(
         existenceOptional,
         // If parameterized location doesn't exist, try base assets dir
         Effect.flatMap((opt) => {
-          if (Option.isSome(opt)) return Effect.succeed(opt);
+          if (Option.isSome(opt)) {
+            return Effect.succeed(opt);
+          }
           if (assetsDir !== path.join(dirname, ASSETS_DIR)) {
             return loadJson(
               AutoGenProjectMeta,
@@ -579,12 +583,16 @@ const handleRecordingDir = Effect.fnUntraced(
       getRoutesDir(),
       Object.keys(projects) as RelativeDir[],
     );
-    if (!location) return;
+    if (!location) {
+      return;
+    }
     const name = dirNameToPackageName(path.basename(recordingDir));
 
     if (yield* fs.exists(recordingDir)) {
       const metaPath = path.join(recordingDir, RECORDING_META_FILE);
-      if (!(yield* fs.exists(metaPath))) return;
+      if (!(yield* fs.exists(metaPath))) {
+        return;
+      }
 
       const recording = yield* loadRecordingMeta(recordingDir);
       yield* broadcast("recordings", {
@@ -622,7 +630,9 @@ const handleRecordingMeta = Effect.fnUntraced(
       getRoutesDir(),
       Object.keys(projects) as RelativeDir[],
     );
-    if (!location) return;
+    if (!location) {
+      return;
+    }
     const name = dirNameToPackageName(path.basename(recordingDir));
 
     if (!(yield* fs.exists(filename))) {
@@ -790,7 +800,9 @@ const handleOpenGraphImage = Effect.fnUntraced(function* ({
 }: Context) {
   const projectPath = path.dirname(relative);
   const project = projects[projectPath];
-  if (!project) return;
+  if (!project) {
+    return;
+  }
 
   project.socials.openGraph = yield* hasOpenGraphImage(dirname);
 });
@@ -805,7 +817,9 @@ const handleTwitterImage = Effect.fnUntraced(function* ({
 }: Context) {
   const projectPath = path.dirname(relative);
   const project = projects[projectPath];
-  if (!project) return;
+  if (!project) {
+    return;
+  }
 
   project.socials.twitter = yield* hasTwitterImage(dirname);
 });
@@ -820,7 +834,9 @@ const handleLiqvidStudioImage = Effect.fnUntraced(function* ({
 }: Context) {
   const projectPath = path.dirname(relative);
   const project = projects[projectPath];
-  if (!project) return;
+  if (!project) {
+    return;
+  }
 
   // TODO: inefficient, could do granular updates instead
   project.socials.liqvidStudio = yield* hasLiqvidStudioImages(
@@ -834,7 +850,9 @@ function parseAspectRatio(value: unknown): AspectRatio {
 
   switch (typeof value) {
     case "object": {
-      if (value === null) return defaultValue;
+      if (value === null) {
+        return defaultValue;
+      }
 
       if (Array.isArray(value)) {
         const [width, height] = value;

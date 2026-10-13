@@ -461,8 +461,14 @@ const showDryRunInfo = Effect.fnUntraced(function* (
 function formatFileSize(bytes: bigint): string {
   const kibi = 1024n;
 
-  if (bytes < kibi) return `${bytes} B`;
-  if (bytes < kibi * kibi) return `${bytes / kibi} KB`;
-  if (bytes < kibi * kibi * kibi) return `${bytes / (kibi * kibi)} MB`;
+  if (bytes < kibi) {
+    return `${bytes} B`;
+  }
+  if (bytes < kibi * kibi) {
+    return `${bytes / kibi} KB`;
+  }
+  if (bytes < kibi * kibi * kibi) {
+    return `${bytes / (kibi * kibi)} MB`;
+  }
   return `${bytes / (kibi * kibi * kibi)} GB`;
 }

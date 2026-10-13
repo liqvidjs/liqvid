@@ -155,21 +155,29 @@ function Root({
   });
 
   useKeyboardShortcut("Escape", (e) => {
-    if (!closeOnEscape) return;
+    if (!closeOnEscape) {
+      return;
+    }
     e.preventDefault();
     setOpen(false);
   });
 
   // persist open state
   useEffect(() => {
-    if (!name) return;
+    if (!name) {
+      return;
+    }
 
     const sessionValue = window.sessionStorage.getItem(openKey + name);
-    if (sessionValue === "true") setOpen(true);
+    if (sessionValue === "true") {
+      setOpen(true);
+    }
   }, [name, setOpen]);
 
   useEffect(() => {
-    if (!name) return;
+    if (!name) {
+      return;
+    }
     window.sessionStorage.setItem(openKey + name, String(open));
   }, [open, name]);
 
@@ -215,7 +223,9 @@ function Close({
       aria-label={children ? undefined : t.close}
       onClick={(event) => {
         onClick?.(event);
-        if (!event.defaultPrevented) setOpen(false);
+        if (!event.defaultPrevented) {
+          setOpen(false);
+        }
       }}
       sx={styles.closeButton}
       type="button"
@@ -261,7 +271,9 @@ function Header({
       onDragReact(
         (_e, { x, y }) => {
           const parent = ref.current?.parentElement;
-          if (!parent) return;
+          if (!parent) {
+            return;
+          }
           const [offsetX, offsetY] = offset.current;
 
           Object.assign(parent.style, {
@@ -270,13 +282,17 @@ function Header({
         },
         // down
         (_e, { x, y }) => {
-          if (!ref.current) return;
+          if (!ref.current) {
+            return;
+          }
           const rect = ref.current.getBoundingClientRect();
           offset.current = [rect.x - x, rect.y - y];
         },
         // up
         (_e, { x, y }) => {
-          if (!name) return;
+          if (!name) {
+            return;
+          }
           window.sessionStorage.setItem(
             positionKey + name,
             `${offset.current[0] + x} ${offset.current[1] + y}`,
@@ -287,10 +303,14 @@ function Header({
   );
 
   useEffect(() => {
-    if (!name) return;
+    if (!name) {
+      return;
+    }
 
     const parent = ref.current?.parentElement;
-    if (!parent) return;
+    if (!parent) {
+      return;
+    }
 
     // get saved value
     const SavedCoordinates = Schema.TemplateLiteralParser([
@@ -299,10 +319,14 @@ function Header({
       Schema.NumberFromString,
     ]);
     const savedRaw = window.sessionStorage.getItem(positionKey + name);
-    if (savedRaw === null) return;
+    if (savedRaw === null) {
+      return;
+    }
 
     const $saved = Schema.decodeUnknownOption(SavedCoordinates)(savedRaw);
-    if (Option.isNone($saved)) return;
+    if (Option.isNone($saved)) {
+      return;
+    }
 
     // restore saved value
     const [savedX, , savedY] = $saved.value;

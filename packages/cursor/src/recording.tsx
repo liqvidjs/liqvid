@@ -25,7 +25,9 @@ export class CursorRecorder extends ReplayDataRecorder<[number, number]> {
   captureMouse(e: MouseEvent): void {
     const t = this.manager.getTime();
 
-    if (this.manager.paused) return;
+    if (this.manager.paused) {
+      return;
+    }
 
     const { left, top, height, width } = this.target.getBoundingClientRect();
 

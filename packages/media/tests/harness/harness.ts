@@ -93,10 +93,14 @@ function workspaceSourcePlugin(): esbuild.Plugin {
                 fs.readFileSync(path.join(packageDir, "package.json"), "utf8"),
               ) as { exports?: Record<string, Record<string, string>> };
               const source = exports?.[subpath]?.["@liqvid/dev"];
-              if (!source) return;
+              if (!source) {
+                return;
+              }
               return { path: fs.realpathSync(path.join(packageDir, source)) };
             }
-            if (dir === path.dirname(dir)) return;
+            if (dir === path.dirname(dir)) {
+              return;
+            }
           }
         },
       );
@@ -117,10 +121,14 @@ function workerPlugin(): esbuild.Plugin {
     name: "worker-url",
     setup(build) {
       build.onLoad({ filter: /\.js$/ }, async (args) => {
-        if (!args.path.startsWith(path.join(PACKAGE_DIR, "dist"))) return;
+        if (!args.path.startsWith(path.join(PACKAGE_DIR, "dist"))) {
+          return;
+        }
         let contents = await fs.promises.readFile(args.path, "utf8");
         const matches = [...contents.matchAll(pattern)];
-        if (matches.length === 0) return;
+        if (matches.length === 0) {
+          return;
+        }
 
         for (const match of matches) {
           const specifier = match[2]!;
@@ -149,7 +157,9 @@ function workerPlugin(): esbuild.Plugin {
 }
 
 function findChrome(): string {
-  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  if (process.env.CHROME_PATH) {
+    return process.env.CHROME_PATH;
+  }
   const candidates = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/usr/bin/google-chrome",
@@ -170,7 +180,9 @@ function findChrome(): string {
     }
   }
   const found = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!found) throw new Error("Could not find Chrome; set CHROME_PATH");
+  if (!found) {
+    throw new Error("Could not find Chrome; set CHROME_PATH");
+  }
   return found;
 }
 
@@ -255,7 +267,9 @@ export async function startHarness({
       return original.call(this, type);
     };
   }, nativeHls);
-  for (const script of init) await page.evaluateOnNewDocument(script);
+  for (const script of init) {
+    await page.evaluateOnNewDocument(script);
+  }
   await page.goto(`${origin}/`);
   await page.waitForFunction(() => window.__fixture !== undefined);
 

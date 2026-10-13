@@ -54,7 +54,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   // volumechange
   const onVolumeChange = useCallback((): void => {
     const domElement = ref.current;
-    if (!domElement) return;
+    if (!domElement) {
+      return;
+    }
 
     domElement.volume = playback.volume;
     domElement.muted = playback.muted;
@@ -64,7 +66,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   const { onDomPlay, play } = useMemo(() => {
     const playCallback = async () => {
       const domElement = ref.current;
-      if (!domElement) return;
+      if (!domElement) {
+        return;
+      }
 
       domElement.removeEventListener("play", domPlayCallback);
       const promise = domElement.play();
@@ -98,7 +102,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   const { onDomPause, pause } = useMemo(() => {
     const onPausePlayback = () => {
       const domElement = ref.current;
-      if (!domElement) return;
+      if (!domElement) {
+        return;
+      }
 
       if (!domElement.ended) {
         domElement.removeEventListener("pause", onPauseDom);
@@ -109,7 +115,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
 
     const onPauseDom = () => {
       const domElement = ref.current;
-      if (!domElement) return;
+      if (!domElement) {
+        return;
+      }
       if (!playback.seeking && !playback.paused && !hasEnded(domElement)) {
         playback.removeEventListener("pause", onPausePlayback);
         playback.pause();
@@ -122,19 +130,25 @@ export function useSyncMedia<T extends HTMLMediaElement>(
 
   const onTimeUpdate = useCallback(() => {
     const domElement = ref.current;
-    if (!domElement) return;
+    if (!domElement) {
+      return;
+    }
 
     const t = playback.currentTime$;
 
     if (t.between(start, end)) {
-      if (!domElement.paused) return;
+      if (!domElement.paused) {
+        return;
+      }
 
       domElement.currentTime = t.minus(start).inSeconds();
       if (!playback.paused) {
         play().catch(playback.pause);
       }
     } else {
-      if (!domElement.paused) pause();
+      if (!domElement.paused) {
+        pause();
+      }
       domElement.currentTime = t.minus(start).inSeconds();
     }
   }, [end, pause, play, playback, ref, start]);
@@ -154,7 +168,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   // ratechange
   usePlaybackEvent("ratechange", () => {
     const domElement = ref.current;
-    if (!domElement) return;
+    if (!domElement) {
+      return;
+    }
 
     domElement.playbackRate = playback.playbackRate;
   });
@@ -162,7 +178,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   // seek
   usePlaybackEvent("seeked", ({ target: playback }) => {
     const domElement = ref.current;
-    if (!domElement) return;
+    if (!domElement) {
+      return;
+    }
 
     const t = playback.currentTime$;
 
@@ -173,7 +191,9 @@ export function useSyncMedia<T extends HTMLMediaElement>(
         play().catch(playback.pause);
       }
     } else {
-      if (!domElement.paused) pause();
+      if (!domElement.paused) {
+        pause();
+      }
     }
   });
 
@@ -232,9 +252,13 @@ function useSyncReadyState(
   }, [ref, setBuffered, setReadyState, start]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
     const media = ref.current;
-    if (!media) return;
+    if (!media) {
+      return;
+    }
 
     const events = [
       "abort",

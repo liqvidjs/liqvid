@@ -137,7 +137,9 @@ export function UpdateBannerClient({
     [makeToast, router, t.toast],
   );
 
-  if (dismissed) return null;
+  if (dismissed) {
+    return null;
+  }
 
   return (
     <div role="status" sx={styles.banner}>

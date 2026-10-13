@@ -131,7 +131,9 @@ function diffStoreStates(
 
   for (const key of keys) {
     const event = diffStoreRecord(key, a[key], b[key]);
-    if (event) events.push(event);
+    if (event) {
+      events.push(event);
+    }
   }
 
   return events;

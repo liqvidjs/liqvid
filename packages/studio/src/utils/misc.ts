@@ -72,7 +72,9 @@ function interpolatePathParams(
   urlPath: string,
   params?: ParameterValues,
 ): string {
-  if (!params) return urlPath;
+  if (!params) {
+    return urlPath;
+  }
   return urlPath.replace(
     /\[([^\]]+)\]/g,
     (match, paramName: string) => params[paramName] ?? match,
@@ -111,7 +113,9 @@ export function cartesianProduct<T extends ParameterConfig>(
 }> {
   const keys = Object.keys(parameters) as (keyof T)[];
 
-  if (keys.length === 0) return [];
+  if (keys.length === 0) {
+    return [];
+  }
 
   return keys.reduce<Record<string, string>[]>(
     (acc, key) => {

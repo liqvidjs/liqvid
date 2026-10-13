@@ -6,6 +6,7 @@ const SECONDS = 1000,
   MINUTES = 60 * SECONDS,
   HOURS = 60 * MINUTES,
   DAYS = 24 * HOURS,
+  // biome-ignore lint/style/noMagicNumbers: days in a week
   WEEKS = 7 * DAYS;
 
 const serializationKey = "@liqvid/duration";
@@ -105,7 +106,7 @@ export class Duration {
           return this;
         },
         setSeconds(s: number) {
-          dur.__valueMs = s * 1000;
+          dur.__valueMs = s * SECONDS;
           return this;
         },
         setToZero() {
@@ -137,19 +138,39 @@ export class Duration {
 
     switch (format) {
       case "short":
-        if (days !== 0) ret.d = days;
-        if (hours !== 0) ret.h = hours;
-        if (minutes !== 0) ret.m = minutes;
-        if (seconds !== 0) ret.s = seconds;
-        if (milliseconds !== 0) ret.ms = milliseconds;
+        if (days !== 0) {
+          ret.d = days;
+        }
+        if (hours !== 0) {
+          ret.h = hours;
+        }
+        if (minutes !== 0) {
+          ret.m = minutes;
+        }
+        if (seconds !== 0) {
+          ret.s = seconds;
+        }
+        if (milliseconds !== 0) {
+          ret.ms = milliseconds;
+        }
         break;
 
       case "long":
-        if (days !== 0) ret.days = days;
-        if (hours !== 0) ret.hours = hours;
-        if (minutes !== 0) ret.minutes = minutes;
-        if (seconds !== 0) ret.seconds = seconds;
-        if (milliseconds !== 0) ret.milliseconds = milliseconds;
+        if (days !== 0) {
+          ret.days = days;
+        }
+        if (hours !== 0) {
+          ret.hours = hours;
+        }
+        if (minutes !== 0) {
+          ret.minutes = minutes;
+        }
+        if (seconds !== 0) {
+          ret.seconds = seconds;
+        }
+        if (milliseconds !== 0) {
+          ret.milliseconds = milliseconds;
+        }
         break;
     }
 
@@ -268,7 +289,7 @@ export class MutableDuration extends Duration implements DurationSetter {
   }
 
   setSeconds(s: number) {
-    this.__valueMs = s * 1000;
+    this.__valueMs = s * SECONDS;
     return this;
   }
 
@@ -290,8 +311,12 @@ export namespace Duration {
 
   /** convert a DurationLike to milliseconds without creating unnecessary Duration objects */
   export function inMilliseconds(val: DurationLike = {}): number {
-    if (val instanceof Duration) return val.inMilliseconds();
-    if (typeof val === "string") return parseTimeMs(val);
+    if (val instanceof Duration) {
+      return val.inMilliseconds();
+    }
+    if (typeof val === "string") {
+      return parseTimeMs(val);
+    }
 
     const {
       milliseconds = 0,
@@ -326,9 +351,12 @@ export namespace Duration {
    * Coerce a DurationLike or Date into a Duration
    */
   export function from(val: DurationLike | Date): Duration {
-    if (val instanceof Date)
+    if (val instanceof Date) {
       return new Duration({ milliseconds: val.getTime() });
-    if (val instanceof Duration) return val;
+    }
+    if (val instanceof Duration) {
+      return val;
+    }
     if (typeof val === "string") {
       return new Duration({ milliseconds: parseTimeMs(val) });
     }
@@ -344,7 +372,7 @@ export namespace Duration {
 
   /** convert a DurationLike to seconds without creating unnecessary Duration objects */
   export function inSeconds(val: DurationLike): number {
-    return Duration.inMilliseconds(val) / 1000;
+    return Duration.inMilliseconds(val) / SECONDS;
   }
 
   /** referentially stable empty duration */

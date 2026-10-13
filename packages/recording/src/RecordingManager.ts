@@ -94,7 +94,9 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
    * @emits start
    */
   beginRecording(plugins: Record<string, Recorder<unknown, unknown>>): void {
-    if (Object.keys(plugins).length === 0) return;
+    if (Object.keys(plugins).length === 0) {
+      return;
+    }
 
     // initialize
     this.plugins = plugins;
@@ -120,7 +122,9 @@ export class RecordingManager extends EventEmitter<RecordingManagerEventMap> {
    * @emits cancel
    */
   cancelRecording(): void {
-    if (!this.active) return;
+    if (!this.active) {
+      return;
+    }
 
     // stop all recorders
     for (const plugin of Object.values(this.plugins)) {

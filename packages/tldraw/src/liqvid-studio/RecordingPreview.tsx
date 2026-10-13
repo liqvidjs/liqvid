@@ -103,7 +103,9 @@ function createPreviewSeekable(): PreviewSeekable {
       return currentTime;
     },
     set currentTime(next) {
-      if (next === currentTime) return;
+      if (next === currentTime) {
+        return;
+      }
       seeking = true;
       events.dispatchEvent(new Event("seeking"));
       currentTime = next;
@@ -153,7 +155,9 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!open || !hasRecording || recording) return;
+    if (!open || !hasRecording || recording) {
+      return;
+    }
 
     let active = true;
 
@@ -174,7 +178,9 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
       })
       .catch((error: unknown) => {
         console.error("Failed to load tldraw recording preview:", error);
-        if (active) setLoadError(true);
+        if (active) {
+          setLoadError(true);
+        }
       });
 
     return () => {
@@ -194,7 +200,9 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
     playback.currentTime = 0;
   }, [durationSeconds, playback]);
 
-  if (!hasRecording) return null;
+  if (!hasRecording) {
+    return null;
+  }
 
   const seek = (time: number) => {
     setPreviewTime(time);
@@ -204,7 +212,9 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
-    if (nextOpen) setLoadError(false);
+    if (nextOpen) {
+      setLoadError(false);
+    }
   };
 
   return (

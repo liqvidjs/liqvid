@@ -78,7 +78,9 @@ function CaptionsToggle({
     }
 
     // blur or keyboard controls will get snagged
-    if (e.currentTarget instanceof HTMLButtonElement) e.currentTarget.blur();
+    if (e.currentTarget instanceof HTMLButtonElement) {
+      e.currentTarget.blur();
+    }
 
     // toggle the mode of all text tracks
     updateTextTracks(newEnabled);
@@ -97,7 +99,9 @@ function CaptionsToggle({
     setIsEmpty(playback.textTracks.length === 0);
   });
 
-  if (isEmpty) return null;
+  if (isEmpty) {
+    return null;
+  }
 
   return render(
     { enabled },
@@ -134,7 +138,9 @@ function CaptionsDisplay(props: Omit<React.ComponentProps<"div">, "children">) {
     // Iterate through all text tracks
     for (const track of playback.textTracks) {
       // Only show tracks with mode "showing"
-      if (track.mode !== "showing") continue;
+      if (track.mode !== "showing") {
+        continue;
+      }
 
       // Collect active cues from this track
       for (const cue of track.activeCues) {

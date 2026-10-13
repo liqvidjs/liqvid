@@ -87,7 +87,9 @@ export function ScrubberBar({
 
   /* Event handlers */
   usePlaybackEvent("seeked", () => {
-    if (playback.seeking) return;
+    if (playback.seeking) {
+      return;
+    }
     const progress = playback.currentTime / playback.duration;
     setProgress({ scrubber: progress, thumb: progress });
   });
@@ -115,11 +117,15 @@ export function ScrubberBar({
 
   // event handlers
   const divEvents = useMemo(() => {
-    if (!anyHover) return {};
+    if (!anyHover) {
+      return {};
+    }
     const listener = onDrag(
       // move
       (_e, { x }) => {
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
         const rect = scrubberBar.current.getBoundingClientRect(),
           progress = clamp(0, (x - rect.left) / rect.width, 1);
 
@@ -128,7 +134,9 @@ export function ScrubberBar({
       },
       // down
       (_e, { x }) => {
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
 
         playback.seeking = true;
 
@@ -155,7 +163,9 @@ export function ScrubberBar({
     if (anyHover) {
       Object.assign(props, {
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => {
-          if (!scrubberBar.current) return;
+          if (!scrubberBar.current) {
+            return;
+          }
           const rect = scrubberBar.current.getBoundingClientRect(),
             progress = clamp(0, (e.clientX - rect.left) / rect.width, 1);
 
@@ -170,7 +180,9 @@ export function ScrubberBar({
     const listener = onDrag(
       // move
       (_e, { x }) => {
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
         const rect = scrubberBar.current.getBoundingClientRect(),
           progress = clamp(0, (x - rect.left) / rect.width, 1);
 
@@ -186,7 +198,9 @@ export function ScrubberBar({
       // end
       (e, { x }: { x: number }) => {
         e.preventDefault();
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
         const rect = scrubberBar.current.getBoundingClientRect(),
           progress = clamp(0, (x - rect.left) / rect.width, 1);
 
@@ -210,7 +224,9 @@ export function ScrubberBar({
     const listener = onDrag(
       // move
       (_e, { x }) => {
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
         const rect = scrubberBar.current.getBoundingClientRect(),
           progress = clamp(0, (x - rect.left) / rect.width, 1);
 
@@ -226,7 +242,9 @@ export function ScrubberBar({
       // end
       (e, { x }) => {
         e.preventDefault();
-        if (!scrubberBar.current) return;
+        if (!scrubberBar.current) {
+          return;
+        }
 
         const rect = scrubberBar.current.getBoundingClientRect(),
           progress = clamp(0, (x - rect.left) / rect.width, 1);
@@ -303,7 +321,9 @@ export function ScrubberBar({
             Array.from({ length: buffered.length }, (_, index) => {
               const start = clamp(0, buffered.start(index), playback.duration);
               const end = clamp(0, buffered.end(index), playback.duration);
-              if (end <= start) return null;
+              if (end <= start) {
+                return null;
+              }
 
               return (
                 <rect
@@ -363,7 +383,9 @@ function resolveHighlightTime(
   script: Script<string> | null,
 ): Duration | null {
   if (isMarkerOffset(time)) {
-    if (!script?.has(time.marker)) return null;
+    if (!script?.has(time.marker)) {
+      return null;
+    }
     return script.get(time.marker).start.plus(time.offset);
   }
   return Duration.from(time as Exclude<VideoHighlight["time"], RelativeOffset>);

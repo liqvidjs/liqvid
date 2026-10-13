@@ -268,7 +268,9 @@ export function HighlightsDialog() {
     let active = true;
 
     loadHighlights({ params: projectParams, projectPath }).then((result) => {
-      if (!active) return;
+      if (!active) {
+        return;
+      }
       setHighlights(result ?? []);
       setLoadError(result === undefined);
     });
@@ -281,7 +283,9 @@ export function HighlightsDialog() {
   // sorted view of the highlights, paired with their index in the stored list
   // so that editing and deleting still refer to the right entry
   const sorted = useMemo(() => {
-    if (highlights === null) return null;
+    if (highlights === null) {
+      return null;
+    }
     return highlights
       .map((highlight, index) => ({ highlight, index }))
       .sort(
@@ -307,7 +311,9 @@ export function HighlightsDialog() {
 
   const addHighlight = useCallback(
     (title: string) => {
-      if (pendingTime === null || highlights === null) return;
+      if (pendingTime === null || highlights === null) {
+        return;
+      }
       persist([...highlights, { time: pendingTime, title }]);
       setPendingTime(null);
     },
@@ -316,7 +322,9 @@ export function HighlightsDialog() {
 
   const updateHighlight = useCallback(
     (index: number, next: Highlight) => {
-      if (highlights === null) return;
+      if (highlights === null) {
+        return;
+      }
       const nextHighlights: Highlight[] = [...highlights];
       nextHighlights[index] = next;
       persist(nextHighlights);
@@ -326,7 +334,9 @@ export function HighlightsDialog() {
 
   const overwriteHighlight = useCallback(
     (index: number) => {
-      if (highlights === null) return;
+      if (highlights === null) {
+        return;
+      }
 
       // read the playback time when the button is clicked, not when the
       // dialog rendered (which would freeze it at the last render time)
@@ -340,7 +350,9 @@ export function HighlightsDialog() {
 
   const deleteHighlight = useCallback(
     (index: number) => {
-      if (highlights === null) return;
+      if (highlights === null) {
+        return;
+      }
       persist(highlights.filter((_, i) => i !== index));
     },
     [highlights, persist],
@@ -432,7 +444,9 @@ export function HighlightsDialog() {
         {/* prompt for the title of a new highlight */}
         <DialogRoot
           onOpenChange={(open) => {
-            if (!open) setPendingTime(null);
+            if (!open) {
+              setPendingTime(null);
+            }
           }}
           open={pendingTime !== null}
         >
@@ -446,7 +460,9 @@ export function HighlightsDialog() {
                   const title = String(
                     new FormData(e.currentTarget).get("title") ?? "",
                   ).trim();
-                  if (title !== "") addHighlight(title);
+                  if (title !== "") {
+                    addHighlight(title);
+                  }
                 }}
               >
                 <div sx={styles.field}>
@@ -535,7 +551,9 @@ function HighlightForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!valid) return;
+        if (!valid) {
+          return;
+        }
 
         onSubmit({
           time:
@@ -593,7 +611,9 @@ function HighlightForm({
             <SelectRoot
               items={Object.fromEntries(markers.map((m) => [m, m]))}
               onValueChange={(value) => {
-                if (value) setMarker(value as string);
+                if (value) {
+                  setMarker(value as string);
+                }
               }}
               value={marker}
             >

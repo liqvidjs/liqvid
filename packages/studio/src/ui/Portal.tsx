@@ -11,7 +11,9 @@ export function Portal(props: PortalProps) {
     setRender(true);
   }, []);
 
-  if (!render) return null;
+  if (!render) {
+    return null;
+  }
 
   return <$Portal {...props} />;
 }

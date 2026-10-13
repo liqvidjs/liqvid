@@ -76,10 +76,14 @@ function getInitialStyles(
   const styles: Record<string, string | number> = {};
 
   for (const key of Object.keys(keyframes)) {
-    if (excludeKeys.has(key)) continue;
+    if (excludeKeys.has(key)) {
+      continue;
+    }
 
     const value = keyframes[key as keyof PropertyIndexedKeyframes];
-    if (value === undefined || value === null) continue;
+    if (value === undefined || value === null) {
+      continue;
+    }
 
     // Get the first value (either from array or single value)
     const firstValue = Array.isArray(value) ? value[0] : value;

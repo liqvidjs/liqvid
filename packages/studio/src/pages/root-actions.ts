@@ -341,7 +341,9 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
     });
 
     for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
+      if (!entry.isDirectory()) {
+        continue;
+      }
 
       const templateDir = path.join(PROJECT_TEMPLATES_DIR, entry.name);
       const templateJsonPath = path.join(templateDir, TEMPLATE_FILE);
@@ -369,8 +371,12 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
 
   // Sort: default first, then alphabetically by name
   templates.sort((a, b) => {
-    if (a.default && !b.default) return -1;
-    if (!a.default && b.default) return 1;
+    if (a.default && !b.default) {
+      return -1;
+    }
+    if (!a.default && b.default) {
+      return 1;
+    }
     return a.name.localeCompare(b.name);
   });
 
@@ -410,7 +416,9 @@ const copyTemplateDir = Effect.fnUntraced(function* (
   const entries = yield* readDirWithFileTypes(srcDir);
 
   for (const [basename, kind] of entries) {
-    if (kind === "SymbolicLink") continue;
+    if (kind === "SymbolicLink") {
+      continue;
+    }
 
     if (basename === TEMPLATE_FILE) {
       // Skip template.json

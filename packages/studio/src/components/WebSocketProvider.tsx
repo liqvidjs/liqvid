@@ -53,7 +53,9 @@ class WebSocketClient {
               Schema.decodeEffect(EnvelopeFromJson)(data).pipe(
                 Effect.andThen(({ channel, message }) => {
                   const subscribers = this.subscribers.get(channel);
-                  if (!subscribers) return Effect.void;
+                  if (!subscribers) {
+                    return Effect.void;
+                  }
 
                   message = deserialize(message as JSONValue, {
                     "@liqvid/duration": Duration.fromJSON,
@@ -95,7 +97,9 @@ class WebSocketClient {
    */
   send<C extends ChannelName>(channel: C, message: ChannelMessage<C>): void {
     const write = this.#write;
-    if (!write) return;
+    if (!write) {
+      return;
+    }
 
     runtime.runFork(
       Schema.encodeEffect(EnvelopeFromJson)({
@@ -122,7 +126,9 @@ class WebSocketClient {
 
 /** Resolve a possibly-relative URL against the current page origin as ws(s). */
 function toAbsoluteUrl(url: string): string {
-  if (/^wss?:\/\//.test(url)) return url;
+  if (/^wss?:\/\//.test(url)) {
+    return url;
+  }
   const { protocol, host } = window.location;
   const wsProtocol = protocol === "https:" ? "wss:" : "ws:";
   return `${wsProtocol}//${host}${url}`;
@@ -216,7 +222,9 @@ export function useChannel<C extends ChannelName>(
   });
 
   useEffect(() => {
-    if (!enabled || !client) return;
+    if (!enabled || !client) {
+      return;
+    }
 
     return client.subscribe(channel, onMessage);
   }, [client, enabled, channel]);

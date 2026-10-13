@@ -56,7 +56,9 @@ export function usePersist<C extends LocalValueConfig>(
     /** parse raw value retrieved from storage */
     // biome-ignore lint/suspicious/noExplicitAny: types got too complex
     const parse = (value: string | null): any => {
-      if (value === null) return (storage?.default ?? fallbackDefault) as T;
+      if (value === null) {
+        return (storage?.default ?? fallbackDefault) as T;
+      }
 
       switch (storage.type) {
         case "boolean":
@@ -189,11 +191,15 @@ export function usePersistentState<C extends LocalValueConfig>(
   }
 
   useEffect(() => {
-    if (storage?.source !== "search-then-messages") return;
+    if (storage?.source !== "search-then-messages") {
+      return;
+    }
 
     const receiveMsg = (m: MessageEvent) => {
       const value = storage.options.incoming(m);
-      if (!value) return;
+      if (!value) {
+        return;
+      }
 
       setState(value.new as ArgType<C>);
     };

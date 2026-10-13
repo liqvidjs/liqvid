@@ -29,7 +29,9 @@ export function ProvidersConfigClient() {
     value: unknown,
   ) {
     const nextProviders = { ...providers, [key]: value };
-    if (value === undefined) delete nextProviders[key];
+    if (value === undefined) {
+      delete nextProviders[key];
+    }
     patch({
       providers:
         Object.keys(nextProviders).length === 0 ? undefined : nextProviders,

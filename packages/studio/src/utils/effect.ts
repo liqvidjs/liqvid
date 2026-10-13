@@ -93,7 +93,9 @@ export const jobProgressLayer = (
     }
 
     increment(step = 1) {
-      if (!this.#message) return;
+      if (!this.#message) {
+        return;
+      }
       this.#message.value += step;
       this.#message.formattedValue = this.#formatValue(this.#message.value);
       hooks?.onUpdate();
@@ -104,7 +106,9 @@ export const jobProgressLayer = (
     }
 
     update(current: number) {
-      if (!this.#message) return;
+      if (!this.#message) {
+        return;
+      }
       this.#message.value = current;
       this.#message.formattedValue = this.#formatValue(current);
       hooks?.onUpdate();

@@ -129,7 +129,9 @@ export class CorePlayback extends EventEmitter<
 
   set currentTime(t: number) {
     t = constrain(0, t, this.duration);
-    if (t === this.currentTime) return;
+    if (t === this.currentTime) {
+      return;
+    }
 
     this.__currentTimeMs = this.__playingFromMs = t * 1000;
     this.__startTimeMs = performance.now();
@@ -155,7 +157,9 @@ export class CorePlayback extends EventEmitter<
 
   /** @emits durationchange */
   set duration(duration: number) {
-    if (duration === this.duration) return;
+    if (duration === this.duration) {
+      return;
+    }
 
     this.__durationMs = duration * 1000;
     this.__emit("durationchange");
@@ -168,7 +172,9 @@ export class CorePlayback extends EventEmitter<
 
   /** @emits volumechange */
   set muted(val: boolean) {
-    if (val === this.__muted) return;
+    if (val === this.__muted) {
+      return;
+    }
 
     this.__muted = val;
 
@@ -193,7 +199,9 @@ export class CorePlayback extends EventEmitter<
 
   /** @emits ratechange */
   set playbackRate(val: number) {
-    if (val === this.__playbackRate) return;
+    if (val === this.__playbackRate) {
+      return;
+    }
 
     this.__playbackRate = val;
     this.__playingFromMs = this.currentTime * 1000;
@@ -211,11 +219,16 @@ export class CorePlayback extends EventEmitter<
    * @emits seeked
    */
   set seeking(val: boolean) {
-    if (val === this.__seeking) return;
+    if (val === this.__seeking) {
+      return;
+    }
 
     this.__seeking = val;
-    if (this.__seeking) this.__emit("seeking");
-    else this.__emit("seeked");
+    if (this.__seeking) {
+      this.__emit("seeking");
+    } else {
+      this.__emit("seeked");
+    }
   }
 
   /** Gets or sets the volume level for the playback. */

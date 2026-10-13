@@ -62,7 +62,9 @@ export function ConfigureLocaleClient({
   const [saving, setSaving] = useState<Locale | null>(null);
 
   async function selectLocale(next: Locale) {
-    if (next === locale || saving) return;
+    if (next === locale || saving) {
+      return;
+    }
 
     setSaving(next);
 

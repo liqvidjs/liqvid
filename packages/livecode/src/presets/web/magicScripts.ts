@@ -68,13 +68,22 @@ export const magicScripts = `
 
         // find script
         const currentScript = offsets.find(({ start, end }) => {
-          if (start.line > absoluteLineNumber) return false;
-          if (start.line === absoluteLineNumber && start.col > characterNumber)
+          if (start.line > absoluteLineNumber) {
             return false;
+          }
+          if (
+            start.line === absoluteLineNumber &&
+            start.col > characterNumber
+          ) {
+            return false;
+          }
 
-          if (end.line < absoluteLineNumber) return false;
-          if (end.line === absoluteLineNumber && end.col < characterNumber)
+          if (end.line < absoluteLineNumber) {
             return false;
+          }
+          if (end.line === absoluteLineNumber && end.col < characterNumber) {
+            return false;
+          }
 
           return true;
         });

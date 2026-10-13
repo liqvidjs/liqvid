@@ -33,7 +33,9 @@ const DEFAULT_TOLERANCE = isChrome ? 60 : 50;
 export function resolveGreenScreen(
   greenscreen: boolean | GreenScreenConfig,
 ): ResolvedGreenScreen | null {
-  if (!greenscreen) return null;
+  if (!greenscreen) {
+    return null;
+  }
   const config = greenscreen === true ? {} : greenscreen;
   return {
     color: config.color ?? DEFAULT_COLOR,
@@ -81,7 +83,9 @@ export function useGreenScreen({
 
   const startProcessing = () => {
     if (video && typeof video.requestVideoFrameCallback === "function") {
-      if (videoFrameRef.current !== null) return;
+      if (videoFrameRef.current !== null) {
+        return;
+      }
       videoFrameRef.current = {
         id: video.requestVideoFrameCallback(processVideoFrame),
         video,
@@ -89,7 +93,9 @@ export function useGreenScreen({
       return;
     }
 
-    if (animationFrameRef.current !== null) return;
+    if (animationFrameRef.current !== null) {
+      return;
+    }
     animationFrameRef.current = requestAnimationFrame(processGreenscreen);
   };
   const startProcessing$ = useEffectEvent(startProcessing);
@@ -111,7 +117,9 @@ export function useGreenScreen({
   /* greenscreen processing - renders a single frame */
   const renderFrame = () => {
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    if (!video || !canvas) {
+      return;
+    }
 
     renderGreenScreen({
       canvas,
@@ -124,7 +132,9 @@ export function useGreenScreen({
 
   /* greenscreen animation loop - continuously renders while playing */
   const processGreenscreen = useEffectEvent(() => {
-    if (!video || video.paused || video.ended) return;
+    if (!video || video.paused || video.ended) {
+      return;
+    }
 
     renderFrame();
     animationFrameRef.current = requestAnimationFrame(processGreenscreen);
@@ -150,9 +160,13 @@ export function useGreenScreen({
 
   /* greenscreen effect */
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
 
-    if (!video) return;
+    if (!video) {
+      return;
+    }
 
     // Start if already playing
     if (!video.paused) {

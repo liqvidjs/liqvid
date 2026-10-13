@@ -30,7 +30,9 @@ export function Cursor({
       let unsub: () => void;
 
       data.then((data) => {
-        if (!ref.current) return;
+        if (!ref.current) {
+          return;
+        }
 
         unsub = cursorReplay({
           align,
@@ -47,7 +49,9 @@ export function Cursor({
       };
     }
 
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     return cursorReplay({
       align,

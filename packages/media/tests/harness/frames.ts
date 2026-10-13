@@ -100,7 +100,9 @@ export async function waitForFrame(
       await captureCanvas(page),
       reference,
     );
-    if (difference <= MATCH_THRESHOLD) return difference;
+    if (difference <= MATCH_THRESHOLD) {
+      return difference;
+    }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   return difference;

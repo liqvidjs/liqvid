@@ -59,9 +59,13 @@ export function parseConfigWithTransform<T extends object>(
 
 // biome-ignore lint/suspicious/noExplicitAny: config object can have any shape
 function access(o: any, keys: string[]): object {
-  if (keys.length === 0) return o as object;
+  if (keys.length === 0) {
+    return o as object;
+  }
   const key = keys.shift();
-  if (key === undefined || !o[key]) return {};
+  if (key === undefined || !o[key]) {
+    return {};
+  }
   return access(o[key], keys);
 }
 

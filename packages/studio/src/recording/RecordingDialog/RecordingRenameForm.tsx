@@ -34,7 +34,9 @@ export function RecordingRenameForm({
 
   const rename = useCallback(() => {
     const newName = name.trim();
-    if (!newName || newName === recordingName) return;
+    if (!newName || newName === recordingName) {
+      return;
+    }
 
     setIsRenaming(true);
     setFailed(false);

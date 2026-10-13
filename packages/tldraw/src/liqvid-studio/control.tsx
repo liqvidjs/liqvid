@@ -182,7 +182,9 @@ function restoreViewport(editor: Editor, snapshot: SavedState["snapshot"]) {
   const camera = snapshot.session.pageStates?.find(
     (pageState) => pageState.pageId === pageId,
   )?.camera;
-  if (camera) editor.setCamera(camera);
+  if (camera) {
+    editor.setCamera(camera);
+  }
 }
 
 /**
@@ -220,7 +222,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
   }, [projectPath, params]);
 
   const capture = () => {
-    if (!editor) return;
+    if (!editor) {
+      return;
+    }
 
     // Live records are not plain objects, and their ids contain ":". React
     // Flight encodes those as opaque temporary references, which the server
@@ -243,7 +247,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
   };
 
   const performOverwrite = async () => {
-    if (!overwriteTarget || !editor) return;
+    if (!overwriteTarget || !editor) {
+      return;
+    }
 
     try {
       await overwriteSnapshot(
@@ -268,10 +274,14 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
   };
 
   const performRename = async () => {
-    if (!renameTarget) return;
+    if (!renameTarget) {
+      return;
+    }
 
     const newName = renameValue.trim();
-    if (!newName || newName === renameTarget.name) return;
+    if (!newName || newName === renameTarget.name) {
+      return;
+    }
 
     try {
       await renameSnapshot(projectPath, params, renameTarget.name, newName);
@@ -289,7 +299,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
   };
 
   const performDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      return;
+    }
 
     await deleteSnapshot(projectPath, params, deleteTarget.name);
     setSaved(await listSaved(projectPath, params));
@@ -431,7 +443,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
 
       <DialogRoot
         onOpenChange={(open) => {
-          if (!open) setRenameTarget(null);
+          if (!open) {
+            setRenameTarget(null);
+          }
         }}
         open={!!renameTarget}
       >
@@ -448,7 +462,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
                 setRenameValue(value);
               }}
               onKeyDown={(event) => {
-                if (event.key === "Enter") void performRename();
+                if (event.key === "Enter") {
+                  void performRename();
+                }
               }}
               sx={styles.input}
               value={renameValue}
@@ -494,7 +510,9 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
 
       <AlertDialogRoot
         onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
+          if (!open) {
+            setDeleteTarget(null);
+          }
         }}
         open={!!deleteTarget}
       >

@@ -17,7 +17,9 @@ export function CanvasLayer({ children }: { children: React.ReactNode }) {
   // zoom or pan (which previously made the cursor appear to jump).
   useQuickReactor("sync canvas layer to camera", () => {
     const layer = layerRef.current;
-    if (!layer) return;
+    if (!layer) {
+      return;
+    }
 
     const { x, y, z } = editor.getCamera();
     layer.style.transform = `translate(${x * z}px, ${y * z}px)`;

@@ -78,12 +78,16 @@ export function useTime<T = number>(
       typeof transform === "function"
         ? () => {
             const value = transform(playback.currentTime);
-            if (value !== prev.current) callback(value);
+            if (value !== prev.current) {
+              callback(value);
+            }
             prev.current = value;
           }
         : () => {
             const t = playback.currentTime as unknown as T;
-            if (t !== prev.current) callback(t);
+            if (t !== prev.current) {
+              callback(t);
+            }
             prev.current = t;
           };
 

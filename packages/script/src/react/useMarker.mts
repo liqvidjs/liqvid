@@ -32,7 +32,9 @@ export function useMarker<M extends string, T>(
   const script = useScript<M>();
 
   const selector: (marker: Marker<M>) => T = useMemo(() => {
-    if (args.length < 2) return (m: Marker<M>) => m as unknown as T;
+    if (args.length < 2) {
+      return (m: Marker<M>) => m as unknown as T;
+    }
     return args[0] as unknown as (m: Marker<M>) => T;
   }, [args.length, args[0]]);
 
@@ -51,7 +53,9 @@ export function useMarker<M extends string, T>(
           break;
         case 2: {
           const value = args[0](active, prev);
-          if (value === prevValue.current) return;
+          if (value === prevValue.current) {
+            return;
+          }
           args[1](value, prevValue.current);
           prevValue.current = value;
         }
@@ -62,5 +66,7 @@ export function useMarker<M extends string, T>(
 
   useEventListener(script, "markerupdate", check);
 
-  if (args.length === 0) return activeMarker;
+  if (args.length === 0) {
+    return activeMarker;
+  }
 }

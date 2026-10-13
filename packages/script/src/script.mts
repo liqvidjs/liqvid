@@ -182,7 +182,9 @@ export class Script<M extends string = string> extends EventEmitter<
       index = Math.floor((lower + upper) / 2);
     }
 
-    if (index === this.__index) return;
+    if (index === this.__index) {
+      return;
+    }
 
     const prev = this.markers[this.__index]!;
     this.__index = index;

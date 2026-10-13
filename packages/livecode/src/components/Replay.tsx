@@ -244,7 +244,9 @@ export function ReplayMultiple({
   useEffect(() => {
     const state = store.getState();
     const group = state.groups[groupId];
-    if (!group) return;
+    if (!group) {
+      return;
+    }
 
     const views: Record<string, EditorView> = {};
     for (const file of group.files) {

@@ -270,7 +270,9 @@ export class LiqvidStudioProvider
           .pipe(Effect.orDie);
 
         for (const file of body.files) {
-          if (!file.key.startsWith(prefix)) continue;
+          if (!file.key.startsWith(prefix)) {
+            continue;
+          }
           files.push({
             key: file.key.slice(prefix.length) as RelativeFile,
             lastModified: new Date(file.lastModified),
@@ -278,7 +280,9 @@ export class LiqvidStudioProvider
           });
         }
         cursor = body.truncated ? (body.nextCursor ?? undefined) : undefined;
-        if (!cursor) break;
+        if (!cursor) {
+          break;
+        }
       }
 
       return files;
@@ -354,7 +358,9 @@ export class LiqvidStudioProvider
     return Effect.gen({ self: this }, function* (this: LiqvidStudioProvider) {
       const metaFile = path.join(process.cwd(), LIQVID_DIR, WORKSPACE_META);
       const existingMeta = yield* this.#readWorkspaceMeta(metaFile);
-      if (Option.isSome(existingMeta)) return existingMeta.value;
+      if (Option.isSome(existingMeta)) {
+        return existingMeta.value;
+      }
 
       const fs = yield* FileSystem.FileSystem;
 
@@ -730,7 +736,9 @@ export class LiqvidStudioProvider
 
   #getWorkspaceName() {
     return Effect.gen({ self: this }, function* () {
-      if (this.#workspaceName) return this.#workspaceName;
+      if (this.#workspaceName) {
+        return this.#workspaceName;
+      }
       if (this.#config.workspace) {
         this.#workspaceName = this.#config.workspace;
         return this.#workspaceName;
@@ -799,8 +807,12 @@ export class LiqvidStudioProvider
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
   if (bytes < 1024 * 1024 * 1024) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
@@ -841,7 +853,9 @@ async function selectProjectsToUnpublish(
     theme: { keybindings: ["vim"] },
   });
   const selected = new Set(selection);
-  if (selected.size === 0) return selected;
+  if (selected.size === 0) {
+    return selected;
+  }
 
   return (await confirm({
     default: false,

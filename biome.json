@@ -146,6 +146,10 @@
           }
         },
         "useAtIndex": "error",
+        "useBlockStatements": {
+          "fix": "safe",
+          "level": "info"
+        },
         "useConsistentArrayType": "warn",
         "useConsistentObjectDefinitions": "off",
         "useErrorCause": "error",

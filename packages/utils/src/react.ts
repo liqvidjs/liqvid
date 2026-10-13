@@ -76,17 +76,23 @@ export function onClickReact<T extends HTMLElement | SVGElement>(
 
     // touchstart handler
     const onTouchStart: React.TouchEventHandler<T> = (e) => {
-      if (typeof touchId === "number") return;
+      if (typeof touchId === "number") {
+        return;
+      }
       target = e.currentTarget as T;
       touchId = e.changedTouches[0]?.identifier;
     };
 
     // touchend handler
     const onTouchEnd: React.TouchEventHandler<T> = (e) => {
-      if (typeof touchId !== "number") return;
+      if (typeof touchId !== "number") {
+        return;
+      }
 
       for (const touch of Array.from(e.changedTouches)) {
-        if (touch.identifier !== touchId) continue;
+        if (touch.identifier !== touchId) {
+          continue;
+        }
 
         if (
           target.contains(

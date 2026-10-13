@@ -115,7 +115,9 @@ async function exists(file: string): Promise<boolean> {
 async function waitFor(assertion: () => Promise<boolean>): Promise<void> {
   const deadline = Date.now() + 5000;
   while (Date.now() < deadline) {
-    if (await assertion()) return;
+    if (await assertion()) {
+      return;
+    }
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   expect(await assertion()).toBe(true);

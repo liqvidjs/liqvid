@@ -48,7 +48,9 @@ export function HTMLPreview(props: React.ComponentProps<"iframe">) {
 
   const refresh = useCallback(() => {
     const { groups, activeGroup } = store.getState();
-    if (!activeGroup) return;
+    if (!activeGroup) {
+      return;
+    }
     const files = groups?.[activeGroup]?.files ?? [];
 
     const args = files.reduce(
@@ -112,8 +114,12 @@ export function HTMLPreview(props: React.ComponentProps<"iframe">) {
   const clearMessages = useClearMessages();
 
   useEventListener(globalThis?.window, "message", (msg: MessageEvent) => {
-    if (!msg.data?.type) return;
-    if (!isWebConsoleMessageUp(msg.data)) return;
+    if (!msg.data?.type) {
+      return;
+    }
+    if (!isWebConsoleMessageUp(msg.data)) {
+      return;
+    }
 
     switch (msg.data.type) {
       case "console.debug":
@@ -157,8 +163,12 @@ function isWebConsoleMessageUp(msg: unknown): msg is WebConsoleMessageUp {
 
 function transpiledExtension(path: string) {
   return path.replace(/\.([jt]sx|m?ts)$/g, (_, ext) => {
-    if (ext === ".jsx" || ext === "ts" || ext === "tsx") return ".js";
-    if (ext === "mts") return ".mjs";
+    if (ext === ".jsx" || ext === "ts" || ext === "tsx") {
+      return ".js";
+    }
+    if (ext === "mts") {
+      return ".mjs";
+    }
     return `.${ext}`;
   });
 }

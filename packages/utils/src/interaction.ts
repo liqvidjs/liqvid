@@ -72,7 +72,9 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
   return (e: E) => {
     /* click events */
     if (e instanceof MouseEvent) {
-      if (e.button !== 0) return;
+      if (e.button !== 0) {
+        return;
+      }
 
       let lastX = e.clientX,
         lastY = e.clientY;
@@ -123,7 +125,9 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
         e.preventDefault();
 
         for (const touch of Array.from(e.changedTouches)) {
-          if (touch.identifier !== touchId) continue;
+          if (touch.identifier !== touchId) {
+            continue;
+          }
 
           const dx = touch.clientX - lastX,
             dy = touch.clientY - lastY;
@@ -150,7 +154,9 @@ export function onDrag<E extends MouseEvent | TouchEvent>(
         assertType<TouchEvent>(e);
         e.preventDefault();
         for (const touch of Array.from(e.changedTouches)) {
-          if (touch.identifier !== touchId) continue;
+          if (touch.identifier !== touchId) {
+            continue;
+          }
 
           const dx = touch.clientX - lastX,
             dy = touch.clientY - lastY;
@@ -208,15 +214,21 @@ export function onClick<T extends HTMLElement | SVGElement>(
 
   // touchstart handler
   const touchStart = (e: TouchEvent): void => {
-    if (typeof touchId === "number") return;
+    if (typeof touchId === "number") {
+      return;
+    }
     touchId = e.changedTouches[0]?.identifier;
   };
 
   // touchend handler
   const touchEnd = (e: TouchEvent): void => {
-    if (typeof touchId !== "number") return;
+    if (typeof touchId !== "number") {
+      return;
+    }
     for (const touch of Array.from(e.changedTouches)) {
-      if (touch.identifier !== touchId) continue;
+      if (touch.identifier !== touchId) {
+        continue;
+      }
 
       if (
         node.contains(document.elementFromPoint(touch.clientX, touch.clientY))

@@ -52,7 +52,9 @@ export function PlaybackProvider({
   });
 
   useEager(() => {
-    if (!value) return;
+    if (!value) {
+      return;
+    }
 
     if (restore?.muted) {
       value.muted = getMuted();
@@ -115,7 +117,9 @@ export function useTime$<T>(
   const playback = usePlayback();
 
   const selector: (t: Duration) => T = useMemo(() => {
-    if (args.length < 2) return (t: Duration) => t as unknown as T;
+    if (args.length < 2) {
+      return (t: Duration) => t as unknown as T;
+    }
     return args[0] as unknown as (t: Duration) => T;
   }, [args.length, args[0]]);
 
@@ -162,7 +166,9 @@ export function useTime<T>(
   const playback = usePlayback();
 
   const selector: (t: number) => T = useMemo(() => {
-    if (args.length < 2) return (t: number) => t as unknown as T;
+    if (args.length < 2) {
+      return (t: number) => t as unknown as T;
+    }
     return args[0] as unknown as (t: number) => T;
   }, [args.length, args[0]]);
 
@@ -216,7 +222,9 @@ export function useReadyStateItem(defaultValue = 4, enabled = true) {
   const playback = usePlayback();
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
     playback.registerReadyStateItem(item);
 
     return () => {
@@ -225,7 +233,9 @@ export function useReadyStateItem(defaultValue = 4, enabled = true) {
   }, [enabled, playback, item]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
     playback.updateReadyStateItem(item, readyState);
   }, [enabled, playback, item, readyState]);
 
@@ -238,7 +248,9 @@ export function useBufferedItem(enabled = true) {
   const playback = usePlayback();
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
     playback.registerBufferedItem(item);
 
     return () => {
@@ -247,7 +259,9 @@ export function useBufferedItem(enabled = true) {
   }, [enabled, playback, item]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
     playback.updateBufferedItem(item, buffered);
   }, [enabled, playback, item, buffered]);
 

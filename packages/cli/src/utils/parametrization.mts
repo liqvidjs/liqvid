@@ -23,8 +23,12 @@ export function resolveParametrized<T>(
   input: Parametrized<T> | undefined,
   parameters: ParameterValues,
 ): T | undefined {
-  if (input === undefined) return undefined;
-  if (!Array.isArray(input)) return input as T;
+  if (input === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(input)) {
+    return input as T;
+  }
 
   return input.find((entry) =>
     Object.entries(entry).every(

@@ -205,8 +205,12 @@ export function ProjectListClient({
           {Array.from(folderTree.entries())
             .sort(([a], [b]) => {
               // Empty folder name (root projects) should come last
-              if (a === "") return 1;
-              if (b === "") return -1;
+              if (a === "") {
+                return 1;
+              }
+              if (b === "") {
+                return -1;
+              }
               return a.localeCompare(b);
             })
             .map(([folderName, folder]) =>

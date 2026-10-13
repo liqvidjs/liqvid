@@ -33,7 +33,9 @@ export function Controls({
   /** reset the hiding timer */
   const resetTimer = useCallback(
     (e: unknown) => {
-      if (playback.paused || !hideAfterMs) return;
+      if (playback.paused || !hideAfterMs) {
+        return;
+      }
 
       // allow keyboard input on elements
       if (e instanceof KeyboardEvent) {
@@ -49,7 +51,9 @@ export function Controls({
         }
       }
 
-      if (timer.current !== undefined) clearTimeout(timer.current);
+      if (timer.current !== undefined) {
+        clearTimeout(timer.current);
+      }
 
       timer.current = window.setTimeout(
         () => setControls((prev) => ({ ...prev, visible: false })),
@@ -94,7 +98,9 @@ export function Controls({
   );
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      return;
+    }
 
     setControls((prev) => ({ ...prev, mounted: true, visible: true }));
 
@@ -103,7 +109,9 @@ export function Controls({
     };
   }, [setControls, isActive]);
 
-  if (!isActive) return null;
+  if (!isActive) {
+    return null;
+  }
 
   return (
     <div className={clsx("lv-controls", className)} {...props}>

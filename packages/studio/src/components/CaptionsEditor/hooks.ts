@@ -47,7 +47,9 @@ export function useHoverHighlight(
 
   const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = stripesRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const { words } = store.getState();
 
@@ -58,7 +60,9 @@ export function useHoverHighlight(
         ? wordIndexAtCaret(container, words, caret)
         : -1;
 
-    if (index === hoveredWord.current) return;
+    if (index === hoveredWord.current) {
+      return;
+    }
     hoveredWord.current = index;
 
     if (index < 0) {
@@ -93,14 +97,20 @@ export function useWordEditor(
 
   const begin = (index: number) => {
     const container = stripesRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const { words } = store.getState();
     const word = words[index]?.[0];
-    if (word === undefined) return;
+    if (word === undefined) {
+      return;
+    }
 
     const rect = wordRectRelativeToStripes(container, words, index);
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
 
     setEditing({ index, rect, value: word });
   };
@@ -114,7 +124,9 @@ export function useWordEditor(
       const { index, value } = editing;
       store.setState((state) => {
         const current = state.words[index]?.[0];
-        if (current === undefined || current === value) return state;
+        if (current === undefined || current === value) {
+          return state;
+        }
 
         return apply(state, { action: "change-word", index, value });
       });
@@ -149,16 +161,24 @@ export function useSelectOnClick(store: Store) {
     const container = e.currentTarget.querySelector<HTMLElement>(
       '[data-role="stripes"]',
     );
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const { words } = store.getState();
-    if (words.length === 0) return;
+    if (words.length === 0) {
+      return;
+    }
 
     const caret = caretPositionFromPoint(e.clientX, e.clientY);
-    if (!caret || !container.contains(caret.node)) return;
+    if (!caret || !container.contains(caret.node)) {
+      return;
+    }
 
     const index = wordIndexAtCaret(container, words, caret);
-    if (index < 0) return;
+    if (index < 0) {
+      return;
+    }
 
     const clamped = Math.min(Math.max(index, 0), words.length - 1);
 
@@ -205,7 +225,9 @@ export function useCaptionsEditorShortcuts(
 
     // Ignore shortcuts while typing in an input/textarea/contenteditable (e.g.
     // the inline word editor), which handles its own keys.
-    if (isEditableTarget(e.target)) return;
+    if (isEditableTarget(e.target)) {
+      return;
+    }
 
     if (pendingKey.current) {
       const shortcut = pendingKey.current + e.key;
@@ -311,7 +333,9 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => {
           const t = playback.currentTime$.inMilliseconds();
           const index = activeWordIndex(state.words, t);
-          if (index < 0) return state;
+          if (index < 0) {
+            return state;
+          }
 
           return apply(state, {
             action: "selection-set",
@@ -322,7 +346,9 @@ export function useCaptionsEditorShortcuts(
       case keys.deleteWord:
         e.stopPropagation();
         store.setState((state) => {
-          if (state.words.length === 0) return state;
+          if (state.words.length === 0) {
+            return state;
+          }
           return apply(state, {
             action: "delete-word",
             index: state.selection.start,
@@ -334,7 +360,9 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => {
           const index = state.selection.start;
           // Nothing to merge if there is no following word.
-          if (index >= state.words.length - 1) return state;
+          if (index >= state.words.length - 1) {
+            return state;
+          }
           return apply(state, { action: "merge-word", index });
         });
         break;
@@ -343,10 +371,14 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => {
           const index = state.selection.start;
           const word = state.words[index]?.[0];
-          if (word === undefined) return state;
+          if (word === undefined) {
+            return state;
+          }
 
           const value = cycleCapitalization(word);
-          if (value === word) return state;
+          if (value === word) {
+            return state;
+          }
 
           return apply(state, { action: "change-word", index, value });
         });
@@ -363,10 +395,14 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => {
           const index = state.selection.start;
           const word = state.words[index]?.[0];
-          if (word === undefined) return state;
+          if (word === undefined) {
+            return state;
+          }
 
           const value = word.toLocaleLowerCase();
-          if (value === word) return state;
+          if (value === word) {
+            return state;
+          }
 
           return apply(state, { action: "change-word", index, value });
         });
@@ -377,17 +413,23 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => {
           const index = state.selection.start;
           const word = state.words[index]?.[0];
-          if (word === undefined) return state;
+          if (word === undefined) {
+            return state;
+          }
 
           const value = word.toLocaleUpperCase();
-          if (value === word) return state;
+          if (value === word) {
+            return state;
+          }
 
           return apply(state, { action: "change-word", index, value });
         });
         break;
 
       case "s": {
-        if (!hasModKey(e)) return;
+        if (!hasModKey(e)) {
+          return;
+        }
         e.stopPropagation();
         e.preventDefault();
         save();
@@ -395,7 +437,9 @@ export function useCaptionsEditorShortcuts(
       }
 
       case "z":
-        if (!hasModKey(e)) return;
+        if (!hasModKey(e)) {
+          return;
+        }
         e.stopPropagation();
         e.preventDefault();
 
@@ -403,7 +447,9 @@ export function useCaptionsEditorShortcuts(
         store.setState((state) => (e.shiftKey ? redo(state) : undo(state)));
         break;
       case "y":
-        if (!hasModKey(e)) return;
+        if (!hasModKey(e)) {
+          return;
+        }
         e.stopPropagation();
         e.preventDefault();
 

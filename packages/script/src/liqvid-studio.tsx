@@ -29,7 +29,9 @@ export function RecordingComponent({
   const hasTimings = files.has(TIMINGS_JSON);
 
   useEffect(() => {
-    if (!hasTimings) return;
+    if (!hasTimings) {
+      return;
+    }
 
     let active = true;
 
@@ -45,10 +47,14 @@ export function RecordingComponent({
         }
         const entries = objectEntries($parsed.success);
 
-        if (active) setTimings(entries);
+        if (active) {
+          setTimings(entries);
+        }
       })
       .catch(() => {
-        if (active) setTimings(null);
+        if (active) {
+          setTimings(null);
+        }
       });
 
     return () => {

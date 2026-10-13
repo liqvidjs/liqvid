@@ -262,7 +262,9 @@ export function CaptionsEditor({
   const save = async () => {
     const { captionBreaks, paragraphBreaks, words } = store.getState();
 
-    if (saving) return;
+    if (saving) {
+      return;
+    }
 
     setSaving(true);
     try {
@@ -305,7 +307,9 @@ export function CaptionsEditor({
   });
 
   const fillerIndices = useMemo(() => {
-    if (!fillerOpen) return null;
+    if (!fillerOpen) {
+      return null;
+    }
     return new Set(matchFillerWords(transcript, fillerOptions));
   }, [fillerOpen, fillerOptions, transcript]);
 
@@ -313,7 +317,9 @@ export function CaptionsEditor({
   const confirmDeleteFillerWords = () => {
     store.setState((state) => {
       const indices = matchFillerWords(state.words, fillerOptions);
-      if (indices.length === 0) return state;
+      if (indices.length === 0) {
+        return state;
+      }
 
       return apply(state, { action: "delete-words", indices });
     });
@@ -343,7 +349,9 @@ export function CaptionsEditor({
     const nodes: React.ReactNode[] = [];
 
     for (let i = from; i < to; i++) {
-      if (i > from) nodes.push(" ");
+      if (i > from) {
+        nodes.push(" ");
+      }
 
       const word = transcript[i]![0];
 
@@ -387,7 +395,9 @@ export function CaptionsEditor({
       (index) => index >= from && index < to && index !== skipBreakAt,
     );
 
-    if (breaks.length === 0) return renderWords(from, to);
+    if (breaks.length === 0) {
+      return renderWords(from, to);
+    }
 
     const pieces: React.ReactNode[] = [];
     let cursor = from;
@@ -409,7 +419,9 @@ export function CaptionsEditor({
     return <>{pieces}</>;
   };
 
-  if (transcript.length === 0) return;
+  if (transcript.length === 0) {
+    return;
+  }
 
   const hoverWordSx = stylex.props(styles.hoverWord);
   const wordInputSx = stylex.props(styles.wordInput);
@@ -686,7 +698,9 @@ function sentenceBreaks(transcript: Transcript): number[] {
   const breaks: number[] = [];
 
   for (let i = 0; i < transcript.length - 1; i++) {
-    if (isSentenceEnd(transcript[i]!)) breaks.push(i);
+    if (isSentenceEnd(transcript[i]!)) {
+      breaks.push(i);
+    }
   }
 
   return breaks;

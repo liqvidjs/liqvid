@@ -80,7 +80,9 @@ export class Keymap {
       .map((str) => {
         const lower = str.toLowerCase();
 
-        if (str === "") return "";
+        if (str === "") {
+          return "";
+        }
 
         if (mixedCase[lower]) {
           return mixedCase[lower];
@@ -165,7 +167,9 @@ export class Keymap {
 
   /** Get the list of handlers for a given shortcut sequence. */
   getHandlers(seq: string) {
-    if (!Object.hasOwn(this.__bindings, seq)) return [];
+    if (!Object.hasOwn(this.__bindings, seq)) {
+      return [];
+    }
     return this.__bindings[seq]!.slice();
   }
 
@@ -173,7 +177,9 @@ export class Keymap {
   handle(e: KeyboardEvent) {
     const seq = Keymap.identify(e);
 
-    if (!this.__bindings[seq]) return;
+    if (!this.__bindings[seq]) {
+      return;
+    }
 
     if (this.__bindings[seq]) {
       e.preventDefault();
@@ -188,7 +194,9 @@ export class Keymap {
   handleShortcut(seq: string) {
     const normalized = Keymap.normalize(seq);
     const handlers = this.__bindings[normalized];
-    if (!handlers) return;
+    if (!handlers) {
+      return;
+    }
 
     const event = new KeyboardEvent("keydown");
     event.preventDefault();

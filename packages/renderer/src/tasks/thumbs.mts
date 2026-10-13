@@ -293,7 +293,9 @@ const blitCaptured = Effect.fnUntraced(
 
     while (true) {
       const message = yield* PubSub.take(subscription);
-      if (message._tag === "end") return;
+      if (message._tag === "end") {
+        return;
+      }
 
       const { index } = message;
       const sheetNum = Math.floor(index / perSheet);
@@ -331,7 +333,9 @@ const blitCaptured = Effect.fnUntraced(
       });
 
       current.filled += 1;
-      if (current.filled < current.expected) continue;
+      if (current.filled < current.expected) {
+        continue;
+      }
 
       sheets.delete(sheetNum);
       yield* Effect.promise(async () => {

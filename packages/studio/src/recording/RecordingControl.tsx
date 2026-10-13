@@ -117,7 +117,9 @@ export function RecordingControl({ shortcuts }: RecordingControlProps) {
   useKeyboardShortcut(shortcuts?.startStop, startStop);
 
   // don't render in preview mode
-  if (isPreview) return;
+  if (isPreview) {
+    return;
+  }
 
   /* render */
 
@@ -141,7 +143,9 @@ function useWarnBeforeClosingIfRecordingsExist() {
     globalThis?.window,
     "beforeunload",
     useCallback((e: BeforeUnloadEvent) => {
-      if (warn.current) e.returnValue = "You have recording data";
+      if (warn.current) {
+        e.returnValue = "You have recording data";
+      }
     }, []),
   );
 }

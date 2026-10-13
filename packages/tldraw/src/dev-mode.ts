@@ -52,7 +52,9 @@ export function subscribeDevMode(
 
   return () => {
     editorSubscribers?.delete(subscriber);
-    if (editorSubscribers?.size === 0) subscribers.delete(editor);
+    if (editorSubscribers?.size === 0) {
+      subscribers.delete(editor);
+    }
   };
 }
 
@@ -67,7 +69,9 @@ export function syncDevModeShapeLocks(
   shapeIds?: ReadonlySet<string>,
 ): void {
   attachDevModeHandler(editor);
-  if (reconcilingLocks.has(editor.store)) return;
+  if (reconcilingLocks.has(editor.store)) {
+    return;
+  }
 
   let previousStates = previousLockStates.get(editor.store);
   if (!previousStates) {
@@ -77,7 +81,9 @@ export function syncDevModeShapeLocks(
 
   if (shapeIds) {
     for (const id of shapeIds) {
-      if (!editor.getShape(id as TLShape["id"])) previousStates.delete(id);
+      if (!editor.getShape(id as TLShape["id"])) {
+        previousStates.delete(id);
+      }
     }
   } else {
     const allShapeIds = new Set(
@@ -87,7 +93,9 @@ export function syncDevModeShapeLocks(
         .map((shape) => shape.id),
     );
     for (const id of previousStates.keys()) {
-      if (!allShapeIds.has(id as TLShape["id"])) previousStates.delete(id);
+      if (!allShapeIds.has(id as TLShape["id"])) {
+        previousStates.delete(id);
+      }
     }
   }
 
@@ -125,7 +133,9 @@ export function syncDevModeShapeLocks(
     }
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   applyShapeLockUpdates(editor, updates);
 }
@@ -177,7 +187,9 @@ export function rememberUserLocksInSnapshot(
   snapshot: TLEditorSnapshot,
 ): TLEditorSnapshot {
   const previous = previousLockStates.get(editor.store);
-  if (!previous) return snapshot;
+  if (!previous) {
+    return snapshot;
+  }
 
   for (const [id, isLocked] of previous) {
     const record =
@@ -202,7 +214,9 @@ function applyShapeLockUpdates(
     type: TLShape["type"];
   }>[],
 ): void {
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   reconcilingLocks.add(editor.store);
   try {
@@ -224,7 +238,9 @@ export function toggleDevOnlyOnSelectedShapes(editor: Editor): void {
     selectedShapes.length === 0 && editingShape
       ? [editingShape]
       : selectedShapes;
-  if (shapes.length === 0) return;
+  if (shapes.length === 0) {
+    return;
+  }
   const devOnlyCount = shapes.filter(isDevOnlyShape).length;
   // A tie defaults to enabling dev-only so mixed selections resolve together.
   const devOnly = devOnlyCount <= shapes.length / 2;
@@ -266,7 +282,9 @@ export function toggleDevMode(editor: Editor, enabled?: boolean): boolean {
   const current = isDevModeEnabled(editor);
   const next = enabled ?? !current;
   if (next === current) {
-    if (next) attachDevModeHandler(editor);
+    if (next) {
+      attachDevModeHandler(editor);
+    }
     return next;
   }
 
@@ -280,6 +298,8 @@ export function toggleDevMode(editor: Editor, enabled?: boolean): boolean {
   }
 
   syncDevModeShapeLocks(editor);
-  for (const callback of subscribers.get(editor) ?? []) callback();
+  for (const callback of subscribers.get(editor) ?? []) {
+    callback();
+  }
   return next;
 }

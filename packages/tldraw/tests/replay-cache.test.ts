@@ -66,7 +66,9 @@ function makeReplay(defaultCacheDepth: CacheDepth) {
     defaultCacheDepth,
     invert: (_state, action) => -action,
     merge(...actions) {
-      if (actions.length > 0) mergeBatchSizes.push(actions.length);
+      if (actions.length > 0) {
+        mergeBatchSizes.push(actions.length);
+      }
       return actions.reduce((sum, action) => sum + action, 0);
     },
   });

@@ -196,7 +196,9 @@ function buildTranscript(
 
     // Fall back to distributing the segment time across its words.
     const words = segment.text.trim().split(/\s+/).filter(Boolean);
-    if (words.length === 0) continue;
+    if (words.length === 0) {
+      continue;
+    }
 
     const duration = segment.to - segment.from;
     const wordDuration = duration / words.length;
@@ -230,7 +232,9 @@ function captionBreaksFromSegments(
 
   for (const segment of segments) {
     // Only non-empty segments become VTT cues / caption boundaries.
-    if (segment.text.trim().length === 0) continue;
+    if (segment.text.trim().length === 0) {
+      continue;
+    }
 
     const endTime = segment.to;
 
@@ -385,7 +389,9 @@ export function transcribe({
             bar.update(Math.min(segment.to, durationMs));
 
             const text = segment.text.trim();
-            if (text.length === 0) return;
+            if (text.length === 0) {
+              return;
+            }
 
             const line = `[${formatVttTimestamp(segment.from)} --> ${formatVttTimestamp(segment.to)}] ${text}`;
 

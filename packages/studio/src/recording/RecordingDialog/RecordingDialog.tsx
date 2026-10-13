@@ -127,11 +127,15 @@ export function RecordingDialog({
 
   // Load enabled plugins from localStorage on mount
   useEffect(() => {
-    if (initializedRef.current) return;
+    if (initializedRef.current) {
+      return;
+    }
     initializedRef.current = true;
 
     const stored = getPersistedPlugins();
-    if (!stored) return;
+    if (!stored) {
+      return;
+    }
 
     try {
       const savedPlugins = JSON.parse(stored) as string[];
@@ -199,7 +203,9 @@ export function RecordingDialog({
     setRecordings,
   });
 
-  if (isPreview) return;
+  if (isPreview) {
+    return;
+  }
 
   return (
     <TranslationProvider t={t}>
@@ -228,10 +234,14 @@ export function RecordingDialog({
 
                   <div sx={styles.togglePlugins}>
                     {Object.values(plugins).map((plugin) => {
-                      if (!("recorder" in plugin)) return null;
+                      if (!("recorder" in plugin)) {
+                        return null;
+                      }
 
                       const studioPlugin = plugins[plugin.package];
-                      if (!studioPlugin) return null;
+                      if (!studioPlugin) {
+                        return null;
+                      }
 
                       return (
                         // biome-ignore lint/correctness/noRestrictedElements: this is ok
@@ -255,13 +265,19 @@ export function RecordingDialog({
                   <table sx={styles.configurationTable}>
                     <tbody>
                       {Object.values(plugins).map((plugin) => {
-                        if (!("recorder" in plugin)) return null;
-                        if (!enabledPlugins[plugin.package]) return null;
+                        if (!("recorder" in plugin)) {
+                          return null;
+                        }
+                        if (!enabledPlugins[plugin.package]) {
+                          return null;
+                        }
 
                         const ConfigurationComponent =
                           plugin.configurationComponent;
 
-                        if (!ConfigurationComponent) return null;
+                        if (!ConfigurationComponent) {
+                          return null;
+                        }
 
                         return (
                           <tr key={plugin.package}>
@@ -323,17 +339,23 @@ function useRecordingEvents({
     useMemo(
       () => ({
         deleteRecording: (event) => {
-          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          if (!isCurrentProject(event, { projectParams, projectPath })) {
+            return;
+          }
           recordingsRevisionRef.current++;
           setRecordings((prev) => prev.filter((r) => r.name !== event.name));
         },
         newRecording: (event) => {
-          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          if (!isCurrentProject(event, { projectParams, projectPath })) {
+            return;
+          }
           recordingsRevisionRef.current++;
           setRecordings((prev) => upsertRecording(prev, event.recording));
         },
         updateRecording: (event) => {
-          if (!isCurrentProject(event, { projectParams, projectPath })) return;
+          if (!isCurrentProject(event, { projectParams, projectPath })) {
+            return;
+          }
           recordingsRevisionRef.current++;
           setRecordings((prev) => upsertRecording(prev, event.recording));
         },

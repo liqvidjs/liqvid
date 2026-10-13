@@ -50,7 +50,9 @@ export function animate(
       let i = 0;
       for (; i < fns.length; ++i) {
         if (options[i]!.startTime > t) {
-          if (i === 0) return options[0]!.startValue ?? 0;
+          if (i === 0) {
+            return options[0]!.startValue ?? 0;
+          }
 
           return fns[i - 1]!(t);
         }
@@ -109,7 +111,9 @@ export function animate$(
       let i = 0;
       for (; i < fns.length; ++i) {
         if (options[i]!.startTime.greaterThan(t)) {
-          if (i === 0) return options[0]!.startValue ?? 0;
+          if (i === 0) {
+            return options[0]!.startValue ?? 0;
+          }
 
           return fns[i - 1]!(t);
         }
@@ -227,8 +231,12 @@ export function replay<K>({
    */
   units?: number;
 }): (t: number) => void {
-  if (typeof compressed === "undefined") compressed = false;
-  if (typeof start === "undefined") start = 0;
+  if (typeof compressed === "undefined") {
+    compressed = false;
+  }
+  if (typeof start === "undefined") {
+    start = 0;
+  }
 
   const times = data.map(compressed ? (d) => d[0] / units : (d) => d[0]);
   if (compressed) {
@@ -237,7 +245,9 @@ export function replay<K>({
     }
   }
 
-  if (typeof end === "undefined") end = start + times.at(-1)!;
+  if (typeof end === "undefined") {
+    end = start + times.at(-1)!;
+  }
 
   let lastTime = 0,
     i = 0,
@@ -254,14 +264,19 @@ export function replay<K>({
     }
     isActive = true;
 
-    if (t < lastTime) i = 0;
+    if (t < lastTime) {
+      i = 0;
+    }
     lastTime = t;
 
     let maxI = Math.min(i, times.length - 1);
 
     for (; i < times.length; i++) {
-      if (start! + times[i]! < t) maxI = i;
-      else break;
+      if (start! + times[i]! < t) {
+        maxI = i;
+      } else {
+        break;
+      }
     }
 
     const [, current] = data[maxI]!;

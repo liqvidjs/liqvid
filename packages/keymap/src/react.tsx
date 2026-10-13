@@ -68,10 +68,14 @@ export function useKeyboardShortcut(
  */
 function shouldHandleEvent(e: KeyboardEvent): boolean {
   // always handle if modifier keys are pressed
-  if (e.altKey || e.ctrlKey || e.metaKey) return true;
+  if (e.altKey || e.ctrlKey || e.metaKey) {
+    return true;
+  }
 
   // always handle if no target
-  if (!e.target) return true;
+  if (!e.target) {
+    return true;
+  }
 
   // don't handle if target has data-affords="keys" attribute
   if (e.target instanceof HTMLElement || e.target instanceof SVGElement) {
@@ -89,7 +93,9 @@ export function KeymapProvider({ children }: { children?: React.ReactNode }) {
 
   useEffect(() => {
     // subscriptions already set up
-    if (ambientKeymap) return;
+    if (ambientKeymap) {
+      return;
+    }
 
     function handle(e: KeyboardEvent) {
       if (shouldHandleEvent(e)) {

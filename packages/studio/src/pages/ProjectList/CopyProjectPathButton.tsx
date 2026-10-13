@@ -30,7 +30,9 @@ export function CopyProjectPathButton() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!copied) return;
+    if (!copied) {
+      return;
+    }
     const timeout = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
     return () => clearTimeout(timeout);
   }, [copied]);

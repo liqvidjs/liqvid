@@ -164,7 +164,9 @@ function renderNode(
   segments: readonly string[],
 ): string {
   if (Array.isArray(node)) {
-    if (node.length === 0) return "Record<string, never>";
+    if (node.length === 0) {
+      return "Record<string, never>";
+    }
 
     const prefix = segments
       .map((segment) => `[${JSON.stringify(segment)}]`)
@@ -181,7 +183,9 @@ function renderNode(
   }
 
   const entries = Object.entries(node);
-  if (entries.length === 0) return "Record<string, never>";
+  if (entries.length === 0) {
+    return "Record<string, never>";
+  }
 
   const properties = entries.map(
     ([value, child]) =>

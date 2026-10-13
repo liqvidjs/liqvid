@@ -122,8 +122,12 @@ function encodeAudioMp4(
 ) {
   return runFfmpeg(inputPath, outputPath, config, true, (command) => {
     command.noVideo();
-    if (config.codec) command.audioCodec(config.codec);
-    if (config.bitrate) command.audioBitrate(config.bitrate);
+    if (config.codec) {
+      command.audioCodec(config.codec);
+    }
+    if (config.bitrate) {
+      command.audioBitrate(config.bitrate);
+    }
     command.format("mp4");
   });
 }
@@ -138,7 +142,9 @@ function extractAudio(
 ) {
   return runFfmpeg(inputPath, outputPath, config, true, (command) => {
     command.noVideo();
-    if (config.codec !== undefined) command.audioCodec(config.codec);
+    if (config.codec !== undefined) {
+      command.audioCodec(config.codec);
+    }
   });
 }
 
@@ -152,7 +158,9 @@ function stripAudio(
 ) {
   return runFfmpeg(inputPath, outputPath, config, true, (command) => {
     command.noAudio();
-    if (config.codec !== undefined) command.videoCodec(config.codec);
+    if (config.codec !== undefined) {
+      command.videoCodec(config.codec);
+    }
   });
 }
 
@@ -172,7 +180,9 @@ const encodeHls = Effect.fnUntraced(function* (
   const fs = yield* FileSystem.FileSystem;
   const variants = config.variants ?? DEFAULT_HLS_VARIANTS;
 
-  if (variants.length === 0) return;
+  if (variants.length === 0) {
+    return;
+  }
 
   yield* fs.makeDirectory(outputDir, { recursive: true });
 
@@ -195,8 +205,9 @@ const encodeHls = Effect.fnUntraced(function* (
   const outputOptions = variants.flatMap((variant, index) => {
     const options: string[] = [];
     const append = (option: string, value: string | number | undefined) => {
-      if (value !== undefined)
+      if (value !== undefined) {
         options.push(`${option}:v:${index}`, String(value));
+      }
     };
 
     append("-c", variant.codec ?? "libx264");
@@ -211,7 +222,9 @@ const encodeHls = Effect.fnUntraced(function* (
   if (config.x264Params !== undefined) {
     commonOptions.push("-x264-params", config.x264Params);
   }
-  if (config.preset !== undefined) commonOptions.push("-preset", config.preset);
+  if (config.preset !== undefined) {
+    commonOptions.push("-preset", config.preset);
+  }
   const groupOfPictures = config.groupOfPictures;
   if (groupOfPictures !== undefined) {
     commonOptions.push(GROUP_OF_PICTURE, String(groupOfPictures));
@@ -487,7 +500,9 @@ function buildTranscript(
 
     // Fall back to distributing the segment time across its words.
     const words = segment.text.trim().split(/\s+/).filter(Boolean);
-    if (words.length === 0) continue;
+    if (words.length === 0) {
+      continue;
+    }
 
     const duration = segment.to - segment.from;
     const wordDuration = duration / words.length;
@@ -521,7 +536,9 @@ function captionBreaksFromSegments(
 
   for (const segment of segments) {
     // Only non-empty segments become VTT cues / caption boundaries.
-    if (segment.text.trim().length === 0) continue;
+    if (segment.text.trim().length === 0) {
+      continue;
+    }
 
     const endTime = segment.to;
 
@@ -655,7 +672,9 @@ const transcribeAudio = Effect.fnUntraced(function* (
           // rather than waiting for the whole result.
           task.on("transcribed", (segment) => {
             const text = segment.text.trim();
-            if (text.length === 0) return;
+            if (text.length === 0) {
+              return;
+            }
 
             const line = `[${formatVttTimestamp(segment.from)} --> ${formatVttTimestamp(segment.to)}] ${text}`;
 
@@ -722,7 +741,9 @@ const maybeTranscribe = Effect.fnUntraced(function* (
     NonNullable<LiqvidConfig["media"]>["captioning"]
   >["smartWhisperOptions"],
 ) {
-  if (!wantsTranscription(config)) return;
+  if (!wantsTranscription(config)) {
+    return;
+  }
 
   yield* Effect.logInfo("transcribing audio...");
   yield* transcribeAudio(audioPath, outputDir, config!, whisperConfig).pipe(

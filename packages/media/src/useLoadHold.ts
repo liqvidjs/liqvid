@@ -16,7 +16,9 @@ export function useLoadHold(defer?: Promise<void>): boolean {
       let active = true;
       setHeld(true);
       defer.then(() => {
-        if (active) setHeld(false);
+        if (active) {
+          setHeld(false);
+        }
       });
       return () => {
         active = false;

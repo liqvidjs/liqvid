@@ -23,7 +23,9 @@ export function CaptionsPreview({
     const { captionBreaks, words: transcript } = store.getState();
     const t = playback.currentTime$.inMilliseconds();
 
-    if (transcript.length === 0) return "";
+    if (transcript.length === 0) {
+      return "";
+    }
 
     // There is one more caption than there are breaks: the final caption has
     // no corresponding entry in captionBreaks.

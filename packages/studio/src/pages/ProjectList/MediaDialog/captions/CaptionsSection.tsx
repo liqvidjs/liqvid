@@ -150,14 +150,18 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
   // Poll for updates while any captions are generating
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const isActive = audio.some(
       (a) =>
         a.captions?.status === "pending" || a.captions?.status === "generating",
     );
 
-    if (!isActive) return;
+    if (!isActive) {
+      return;
+    }
 
     const interval = setInterval(loadAudio, 3000);
     return () => clearInterval(interval);
@@ -191,7 +195,9 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   };
 
   const handleRename = async () => {
-    if (!renaming || !renameValue.trim()) return;
+    if (!renaming || !renameValue.trim()) {
+      return;
+    }
 
     setIsRenaming(true);
 

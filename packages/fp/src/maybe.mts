@@ -108,12 +108,16 @@ class internalMaybe<T> implements MaybeMethods<T> {
   }
 
   flatten() {
-    if (this.isNone) return None;
+    if (this.isNone) {
+      return None;
+    }
     if (!isMaybe(this.value)) {
       throw new Error("Called flatten() on non-Maybe<Maybe<_>>");
     }
 
-    if (this.value.isNone) return None;
+    if (this.value.isNone) {
+      return None;
+    }
     return this.value;
   }
 }
@@ -156,8 +160,12 @@ export namespace Maybe {
     $b: Maybe<T>,
     eq: (a: T, b: T) => boolean = (a, b) => a === b,
   ): boolean {
-    if ($a.isNone && $b.isNone) return true;
-    if ($a.isSome && $b.isSome) return eq($a.unwrap(), $b.unwrap());
+    if ($a.isNone && $b.isNone) {
+      return true;
+    }
+    if ($a.isSome && $b.isSome) {
+      return eq($a.unwrap(), $b.unwrap());
+    }
     return false;
   }
 
@@ -165,13 +173,17 @@ export namespace Maybe {
   export function falsy<T>(
     value: T | "" | 0 | false | null | undefined,
   ): Maybe<T> {
-    if (!value) return None as Maybe<T>;
+    if (!value) {
+      return None as Maybe<T>;
+    }
     return Some(value);
   }
 
   /** Returh `None` if `value` is nullish, otherwise `Some(value)` */
   export function nullish<T>(value: T | null | undefined): Maybe<T> {
-    if (value === null || value === undefined) return None as Maybe<T>;
+    if (value === null || value === undefined) {
+      return None as Maybe<T>;
+    }
     return Some(value);
   }
 }

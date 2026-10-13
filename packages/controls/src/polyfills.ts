@@ -60,6 +60,7 @@ export function onFullScreenChange(callback: EventListener): void {
     "webkitfullscreenchange",
     "mozfullscreenchange",
     "MSFullscreenChange",
-  ] as const)
+  ] as const) {
     document.addEventListener(event, callback);
+  }
 }

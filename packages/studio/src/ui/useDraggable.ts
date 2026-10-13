@@ -14,9 +14,13 @@ export function useDraggable<T extends HTMLElement | SVGElement>(
       onDragReact(
         (_e, hit) => {
           const target = ref.current;
-          if (!target) return;
+          if (!target) {
+            return;
+          }
 
-          if (!active.current) return;
+          if (!active.current) {
+            return;
+          }
 
           Object.assign(target.style, {
             left: delta.current.x + hit.x + "px",
@@ -26,9 +30,13 @@ export function useDraggable<T extends HTMLElement | SVGElement>(
         },
         (e, hit) => {
           const target = ref.current;
-          if (!target) return;
+          if (!target) {
+            return;
+          }
 
-          if (!e.target) return;
+          if (!e.target) {
+            return;
+          }
 
           // Don't start drag if clicking on a resize handle
           const eventTarget = e.target as HTMLElement;

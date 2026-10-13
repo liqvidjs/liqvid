@@ -54,7 +54,9 @@ export function WebConsole({
   return (
     <ol className={className}>
       {messages.map((msg, i) => {
-        if (!isWebConsoleMessage(msg)) return null;
+        if (!isWebConsoleMessage(msg)) {
+          return null;
+        }
 
         const { data, kind, timestamp } = msg;
 

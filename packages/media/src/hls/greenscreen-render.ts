@@ -77,7 +77,9 @@ export function renderKeyedFrame({
   tolerance: number;
 }): void {
   const [width, height] = sourceSize(source);
-  if (width === 0 || height === 0) return;
+  if (width === 0 || height === 0) {
+    return;
+  }
 
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
@@ -126,9 +128,13 @@ export function renderKeyedFrame({
 
 /** Release WebGL resources associated with a greenscreen canvas. */
 export function disposeKeyedCanvas(canvas: GreenScreenCanvas | null): void {
-  if (!canvas) return;
+  if (!canvas) {
+    return;
+  }
   const renderer = renderers.get(canvas);
-  if (!renderer) return;
+  if (!renderer) {
+    return;
+  }
 
   renderer.gl.deleteBuffer(renderer.buffer);
   renderer.gl.deleteTexture(renderer.texture);
@@ -138,7 +144,9 @@ export function disposeKeyedCanvas(canvas: GreenScreenCanvas | null): void {
 
 function getRenderer(canvas: GreenScreenCanvas): GreenScreenRenderer | null {
   const existing = renderers.get(canvas);
-  if (existing) return existing;
+  if (existing) {
+    return existing;
+  }
 
   const options = { alpha: true, premultipliedAlpha: true };
   const gl = (canvas.getContext("webgl2", options) ??
@@ -146,7 +154,9 @@ function getRenderer(canvas: GreenScreenCanvas): GreenScreenRenderer | null {
     | WebGLRenderingContext
     | WebGL2RenderingContext
     | null;
-  if (!gl) return null;
+  if (!gl) {
+    return null;
+  }
 
   const renderer = createRenderer(gl);
   renderers.set(canvas, renderer);
@@ -178,8 +188,12 @@ function createRenderer(
       toleranceLocation,
     };
   } catch (error) {
-    if (buffer) gl.deleteBuffer(buffer);
-    if (texture) gl.deleteTexture(texture);
+    if (buffer) {
+      gl.deleteBuffer(buffer);
+    }
+    if (texture) {
+      gl.deleteTexture(texture);
+    }
     gl.deleteProgram(program);
     throw error;
   }
@@ -217,7 +231,9 @@ function createProgram(
   gl.linkProgram(program);
   gl.deleteShader(vertexShader);
   gl.deleteShader(fragmentShader);
-  if (gl.getProgramParameter(program, gl.LINK_STATUS)) return program;
+  if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    return program;
+  }
 
   const message = gl.getProgramInfoLog(program) ?? "Shader linking failed";
   gl.deleteProgram(program);
@@ -230,8 +246,9 @@ function getUniform(
   name: string,
 ): WebGLUniformLocation {
   const location = gl.getUniformLocation(program, name);
-  if (!location)
+  if (!location) {
     throw new Error(`Could not locate greenscreen uniform ${name}`);
+  }
   return location;
 }
 
@@ -246,7 +263,9 @@ function createQuad(
   }
 
   const buffer = gl.createBuffer();
-  if (!buffer) throw new Error("Could not allocate greenscreen vertex buffer");
+  if (!buffer) {
+    throw new Error("Could not allocate greenscreen vertex buffer");
+  }
   gl.useProgram(program);
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(
@@ -267,7 +286,9 @@ function createTexture(
   program: WebGLProgram,
 ): WebGLTexture {
   const texture = gl.createTexture();
-  if (!texture) throw new Error("Could not allocate greenscreen texture");
+  if (!texture) {
+    throw new Error("Could not allocate greenscreen texture");
+  }
 
   try {
     const imageLocation = getUniform(gl, program, "u_image");
@@ -291,7 +312,9 @@ function compileShader(
   source: string,
 ): WebGLShader {
   const shader = gl.createShader(type);
-  if (!shader) throw new Error("Could not create greenscreen shader");
+  if (!shader) {
+    throw new Error("Could not create greenscreen shader");
+  }
 
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
@@ -313,7 +336,9 @@ function renderGreenScreen2d(
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null;
-  if (!context) return;
+  if (!context) {
+    return;
+  }
 
   context.drawImage(source, 0, 0, canvas.width, canvas.height);
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -324,7 +349,9 @@ function renderGreenScreen2d(
     const r = pixels[i]!;
     const g = pixels[i + 1]!;
     const b = pixels[i + 2]!;
-    if (supDistance({ b, g, r }, keyColor) <= tolerance) pixels[i + 3] = 0;
+    if (supDistance({ b, g, r }, keyColor) <= tolerance) {
+      pixels[i + 3] = 0;
+    }
   }
 
   context.putImageData(imageData, 0, 0);

@@ -18,10 +18,14 @@ export async function getHlsSegments(source: string): Promise<HlsSegment[]> {
   let time = 0;
   for (const line of playlist.lines) {
     const match = line.match(/^#EXTINF:([\d.]+)/);
-    if (!match?.[1]) continue;
+    if (!match?.[1]) {
+      continue;
+    }
 
     const duration = Number(match[1]);
-    if (!Number.isFinite(duration) || duration <= 0) continue;
+    if (!Number.isFinite(duration) || duration <= 0) {
+      continue;
+    }
     const start = time;
     time += duration;
     segments.push({ end: time, start });
@@ -36,7 +40,9 @@ export function mergeHlsSegments(
   const ranges: Array<readonly [number, number]> = [];
   for (const index of [...indexes].sort((a, b) => a - b)) {
     const segment = segments[index];
-    if (!segment) continue;
+    if (!segment) {
+      continue;
+    }
     const previous = ranges.at(-1);
     if (previous && previous[1] === segment.start) {
       ranges[ranges.length - 1] = [previous[0], segment.end];

@@ -88,7 +88,9 @@ export const rendersLive = HttpApiBuilder.group(WebApi, "renders", (handlers) =>
         const renders: Array<{ id: string; meta: RenderMeta }> = [];
 
         for (const entry of entries) {
-          if (entry[1] !== "Directory") continue;
+          if (entry[1] !== "Directory") {
+            continue;
+          }
           const basename = entry[0];
 
           const renderDir = path.join(rendersBaseDir, basename);

@@ -13,7 +13,9 @@ for (const entry of fs.readdirSync(DIST, {
   recursive: true,
   withFileTypes: true,
 })) {
-  if (!entry.isFile() || !/\.m?js$/.test(entry.name)) continue;
+  if (!entry.isFile() || !/\.m?js$/.test(entry.name)) {
+    continue;
+  }
   const file = path.join(entry.parentPath, entry.name);
   const contents = fs.readFileSync(file, "utf8");
   const rewritten = contents.replace(
@@ -21,5 +23,7 @@ for (const entry of fs.readdirSync(DIST, {
     (_match, before, specifier, extension, after) =>
       `${before}${specifier}.${EXTENSIONS[extension]}${after}`,
   );
-  if (rewritten !== contents) fs.writeFileSync(file, rewritten);
+  if (rewritten !== contents) {
+    fs.writeFileSync(file, rewritten);
+  }
 }

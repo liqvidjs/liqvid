@@ -51,7 +51,9 @@ export function useEventListener<
   const callback$ = useEffectEvent(callback);
 
   useEffect(() => {
-    if (!target?.addEventListener || !enabled) return;
+    if (!target?.addEventListener || !enabled) {
+      return;
+    }
 
     const listener: typeof callback = (e) => {
       callback$(e);

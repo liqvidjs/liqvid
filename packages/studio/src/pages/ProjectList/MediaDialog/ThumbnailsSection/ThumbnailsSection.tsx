@@ -135,7 +135,9 @@ export function ThumbnailsSection({
   const { isOpen } = useDialogApi();
 
   const loadThumbs = useEffectEvent(async (showLoading = true) => {
-    if (showLoading) setIsLoading(true);
+    if (showLoading) {
+      setIsLoading(true);
+    }
 
     // Serialize params for use in query
     const paramsJson = JSON.stringify(selectedParams ?? {});
@@ -163,7 +165,9 @@ export function ThumbnailsSection({
         console.error("Failed to load thumbnails:", result.cause);
       }
     }
-    if (showLoading) setIsLoading(false);
+    if (showLoading) {
+      setIsLoading(false);
+    }
   });
 
   useEffect(() => {
@@ -173,7 +177,9 @@ export function ThumbnailsSection({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || thumbsData?.job?.status !== "rendering") return;
+    if (!isOpen || thumbsData?.job?.status !== "rendering") {
+      return;
+    }
 
     const interval = window.setInterval(() => {
       void loadThumbs(false);
@@ -210,7 +216,9 @@ export function ThumbnailsSection({
 
   // Calculate thumbnail display info based on ThumbnailBox strategy
   const thumbInfo = useMemo(() => {
-    if (!job) return null;
+    if (!job) {
+      return null;
+    }
 
     const cols = job.cols;
     const rows = job.rows ?? 5;
@@ -242,7 +250,9 @@ export function ThumbnailsSection({
   }, [job, sliderValue, duration]);
 
   const getSheetUrl = (colorScheme: ColorScheme) => {
-    if (!thumbInfo) return "";
+    if (!thumbInfo) {
+      return "";
+    }
 
     // Build the path segments
     const pathSegments: string[] = [projectPath, ASSETS_DIR];

@@ -15,7 +15,9 @@ export async function readResponseWithProgress(
 
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done) {
+      break;
+    }
 
     chunks.push(value);
     loadedBytes += value.byteLength;
@@ -31,7 +33,9 @@ export async function readResponseWithProgress(
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  if (contentLength <= 0) onProgress?.(1);
+  if (contentLength <= 0) {
+    onProgress?.(1);
+  }
 
   return bytes.buffer;
 }

@@ -12,11 +12,14 @@ export function screenToSVG(
 ): [number, number] {
   let graphicsElt = elt;
 
-  while (!(graphicsElt instanceof SVGGraphicsElement))
+  while (!(graphicsElt instanceof SVGGraphicsElement)) {
     graphicsElt = graphicsElt.parentNode as SVGElement;
+  }
 
   const svgElt = elt instanceof SVGSVGElement ? elt : elt.ownerSVGElement;
-  if (!svgElt) throw new Error("could not find SVG element");
+  if (!svgElt) {
+    throw new Error("could not find SVG element");
+  }
 
   const transform = graphicsElt.getScreenCTM()?.inverse();
   let pt = svgElt.createSVGPoint();

@@ -116,7 +116,9 @@ export const renameRecordingInProjectMeta = Effect.fnUntraced(function* (
     existenceOptional,
   );
 
-  if (Option.isNone(existing)) return;
+  if (Option.isNone(existing)) {
+    return;
+  }
 
   const hiddenRecordings = renameHiddenRecording(
     existing.value.hiddenRecordings,
@@ -124,7 +126,9 @@ export const renameRecordingInProjectMeta = Effect.fnUntraced(function* (
     newName,
   );
 
-  if (hiddenRecordings === existing.value.hiddenRecordings) return;
+  if (hiddenRecordings === existing.value.hiddenRecordings) {
+    return;
+  }
 
   yield* writeJSON<AutoGenProjectMeta>(projectMetaFile, {
     ...existing.value,

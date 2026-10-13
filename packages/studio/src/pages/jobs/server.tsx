@@ -22,11 +22,15 @@ async function cancelJob(formData: FormData) {
   "use server";
 
   const id = formData.get("id");
-  if (typeof id !== "string") return;
+  if (typeof id !== "string") {
+    return;
+  }
 
   const { jobs } = getServerState();
   const job = jobs.new.get(id);
-  if (!job) return;
+  if (!job) {
+    return;
+  }
 
   await serverRuntime.runPromise(Fiber.interrupt(job.fiber));
 }
@@ -35,7 +39,9 @@ async function deleteJob(formData: FormData) {
   "use server";
 
   const id = formData.get("id");
-  if (typeof id !== "string") return;
+  if (typeof id !== "string") {
+    return;
+  }
 
   const { jobs } = getServerState();
 

@@ -87,11 +87,15 @@ export function BubbleKeyboardEvents() {
 
   const handleKeyboardShortcuts = useCallback(
     (e: TLEventInfo) => {
-      if (!(e.type === "keyboard" && e.name === "key_down")) return;
+      if (!(e.type === "keyboard" && e.name === "key_down")) {
+        return;
+      }
 
       // only want to do recording shortcuts
       // remove if you're changing the recording shortcuts
-      if (!(e.ctrlKey && e.altKey)) return;
+      if (!(e.ctrlKey && e.altKey)) {
+        return;
+      }
 
       keymap.handle(asKeyboardEventish(e));
     },
@@ -148,7 +152,9 @@ export function SetDevOnlyShapeSvgAttributes() {
         "[data-shape-id]",
       )) {
         const id = wrapper.getAttribute("data-shape-id");
-        if (!id || (shapeIds && !shapeIds.has(id))) continue;
+        if (!id || (shapeIds && !shapeIds.has(id))) {
+          continue;
+        }
 
         const isDevOnly =
           editor.getShape(id as TLShapeId)?.meta.devOnly === true;
@@ -160,7 +166,9 @@ export function SetDevOnlyShapeSvgAttributes() {
 
         for (const svg of wrapper.querySelectorAll("svg")) {
           // Nested shapes have their own wrapper and should use their own meta.
-          if (svg.closest("[data-shape-id]") !== wrapper) continue;
+          if (svg.closest("[data-shape-id]") !== wrapper) {
+            continue;
+          }
 
           if (isDevOnly) {
             svg.setAttribute("data-dev-only", "true");
@@ -178,9 +186,13 @@ export function SetDevOnlyShapeSvgAttributes() {
       shapeIds: ReadonlySet<string>,
       fullSync = false,
     ) => {
-      for (const id of shapeIds) pendingLockSyncIds.add(id);
+      for (const id of shapeIds) {
+        pendingLockSyncIds.add(id);
+      }
       fullLockSyncPending ||= fullSync;
-      if (lockSyncScheduled) return;
+      if (lockSyncScheduled) {
+        return;
+      }
       lockSyncScheduled = true;
       queueMicrotask(() => {
         lockSyncScheduled = false;

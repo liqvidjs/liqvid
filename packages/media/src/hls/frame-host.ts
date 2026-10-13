@@ -91,18 +91,27 @@ function createWorkerFrameHost(options: FrameHostOptions): FrameRenderer {
       queueMicrotask(() => {
         const messages = queue;
         queue = [];
-        if (disposed || fallback) return;
-        for (const queued of messages) send(queued);
+        if (disposed || fallback) {
+          return;
+        }
+        for (const queued of messages) {
+          send(queued);
+        }
       });
     }
-    if (queue.at(-1)?.type === message.type) queue[queue.length - 1] = message;
-    else queue.push(message);
+    if (queue.at(-1)?.type === message.type) {
+      queue[queue.length - 1] = message;
+    } else {
+      queue.push(message);
+    }
   };
 
   worker.addEventListener("message", ({ data }) => {
     const message = data as FrameWorkerResponse;
     if (disposed) {
-      if (message.type === "frame") message.bitmap.close();
+      if (message.type === "frame") {
+        message.bitmap.close();
+      }
       return;
     }
     switch (message.type) {
@@ -138,7 +147,9 @@ function createWorkerFrameHost(options: FrameHostOptions): FrameRenderer {
   // The worker script failed to load or crashed during startup. Unless the
   // canvas already shows worker frames, take over on the main thread.
   worker.addEventListener("error", (event) => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     worker.terminate();
     if (receivedFrame || fallback) {
       options.onError("HLS frame worker failed", event.error ?? event.message);
@@ -164,13 +175,19 @@ function createWorkerFrameHost(options: FrameHostOptions): FrameRenderer {
     },
     render(timestamp) {
       lastCall = () => fallback?.render(timestamp);
-      if (fallback) fallback.render(timestamp);
-      else enqueue({ timestamp, type: "render" });
+      if (fallback) {
+        fallback.render(timestamp);
+      } else {
+        enqueue({ timestamp, type: "render" });
+      }
     },
     seek(timestamp, playing) {
       lastCall = () => fallback?.seek(timestamp, playing);
-      if (fallback) fallback.seek(timestamp, playing);
-      else enqueue({ playing, timestamp, type: "seek" });
+      if (fallback) {
+        fallback.seek(timestamp, playing);
+      } else {
+        enqueue({ playing, timestamp, type: "seek" });
+      }
     },
   };
 }

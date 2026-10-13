@@ -93,7 +93,9 @@ function ConfigurationComponent() {
 
   useEffect(() => {
     const mediaDevices = navigator.mediaDevices;
-    if (!mediaDevices) return;
+    if (!mediaDevices) {
+      return;
+    }
 
     const handleDeviceChange = () => {
       void refreshDevices()
@@ -315,7 +317,9 @@ function RecordingComponent({
 
     void canGeneratePlainTranscriptAction()
       .then((enabled) => {
-        if (active) setCanGenerateTranscript(enabled);
+        if (active) {
+          setCanGenerateTranscript(enabled);
+        }
       })
       .catch((error: unknown) => {
         console.error("Failed to load media recording configuration:", error);

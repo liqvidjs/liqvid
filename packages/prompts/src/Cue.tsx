@@ -37,16 +37,24 @@ export function Cue<M extends string>({
 
   // split into lines
   useEffect(() => {
-    if (!props.children) return;
-    if (!ref.current) return;
-    if (!splitLines) return;
+    if (!props.children) {
+      return;
+    }
+    if (!ref.current) {
+      return;
+    }
+    if (!splitLines) {
+      return;
+    }
 
     ref.current?.normalize();
 
     const lines = [];
     //
     for (const node of Array.from(ref.current.childNodes)) {
-      if (!isText(node)) continue;
+      if (!isText(node)) {
+        continue;
+      }
 
       const blocks = node.wholeText.split(" ");
 

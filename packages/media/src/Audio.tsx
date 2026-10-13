@@ -78,6 +78,7 @@ function findSupportedSource(children: React.ReactNode): string | undefined {
   return sources[0]?.src;
 }
 
+const AUDIO_SAMPLE_RATE = 48_000;
 /**
  * Play audio synced up to the playback using Web Audio API.
  * Routes audio through the playback's audioContext for synchronized playback.
@@ -98,8 +99,12 @@ export function Audio<M extends string = string>({
 
   // Resolve the audio source URL
   const src = useMemo(() => {
-    if (!isActive) return;
-    if (srcProp) return srcProp;
+    if (!isActive) {
+      return;
+    }
+    if (srcProp) {
+      return srcProp;
+    }
     return findSupportedSource(children);
   }, [srcProp, children, isActive]);
 
@@ -108,7 +113,9 @@ export function Audio<M extends string = string>({
   const { setBuffered } = useBufferedItem(trackLoading);
 
   const startInSeconds = (() => {
-    if (!isActive) return 0;
+    if (!isActive) {
+      return 0;
+    }
     if (typeof start === "number") {
       return start;
     } else if (typeof start === "string") {
@@ -166,8 +173,10 @@ export function Audio<M extends string = string>({
       playback.audioContext ??
       (typeof OfflineAudioContext === "undefined"
         ? undefined
-        : new OfflineAudioContext(1, 1, 48_000));
-    if (!decodeContext) return;
+        : new OfflineAudioContext(1, 1, AUDIO_SAMPLE_RATE));
+    if (!decodeContext) {
+      return;
+    }
 
     // Clone the ArrayBuffer because decodeAudioData detaches (consumes) it
     const bufferCopy = arrayBuffer.slice(0);
@@ -176,7 +185,9 @@ export function Audio<M extends string = string>({
     decodeContext
       .decodeAudioData(bufferCopy)
       .then((buffer) => {
-        if (arrayBufferRef.current !== arrayBuffer) return;
+        if (arrayBufferRef.current !== arrayBuffer) {
+          return;
+        }
         audioBufferRef.current = buffer;
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
         setBuffered([[startInSeconds, startInSeconds + buffer.duration]]);
@@ -192,7 +203,9 @@ export function Audio<M extends string = string>({
         playback.registerAudioSource(registrationRef.current);
       })
       .catch((error) => {
-        if (arrayBufferRef.current !== arrayBuffer) return;
+        if (arrayBufferRef.current !== arrayBuffer) {
+          return;
+        }
         console.error("Failed to decode audio:", error);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       })
@@ -227,7 +240,9 @@ export function Audio<M extends string = string>({
       const audioContext = playback.audioContext;
       const audioBuffer = audioBufferRef.current;
 
-      if (!audioContext || !audioBuffer || !playback.audioNode) return;
+      if (!audioContext || !audioBuffer || !playback.audioNode) {
+        return;
+      }
 
       // Stop any existing playback
       stopAudio();
@@ -279,7 +294,9 @@ export function Audio<M extends string = string>({
    */
   const syncAudio = useCallback(() => {
     const audioBuffer = audioBufferRef.current;
-    if (!audioBuffer) return;
+    if (!audioBuffer) {
+      return;
+    }
 
     const offsetInBuffer = getBufferOffset();
     const isWithinRange =
@@ -323,7 +340,9 @@ export function Audio<M extends string = string>({
     fetch(src, { signal: controller.signal })
       .then((response) => readResponseWithProgress(response, onProgress))
       .then((arrayBuffer) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         arrayBufferRef.current = arrayBuffer;
         reportAudioLoaded(
           startInSeconds,
@@ -335,7 +354,9 @@ export function Audio<M extends string = string>({
         decodeAudio();
       })
       .catch((error) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         console.error("Failed to fetch audio:", error);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       });
@@ -397,7 +418,9 @@ export function Audio<M extends string = string>({
 
   // Cleanup on unmount
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      return;
+    }
     return () => {
       stopAudio();
       // Unregister from offline rendering
@@ -420,7 +443,9 @@ function createBufferProgressHandler(
   durationInSeconds: number | undefined,
   setBuffered: (ranges: readonly BufferedRange[]) => void,
 ): ((progress: number) => void) | undefined {
-  if (durationInSeconds === undefined) return;
+  if (durationInSeconds === undefined) {
+    return;
+  }
 
   return (progress) => {
     // Approximate the sequential media-time range from downloaded bytes.

@@ -44,7 +44,9 @@ export function VimToggle({
 
   // persistence
   const vimPersistenceConfig = useMemo((): BooleanValueConfig | undefined => {
-    if (!persistence?.name) return undefined;
+    if (!persistence?.name) {
+      return undefined;
+    }
 
     return {
       default: persistence.default ?? defaultEnabled,

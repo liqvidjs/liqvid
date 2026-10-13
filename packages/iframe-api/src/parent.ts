@@ -55,10 +55,14 @@ export function getIframeApi<D extends IFrameAPIDeclaration>(
 
   const handleMessage = (event: MessageEvent) => {
     // Only accept messages from the iframe
-    if (event.source !== iframe.contentWindow) return;
+    if (event.source !== iframe.contentWindow) {
+      return;
+    }
 
     const data = event.data as IFrameMessage;
-    if (!data || typeof data !== "object" || !("type" in data)) return;
+    if (!data || typeof data !== "object" || !("type" in data)) {
+      return;
+    }
 
     if (
       data.type === "observe-intersection" &&
@@ -108,7 +112,9 @@ export function getIframeApi<D extends IFrameAPIDeclaration>(
     }
 
     const pending = pendingRequests.get(data.requestId);
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
 
     switch (data.type) {
       case "received":
