@@ -14,7 +14,7 @@ import { syncDevModeShapeLocks } from "../dev-mode.ts";
 import { TldrawRecording } from "../recording.tsx";
 import { TLDRAW_SYMBOL } from "../symbols.ts";
 
-import { useFollow } from ".";
+import { useFollow } from "./index.tsx";
 
 /**
  * Preserve the viewport when the container is resized. When the container width

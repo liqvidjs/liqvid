@@ -3,7 +3,7 @@ import { useMarker, useScript } from "@liqvid/script/react";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
-import { usePromptsApi } from "./PromptsProvider";
+import { usePromptsApi } from "./PromptsProvider.tsx";
 
 export type CueState = "active" | "future" | "past";
 
