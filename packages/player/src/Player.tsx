@@ -82,7 +82,7 @@ export function Root({
 
   const [controls, setControls] = useState<ControlsState>({
     mounted: false,
-    visible: false,
+    visible: true,
   });
 
   const context = useMemo(

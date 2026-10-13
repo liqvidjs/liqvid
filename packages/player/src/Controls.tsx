@@ -28,10 +28,12 @@ export function Controls({
 
   const timer = useRef(0);
 
+  const hideAfterMs = Duration.inMilliseconds(hideAfter);
+
   /** reset the hiding timer */
   const resetTimer = useCallback(
     (e: unknown) => {
-      if (playback.paused || !hideAfter) return;
+      if (playback.paused || !hideAfterMs) return;
 
       // allow keyboard input on elements
       if (e instanceof KeyboardEvent) {
@@ -51,12 +53,12 @@ export function Controls({
 
       timer.current = window.setTimeout(
         () => setControls((prev) => ({ ...prev, visible: false })),
-        Duration.inMilliseconds(hideAfter),
+        hideAfterMs,
       );
 
       setControls((prev) => ({ ...prev, visible: true }));
     },
-    [playback, hideAfter, setControls],
+    [playback, setControls, hideAfterMs],
   );
 
   /* ------------------------- subscriptions ------------------------- */
