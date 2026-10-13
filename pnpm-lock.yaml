@@ -456,6 +456,9 @@ catalogs:
     effect-paths:
       specifier: ^1.0.1
       version: 1.0.1
+    esbuild:
+      specifier: ^0.28.2
+      version: 0.28.2
     eslint:
       specifier: ^10.10.0
       version: 10.12.0
@@ -3026,9 +3029,15 @@ importers:
       '@biomejs/biome':
         specifier: catalog:dev
         version: 2.5.15
+      '@jest/globals':
+        specifier: catalog:dev
+        version: 30.5.2(supports-color@10.2.2)
       '@ts-ffmpeg/fluent-ffmpeg':
         specifier: catalog:peer
         version: 2.2.6
+      '@types/jest':
+        specifier: catalog:dev
+        version: 30.0.0
       '@types/node':
         specifier: catalog:dev
         version: 26.6.4
@@ -3047,6 +3056,24 @@ importers:
       effect-paths:
         specifier: catalog:dev
         version: 1.0.1(effect@4.0.0)
+      esbuild:
+        specifier: catalog:dev
+        version: 0.28.2
+      jest:
+        specifier: catalog:dev
+        version: 30.5.2(@types/node@26.6.4)(supports-color@10.2.2)
+      puppeteer-core:
+        specifier: 'catalog:'
+        version: 25.12.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)(yauzl@2.10.0)
+      react-dom:
+        specifier: 19.3.0
+        version: 19.3.0(react@19.3.0)
+      ts-jest:
+        specifier: catalog:dev
+        version: 29.4.14(@babel/core@7.29.7(supports-color@10.2.2))(@jest/transform@30.5.2(supports-color@10.2.2))(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.5.2(@types/node@26.6.4)(supports-color@10.2.2))(typescript@7.0.2)
+      ts6:
+        specifier: catalog:dev
+        version: typescript@6.0.3
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)
@@ -3403,6 +3430,15 @@ importers:
       '@effect/tsgo':
         specifier: catalog:dev
         version: 0.47.2
+      '@jest/globals':
+        specifier: catalog:dev
+        version: 30.5.2(supports-color@10.2.2)
+      '@liqvid/media':
+        specifier: workspace:^1.0.0-alpha.2
+        version: link:../media
+      '@liqvid/playback':
+        specifier: workspace:^2.0.0-alpha.0
+        version: link:../playback
       '@types/cli-progress':
         specifier: catalog:dev
         version: 3.11.6
@@ -3412,6 +3448,18 @@ importers:
       '@typescript/typescript6':
         specifier: catalog:dev
         version: 6.0.2
+      esbuild:
+        specifier: catalog:dev
+        version: 0.28.2
+      jest:
+        specifier: catalog:dev
+        version: 30.5.2(@types/node@26.6.4)(supports-color@10.2.2)
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: 19.3.0
+        version: 19.3.0(react@19.3.0)
       typedoc:
         specifier: catalog:dev
         version: 0.28.20(typescript@7.0.2)

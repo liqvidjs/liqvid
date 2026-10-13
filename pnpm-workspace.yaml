@@ -14,6 +14,8 @@ allowBuilds:
   utf-8-validate: false
   workerd: true
 
+ignoreWorkspaceCycles: true
+
 packages:
   - packages/**
   - "!**/tests/**"
@@ -217,6 +219,7 @@ catalogs:
     csstype: ^3.2.3
     effect: 4.0.0
     "effect-paths": "^1.0.1"
+    esbuild: ^0.28.2
     eslint: ^10.10.0
     glslx: ^0.3.1
     jest: ^30.4.2

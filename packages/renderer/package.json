@@ -69,7 +69,7 @@
     "lint": "biome check --fix",
     "lint:agent": "biome check --fix --reporter=concise",
     "lint:tsc": "tsc --noEmit",
-    "test": "jest --coverage",
+    "test": "NODE_OPTIONS='--disable-warning=ExperimentalWarning --experimental-vm-modules' jest",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -86,9 +86,16 @@
     "@biomejs/biome": "catalog:dev",
     "@effect/language-service": "catalog:dev",
     "@effect/tsgo": "catalog:dev",
+    "@jest/globals": "catalog:dev",
+    "@liqvid/media": "workspace:^1.0.0-alpha.2",
+    "@liqvid/playback": "workspace:^2.0.0-alpha.0",
     "@types/cli-progress": "catalog:dev",
     "@types/node": "catalog:dev",
     "@typescript/typescript6": "catalog:dev",
+    "esbuild": "catalog:dev",
+    "jest": "catalog:dev",
+    "react": "catalog:peer",
+    "react-dom": "catalog:peer",
     "typedoc": "catalog:dev",
     "typedoc-plugin-markdown": "catalog:dev",
     "typescript": "catalog:dev"
