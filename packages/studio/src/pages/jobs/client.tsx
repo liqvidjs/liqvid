@@ -4,7 +4,6 @@ import { Duration } from "@liqvid/duration";
 import { deserialize } from "@liqvid/ssr/serde";
 import {
   ClosedCaptioningIcon,
-  FilmStrip,
   FilmStripIcon,
   ImagesIcon,
 } from "@phosphor-icons/react";
@@ -65,13 +64,6 @@ const styles = stylex.create({
 
   completedIcon: {
     fill: colors.successSolid,
-  },
-
-  pathParam: {
-    backgroundColor: "#f59e0b",
-    borderRadius: 2,
-    color: "black",
-    paddingInline: 1,
   },
 
   filter: {
@@ -166,6 +158,13 @@ const styles = stylex.create({
 
   message: {
     whiteSpace: "pre-wrap",
+  },
+
+  pathParam: {
+    backgroundColor: colors.accentSolid,
+    borderRadius: rounded.sm,
+    color: colors.white,
+    paddingInline: spacing.xs,
   },
 
   progress: {
@@ -463,8 +462,6 @@ export function JobsClient({
                     t={t}
                   />
                   <JobPath params={job.params} path={job.path} />
-                  {">"}
-                  <span>{job.name}</span>
                   {job.state === "running" ? (
                     <Button onClick={() => handleCancel(job.id)}>
                       {t.cancel}
