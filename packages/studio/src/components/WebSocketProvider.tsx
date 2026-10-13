@@ -5,7 +5,7 @@ import { deserialize, type JSONValue, serialize } from "@liqvid/ssr/serde";
 import { type CleanUpFn, createUniqueContext } from "@liqvid/utils";
 import { Cause, Effect, Fiber, ManagedRuntime, Schema } from "effect";
 import { Socket } from "effect/socket";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useEffectEvent, useRef } from "react";
 
 import {
   type ChannelMessage,
@@ -208,14 +208,16 @@ export function useChannel<C extends ChannelName>(
 ): void {
   const client = useContext(WebSocketContext);
 
+  const onMessage = useEffectEvent((message: ChannelMessage<C>) => {
+    const handler = (
+      callbacks as Record<string, ((data: unknown) => void) | undefined>
+    )[message.type];
+    handler?.(message.data);
+  });
+
   useEffect(() => {
     if (!enabled || !client) return;
 
-    return client.subscribe(channel, (message) => {
-      const handler = (
-        callbacks as Record<string, ((data: unknown) => void) | undefined>
-      )[message.type];
-      handler?.(message.data);
-    });
-  }, [client, callbacks, enabled, channel]);
+    return client.subscribe(channel, onMessage);
+  }, [client, enabled, channel]);
 }
