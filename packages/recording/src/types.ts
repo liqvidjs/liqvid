@@ -23,6 +23,9 @@ export interface RecordingPlugin<
   title?: string;
 }
 
+/**
+ * Key order is significant for JSON streaming.
+ */
 export type RecordingData<Data, State> = {
   /** Optional schema URL for validating this recording. */
   $schema?: string;
@@ -38,4 +41,11 @@ export type RecordingData<Data, State> = {
 
   /** Recording data to replay. */
   data: Data;
+};
+
+/** Nominal type for RecordingData with fields in correct order for JSON streaming. */
+export type RecordingDataStreaming<Data, State> = RecordingData<Data, State> & {
+  readonly "~effect/Brand": {
+    readonly RecordingDataStreaming: "RecordingDataStreaming";
+  };
 };
