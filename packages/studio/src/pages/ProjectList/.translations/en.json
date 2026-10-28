@@ -3,6 +3,7 @@
   "copyEmbedCode": "Copy embed code",
   "copyProjectPath": "Copy project path",
   "draft": "This project is marked as a draft and will not be published to production.",
+  "filter": "Filter projects",
   "folderView": "Folder view",
   "openInFinder": "Open in Finder",
   "preview": "Preview",

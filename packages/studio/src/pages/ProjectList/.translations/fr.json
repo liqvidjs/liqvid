@@ -1,6 +1,7 @@
 {
   "copyEmbedCode": "Copier le code d'intégration",
   "draft": "Ce projet est marqué comme un brouillon et ne sera pas mis en production.",
+  "filter": "Filtrer les projets",
   "folderView": "Affichage dossier",
   "openInFinder": "Ouvrir dans Finder",
   "preview": "Aperçu",
