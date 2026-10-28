@@ -48,7 +48,8 @@
     }
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "json-schemas/*"
   ],
   "scripts": {
     ".build:clean": "rm -rf dist",
@@ -57,6 +58,7 @@
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
+    "generate:schema": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/generate-schema.mts && biome check --fix json-schemas",
     "lint": "pnpm biome check --fix",
     "lint:tsc": "tsc --noEmit",
     "watch": "tsc --watch"

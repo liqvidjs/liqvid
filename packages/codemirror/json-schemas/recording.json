@@ -1,0 +1,269 @@
+{
+  "$defs": {
+    "Suspend_": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Suspend_"
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "enum": ["Infinity", "-Infinity", "NaN"],
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "minItems": 1,
+          "prefixItems": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": ["Infinity", "-Infinity", "NaN"],
+                  "type": "string"
+                }
+              ]
+            }
+          ],
+          "type": "array"
+        }
+      ],
+      "type": "array"
+    }
+  },
+  "$id": "https://liqvidjs.org/schemas/plugins/codemirror/1.0.0/recording.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "initial": {
+      "additionalProperties": false,
+      "properties": {
+        "activeFile": {
+          "type": "string"
+        },
+        "files": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "selection": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "anchor": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "enum": ["Infinity", "-Infinity", "NaN"],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "head": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "enum": ["Infinity", "-Infinity", "NaN"],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["anchor", "head"],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "required": ["activeFile", "files"],
+      "type": "object"
+    },
+    "package": {
+      "anyOf": [
+        {
+          "enum": ["@lqv/codemirror"],
+          "type": "string"
+        }
+      ]
+    },
+    "replay": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": ["Infinity", "-Infinity", "NaN"],
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Suspend_"
+              },
+              {
+                "anyOf": [
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "anyOf": [
+                          {
+                            "enum": ["s"],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "enum": ["Infinity", "-Infinity", "NaN"],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "prefixItems": [
+                      {
+                        "anyOf": [
+                          {
+                            "enum": ["s"],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "enum": ["Infinity", "-Infinity", "NaN"],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "enum": ["Infinity", "-Infinity", "NaN"],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "type": "array"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "type": "array"
+      },
+      "type": "array"
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": ["initial", "package", "replay", "version"],
+  "type": "object"
+}
