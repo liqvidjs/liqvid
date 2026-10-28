@@ -454,8 +454,8 @@ const CopyProviderSettings = Schema.Struct({
 
 /** GitHub Pages provider settings. */
 const GitHubPagesProviderSettings = Schema.Struct({
+  directory: Schema.optional(Schema.Literals(["/", "/docs"])),
   repository: Schema.String,
-  root: Schema.optional(Schema.Boolean),
   username: Schema.String,
 });
 

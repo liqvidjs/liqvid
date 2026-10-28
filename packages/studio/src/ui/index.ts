@@ -25,3 +25,4 @@ export * from "./TextField.tsx";
 export * from "./Time.tsx";
 export * from "./useDraggable.ts";
 export * from "./useResizable.ts";
+export * from "./useServerTranslations.ts";

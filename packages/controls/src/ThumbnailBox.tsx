@@ -5,23 +5,14 @@ import { useFirstRender } from "@liqvid/utils";
 import { useEffect } from "react";
 
 export type ThumbData = {
-  /**
-   * Number of columns per thumbnail sheet.
-   * @default 5
-   */
-  cols?: number;
+  /** Number of columns per thumbnail sheet. */
+  cols: number;
 
-  /**
-   * How many seconds between thumbnails.
-   * @default 4
-   */
-  frequency?: number;
+  /** How many seconds between thumbnails. */
+  frequency: number;
 
-  /**
-   * Height of individual thumbnails.
-   * @default 90
-   */
-  height?: number;
+  /** Height of individual thumbnails. */
+  height: number;
 
   /**
    * URL pattern for thumbnails. Must include "%s" for the index of the image.
@@ -29,17 +20,11 @@ export type ThumbData = {
    */
   path: string;
 
-  /**
-   * Number of rows per thumbnail sheet.
-   * @default 5
-   */
-  rows?: number;
+  /** Number of rows per thumbnail sheet. */
+  rows: number;
 
-  /**
-   * Width of individual thumbnails.
-   * @default 160
-   */
-  width?: number;
+  /** Width of individual thumbnails. */
+  width: number;
 };
 
 export type ThumbnailProps = {
@@ -55,7 +40,10 @@ export type ThumbnailProps = {
   title?: string;
 };
 
-export type ThumbnailBoxProps = Omit<ThumbnailProps, "src"> & {
+export type ThumbnailBoxProps = Omit<
+  ThumbnailProps,
+  "col" | "row" | "src" | "time"
+> & {
   cols: number;
 
   /** Points of interest in the video to highlight. */

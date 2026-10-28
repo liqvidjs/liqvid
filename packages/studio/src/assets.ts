@@ -102,33 +102,33 @@ export class DirectoryHelper<
       type?: "json";
 
       /** optional version string */
-      v?: string;
+      version?: string;
     },
   ): Promise<FetchType<DS, F>>;
   async fetch<F extends Files<FilePaths<DS>>>(
     filename: F,
-    options: { type: "blob"; v?: string },
+    options: { type: "blob"; version?: string },
   ): Promise<ArrayBuffer>;
   async fetch<F extends Files<FilePaths<DS>>>(
     filename: F,
-    options: { type: "raw"; v?: string },
+    options: { type: "raw"; version?: string },
   ): Promise<Response>;
   async fetch<F extends Files<FilePaths<DS>>>(
     filename: F,
-    options: { type: "text"; v?: string },
+    options: { type: "text"; version?: string },
   ): Promise<string>;
   async fetch<T>(
     filename: Files<FilePaths<DS>>,
     options?: {
       type: "blob" | "json" | "raw" | "text";
-      v?: string;
+      version?: string;
     },
   ): Promise<T>;
   async fetch(
     filename: Files<FilePaths<DS>>,
     options?: {
       type?: "blob" | "json" | "raw" | "text";
-      v?: string;
+      version?: string;
     },
   ): Promise<unknown> {
     // TODO: maybe support RSC here
@@ -136,7 +136,7 @@ export class DirectoryHelper<
       return null;
     }
 
-    const url = this.file(filename, options?.v);
+    const url = this.file(filename, { version: options?.version });
 
     if (!globalFetchCache.has(url)) {
       globalFetchCache.set(
@@ -163,8 +163,8 @@ export class DirectoryHelper<
    * get the fully qualified name of a file
    * TODO: support versioning
    */
-  file(filename: Files<FilePaths<DS>>, _version?: string) {
-    return `${this.dirname}/${filename}`;
+  file(filename: Files<FilePaths<DS>>, { version }: { version?: string } = {}) {
+    return `${this.dirname}/${filename}` + (version ? `?v=${version}` : "");
   }
 
   /** substitute variables into the dirname of this helper */

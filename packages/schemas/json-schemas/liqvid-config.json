@@ -760,6 +760,17 @@
                     }
                   ]
                 },
+                "directory": {
+                  "anyOf": [
+                    {
+                      "enum": ["/", "/docs"],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "repository": {
                   "description": "Name of the repository to publish to",
                   "type": "string"

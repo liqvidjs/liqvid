@@ -6,7 +6,6 @@ const SECONDS = 1000,
   MINUTES = 60 * SECONDS,
   HOURS = 60 * MINUTES,
   DAYS = 24 * HOURS,
-  // biome-ignore lint/style/noMagicNumbers: days in a week
   WEEKS = 7 * DAYS;
 
 const serializationKey = "@liqvid/duration";

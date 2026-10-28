@@ -194,7 +194,7 @@
     "@liqvid/schemas": "workspace:^1.0.0-alpha.0",
     "@liqvid/script": "workspace:^1.0.0-alpha.2",
     "@liqvid/ssr": "workspace:^1.0.0-alpha.0",
-    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.1",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/studio-public-api": "workspace:^1.0.0-alpha.0",
     "@liqvid/utils": "workspace:^2.0.0-alpha.0",
     "effect-paths": "catalog:peer",

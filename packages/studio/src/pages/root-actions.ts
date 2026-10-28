@@ -4,17 +4,23 @@ import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { NodeFileSystem } from "@effect/platform-node";
 import { runNextBuild } from "@liqvid/cli/build";
 import { publishContent, publishMedia } from "@liqvid/cli/publish";
 import {
+  loadJson,
   readDirWithFileTypes,
   UP,
   writeJSON,
   writeJSONWithSchema,
 } from "@liqvid/cli/utils";
-import { AutoGenProjectMeta, type ParameterValues } from "@liqvid/schemas";
+import {
+  AutoGenProjectMeta,
+  type ParameterValues,
+  TemplateJson,
+} from "@liqvid/schemas";
 import { isValidRecordingName } from "@liqvid/studio-plugin-api";
-import { Effect, Exit, FileSystem, type PlatformError } from "effect";
+import { Effect, Exit, FileSystem, type PlatformError, Result } from "effect";
 import {
   type AbsoluteDir,
   type AbsoluteFile,
@@ -33,8 +39,9 @@ import {
   SCREENSHOTS_DIR,
   TEMPLATE_FILE,
   TYPES_AUTOGEN,
+  USER_TEMPLATES_DIR,
 } from "#_/conventions";
-import type { PlainString } from "#_/i18n/shared";
+import { PlainString } from "#_/i18n/shared";
 import { getServerState } from "#_/initialize";
 import { serverRuntime } from "#_/server-runtime";
 import type { PackageName } from "#_/types/misc";
@@ -141,9 +148,10 @@ export async function publishAction(): Promise<PublishActionResult> {
   }
 }
 
-export interface TemplateInfo {
+export type TemplateInfo = Readonly<{
   /** Whether this is the default template */
   default?: boolean;
+
   /** Unique identifier (directory name) */
   id: string;
 
@@ -152,7 +160,7 @@ export interface TemplateInfo {
 
   /** Full path to the template directory */
   path: AbsoluteDir;
-}
+}>;
 
 interface CreateProjectInput {
   name: string;
@@ -171,8 +179,6 @@ const TEMPLATES_DIR = path.join(
   UP,
   RelativeDir("templates"),
 );
-
-const PROJECT_TEMPLATES_DIR = path.join(TEMPLATES_DIR, RelativeDir("projects"));
 
 /**
  * Open project in Finder
@@ -333,54 +339,57 @@ export async function openCaptionsInFinderAction(
  * Templates are sorted with default first, then alphabetically by name.
  */
 export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
-  const templates: TemplateInfo[] = [];
+  return Effect.gen(function* () {
+    const templates: TemplateInfo[] = [];
 
-  try {
-    const entries = await fsp.readdir(PROJECT_TEMPLATES_DIR, {
-      withFileTypes: true,
-    });
+    const userTemplatesDir = path.join(process.cwd(), USER_TEMPLATES_DIR);
 
-    for (const entry of entries) {
-      if (!entry.isDirectory()) {
+    const entries = yield* readDirWithFileTypes(userTemplatesDir).pipe(
+      Effect.catch(() => Effect.succeed([])),
+    );
+
+    for (const [filename, kind] of entries) {
+      if (kind !== "Directory") {
         continue;
       }
 
-      const templateDir = path.join(PROJECT_TEMPLATES_DIR, entry.name);
+      const templateDir = path.join(userTemplatesDir, filename);
       const templateJsonPath = path.join(templateDir, TEMPLATE_FILE);
 
-      try {
-        const content = await fsp.readFile(templateJsonPath, "utf8");
-        const templateJson = JSON.parse(content) as {
-          name: PlainString;
-          default?: boolean;
-        };
+      const $templateJson = yield* loadJson(
+        TemplateJson,
+        templateJsonPath,
+      ).pipe(Effect.result);
 
-        templates.push({
-          default: templateJson.default === true,
-          id: entry.name,
-          name: templateJson.name,
-          path: templateDir,
-        });
-      } catch {
-        // Skip directories without valid template.json
+      if (Result.isFailure($templateJson)) {
+        yield* Effect.logError(
+          `Failed to load template.json for template "${filename}": ${$templateJson.failure.message}`,
+        );
+        continue;
       }
-    }
-  } catch {
-    // If templates directory doesn't exist, return empty array
-  }
+      const templateJson = $templateJson.success;
 
-  // Sort: default first, then alphabetically by name
-  templates.sort((a, b) => {
-    if (a.default && !b.default) {
-      return -1;
+      templates.push({
+        default: templateJson.default === true,
+        id: filename,
+        name: PlainString(templateJson.name),
+        path: templateDir,
+      });
     }
-    if (!a.default && b.default) {
-      return 1;
-    }
-    return a.name.localeCompare(b.name);
-  });
 
-  return templates;
+    // Sort: default first, then alphabetically by name
+    templates.sort((a, b) => {
+      if (a.default && !b.default) {
+        return -1;
+      }
+      if (!a.default && b.default) {
+        return 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return templates;
+  }).pipe(Effect.provide(NodeFileSystem.layer), Effect.runPromise);
 }
 
 /**
@@ -389,7 +398,7 @@ export async function loadTemplatesAction(): Promise<TemplateInfo[]> {
 const compileTemplate = Effect.fnUntraced(function* (
   templatePath: AbsoluteFile,
   outputPath: AbsoluteFile,
-  data: Record<string, unknown>,
+  data: Readonly<Record<string, unknown>>,
 ) {
   const fs = yield* FileSystem.FileSystem;
   const templateContent = yield* fs.readFileString(templatePath);
@@ -397,6 +406,11 @@ const compileTemplate = Effect.fnUntraced(function* (
   const result = template(data);
   yield* fs.writeFileString(outputPath, result);
 });
+
+interface TemplateDirData {
+  name: string;
+  [key: string]: unknown;
+}
 
 /**
  * Recursively copy and compile template files from source to destination.
@@ -406,7 +420,7 @@ const compileTemplate = Effect.fnUntraced(function* (
 const copyTemplateDir = Effect.fnUntraced(function* (
   srcDir: AbsoluteDir,
   destDir: AbsoluteDir,
-  data: Record<string, unknown>,
+  data: Readonly<TemplateDirData>,
 ): Generator<
   Effect.Effect<void, PlatformError.PlatformError, FileSystem.FileSystem>
 > {
@@ -551,7 +565,7 @@ export async function createProjectAction(
         },
       );
 
-      const templateData = { name };
+      const templateData = { name } satisfies TemplateDirData;
 
       // Copy and compile template files
       yield* copyTemplateDir(template.path, fullProjectPath, templateData);

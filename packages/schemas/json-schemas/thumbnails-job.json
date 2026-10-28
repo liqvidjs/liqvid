@@ -74,7 +74,14 @@
       ]
     },
     "jobId": {
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "quality": {
       "anyOf": [
@@ -120,8 +127,15 @@
       ]
     },
     "status": {
-      "enum": ["rendering", "completed", "failed"],
-      "type": "string"
+      "anyOf": [
+        {
+          "enum": ["rendering", "completed", "failed"],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "width": {
       "anyOf": [

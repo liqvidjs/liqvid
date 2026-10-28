@@ -86,6 +86,7 @@
     "typescript": "catalog:dev"
   },
   "peerDependencies": {
+    "@phosphor-icons/react": ">=2",
     "@liqvid/color-scheme": "workspace:^1.0.0-alpha.4",
     "@liqvid/duration": "workspace:^1.4.0",
     "@liqvid/keymap": "workspace:^2.0.0-alpha.2",

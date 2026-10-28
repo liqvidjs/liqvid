@@ -189,7 +189,7 @@ export const StructuredLog = Schema.Struct({
   type: StructuredLogType,
 });
 
-type StructuredLogEncoded = (typeof StructuredLog)["Encoded"] & {
+export type StructuredLogEncoded = (typeof StructuredLog)["Encoded"] & {
   readonly annotations: { readonly [key: string]: JSONValue };
   readonly message: readonly JSONValue[];
   readonly timestamp: SerializedDate;
@@ -268,7 +268,7 @@ export const ServiceClient = Schema.Struct({
 });
 
 export type ServiceClientEncoded = (typeof ServiceClient)["Encoded"] & {
-  logs: readonly StructuredLogEncoded[];
+  readonly logs: readonly StructuredLogEncoded[];
   readonly startTime: SerializedDate;
 };
 export type ServiceClient = (typeof ServiceClient)["Type"];

@@ -19,7 +19,8 @@ export type CleanUpFn = () => void;
  */
 export type Awaitable<T> = T | Promise<T>;
 
-const createIdentity =
+/** Create an identity function that is erased at runtime. */
+export const createIdentity =
   /* @__PURE__ */
     () =>
     <T>(x: T): Readonly<T> =>
@@ -31,7 +32,7 @@ export const readonly = createIdentity();
 /** Prevent TypeScript from inferring a type. */
 export type PreventInference<T> = [T][T extends unknown ? 0 : never];
 
-/** Remove the `readonly` modifier from all properties of a type. */
+/** Remove the `readonly` modifier from properties of a type. */
 export type Mutable<T, K extends keyof T = keyof T> = {
   -readonly [P in K]: T[P];
 } & {

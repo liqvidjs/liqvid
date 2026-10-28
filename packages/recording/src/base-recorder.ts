@@ -2,6 +2,7 @@ import { Duration, type DurationSetter } from "@liqvid/duration";
 
 import type { Recorder } from "./recorder.ts";
 
+/** Base class implementing some common {@link Recorder} patterns */
 export abstract class BaseRecorder<
   Datum = unknown,
   FinalData = Datum[],

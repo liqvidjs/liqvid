@@ -1,6 +1,11 @@
 {
   "extends": ["../../biome.json"],
   "linter": {
+    "domains": {
+      "next": "recommended",
+      "react": "recommended",
+      "test": "recommended"
+    },
     "rules": {
       "a11y": {
         "noLabelWithoutControl": {

@@ -49,7 +49,6 @@
       "**",
       "!build",
       "!coverage",
-      "!opencode.json",
       "!packages/create-liqvid/templates/app*",
       "!packages/desmos-react",
       "!packages/epiplexis",
@@ -89,6 +88,7 @@
     }
   },
   "linter": {
+    "domains": { "test": "recommended" },
     "enabled": true,
     "rules": {
       "a11y": {

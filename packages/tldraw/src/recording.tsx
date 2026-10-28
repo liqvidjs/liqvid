@@ -1,5 +1,9 @@
 import { diffObjects } from "@liqvid/diff";
-import { type RecordingPlugin, ReplayDataRecorder } from "@liqvid/recording";
+import {
+  type RecordingData,
+  type RecordingPlugin,
+  ReplayDataRecorder,
+} from "@liqvid/recording";
 import type { RecordingComponentProps } from "@liqvid/studio-plugin-api";
 import type { ReplayData } from "@liqvid/utils";
 import { assertType, bind } from "@liqvid/utils";
@@ -32,7 +36,7 @@ import {
   encodeDiffPaths,
   encodePointer,
 } from "./utils.ts";
-import { PACKAGE, VERSION } from "./version.ts";
+import { PACKAGE, SCHEMA, VERSION } from "./version.ts";
 import { extractSegmentAppend, isSegmentAppend } from "./zsa.ts";
 
 type TldrawState = {
@@ -46,11 +50,25 @@ export class TldrawRecorder extends ReplayDataRecorder<
   TldrawEvent,
   TldrawState
 > {
+  readonly package = PACKAGE;
+  readonly version = VERSION;
+  readonly $schema = SCHEMA;
+
   #editor: Editor | undefined;
   #unlisten: (() => void) | undefined;
   #unlistenPointer: (() => void) | undefined;
   readonly #shapeCache: Map<string, DecodedTLShape> = new Map();
   readonly #pageCache: Map<string, TLPage> = new Map();
+
+  initial: TldrawState = {
+    containerWidth: 0,
+    pointer: [0, 0],
+    snapshot: {
+      schema: { schemaVersion: 2, sequences: {} },
+      store: {},
+    },
+    viewport: { camera: [0, 0, 0], page: "" as TLPageId },
+  };
 
   /**
    * The author's last-recorded viewport, so that changes can be diffed and
@@ -65,9 +83,6 @@ export class TldrawRecorder extends ReplayDataRecorder<
    * pointer event.
    */
   #pointer: Pointer = [0, 0];
-
-  readonly package = PACKAGE;
-  readonly version = VERSION;
 
   constructor() {
     super();
@@ -357,13 +372,7 @@ export const icon = (props: React.ComponentProps<"svg">) => (
   </svg>
 );
 
-export const TldrawRecording: RecordingPlugin<
-  [number, TldrawEvent],
-  ReplayData<TldrawEvent>,
-  TldrawRecorder
-> & {
-  recordingComponent?: (props: RecordingComponentProps) => React.ReactNode;
-} = {
+export const TldrawRecording = {
   icon,
   name: "Tldraw",
   package: PACKAGE,
@@ -374,4 +383,10 @@ export const TldrawRecording: RecordingPlugin<
     })),
   ),
   title: "Record Tldraw",
+} satisfies RecordingPlugin<
+  [number, TldrawEvent],
+  RecordingData<ReplayData<TldrawEvent>, TldrawState>,
+  TldrawRecorder
+> & {
+  recordingComponent?: (props: RecordingComponentProps) => React.ReactNode;
 };

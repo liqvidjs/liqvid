@@ -100,6 +100,7 @@ export const LIGHT_DIR = RelativeDir("light");
 export const DARK_DIR = RelativeDir("dark");
 
 /* ------------------------------ templates ------------------------------ */
+export const USER_TEMPLATES_DIR = RelativeDir("templates");
 
 export const TEMPLATE_FILE = RelativeFile("template.json");
 

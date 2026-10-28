@@ -18,17 +18,19 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
+import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
 import type { ToastPropsWithTime } from "#_/ui/Toast.js";
 import { Toaster } from "#_/ui/Toaster.js";
-
-import { clientRuntime, LiqvidStudioApiClient } from "../client.mts";
 
 import { WebSocketProvider } from "./WebSocketProvider.tsx";
 
 import "../palette.css";
+
+const EMPTY_INSTANCES: readonly unknown[] = Object.freeze([]);
 
 export interface StudioPrivateContextShape {
   instances: Record<string, Set<unknown>>;
@@ -55,6 +57,8 @@ export function LiqvidDevToolsProvider({
   const projectPath = useProjectPath();
   const projectParams = useProjectParams();
   const [instances] = useState<Record<string, Set<unknown>>>(() => ({}));
+  const instanceSnapshots = useRef<Record<string, readonly unknown[]>>({});
+  const instanceListeners = useRef(new Map<string, Set<() => void>>());
   const privateContext = useMemo(
     () => ({ instances, projectPath }),
     [projectPath, instances],
@@ -63,14 +67,32 @@ export function LiqvidDevToolsProvider({
   const [toasts, setToasts] = useState<ToastPropsWithTime[]>([]);
   const api = useMemo(
     (): Omit<PluginContext, "plugins"> => ({
+      getInstances(pluginName) {
+        return instanceSnapshots.current[pluginName] ?? EMPTY_INSTANCES;
+      },
       makeToast(toast) {
         setToasts((prev) => [...prev, { ...toast, time: Date.now() }]);
       },
       registerInstance(pluginName, instance) {
         instances[pluginName] ??= new Set();
         instances[pluginName].add(instance);
+        instanceSnapshots.current[pluginName] = Array.from(
+          instances[pluginName],
+        );
+        for (const listener of instanceListeners.current.get(pluginName) ??
+          []) {
+          listener();
+        }
         return () => {
-          instances[pluginName]?.delete(instance);
+          if (instances[pluginName]?.delete(instance)) {
+            instanceSnapshots.current[pluginName] = Array.from(
+              instances[pluginName],
+            );
+            for (const listener of instanceListeners.current.get(pluginName) ??
+              []) {
+              listener();
+            }
+          }
         };
       },
       setDuration: (duration: DurationLike) => {
@@ -89,6 +111,16 @@ export function LiqvidDevToolsProvider({
             });
           }),
         );
+      },
+      subscribeInstances(pluginName, listener) {
+        let listeners = instanceListeners.current.get(pluginName);
+        if (!listeners) {
+          listeners = new Set();
+          instanceListeners.current.set(pluginName, listeners);
+        }
+        listeners.add(listener);
+        return () =>
+          instanceListeners.current.get(pluginName)?.delete(listener);
       },
     }),
     [instances, projectParams, projectPath],

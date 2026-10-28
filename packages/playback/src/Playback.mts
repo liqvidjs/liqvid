@@ -463,7 +463,7 @@ function transformOptions(
 function transformOptions(
   options: DurationLike | KeyframeEffectOptionsWithDurations | undefined,
 ): number | KeyframeEffectOptions | undefined {
-  if (!options) {
+  if (options === undefined) {
     return options;
   }
 

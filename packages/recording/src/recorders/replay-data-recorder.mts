@@ -3,6 +3,7 @@ import type { ReplayData } from "@liqvid/utils";
 import { BaseRecorder } from "../base-recorder.ts";
 import type { RecordingData } from "../types.ts";
 
+/** Recording {@link ReplayData} (initial state, plus array of events and millisecond times between them) */
 export abstract class ReplayDataRecorder<
   Datum,
   Initial,
