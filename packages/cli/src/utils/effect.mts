@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { inspect } from "node:util";
 
 import {
   $SchemaFilename,
@@ -8,13 +9,16 @@ import {
   LiqvidConfig,
   schemaUrl,
 } from "@liqvid/schemas";
+import chalk from "chalk";
 import {
   Cause,
   Effect,
   FileSystem,
   flow,
   Layer,
+  Logger,
   type PlatformError,
+  References,
   Schema,
 } from "effect";
 import type { Concurrency } from "effect/Types";
@@ -31,6 +35,44 @@ import { JSONC } from "jsonc.min";
 import { CONFIG_FILE, CONFIG_FILE_JSONC } from "#_/tasks/conventions.mjs";
 
 import { FileDecodeError } from "../errors.mts";
+
+const cliLogger = Logger.withLeveledConsole(
+  Logger.make(({ cause, fiber, logLevel, message }) => {
+    const lines = (Array.isArray(message) ? message : [message]).map((value) =>
+      typeof value === "string" ? value : inspect(value),
+    );
+
+    if (cause.reasons.length > 0) {
+      lines.push(Cause.pretty(cause));
+    }
+
+    for (const [key, value] of Object.entries(
+      fiber.getRef(References.CurrentLogAnnotations),
+    )) {
+      lines.push(
+        `${key}: ${typeof value === "string" ? value : inspect(value)}`,
+      );
+    }
+
+    const output = lines.join("\n");
+    switch (logLevel) {
+      case "Trace":
+        return chalk.gray(output);
+      case "Debug":
+        return chalk.magenta(output);
+      case "Warn":
+        return chalk.yellow(output);
+      case "Error":
+        return chalk.red(output);
+      case "Fatal":
+        return chalk.bold.red(output);
+      default:
+        return output;
+    }
+  }),
+);
+
+export const cliLoggerLayer = Logger.layer([cliLogger]);
 
 export const readDirWithFileTypes = Effect.fnUntraced(function* (
   dirname: AbsoluteDir,

@@ -2,7 +2,7 @@ import * as path from "node:path";
 
 import { NodeFileSystem } from "@effect/platform-node";
 import { EnvFiles, type LiqvidConfig } from "@liqvid/schemas";
-import { Effect, FileSystem, Layer, Logger, Option, References } from "effect";
+import { Effect, FileSystem, Layer, Option, References } from "effect";
 import { Command, Flag } from "effect/cli";
 import { type AbsoluteDir, type AbsoluteFile, RelativeDir } from "effect-paths";
 import fg from "fast-glob";
@@ -15,6 +15,7 @@ import { S3Provider } from "#_/providers/hosting/s3";
 import { SFTPProvider } from "#_/providers/hosting/sftp";
 import type { HostingProvider, MediaHostingProvider } from "#_/providers/types";
 import {
+  cliLoggerLayer,
   loadEnvFiles,
   loadLiqvidConfig,
   resolveConfigPath,
@@ -176,8 +177,9 @@ export async function publishContent(
       ),
       Effect.provide(
         Layer.mergeAll(
-          Logger.layer([Logger.consolePretty({ colors: true })]),
-          Layer.mergeAll(NodeFileSystem.layer, defaultCliProgressLayer()),
+          cliLoggerLayer,
+          NodeFileSystem.layer,
+          defaultCliProgressLayer(),
         ),
       ),
     ),

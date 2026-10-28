@@ -20,7 +20,7 @@ import { renderAudioCommand } from "./tasks/render-audio.mts";
 import { screenshotCommand } from "./tasks/screenshot.mts";
 import { thumbs } from "./tasks/thumbs.mts";
 import { transcribeCommand } from "./tasks/transcribe.mts";
-import { UP } from "./utils/effect.mts";
+import { cliLoggerLayer, UP } from "./utils/effect.mts";
 
 // version
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -48,6 +48,7 @@ const liqvid = Command.make("liqvid").pipe(
 /** CLI entry point. */
 export const main = Command.run(liqvid, { version }).pipe(
   Effect.provide(NodeServices.layer),
+  Effect.provide(cliLoggerLayer),
 );
 
 // entry
