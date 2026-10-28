@@ -27,6 +27,7 @@ export function PlaybackSpeed({ buttonClass }: { buttonClass: string }) {
 
   const player = usePlayer();
 
+
   return (
     <Menu.SubmenuRoot
       onOpenChange={(isOpen) => {

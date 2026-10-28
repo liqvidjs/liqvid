@@ -1,9 +1,9 @@
 import { DirectoryHelper } from "@liqvid/studio";
 
-import type { ProjectDir } from "../.liqvid/types.ts";
+import type { ProjectStructure } from "../.liqvid/types.ts";
 
 /** @package */
-export const project = new DirectoryHelper<ProjectDir>();
+export const project = new DirectoryHelper<ProjectStructure>();
 
 /** @package */
 export const assets = project.dir(".liqvid");

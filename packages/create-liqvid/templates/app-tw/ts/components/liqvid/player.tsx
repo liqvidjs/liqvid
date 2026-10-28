@@ -9,6 +9,7 @@ import { MarkerRecording } from "@liqvid/script/recording";
 import {
   LiqvidDevToolsProvider,
   type LiqvidStudioPlugin,
+  HighlightsControl,
   RecordingControl,
 } from "@liqvid/studio";
 import type { Awaitable } from "@liqvid/utils";
@@ -170,6 +171,7 @@ function PlayerChrome({
             {/* right controls */}
             <div className="lv-controls-right h-full">
               <RecordingControl shortcuts={shortcuts.recording} />
+              <HighlightsControl shortcut={shortcuts.highlights} />
               <AdditionalSettings transcript={transcript} />
               <FullScreen />
             </div>

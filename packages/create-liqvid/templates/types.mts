@@ -14,24 +14,24 @@ export type TemplateType =
   | "default-tw-empty";
 
 export interface GetTemplateFileArgs {
-  template: RelativeDir<TemplateType>;
   file: RelativeFile;
+  template: RelativeDir<TemplateType>;
 }
 
 export interface InstallTemplateArgs {
   appName: string;
-  root: AbsoluteDir;
-  packageManager: PackageManager;
-  isOnline: boolean;
-  template: RelativeDir<TemplateType>;
-  tailwind: boolean;
-  skipInstall: boolean;
   bundler: Bundler;
-  reactCompiler: boolean;
+  isOnline: boolean;
+  packageManager: PackageManager;
   /** Whether to set up the project to use Portless for local development. */
   portless: boolean;
   /** Presets selected by the user, whose deps + content will be included. */
   presets?: PresetName[];
+  reactCompiler: boolean;
+  root: AbsoluteDir;
+  skipInstall: boolean;
+  tailwind: boolean;
+  template: RelativeDir<TemplateType>;
 }
 
 export const Bundler = {

@@ -6,9 +6,10 @@
 
 import { DirectoryHelper } from "@liqvid/studio";
 import { UniversalHelper } from "liqvid";
-import { usePathname } from "next/navigation";
 
-import type { ProjectDir } from "../.liqvid/types.ts";
+import type { ProjectStructure } from "../.liqvid/types.ts";
+
+import projectPath from "../.liqvid/project-path.json" with { type: "json" };
 
 /* -------------------- helpers -------------------- */
 
@@ -21,15 +22,15 @@ import type { ProjectDir } from "../.liqvid/types.ts";
  */
 export const $u = UniversalHelper;
 
-/** @package Reference the files in this project with type-safety. Need to interpolate the pathname before using. */
-export const projectDirTemplated = new DirectoryHelper<ProjectDir, "pathname">(
+/**
+ * Reference the files in this project with type-safety.
+ * @access parent
+ */
+export const projectFiles = new DirectoryHelper<
+  ProjectStructure,
+  "projectPath"
+>(
   process.env.NODE_ENV === "development"
-    ? `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/liqvid/static{pathname}`
-    : `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}{pathname}`,
+    ? `/api/liqvid/static/${projectPath}`
+    : `${process.env.NEXT_PUBLIC_LIQVID_MEDIA_BASE}/${projectPath}`,
 );
-
-/** @package Reference the files in this project with type-safety. */
-export function useProjectFiles() {
-  const pathname = usePathname();
-  return projectDirTemplated.interpolate({ pathname });
-}

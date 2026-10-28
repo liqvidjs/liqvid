@@ -16,7 +16,7 @@
 );
 
 @custom-variant lv-render-thumbs (
-  &:where([data-render-mode="thumbs"], [data-render-mode="thumbs"] *)
+  &:where([data-render-mode="thumbnails"], [data-render-mode="thumbnails"] *)
 );
 
 @custom-variant lv-render-video (

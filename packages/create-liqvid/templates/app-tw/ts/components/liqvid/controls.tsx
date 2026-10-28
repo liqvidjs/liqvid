@@ -429,7 +429,7 @@ export function AdditionalSettings({
 }
 
 const CaptionsEditorDevOnly = dynamic(async () => {
-  if (process.env.NODE_ENV === "production") {
+  if (import.meta.env.PROD) {
     return {
       default: () => null,
     };

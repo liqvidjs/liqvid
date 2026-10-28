@@ -8,6 +8,7 @@ export const shortcuts = {
   captions: "C",
   colorScheme: "Meta+'",
   fullscreen: "F",
+  highlights: "Alt+Meta+H",
   mute: "M",
 
   playPause: ["K", "Space"],
