@@ -5,8 +5,12 @@ import {
   usePlaybackEvent,
   useReadyStateItem,
 } from "@liqvid/playback/react";
+import {
+  endDevTiming,
+  startDevTiming,
+} from "@liqvid/studio-plugin-api/dev-timing";
 import { useStableDuration } from "@liqvid/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface MediaProps {
   /** Defer media loading until this promise resolves. */
@@ -21,6 +25,7 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   ref: React.RefObject<T | null>,
   start: DurationLike = {},
   enabled = true,
+  timingLabel: "Video" | "HlsVideo" | null = "Video",
 ) {
   const start$ = useStableDuration(start);
   const playback = usePlayback();
@@ -207,7 +212,7 @@ export function useSyncMedia<T extends HTMLMediaElement>(
   }, [onVolumeChange]);
 
   /* ------------------------------ readyState ------------------------------ */
-  useSyncReadyState(ref, start$, enabled);
+  useSyncReadyState(ref, start$, enabled, timingLabel);
 }
 
 /**
@@ -226,9 +231,12 @@ function useSyncReadyState(
   ref: React.RefObject<HTMLMediaElement | null>,
   start: DurationLike,
   enabled: boolean,
+  timingLabel: "Video" | "HlsVideo" | null,
 ) {
   const { setReadyState } = useReadyStateItem(0, enabled);
   const { setBuffered } = useBufferedItem(enabled);
+  const timingStartedAtRef = useRef<number | undefined>(startDevTiming());
+  const timingReportedRef = useRef(false);
 
   const updateMediaState = useCallback(() => {
     const media = ref.current;
@@ -239,6 +247,18 @@ function useSyncReadyState(
     }
 
     setReadyState(media.readyState);
+    if (
+      timingLabel &&
+      media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      !timingReportedRef.current
+    ) {
+      timingReportedRef.current = true;
+      endDevTiming(
+        `${timingLabel} readyState >= 2`,
+        timingStartedAtRef.current,
+        { src: media.currentSrc || media.src },
+      );
+    }
     const ranges: Array<readonly [number, number]> = [];
     const offset = Duration.inSeconds(start);
 
@@ -249,7 +269,7 @@ function useSyncReadyState(
       ]);
     }
     setBuffered(ranges);
-  }, [ref, setBuffered, setReadyState, start]);
+  }, [ref, setBuffered, setReadyState, start, timingLabel]);
 
   useEffect(() => {
     if (!enabled) {
@@ -260,6 +280,19 @@ function useSyncReadyState(
       return;
     }
 
+    const alreadyReady = media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+    const startedBeforeReady = timingStartedAtRef.current !== undefined;
+    if (!alreadyReady && !startedBeforeReady) {
+      timingStartedAtRef.current = startDevTiming();
+    }
+    timingReportedRef.current = alreadyReady && !startedBeforeReady;
+
+    const onLoadStart = () => {
+      timingStartedAtRef.current = startDevTiming();
+      timingReportedRef.current = false;
+      updateMediaState();
+    };
+
     const events = [
       "abort",
       "canplay",
@@ -269,7 +302,6 @@ function useSyncReadyState(
       "error",
       "loadeddata",
       "loadedmetadata",
-      "loadstart",
       "playing",
       "progress",
       "seeked",
@@ -280,10 +312,12 @@ function useSyncReadyState(
     ] as const;
 
     updateMediaState();
+    media.addEventListener("loadstart", onLoadStart);
     for (const event of events) {
       media.addEventListener(event, updateMediaState);
     }
     return () => {
+      media.removeEventListener("loadstart", onLoadStart);
       for (const event of events) {
         media.removeEventListener(event, updateMediaState);
       }

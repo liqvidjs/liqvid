@@ -9,6 +9,10 @@ import {
   useReadyStateItem,
 } from "@liqvid/playback/react";
 import { useScriptOptional } from "@liqvid/script/react";
+import {
+  endDevTiming,
+  startDevTiming,
+} from "@liqvid/studio-plugin-api/dev-timing";
 import { isSafari } from "@liqvid/utils";
 import { RenderMode } from "@lqv/playback/react";
 import {
@@ -111,6 +115,25 @@ export function Audio<M extends string = string>({
   const trackLoading = isActive && Boolean(src) && !held;
   const { setReadyState } = useReadyStateItem(0, trackLoading);
   const { setBuffered } = useBufferedItem(trackLoading);
+  const timingStartedAtRef = useRef<number | undefined>(undefined);
+  const timingReportedRef = useRef(false);
+
+  const reportReady = useCallback(
+    (readyState: number, failed = false) => {
+      if (
+        readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+        timingReportedRef.current
+      ) {
+        return;
+      }
+      timingReportedRef.current = true;
+      endDevTiming("Audio readyState >= 2", timingStartedAtRef.current, {
+        failed,
+        src,
+      });
+    },
+    [src],
+  );
 
   const startInSeconds = (() => {
     if (!isActive) {
@@ -189,6 +212,7 @@ export function Audio<M extends string = string>({
           return;
         }
         audioBufferRef.current = buffer;
+        reportReady(HTMLMediaElement.HAVE_ENOUGH_DATA);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
         setBuffered([[startInSeconds, startInSeconds + buffer.duration]]);
 
@@ -207,6 +231,7 @@ export function Audio<M extends string = string>({
           return;
         }
         console.error("Failed to decode audio:", error);
+        reportReady(HTMLMediaElement.HAVE_ENOUGH_DATA, true);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       })
       .finally(() => {
@@ -214,7 +239,7 @@ export function Audio<M extends string = string>({
           decodingArrayBufferRef.current = null;
         }
       });
-  }, [playback, setBuffered, setReadyState, startInSeconds]);
+  }, [playback, reportReady, setBuffered, setReadyState, startInSeconds]);
 
   /**
    * Stop the current audio source
@@ -318,6 +343,8 @@ export function Audio<M extends string = string>({
   // Fetch the audio file immediately
   useEffect(() => {
     if (!src || held) {
+      timingStartedAtRef.current = undefined;
+      timingReportedRef.current = true;
       setReadyState(HTMLMediaElement.HAVE_NOTHING);
       setBuffered([]);
       return;
@@ -327,6 +354,8 @@ export function Audio<M extends string = string>({
     const controller = new AbortController();
     const durationInSeconds =
       duration === undefined ? undefined : Duration.inSeconds(duration);
+    timingStartedAtRef.current = startDevTiming();
+    timingReportedRef.current = false;
     const onProgress = createBufferProgressHandler(
       startInSeconds,
       durationInSeconds,
@@ -358,6 +387,7 @@ export function Audio<M extends string = string>({
           return;
         }
         console.error("Failed to fetch audio:", error);
+        reportReady(HTMLMediaElement.HAVE_ENOUGH_DATA, true);
         setReadyState(HTMLMediaElement.HAVE_ENOUGH_DATA);
       });
 
@@ -375,6 +405,7 @@ export function Audio<M extends string = string>({
     setReadyState,
     startInSeconds,
     stopAudio,
+    reportReady,
   ]);
 
   // Decode audio when audioContext becomes available

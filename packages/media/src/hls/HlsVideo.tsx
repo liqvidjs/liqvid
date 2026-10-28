@@ -103,6 +103,7 @@ export function HlsVideo({
       src={source}
       start={start}
       style={style}
+      timingLabel="HlsVideo"
       {...props}
     >
       {props.children}
@@ -124,7 +125,7 @@ function NativeAudio({
   start?: DurationLike;
 }) {
   const ref = useRef<HTMLAudioElement>(null);
-  useSyncMedia(ref, start);
+  useSyncMedia(ref, start, true, null);
 
   return (
     // biome-ignore lint/a11y/useMediaCaption: caption tracks are passed through as children

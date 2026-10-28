@@ -1,4 +1,8 @@
 import type { DurationString } from "@liqvid/duration";
+import {
+  endDevTiming,
+  startDevTiming,
+} from "@liqvid/studio-plugin-api/dev-timing";
 
 export type Directory = {
   [key: string]: Directory | (() => unknown);
@@ -139,20 +143,37 @@ export class DirectoryHelper<
     const url = this.file(filename, { version: options?.version });
 
     if (!globalFetchCache.has(url)) {
+      const startedAt = startDevTiming();
+      const request = fetch(url).then((res) => {
+        switch (options?.type ?? "json") {
+          case "json":
+            return res.json();
+          case "blob":
+            return res.arrayBuffer();
+          case "raw":
+            return res;
+          case "text":
+            return res.text();
+        }
+      });
       globalFetchCache.set(
         url,
-        fetch(url).then((res) => {
-          switch (options?.type ?? "json") {
-            case "json":
-              return res.json();
-            case "blob":
-              return res.arrayBuffer();
-            case "raw":
-              return res;
-            case "text":
-              return res.text();
-          }
-        }),
+        request.then(
+          (value) => {
+            endDevTiming("DirectoryHelper.fetch()", startedAt, {
+              type: options?.type ?? "json",
+              url,
+            });
+            return value;
+          },
+          (error: unknown) => {
+            endDevTiming("DirectoryHelper.fetch() failed", startedAt, {
+              type: options?.type ?? "json",
+              url,
+            });
+            throw error;
+          },
+        ),
       );
     }
 

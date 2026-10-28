@@ -5,6 +5,10 @@ import {
   usePlaybackEvent,
   useReadyStateItem,
 } from "@liqvid/playback/react";
+import {
+  endDevTiming,
+  startDevTiming,
+} from "@liqvid/studio-plugin-api/dev-timing";
 import { useStableDuration } from "@liqvid/utils";
 import { useCallback, useEffect, useEffectEvent, useRef } from "react";
 
@@ -97,6 +101,8 @@ export function useMediaBunnyFrames({
     }
 
     reportReadyState(ReadyState.HAVE_NOTHING);
+    const timingStartedAt = startDevTiming();
+    let timingReported = false;
     const renderer = createFrameHost({
       canvas,
       greenscreen:
@@ -109,7 +115,15 @@ export function useMediaBunnyFrames({
         reportReadyState(ReadyState.HAVE_ENOUGH_DATA);
         console.error(`${message} with MediaBunny`, error);
       },
-      onReadyState: reportReadyState,
+      onReadyState(readyState) {
+        reportReadyState(readyState);
+        if (readyState >= ReadyState.HAVE_CURRENT_DATA && !timingReported) {
+          timingReported = true;
+          endDevTiming("HlsVideo readyState >= 2", timingStartedAt, {
+            src: source,
+          });
+        }
+      },
       preloadSeconds,
       source: new URL(source, document.baseURI).href,
     });

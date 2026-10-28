@@ -6,12 +6,19 @@ import { Children, isValidElement, type JSX, useRef } from "react";
 import { useLoadHold } from "./useLoadHold.ts";
 import { type MediaProps, useSyncMedia } from "./useSyncMedia.ts";
 
-type VideoProps = JSX.IntrinsicElements["video"] & MediaProps;
+type VideoProps = JSX.IntrinsicElements["video"] &
+  MediaProps & { timingLabel?: "Video" | "HlsVideo" };
 
 /**
  * Liqvid equivalent of {@link HTMLVideoElement `<video>`}.
  */
-export function Video({ defer, ref: propsRef, start, ...props }: VideoProps) {
+export function Video({
+  defer,
+  ref: propsRef,
+  start,
+  timingLabel = "Video",
+  ...props
+}: VideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const held = useLoadHold(defer);
   const { children, src, ...rest } = props;
@@ -24,7 +31,7 @@ export function Video({ defer, ref: propsRef, start, ...props }: VideoProps) {
         Boolean((child.props as { src?: string }).src),
     );
 
-  useSyncMedia(ref, start, !held && hasSource);
+  useSyncMedia(ref, start, !held && hasSource, timingLabel);
 
   return (
     <video

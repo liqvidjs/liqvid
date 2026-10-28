@@ -26,6 +26,16 @@
       "@liqvid/dev": "./src/server.mts",
       "types": "./dist/types/server.d.mts",
       "import": "./dist/esm/server.mjs"
+    },
+    "./dev-timing": {
+      "@liqvid/dev": "./src/dev-timing.mts",
+      "types": "./dist/types/dev-timing.d.mts",
+      "import": "./dist/esm/dev-timing.mjs"
+    },
+    "./dev-timing/react": {
+      "@liqvid/dev": "./src/dev-timing.tsx",
+      "types": "./dist/types/dev-timing.d.ts",
+      "import": "./dist/esm/dev-timing.js"
     }
   },
   "files": [
