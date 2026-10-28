@@ -1,0 +1,38 @@
+{
+  "cancel": "Cancel",
+  "caption": "Saved code states",
+  "capture": "Save current state",
+  "copy": "Copy",
+  "copySavedState": "Copy saved state",
+  "delete": "Delete",
+  "errors": {
+    "copyFailed": "Copy failed",
+    "deleteFailed": "Failed to delete saved state",
+    "invalidName": "Saved state names must be a single path segment",
+    "makeGlobalFailed": "Failed to make saved state global",
+    "nameExists": "A saved state named {name} already exists",
+    "notFound": "No saved state named {name}",
+    "overwriteFailed": "Overwrite failed",
+    "renameFailed": "Rename failed"
+  },
+  "globalStates": "Global saved states",
+  "headers": {
+    "actions": "Actions",
+    "name": "Name"
+  },
+  "instance": "LiveCode instance {index}",
+  "loadingProjects": "Loading projects…",
+  "makeGlobal": "Make global",
+  "newName": "New name",
+  "noMatchingFile": "No matching file",
+  "noMatchingProjects": "No matching projects",
+  "overwrite": "Overwrite",
+  "parameters": "Project parameters",
+  "preview": "Preview",
+  "projectStates": "Project saved states",
+  "rename": "Rename",
+  "restore": "Restore",
+  "restoreTo": "Restore to:",
+  "searchProjects": "Search projects…",
+  "workspaceProjects": "Workspace projects"
+}

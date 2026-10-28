@@ -5,7 +5,11 @@ import { createElement, lazy, Suspense, useMemo, useState } from "react";
 import type { PluginContext } from "./plugin-api.client.mts";
 import type { LiqvidStudioPlugin } from "./types.mts";
 
-export { type PluginContext, usePluginApi } from "./plugin-api.client.mts";
+export {
+  type PluginContext,
+  usePluginApi,
+  useRegisteredInstances,
+} from "./plugin-api.client.mts";
 
 export const LiqvidStudioPluginApiProvider = (
   props: React.ComponentProps<typeof LiqvidStudioPluginApiProviderInner>,
@@ -39,6 +43,8 @@ export const LiqvidStudioPluginApiProviderInner = lazy(() =>
           registerInstance: () => () => {},
           setDuration: () => {},
           ...value,
+          getInstances: value?.getInstances ?? (() => EMPTY_INSTANCES),
+          subscribeInstances: value?.subscribeInstances ?? (() => () => {}),
         }),
         [plugins, value],
       );
@@ -51,3 +57,5 @@ export const LiqvidStudioPluginApiProviderInner = lazy(() =>
     },
   })),
 );
+
+const EMPTY_INSTANCES: readonly unknown[] = Object.freeze([]);

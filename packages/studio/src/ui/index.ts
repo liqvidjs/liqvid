@@ -11,6 +11,7 @@ export * from "./AlertDialog.tsx";
 export * from "./Button.tsx";
 export * from "./ButtonWithDropdown.tsx";
 export * from "./Checkbox.tsx";
+export * from "./CopySavedStateDialog.tsx";
 export * from "./Dialog.tsx";
 export * from "./DockableDialog.tsx";
 export * from "./IconButton.tsx";

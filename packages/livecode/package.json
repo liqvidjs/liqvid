@@ -13,7 +13,9 @@
   },
   "license": "MIT",
   "author": "Yuri Sulyma <yuri@liqvidjs.org>",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -31,6 +33,11 @@
       "@liqvid/dev": "./src/presets/web/index.ts",
       "types": "./dist/types/presets/web/index.d.ts",
       "import": "./dist/esm/presets/web/index.js"
+    },
+    "./liqvid-studio": {
+      "@liqvid/dev": "./src/liqvid-studio/index.tsx",
+      "types": "./dist/types/liqvid-studio/index.d.ts",
+      "import": "./dist/esm/liqvid-studio/index.js"
     }
   },
   "files": [
@@ -39,7 +46,9 @@
   "scripts": {
     ".build:clean": "rm -rf dist",
     ".build:postclean": "rm dist/tsconfig.tsbuildinfo",
-    "build": "tsc",
+    ".build:css": "mkdir -p dist/esm/liqvid-studio && cp src/liqvid-studio/preview.css src/liqvid-studio/stylex.css dist/esm/liqvid-studio/",
+    ".build:stylex": "node build-stylex.mjs",
+    "build": "tsc && pnpm .build:css && pnpm .build:stylex",
     "build:fresh": "pnpm .build:clean && pnpm build && pnpm .build:postclean",
     "docs:gen": "typedoc",
     "docs:watch": "typedoc --watch",
@@ -53,6 +62,7 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@babel/core": "catalog:dev",
     "@biomejs/biome": "catalog:dev",
     "@codemirror/autocomplete": "catalog:dev",
     "@codemirror/commands": "catalog:dev",
@@ -65,6 +75,13 @@
     "@codemirror/search": "catalog:dev",
     "@codemirror/state": "catalog:dev",
     "@codemirror/view": "catalog:dev",
+    "@phosphor-icons/react": "catalog:",
+    "@stylexjs/stylex": "catalog:",
+    "@stylexjs/babel-plugin": "catalog:dev",
+    "effect-paths": "catalog:peer",
+    "@liqvid/schemas": "workspace:^",
+    "@liqvid/studio": "workspace:^",
+    "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
     "@lqv/codemirror": "workspace:^",
     "@types/babel__standalone": "catalog:dev",
     "@types/node": "catalog:dev",
@@ -93,6 +110,7 @@
     "@codemirror/search": "catalog:peer",
     "@codemirror/state": "catalog:peer",
     "@codemirror/view": "catalog:peer",
+    "@liqvid/schemas": "workspace:^",
     "@liqvid/color-scheme": "workspace:^1.0.0-alpha.2",
     "@liqvid/duration": "workspace:^1.3.0",
     "@liqvid/event-emitter": "workspace:^1.0.0-alpha.0",
@@ -101,20 +119,33 @@
     "@liqvid/keymap": "workspace:^2.0.0-alpha.1",
     "@liqvid/recording": "workspace:^1.0.0-alpha.1",
     "@liqvid/studio-plugin-api": "workspace:^1.0.0-alpha.0",
+    "@liqvid/studio": "workspace:^1.0.0-alpha.6",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
     "@lqv/codemirror": "workspace:^1.0.0-alpha.0",
     "@lqv/playback": "workspace:^1.0.0-alpha.0",
+    "@phosphor-icons/react": ">=2",
     "@replit/codemirror-vim": "catalog:peer",
     "effect": "catalog:peer",
+    "effect-paths": "catalog:peer",
     "glslx": "catalog:peer",
     "jszip": "catalog:peer",
     "prettier": "catalog:peer",
     "prettier-plugin-glsl": "catalog:peer",
     "react": "catalog:peer",
+    "@stylexjs/stylex": "catalog:peer",
     "skulpt": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "@babel/standalone": {
+      "optional": true
+    },
+    "@liqvid/schemas": {
+      "optional": true
+    },
+    "@liqvid/studio": {
+      "optional": true
+    },
+    "@phosphor-icons/react": {
       "optional": true
     },
     "@codemirror/lang-css": {
@@ -127,6 +158,12 @@
       "optional": true
     },
     "@codemirror/lang-python": {
+      "optional": true
+    },
+    "@stylexjs/stylex": {
+      "optional": true
+    },
+    "effect-paths": {
       "optional": true
     },
     "@codemirror/lang-sql": {

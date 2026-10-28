@@ -1,0 +1,102 @@
+.lqv-code-preview {
+  --split: 50%;
+  --v-split: 50%;
+  --light-bg: #fff;
+  --light-fg: #383a42;
+  --light-surface: #fafafd;
+  --light-sep: #f0f1f2;
+  --dark-bg: #1e1e1e;
+  --dark-fg: #d4d4d4;
+  --dark-surface: #191a1b;
+  --dark-sep: #2a2b2c;
+  --fg: light-dark(var(--light-fg), var(--dark-fg));
+  --bg: light-dark(var(--light-bg), var(--dark-bg));
+  --surface: light-dark(var(--light-surface), var(--dark-surface));
+  --sep: light-dark(var(--light-sep), var(--dark-sep));
+
+  display: flex;
+  height: min(70vh, 48rem);
+  min-height: 16rem;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--sep);
+  border-radius: 4px;
+}
+
+.lqv-code-preview-tabs {
+  overflow: auto;
+  white-space: nowrap;
+  background: var(--surface);
+  border-bottom: 1px solid var(--sep);
+}
+
+.lqv-code-preview-tab {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.5rem 1rem 0.5rem 2rem;
+  border: 0;
+  border-right: 1px solid var(--sep);
+  color: light-dark(#8e8e90, #8c8c8c);
+  cursor: pointer;
+}
+
+.lqv-code-preview-tab[aria-selected="true"] {
+  color: light-dark(#000, #fff);
+  background: var(--bg);
+  box-shadow:
+    inset 0 3px var(--lv-accent, #3b82f6),
+    0 1px var(--bg);
+}
+
+.lqv-code-preview-tab[class~="lqv-filetype-css"]::before {
+  position: absolute;
+  left: 0.5rem;
+  content: "#";
+  color: #1a69b5;
+  font-family: monospace;
+}
+
+.lqv-code-preview-tab[class~="lqv-filetype-html"]::before {
+  position: absolute;
+  left: 0.5rem;
+  content: "<>";
+  color: #f66;
+  font-family: monospace;
+}
+
+.lqv-code-preview-tab[class~="lqv-filetype-tsx"]::before {
+  position: absolute;
+  left: 0.5rem;
+  content: "⚛";
+  color: rgb(88 196 220);
+}
+
+.lqv-code-preview .lqv-editor-group,
+.lqv-code-preview .lqv-editor-panel {
+  height: 100%;
+  overflow: hidden;
+}
+
+.lqv-code-preview-editor {
+  height: 100%;
+  overflow: hidden;
+}
+
+.lqv-code-preview .lqv-editor-group {
+  flex: 1;
+}
+
+.lqv-code-preview .lqv-editor-panel > div {
+  height: 100%;
+}
+
+.lqv-code-preview .cm-scroller {
+  font-family: monospace;
+  scrollbar-width: thin;
+}
+
+.lqv-code-preview .cm-focused {
+  outline: none !important;
+}

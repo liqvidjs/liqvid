@@ -16,6 +16,12 @@ import {
   useLiveCodeStore,
 } from "../store.ts";
 
+export type LiveCodeStudioInstance = CodeMirrorInstance & {
+  getFiles(): Readonly<Record<string, string>>;
+  restoreFile(filename: string, content: string): boolean;
+  subscribe(listener: () => void): () => void;
+};
+
 /**
  * Container for code editing/recording/replaying.
  */
@@ -34,7 +40,17 @@ export function LiveCode({
 
   useEffect(
     () =>
-      registerInstance<CodeMirrorInstance>("@lqv/codemirror", {
+      registerInstance<LiveCodeStudioInstance>("@lqv/codemirror", {
+        getFiles() {
+          const { activeGroup, groups } = store.getState();
+          const group = activeGroup ? groups[activeGroup] : undefined;
+          return Object.fromEntries(
+            group?.files.map(({ filename, view }) => [
+              filename,
+              view.state.doc.toString(),
+            ]) ?? [],
+          );
+        },
         name,
         provideRecorder(recorder) {
           store.setState((prev) => ({ ...prev, recorder }));
@@ -52,6 +68,24 @@ export function LiveCode({
               EditorView
             >,
           });
+        },
+        restoreFile(filename, content) {
+          const { activeGroup, groups } = store.getState();
+          const view = activeGroup
+            ? groups[activeGroup]?.files.find(
+                (file) => file.filename === filename,
+              )?.view
+            : undefined;
+          if (!view) {
+            return false;
+          }
+          view.dispatch({
+            changes: { from: 0, insert: content, to: view.state.doc.length },
+          });
+          return true;
+        },
+        subscribe(listener) {
+          return store.subscribe(listener);
         },
       }),
     [name, registerInstance, store],
