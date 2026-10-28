@@ -122,6 +122,7 @@
     "@liqvid/studio-plugin-api": "workspace:^",
     "@liqvid/studio-public-api": "workspace:^",
     "@liqvid/utils": "workspace:^2.0.0-alpha.4",
+    "@octokit/auth-oauth-device": "catalog:",
     "@octokit/rest": "catalog:",
     "@types/node": "catalog:dev",
     "chalk": "catalog:",

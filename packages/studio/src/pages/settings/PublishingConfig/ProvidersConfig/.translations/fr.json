@@ -1,6 +1,9 @@
 {
   "copyClean": "Effacez la destination avant de copier",
   "copyDestination": "Destination",
+  "githubDirectory": "Répertoire de publication",
+  "githubDocs": "Dossier /docs",
+  "githubRoot": "/ (racine du dépôt)",
   "providerCopy": "Copier",
   "providers": "Fournisseurs",
   "providersDescription": "Configurez les détails de connexion pour chaque fournisseur.",

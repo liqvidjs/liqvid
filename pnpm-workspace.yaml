@@ -64,6 +64,7 @@ catalog:
   "@lqv/cursor": ^0.2.1
   "@lqv/playback": ^0.2.2
   "@napi-rs/image": ^1.15.0
+  '@octokit/auth-oauth-device': ^8.0.5
   "@octokit/rest": ^22.0.1
   "@phosphor-icons/react": ^2.1.10
   "@puppeteer/browsers": ^3.0.6

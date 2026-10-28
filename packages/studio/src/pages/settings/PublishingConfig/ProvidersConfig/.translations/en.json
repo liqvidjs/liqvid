@@ -1,7 +1,9 @@
 {
   "copyClean": "Clean destination before copying",
   "copyDestination": "Destination",
-  "githubRoot": "Serve at repository root",
+  "githubDirectory": "Publish directory",
+  "githubDocs": "/docs folder",
+  "githubRoot": "/ (repository root)",
   "providerCopy": "Copy",
   "providerGitHubPages": "GitHub Pages",
   "providerLiqvidStudio": "Liqvid Studio",
