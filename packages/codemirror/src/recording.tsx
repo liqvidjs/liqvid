@@ -1,6 +1,6 @@
 import type { Extension } from "@codemirror/state";
 import { EditorView, keymap, ViewPlugin } from "@codemirror/view";
-import { ReplayDataRecorder } from "@liqvid/recording";
+import { type RecordingData, ReplayDataRecorder } from "@liqvid/recording";
 import type { LiqvidStudioRecordingPlugin } from "@liqvid/studio-plugin-api";
 import { bind, mapRecord, type ReplayData } from "@liqvid/utils";
 
@@ -8,6 +8,7 @@ import { ConfigurationComponent } from "./configuration.tsx";
 import { icon } from "./icon.tsx";
 import { scrollCmd } from "./index.ts";
 import type { CMConfig, CMState } from "./types.ts";
+import { PACKAGE, SCHEMA, VERSION } from "./version.ts";
 
 export type EditorChange = [
   [number, ...(EditorChange | number | string)[]],
@@ -25,10 +26,10 @@ export type CodeMirrorInstance = {
 
 // the actual thingy that gets exported
 export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
-  readonly package = "@lqv/codemirror";
-  readonly version = "1.0.0";
-  $schema = undefined;
-  initial: CMState | undefined = undefined;
+  readonly package = PACKAGE;
+  readonly version = VERSION;
+  readonly $schema = SCHEMA;
+  initial: CMState = { activeFile: "<invalid>", files: {} };
 
   private __config: CMConfig | undefined;
 
@@ -77,7 +78,9 @@ export class CodeRecorder extends ReplayDataRecorder<CaptureData, CMState> {
    * @param specialKeys Map of key sequences to commands, e.g. {"Mod-Enter": "run"}.
    * @returns CodeMirror extension.
    */
-  extension(specialKeys: Record<string, string> | string[] = {}): Extension {
+  extension(
+    specialKeys: Readonly<Record<string, string>> | readonly string[] = {},
+  ): Extension {
     // legacy
     if (Array.isArray(specialKeys)) {
       specialKeys = Object.fromEntries(specialKeys.map((key) => [key, key]));
@@ -174,7 +177,7 @@ export const CodeRecording = {
   version: "1.0.0",
 } satisfies LiqvidStudioRecordingPlugin<
   [number, CaptureData],
-  ReplayData<CaptureData>,
+  RecordingData<ReplayData<CaptureData>, CMState>,
   unknown,
   CodeMirrorInstance
 >;

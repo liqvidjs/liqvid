@@ -115,7 +115,7 @@ export function cmReplayMultiple({
    * @param cmd Command to handle.
    * @param docs CodeMirror documents.
    */
-  handle?: (cmd: string, docs: Record<string, Text>) => void;
+  handle?: (cmd: string, docs: Readonly<Record<string, Text>>) => void;
 
   /**
    * Initial state for each file (content and selection).
