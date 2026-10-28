@@ -67,6 +67,24 @@ describe("greenscreen", () => {
     return waitForKeyedFrame(harness.page);
   }
 
+  test("keys out green decoded by Safari", async () => {
+    harness = await startHarness({
+      init: [
+        () => {
+          Object.defineProperty(navigator, "userAgent", {
+            configurable: true,
+            value:
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+          });
+        },
+      ],
+    });
+    const tolerance = await harness.page.evaluate(() =>
+      window.__fixture.getGreenScreenTolerance(),
+    );
+    expect(tolerance).toBeGreaterThanOrEqual(61);
+  });
+
   test("keys out the green background and keeps the subject", async () => {
     const capture = await mount(true);
     const { page } = harness!;

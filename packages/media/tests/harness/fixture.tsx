@@ -4,6 +4,7 @@ import { Profiler } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 // Tests run against the compiled package, not the sources.
+import { resolveGreenScreen } from "../../dist/esm/hls/greenscreen.js";
 import { HlsVideo, type HlsVideoProps } from "../../dist/esm/hls/index.js";
 
 export type FixtureApi = {
@@ -11,6 +12,7 @@ export type FixtureApi = {
   mount: (props: HlsVideoProps) => void;
   playback: Playback;
   readyStates: number[];
+  getGreenScreenTolerance: () => number;
   unmount: () => void;
 };
 
@@ -28,6 +30,7 @@ let root: Root | null = null;
 
 const fixture: FixtureApi = {
   commits: 0,
+  getGreenScreenTolerance: () => resolveGreenScreen(true)!.tolerance,
   mount(props) {
     root?.unmount();
     root = createRoot(container);

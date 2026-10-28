@@ -1,5 +1,5 @@
 import { useEventListener } from "@liqvid/event-emitter/react";
-import { isChrome } from "@liqvid/utils";
+import { isChrome, isSafari } from "@liqvid/utils";
 import { useEffect, useEffectEvent, useRef } from "react";
 
 import {
@@ -26,8 +26,8 @@ export type ResolvedGreenScreen = Readonly<{
 
 const DEFAULT_COLOR: HexColor = "#00FF00";
 
-// Chrome does weird things to colors
-const DEFAULT_TOLERANCE = isChrome ? 60 : 50;
+// Safari's HLS decoder shifts green pixels farther from #00FF00.
+const DEFAULT_TOLERANCE = isSafari ? 65 : isChrome ? 60 : 50;
 
 /** Fill in greenscreen defaults, or return null when keying is disabled. */
 export function resolveGreenScreen(
