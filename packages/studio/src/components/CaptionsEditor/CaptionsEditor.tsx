@@ -12,7 +12,14 @@ import {
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import type { RelativeDir } from "effect-paths";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { useStore } from "zustand";
 
 import { useChannel } from "#_/components/WebSocketProvider";
@@ -201,6 +208,39 @@ const styles = stylex.create({
   },
 });
 
+type CaptionsEditorState = {
+  activeWord: number;
+  fillerOpen: boolean;
+  fillerOptions: FillerWordOptions;
+  saving: boolean;
+};
+
+type CaptionsEditorAction =
+  | { kind: "activeWord"; value: number }
+  | { kind: "fillerOpen"; value: boolean }
+  | { kind: "fillerOptions"; value: FillerWordOptions }
+  | { kind: "saving"; value: boolean };
+
+function captionsEditorReducer(
+  state: CaptionsEditorState,
+  action: CaptionsEditorAction,
+): CaptionsEditorState {
+  switch (action.kind) {
+    case "activeWord": {
+      return { ...state, activeWord: action.value };
+    }
+    case "fillerOpen": {
+      return { ...state, fillerOpen: action.value };
+    }
+    case "fillerOptions": {
+      return { ...state, fillerOptions: action.value };
+    }
+    case "saving": {
+      return { ...state, saving: action.value };
+    }
+  }
+}
+
 export function CaptionsEditor({
   displayProps = {},
   shortcuts = {},
@@ -214,6 +254,17 @@ export function CaptionsEditor({
   transcript: Awaitable<RichTranscript>;
 } & React.ComponentProps<typeof DialogRoot> & { open: boolean }) {
   const [store] = useState(() => makeStore());
+  const [state, dispatch] = useReducer(captionsEditorReducer, {
+    activeWord: -1,
+    fillerOpen: false,
+    fillerOptions: {
+      fillerWords: "uh, um",
+      ignoreCapitalization: true,
+      ignorePunctuation: true,
+    },
+    saving: false,
+  });
+  const { activeWord, fillerOpen, fillerOptions, saving } = state;
   const projectParams = useProjectParams();
   const projectPath = useProjectPath();
 
@@ -257,8 +308,6 @@ export function CaptionsEditor({
   // Scroll the current selection into view whenever it changes.
   const selectionRef = useRef<HTMLElement>(null);
 
-  const [saving, setSaving] = useState(false);
-
   const save = async () => {
     const { captionBreaks, paragraphBreaks, words } = store.getState();
 
@@ -266,7 +315,7 @@ export function CaptionsEditor({
       return;
     }
 
-    setSaving(true);
+    dispatch({ kind: "saving", value: true });
     try {
       await saveCaptions({
         params: projectParams,
@@ -278,7 +327,7 @@ export function CaptionsEditor({
         },
       });
     } finally {
-      setSaving(false);
+      dispatch({ kind: "saving", value: false });
     }
   };
 
@@ -299,13 +348,6 @@ export function CaptionsEditor({
   // "Delete filler words" dialog. The options persist across openings, and
   // while the dialog is open the matching words are highlighted live in the
   // transcript (see `renderWords`).
-  const [fillerOpen, setFillerOpen] = useState(false);
-  const [fillerOptions, setFillerOptions] = useState<FillerWordOptions>({
-    fillerWords: "uh, um",
-    ignoreCapitalization: true,
-    ignorePunctuation: true,
-  });
-
   const fillerIndices = useMemo(() => {
     if (!fillerOpen) {
       return null;
@@ -323,14 +365,12 @@ export function CaptionsEditor({
 
       return apply(state, { action: "delete-words", indices });
     });
-    setFillerOpen(false);
+    dispatch({ kind: "fillerOpen", value: false });
   };
-
-  const [activeWord, setActiveWord] = useState(-1);
 
   useTime(
     (t) => activeWordIndex(transcript, t * 1000),
-    (index) => setActiveWord(index),
+    (index) => dispatch({ kind: "activeWord", value: index }),
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-run when the selection changes to scroll the new mark into view
@@ -499,7 +539,11 @@ export function CaptionsEditor({
                       >
                         {t.clearParagraphBreaks}
                       </MenuItem>
-                      <MenuItem onClick={() => setFillerOpen(true)}>
+                      <MenuItem
+                        onClick={() =>
+                          dispatch({ kind: "fillerOpen", value: true })
+                        }
+                      >
                         {t.deleteFillerWords}
                       </MenuItem>
                     </MenuPopup>
@@ -513,14 +557,18 @@ export function CaptionsEditor({
                 // interactive) while the dialog is open.
                 disablePointerDismissal
                 modal={false}
-                onOpenChange={setFillerOpen}
+                onOpenChange={(value) =>
+                  dispatch({ kind: "fillerOpen", value })
+                }
                 open={fillerOpen}
               >
                 <DeleteFillerWordsDialog
                   matchCount={fillerIndices?.size ?? 0}
                   onConfirm={confirmDeleteFillerWords}
                   options={fillerOptions}
-                  setOptions={setFillerOptions}
+                  setOptions={(value) =>
+                    dispatch({ kind: "fillerOptions", value })
+                  }
                   t={t}
                 />
               </DialogRoot>

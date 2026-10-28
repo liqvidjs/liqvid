@@ -5,7 +5,7 @@ import { useProjectPath } from "@liqvid/studio-plugin-api";
 import { WaveformIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 
 import type { AudioEntry } from "#_/api/schemas";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
@@ -101,6 +101,58 @@ const styles = stylex.create({
   },
 });
 
+type CaptionsState = {
+  audio: readonly AudioEntry[];
+  isGeneratingAudio: boolean;
+  isLoading: boolean;
+  isRenaming: boolean;
+  multiple: boolean;
+  renameValue: string;
+  renaming: AudioEntry | null;
+};
+
+type CaptionsAction =
+  | { audio: readonly AudioEntry[]; kind: "audio"; multiple: boolean }
+  | { kind: "generatingAudio"; value: boolean }
+  | { kind: "loading"; value: boolean }
+  | { kind: "renameStart"; value: AudioEntry }
+  | { kind: "renameValue"; value: string }
+  | { kind: "renaming"; value: AudioEntry | null }
+  | { kind: "renamingInProgress"; value: boolean };
+
+function captionsReducer(
+  state: CaptionsState,
+  action: CaptionsAction,
+): CaptionsState {
+  switch (action.kind) {
+    case "audio": {
+      return { ...state, audio: action.audio, multiple: action.multiple };
+    }
+    case "generatingAudio": {
+      return { ...state, isGeneratingAudio: action.value };
+    }
+    case "loading": {
+      return { ...state, isLoading: action.value };
+    }
+    case "renameStart": {
+      return {
+        ...state,
+        renameValue: action.value.id,
+        renaming: action.value,
+      };
+    }
+    case "renameValue": {
+      return { ...state, renameValue: action.value };
+    }
+    case "renaming": {
+      return { ...state, renaming: action.value };
+    }
+    case "renamingInProgress": {
+      return { ...state, isRenaming: action.value };
+    }
+  }
+}
+
 export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   // const { hasCaptioningConfigured } = useDerivedConfig();
   const { captions: t } = useTranslations<{ captions: T }>();
@@ -112,16 +164,27 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
   const { isOpen } = useDialogApi();
 
-  const [audio, setAudio] = useState<readonly AudioEntry[]>([]);
-  const [multiple, setMultiple] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
-  const [renaming, setRenaming] = useState<AudioEntry | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [state, dispatch] = useReducer(captionsReducer, {
+    audio: [],
+    isGeneratingAudio: false,
+    isLoading: false,
+    isRenaming: false,
+    multiple: false,
+    renameValue: "",
+    renaming: null,
+  });
+  const {
+    audio,
+    isGeneratingAudio,
+    isLoading,
+    isRenaming,
+    multiple,
+    renameValue,
+    renaming,
+  } = state;
 
   const loadAudio = useCallback(async () => {
-    setIsLoading(true);
+    dispatch({ kind: "loading", value: true });
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -133,13 +196,16 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
     );
 
     if (Exit.isSuccess(result)) {
-      setAudio(result.value.items);
-      setMultiple(result.value.multiple);
+      dispatch({
+        audio: result.value.items,
+        kind: "audio",
+        multiple: result.value.multiple,
+      });
     } else {
       console.error("Failed to load audio:", result.cause);
     }
 
-    setIsLoading(false);
+    dispatch({ kind: "loading", value: false });
   }, [paramsJson, projectPath]);
 
   useEffect(() => {
@@ -168,7 +234,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
   }, [isOpen, audio, loadAudio]);
 
   const handleGenerateAudio = async () => {
-    setIsGeneratingAudio(true);
+    dispatch({ kind: "generatingAudio", value: true });
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -186,12 +252,11 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
       console.error("Failed to generate audio:", result.cause);
     }
 
-    setIsGeneratingAudio(false);
+    dispatch({ kind: "generatingAudio", value: false });
   };
 
   const handleStartRename = (entry: AudioEntry) => {
-    setRenaming(entry);
-    setRenameValue(entry.id);
+    dispatch({ kind: "renameStart", value: entry });
   };
 
   const handleRename = async () => {
@@ -199,7 +264,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
       return;
     }
 
-    setIsRenaming(true);
+    dispatch({ kind: "renamingInProgress", value: true });
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -212,13 +277,13 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
     );
 
     if (Exit.isSuccess(result)) {
-      setRenaming(null);
+      dispatch({ kind: "renaming", value: null });
       await loadAudio();
     } else {
       console.error("Failed to rename audio:", result.cause);
     }
 
-    setIsRenaming(false);
+    dispatch({ kind: "renamingInProgress", value: false });
   };
 
   return (
@@ -262,7 +327,9 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
 
       {/* Rename Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setRenaming(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "renaming", value: null })
+        }
         open={!!renaming}
       >
         <DialogPortal>
@@ -272,7 +339,7 @@ export function CaptionsSection({ selectedParams }: CaptionsSectionProps) {
             <div sx={styles.formField}>
               <TextField
                 label={t.rename.name}
-                onChange={(value) => setRenameValue(value)}
+                onChange={(value) => dispatch({ kind: "renameValue", value })}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isRenaming) {
                     handleRename();

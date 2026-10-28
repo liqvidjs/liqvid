@@ -8,7 +8,7 @@ import {
   useProjectPath,
 } from "@liqvid/studio-plugin-api";
 import { RelativeFile } from "effect-paths";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 
 import { CameraPreview } from "./CameraPreview.tsx";
 import {
@@ -46,24 +46,90 @@ const t = {
   reprocessingHls: "Starting HLS job…" as LocalizedString,
 };
 
+type ConfigurationState = {
+  audioEnabled: boolean;
+  audioLoading: boolean;
+  devices: MediaDeviceMap;
+  selectedAudioDevice: string | undefined;
+  selectedVideoDevice: string | undefined;
+  videoEnabled: boolean;
+  videoLoading: boolean;
+};
+
+type ConfigurationAction =
+  | { deviceId: string | undefined; kind: "audioDevice" }
+  | { enabled: boolean; kind: "audioEnabled" }
+  | { kind: "audioLoading"; loading: boolean }
+  | { devices: MediaDeviceMap; kind: "devices" }
+  | { deviceId: string | undefined; kind: "videoDevice" }
+  | { enabled: boolean; kind: "videoEnabled" }
+  | { kind: "videoLoading"; loading: boolean };
+
+function configurationReducer(
+  state: ConfigurationState,
+  action: ConfigurationAction,
+): ConfigurationState {
+  switch (action.kind) {
+    case "audioDevice": {
+      return { ...state, selectedAudioDevice: action.deviceId };
+    }
+    case "audioEnabled": {
+      return {
+        ...state,
+        audioEnabled: action.enabled,
+        selectedAudioDevice: action.enabled
+          ? state.selectedAudioDevice
+          : undefined,
+      };
+    }
+    case "audioLoading": {
+      return { ...state, audioLoading: action.loading };
+    }
+    case "devices": {
+      return { ...state, devices: action.devices };
+    }
+    case "videoDevice": {
+      return { ...state, selectedVideoDevice: action.deviceId };
+    }
+    case "videoEnabled": {
+      return {
+        ...state,
+        selectedVideoDevice: action.enabled
+          ? state.selectedVideoDevice
+          : undefined,
+        videoEnabled: action.enabled,
+      };
+    }
+    case "videoLoading": {
+      return { ...state, videoLoading: action.loading };
+    }
+  }
+}
+
 function ConfigurationComponent() {
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(false);
-  const [audioLoading, setAudioLoading] = useState(false);
-  const [videoLoading, setVideoLoading] = useState(false);
-
-  const [selectedAudioDevice, setSelectedAudioDevice] = useState<
-    string | undefined
-  >(undefined);
-  const [selectedVideoDevice, setSelectedVideoDevice] = useState<
-    string | undefined
-  >(undefined);
-
-  const [devices, setDevices] = useState<MediaDeviceMap>({
-    audioinput: [],
-    audiooutput: [],
-    videoinput: [],
+  const [state, dispatch] = useReducer(configurationReducer, {
+    audioEnabled: false,
+    audioLoading: false,
+    devices: {
+      audioinput: [],
+      audiooutput: [],
+      videoinput: [],
+    },
+    selectedAudioDevice: undefined,
+    selectedVideoDevice: undefined,
+    videoEnabled: false,
+    videoLoading: false,
   });
+
+  const {
+    audioEnabled,
+    audioLoading,
+    devices,
+    selectedAudioDevice,
+    selectedVideoDevice,
+    videoEnabled,
+    videoLoading,
+  } = state;
 
   const refreshDevices = useCallback(async () => {
     const deviceList = await navigator.mediaDevices.enumerateDevices();
@@ -87,7 +153,7 @@ function ConfigurationComponent() {
         videoinput: [],
       } as MediaDeviceMap,
     );
-    setDevices(grouped);
+    dispatch({ devices: grouped, kind: "devices" });
     return grouped;
   }, []);
 
@@ -106,7 +172,10 @@ function ConfigurationComponent() {
               (device) => device.deviceId === selectedAudioDevice,
             )
           ) {
-            setSelectedAudioDevice(grouped.audioinput[0]?.deviceId);
+            dispatch({
+              deviceId: grouped.audioinput[0]?.deviceId,
+              kind: "audioDevice",
+            });
           }
 
           if (
@@ -115,7 +184,10 @@ function ConfigurationComponent() {
               (device) => device.deviceId === selectedVideoDevice,
             )
           ) {
-            setSelectedVideoDevice(grouped.videoinput[0]?.deviceId);
+            dispatch({
+              deviceId: grouped.videoinput[0]?.deviceId,
+              kind: "videoDevice",
+            });
           }
         })
         .catch((error: unknown) => {
@@ -155,7 +227,7 @@ function ConfigurationComponent() {
       const checked = e.target.checked;
 
       if (checked) {
-        setAudioLoading(true);
+        dispatch({ kind: "audioLoading", loading: true });
         try {
           // Request permission first
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -171,18 +243,17 @@ function ConfigurationComponent() {
           // Auto-select first device if available
           const first = grouped.audioinput[0];
           if (first) {
-            setSelectedAudioDevice(first.deviceId);
+            dispatch({ deviceId: first.deviceId, kind: "audioDevice" });
           }
 
-          setAudioEnabled(true);
+          dispatch({ enabled: true, kind: "audioEnabled" });
         } catch (e) {
           console.error("Failed to get audio permission:", e);
         } finally {
-          setAudioLoading(false);
+          dispatch({ kind: "audioLoading", loading: false });
         }
       } else {
-        setAudioEnabled(false);
-        setSelectedAudioDevice(undefined);
+        dispatch({ enabled: false, kind: "audioEnabled" });
       }
     },
     [refreshDevices],
@@ -193,7 +264,7 @@ function ConfigurationComponent() {
       const checked = e.target.checked;
 
       if (checked) {
-        setVideoLoading(true);
+        dispatch({ kind: "videoLoading", loading: true });
         try {
           // Request permission first
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -209,18 +280,17 @@ function ConfigurationComponent() {
           // Auto-select first device if available
           const first = grouped.videoinput[0];
           if (first) {
-            setSelectedVideoDevice(first.deviceId);
+            dispatch({ deviceId: first.deviceId, kind: "videoDevice" });
           }
 
-          setVideoEnabled(true);
+          dispatch({ enabled: true, kind: "videoEnabled" });
         } catch (e) {
           console.error("Failed to get video permission:", e);
         } finally {
-          setVideoLoading(false);
+          dispatch({ kind: "videoLoading", loading: false });
         }
       } else {
-        setVideoEnabled(false);
-        setSelectedVideoDevice(undefined);
+        dispatch({ enabled: false, kind: "videoEnabled" });
       }
     },
     [refreshDevices],
@@ -244,7 +314,7 @@ function ConfigurationComponent() {
           <select
             name="audioInput"
             onChange={(e) => {
-              setSelectedAudioDevice(e.target.value);
+              dispatch({ deviceId: e.target.value, kind: "audioDevice" });
             }}
             value={selectedAudioDevice}
           >
@@ -271,7 +341,9 @@ function ConfigurationComponent() {
         {videoEnabled && !videoLoading && devices.videoinput.length > 0 && (
           <select
             name="videoInput"
-            onChange={(e) => setSelectedVideoDevice(e.target.value)}
+            onChange={(e) =>
+              dispatch({ deviceId: e.target.value, kind: "videoDevice" })
+            }
             value={selectedVideoDevice}
           >
             {devices.videoinput.map((d) => (
@@ -287,6 +359,54 @@ function ConfigurationComponent() {
   );
 }
 
+type RecordingState = {
+  canGenerateTranscript: boolean;
+  isGeneratingTranscript: boolean;
+  isLoadingTranscript: boolean;
+  isReprocessingHls: boolean;
+  isTranscriptOpen: boolean;
+  transcript: string;
+  updatedFiles: readonly string[] | null;
+};
+
+type RecordingAction =
+  | { kind: "canGenerateTranscript"; value: boolean }
+  | { kind: "generatingTranscript"; value: boolean }
+  | { kind: "loadingTranscript"; value: boolean }
+  | { kind: "reprocessingHls"; value: boolean }
+  | { kind: "transcript"; value: string }
+  | { kind: "transcriptOpen"; value: boolean }
+  | { kind: "updatedFiles"; value: readonly string[] | null };
+
+function recordingReducer(
+  state: RecordingState,
+  action: RecordingAction,
+): RecordingState {
+  switch (action.kind) {
+    case "canGenerateTranscript": {
+      return { ...state, canGenerateTranscript: action.value };
+    }
+    case "generatingTranscript": {
+      return { ...state, isGeneratingTranscript: action.value };
+    }
+    case "loadingTranscript": {
+      return { ...state, isLoadingTranscript: action.value };
+    }
+    case "reprocessingHls": {
+      return { ...state, isReprocessingHls: action.value };
+    }
+    case "transcript": {
+      return { ...state, transcript: action.value };
+    }
+    case "transcriptOpen": {
+      return { ...state, isTranscriptOpen: action.value };
+    }
+    case "updatedFiles": {
+      return { ...state, updatedFiles: action.value };
+    }
+  }
+}
+
 function RecordingComponent({
   files,
   loadFile,
@@ -295,9 +415,26 @@ function RecordingComponent({
   const { makeToast } = usePluginApi();
   const projectParams = useProjectParams();
   const projectPath = useProjectPath();
-  const [updatedFiles, setUpdatedFiles] = useState<readonly string[] | null>(
-    null,
-  );
+  const [state, dispatch] = useReducer(recordingReducer, {
+    canGenerateTranscript: false,
+    isGeneratingTranscript: false,
+    isLoadingTranscript: false,
+    isReprocessingHls: false,
+    isTranscriptOpen: false,
+    transcript: "",
+    updatedFiles: null,
+  });
+
+  const {
+    canGenerateTranscript,
+    isGeneratingTranscript,
+    isLoadingTranscript,
+    isReprocessingHls,
+    isTranscriptOpen,
+    transcript,
+    updatedFiles,
+  } = state;
+
   const mediaFiles = updatedFiles ?? files.list();
   const hasHlsFiles = mediaFiles.some((filename) =>
     filename.startsWith("hls/"),
@@ -305,12 +442,6 @@ function RecordingComponent({
   const visibleFiles = mediaFiles.filter(
     (filename) => !filename.startsWith("hls/"),
   );
-  const [canGenerateTranscript, setCanGenerateTranscript] = useState(false);
-  const [isReprocessingHls, setIsReprocessingHls] = useState(false);
-  const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
-  const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
-  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-  const [transcript, setTranscript] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -318,7 +449,7 @@ function RecordingComponent({
     void canGeneratePlainTranscriptAction()
       .then((enabled) => {
         if (active) {
-          setCanGenerateTranscript(enabled);
+          dispatch({ kind: "canGenerateTranscript", value: enabled });
         }
       })
       .catch((error: unknown) => {
@@ -334,11 +465,11 @@ function RecordingComponent({
     files.has(filename) || mediaFiles.includes(filename);
 
   const refreshFileList = (updatedFiles: string[]) => {
-    setUpdatedFiles(updatedFiles);
+    dispatch({ kind: "updatedFiles", value: updatedFiles });
   };
 
   const handleReprocessHls = async () => {
-    setIsReprocessingHls(true);
+    dispatch({ kind: "reprocessingHls", value: true });
     try {
       await reprocessHlsAction({
         projectParams,
@@ -353,12 +484,12 @@ function RecordingComponent({
         type: "negative",
       });
     } finally {
-      setIsReprocessingHls(false);
+      dispatch({ kind: "reprocessingHls", value: false });
     }
   };
 
   const handleGenerateTranscript = async () => {
-    setIsGeneratingTranscript(true);
+    dispatch({ kind: "generatingTranscript", value: true });
     try {
       refreshFileList(
         await generatePlainTranscriptAction({
@@ -375,24 +506,27 @@ function RecordingComponent({
         type: "negative",
       });
     } finally {
-      setIsGeneratingTranscript(false);
+      dispatch({ kind: "generatingTranscript", value: false });
     }
   };
 
   const handleViewTranscript = async () => {
-    setIsTranscriptOpen(true);
-    setIsLoadingTranscript(true);
+    dispatch({ kind: "transcriptOpen", value: true });
+    dispatch({ kind: "loadingTranscript", value: true });
     try {
-      setTranscript(await loadFile(PLAIN_TRANSCRIPT));
+      dispatch({
+        kind: "transcript",
+        value: await loadFile(PLAIN_TRANSCRIPT),
+      });
     } catch (error) {
       makeToast({
         message: error instanceof Error ? error.message : undefined,
         title: "Failed to load transcript",
         type: "negative",
       });
-      setIsTranscriptOpen(false);
+      dispatch({ kind: "transcriptOpen", value: false });
     } finally {
-      setIsLoadingTranscript(false);
+      dispatch({ kind: "loadingTranscript", value: false });
     }
   };
 
@@ -477,7 +611,12 @@ const latest = recordings.dir(${JSON.stringify(name)});
           Use
         </button>
       </div>
-      <DialogRoot onOpenChange={setIsTranscriptOpen} open={isTranscriptOpen}>
+      <DialogRoot
+        onOpenChange={(open) =>
+          dispatch({ kind: "transcriptOpen", value: open })
+        }
+        open={isTranscriptOpen}
+      >
         <TranscriptDialog transcript={transcript} />
       </DialogRoot>
     </div>

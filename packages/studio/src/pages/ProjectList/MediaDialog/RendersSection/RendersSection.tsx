@@ -19,7 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 
 import type { RenderEntry } from "#_/api/schemas";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
@@ -58,6 +58,7 @@ export type { T as TranslationsRendersSection };
 interface RendersSectionProps {
   /** Project aspect ratio (defaults to 16:9) */
   aspectRatio?: AspectRatio;
+
   /** Selected parameter values for parameterized projects */
   selectedParams?: Record<string, string>;
 }
@@ -316,6 +317,72 @@ function widthFromHeight(height: number, aspectRatio: AspectRatio): number {
   return Math.round((height * aspectRatio.width) / aspectRatio.height / 2) * 2;
 }
 
+type RendersState = {
+  config: RenderConfig;
+  configOpen: boolean;
+  deleteDialog: { renderId: string } | null;
+  isLoading: boolean;
+  isStarting: boolean;
+  playingRender: RenderEntry | null;
+  renameValue: string;
+  renamingRender: RenderEntry | null;
+  renders: readonly RenderEntry[];
+};
+
+type RendersAction =
+  | { kind: "config"; value: RenderConfig }
+  | { kind: "configOpen"; value: boolean }
+  | { kind: "deleteDialog"; value: { renderId: string } | null }
+  | { kind: "loading"; value: boolean }
+  | { kind: "playing"; value: RenderEntry | null }
+  | { kind: "renameOpen"; value: RenderEntry }
+  | { kind: "renameValue"; value: string }
+  | { kind: "renaming"; value: RenderEntry | null }
+  | { kind: "renders"; value: readonly RenderEntry[] }
+  | { kind: "starting"; value: boolean };
+
+function rendersReducer(
+  state: RendersState,
+  action: RendersAction,
+): RendersState {
+  switch (action.kind) {
+    case "config": {
+      return { ...state, config: action.value };
+    }
+    case "configOpen": {
+      return { ...state, configOpen: action.value };
+    }
+    case "deleteDialog": {
+      return { ...state, deleteDialog: action.value };
+    }
+    case "loading": {
+      return { ...state, isLoading: action.value };
+    }
+    case "playing": {
+      return { ...state, playingRender: action.value };
+    }
+    case "renameOpen": {
+      return {
+        ...state,
+        renameValue: action.value.id,
+        renamingRender: action.value,
+      };
+    }
+    case "renameValue": {
+      return { ...state, renameValue: action.value };
+    }
+    case "renaming": {
+      return { ...state, renamingRender: action.value };
+    }
+    case "renders": {
+      return { ...state, renders: action.value };
+    }
+    case "starting": {
+      return { ...state, isStarting: action.value };
+    }
+  }
+}
+
 export function RendersSection({
   aspectRatio = DEFAULT_ASPECT_RATIO,
   selectedParams,
@@ -325,31 +392,42 @@ export function RendersSection({
 
   const { isOpen } = useDialogApi();
 
-  const [renders, setRenders] = useState<readonly RenderEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
-  const [playingRender, setPlayingRender] = useState<RenderEntry | null>(null);
-  const [renamingRender, setRenamingRender] = useState<RenderEntry | null>(
-    null,
+  const [state, dispatch] = useReducer(
+    rendersReducer,
+    aspectRatio,
+    (aspectRatio): RendersState => ({
+      config: {
+        colorScheme: "light",
+        height: heightFromWidth(1280, aspectRatio),
+        width: 1280,
+      },
+      configOpen: false,
+      deleteDialog: null,
+      isLoading: false,
+      isStarting: false,
+      playingRender: null,
+      renameValue: "",
+      renamingRender: null,
+      renders: [],
+    }),
   );
-  const [renameValue, setRenameValue] = useState("");
-  const [deleteDialog, setDeleteDialog] = useState<{
-    renderId: string;
-  } | null>(null);
-
-  // Render config state
-  const [configOpen, setConfigOpen] = useState(false);
-  const [config, setConfig] = useState<RenderConfig>(() => ({
-    colorScheme: "light",
-    height: heightFromWidth(1280, aspectRatio),
-    width: 1280,
-  }));
+  const {
+    config,
+    configOpen,
+    deleteDialog,
+    isLoading,
+    isStarting,
+    playingRender,
+    renameValue,
+    renamingRender,
+    renders,
+  } = state;
 
   // Serialize params for use in query
   const paramsJson = JSON.stringify(selectedParams ?? {});
 
   const loadRenders = useCallback(async () => {
-    setIsLoading(true);
+    dispatch({ kind: "loading", value: true });
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -361,12 +439,12 @@ export function RendersSection({
     );
 
     if (Exit.isSuccess(result)) {
-      setRenders(result.value);
+      dispatch({ kind: "renders", value: result.value });
     } else {
       console.error("Failed to load renders:", result.cause);
     }
 
-    setIsLoading(false);
+    dispatch({ kind: "loading", value: false });
   }, [paramsJson, projectPath]);
 
   useEffect(() => {
@@ -398,8 +476,7 @@ export function RendersSection({
   };
 
   const handleStartRename = (render: RenderEntry) => {
-    setRenamingRender(render);
-    setRenameValue(render.id);
+    dispatch({ kind: "renameOpen", value: render });
   };
 
   const getStatusIcon = (status: RenderEntry["meta"]["status"]) => {
@@ -443,7 +520,12 @@ export function RendersSection({
     <TranslationProvider t={t}>
       <div sx={styles.section}>
         <div sx={styles.sectionActions}>
-          <DialogRoot onOpenChange={setConfigOpen} open={configOpen}>
+          <DialogRoot
+            onOpenChange={(open) =>
+              dispatch({ kind: "configOpen", value: open })
+            }
+            open={configOpen}
+          >
             <DialogTrigger disabled={isStarting}>
               {isStarting ? (
                 <>
@@ -460,10 +542,13 @@ export function RendersSection({
                 aspectRatio,
                 config,
                 loadRenders,
+                onChangeConfig: (value: RenderConfig) =>
+                  dispatch({ kind: "config", value }),
+                onConfigOpenChange: (value: boolean) =>
+                  dispatch({ kind: "configOpen", value }),
+                onStartingChange: (value: boolean) =>
+                  dispatch({ kind: "starting", value }),
                 selectedParams,
-                setConfig,
-                setConfigOpen,
-                setIsStarting,
               }}
             />
           </DialogRoot>
@@ -508,7 +593,9 @@ export function RendersSection({
                   {render.meta.status === "completed" && (
                     <>
                       <Button
-                        onClick={() => setPlayingRender(render)}
+                        onClick={() =>
+                          dispatch({ kind: "playing", value: render })
+                        }
                         title={t.play}
                       >
                         <PlayIcon size={16} weight="fill" />
@@ -528,7 +615,12 @@ export function RendersSection({
                     <PencilSimpleIcon size={16} />
                   </Button>
                   <Button
-                    onClick={() => setDeleteDialog({ renderId: render.id })}
+                    onClick={() =>
+                      dispatch({
+                        kind: "deleteDialog",
+                        value: { renderId: render.id },
+                      })
+                    }
                     title={t.delete}
                   >
                     <TrashIcon size={16} />
@@ -542,7 +634,9 @@ export function RendersSection({
 
       {/* Video Player Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setPlayingRender(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "playing", value: null })
+        }
         open={!!playingRender}
       >
         <VideoPlayerDialog {...{ playingRender }} />
@@ -550,7 +644,9 @@ export function RendersSection({
 
       {/* Rename Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setRenamingRender(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "renaming", value: null })
+        }
         open={!!renamingRender}
       >
         <DialogPortal>
@@ -558,11 +654,12 @@ export function RendersSection({
           <RenameDialog
             {...{
               loadRenders,
+              onClose: () => dispatch({ kind: "renaming", value: null }),
+              onRenameValueChange: (value: string) =>
+                dispatch({ kind: "renameValue", value }),
               params: paramsJson,
               renameValue,
               renamingRender,
-              setRenameValue,
-              setRenamingRender,
             }}
           />
         </DialogPortal>
@@ -570,15 +667,17 @@ export function RendersSection({
 
       {/* Delete Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "deleteDialog", value: null })
+        }
         open={!!deleteDialog}
       >
         <DeleteDialog
           {...{
             deleteDialog,
             loadRenders,
+            onClose: () => dispatch({ kind: "deleteDialog", value: null }),
             params: paramsJson,
-            setDeleteDialog,
           }}
         />
       </DialogRoot>
@@ -590,18 +689,18 @@ function ConfigDialog({
   aspectRatio,
   config,
   loadRenders,
+  onChangeConfig,
+  onConfigOpenChange,
+  onStartingChange,
   selectedParams,
-  setConfig,
-  setConfigOpen,
-  setIsStarting,
 }: {
   aspectRatio: AspectRatio;
   config: RenderConfig;
   loadRenders: () => Promise<void>;
+  onChangeConfig: (config: RenderConfig) => void;
+  onConfigOpenChange: (open: boolean) => void;
+  onStartingChange: (starting: boolean) => void;
   selectedParams?: Record<string, string>;
-  setConfig: React.Dispatch<React.SetStateAction<RenderConfig>>;
-  setConfigOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsStarting: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { dialog: t } = useTranslations<T>();
   const projectPath = useProjectPath();
@@ -609,8 +708,8 @@ function ConfigDialog({
   const [lockAspectRatio, setLockAspectRatio] = useState(true);
 
   const handleStartRender = async () => {
-    setIsStarting(true);
-    setConfigOpen(false);
+    onStartingChange(true);
+    onConfigOpenChange(false);
 
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
@@ -633,45 +732,49 @@ function ConfigDialog({
       console.error("Failed to start render:", result.cause);
     }
 
-    setIsStarting(false);
+    onStartingChange(false);
   };
 
   const handleWidthPreset = (width: number) => {
-    setConfig((c) => ({
-      ...c,
-      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+    onChangeConfig({
+      ...config,
+      height: lockAspectRatio
+        ? heightFromWidth(width, aspectRatio)
+        : config.height,
       width,
-    }));
+    });
   };
 
   const handleWidthChange = (width: number) => {
-    setConfig((c) => ({
-      ...c,
-      height: lockAspectRatio ? heightFromWidth(width, aspectRatio) : c.height,
+    onChangeConfig({
+      ...config,
+      height: lockAspectRatio
+        ? heightFromWidth(width, aspectRatio)
+        : config.height,
       width,
-    }));
+    });
   };
 
   const handleHeightChange = (height: number) => {
-    setConfig((c) => ({
-      ...c,
+    onChangeConfig({
+      ...config,
       height,
-      width: lockAspectRatio ? widthFromHeight(height, aspectRatio) : c.width,
-    }));
+      width: lockAspectRatio
+        ? widthFromHeight(height, aspectRatio)
+        : config.width,
+    });
   };
 
   const handleToggleLock = () => {
-    setLockAspectRatio((locked) => {
-      const next = !locked;
-      // When re-locking, snap the height to match the aspect ratio
-      if (next) {
-        setConfig((c) => ({
-          ...c,
-          height: heightFromWidth(c.width, aspectRatio),
-        }));
-      }
-      return next;
-    });
+    const next = !lockAspectRatio;
+    setLockAspectRatio(next);
+    // When re-locking, snap the height to match the aspect ratio
+    if (next) {
+      onChangeConfig({
+        ...config,
+        height: heightFromWidth(config.width, aspectRatio),
+      });
+    }
   };
 
   return (
@@ -684,7 +787,7 @@ function ConfigDialog({
           <span id="render-color-scheme-label">{t.colorScheme.label}</span>
           <RadioTabs<ColorScheme>
             aria-labelledby="render-color-scheme-label"
-            onValueChange={(v) => setConfig((c) => ({ ...c, colorScheme: v }))}
+            onValueChange={(v) => onChangeConfig({ ...config, colorScheme: v })}
             value={config.colorScheme}
           >
             <RadioTabsItem
@@ -767,18 +870,18 @@ function ConfigDialog({
 
 function RenameDialog({
   loadRenders,
+  onClose,
+  onRenameValueChange,
   params,
   renameValue,
   renamingRender,
-  setRenamingRender,
-  setRenameValue,
 }: {
   loadRenders: () => Promise<void>;
+  onClose: () => void;
+  onRenameValueChange: (value: string) => void;
   params: string;
   renameValue: string;
   renamingRender: RenderEntry | null;
-  setRenameValue: React.Dispatch<React.SetStateAction<string>>;
-  setRenamingRender: React.Dispatch<React.SetStateAction<RenderEntry | null>>;
 }) {
   const t = useTranslations<T>().rename;
   const c = useCommonTranslations();
@@ -808,7 +911,7 @@ function RenameDialog({
     );
 
     if (Exit.isSuccess(result)) {
-      setRenamingRender(null);
+      onClose();
       await loadRenders();
     } else {
       console.error("Failed to rename render:", result.cause);
@@ -823,7 +926,7 @@ function RenameDialog({
       <div sx={styles.formField}>
         <TextField
           label={t.name}
-          onChange={setRenameValue}
+          onChange={onRenameValueChange}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !isRenaming) {
               handleRename();
@@ -856,18 +959,15 @@ function RenameDialog({
 function DeleteDialog({
   deleteDialog,
   loadRenders,
+  onClose,
   params,
-  setDeleteDialog,
 }: {
   deleteDialog: { renderId: string } | null;
   loadRenders: () => Promise<void>;
+  onClose: () => void;
   params: string;
-  setDeleteDialog: React.Dispatch<
-    React.SetStateAction<{ renderId: string } | null>
-  >;
 }) {
   const t = useTranslations<T>().deleteDialog;
-  const c = useCommonTranslations();
   const projectPath = useProjectPath();
 
   const performDelete = async () => {
@@ -887,7 +987,7 @@ function DeleteDialog({
         }),
       );
 
-      setDeleteDialog(null);
+      onClose();
       await loadRenders();
     } catch (e) {
       console.error("Failed to delete render:", e);

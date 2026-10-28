@@ -7,7 +7,7 @@ import { ImagesIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect, Exit } from "effect";
 import Link from "next/link";
-import { useEffect, useEffectEvent, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import type { ThumbsData } from "#_/api/schemas";
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
@@ -120,6 +120,36 @@ const styles = stylex.create({
   },
 });
 
+type ThumbsState = {
+  isGenerating: boolean;
+  isLoading: boolean;
+  sliderValue: number;
+  thumbsData: ThumbsData | null;
+};
+
+type ThumbsAction =
+  | { kind: "generating"; value: boolean }
+  | { kind: "loading"; value: boolean }
+  | { kind: "sliderValue"; value: number }
+  | { kind: "thumbsData"; value: ThumbsData | null };
+
+function thumbsReducer(state: ThumbsState, action: ThumbsAction): ThumbsState {
+  switch (action.kind) {
+    case "generating": {
+      return { ...state, isGenerating: action.value };
+    }
+    case "loading": {
+      return { ...state, isLoading: action.value };
+    }
+    case "sliderValue": {
+      return { ...state, sliderValue: action.value };
+    }
+    case "thumbsData": {
+      return { ...state, thumbsData: action.value };
+    }
+  }
+}
+
 /** @pacakge */
 export function ThumbnailsSection({
   duration,
@@ -128,15 +158,18 @@ export function ThumbnailsSection({
   const projectPath = useProjectPath();
   const { thumbs: t } = useTranslations<{ thumbs: T }>();
   const c = useCommonTranslations();
-  const [thumbsData, setThumbsData] = useState<ThumbsData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [sliderValue, setSliderValue] = useState(0);
+  const [state, dispatch] = useReducer(thumbsReducer, {
+    isGenerating: false,
+    isLoading: false,
+    sliderValue: 0,
+    thumbsData: null,
+  });
+  const { isGenerating, isLoading, sliderValue, thumbsData } = state;
   const { isOpen } = useDialogApi();
 
   const loadThumbs = useEffectEvent(async (showLoading = true) => {
     if (showLoading) {
-      setIsLoading(true);
+      dispatch({ kind: "loading", value: true });
     }
 
     // Serialize params for use in query
@@ -152,7 +185,7 @@ export function ThumbnailsSection({
     );
 
     if (Exit.isSuccess(result)) {
-      setThumbsData(result.value);
+      dispatch({ kind: "thumbsData", value: result.value });
     } else {
       if (
         result.cause.reasons.every(
@@ -166,7 +199,7 @@ export function ThumbnailsSection({
       }
     }
     if (showLoading) {
-      setIsLoading(false);
+      dispatch({ kind: "loading", value: false });
     }
   });
 
@@ -189,7 +222,7 @@ export function ThumbnailsSection({
   }, [isOpen, thumbsData?.job?.status]);
 
   const handleGenerate = useEffectEvent(async () => {
-    setIsGenerating(true);
+    dispatch({ kind: "generating", value: true });
     const result = await clientRuntime.runPromiseExit(
       Effect.gen(function* () {
         const client = yield* LiqvidStudioApiClient;
@@ -207,7 +240,7 @@ export function ThumbnailsSection({
       console.error("Failed to generate thumbnails:", result.cause);
     }
 
-    setIsGenerating(false);
+    dispatch({ kind: "generating", value: false });
   });
 
   const hasNoThumbs = thumbsData === null;
@@ -388,7 +421,7 @@ export function ThumbnailsSection({
             <Range
               max={100}
               min={0}
-              onChange={setSliderValue}
+              onChange={(value) => dispatch({ kind: "sliderValue", value })}
               step={0.1}
               {...stylex.props(styles.seekSlider)}
               value={sliderValue}

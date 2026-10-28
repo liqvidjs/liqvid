@@ -16,7 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useReducer } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
 import { useDerivedConfig } from "#_/components/DerivedConfig.js";
@@ -131,6 +131,39 @@ const styles = stylex.create({
   },
 });
 
+type ScreenshotState = {
+  colorScheme: ColorSchemeOption;
+  isCapturing: boolean;
+  previewTime: Duration;
+  timeInput: string;
+};
+
+type ScreenshotAction =
+  | { kind: "colorScheme"; value: ColorSchemeOption }
+  | { kind: "isCapturing"; value: boolean }
+  | { kind: "previewTime"; value: Duration }
+  | { kind: "timeInput"; value: string };
+
+function screenshotReducer(
+  state: ScreenshotState,
+  action: ScreenshotAction,
+): ScreenshotState {
+  switch (action.kind) {
+    case "colorScheme": {
+      return { ...state, colorScheme: action.value };
+    }
+    case "isCapturing": {
+      return { ...state, isCapturing: action.value };
+    }
+    case "previewTime": {
+      return { ...state, previewTime: action.value };
+    }
+    case "timeInput": {
+      return { ...state, timeInput: action.value };
+    }
+  }
+}
+
 export function ScreenshotModal({
   basePath,
   duration,
@@ -142,10 +175,13 @@ export function ScreenshotModal({
   const { screenshots: t } = useTranslations<{ screenshots: T }>();
 
   const { renderSource } = useDerivedConfig();
-  const [previewTime, setPreviewTime] = useState(Duration.zero);
-  const [timeInput, setTimeInput] = useState(formatTimeMs(0));
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [colorScheme, setColorScheme] = useState<ColorSchemeOption>("both");
+  const [state, dispatch] = useReducer(screenshotReducer, {
+    colorScheme: "both",
+    isCapturing: false,
+    previewTime: Duration.zero,
+    timeInput: formatTimeMs(0),
+  });
+  const { colorScheme, isCapturing, previewTime, timeInput } = state;
 
   const { aspectRatio, path: projectPath } = project;
   const durationSeconds = Duration.inSeconds(duration);
@@ -188,7 +224,7 @@ export function ScreenshotModal({
   // Seek when preview time changes
   useEffect(() => {
     api?.seekTo(previewTime.inSeconds()).catch(console.error);
-    setTimeInput(formatTimeMs(previewTime));
+    dispatch({ kind: "timeInput", value: formatTimeMs(previewTime) });
   }, [previewTime, api]);
 
   // Update color scheme in iframe (only for light/dark, not "both")
@@ -199,7 +235,7 @@ export function ScreenshotModal({
   }, [colorScheme, api]);
 
   const handleCapture = async () => {
-    setIsCapturing(true);
+    dispatch({ kind: "isCapturing", value: true });
     try {
       // Default to 1200x630 for OpenGraph
       const width = 1200;
@@ -228,7 +264,7 @@ export function ScreenshotModal({
     } catch (e) {
       console.error("Failed to capture screenshot:", e);
     } finally {
-      setIsCapturing(false);
+      dispatch({ kind: "isCapturing", value: false });
     }
   };
 
@@ -239,7 +275,7 @@ export function ScreenshotModal({
 
     const parsedTime = parseTime$(timeInput);
     if (parsedTime.lessThanOrEqual(duration)) {
-      setPreviewTime(parsedTime);
+      dispatch({ kind: "previewTime", value: parsedTime });
     }
   };
 
@@ -269,11 +305,13 @@ export function ScreenshotModal({
           {/** biome-ignore lint/correctness/noRestrictedElements: this is special */}
           <input
             aria-label={t.timeLabel}
-            onBlur={() => setTimeInput(formatTimeMs(previewTime))}
+            onBlur={() =>
+              dispatch({ kind: "timeInput", value: formatTimeMs(previewTime) })
+            }
             onChange={(e) => {
               const { value } = e.target;
               if (Duration.isDurationString(value)) {
-                setTimeInput(value);
+                dispatch({ kind: "timeInput", value });
               }
             }}
             onKeyDown={(e) => {
@@ -291,7 +329,10 @@ export function ScreenshotModal({
             max={durationSeconds || 60}
             min={0}
             onChange={(e) =>
-              setPreviewTime(Duration.from({ seconds: e.target.valueAsNumber }))
+              dispatch({
+                kind: "previewTime",
+                value: Duration.from({ seconds: e.target.valueAsNumber }),
+              })
             }
             step={0.1}
             sx={styles.seekSlider}
@@ -308,7 +349,7 @@ export function ScreenshotModal({
           <span id={id}>{t.colorScheme.label}</span>
           <RadioTabs<ColorSchemeOption>
             aria-labelledby={id}
-            onValueChange={setColorScheme}
+            onValueChange={(value) => dispatch({ kind: "colorScheme", value })}
             value={colorScheme}
           >
             <RadioTabsItem

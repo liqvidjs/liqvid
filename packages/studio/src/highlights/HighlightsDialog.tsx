@@ -17,7 +17,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useReducer } from "react";
 
 import type { HighlightEntry } from "#_/api/schemas";
 import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
@@ -224,6 +224,53 @@ function timeMs(
   return Duration.inMilliseconds(time as DurationOptions);
 }
 
+type HighlightsState = {
+  editingIndex: number | null;
+  highlights: readonly Highlight[] | null;
+  loadError: boolean;
+  pendingTime: string | null;
+  saveError: boolean;
+};
+
+type HighlightsAction =
+  | { index: number | null; kind: "editingIndex" }
+  | { highlights: readonly Highlight[]; kind: "persist" }
+  | { kind: "loaded"; value: readonly Highlight[] | undefined }
+  | { kind: "pendingTime"; value: string | null }
+  | { kind: "saveError"; value: boolean };
+
+function highlightsReducer(
+  state: HighlightsState,
+  action: HighlightsAction,
+): HighlightsState {
+  switch (action.kind) {
+    case "editingIndex": {
+      return { ...state, editingIndex: action.index };
+    }
+    case "loaded": {
+      return {
+        ...state,
+        highlights: action.value ?? [],
+        loadError: action.value === undefined,
+      };
+    }
+    case "pendingTime": {
+      return { ...state, pendingTime: action.value };
+    }
+    case "persist": {
+      return {
+        ...state,
+        editingIndex: null,
+        highlights: action.highlights,
+        saveError: false,
+      };
+    }
+    case "saveError": {
+      return { ...state, saveError: action.value };
+    }
+  }
+}
+
 /**
  * Dialog for managing a project's highlights.
  */
@@ -253,15 +300,14 @@ export function HighlightsDialog() {
     [script],
   );
 
-  const [highlights, setHighlights] = useState<readonly Highlight[] | null>(
-    null,
-  );
-  const [loadError, setLoadError] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-  // playback time captured while the "new highlight" title prompt is open
-  const [pendingTime, setPendingTime] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(highlightsReducer, {
+    editingIndex: null,
+    highlights: null,
+    loadError: false,
+    pendingTime: null,
+    saveError: false,
+  });
+  const { editingIndex, highlights, loadError, pendingTime, saveError } = state;
 
   // load highlights
   useEffect(() => {
@@ -271,8 +317,7 @@ export function HighlightsDialog() {
       if (!active) {
         return;
       }
-      setHighlights(result ?? []);
-      setLoadError(result === undefined);
+      dispatch({ kind: "loaded", value: result });
     });
 
     return () => {
@@ -298,12 +343,10 @@ export function HighlightsDialog() {
   // persist an updated list of highlights
   const persist = useCallback(
     (next: readonly Highlight[]) => {
-      setHighlights(next);
-      setEditingIndex(null);
-      setSaveError(false);
+      dispatch({ highlights: next, kind: "persist" });
 
       storeHighlights(next, { params: projectParams, projectPath }).then((ok) =>
-        setSaveError(!ok),
+        dispatch({ kind: "saveError", value: !ok }),
       );
     },
     [projectParams, projectPath],
@@ -315,7 +358,7 @@ export function HighlightsDialog() {
         return;
       }
       persist([...highlights, { time: pendingTime, title }]);
-      setPendingTime(null);
+      dispatch({ kind: "pendingTime", value: null });
     },
     [highlights, pendingTime, persist],
   );
@@ -370,7 +413,12 @@ export function HighlightsDialog() {
         <div sx={styles.addButton}>
           <Button
             disabled={loadError}
-            onClick={() => setPendingTime(formatTime(playback.currentTime$))}
+            onClick={() =>
+              dispatch({
+                kind: "pendingTime",
+                value: formatTime(playback.currentTime$),
+              })
+            }
             size="small"
           >
             <PlusIcon />
@@ -390,7 +438,9 @@ export function HighlightsDialog() {
                   <HighlightForm
                     highlight={highlight}
                     markers={markerNames}
-                    onCancel={() => setEditingIndex(null)}
+                    onCancel={() =>
+                      dispatch({ index: null, kind: "editingIndex" })
+                    }
                     onSubmit={(next) => updateHighlight(index, next)}
                   />
                 ) : (
@@ -417,7 +467,9 @@ export function HighlightsDialog() {
                       </IconButton>
                       <IconButton
                         aria-label="Edit highlight"
-                        onClick={() => setEditingIndex(index)}
+                        onClick={() =>
+                          dispatch({ index, kind: "editingIndex" })
+                        }
                         size="sm"
                         title="Edit highlight"
                       >
@@ -445,7 +497,7 @@ export function HighlightsDialog() {
         <DialogRoot
           onOpenChange={(open) => {
             if (!open) {
-              setPendingTime(null);
+              dispatch({ kind: "pendingTime", value: null });
             }
           }}
           open={pendingTime !== null}
@@ -498,6 +550,66 @@ export function HighlightsDialog() {
   );
 }
 
+type HighlightFormState = {
+  marker: string;
+  mode: "absolute" | "marker";
+  offset: string;
+  time: string;
+  title: string;
+};
+
+type HighlightFormAction =
+  | { kind: "marker"; value: string }
+  | { kind: "mode"; value: "absolute" | "marker" }
+  | { kind: "offset"; value: string }
+  | { kind: "time"; value: string }
+  | { kind: "title"; value: string };
+
+function highlightFormReducer(
+  state: HighlightFormState,
+  action: HighlightFormAction,
+): HighlightFormState {
+  switch (action.kind) {
+    case "marker": {
+      return { ...state, marker: action.value };
+    }
+    case "mode": {
+      return { ...state, mode: action.value };
+    }
+    case "offset": {
+      return { ...state, offset: action.value };
+    }
+    case "time": {
+      return { ...state, time: action.value };
+    }
+    case "title": {
+      return { ...state, title: action.value };
+    }
+  }
+}
+
+function createHighlightFormState(
+  highlight: Highlight,
+  markers: readonly string[] | null,
+): HighlightFormState {
+  return {
+    marker: (() => {
+      if (
+        markers &&
+        isMarkerOffset(highlight.time) &&
+        markers.includes(highlight.time.marker)
+      ) {
+        return highlight.time.marker;
+      }
+      return markers?.[0] ?? "";
+    })(),
+    mode: isMarkerOffset(highlight.time) && markers ? "marker" : "absolute",
+    offset: isMarkerOffset(highlight.time) ? highlight.time.offset : "0:00",
+    time: typeof highlight.time === "string" ? highlight.time : "0:00",
+    title: highlight.title,
+  };
+}
+
 /** Form for adding or editing a highlight's title and time. */
 function HighlightForm({
   highlight,
@@ -514,26 +626,12 @@ function HighlightForm({
 
   onSubmit(highlight: Highlight): void;
 }) {
-  const [title, setTitle] = useState(highlight.title);
-  const [mode, setMode] = useState<"absolute" | "marker">(() =>
-    isMarkerOffset(highlight.time) && markers ? "marker" : "absolute",
+  const [state, dispatch] = useReducer(
+    highlightFormReducer,
+    { highlight, markers },
+    ({ highlight, markers }) => createHighlightFormState(highlight, markers),
   );
-  const [time, setTime] = useState(() =>
-    typeof highlight.time === "string" ? highlight.time : "0:00",
-  );
-  const [marker, setMarker] = useState(() => {
-    if (
-      markers &&
-      isMarkerOffset(highlight.time) &&
-      markers.includes(highlight.time.marker)
-    ) {
-      return highlight.time.marker;
-    }
-    return markers?.[0] ?? "";
-  });
-  const [offset, setOffset] = useState(() =>
-    isMarkerOffset(highlight.time) ? highlight.time.offset : "0:00",
-  );
+  const { marker, mode, offset, time, title } = state;
 
   const valid =
     title.trim() !== "" &&
@@ -567,7 +665,7 @@ function HighlightForm({
         <span sx={styles.fieldLabel}>{t.title}</span>
         <TextField
           id={ids.title}
-          onChange={setTitle}
+          onChange={(value) => dispatch({ kind: "title", value })}
           placeholder={t.titlePlaceholder}
           value={title}
         />
@@ -575,7 +673,9 @@ function HighlightForm({
 
       {markers !== null && (
         <RadioGroup
-          onValueChange={(value) => setMode(value as "absolute" | "marker")}
+          onValueChange={(value) =>
+            dispatch({ kind: "mode", value: value as "absolute" | "marker" })
+          }
           value={mode}
         >
           <label sx={styles.radioRow}>
@@ -598,7 +698,7 @@ function HighlightForm({
           <span sx={styles.fieldLabel}>{t.time}</span>
           <TextField
             id={ids.time}
-            onChange={setTime}
+            onChange={(value) => dispatch({ kind: "time", value })}
             placeholder={t.timePlaceholder}
             value={time}
           />
@@ -612,7 +712,7 @@ function HighlightForm({
               items={Object.fromEntries(markers.map((m) => [m, m]))}
               onValueChange={(value) => {
                 if (value) {
-                  setMarker(value as string);
+                  dispatch({ kind: "marker", value: value as string });
                 }
               }}
               value={marker}
@@ -642,7 +742,7 @@ function HighlightForm({
             <span sx={styles.fieldLabel}>{t.offset}</span>
             <TextField
               id={ids.offset}
-              onChange={setOffset}
+              onChange={(value) => dispatch({ kind: "offset", value })}
               placeholder={PlainString("0:00")}
               value={offset}
             />

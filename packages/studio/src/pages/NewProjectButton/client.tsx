@@ -3,7 +3,7 @@
 import { PlusIcon } from "@phosphor-icons/react";
 import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useReducer } from "react";
 
 import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
 import { type Localized, PlainString } from "#_/i18n/shared";
@@ -83,15 +83,88 @@ const styles = stylex.create({
   },
 });
 
+type NewProjectState = {
+  error: string | null;
+  isCreating: boolean;
+  name: string;
+  open: boolean;
+  projectPath: RelativeDir;
+  templateId: string;
+  templates: TemplateInfo[];
+};
+
+type NewProjectAction =
+  | { kind: "creating"; value: boolean }
+  | { kind: "error"; value: string | null }
+  | { kind: "name"; value: string }
+  | { kind: "open"; value: boolean }
+  | { kind: "projectPath"; value: RelativeDir }
+  | { kind: "reset" }
+  | { kind: "templateId"; value: string }
+  | { kind: "templatesLoaded"; value: TemplateInfo[] };
+
+function newProjectReducer(
+  state: NewProjectState,
+  action: NewProjectAction,
+): NewProjectState {
+  switch (action.kind) {
+    case "creating": {
+      return { ...state, isCreating: action.value };
+    }
+    case "error": {
+      return { ...state, error: action.value };
+    }
+    case "name": {
+      return { ...state, name: action.value };
+    }
+    case "open": {
+      return { ...state, open: action.value };
+    }
+    case "projectPath": {
+      return { ...state, projectPath: action.value };
+    }
+    case "reset": {
+      return {
+        ...state,
+        error: null,
+        name: "",
+        open: false,
+        projectPath: RelativeDir(""),
+        templateId: "",
+      };
+    }
+    case "templateId": {
+      return { ...state, templateId: action.value };
+    }
+    case "templatesLoaded": {
+      if (action.value.length === 0) {
+        return { ...state, templates: action.value };
+      }
+      // Select the default template, or the first one if none is marked as
+      // default (templates are sorted with default first).
+      const defaultTemplate = action.value.find((t) => t.default);
+      return {
+        ...state,
+        templateId: defaultTemplate?.id ?? action.value[0]!.id,
+        templates: action.value,
+      };
+    }
+  }
+}
+
 /** @package */
 export function NewProjectButtonClient({ t }: { t: T }) {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [projectPath, setProjectPath] = useState<RelativeDir>(RelativeDir(""));
-  const [templateId, setTemplateId] = useState("");
-  const [templates, setTemplates] = useState<TemplateInfo[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(newProjectReducer, {
+    error: null,
+    isCreating: false,
+    name: "",
+    open: false,
+    projectPath: RelativeDir(""),
+    templateId: "",
+    templates: [],
+  });
+  const { error, isCreating, name, open, projectPath, templateId, templates } =
+    state;
 
   // Validation: disallow dots in project path
   const pathHasDot = projectPath.includes(".");
@@ -101,30 +174,20 @@ export function NewProjectButtonClient({ t }: { t: T }) {
   useEffect(() => {
     if (open) {
       loadTemplatesAction().then((loadedTemplates) => {
-        setTemplates(loadedTemplates);
-        // Select the default template, or the first one if none is marked as default
-        // (templates are sorted with default first)
-        if (loadedTemplates.length > 0) {
-          const defaultTemplate = loadedTemplates.find((t) => t.default);
-          setTemplateId(defaultTemplate?.id ?? loadedTemplates[0]!.id);
-        }
+        dispatch({ kind: "templatesLoaded", value: loadedTemplates });
       });
     }
   }, [open]);
 
   const closeDialog = useCallback(() => {
-    setOpen(false);
-    setName("");
-    setProjectPath(RelativeDir(""));
-    setTemplateId("");
-    setError(null);
+    dispatch({ kind: "reset" });
   }, []);
 
   const handleSubmit = useCallback(
     async (e: React.SubmitEvent) => {
       e.preventDefault();
-      setIsCreating(true);
-      setError(null);
+      dispatch({ kind: "creating", value: true });
+      dispatch({ kind: "error", value: null });
 
       try {
         const result = await createProjectAction({
@@ -136,10 +199,10 @@ export function NewProjectButtonClient({ t }: { t: T }) {
         if (result.success) {
           closeDialog();
         } else {
-          setError(result.error ?? t.error);
+          dispatch({ kind: "error", value: result.error ?? t.error });
         }
       } finally {
-        setIsCreating(false);
+        dispatch({ kind: "creating", value: false });
       }
     },
     [name, projectPath, templateId, closeDialog, t.error],
@@ -152,7 +215,10 @@ export function NewProjectButtonClient({ t }: { t: T }) {
   };
 
   return (
-    <DialogRoot onOpenChange={setOpen} open={open}>
+    <DialogRoot
+      onOpenChange={(value) => dispatch({ kind: "open", value })}
+      open={open}
+    >
       <DialogTrigger
         render={<IconButton title={t.newProject} variant="primary" />}
       >
@@ -169,7 +235,7 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 disabled={isCreating}
                 id={ids.projectName}
                 label={t.dialog.name}
-                onChange={setName}
+                onChange={(value) => dispatch({ kind: "name", value })}
                 placeholder={t.dialog.namePlaceholder}
                 required
                 value={name}
@@ -182,7 +248,12 @@ export function NewProjectButtonClient({ t }: { t: T }) {
                 disabled={isCreating}
                 id={ids.projectPath}
                 label={t.dialog.path}
-                onChange={(value) => setProjectPath(RelativeDir(value))}
+                onChange={(value) =>
+                  dispatch({
+                    kind: "projectPath",
+                    value: RelativeDir(value),
+                  })
+                }
                 placeholder={PlainString("category/project-slug")}
                 required
                 value={projectPath}
@@ -199,7 +270,8 @@ export function NewProjectButtonClient({ t }: { t: T }) {
               <SelectRoot
                 disabled={isCreating || templates.length === 0}
                 onValueChange={(value) =>
-                  value && setTemplateId(value as string)
+                  value &&
+                  dispatch({ kind: "templateId", value: value as string })
                 }
                 value={templateId}
               >

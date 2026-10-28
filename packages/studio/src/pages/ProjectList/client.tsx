@@ -10,7 +10,7 @@ import { deserialize } from "@liqvid/ssr/serde";
 import * as stylex from "@stylexjs/stylex";
 import { RelativeDir } from "effect-paths";
 import picomatch from "picomatch";
-import { useState } from "react";
+import { useReducer } from "react";
 import Cookies from "universal-cookie";
 
 import { useChannel } from "#_/components/WebSocketProvider";
@@ -24,6 +24,7 @@ import {
 import { spacing } from "#_/design/tokens.stylex";
 import type { Localized } from "#_/i18n/shared";
 import { Switch } from "#_/ui/Switch";
+import { TextField } from "#_/ui/TextField";
 import { getDefaultParams } from "#_/utils/parameters-client";
 import { useTranslations } from "#_/utils/react";
 
@@ -80,6 +81,58 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
+type ProjectListState = {
+  collapsedFolders: Set<string>;
+  filterText: string;
+  folderView: boolean;
+  projects: Record<RelativeDir, ProjectMeta>;
+  selectedRootParams: ParameterValues;
+  showHiddenProjects: boolean;
+};
+
+type ProjectListAction =
+  | { kind: "collapsedFolders"; value: Set<string> }
+  | { kind: "filterText"; value: string }
+  | { kind: "folderView"; value: boolean }
+  | { kind: "projectDelete"; value: RelativeDir }
+  | { kind: "projectUpsert"; value: ProjectMeta }
+  | { kind: "selectedRootParams"; value: ParameterValues }
+  | { kind: "showHiddenProjects"; value: boolean };
+
+function projectListReducer(
+  state: ProjectListState,
+  action: ProjectListAction,
+): ProjectListState {
+  switch (action.kind) {
+    case "collapsedFolders": {
+      return { ...state, collapsedFolders: action.value };
+    }
+    case "filterText": {
+      return { ...state, filterText: action.value };
+    }
+    case "folderView": {
+      return { ...state, folderView: action.value };
+    }
+    case "projectDelete": {
+      const projects = { ...state.projects };
+      delete projects[action.value];
+      return { ...state, projects };
+    }
+    case "projectUpsert": {
+      return {
+        ...state,
+        projects: { ...state.projects, [action.value.path]: action.value },
+      };
+    }
+    case "selectedRootParams": {
+      return { ...state, selectedRootParams: action.value };
+    }
+    case "showHiddenProjects": {
+      return { ...state, showHiddenProjects: action.value };
+    }
+  }
+}
+
 export function ProjectListClient({
   basePath,
   initialCollapsedFolders,
@@ -91,27 +144,46 @@ export function ProjectListClient({
   const t = useTranslations<T>();
 
   const { hideProjects, rootParameters } = useLiqvidConfig();
-  const [projects, setProjects] = useState(
-    (): Record<RelativeDir, ProjectMeta> =>
-      deserialize(dehydratedProjects, {
+  const [state, dispatch] = useReducer(
+    projectListReducer,
+    {
+      dehydratedProjects,
+      initialCollapsedFolders,
+      initialFolderView,
+      initialSelectedRootParams,
+      initialShowHiddenProjects,
+      rootParameters,
+    },
+    ({
+      dehydratedProjects,
+      initialCollapsedFolders,
+      initialFolderView,
+      initialSelectedRootParams,
+      initialShowHiddenProjects,
+      rootParameters,
+    }): ProjectListState => ({
+      collapsedFolders: new Set(initialCollapsedFolders),
+      filterText: "",
+      folderView: initialFolderView,
+      projects: deserialize(dehydratedProjects, {
         "@liqvid/duration": Duration.fromJSON,
       }),
-  );
-  const [folderView, setFolderView] = useState(initialFolderView);
-  const [showHiddenProjects, setShowHiddenProjects] = useState(
-    initialShowHiddenProjects,
-  );
-  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
-    () => new Set(initialCollapsedFolders),
-  );
-  // Selected root parameter values - initialized from cookie or defaults
-  const [selectedRootParams, setSelectedRootParams] = useState<ParameterValues>(
-    () => {
       // Use initial values from cookie, fill in any missing with defaults
-      const defaults = getDefaultParams(rootParameters);
-      return { ...defaults, ...initialSelectedRootParams };
-    },
+      selectedRootParams: {
+        ...getDefaultParams(rootParameters),
+        ...initialSelectedRootParams,
+      },
+      showHiddenProjects: initialShowHiddenProjects,
+    }),
   );
+  const {
+    collapsedFolders,
+    filterText,
+    folderView,
+    projects,
+    selectedRootParams,
+    showHiddenProjects,
+  } = state;
 
   // Check if we have any root parameters to display
   const hasRootParameters = Object.values(rootParameters).some(
@@ -120,63 +192,67 @@ export function ProjectListClient({
 
   useChannel("projects", {
     deleteProject: (data) => {
-      setProjects((prev) => {
-        const next = { ...prev };
-        delete next[data.path];
-        return next;
-      });
+      dispatch({ kind: "projectDelete", value: data.path });
     },
     newProject: (data) => {
-      setProjects((prev) => ({ ...prev, [data.path]: data }));
+      dispatch({ kind: "projectUpsert", value: data });
     },
     updateProject: (data) => {
-      setProjects((prev) => ({ ...prev, [data.path]: data }));
+      dispatch({ kind: "projectUpsert", value: data });
     },
   });
 
   function handleFolderViewChange(enabled: boolean) {
-    setFolderView(enabled);
+    dispatch({ kind: "folderView", value: enabled });
     const cookies = new Cookies();
     cookies.set(FOLDER_VIEW_COOKIE, enabled, cookieOptions);
   }
 
   function handleShowHiddenProjectsChange(enabled: boolean) {
-    setShowHiddenProjects(enabled);
+    dispatch({ kind: "showHiddenProjects", value: enabled });
     const cookies = new Cookies();
     cookies.set(SHOW_HIDDEN_PROJECTS_COOKIE, enabled, cookieOptions);
   }
 
   function handleFolderToggle(folderName: string, expanded: boolean) {
-    setCollapsedFolders((prev) => {
-      const next = new Set(prev);
-      if (expanded) {
-        next.delete(folderName);
-      } else {
-        next.add(folderName);
-      }
-      const cookies = new Cookies();
-      cookies.set(
-        COLLAPSED_FOLDERS_COOKIE,
-        JSON.stringify([...next]),
-        cookieOptions,
-      );
-      return next;
-    });
+    const next = new Set(collapsedFolders);
+    if (expanded) {
+      next.delete(folderName);
+    } else {
+      next.add(folderName);
+    }
+    dispatch({ kind: "collapsedFolders", value: next });
+
+    const cookies = new Cookies();
+    cookies.set(
+      COLLAPSED_FOLDERS_COOKIE,
+      JSON.stringify([...next]),
+      cookieOptions,
+    );
   }
 
-  const sortedProjects = Object.entries(projects).sort(([, a], [, b]) =>
-    a.path.localeCompare(b.path),
-  );
+  const sortedProjects = Object.entries(projects)
+    .sort(([, a], [, b]) => a.path.localeCompare(b.path))
+    .filter(([, project]) => matchesFilter(project, filterText));
 
   const folderTree = buildFolderTree(
-    showHiddenProjects ? projects : omitHiddenProjects(projects, hideProjects),
+    filterProjects(
+      showHiddenProjects
+        ? projects
+        : omitHiddenProjects(projects, hideProjects),
+      filterText,
+    ),
   );
 
   return (
     <SelectedRootParametersProvider value={selectedRootParams}>
       {/* Root parameter selector at top of project list */}
       {hasRootParameters && (
-        <RootParameterSelector onRootParamsChange={setSelectedRootParams} />
+        <RootParameterSelector
+          onRootParamsChange={(value) =>
+            dispatch({ kind: "selectedRootParams", value })
+          }
+        />
       )}
 
       <div sx={styles.viewToggle}>
@@ -198,6 +274,22 @@ export function ProjectListClient({
             />
           </label>
         )}
+        <TextField
+          aria-label={t.filter}
+          onChange={(value) => dispatch({ kind: "filterText", value })}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") {
+              return;
+            }
+            if (filterText) {
+              dispatch({ kind: "filterText", value: "" });
+            } else {
+              event.currentTarget.blur();
+            }
+          }}
+          placeholder={t.filter}
+          value={filterText}
+        />
       </div>
 
       {folderView ? (
@@ -241,6 +333,31 @@ export function ProjectListClient({
         </ul>
       )}
     </SelectedRootParametersProvider>
+  );
+}
+
+function matchesFilter(project: ProjectMeta, filterText: string): boolean {
+  const filter = filterText.trim().toLowerCase();
+  const title = project.title ?? "";
+  const titleText =
+    typeof title === "string"
+      ? title
+      : title.map(({ value }) => value).join("");
+  return (
+    filter === "" ||
+    titleText.toLowerCase().includes(filter) ||
+    project.path.toLowerCase().includes(filter)
+  );
+}
+
+function filterProjects(
+  projects: Readonly<Record<RelativeDir, ProjectMeta>>,
+  filterText: string,
+): Readonly<Record<RelativeDir, ProjectMeta>> {
+  return Object.fromEntries(
+    Object.entries(projects).filter(([, project]) =>
+      matchesFilter(project, filterText),
+    ),
   );
 }
 

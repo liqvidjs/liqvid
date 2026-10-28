@@ -2,7 +2,7 @@
 
 import { RadioGroup } from "@base-ui/react/radio-group";
 import * as stylex from "@stylexjs/stylex";
-import { useRef, useState } from "react";
+import { useReducer } from "react";
 
 import {
   colors,
@@ -166,6 +166,36 @@ function serialize(parsed: Parsed): string {
   return `{env:${parsed.environment}:${parsed.varName}}`;
 }
 
+type EnvVarState = {
+  environment: string;
+  literal: string;
+  mode: Mode;
+  varName: string;
+};
+
+type EnvVarAction =
+  | { kind: "environment"; value: string }
+  | { kind: "literal"; value: string }
+  | { kind: "mode"; value: Mode }
+  | { kind: "varName"; value: string };
+
+function envVarReducer(state: EnvVarState, action: EnvVarAction): EnvVarState {
+  switch (action.kind) {
+    case "environment": {
+      return { ...state, environment: action.value };
+    }
+    case "literal": {
+      return { ...state, literal: action.value };
+    }
+    case "mode": {
+      return { ...state, mode: action.value };
+    }
+    case "varName": {
+      return { ...state, varName: action.value };
+    }
+  }
+}
+
 export function EnvVarInput({
   disallowLiteral = false,
   onChange,
@@ -186,19 +216,20 @@ export function EnvVarInput({
   };
   value: string | undefined;
 }) {
-  const initial = useRef(parse(value)).current;
-  const [mode, setMode] = useState<Mode>(
-    disallowLiteral ? "env" : initial.mode,
+  const [state, dispatch] = useReducer(
+    envVarReducer,
+    { disallowLiteral, value },
+    ({ disallowLiteral, value }): EnvVarState => {
+      const initial = parse(value);
+      return {
+        environment: initial.mode === "env" ? initial.environment : "",
+        literal: initial.mode === "literal" ? initial.value : "",
+        mode: disallowLiteral ? "env" : initial.mode,
+        varName: initial.mode === "env" ? initial.varName : "",
+      };
+    },
   );
-  const [literal, setLiteral] = useState(
-    initial.mode === "literal" ? initial.value : "",
-  );
-  const [varName, setVarName] = useState(
-    initial.mode === "env" ? initial.varName : "",
-  );
-  const [environment, setEnvironment] = useState(
-    initial.mode === "env" ? initial.environment : "",
-  );
+  const { environment, literal, mode, varName } = state;
 
   function emit(next: Parsed) {
     const serialized = serialize(next);
@@ -206,7 +237,7 @@ export function EnvVarInput({
   }
 
   function handleModeChange(nextMode: Mode) {
-    setMode(nextMode);
+    dispatch({ kind: "mode", value: nextMode });
     if (nextMode === "literal") {
       emit({ mode: "literal", value: literal });
     } else {
@@ -215,17 +246,17 @@ export function EnvVarInput({
   }
 
   function handleLiteralChange(v: string) {
-    setLiteral(v);
+    dispatch({ kind: "literal", value: v });
     emit({ mode: "literal", value: v });
   }
 
   function handleVarNameChange(v: string) {
-    setVarName(v);
+    dispatch({ kind: "varName", value: v });
     emit({ environment, mode: "env", varName: v });
   }
 
   function handleEnvironmentChange(v: string) {
-    setEnvironment(v);
+    dispatch({ kind: "environment", value: v });
     emit({ environment: v, mode: "env", varName });
   }
 

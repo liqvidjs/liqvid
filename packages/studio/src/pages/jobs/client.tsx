@@ -15,7 +15,7 @@ import {
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import * as stylex from "@stylexjs/stylex";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import Cookies from "universal-cookie";
 
 import type {
@@ -269,6 +269,97 @@ type MetaState = {
   readonly spans: readonly (readonly [string, number])[];
 };
 
+type JobsState = {
+  activeTab: TabValue;
+  jobs: Record<string, LoggableJobClient>;
+  levels: ReadonlySet<LogLevel>;
+  meta: MetaState | null;
+  services: Record<string, ServiceClient>;
+};
+
+type JobsAction =
+  | { id: string; kind: "appendJobLog"; log: StructuredLog }
+  | { id: string; kind: "appendServiceLog"; log: StructuredLog }
+  | { id: string; kind: "deleteJob" }
+  | { job: LoggableJobClient; kind: "jobRestore" }
+  | { kind: "levels"; value: ReadonlySet<LogLevel> }
+  | { kind: "meta"; value: MetaState | null }
+  | { kind: "tab"; value: TabValue }
+  | { job: LoggableJobClient; kind: "upsertJob" }
+  | { service: ServiceClient; kind: "upsertService" };
+
+function jobsReducer(state: JobsState, action: JobsAction): JobsState {
+  switch (action.kind) {
+    case "appendJobLog": {
+      const job = state.jobs[action.id];
+      if (!job) {
+        return state;
+      }
+      return {
+        ...state,
+        jobs: {
+          ...state.jobs,
+          [action.id]: { ...job, logs: [...job.logs, action.log] },
+        },
+      };
+    }
+    case "appendServiceLog": {
+      const service = state.services[action.id];
+      if (!service) {
+        return state;
+      }
+      return {
+        ...state,
+        services: {
+          ...state.services,
+          [action.id]: {
+            ...service,
+            logs: [...service.logs, reviveLog(action.log)],
+          },
+        },
+      };
+    }
+    case "deleteJob": {
+      if (!(action.id in state.jobs)) {
+        return state;
+      }
+      const jobs = { ...state.jobs };
+      delete jobs[action.id];
+      return { ...state, jobs };
+    }
+    case "jobRestore": {
+      if (action.job.id in state.jobs) {
+        return state;
+      }
+      return {
+        ...state,
+        jobs: { ...state.jobs, [action.job.id]: action.job },
+      };
+    }
+    case "levels": {
+      return { ...state, levels: action.value };
+    }
+    case "meta": {
+      return { ...state, meta: action.value };
+    }
+    case "tab": {
+      return { ...state, activeTab: action.value };
+    }
+    case "upsertJob": {
+      return {
+        ...state,
+        jobs: { ...state.jobs, [action.job.id]: action.job },
+      };
+    }
+    case "upsertService": {
+      return {
+        ...state,
+        services: { ...state.services, [action.service.id]: action.service },
+      };
+    }
+  }
+}
+
 /** @package */
 export function JobsClient({
   cancelJob,
@@ -287,45 +378,58 @@ export function JobsClient({
   services: Readonly<Record<string, ServiceClientEncoded>>;
   t: T;
 }) {
-  const [jobs, setJobs] = useState<Record<string, LoggableJobClient>>(() =>
-    deserialize(initialJobs, { "@liqvid/duration": Duration.fromJSON }),
+  const [state, dispatch] = useReducer(
+    jobsReducer,
+    {
+      initialJobs,
+      initialLogLevels,
+      initialServices,
+      initialTab,
+    },
+    ({
+      initialJobs,
+      initialLogLevels,
+      initialServices,
+      initialTab,
+    }): JobsState => ({
+      activeTab: initialTab,
+      jobs: deserialize(initialJobs, {
+        "@liqvid/duration": Duration.fromJSON,
+      }),
+      levels: new Set(initialLogLevels as LogLevel[]),
+      meta: null,
+      services: deserialize(initialServices, {
+        "@liqvid/duration": Duration.fromJSON,
+      }),
+    }),
   );
-  const [services, setServices] = useState<Record<string, ServiceClient>>(() =>
-    deserialize(initialServices, { "@liqvid/duration": Duration.fromJSON }),
-  );
-  const [levels, setLevels] = useState<ReadonlySet<LogLevel>>(
-    () => new Set(initialLogLevels as LogLevel[]),
-  );
-  const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
-
-  const [meta, setAnnotations] = useState<MetaState | null>(null);
+  const { activeTab, jobs, levels, meta, services } = state;
 
   const toggleLevel = (level: LogLevel) => {
-    setLevels((prev) => {
-      const next = new Set(prev);
-      if (next.has(level)) {
-        next.delete(level);
-      } else {
-        next.add(level);
-      }
-      const cookies = new Cookies();
-      cookies.set(LOG_LEVELS_COOKIE, JSON.stringify([...next]), cookieOptions);
-      return next;
-    });
+    const next = new Set(levels);
+    if (next.has(level)) {
+      next.delete(level);
+    } else {
+      next.add(level);
+    }
+    dispatch({ kind: "levels", value: next });
+
+    const cookies = new Cookies();
+    cookies.set(LOG_LEVELS_COOKIE, JSON.stringify([...next]), cookieOptions);
   };
 
   const handleTabChange = (value: TabValue) => {
-    setActiveTab(value);
+    dispatch({ kind: "tab", value });
     const cookies = new Cookies();
     cookies.set(JOBS_TAB_COOKIE, value, cookieOptions);
   };
 
   const upsertJob = useCallback((job: LoggableJobClient) => {
-    setJobs((prev) => ({ ...prev, [job.id]: job }));
+    dispatch({ job, kind: "upsertJob" });
   }, []);
 
   const upsertService = useCallback((service: ServiceClient) => {
-    setServices((prev) => ({ ...prev, [service.id]: service }));
+    dispatch({ kind: "upsertService", service });
   }, []);
 
   const handleCancel = useCallback(
@@ -343,25 +447,19 @@ export function JobsClient({
     (id: string) => {
       // Optimistically remove the job so the list updates instantly without a
       // page refresh; restore it if the server action fails.
-      let removed: LoggableJobClient | undefined;
-      setJobs((prev) => {
-        removed = prev[id];
-        if (!removed) {
-          return prev;
-        }
-        const { [id]: _removed, ...rest } = prev;
-        return rest;
-      });
+      const removed = jobs[id];
+      if (!removed) {
+        return;
+      }
+      dispatch({ id, kind: "deleteJob" });
 
       const formData = new FormData();
       formData.set("id", id);
       void deleteJob(formData).catch(() => {
-        setJobs((prev) =>
-          removed && !(id in prev) ? { ...prev, [id]: removed } : prev,
-        );
+        dispatch({ job: removed, kind: "jobRestore" });
       });
     },
-    [deleteJob],
+    [deleteJob, jobs],
   );
 
   useChannel(
@@ -369,26 +467,11 @@ export function JobsClient({
     useMemo(
       () => ({
         appendLog: ({ id, log }) => {
-          setJobs((prev) => {
-            const job = prev[id];
-            if (!job) {
-              return prev;
-            }
-            return {
-              ...prev,
-              [id]: { ...job, logs: [...job.logs, log] },
-            };
-          });
+          dispatch({ id, kind: "appendJobLog", log });
         },
 
         deleteJob: ({ id }) => {
-          setJobs((prev) => {
-            if (!(id in prev)) {
-              return prev;
-            }
-            const { [id]: _removed, ...rest } = prev;
-            return rest;
-          });
+          dispatch({ id, kind: "deleteJob" });
         },
 
         newJob: ({ job }) => {
@@ -408,16 +491,7 @@ export function JobsClient({
     useMemo(
       () => ({
         appendLog: ({ id, log }) => {
-          setServices((prev) => {
-            const service = prev[id];
-            if (!service) {
-              return prev;
-            }
-            return {
-              ...prev,
-              [id]: { ...service, logs: [...service.logs, reviveLog(log)] },
-            };
-          });
+          dispatch({ id, kind: "appendServiceLog", log });
         },
 
         newService: ({ service }) => {
@@ -434,7 +508,7 @@ export function JobsClient({
 
   useEffect(() => {
     if (window.location.hash) {
-      setActiveTab("jobs");
+      dispatch({ kind: "tab", value: "jobs" });
     }
   }, []);
 
@@ -490,7 +564,7 @@ export function JobsClient({
                 <LogGroup
                   levels={levels}
                   logs={job.logs}
-                  onAnnotations={setAnnotations}
+                  onAnnotations={(value) => dispatch({ kind: "meta", value })}
                 />
               </li>
             ))}
@@ -509,7 +583,7 @@ export function JobsClient({
                 <LogGroup
                   levels={levels}
                   logs={service.logs}
-                  onAnnotations={setAnnotations}
+                  onAnnotations={(value) => dispatch({ kind: "meta", value })}
                 />
               </li>
             ))}

@@ -17,7 +17,7 @@ import {
 import * as stylex from "@stylexjs/stylex";
 import { Effect } from "effect";
 import type { RelativeDir } from "effect-paths";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useReducer } from "react";
 
 import { clientRuntime, LiqvidStudioApiClient } from "#_/client";
 import { colors, dims, rounded, spacing, text } from "#_/design/tokens.stylex";
@@ -372,6 +372,71 @@ function ScreenshotItem({
   );
 }
 
+type ScreenshotsState = {
+  confirmDialog: ConfirmState | null;
+  deleteDialog: { screenshotId: string } | null;
+  isLoading: boolean;
+  previewDialog: { src: string; alt: string } | null;
+  renameDialog: { screenshotId: string } | null;
+  renameError: string | null;
+  renameValue: string;
+  screenshots: readonly ScreenshotEntry[];
+};
+
+type ScreenshotsAction =
+  | { kind: "confirmDialog"; value: ConfirmState | null }
+  | { kind: "deleteDialog"; value: { screenshotId: string } | null }
+  | { kind: "loading"; value: boolean }
+  | {
+      kind: "previewDialog";
+      value: { src: string; alt: string } | null;
+    }
+  | { kind: "renameDialog"; value: { screenshotId: string } | null }
+  | { kind: "renameError"; value: string | null }
+  | { kind: "renameOpen"; value: string }
+  | { kind: "renameValue"; value: string }
+  | { kind: "screenshots"; value: readonly ScreenshotEntry[] };
+
+function screenshotsReducer(
+  state: ScreenshotsState,
+  action: ScreenshotsAction,
+): ScreenshotsState {
+  switch (action.kind) {
+    case "confirmDialog": {
+      return { ...state, confirmDialog: action.value };
+    }
+    case "deleteDialog": {
+      return { ...state, deleteDialog: action.value };
+    }
+    case "loading": {
+      return { ...state, isLoading: action.value };
+    }
+    case "previewDialog": {
+      return { ...state, previewDialog: action.value };
+    }
+    case "renameDialog": {
+      return { ...state, renameDialog: action.value };
+    }
+    case "renameError": {
+      return { ...state, renameError: action.value };
+    }
+    case "renameOpen": {
+      return {
+        ...state,
+        renameDialog: { screenshotId: action.value },
+        renameError: null,
+        renameValue: action.value,
+      };
+    }
+    case "renameValue": {
+      return { ...state, renameValue: action.value };
+    }
+    case "screenshots": {
+      return { ...state, screenshots: action.value };
+    }
+  }
+}
+
 export function ScreenshotsSection({
   basePath,
   duration,
@@ -381,23 +446,26 @@ export function ScreenshotsSection({
   const { screenshots: t } = useTranslations<{ screenshots: T }>();
   const { isOpen } = useDialogApi();
 
-  const [screenshots, setScreenshots] = useState<readonly ScreenshotEntry[]>(
-    [],
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmState | null>(null);
-  const [renameDialog, setRenameDialog] = useState<{
-    screenshotId: string;
-  } | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [renameError, setRenameError] = useState<string | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    screenshotId: string;
-  } | null>(null);
-  const [previewDialog, setPreviewDialog] = useState<{
-    src: string;
-    alt: string;
-  } | null>(null);
+  const [state, dispatch] = useReducer(screenshotsReducer, {
+    confirmDialog: null,
+    deleteDialog: null,
+    isLoading: false,
+    previewDialog: null,
+    renameDialog: null,
+    renameError: null,
+    renameValue: "",
+    screenshots: [],
+  });
+  const {
+    confirmDialog,
+    deleteDialog,
+    isLoading,
+    previewDialog,
+    renameDialog,
+    renameError,
+    renameValue,
+    screenshots,
+  } = state;
 
   const projectPath = project.path;
 
@@ -405,7 +473,7 @@ export function ScreenshotsSection({
   const paramsJson = JSON.stringify(selectedParams ?? {});
 
   const loadScreenshots = async () => {
-    setIsLoading(true);
+    dispatch({ kind: "loading", value: true });
 
     await clientRuntime.runPromise(
       Effect.gen(function* () {
@@ -418,11 +486,11 @@ export function ScreenshotsSection({
           },
         });
 
-        setScreenshots(screenshots);
+        dispatch({ kind: "screenshots", value: screenshots });
       }),
     );
 
-    setIsLoading(false);
+    dispatch({ kind: "loading", value: false });
   };
 
   const loadScreenshots$ = useEffectEvent(loadScreenshots);
@@ -437,9 +505,7 @@ export function ScreenshotsSection({
   }, [isOpen, selectedParams]);
 
   const openRenameDialog = (screenshotId: string) => {
-    setRenameValue(screenshotId);
-    setRenameError(null);
-    setRenameDialog({ screenshotId });
+    dispatch({ kind: "renameOpen", value: screenshotId });
   };
 
   return (
@@ -483,10 +549,20 @@ export function ScreenshotsSection({
                   isPrimary={variantIndex === 0}
                   key={`${screenshot.id}-${variant.label ?? "single"}`}
                   onConfirmOverwrite={(screenshotId, target, label) =>
-                    setConfirmDialog({ screenshotId, target, variant: label })
+                    dispatch({
+                      kind: "confirmDialog",
+                      value: { screenshotId, target, variant: label },
+                    })
                   }
-                  onDelete={(screenshotId) => setDeleteDialog({ screenshotId })}
-                  onPreview={(src, alt) => setPreviewDialog({ alt, src })}
+                  onDelete={(screenshotId) =>
+                    dispatch({
+                      kind: "deleteDialog",
+                      value: { screenshotId },
+                    })
+                  }
+                  onPreview={(src, alt) =>
+                    dispatch({ kind: "previewDialog", value: { alt, src } })
+                  }
                   onRename={openRenameDialog}
                   parameterValues={selectedParams}
                   params={paramsJson}
@@ -501,17 +577,25 @@ export function ScreenshotsSection({
 
       {/* Confirmation Dialog */}
       <AlertDialogRoot
-        onOpenChange={(open) => !open && setConfirmDialog(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "confirmDialog", value: null })
+        }
         open={!!confirmDialog}
       >
         <ConfirmationDialog
-          {...{ confirmDialog, params: paramsJson, setConfirmDialog }}
+          {...{
+            confirmDialog,
+            onClose: () => dispatch({ kind: "confirmDialog", value: null }),
+            params: paramsJson,
+          }}
         />
       </AlertDialogRoot>
 
       {/* Rename Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setRenameDialog(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "renameDialog", value: null })
+        }
         open={!!renameDialog}
       >
         <DialogPortal>
@@ -519,13 +603,15 @@ export function ScreenshotsSection({
           <RenameDialog
             {...{
               loadScreenshots,
+              onClose: () => dispatch({ kind: "renameDialog", value: null }),
+              onRenameErrorChange: (value: string | null) =>
+                dispatch({ kind: "renameError", value }),
+              onRenameValueChange: (value: string) =>
+                dispatch({ kind: "renameValue", value }),
               params: paramsJson,
               renameDialog,
               renameError,
               renameValue,
-              setRenameDialog,
-              setRenameError,
-              setRenameValue,
             }}
           />
         </DialogPortal>
@@ -533,22 +619,26 @@ export function ScreenshotsSection({
 
       {/* Delete Dialog */}
       <AlertDialogRoot
-        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "deleteDialog", value: null })
+        }
         open={!!deleteDialog}
       >
         <DeleteDialog
           {...{
             deleteDialog,
             loadScreenshots,
+            onClose: () => dispatch({ kind: "deleteDialog", value: null }),
             params: paramsJson,
-            setDeleteDialog,
           }}
         />
       </AlertDialogRoot>
 
       {/* Preview Dialog */}
       <DialogRoot
-        onOpenChange={(open) => !open && setPreviewDialog(null)}
+        onOpenChange={(open) =>
+          !open && dispatch({ kind: "previewDialog", value: null })
+        }
         open={!!previewDialog}
       >
         <DialogPortal>
@@ -571,12 +661,12 @@ export function ScreenshotsSection({
 
 function ConfirmationDialog({
   confirmDialog,
+  onClose,
   params,
-  setConfirmDialog,
 }: {
   confirmDialog: ConfirmState | null;
+  onClose: () => void;
   params: string;
-  setConfirmDialog: React.Dispatch<React.SetStateAction<ConfirmState | null>>;
 }) {
   const t = useTranslations<{ screenshots: T }>().screenshots.confirmDialog;
   const projectPath = useProjectPath();
@@ -603,7 +693,7 @@ function ConfirmationDialog({
                   confirmDialog.variant,
                   params,
                 );
-                setConfirmDialog(null);
+                onClose();
               }
             }}
           >
@@ -617,24 +707,22 @@ function ConfirmationDialog({
 
 function RenameDialog({
   loadScreenshots,
+  onClose,
+  onRenameErrorChange,
+  onRenameValueChange,
   params,
   renameDialog,
   renameError,
   renameValue,
-  setRenameDialog,
-  setRenameError,
-  setRenameValue,
 }: {
   loadScreenshots: () => Promise<void>;
+  onClose: () => void;
+  onRenameErrorChange: (error: string | null) => void;
+  onRenameValueChange: (value: string) => void;
   params: string;
   renameDialog: { screenshotId: string } | null;
   renameError: string | null;
   renameValue: string;
-  setRenameDialog: React.Dispatch<
-    React.SetStateAction<{ screenshotId: string } | null>
-  >;
-  setRenameError: React.Dispatch<React.SetStateAction<string | null>>;
-  setRenameValue: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const t = useTranslations<{ screenshots: T }>().screenshots.renameDialog;
   const projectPath = useProjectPath();
@@ -646,7 +734,7 @@ function RenameDialog({
 
     const newName = renameValue.trim();
     if (!newName) {
-      setRenameError("Name is required");
+      onRenameErrorChange("Name is required");
       return;
     }
 
@@ -662,10 +750,10 @@ function RenameDialog({
         }),
       );
 
-      setRenameDialog(null);
+      onClose();
       await loadScreenshots();
     } catch (e) {
-      setRenameError("Failed to rename screenshot");
+      onRenameErrorChange("Failed to rename screenshot");
       console.error("Failed to rename screenshot:", e);
     }
   };
@@ -677,8 +765,8 @@ function RenameDialog({
         <TextField
           label={t.newName}
           onChange={(value) => {
-            setRenameValue(value);
-            setRenameError(null);
+            onRenameValueChange(value);
+            onRenameErrorChange(null);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -700,15 +788,13 @@ function RenameDialog({
 function DeleteDialog({
   deleteDialog,
   loadScreenshots,
+  onClose,
   params,
-  setDeleteDialog,
 }: {
   deleteDialog: { screenshotId: string } | null;
   loadScreenshots: () => Promise<void>;
+  onClose: () => void;
   params: string;
-  setDeleteDialog: React.Dispatch<
-    React.SetStateAction<{ screenshotId: string } | null>
-  >;
 }) {
   const t = useTranslations<{ screenshots: T }>().screenshots.deleteDialog;
   const projectPath = useProjectPath();
@@ -730,7 +816,7 @@ function DeleteDialog({
         }),
       );
 
-      setDeleteDialog(null);
+      onClose();
       await loadScreenshots();
     } catch (e) {
       console.error("Failed to delete screenshot:", e);
