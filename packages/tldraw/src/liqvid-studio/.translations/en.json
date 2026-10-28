@@ -1,27 +1,40 @@
 {
+  "cancel": "Cancel",
   "caption": "Saved states",
   "capture": "Capture",
   "confirmDelete": "Are you sure you want to delete this saved state? This action cannot be undone.",
   "confirmOverwrite": "Overwrite this saved state with the current canvas? This action cannot be undone.",
+  "copy": "Copy",
+  "copySavedState": "Copy saved state",
   "delete": "Delete",
   "errors": {
+    "copyFailed": "Copy failed",
     "invalidName": "Saved state names must be a single path segment",
+    "makeGlobalFailed": "Failed to make saved state global",
     "nameExists": "A saved state named {name} already exists",
     "notFound": "No saved state named {name}",
     "overwriteFailed": "Overwrite failed",
     "renameFailed": "Rename failed"
   },
+  "globalStates": "Global saved states",
   "headers": {
     "actions": "Actions",
     "date": "Date",
     "name": "Name",
     "preview": "Preview"
   },
+  "loadingProjects": "Loading projects…",
+  "makeGlobal": "Make global",
   "newName": "New name",
+  "noMatchingProjects": "No matching projects",
   "overwrite": "Overwrite",
+  "parameters": "Project parameters",
+  "projectStates": "Project saved states",
   "rename": "Rename",
   "restore": "Restore",
   "restoreOptions": "Restore options",
   "restoreShapes": "Restore shapes",
-  "restoreViewport": "Restore viewport"
+  "restoreViewport": "Restore viewport",
+  "searchProjects": "Search projects…",
+  "workspaceProjects": "Workspace projects"
 }

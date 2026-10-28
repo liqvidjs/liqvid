@@ -24,6 +24,7 @@ import {
   DockableDialog,
   PlainString,
   TextField,
+  useServerTranslations,
 } from "@liqvid/studio/ui";
 import {
   colors,
@@ -37,7 +38,7 @@ import { waitFor } from "@liqvid/utils";
 import x from "@stylexjs/atoms";
 import * as stylex from "@stylexjs/stylex";
 import type { Editor } from "@tldraw/editor";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { TldrawImage, TldrawUiContextProvider, TldrawUiIcon } from "tldraw";
 
 import { rememberUserLocksInSnapshot } from "../dev-mode.ts";
@@ -45,10 +46,12 @@ import { icon } from "../recording.tsx";
 import { TLDRAW_SYMBOL } from "../symbols.ts";
 import { fastClone } from "../utils.ts";
 
+import { CopySavedStateDialog } from "./CopySavedStateDialog.tsx";
 import {
   deleteSnapshot,
   getTranslations,
   listSaved,
+  makeSnapshotGlobal,
   overwriteSnapshot,
   renameSnapshot,
   saveSnapshot,
@@ -64,18 +67,6 @@ type T = Awaited<ReturnType<typeof getTranslations>>;
  * studio locale. `useAsyncTranslations` cannot do this: it only reads files
  * inside the studio package.
  */
-function useServerTranslations(defaults: T, load: () => Promise<T>): T {
-  const [translations, setTranslations] = useState(defaults);
-
-  useEffect(() => {
-    load().then(setTranslations, (error: unknown) => {
-      console.error("Failed to load tldraw translations", error);
-    });
-  }, [load]);
-
-  return translations;
-}
-
 export type TldrawHelperProps = {
   shortcut?: ShortcutsSpecifier;
 };
@@ -187,25 +178,115 @@ function restoreViewport(editor: Editor, snapshot: SavedState["snapshot"]) {
   }
 }
 
+type TldrawState = {
+  actionError: string | null;
+  copyTarget: SavedState | null;
+  deleteTarget: SavedState | null;
+  editor: Editor | null;
+  overwriteError: string | null;
+  overwriteTarget: SavedState | null;
+  renameError: string | null;
+  renameTarget: SavedState | null;
+  renameValue: string;
+  saved: readonly SavedState[];
+};
+
+type TldrawAction =
+  | { kind: "actionError"; value: string | null }
+  | { kind: "copyTarget"; value: SavedState | null }
+  | { kind: "deleteTarget"; value: SavedState | null }
+  | { kind: "editor"; value: Editor | null }
+  | { kind: "overwriteError"; value: string | null }
+  | { kind: "overwriteTarget"; value: SavedState | null }
+  | { kind: "rename"; target: SavedState; value: string }
+  | { kind: "renameError"; value: string | null }
+  | { kind: "renameTarget"; value: SavedState | null }
+  | { kind: "renameValue"; value: string }
+  | { kind: "saved"; value: readonly SavedState[] }
+  | { kind: "savedAdd"; value: SavedState };
+
+function tldrawReducer(state: TldrawState, action: TldrawAction): TldrawState {
+  switch (action.kind) {
+    case "actionError": {
+      return { ...state, actionError: action.value };
+    }
+    case "copyTarget": {
+      return { ...state, copyTarget: action.value };
+    }
+    case "deleteTarget": {
+      return { ...state, deleteTarget: action.value };
+    }
+    case "editor": {
+      return { ...state, editor: action.value };
+    }
+    case "overwriteError": {
+      return { ...state, overwriteError: action.value };
+    }
+    case "overwriteTarget": {
+      return { ...state, overwriteTarget: action.value };
+    }
+    case "rename": {
+      return {
+        ...state,
+        renameTarget: action.target,
+        renameValue: action.value,
+      };
+    }
+    case "renameError": {
+      return { ...state, renameError: action.value };
+    }
+    case "renameTarget": {
+      return { ...state, renameTarget: action.value };
+    }
+    case "renameValue": {
+      return { ...state, renameValue: action.value };
+    }
+    case "saved": {
+      return { ...state, saved: action.value };
+    }
+    case "savedAdd": {
+      return { ...state, saved: [...state.saved, action.value] };
+    }
+  }
+}
+
 /**
  * Liqvid recording control.
  */
 export function TldrawHelper({ shortcut }: TldrawHelperProps) {
-  const t = useServerTranslations(Translations as T, getTranslations);
-  const [saved, setSaved] = useState<readonly SavedState[]>([]);
+  const t = useServerTranslations(
+    Translations as T,
+    getTranslations,
+    "Failed to load tldraw translations",
+  );
   const projectPath = useProjectPath();
   const params = useProjectParams();
   const { colorScheme } = useColorScheme();
 
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<SavedState | null>(null);
-  const [overwriteError, setOverwriteError] = useState<string | null>(null);
-  const [overwriteTarget, setOverwriteTarget] = useState<SavedState | null>(
-    null,
-  );
-  const [renameError, setRenameError] = useState<string | null>(null);
-  const [renameTarget, setRenameTarget] = useState<SavedState | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [state, dispatch] = useReducer(tldrawReducer, {
+    actionError: null,
+    copyTarget: null,
+    deleteTarget: null,
+    editor: null,
+    overwriteError: null,
+    overwriteTarget: null,
+    renameError: null,
+    renameTarget: null,
+    renameValue: "",
+    saved: [],
+  });
+  const {
+    actionError,
+    copyTarget,
+    deleteTarget,
+    editor,
+    overwriteError,
+    overwriteTarget,
+    renameError,
+    renameTarget,
+    renameValue,
+    saved,
+  } = state;
 
   useEffect(() => {
     waitFor(() => {
@@ -216,9 +297,11 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
           } | null
         )?.[TLDRAW_SYMBOL] ?? null
       );
-    }).then(setEditor);
+    }).then((value) => dispatch({ kind: "editor", value }));
 
-    listSaved(projectPath, params).then(setSaved);
+    listSaved(projectPath, params).then((value) =>
+      dispatch({ kind: "saved", value }),
+    );
   }, [projectPath, params]);
 
   const capture = () => {
@@ -234,16 +317,19 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
       fastClone(editor.getSnapshot()),
     );
 
-    saveSnapshot(projectPath, params, snapshot, saved.length).then(
-      (newSaved) => {
-        setSaved((prev) => [...prev, newSaved]);
-      },
-    );
+    saveSnapshot(
+      projectPath,
+      params,
+      snapshot,
+      saved.filter((state) => !state.isGlobal).length,
+    ).then((newSaved) => {
+      dispatch({ kind: "savedAdd", value: newSaved });
+    });
   };
 
   const overwrite = (savedState: SavedState) => {
-    setOverwriteError(null);
-    setOverwriteTarget(savedState);
+    dispatch({ kind: "overwriteError", value: null });
+    dispatch({ kind: "overwriteTarget", value: savedState });
   };
 
   const performOverwrite = async () => {
@@ -257,20 +343,29 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
         params,
         overwriteTarget.name,
         rememberUserLocksInSnapshot(editor, fastClone(editor.getSnapshot())),
+        overwriteTarget.isGlobal,
       );
-      setSaved(await listSaved(projectPath, params));
-      setOverwriteTarget(null);
+      dispatch({
+        kind: "saved",
+        value: await listSaved(projectPath, params),
+      });
+      dispatch({ kind: "overwriteTarget", value: null });
     } catch (error) {
-      setOverwriteError(
-        error instanceof Error ? error.message : t.errors.overwriteFailed,
-      );
+      dispatch({
+        kind: "overwriteError",
+        value:
+          error instanceof Error ? error.message : t.errors.overwriteFailed,
+      });
     }
   };
 
   const rename = (savedState: SavedState) => {
-    setRenameError(null);
-    setRenameTarget(savedState);
-    setRenameValue(savedState.name);
+    dispatch({ kind: "renameError", value: null });
+    dispatch({
+      kind: "rename",
+      target: savedState,
+      value: savedState.name,
+    });
   };
 
   const performRename = async () => {
@@ -284,18 +379,28 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
     }
 
     try {
-      await renameSnapshot(projectPath, params, renameTarget.name, newName);
-      setSaved(await listSaved(projectPath, params));
-      setRenameTarget(null);
-    } catch (error) {
-      setRenameError(
-        error instanceof Error ? error.message : t.errors.renameFailed,
+      await renameSnapshot(
+        projectPath,
+        params,
+        renameTarget.name,
+        newName,
+        renameTarget.isGlobal,
       );
+      dispatch({
+        kind: "saved",
+        value: await listSaved(projectPath, params),
+      });
+      dispatch({ kind: "renameTarget", value: null });
+    } catch (error) {
+      dispatch({
+        kind: "renameError",
+        value: error instanceof Error ? error.message : t.errors.renameFailed,
+      });
     }
   };
 
   const remove = (savedState: SavedState) => {
-    setDeleteTarget(savedState);
+    dispatch({ kind: "deleteTarget", value: savedState });
   };
 
   const performDelete = async () => {
@@ -303,14 +408,42 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
       return;
     }
 
-    await deleteSnapshot(projectPath, params, deleteTarget.name);
-    setSaved(await listSaved(projectPath, params));
-    setDeleteTarget(null);
+    await deleteSnapshot(
+      projectPath,
+      params,
+      deleteTarget.name,
+      deleteTarget.isGlobal,
+    );
+    dispatch({
+      kind: "saved",
+      value: await listSaved(projectPath, params),
+    });
+    dispatch({ kind: "deleteTarget", value: null });
   };
 
-  const sortedSaved = [...saved].sort((a, b) =>
-    a.createdAt.localeCompare(b.createdAt),
-  );
+  const sortedProjectSaved = saved
+    .filter((state) => !state.isGlobal)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const sortedGlobalSaved = saved
+    .filter((state) => state.isGlobal)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+  const makeGlobal = async (savedState: SavedState) => {
+    dispatch({ kind: "actionError", value: null });
+    try {
+      await makeSnapshotGlobal(projectPath, params, savedState.name);
+      dispatch({
+        kind: "saved",
+        value: await listSaved(projectPath, params),
+      });
+    } catch (error) {
+      dispatch({
+        kind: "actionError",
+        value:
+          error instanceof Error ? error.message : t.errors.makeGlobalFailed,
+      });
+    }
+  };
 
   return (
     <>
@@ -344,7 +477,12 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedSaved.map((s) => (
+                  <tr>
+                    <th colSpan={3} sx={styles.header}>
+                      {t.projectStates}
+                    </th>
+                  </tr>
+                  {sortedProjectSaved.map((s) => (
                     <tr key={s.name}>
                       <td sx={styles.cell}>
                         <div aria-hidden="true" sx={styles.preview}>
@@ -408,6 +546,109 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
                             />
                           </Button>
                           <Button
+                            onClick={() =>
+                              dispatch({ kind: "copyTarget", value: s })
+                            }
+                            size="small"
+                            title={t.copy}
+                          >
+                            {t.copy}
+                          </Button>
+                          <Button
+                            onClick={() => void makeGlobal(s)}
+                            size="small"
+                            title={t.makeGlobal}
+                          >
+                            {t.makeGlobal}
+                          </Button>
+                          <Button
+                            onClick={() => rename(s)}
+                            size="small"
+                            title={t.rename}
+                          >
+                            <TldrawUiIcon icon="edit" label={t.rename} />
+                          </Button>
+                          <Button
+                            kind="destructive"
+                            onClick={() => remove(s)}
+                            size="small"
+                            title={t.delete}
+                          >
+                            <TldrawUiIcon icon="trash" label={t.delete} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <th colSpan={3} sx={styles.header}>
+                      {t.globalStates}
+                    </th>
+                  </tr>
+                  {sortedGlobalSaved.map((s) => (
+                    <tr key={s.name}>
+                      <td sx={styles.cell}>
+                        <div aria-hidden="true" sx={styles.preview}>
+                          <TldrawImage
+                            background
+                            darkMode={colorScheme === "dark"}
+                            padding={8}
+                            snapshot={s.snapshot}
+                          />
+                        </div>
+                      </td>
+                      <th scope="row" sx={styles.name}>
+                        {s.name}
+                      </th>
+                      <td sx={styles.cell}>
+                        <div sx={styles.actions}>
+                          <div sx={styles.restore}>
+                            <ButtonWithDropdown
+                              disabled={!editor}
+                              dropdownLabel={t.restoreOptions}
+                              onClick={() => editor?.loadSnapshot(s.snapshot)}
+                              options={[
+                                {
+                                  id: "restore-viewport",
+                                  label: t.restoreViewport,
+                                  onSelect: () =>
+                                    editor &&
+                                    restoreViewport(editor, s.snapshot),
+                                },
+                                {
+                                  id: "restore-shapes",
+                                  label: t.restoreShapes,
+                                  onSelect: () =>
+                                    editor?.loadSnapshot({
+                                      document: s.snapshot.document,
+                                    }),
+                                },
+                              ]}
+                            >
+                              {t.restore}
+                            </ButtonWithDropdown>
+                          </div>
+                          <Button
+                            disabled={!editor}
+                            onClick={() => overwrite(s)}
+                            size="small"
+                            title={t.overwrite}
+                          >
+                            <TldrawUiIcon
+                              icon="arrow-cycle"
+                              label={t.overwrite}
+                            />
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              dispatch({ kind: "copyTarget", value: s })
+                            }
+                            size="small"
+                            title={t.copy}
+                          >
+                            {t.copy}
+                          </Button>
+                          <Button
                             onClick={() => rename(s)}
                             size="small"
                             title={t.rename}
@@ -428,6 +669,11 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
                   ))}
                 </tbody>
               </table>
+              {actionError && (
+                <p role="alert" sx={styles.error}>
+                  {actionError}
+                </p>
+              )}
               <Button
                 disabled={!editor}
                 kind="primary"
@@ -444,7 +690,7 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
       <DialogRoot
         onOpenChange={(open) => {
           if (!open) {
-            setRenameTarget(null);
+            dispatch({ kind: "renameTarget", value: null });
           }
         }}
         open={!!renameTarget}
@@ -458,8 +704,8 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
               data-affords="keys"
               label={t.newName}
               onChange={(value) => {
-                setRenameError(null);
-                setRenameValue(value);
+                dispatch({ kind: "renameError", value: null });
+                dispatch({ kind: "renameValue", value });
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -479,11 +725,32 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
         </DialogPortal>
       </DialogRoot>
 
+      <DialogRoot
+        onOpenChange={(open) => {
+          if (!open) {
+            dispatch({ kind: "copyTarget", value: null });
+          }
+        }}
+        open={!!copyTarget}
+      >
+        <DialogPortal>
+          <DialogBackdrop />
+          <CopySavedStateDialog
+            currentParams={params}
+            currentProjectPath={projectPath}
+            onClose={() => dispatch({ kind: "copyTarget", value: null })}
+            open={!!copyTarget}
+            savedState={copyTarget}
+            t={t}
+          />
+        </DialogPortal>
+      </DialogRoot>
+
       <AlertDialogRoot
         onOpenChange={(open) => {
           if (!open) {
-            setOverwriteError(null);
-            setOverwriteTarget(null);
+            dispatch({ kind: "overwriteError", value: null });
+            dispatch({ kind: "overwriteTarget", value: null });
           }
         }}
         open={!!overwriteTarget}
@@ -511,7 +778,7 @@ export function TldrawHelper({ shortcut }: TldrawHelperProps) {
       <AlertDialogRoot
         onOpenChange={(open) => {
           if (!open) {
-            setDeleteTarget(null);
+            dispatch({ kind: "deleteTarget", value: null });
           }
         }}
         open={!!deleteTarget}

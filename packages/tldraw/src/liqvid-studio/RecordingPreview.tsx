@@ -27,7 +27,7 @@ import type { Seekable } from "@lqv/playback";
 import { SeekableContext } from "@lqv/playback/react";
 import * as stylex from "@stylexjs/stylex";
 import { RelativeFile } from "effect-paths";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { TldrawUiContextProvider } from "tldraw";
 
 import { TldrawReplay } from "../react/index.tsx";
@@ -146,13 +146,49 @@ function createPreviewSeekable(): PreviewSeekable {
   };
 }
 
+type PreviewState = {
+  loadError: boolean;
+  open: boolean;
+  previewTime: number;
+  recording: PreviewRecording | null;
+};
+
+type PreviewAction =
+  | { kind: "loadError"; value: boolean }
+  | { kind: "open"; value: boolean }
+  | { kind: "previewTime"; value: number }
+  | { kind: "recording"; value: PreviewRecording | null };
+
+function previewReducer(
+  state: PreviewState,
+  action: PreviewAction,
+): PreviewState {
+  switch (action.kind) {
+    case "loadError": {
+      return { ...state, loadError: action.value };
+    }
+    case "open": {
+      return { ...state, open: action.value };
+    }
+    case "previewTime": {
+      return { ...state, previewTime: action.value };
+    }
+    case "recording": {
+      return { ...state, recording: action.value };
+    }
+  }
+}
+
 export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
   const hasRecording = files.has(RECORDING_JSON);
-  const [recording, setRecording] = useState<PreviewRecording | null>(null);
-  const [loadError, setLoadError] = useState(false);
-  const [previewTime, setPreviewTime] = useState(0);
+  const [state, dispatch] = useReducer(previewReducer, {
+    loadError: false,
+    open: false,
+    previewTime: 0,
+    recording: null,
+  });
+  const { loadError, open, previewTime, recording } = state;
   const [playback] = useState(createPreviewSeekable);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!open || !hasRecording || recording) {
@@ -169,17 +205,20 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
         >;
 
         if (active) {
-          setRecording({
-            ...parsed,
-            initialState: parsed.initial,
-          } as PreviewRecording);
-          setLoadError(false);
+          dispatch({
+            kind: "recording",
+            value: {
+              ...parsed,
+              initialState: parsed.initial,
+            } as PreviewRecording,
+          });
+          dispatch({ kind: "loadError", value: false });
         }
       })
       .catch((error: unknown) => {
         console.error("Failed to load tldraw recording preview:", error);
         if (active) {
-          setLoadError(true);
+          dispatch({ kind: "loadError", value: true });
         }
       });
 
@@ -205,15 +244,15 @@ export function RecordingPreview({ files, loadFile }: RecordingComponentProps) {
   }
 
   const seek = (time: number) => {
-    setPreviewTime(time);
+    dispatch({ kind: "previewTime", value: time });
     // biome-ignore lint/nursery/useReactCompiler: Playback exposes mutable media-like properties
     playback.currentTime = time;
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
-    setOpen(nextOpen);
+    dispatch({ kind: "open", value: nextOpen });
     if (nextOpen) {
-      setLoadError(false);
+      dispatch({ kind: "loadError", value: false });
     }
   };
 
